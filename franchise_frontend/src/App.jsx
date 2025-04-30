@@ -1,11 +1,15 @@
 import react  from 'react'
 import './App.css'
+import Footer from './Components/Footers/Footer'
+import Navbar from './Components/Navbar/NavBar'
 
 function App() {
 
   return (
-    <>
-      <h1>Franchise</h1>
+    <> 
+       <Navbar />
+
+    <Footer />
     </>
   )
 }
