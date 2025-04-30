@@ -1,13 +1,18 @@
-import react  from 'react'
+import {Route,Routes} from "react-router-dom"
 import './App.css'
+import HomeBannerSec from './Components/HomePage_BannerSection/HomeBannerSec'
 
 function App() {
 
   return (
-    <>
-      <h1>Franchise</h1>
-    </>
+    
+<>
+<Routes>
+<Route path='/' element={<HomeBannerSec/>}/>
+</Routes>
+</>
+    
   )
 }
 
-export default App
+export default App;
