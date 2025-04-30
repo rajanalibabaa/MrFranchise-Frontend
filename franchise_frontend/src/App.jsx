@@ -1,12 +1,17 @@
-import react  from 'react'
-import './App.css'
+import react  from 'react';
+import {Route,Routes} from "react-router-dom"
+
+import InvestorRegister from './Pages/Registration/InvestorsRegister';
 
 function App() {
 
   return (
-    <>
-      <h1>Franchise</h1>
-    </>
+   <>
+   
+      <Routes>
+        <Route path="/investor-register" element={<InvestorRegister/>} />
+      </Routes>
+      </>
   )
 }
 
