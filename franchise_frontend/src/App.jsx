@@ -1,17 +1,21 @@
-import react  from 'react'
+import {Route,Routes} from "react-router-dom"
 import './App.css'
-import Footer from './Components/Footers/Footer'
-import Navbar from './Components/Navbar/NavBar'
+import HomeBannerSec from './Components/HomePage_BannerSection/HomeBannerSec'
+import TopBrandVdoSec from "./Components/HomePage_VideoSection/TopBrandVdoSec";
+import BrandViewPage from "./Pages/BrandViewPage/BrandViewPage";
 
 function App() {
 
   return (
-    <> 
-       <Navbar />
-
-    <Footer />
-    </>
+    
+<>
+<Routes>
+<Route path='/' element={<HomeBannerSec/>}/>
+<Route path='/brandViewPage' element={<BrandViewPage/>}/>
+</Routes>
+</>
+    
   )
 }
 
-export default App
+export default App;
