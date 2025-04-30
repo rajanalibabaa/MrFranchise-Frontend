@@ -12,6 +12,9 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
+import TopBrandVdoSec from "../HomePage_VideoSection/TopBrandVdoSec";
+import TopIndusVdoSec from "../HomePage_VideoSection/TopIndusVdoSec";
+import TopInvestVdoSec from "../HomePage_VideoSection/TopInvestVdoSec";
 
 const HomeBannerSec = () => {
    
@@ -24,6 +27,7 @@ const HomeBannerSec = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
   return (
+    <>
     <Box
       sx={{
       
@@ -180,7 +184,13 @@ const HomeBannerSec = () => {
           </Typography>
         </Box>
       </Modal>
+     
     </Box>
+     <TopBrandVdoSec/>
+     <TopIndusVdoSec/>
+     <TopInvestVdoSec/>
+     </>
+    
   )
 }
 
