@@ -241,7 +241,7 @@ const TopBrandVdoSec = () => {
           </Typography>
 
           <Button
-            onClick={() => navigate("/brandview")}
+            onClick={() => navigate("/brandViewPage")}
             variant="outlined"
             fullWidth
             sx={{ mt: 2, borderRadius: 2 }}

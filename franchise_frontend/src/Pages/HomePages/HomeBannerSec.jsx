@@ -12,9 +12,11 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
-import TopBrandVdoSec from "../HomePage_VideoSection/TopBrandVdoSec";
-import TopIndusVdoSec from "../HomePage_VideoSection/TopIndusVdoSec";
-import TopInvestVdoSec from "../HomePage_VideoSection/TopInvestVdoSec";
+import TopBrandVdoSec from "../../Components/HomePage_VideoSection/TopBrandVdoSec";
+import TopIndusVdoSec from "../../Components/HomePage_VideoSection/TopIndusVdoSec";
+import TopInvestVdoSec from "../../Components/HomePage_VideoSection/TopInvestVdoSec";
+import Navbar from "../../Components/Navbar/NavBar";
+import Footer from "../../Components/Footers/Footer";
 
 const HomeBannerSec = () => {
    
@@ -28,6 +30,8 @@ const HomeBannerSec = () => {
     const handleClose = () => setOpen(false);
   return (
     <>
+    {/* navbarcontent */}
+    <Navbar />
     <Box
       sx={{
       
@@ -48,7 +52,7 @@ const HomeBannerSec = () => {
          Welcome to <Box component="span" sx={{ color: "yellow", fontWeight: "bold" }}>Our Franchise</Box> Website
         </Typography>
         <Typography variant="body1" sx={{ mb: 3 }}>
-          World's highest visited franchise website networ
+          World's highest visited franchise website network
         </Typography>
    
 
@@ -186,9 +190,14 @@ const HomeBannerSec = () => {
       </Modal>
      
     </Box>
+    {/* top single vido section */}
      <TopBrandVdoSec/>
+     {/* top double video section */}
      <TopIndusVdoSec/>
+     {/* top triple video section */}
      <TopInvestVdoSec/>
+{/* footer sections */}
+     <Footer/>
      </>
     
   )
