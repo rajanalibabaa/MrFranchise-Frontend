@@ -1,15 +1,13 @@
-import react  from 'react'
+
 import './App.css'
-import Footer from './Components/Footers/Footer'
-import Navbar from './Components/Navbar/NavBar'
+import BrandListingForm from './Pages/BrandListingForm/BrandListingForm.jsx'
+
 
 function App() {
 
   return (
     <> 
-       <Navbar />
-
-    <Footer />
+<BrandListingForm/>
     </>
   )
 }
