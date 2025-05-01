@@ -24,7 +24,7 @@ const steps = [
   "Gallery",
 ];
 
-function BrandListingPage() {
+function BrandListingFormPage() {
   const [formData, setFormData] = useState({
     brandDetails: {
       companyName: "",
@@ -225,4 +225,4 @@ function BrandListingPage() {
   );
 }
 
-export default BrandListingPage;
+export default BrandListingFormPage;

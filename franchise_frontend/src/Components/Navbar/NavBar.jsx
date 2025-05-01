@@ -59,7 +59,7 @@ function Navbar() {
             <Typography variant="h6">MR FRANCHISE</Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Link to="/allcategories">CATEGORY</Link>
-              <Button variant="outlined" onClick={() => handleNavigate("/brandlisting")}>ADD LISTING</Button>
+              <Button variant="outlined" onClick={() => handleNavigate("/brandListingForm")}>ADD LISTING</Button>
               <Box sx={{ position: "relative" }} onClick={() => dispatch(toggleMenu())}>
                 {isLoggedIn ? (
                   <User />
