@@ -28,8 +28,6 @@ const phoneCodes = {
   Australia: "+61",
 };
 
-
-
 const InvestorRegister = () => {
   const {
     register,

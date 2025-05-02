@@ -27,10 +27,12 @@ const BrandRegister = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    dispatch(setField({
-      name,
-      value: type === "checkbox" ? checked : value,
-    }));
+    dispatch(
+      setField({
+        name,
+        value: type === "checkbox" ? checked : value,
+      })
+    );
   };
 
   const validateForm = (data) => {
@@ -40,10 +42,13 @@ const BrandRegister = () => {
     if (!data.phone) validationErrors.phone = "Phone number is required";
     if (!data.email) validationErrors.email = "Email is required";
     if (!data.brandName) validationErrors.brandName = "Brand name is required";
-    if (!data.companyName) validationErrors.companyName = "Company name is required";
+    if (!data.companyName)
+      validationErrors.companyName = "Company name is required";
     if (!data.category) validationErrors.category = "Category is required";
-    if (!data.franchiseType) validationErrors.franchiseType = "Franchise type is required";
-    if (!data.agreeToTerms) validationErrors.agreeToTerms = "You must agree to the terms";
+    if (!data.franchiseType)
+      validationErrors.franchiseType = "Franchise type is required";
+    if (!data.agreeToTerms)
+      validationErrors.agreeToTerms = "You must agree to the terms";
     return validationErrors;
   };
 
@@ -62,7 +67,17 @@ const BrandRegister = () => {
 
   return (
     <Grid container sx={{ minHeight: "100vh", overflow: "hidden" }}>
-      <Grid item xs={12} md={6} sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 4 }}>
+      <Grid
+        item
+        xs={12}
+        md={6}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 4,
+        }}
+      >
         <Box
           component="img"
           src={brandImage}
@@ -71,7 +86,17 @@ const BrandRegister = () => {
         />
       </Grid>
 
-      <Grid item xs={12} md={6} sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 4 }}>
+      <Grid
+        item
+        xs={12}
+        md={6}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 4,
+        }}
+      >
         <Box sx={{ width: "100%", maxWidth: 600 }}>
           <Typography variant="h4" fontWeight={600} mb={4} textAlign="center">
             Brand Registration
@@ -87,7 +112,7 @@ const BrandRegister = () => {
                 { name: "brandName", label: "Enter your brand name" },
                 { name: "companyName", label: "Enter your company name" },
               ].map(({ name, label }) => (
-                <Grid item xs={12} sm={6} sx={{width:"48%"}}key={name}>
+                <Grid item xs={12} sm={6} sx={{ width: "48%" }} key={name}>
                   <TextField
                     fullWidth
                     name={name}
@@ -100,7 +125,7 @@ const BrandRegister = () => {
                 </Grid>
               ))}
 
-              <Grid item xs={12} sm={6} sx={{width:"48%"}}>
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
                 <FormControl fullWidth error={!!errors.category}>
                   <InputLabel>Select Category</InputLabel>
                   <Select
@@ -109,15 +134,23 @@ const BrandRegister = () => {
                     label="Select the Category"
                     onChange={handleChange}
                   >
-                    {["Food & Beverage", "Retail", "Education", "Health & Wellness", "Technology"].map((cat) => (
-                      <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                    {[
+                      "Food & Beverage",
+                      "Retail",
+                      "Education",
+                      "Health & Wellness",
+                      "Technology",
+                    ].map((cat) => (
+                      <MenuItem key={cat} value={cat}>
+                        {cat}
+                      </MenuItem>
                     ))}
                   </Select>
                   <FormHelperText>{errors.category}</FormHelperText>
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sm={6} sx={{width:"48%"}}>
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
                 <FormControl fullWidth error={!!errors.franchiseType}>
                   <InputLabel>Select Franchise Type</InputLabel>
                   <Select
@@ -127,30 +160,52 @@ const BrandRegister = () => {
                     onChange={handleChange}
                   >
                     {["Single Unit", "Multi Unit"].map((type) => (
-                      <MenuItem key={type} value={type}>{type}</MenuItem>
+                      <MenuItem key={type} value={type}>
+                        {type}
+                      </MenuItem>
                     ))}
                   </Select>
                   <FormHelperText>{errors.franchiseType}</FormHelperText>
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sx={{width:"100%"}}>
+              <Grid item xs={12} sx={{ width: "100%" }}>
                 <FormControlLabel
-                  control={<Checkbox name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleChange} />}
-                  label={<Typography variant="body2">I agree to the <strong>terms and conditions</strong></Typography>}
+                  control={
+                    <Checkbox
+                      name="agreeToTerms"
+                      checked={formData.agreeToTerms}
+                      onChange={handleChange}
+                    />
+                  }
+                  label={
+                    <Typography variant="body2">
+                      I agree to the <strong>terms and conditions</strong>
+                    </Typography>
+                  }
                 />
-                {errors.agreeToTerms && <FormHelperText error>{errors.agreeToTerms}</FormHelperText>}
+                {errors.agreeToTerms && (
+                  <FormHelperText error>{errors.agreeToTerms}</FormHelperText>
+                )}
               </Grid>
 
-              <Grid item xs={12} sx={{width:"100%"}}>
-                <Button type="submit" fullWidth variant="contained" sx={{ mt: 1, py: 1.5, fontWeight: 600 }}>
+              <Grid item xs={12} sx={{ width: "100%" }}>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 1, py: 1.5, fontWeight: 600 }}
+                >
                   Register
                 </Button>
               </Grid>
 
-              <Grid item xs={12} sx={{width:"100%"}}>
+              <Grid item xs={12} sx={{ width: "100%" }}>
                 <Typography variant="body2" textAlign="center">
-                  Already have an account? <Link href="/loginPage" underline="hover">Sign In</Link>
+                  Already have an account?{" "}
+                  <Link href="/loginPage" underline="hover">
+                    Sign In
+                  </Link>
                 </Typography>
               </Grid>
             </Grid>

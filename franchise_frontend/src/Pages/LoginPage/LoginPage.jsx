@@ -77,18 +77,20 @@ function LoginPage() {
           },
         }
       );
-
       console.log("OTP response:", response.data.success);
       setIsOtpSent(response.data.success);
     } catch (error) {
-      console.error("Error sending OTP:", error.response?.data || error.message);
+      console.error(
+        "Error sending OTP:",
+        error.response?.data || error.message
+      );
       setErrors((prev) => ({
         ...prev,
         username: "Failed to send OTP. Please try again.",
       }));
     }
   };
-
+console.log("isOtpSent:", isOtpSent);
   const validateOtp = async () => {
     if (!formData.otp) {
       setErrors((prev) => ({
@@ -115,7 +117,7 @@ function LoginPage() {
 
       if (response.data.success) {
         console.log("OTP verified successfully");
-        navigate("/"); 
+        navigate("/");
       } else {
         setErrors((prev) => ({
           ...prev,
@@ -123,7 +125,10 @@ function LoginPage() {
         }));
       }
     } catch (error) {
-      console.error("Error verifying OTP:", error.response?.data || error.message);
+      console.error(
+        "Error verifying OTP:",
+        error.response?.data || error.message
+      );
       setErrors((prev) => ({
         ...prev,
         otp: "Failed to verify OTP. Please try again.",
@@ -267,7 +272,7 @@ function LoginPage() {
             sx={{ my: 2, color: "text.secondary" }}
           >
             Don't have an account?{" "}
-            <Link href="/register" color="primary" fontWeight={500}>
+            <Link href="/registerhandleuser" color="primary" fontWeight={500}>
               Register here
             </Link>
           </Typography>
