@@ -138,6 +138,8 @@ const InvestorRegister = () => {
         }
       );
       // console.log('Server Response:', response.data);
+      
+      
       navigate("/loginpage");
     } catch (error) {
       if (error.response) {

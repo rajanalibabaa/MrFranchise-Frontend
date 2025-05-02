@@ -17,18 +17,18 @@ import LinkedInIcon from "../../assets/images/LinkedinIcon.png";
 import InstagramIcon from "../../assets/images/InstagramIcon.png";
 import TwitterIcon from "../../assets/images/TwitterIcon.png";
 import GoogleIcon from "../../assets/images/GoogleIcon.png";
+import axios from "axios";
 
-const LoginPage = () => {
+function LoginPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ username: "", otp: "" });
   const [errors, setErrors] = useState({});
   const [isOtpSent, setIsOtpSent] = useState(false);
-  const [generatedOtp, setGeneratedOtp] = useState("");
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
-    setErrors((prev) => ({ ...prev, [id]: "" }));
+    setErrors((prev) => ({ ...prev, [id]: "" })); // Clear errors for the field
   };
 
   const socialIcons = {
@@ -50,25 +50,94 @@ const LoginPage = () => {
       newErrors.username = "Invalid email or phone number";
     }
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.keys(newErrors).length === 0; // Return true if no errors
   };
 
-  const handleOtpRequest = (e) => {
+  const handleOtpRequest = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      setGeneratedOtp(otp);
-      setIsOtpSent(true);
-      alert(`OTP sent: ${otp}`);
+
+    // if (!validateForm()) {
+    //   return; // Stop execution if validation fails
+    // }
+
+    const isEmail = formData.username.includes("@");
+    const email = isEmail ? formData.username : null;
+    const mobileNumber = isEmail ? null : formData.username;
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/investor/generateOTPforInvestor",
+        {
+          email,
+          mobileNumber,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("OTP response:", response.data.success);
+      setIsOtpSent(response.data.success);
+    } catch (error) {
+      console.error("Error sending OTP:", error.response?.data || error.message);
+      setErrors((prev) => ({
+        ...prev,
+        username: "Failed to send OTP. Please try again.",
+      }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const validateOtp = async () => {
+    if (!formData.otp) {
+      setErrors((prev) => ({
+        ...prev,
+        otp: "OTP is required",
+      }));
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/investor/login",
+        {
+          verifyOtp: formData.otp,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Login response:", response.data);
+
+      if (response.data.success) {
+        console.log("OTP verified successfully");
+        navigate("/"); 
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          otp: "Invalid OTP. Please try again.",
+        }));
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error.response?.data || error.message);
+      setErrors((prev) => ({
+        ...prev,
+        otp: "Failed to verify OTP. Please try again.",
+      }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.otp === generatedOtp) {
-      navigate("/");
+
+    if (isOtpSent) {
+      await validateOtp(); // Validate OTP if it has been sent
     } else {
-      setErrors({ otp: "Invalid OTP" });
+      handleOtpRequest(e); // Request OTP if it hasn't been sent
     }
   };
 
@@ -76,12 +145,11 @@ const LoginPage = () => {
     <Grid
       container
       sx={{
-        // height: "100vh",
-        marginTop:"70px",
+        marginTop: "70px",
         display: "flex",
         flexDirection: "row",
         width: "100%",
-        padding:"20px"
+        padding: "20px",
       }}
     >
       {/* Left Side - Illustration */}
@@ -152,7 +220,7 @@ const LoginPage = () => {
             Please log in to your account to continue.
           </Typography>
 
-          <form onSubmit={isOtpSent ? handleSubmit : handleOtpRequest}>
+          <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
               label="Email/Phone Number"
@@ -241,6 +309,6 @@ const LoginPage = () => {
       </Grid>
     </Grid>
   );
-};
+}
 
 export default LoginPage;
