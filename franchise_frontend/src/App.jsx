@@ -15,6 +15,7 @@ import IconBreadcrumbs from './Pages/Profile_Pages/IconBreadcrumbs';
 import ManageProfile from './Components/Profile_Component/ManageProfile';
 import PostRequirement from './Components/Profile_Component/PostRequirement';
 import ResponseManager from './Components/Profile_Component/ResponseManager';
+import DashBoard from './Components/Profile_Component/DashBoard';
 
 function App() {
 
@@ -33,14 +34,14 @@ function App() {
        
         
        
-        <Route path='/profilepage' element={<ProfilePage />} />
-        <Route path='/iIconbreadcrumbs' element={<IconBreadcrumbs />} />
-        <Route path='/dashboard' element={<DashBoard />} />
-        <Route path='/complaint' element={<Complaint />} />
-        <Route path='/feedback' element={<FeedBack />} />
-        <Route path='/manageProfile' element={<ManageProfile />} />
-        <Route path='/PostRequirement' element={<PostRequirement />} />
-        <Route path='/respondemanager' element={<ResponseManager />} />
+        {/* <Route path='/profilepage' element={<ProfilePage />} /> */}
+        {/* <Route path='/iIconbreadcrumbs' element={<IconBreadcrumbs />} /> */}
+        <Route path='/dashboard' element={<DashBoard/>} />
+        {/* <Route path='/complaint' element={<Complaint />} /> */}
+        {/* <Route path='/feedback' element={<FeedBack />} /> */}
+        {/* <Route path='/manageProfile' element={<ManageProfile />} /> */}
+        {/* <Route path='/PostRequirement' element={<PostRequirement />} /> */}
+        {/* <Route path='/respondemanager' element={<ResponseManager />} /> */}
         
         
         </Routes>
