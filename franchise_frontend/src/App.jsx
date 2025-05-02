@@ -37,7 +37,7 @@ function App() {
         <Route path='/iIconbreadcrumbs' element={<IconBreadcrumbs />} />
         <Route path='/dashboard' element={<DashBoard />} />
         <Route path='/complaint' element={<Complaint />} />
-        <Route path='/feedBack' element={<FeedBack />} />
+        <Route path='/feedback' element={<FeedBack />} />
         <Route path='/manageProfile' element={<ManageProfile />} />
         <Route path='/PostRequirement' element={<PostRequirement />} />
         <Route path='/respondemanager' element={<ResponseManager />} />
