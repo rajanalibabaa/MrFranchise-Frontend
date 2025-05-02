@@ -8,8 +8,8 @@ const ResponseManager = () => {
     {/* <Box>
    <ProfilePage />
    </Box> */}
-   <Box sx={{ p: 4, backgroundColor: "#f5f5f5", borderRadius: 3, maxWidth: 800, mx: "auto", boxShadow: 3 }}>
-   <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, textAlign: "center" }}>
+   <Box sx={{ p: 8, backgroundColor: "#f5f5f5", borderRadius: 3, maxWidth: 800, mx: "auto", boxShadow: 3 }}>
+   <Typography variant="h5" sx={{ mb: 3, fontWeight: 800, textAlign: "center" }}>
      RESPONSE MANAGER
      
    </Typography>
@@ -26,7 +26,7 @@ const ResponseManager = () => {
        p: 3,
      }}
    >
-     <Box sx={{ flex: 1 }}>
+     <Box sx={{ flex: 1, textAlign: "left", flexGrow: 1,paddingRight: 20 }}>
        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
          Account Manager
        </Typography>

@@ -25,8 +25,8 @@ const DashBoard= ({ selectedSection, sectionContent }) => {
             sectionContent[selectedSection]
           ) : (
             <Box sx={{ display: "flex", gap: 4 }}>
-              {/* Profile Sidebar */}
-              <Box sx={{ width: 240, textAlign: "center", bgcolor: "#fff", p: 2, borderRadius: 2, boxShadow: 2 }}>
+             
+              <Box sx={{ width: 240,height:200 ,textAlign: "center", bgcolor: "#fff", p: 2, borderRadius: 2, boxShadow: 2 }}>
                 <Avatar sx={{
                   width: 200,
                   height: 200,
@@ -51,14 +51,14 @@ const DashBoard= ({ selectedSection, sectionContent }) => {
 
               {/* Profile Info */}
               <Box sx={{ flex: 1 }}>
-                <Box sx={{ mb: 3, bgcolor: "#fff", p: 2, borderRadius: 2, boxShadow: 2 }}>
+                <Box sx={{ mb: 3, bgcolor: "#fff", p: 2, borderRadius: 2, boxShadow: 2, width: "90%", textAlign: "center",height: "30%" }}>
                   <Typography variant="h5" fontWeight={600}>
                     Welcome (Manikandan.M)
                   </Typography>
                   <Typography color="text.secondary">Investor</Typography>
                 </Box>
 
-                <Box
+                {/* <Box
                   sx={{
                     display: "grid",
                     gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
@@ -67,13 +67,14 @@ const DashBoard= ({ selectedSection, sectionContent }) => {
                     p: 3,
                     borderRadius: 2,
                     boxShadow: 2,
+                    width: "195%",
                   }}
                 >
                   <TextField label="Name" placeholder="Enter your name" size="small" />
                   <TextField label="Email" type="email" placeholder="Enter your Email" size="small" />
                   <TextField label="Mobile" placeholder="Enter your Mobile" size="small" />
                   <TextField label="State" placeholder="Enter your State" size="small" />
-                </Box>
+                </Box> */}
               </Box>
             </Box>
           )}

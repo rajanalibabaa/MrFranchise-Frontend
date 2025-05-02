@@ -3,10 +3,6 @@ import { Box, Button, TextField, Typography, Paper } from "@mui/material";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-
-
-
-
 const ManageProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [investorData, setInvestorData] = useState({});
@@ -96,6 +92,9 @@ const ManageProfile = () => {
                     // maxWidth: 1000,
                     mx: "auto",
                     mt: 4,
+                    padding: 10,
+                    height: "90vh",
+                    width: "100%",
                 }}
             >
                 <Typography

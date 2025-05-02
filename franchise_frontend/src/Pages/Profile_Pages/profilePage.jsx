@@ -67,7 +67,7 @@ const ProfilePage = () => {
           Feedback
         </Button>
         <Button
-          onClick={() => navigate("/compaint")}
+          onClick={() => navigate("/complaint")}
           variant="outlined"
           color="error"
           fullWidth

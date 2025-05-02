@@ -1,16 +1,17 @@
 import React from 'react'
 import { Box, Button, TextField, Typography } from "@mui/material";
-import ProfilePage from "../../Pages/profilePage";
+// import ProfilePage from "../../Pages/profilePage";
 
 
 
 function Complaint() {
+    
   return (
     <div>
     {/* <Box>
     <ProfilePage />
     </Box> */}
-    <Box sx={{ p: 4, maxWidth: 600, mx: "auto", backgroundColor: "#f5f5f5", borderRadius: 3, boxShadow: 2 }}>
+    <Box sx={{ p: 4, maxWidth: 600, mx: "auto", backgroundColor: "#f5f5f5", borderRadius: 3, boxShadow: 2, padding: 5,height: "40vh", width: "300%",marginTop: 10,marginLeft: 30 }}>
     <Typography variant="h5" sx={{ mb: 3, fontWeight: "bold", textAlign: "center" }}>
       Complaint
     </Typography>
@@ -22,6 +23,14 @@ function Complaint() {
         
       }}
     >
+        <TextField
+                  required
+                  label="Topic"
+                  placeholder="Enter topic"
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                />
       <TextField
         required
         label="Complaint"
