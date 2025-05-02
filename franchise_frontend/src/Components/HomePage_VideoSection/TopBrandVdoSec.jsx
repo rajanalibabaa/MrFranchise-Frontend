@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button, IconButton } from "@mui/material";
 // import img from "../../assets/Images/bgimg.jpg"
+import axios from "axios";
 
 
 const topbrandData = [
@@ -51,6 +52,23 @@ const TopBrandVdoSec = () => {
     const prevVideo = () => setCurrentVideo((prev) => (prev - 1 + topbrandData.length) % topbrandData.length);
   
     const currentItem = topbrandData[currentVideo];
+
+    const [setTopBrandData] = useState(true);
+
+    useEffect(() => {
+      const topbrandData = async() => {
+        try {
+          const response = await axios.get ("http://localhost:5000/api/v1/admin/videoAdvertise/getAdminVideoAdvertise");
+          setTopBrandData(response.data);
+        } catch (error) {
+          console.error("Error fetching top brand data:", error);
+        } 
+        }
+      topbrandData();
+      },);
+      
+    
+
   return (
     <Box sx={{ p: 2 }}>
       <Typography

@@ -16,6 +16,7 @@
     "@mui/material": "^7.0.2",
     "@mui/styled-engine-sc": "^7.0.2",
     "@reduxjs/toolkit": "^2.7.0",
+    "axios": "^1.9.0",
     "framer-motion": "^12.9.2",
     "lucide-react": "^0.503.0",
     "react": "^19.0.0",
