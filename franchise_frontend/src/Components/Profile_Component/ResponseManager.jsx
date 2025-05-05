@@ -1,5 +1,6 @@
 import React from 'react'
 import { Box, Typography, Avatar, Link } from "@mui/material";
+import img from "../../assets/images/brandLogo.jpg"; // Adjust the path as necessaryv
 
 
 const ResponseManager = () => {
@@ -8,7 +9,7 @@ const ResponseManager = () => {
     {/* <Box>
    <ProfilePage />
    </Box> */}
-   <Box sx={{ p: 8, backgroundColor: "#f5f5f5", borderRadius: 3, maxWidth: 800, mx: "auto", boxShadow: 3 }}>
+   <Box sx={{ p: 4, backgroundColor: "#f5f5f5", borderRadius: 3, maxWidth: 1100, mx: "auto", boxShadow: 3,marginTop: 10,marginLeft: 3 }}>
    <Typography variant="h5" sx={{ mb: 3, fontWeight: 800, textAlign: "center" }}>
      RESPONSE MANAGER
      
@@ -53,8 +54,10 @@ const ResponseManager = () => {
            border: "1px solid #ccc",
          }}
        >
-         <Typography variant="body2">
-           <strong>Description:</strong> Sample description text for manager...
+         <Typography variant="body2" sx={{ width: "100%" }}>
+           <strong>Description:</strong> Lorem ipsum, dolor sit amet consectetur adipisicing elit. 
+           In nesciunt eaque libero delectus? Pariatur assumenda sit laborum nesciunt sint,
+           tempore cupiditate modi ducimus provident quis eos praesentium nihil dicta deserunt.
          </Typography>
        </Box>
      </Box>
@@ -62,7 +65,7 @@ const ResponseManager = () => {
      <Box sx={{ flexShrink: 0 }}>
        <Avatar
          alt="Manager Logo"
-        //  src={'img'}
+         src={img}
          sx={{ width: 120, height: 120, borderRadius: 2 }}
          variant="rounded"
        />

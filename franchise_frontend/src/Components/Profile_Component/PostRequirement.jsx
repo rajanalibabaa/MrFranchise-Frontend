@@ -46,7 +46,7 @@ const PostRequirement = () => {
   
     const getInvestorDataValue = (key) => previewData?.[key] || "N/A";
   return (
-    <Box sx={{ display: "flex", minHeight: "90vh", backgroundColor: "#fafafa", padding: 2,width: "100%" }}>
+    <Box sx={{ display: "flex", minHeight: "75vh", backgroundColor: "#fafafa", padding: 2,width: "99%" }}>
       {/* <Box sx={{ width: 250, borderRight: "1px solid #ddd",  }}>
         <ProfilePage />
       </Box> */}
@@ -106,7 +106,7 @@ const PostRequirement = () => {
             </Paper>
 
             <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 3 }}>
-              <Button variant="outlined" color="secondary" onClick={handleBackToEdit}>
+              <Button variant="outlined"  onClick={handleBackToEdit} sx={{ backgroundColor: "#fff", }}>
                 Back to Edit
               </Button>
               <Button variant="contained" color="success" onClick={handleSubmitRequirement}>
