@@ -17,19 +17,31 @@ import TopIndusVdoSec from "../../Components/HomePage_VideoSection/TopIndusVdoSe
 import TopInvestVdoSec from "../../Components/HomePage_VideoSection/TopInvestVdoSec";
 import Navbar from "../../Components/Navbar/NavBar";
 import Footer from "../../Components/Footers/Footer";
+import LoginRegisterPopUp from "../../Components/PopUpModal/LoginRegisterPopUp";
+import PopupModal from "../../Components/PopUpModal/PopUpModal";
+
 
 const HomeBannerSec = () => {
-   
-
     const [industry, setIndustry] = useState("");
     const [sector, setSector] = useState("");
     const [service, setService] = useState("");
     const [open, setOpen] = useState(false);
+
+
     const navigate = useNavigate();
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+   
+    // const handlePopupClose = () => {
+    //   setIsPopupOpen(false); // Close the modal
+    // };
+
   return (
     <>
+    <PopupModal/>
+
+    {/* login and register pop up */}
+    <LoginRegisterPopUp/>
     {/* navbarcontent */}
     <Navbar />
     <Box

@@ -1,4 +1,3 @@
-
 import React  from 'react';
 import {Route,Routes} from "react-router-dom"
 import InvestorRegister from './Pages/Registration/InvestorsRegister';
@@ -10,7 +9,6 @@ import HomeBannerSec from './Pages/HomePages/HomeBannerSec';
 import RegisterHandleUser from './Pages/Registration/RegisterHandlePage';
 import BrandListingFormPage from './Pages/BrandListingForm/BrandListingFormPage';
 import SideViewContent from './Components/SideViewContentMenu/SideHoverMenu';
-
 function App() {
 
   return (

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Grid,
   Typography,
@@ -35,6 +36,8 @@ const BrandRegister = () => {
     );
   };
 
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const validateForm = (data) => {
     const validationErrors = {};
     if (!data.firstName) validationErrors.firstName = "First name is required";
@@ -52,18 +55,46 @@ const BrandRegister = () => {
     return validationErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm(formData);
     dispatch(setErrors(validationErrors));
-
+  
     if (Object.keys(validationErrors).length === 0) {
-      console.log("Form is valid. Navigating...");
-      navigate("/loginPage");
+      console.log("✅ Posting this data to API:", formData);
+  
+      try {
+        const response = await axios.post("https://reqres.in/api/users", formData);
+        console.log("✅ API Response:", response.data);
+        navigate("/loginPage");
+      } catch (error) {
+        console.error("❌ API Error:", error);
+      }
     } else {
-      console.log("Form has errors:", validationErrors);
+      console.warn("⚠️ Form has errors:", validationErrors);
     }
   };
+  
+
+  useEffect(() => {
+    const postFormData = async () => {
+      try {
+        const response = await axios.post(
+          "https://reqres.in/api/users",
+          formData
+        );
+        console.log("Success:", response.data);
+        navigate("/loginPage");
+      } catch (error) {
+        console.error("API Error:", error);
+      }
+    };
+
+    if (isSubmitted) {
+      postFormData();
+      setIsSubmitted(false);
+    }
+  }, [isSubmitted, formData, navigate]);
 
   return (
     <Grid container sx={{ minHeight: "100vh", overflow: "hidden" }}>
@@ -104,26 +135,81 @@ const BrandRegister = () => {
 
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
-              {[
-                { name: "firstName", label: "Enter your first name" },
-                { name: "lastName", label: "Enter your last name" },
-                { name: "phone", label: "Enter your phone number" },
-                { name: "email", label: "Enter your email" },
-                { name: "brandName", label: "Enter your brand name" },
-                { name: "companyName", label: "Enter your company name" },
-              ].map(({ name, label }) => (
-                <Grid item xs={12} sm={6} sx={{ width: "48%" }} key={name}>
-                  <TextField
-                    fullWidth
-                    name={name}
-                    label={label}
-                    value={formData[name]}
-                    onChange={handleChange}
-                    error={!!errors[name]}
-                    helperText={errors[name]}
-                  />
-                </Grid>
-              ))}
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+                <TextField
+                  fullWidth
+                  name="firstName"
+                  label="Enter your first name"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  error={!!errors.firstName}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+                <TextField
+                  fullWidth
+                  name="lastName"
+                  label="Enter your last name"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  error={!!errors.lastName}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+                <TextField
+                  fullWidth
+                  name="phone"
+                  label="Enter your phone number"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  error={!!errors.phone}
+                  inputProps={{
+                    maxLength: 10,
+                    inputMode: "numeric",
+                  }}
+                  onInput={(e) => {
+                    e.target.value = e.target.value.replace(/\D/g, "");
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+                <TextField
+                  fullWidth
+                  name="email"
+                  label="Enter your email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  error={!!errors.email}
+                  inputProps={{
+                    pattern:"^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+                <TextField
+                  fullWidth
+                  name="brandName"
+                  label="Enter your brand name"
+                  value={formData.brandName}
+                  onChange={handleChange}
+                  error={!!errors.brandName}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+                <TextField
+                  fullWidth
+                  name="companyName"
+                  label="Enter your company name"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  error={!!errors.companyName}
+                />
+              </Grid>
 
               <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
                 <FormControl fullWidth error={!!errors.category}>
@@ -146,7 +232,7 @@ const BrandRegister = () => {
                       </MenuItem>
                     ))}
                   </Select>
-                  <FormHelperText>{errors.category}</FormHelperText>
+                  {/* <FormHelperText>{errors.category}</FormHelperText> */}
                 </FormControl>
               </Grid>
 
@@ -165,7 +251,7 @@ const BrandRegister = () => {
                       </MenuItem>
                     ))}
                   </Select>
-                  <FormHelperText>{errors.franchiseType}</FormHelperText>
+                  {/* <FormHelperText>{errors.franchiseType}</FormHelperText> */}
                 </FormControl>
               </Grid>
 

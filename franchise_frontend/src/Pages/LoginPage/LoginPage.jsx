@@ -167,6 +167,7 @@ console.log("isOtpSent:", isOtpSent);
           justifyContent: "center",
           alignItems: "center",
           p: 6,
+          margin:"0 20px"
         }}
       >
         <Box
@@ -177,8 +178,6 @@ console.log("isOtpSent:", isOtpSent);
             width: "100%",
             maxWidth: 500,
             height: "auto",
-            borderRadius: 2,
-            boxShadow: 3,
           }}
         />
       </Grid>
@@ -193,7 +192,11 @@ console.log("isOtpSent:", isOtpSent);
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          p: 4,
+          p: 6,
+          borderRadius: 2,
+          boxShadow: 3,
+          margin:"0 100px"
+
         }}
       >
         <IconButton
