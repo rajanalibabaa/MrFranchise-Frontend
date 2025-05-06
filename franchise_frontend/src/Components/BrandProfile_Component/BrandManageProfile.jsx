@@ -1,67 +1,56 @@
-import React, { useState, useEffect } from 'react';
-import {
-    Box, Button, TextField, Typography, Paper, Avatar
+import React, { useState } from 'react';
+import {Box, Button, TextField, Typography, Paper, Avatar
 } from "@mui/material";
-import axios from "axios";
+// import axios from "axios";
 import img from "../../assets/images/brandLogo.jpg";
 import PersonIcon from '@mui/icons-material/Person';
 
-const ManageProfile = () => {
+const BrandManageProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
-    const [investorData, setInvestorData] = useState({});
-    const id = "6805dcbdfff4495f419cc07e";
+    const [BrandData] = useState({});
+    // const id = "6805dcbdfff4495f419cc07e";
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(
-                    `http://localhost:5000/api/investor/getInvestor/${id}`,
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${localStorage.getItem("token")}`,
-                        },
-                    }
-                );
-                setInvestorData(response.data);
-            } catch (error) {
-                console.error("Error fetching investor data:", error);
-            }
-        };
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             const response = await axios.get(
+    //                 `http://localhost:5000/api/Brandr/getBrand/${id}`,
+    //                 {
+    //                     headers: {
+    //                         "Content-Type": "application/json",
+    //                         Authorization: `Bearer ${localStorage.getItem("token")}`,
+    //                     },
+    //                 }
+    //             );
+    //             setInvestorData(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching investor data:", error);
+    //         }
+    //     };
 
-        fetchData();
-    }, [id]);
+    //     fetchData();
+    // }, [id]);
 
-    const handleManageProfileChange = (e) => {
-        const { name, value } = e.target;
-        setInvestorData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
-    
+    // const handleManageProfileChange = (e) => {
+    //     const { name, value } = e.target;
+    //     setInvestorData((prevData) => ({
+    //         ...prevData,
+    //         [name]: value,
+    //     }));
+    // };
 
     const fieldLabels = [
-        { key: "name", label: "Name" },
+        { key: "FirstName", label: "FirstName" },
+        { key: "LastName", label: "LastName" },
         { key: "email", label: "Email" },
-        { key: "phone", label: "Phone" },
-        { key: "whatsapp", label: "WhatsApp" },
-        { key: "address", label: "Address" },
+        { key: "phoneNumber", label: "phoneNumber" },
+        { key: "brandName", label: "Brandname" },
+        { key: "companyname", label: "ComapanyName" },
         { key: "city", label: "City" },
         { key: "district", label: "District" },
-        { key: "state", label: "State" },
-        { key: "country", label: "Country" },
-        { key: "pincode", label: "Pincode" },
-        { key: "occupation", label: "Occupation" },
-        { key: "category", label: "Category" },
-        { key: "investmentRange", label: "Investment Range" },
-        { key: "capital", label: "Capital" },
-        { key: "lookingFor", label: "Looking For" },
-        { key: "ownProperty", label: "Own Property" },
-        { key: "propertyType", label: "Property Type" },
-        { key: "minArea", label: "Min Area" },
-        { key: "maxArea", label: "Max Area" },
-        { key: "sqft", label: "Sqft" },
+        { key: "Category", label: "Category" },
+        { key: "franchise", label: "Franchise" },
+        
     ];
 
     const renderTwoColumnForm = () => {
@@ -79,8 +68,8 @@ const ManageProfile = () => {
                         fullWidth
                         label={field1.label}
                         name={field1.key}
-                        value={investorData?.[field1.key] || ""}
-                        onChange={handleManageProfileChange}
+                        value={BrandData?.[field1.key] || ""}
+                        // onChange={handleManageProfileChange}
                         size="small"
                     />
                     {field2 ? (
@@ -88,8 +77,8 @@ const ManageProfile = () => {
                             fullWidth
                             label={field2.label}
                             name={field2.key}
-                            value={investorData?.[field2.key] || ""}
-                            onChange={handleManageProfileChange}
+                            value={BrandData?.[field2.key] || ""}
+                            // onChange={handleManageProfileChange}
                             size="small"
                         />
                     ) : (
@@ -101,8 +90,7 @@ const ManageProfile = () => {
 
         return rows;
     };
-  
-   
+
     return (
         <div style={{ display: "flex", marginTop: -30 }}>
             <Box
@@ -114,7 +102,7 @@ const ManageProfile = () => {
                     mx: "auto",
                     mt: 4,
                     padding: 10,
-                    height: "90vh",
+                    height: "60vh",
                     width: "100%",
                 }}
             >
@@ -122,7 +110,7 @@ const ManageProfile = () => {
                     variant="h4"
                     sx={{ mb: 3, fontWeight: 700, textAlign: "center", color: "#333" }}
                 >
-                    Investor Profile
+                    Brand Profile
                 </Typography>
 
                 {isEditing ? (
@@ -160,17 +148,17 @@ const ManageProfile = () => {
                         </Box>
 
                         <Paper sx={{ p: 2, backgroundColor: "#fff", borderRadius: 2, border: "1px solid #ddd", marginTop: 2, marginLeft: -5 }}>
-                            <Typography><strong>Name:</strong> {investorData.firstName} {investorData.lastName}</Typography>
-                            <Typography><strong>Email:</strong> {investorData.email}</Typography>
-                            <Typography><strong>Phone:</strong> {investorData.mobileNumber}</Typography>
-                            <Typography><strong>WhatsApp:</strong> {investorData.whatsappNumber}</Typography>
-                            <Typography><strong>Address:</strong> {investorData.address}</Typography>
-                            <Typography><strong>City:</strong> {investorData.city}</Typography>
-                            <Typography><strong>District:</strong> {investorData.district}</Typography>
-                            <Typography><strong>State:</strong> {investorData.state}</Typography>
-                            <Typography><strong>Country:</strong> {investorData.country}</Typography>
-                            <Typography><strong>Pincode:</strong> {investorData.pincode}</Typography>
-                            <Typography><strong>Occupation:</strong> {investorData.occupation}</Typography>
+                            <Typography><strong>FirstName:</strong> {BrandData.firstName} {BrandData.LastName}</Typography>
+                            <Typography><strong>Email:</strong> {BrandData.email}</Typography>
+                            <Typography><strong>phoneNumber:</strong> {BrandData.phoneNumber}</Typography>
+                            <Typography><strong>brandName:</strong> {BrandData.brandName}</Typography>
+                            <Typography><strong>companyname:</strong> {BrandData.address}</Typography>
+                            <Typography><strong>City:</strong> {BrandData.city}</Typography>
+                            <Typography><strong>District:</strong> {BrandData.district}</Typography>
+                            <Typography><strong>Category:</strong> {BrandData.state}</Typography>
+                            <Typography><strong>franchise:</strong> {BrandData.country}</Typography>
+                            {/* <Typography><strong>Pincode:</strong> {BrandData.pincode}</Typography> */}
+                            {/* <Typography><strong>Occupation:</strong> {investorData.occupation}</Typography>
                             <Typography><strong>Category:</strong> {investorData.category}</Typography>
                             <Typography><strong>Investment Range:</strong> {investorData.investmentRange}</Typography>
                             <Typography><strong>Capital:</strong> {investorData.capital}</Typography>
@@ -179,7 +167,7 @@ const ManageProfile = () => {
                             <Typography><strong>Property Type:</strong> {investorData.propertyType}</Typography>
                             <Typography><strong>Min Area:</strong> {investorData.minArea}</Typography>
                             <Typography><strong>Max Area:</strong> {investorData.maxArea}</Typography>
-                            <Typography><strong>Sqft:</strong> {investorData.sqft}</Typography>
+                            <Typography><strong>Sqft:</strong> {investorData.sqft}</Typography> */}
                         </Paper>
                     </>
                 )}
@@ -188,4 +176,4 @@ const ManageProfile = () => {
     );
 };
 
-export default ManageProfile;
+export default BrandManageProfile;

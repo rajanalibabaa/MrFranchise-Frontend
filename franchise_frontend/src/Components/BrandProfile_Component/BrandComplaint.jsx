@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import {
   Box,
   Button,
   TextField,
   Typography,
+  Rating,
   Paper,
   FormControl,
   InputLabel,
@@ -12,39 +12,10 @@ import {
   MenuItem
 } from "@mui/material";
 
-function Complaint() {
+
+function BrandComplaint() {
+  
   const [selectedTopic, setSelectedTopic] = useState('');
-  const [complaintText, setComplaintText] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const formattedData = {
-      topic: selectedTopic,
-      complaint: complaintText,
-    };
-
-    console.log(formattedData)
-
-    try {
-      const response = await axios.post(
-        " http://localhost:5000/api/complaint/createComplaint",
-        formattedData,
-        {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      );
-      console.log("Complaint submitted:", response.data);
-      alert("Complaint submitted successfully!");
-      // Clear the form
-      setSelectedTopic('');
-      setComplaintText('');
-    } catch (error) {
-      console.error("Submission error:", error);
-    }
-  };
 
   return (
     <Box sx={{ mt: 8, px: 2, marginLeft: -20, padding: 4 }}>
@@ -56,8 +27,12 @@ function Complaint() {
         <Box
           component="form"
           sx={{ display: "flex", flexDirection: "column", gap: 3 }}
-          onSubmit={handleSubmit}
+          onSubmit={(e) => {
+            e.preventDefault();
+            // handle complaint submission
+          }}
         >
+          {/* Topic Dropdown */}
           <FormControl required fullWidth size="small">
             <InputLabel id="complaint-topic-label">Topic</InputLabel>
             <Select
@@ -75,6 +50,7 @@ function Complaint() {
             </Select>
           </FormControl>
 
+          
           <TextField
             required
             label="Complaint"
@@ -84,10 +60,9 @@ function Complaint() {
             rows={5}
             fullWidth
             size="small"
-            value={complaintText}
-            onChange={(e) => setComplaintText(e.target.value)}
           />
 
+          
           <Box sx={{ textAlign: "right" }}>
             <Button type="submit" variant="contained" color="primary" sx={{ backgroundColor: "#558b2f" }}>
               Submit Your Complaint
@@ -99,4 +74,4 @@ function Complaint() {
   );
 }
 
-export default Complaint;
+export default BrandComplaint;

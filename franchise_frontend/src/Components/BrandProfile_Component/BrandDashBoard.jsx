@@ -9,7 +9,7 @@ import {
 import PersonIcon from '@mui/icons-material/Person';
 import img from "../../assets/images/brandLogo.jpg"; // Adjust the path as necessary
 
-const DashBoard = ({ selectedSection, sectionContent }) => {
+const BrandDashBoard = ({ selectedSection, sectionContent }) => {
     const [tabValue, setTabValue] = useState(0);
 
     const handleTabChange = (event, newValue) => {
@@ -21,7 +21,7 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
             <Typography variant="h6" fontWeight={600} mb={2}>
                 Dashboard
             </Typography>
-            <Box sx={{ display: "flex", minHeight: "85vh", bgcolor: "#f4f6f8" }}>
+            <Box sx={{ display: "flex", minHeight: "75vh", bgcolor: "#f4f6f8" }}>
                 {/* Main Content */}
                 <Box sx={{ flex: 1, p: 3 }}>
                     {selectedSection ? (
@@ -90,7 +90,7 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                                         <Tab label="Expressed Interest" />
                                         <Tab label="Viewed Brands" />
                                         <Tab label="Liked Brands" />
-                                        <Tab label="Short List" />
+                                        <Tab label="Short Brands" />
                                     </Tabs>
                                 </Box>
                             </Box>
@@ -105,4 +105,4 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
     );
 };
 
-export default DashBoard;
+export default BrandDashBoard;

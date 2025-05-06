@@ -18,6 +18,13 @@ import ResponseManager from './Components/Profile_Component/ResponseManager';
 import DashBoard from './Components/Profile_Component/DashBoard';
 import FeedBack from './Components/Profile_Component/FeedBack';
 import Complaint from './Components/Profile_Component/Complaint';
+import BrandDashBoard from './Components/BrandProfile_Component/BrandDashBoard';
+import Sidebar from './Pages/BrandProfile_Pages.jsx/Sidebar_page';
+import BrandManageProfile from './Components/BrandProfile_Component/BrandManageProfile';
+import BrandFeedBack from './Components/BrandProfile_Component/BrandFeedback';
+import BrandComplaint from './Components/BrandProfile_Component/BrandComplaint';
+import BrandAddVedios from './Components/BrandProfile_Component/BrandAddVedios';
+
 
 function App() {
 
@@ -26,6 +33,8 @@ function App() {
     <>
       <Routes>
         <Route path='/' element={<HomeBannerSec />} />
+
+
         <Route path='/brandViewPage' element={<BrandViewPage />} />
         <Route path="/investor-register" element={<InvestorRegister />} />
         <Route path='/brand-register' element={<BrandRegister />} />
@@ -33,18 +42,30 @@ function App() {
         <Route path='/registerhandleuser' element={<RegisterHandleUser />} />
         <Route path='/brandlistingform' element={<BrandListingFormPage />} />
         <Route path='/sideviewcontentmenu' element={<SideViewContent />} />
-       
-         <Route path="/dashboard" element={<ProfilePage />}>
-          <Route index element={<DashBoard />} /> 
+
+        <Route path="/investerdashboard" element={<ProfilePage />}>
+          <Route index element={<DashBoard />} />
           <Route path="iIconbreadcrumbs" element={<IconBreadcrumbs />} />
           <Route path="complaint" element={<Complaint />} />
           <Route path="feedBack" element={<FeedBack />} />
           <Route path="manageProfile" element={<ManageProfile />} />
           <Route path="PostRequirement" element={<PostRequirement />} />
           <Route path="respondemanager" element={<ResponseManager />} />
-        </Route>   
-        
-        </Routes>
+        </Route>
+
+        <Route path="/brandDashboard" element={<Sidebar />}>
+          <Route index element={<BrandDashBoard />} />
+          <Route path="brandDashboard" element={<BrandDashBoard />} />
+          <Route path="brandaddvedios" element={<BrandAddVedios />} />
+          <Route path="brandfeedback" element={<BrandFeedBack />} />
+          <Route path="brandcomplaint" element={<BrandComplaint />} />
+          <Route path="brandmanageprofile" element={<BrandManageProfile />} />
+          
+
+        </Route>
+
+
+      </Routes>
     </>
 
   )

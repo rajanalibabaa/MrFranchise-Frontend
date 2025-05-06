@@ -1,12 +1,13 @@
 import React from "react";
 import { Link as RouterLink, Outlet, useLocation } from "react-router-dom";
 import { Box, Button, Breadcrumbs, Typography, Link } from "@mui/material";
-import HomeIcon from '@mui/icons-material/Home';
-import WhatshotIcon from '@mui/icons-material/Whatshot';
+import HomeIcon from "@mui/icons-material/Home";
+import WhatshotIcon from "@mui/icons-material/Whatshot";
 
 const IconBreadcrumbs = () => {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
+
 
   return (
     <Box
@@ -23,6 +24,7 @@ const IconBreadcrumbs = () => {
       }}
     >
       <Breadcrumbs aria-label="breadcrumb" sx={{ px: 1, color: "#fff" }}>
+        {/* Home breadcrumb */}
         <Link
           component={RouterLink}
           underline="hover"
@@ -33,6 +35,7 @@ const IconBreadcrumbs = () => {
           HOME
         </Link>
 
+        {/* Dynamic breadcrumbs */}
         {pathnames.map((value, index) => {
           const to = `/${pathnames.slice(0, index + 1).join("/")}`;
           const isLast = index === pathnames.length - 1;
@@ -67,9 +70,10 @@ const IconBreadcrumbs = () => {
   );
 };
 
-const ProfilePage = () => {
+const Sidebar = () => {
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", backgroundColor: "#f4f6f8" }}>
+      {/* Sidebar */}
       <Box
         sx={{
           width: 240,
@@ -84,29 +88,56 @@ const ProfilePage = () => {
         }}
       >
         <Box>
-          <Button
-            variant="contained"
-            color="secondary"
-            sx={{ width: "100%", mb: 2, backgroundColor: "#ffab00" }}
-          >
-            Upgrade Account
-          </Button>
-          <RouterLink to="/investerdashboard" style={navLinkStyle}>Dashboard</RouterLink>
-          <RouterLink to="/investerdashboard/PostRequirement" style={navLinkStyle}>Post Requirement</RouterLink>
-          <RouterLink to="/investerdashboard/manageProfile" style={navLinkStyle}>Manage Profile</RouterLink>
-          <RouterLink to="/investerdashboard/respondemanager" style={navLinkStyle}>Response Manager</RouterLink>
+          <RouterLink to="/brandDashboard/brandDashboard" style={navLinkStyle}>
+            Dashboard
+          </RouterLink>
+
+          <RouterLink to="/brandDashboard/brandmanageprofile" style={navLinkStyle}>
+            Manage Profile
+          </RouterLink>
+
+          <RouterLink to="/brandDashboard/brandaddvedios" style={navLinkStyle}>
+            Add Videos
+          </RouterLink>
         </Box>
 
         <Box sx={{ mt: "auto", textAlign: "center" }}>
-          <RouterLink to="/investerdashboard/feedBack" style={{ ...navLinkStyle, color: "#fafafa", backgroundColor: "#ffab00" }}>
+          <Button
+            component={RouterLink}
+            to="/brandDashboard/brandfeedback"
+            fullWidth
+            variant="contained"
+            sx={{
+              bgcolor: "#ffab00",
+              color: "#fff",
+              fontWeight: 600,
+              mb: 1,
+              borderRadius: 1,
+              "&:hover": { bgcolor: "#ffa000" },
+            }}
+          >
             Feedback
-          </RouterLink>
-          <RouterLink to="/investerdashboard/complaint" style={{ ...navLinkStyle, color: "#fafafa", backgroundColor: "#ffab00" }}>
+          </Button>
+
+          <Button
+            component={RouterLink}
+            to="/brandDashboard/brandcomplaint"
+            fullWidth
+            variant="contained"
+            sx={{
+              bgcolor: "#ffab00",
+              color: "#fff",
+              fontWeight: 600,
+              borderRadius: 1,
+              "&:hover": { bgcolor: "#ffa000" },
+            }}
+          >
             Complaint
-          </RouterLink>
+          </Button>
         </Box>
       </Box>
 
+      {/* Main Content */}
       <Box sx={{ flexGrow: 1, p: 3 }}>
         <IconBreadcrumbs />
         <Outlet />
@@ -125,4 +156,4 @@ const navLinkStyle = {
   borderRadius: "4px",
 };
 
-export default ProfilePage;
+export default Sidebar;
