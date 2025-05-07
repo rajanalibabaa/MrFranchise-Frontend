@@ -10,6 +10,7 @@ import HomeBannerSec from './Pages/HomePages/HomeBannerSec';
 import RegisterHandleUser from './Pages/Registration/RegisterHandlePage';
 import BrandListingFormPage from './Pages/BrandListingForm/BrandListingFormPage';
 import SideViewContent from './Components/SideViewContentMenu/SideHoverMenu';
+import AllCategoryMainPage from './Pages/AllCategoryPage/AllCategoryMainPage';
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
         <Route path='/registerhandleuser' element={<RegisterHandleUser/>}/>
         <Route path='/brandlistingform' element={<BrandListingFormPage/>}/>
         <Route path='/sideviewcontentmenu' element={<SideViewContent/>}/>
+        <Route path='/allcategories' element={<AllCategoryMainPage/>}/>
 </Routes>
 </>
     
