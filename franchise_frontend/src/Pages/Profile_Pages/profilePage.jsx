@@ -1,0 +1,128 @@
+import React from "react";
+import { Link as RouterLink, Outlet, useLocation } from "react-router-dom";
+import { Box, Button, Breadcrumbs, Typography, Link } from "@mui/material";
+import HomeIcon from '@mui/icons-material/Home';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
+
+const IconBreadcrumbs = () => {
+  const location = useLocation();
+  const pathnames = location.pathname.split("/").filter((x) => x);
+
+  return (
+    <Box
+      sx={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+        pb: 1,
+        mb: 2,
+        borderBottom: '1px solid #e0e0e0',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+        backgroundColor: "#558b2f",
+        padding: 2,
+      }}
+    >
+      <Breadcrumbs aria-label="breadcrumb" sx={{ px: 1, color: "#fff" }}>
+        <Link
+          component={RouterLink}
+          underline="hover"
+          to="/"
+          sx={{ display: "flex", alignItems: "center", color: "inherit" }}
+        >
+          <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+          HOME
+        </Link>
+
+        {pathnames.map((value, index) => {
+          const to = `/${pathnames.slice(0, index + 1).join("/")}`;
+          const isLast = index === pathnames.length - 1;
+          const label = value
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (l) => l.toUpperCase());
+
+          return isLast ? (
+            <Typography
+              key={to}
+              color="text.primary"
+              sx={{ display: "flex", alignItems: "center" }}
+            >
+              <WhatshotIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+              {label}
+            </Typography>
+          ) : (
+            <Link
+              component={RouterLink}
+              underline="hover"
+              to={to}
+              key={to}
+              sx={{ display: "flex", alignItems: "center", color: "inherit" }}
+            >
+              <WhatshotIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+              {label}
+            </Link>
+          );
+        })}
+      </Breadcrumbs>
+    </Box>
+  );
+};
+
+const ProfilePage = () => {
+  return (
+    <Box sx={{ display: "flex", minHeight: "100vh", backgroundColor: "#f4f6f8" }}>
+      <Box
+        sx={{
+          width: 240,
+          backgroundColor: "#fff",
+          boxShadow: 3,
+          p: 2,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          height: "100vh",
+          boxSizing: "border-box",
+        }}
+      >
+        <Box>
+          <Button
+            variant="contained"
+            color="secondary"
+            sx={{ width: "100%", mb: 2, backgroundColor: "#ffab00" }}
+          >
+            Upgrade Account
+          </Button>
+          <RouterLink to="/investerdashboard" style={navLinkStyle}>Dashboard</RouterLink>
+          <RouterLink to="/investerdashboard/PostRequirement" style={navLinkStyle}>Post Requirement</RouterLink>
+          <RouterLink to="/investerdashboard/manageProfile" style={navLinkStyle}>Manage Profile</RouterLink>
+          <RouterLink to="/investerdashboard/respondemanager" style={navLinkStyle}>Response Manager</RouterLink>
+        </Box>
+
+        <Box sx={{ mt: "auto", textAlign: "center" }}>
+          <RouterLink to="/investerdashboard/feedBack" style={{ ...navLinkStyle, color: "#fafafa", backgroundColor: "#ffab00" }}>
+            Feedback
+          </RouterLink>
+          <RouterLink to="/investerdashboard/complaint" style={{ ...navLinkStyle, color: "#fafafa", backgroundColor: "#ffab00" }}>
+            Complaint
+          </RouterLink>
+        </Box>
+      </Box>
+
+      <Box sx={{ flexGrow: 1, p: 3 }}>
+        <IconBreadcrumbs />
+        <Outlet />
+      </Box>
+    </Box>
+  );
+};
+
+const navLinkStyle = {
+  display: "block",
+  textDecoration: "none",
+  color: "#333",
+  marginBottom: "10px",
+  padding: "10px",
+  backgroundColor: "#f9f9f9",
+  borderRadius: "4px",
+};
+
+export default ProfilePage;
