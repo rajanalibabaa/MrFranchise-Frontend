@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Modal, Typography, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import pop1 from '../Assets/Images/ModelBg.jpeg';
+import pop1 from '../../assets/Images/ModelBg.jpeg';
 
 const style = {
   position: 'absolute',
