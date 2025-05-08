@@ -20,7 +20,7 @@ import {
   List,
   ListItemText,
   Box,
-  ListItem,
+  ListItem
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "../../Pages/BrandListingForm/BrandCategories";
@@ -45,12 +45,10 @@ const InvestorRegister = () => {
 
   const navigate = useNavigate();
   const [phonePrefix, setPhonePrefix] = useState("+91");
-  const [unit, setUnit] = useState("Sq. ft");
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [showOtpField, setShowOtpField] = useState(false);
 
   const selectedCountry = watch("country");
   const pincode = watch("pincode");
@@ -76,8 +74,8 @@ const InvestorRegister = () => {
       if (selectedCountry === "India" && pincode && pincode.length === 6) {
         try {
           const response = await axios.get(
-            `https://api.postalpincode.in/pincode/${pincode}`
-          );
+            `https://api.postalpincode.in/pincode/${pincode}`,
+                      );
           const data = response.data[0];
           if (data.Status === "Success") {
             const locationDetails = data.PostOffice[0];
@@ -113,25 +111,16 @@ const InvestorRegister = () => {
   const handleCategorySelection = (mainCategory, subCategory, item) => {
     const selectedPath = `${mainCategory} > ${subCategory} > ${item}`;
     setSelectedCategory(selectedPath);
-    setValue("category", selectedPath); // Set the value in the form
-    setDropdownOpen(false); // Close the dropdown
+    setValue("category", selectedPath); 
+    setDropdownOpen(false); 
   };
-  const [occupation, setOccupation] = useState("");
-  const [category, setCategory] = useState("");
-  const [investmentRange, setInvestmentRange] = useState("");
-  const [capital, setCapital] = useState("");
-  const [lookingFor, setLookingFor] = useState("");
-  const [propertyData, setPropertyData] = useState({ propertyType: "" });
+  
   const onSubmit = async (data) => {
     console.log("Form Data:", data);
-    // Add your form submission logic here
-    navigate("/loginpage");
-
-    const { terms, minArea, maxArea, ...restData } = data;
-
+  
+    // Format the data before sending
     const formattedData = {
       firstName: data.firstName || "",
-      lastName: data.lastName || "",
       email: data.email || "",
       mobileNumber: `${phonePrefix}${data.mobileNumber || ""}`.trim(),
       whatsappNumber: `${phonePrefix}${data.whatsappNumber || ""}`.trim(),
@@ -141,44 +130,47 @@ const InvestorRegister = () => {
       state: data.state || "",
       district: data.district || "",
       city: data.city || "",
-      category: data.category || "",
+      category: data.category || "", // Ensure this matches one of the allowed values
       investmentRange: data.investmentRange || "",
-      capital: data.capital || "",
       occupation: data.occupation || "",
-      type: data.type || "",
+      propertytype: data.propertytype || "",
       lookingFor: data.lookingFor || "",
-      areaRequirements: {
-        min: data.minArea || 0,
-        max: data.maxArea || 0,
-        unit: unit || "Sq. ft",
-      },
     };
-    console.log("Formatted Data:", formattedData); // Log the data being sent
-
+  
+    console.log("Formatted Data:", formattedData);
+  
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/investor/createInvestor",
+        "https://franchise-backend-wgp6.onrender.com/api/investor/createInvestor",
         formattedData,
         {
           headers: {
             "Content-Type": "application/json",
+
+
           },
         }
       );
-      // console.log('Server Response:', response.data);
-      navigate("/loginpage");
+  
+      if (response.status === 200) {
+        navigate("/loginpage");
+      } else {
+        console.error("Unexpected response status:", response.status);
+      }
     } catch (error) {
       if (error.response) {
         console.error("Error Response:", error.response.data);
         console.error("Error Status:", error.response.status);
+        alert(`Error: ${JSON.stringify(error.response.data.errors)}`);
       } else if (error.request) {
         console.error("Error Request:", error.request);
+        alert("No response from the server. Please check your connection.");
       } else {
         console.error("Error:", error.message);
+        alert("An unexpected error occurred. Please try again.");
       }
     }
   };
-
   const renderSelectField = (
     label,
     name,
@@ -217,7 +209,7 @@ const InvestorRegister = () => {
         py: 2,
       }}
     >
-      <Paper elevation={3} sx={{ pt: 1, pl: 5, pr: 3, maxHeight: "760px" }}>
+      <Paper elevation={3} sx={{ pt: 1, pl: 5, pr: 3, maxHeight: "690px", height:"690px" }}>
         <Typography
           variant="h4"
           gutterBottom
@@ -232,7 +224,7 @@ const InvestorRegister = () => {
             <Grid sx={{ width: "46%", xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
-                label="First Name"
+                label="Name"
                 {...register("firstName", {
                   required: "First name is required",
                 })}
@@ -240,7 +232,7 @@ const InvestorRegister = () => {
                 helperText={errors.firstName?.message}
               />
             </Grid>
-            <Grid sx={{ width: "46%", xs: 12, sm: 6 }}>
+            {/* <Grid sx={{ width: "46%", xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Last Name"
@@ -248,7 +240,7 @@ const InvestorRegister = () => {
                 error={!!errors.lastName}
                 helperText={errors.lastName?.message}
               />
-            </Grid>
+            </Grid> */}
 
             <Grid sx={{ width: "30%", xs: 12, sm: 3 }}>
               {renderSelectField(
@@ -471,31 +463,24 @@ const InvestorRegister = () => {
                     <List>
                       {categories.map((category, index) => (
                         <ListItem
-                          key={index}
-                          button
-                          onMouseEnter={() => setActiveCategory(index)}
-                          selected={activeCategory === index}
-                        >
-                          <ListItemText
-                            primary={category.name}
-                            sx={{
-                              fontWeight:
-                                activeCategory === index ? "bold" : "normal",
-                              color:
-                                activeCategory === index
-                                  ? "primary.main"
-                                  : "inherit",
-                            }}
-                          />
-                          <ChevronRightIcon
-                            sx={{
-                              color:
-                                activeCategory === index
-                                  ? "primary.main"
-                                  : "inherit",
-                            }}
-                          />
-                        </ListItem>
+                        key={index}
+                       button="true"
+                        onMouseEnter={() => setActiveCategory(index)}
+                        selected={activeCategory === index}
+                      >
+                        <ListItemText
+                          primary={category.name}
+                          sx={{
+                            fontWeight: activeCategory === index ? "bold" : "normal",
+                            color: activeCategory === index ? "primary.main" : "inherit",
+                          }}
+                        />
+                        <ChevronRightIcon
+                          sx={{
+                            color: activeCategory === index ? "primary.main" : "inherit",
+                          }}
+                        />
+                      </ListItem>
                       ))}
                     </List>
                   </Box>
@@ -520,7 +505,7 @@ const InvestorRegister = () => {
                             (subCategory, subIndex) => (
                               <ListItem
                                 key={subIndex}
-                                button
+                                button="true"
                                 onMouseEnter={() =>
                                   setActiveSubCategory(subCategory)
                                 }
@@ -577,7 +562,7 @@ const InvestorRegister = () => {
                         {activeSubCategory.children.map((item, index) => (
                           <ListItem
                             key={index}
-                            button
+                           button="true"
                             onClick={() =>
                               handleCategorySelection(
                                 categories[activeCategory]?.name,
@@ -624,7 +609,7 @@ const InvestorRegister = () => {
               </TextField>
             </Grid>
 
-            <Grid sx={{ width: "22%", xs: 12, sm: 4 }}>
+            {/* <Grid sx={{ width: "22%", xs: 12, sm: 4 }}>
               <TextField
                 select
                 fullWidth
@@ -648,7 +633,7 @@ const InvestorRegister = () => {
                 <option value="Rs.2Cr-5Cr">Rs.2Cr-5Cr</option>
                 <option value="Rs.5Cr-above">Rs.5Cr-above</option>
               </TextField>
-            </Grid>
+            </Grid> */}
 
             <Grid sx={{ width: "22%", xs: 12, sm: 4 }}>
               <TextField
@@ -672,24 +657,25 @@ const InvestorRegister = () => {
             </Grid>
 
             <Grid sx={{ width: "22%", xs: 12, sm: 4 }}>
-              <TextField
-                select
-                fullWidth
-                // label="Property Type"
-                defaultValue=""
-                SelectProps={{ native: true }}
-                {...register("type", { required: "Property Type is required" })}
-                error={!!errors.type}
-                helperText={errors.type?.message}
-              >
-                <option value="">Select Property Type</option>
-                <option value="Residential">Residential</option>
-                <option value="Commercial">Commercial</option>
-                <option value="Industrial">Industrial</option>
-              </TextField>
-            </Grid>
+  <TextField
+    select
+    fullWidth
+    // label="Property Type"
+    defaultValue="" 
+    SelectProps={{ native: true }}
+    {...register("propertytype", { required: "Property Type is required" })} // Ensure the name matches
+    error={!!errors.type}
+    helperText={errors.type?.message}
+  >
+    <option value="">Select Property Type</option>
+    <option value="Residential">Residential</option>
+    <option value="Commercial">Commercial</option>
+    <option value="Industrial">Industrial</option>
+    <option value="Retail">Agricultural</option>
+  </TextField>
+</Grid>
 
-            <Grid xs={12}>
+            {/* <Grid xs={12}>
               <Typography variant="subtitle1" gutterBottom>
                 Floor Area Requirements
               </Typography>
@@ -730,7 +716,7 @@ const InvestorRegister = () => {
                   </FormControl>
                 </Grid>
               </Grid>
-            </Grid>
+            </Grid> */}
 
             <Grid sx={{ width: "100%", x: 12 }}>
               <FormControlLabel
