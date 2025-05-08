@@ -55,15 +55,15 @@ function LoginPage() {
 
   const handleOtpRequest = async (e) => {
     e.preventDefault();
-
-    // if (!validateForm()) {
-    //   return; // Stop execution if validation fails
-    // }
-
+  
+    if (!validateForm()) {
+      return; // Stop execution if validation fails
+    }
+  
     const isEmail = formData.username.includes("@");
     const email = isEmail ? formData.username : null;
     const mobileNumber = isEmail ? null : formData.username;
-
+  
     try {
       const response = await axios.post(
         "http://localhost:5000/api/v1/investor/generateOTPforInvestor",
@@ -90,6 +90,7 @@ function LoginPage() {
       }));
     }
   };
+  
 console.log("isOtpSent:", isOtpSent);
   const validateOtp = async () => {
     if (!formData.otp) {

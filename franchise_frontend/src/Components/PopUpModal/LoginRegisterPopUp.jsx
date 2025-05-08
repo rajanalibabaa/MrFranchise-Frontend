@@ -23,27 +23,12 @@ const LoginRegisterPopUp = () => {
       if (!interactionDetected && !manuallyClosed) {
         setOpen(true);
       }
-    }, 120000); 
+    }, 420000); 
 
     return () => clearTimeout(timer);
   }, [interactionDetected, manuallyClosed]);
 
-  useEffect(() => {
-    const handleUserClick = () => {
-      if (!manuallyClosed) {
-        event.preventDefault();
-        setOpen(true);
-      }
-    };
   
-    document.addEventListener("click", handleUserClick);
-  
-    return () => {
-    document.removeEventListener("click", handleUserClick);
-    };
-  }, [manuallyClosed]);
-  
-
   const handleClose = () => {
     setOpen(false); 
     setManuallyClosed(true); 
