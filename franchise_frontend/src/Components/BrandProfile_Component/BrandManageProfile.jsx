@@ -117,11 +117,11 @@ const BrandManageProfile = () => {
                     <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                         {renderTwoColumnForm()}
                         <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 2,marginTop: -1 }}>
-                            <Button variant="contained" color="primary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00" }}>
-                                Update
-                            </Button>
-                            <Button variant="outlined" color="secondary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00", color: "#fff" }}>
+                            <Button  color="secondary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00", color: "#fff" }}>
                                 Cancel
+                            </Button>
+                            <Button variant="contained" color="primary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#558b2f" }}>
+                                Update
                             </Button>
                         </Box>
                     </Box>

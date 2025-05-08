@@ -27,6 +27,7 @@ const labels = {
   5: 'Excellent+',
 };
 
+
 function getLabelText(value) {
   return `${value} Star${value !== 1 ? 's' : ''}, ${labels[value]}`;
 }
@@ -48,22 +49,23 @@ const FeedBack = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/feedback/createFeedback",
+        "https://franchise-backend-wgp6.onrender.com/api/feedback/createFeedback",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
       console.log("Feedback submitted:", response.data);
-    //   alert("Feedback submitted successfully!");
-    setFeedbackText('')
+      setFeedbackText('');
+      setSelectedTopic('');
+      setValue(2);
     } catch (error) {
       console.error("Submission error:", error);
     }
   };
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10, px: 2, marginLeft: -20 }}>
+    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10, px: 2 }}>
       <Paper elevation={4} sx={{ p: 4, maxWidth: 700, width: "100%", borderRadius: 4, backgroundColor: "#ffffff" }}>
-        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center", color: "#1976d2" }}>
+        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center", color: "#ffa000" }}>
           Submit Your Feedback
         </Typography>
 
@@ -117,7 +119,12 @@ const FeedBack = () => {
             onChange={(e) => setFeedbackText(e.target.value)}
           />
 
-          <Button type="submit" variant="contained" color="primary" sx={{ alignSelf: "flex-end", borderRadius: 2, px: 4, backgroundColor: "#558b2f" }}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            sx={{ alignSelf: "flex-end", borderRadius: 2, px: 4, backgroundColor: "#558b2f" }}
+          >
             Submit Your Feedback
           </Button>
         </Box>

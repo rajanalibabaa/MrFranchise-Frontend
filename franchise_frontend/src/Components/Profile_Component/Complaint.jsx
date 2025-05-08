@@ -28,7 +28,7 @@ function Complaint() {
 
     try {
       const response = await axios.post(
-        " http://localhost:5000/api/complaint/createComplaint",
+        " https://franchise-backend-wgp6.onrender.com/api/complaint/createComplaint",
         formattedData,
         {
           headers: {
@@ -49,7 +49,7 @@ function Complaint() {
   return (
     <Box sx={{ mt: 8, px: 2, marginLeft: -20, padding: 4 }}>
       <Paper elevation={4} sx={{ p: 4, maxWidth: 700, mx: "auto", borderRadius: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center", color: "#1976d2" }}>
+        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center", color: "#ffa000" }}>
           Submit a Complaint
         </Typography>
 

@@ -72,8 +72,8 @@ const IconBreadcrumbs = () => {
 
 const Sidebar = () => {
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", backgroundColor: "#f4f6f8" }}>
-      {/* Sidebar */}
+    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      {/* Sidebar (fixed height, non-scrollable) */}
       <Box
         sx={{
           width: 240,
@@ -85,20 +85,13 @@ const Sidebar = () => {
           justifyContent: "space-between",
           height: "100vh",
           boxSizing: "border-box",
+          flexShrink: 0,
         }}
       >
         <Box>
-          <RouterLink to="/brandDashboard/brandDashboard" style={navLinkStyle}>
-            Dashboard
-          </RouterLink>
-
-          <RouterLink to="/brandDashboard/brandmanageprofile" style={navLinkStyle}>
-            Manage Profile
-          </RouterLink>
-
-          <RouterLink to="/brandDashboard/brandaddvedios" style={navLinkStyle}>
-            Add Videos
-          </RouterLink>
+          <RouterLink to="/brandDashboard/brandDashboard" style={navLinkStyle}>Dashboard</RouterLink>
+          <RouterLink to="/brandDashboard/brandmanageprofile" style={navLinkStyle}>Manage Profile</RouterLink>
+          <RouterLink to="/brandDashboard/brandaddvedios" style={navLinkStyle}>Add Videos</RouterLink>
         </Box>
 
         <Box sx={{ mt: "auto", textAlign: "center" }}>
@@ -137,14 +130,15 @@ const Sidebar = () => {
         </Box>
       </Box>
 
-      {/* Main Content */}
-      <Box sx={{ flexGrow: 1, p: 3 }}>
+      {/* Scrollable main content */}
+      <Box sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
         <IconBreadcrumbs />
         <Outlet />
       </Box>
     </Box>
   );
 };
+
 
 const navLinkStyle = {
   display: "block",

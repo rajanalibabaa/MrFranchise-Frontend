@@ -9,13 +9,13 @@ import PersonIcon from '@mui/icons-material/Person';
 const ManageProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [investorData, setInvestorData] = useState({});
-    const id = "6805dcbdfff4495f419cc07e";
+    const id = "680606dacf204b491b61d764";
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await axios.get(
-                    `http://localhost:5000/api/investor/getInvestor/${id}`,
+                    `https://franchise-backend-wgp6.onrender.com/api/investor/getInvestor/${id}`,
                     {
                         headers: {
                             "Content-Type": "application/json",
@@ -42,10 +42,11 @@ const ManageProfile = () => {
     
 
     const fieldLabels = [
-        { key: "name", label: "Name" },
+        { key: "firstName", label: "First Name" },
+        { key: "lastName", label: "Last Name" },
         { key: "email", label: "Email" },
-        { key: "phone", label: "Phone" },
-        { key: "whatsapp", label: "WhatsApp" },
+        { key: "mobileNumber", label: "Phone" },
+        { key: "whatsappNumber", label: "WhatsApp" },
         { key: "address", label: "Address" },
         { key: "city", label: "City" },
         { key: "district", label: "District" },
@@ -58,12 +59,8 @@ const ManageProfile = () => {
         { key: "capital", label: "Capital" },
         { key: "lookingFor", label: "Looking For" },
         { key: "ownProperty", label: "Own Property" },
-        { key: "propertyType", label: "Property Type" },
-        { key: "minArea", label: "Min Area" },
-        { key: "maxArea", label: "Max Area" },
-        { key: "sqft", label: "Sqft" },
     ];
-
+    
     const renderTwoColumnForm = () => {
         const rows = [];
 
@@ -132,7 +129,7 @@ const ManageProfile = () => {
                             <Button variant="contained" color="primary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00" }}>
                                 Update
                             </Button>
-                            <Button variant="outlined" color="secondary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00", color: "#fff" }}>
+                            <Button  color="secondary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00", color: "#fff" }}>
                                 Cancel
                             </Button>
                         </Box>
@@ -176,10 +173,10 @@ const ManageProfile = () => {
                             <Typography><strong>Capital:</strong> {investorData.capital}</Typography>
                             <Typography><strong>Looking For:</strong> {investorData.lookingFor}</Typography>
                             <Typography><strong>Own Property:</strong> {investorData.ownProperty}</Typography>
-                            <Typography><strong>Property Type:</strong> {investorData.propertyType}</Typography>
+                            {/* <Typography><strong>Property Type:</strong> {investorData.propertyType}</Typography>
                             <Typography><strong>Min Area:</strong> {investorData.minArea}</Typography>
                             <Typography><strong>Max Area:</strong> {investorData.maxArea}</Typography>
-                            <Typography><strong>Sqft:</strong> {investorData.sqft}</Typography>
+                            <Typography><strong>Sqft:</strong> {investorData.sqft}</Typography> */}
                         </Paper>
                     </>
                 )}
