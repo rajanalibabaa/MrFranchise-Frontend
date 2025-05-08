@@ -23,20 +23,19 @@ const imageStyle = {
 };
 
 const PopupModal = ({ open, onClose }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false); // Renamed state
+  const [isModalOpen, setIsModalOpen] = useState(false); 
 
   useEffect(() => {
-    // Check if the popup has already been shown in this session
     const hasShownPopup = sessionStorage.getItem('hasShownPopup');
     if (!hasShownPopup) {
-      setIsModalOpen(true); // Show the popup
-      sessionStorage.setItem('hasShownPopup', 'true'); // Mark as shown
+      setIsModalOpen(true); 
+      sessionStorage.setItem('hasShownPopup', 'true'); 
     }
   }, []);
 
   const handleClose = () => {
     setIsModalOpen(false);
-    if (onClose) onClose(); // Call the onClose prop if provided
+    if (onClose) onClose(); 
   };
 
   return (

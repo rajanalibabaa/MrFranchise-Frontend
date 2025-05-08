@@ -220,7 +220,7 @@ const InvestorRegister = () => {
         </Typography>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} >
             <Grid sx={{ width: "46%", xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
@@ -229,7 +229,10 @@ const InvestorRegister = () => {
                   required: "First name is required",
                 })}
                 error={!!errors.firstName}
-                helperText={errors.firstName?.message}
+                helperText={
+                  <span style={{ minHeight: "0.5rem", display: "block" }}>
+                    {errors.firstName?.message || " "}
+                  </span>}
               />
             </Grid>
             {/* <Grid sx={{ width: "46%", xs: 12, sm: 6 }}>
@@ -256,7 +259,7 @@ const InvestorRegister = () => {
                 label="Pincode"
                 {...register("pincode", { required: "Pincode is required" })}
                 error={!!errors.pincode}
-                helperText={errors.pincode?.message}
+                helperText={<span style={{ minHeight: "0.5rem", display: "block" }}>{errors.pincode?.message} </span>}
               />
             </Grid>
             <Grid sx={{ width: "30%", xs: 12, sm: 3 }}>
@@ -295,7 +298,7 @@ const InvestorRegister = () => {
                 label="Address"
                 {...register("address", { required: "Address is required" })}
                 error={!!errors.address}
-                helperText={errors.address?.message}
+                helperText={ <span style={{ minHeight: "0.5rem", display: "block" }}>{errors.address?.message}</span>}
               />
             </Grid>
 
@@ -312,7 +315,7 @@ const InvestorRegister = () => {
                   },
                 })}
                 error={!!errors.email}
-                helperText={errors.email?.message}
+                helperText={<span style={{ minHeight: "0.5rem", display: "block" }}>{errors.email?.message}</span>}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -341,7 +344,7 @@ const InvestorRegister = () => {
                   },
                 })}
                 error={!!errors.mobileNumber}
-                helperText={errors.mobileNumber?.message}
+                helperText={<span style={{ minHeight: "0.5rem", display: "block" }}>{errors.mobileNumber?.message}</span>}
                 inputProps={{ maxLength: 10 }}
                 onInput={(e) => {
                   e.target.value = e.target.value
@@ -385,7 +388,7 @@ const InvestorRegister = () => {
                   },
                 })}
                 error={!!errors.whatsappNumber}
-                helperText={errors.whatsappNumber?.message}
+                helperText={<span style={{ minHeight: "0.5rem", display: "block" }}>{errors.whatsappNumber?.message}</span>}
                 inputProps={{ maxLength: 10 }}
                 onInput={(e) => {
                   e.target.value = e.target.value
@@ -406,7 +409,7 @@ const InvestorRegister = () => {
                   required: "Occupation is required",
                 })}
                 error={!!errors.occupation}
-                helperText={errors.occupation?.message}
+                helperText={<span style={{ minHeight: "0.5rem", display: "block" }}>{errors.occupation?.message}</span>}
               >
                 <option value="">Select Occupation</option>
                 <option value="Student">Student</option>
@@ -427,7 +430,7 @@ const InvestorRegister = () => {
                   readOnly: true,
                 }}
                 error={!!errors.category}
-                helperText={errors.category?.message}
+                helperText={<span style={{ minHeight: "0.5rem", display: "block" }}>{errors.category?.message}</span>}
                 {...register("category", {
                   required: "Category is required",
                 })}
@@ -592,7 +595,7 @@ const InvestorRegister = () => {
                   required: "Investment range is required",
                 })}
                 error={!!errors.investmentRange}
-                helperText={errors.investmentRange?.message}
+                helperText={ <span style={{ minHeight: "0.5rem", display: "block" }}>{errors.investmentRange?.message}</span>}
               >
                 <option value="">Select Investment Range</option>
                 <option value="Rs.10,000-50,000">Rs.10,000-50,000</option>
@@ -646,7 +649,7 @@ const InvestorRegister = () => {
                   required: "Looking For is required",
                 })}
                 error={!!errors.lookingFor}
-                helperText={errors.lookingFor?.message}
+                helperText={<span style={{ minHeight: "0.5rem", display: "block" }}>{errors.lookingFor?.message}</span>}
               >
                 <option value="">Select Looking For</option>
                 <option value="Unit">Unit</option>
@@ -665,7 +668,7 @@ const InvestorRegister = () => {
     SelectProps={{ native: true }}
     {...register("propertytype", { required: "Property Type is required" })} // Ensure the name matches
     error={!!errors.type}
-    helperText={errors.type?.message}
+    helperText={<span style={{ minHeight: "0.5rem", display: "block" }}>{errors.type?.message}</span>}
   >
     <option value="">Select Property Type</option>
     <option value="Residential">Residential</option>
@@ -718,7 +721,7 @@ const InvestorRegister = () => {
               </Grid>
             </Grid> */}
 
-            <Grid sx={{ width: "100%", x: 12 }}>
+            <Grid sx={{ width: "100%", xs: 12 }}>
               <FormControlLabel
                 control={
                   <Checkbox {...register("terms", { required: true })} />
@@ -734,9 +737,11 @@ const InvestorRegister = () => {
 
             <Grid
               sx={{
-                width: "100%",
+                width: "70%",
                 display: "flex",
                 justifyContent: "center",
+                alignItems: "center",
+                marginLeft: "15%",
                 xs: 12,
               }}
             >

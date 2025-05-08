@@ -28,7 +28,7 @@ function LoginPage() {
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
-    setErrors((prev) => ({ ...prev, [id]: "" })); // Clear errors for the field
+    setErrors((prev) => ({ ...prev, [id]: "" })); 
   };
 
   const socialIcons = {
@@ -50,7 +50,7 @@ function LoginPage() {
       newErrors.username = "Invalid email or phone number";
     }
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // Return true if no errors
+    return Object.keys(newErrors).length === 0; 
   };
 
   const handleOtpRequest = async (e) => {
@@ -66,7 +66,7 @@ function LoginPage() {
   
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/investor/generateOTPforInvestor",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/investor/generateOTPforInvestor",
         {
           email,
           mobileNumber,
@@ -90,7 +90,7 @@ function LoginPage() {
       }));
     }
   };
-  
+
 console.log("isOtpSent:", isOtpSent);
   const validateOtp = async () => {
     if (!formData.otp) {
@@ -103,7 +103,7 @@ console.log("isOtpSent:", isOtpSent);
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/investor/login",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/investor/login",
         {
           verifyOtp: formData.otp,
         },

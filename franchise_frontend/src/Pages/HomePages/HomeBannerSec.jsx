@@ -45,7 +45,7 @@ const HomeBannerSec = () => {
       }
     }, []);
 
-<PopupModal open={isPopupOpen} onClose={handlePopupClose} />
+{/* <PopupModal open={isPopupOpen} onClose={handlePopupClose} /> */}
 
   return (
     <>

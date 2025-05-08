@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setField, setErrors } from "../../Redux/slices/brandRegisterSlice";
 import brandImage from "../../assets/Images/BrandRegister.jpg";
+import { categories } from "../BrandListingForm/BrandCategories"; 
 
 const BrandRegister = () => {
   const navigate = useNavigate();
@@ -41,7 +42,6 @@ const BrandRegister = () => {
   const validateForm = (data) => {
     const validationErrors = {};
     if (!data.firstName) validationErrors.firstName = "First name is required";
-    if (!data.lastName) validationErrors.lastName = "Last name is required";
     if (!data.phone) validationErrors.phone = "Phone number is required";
     if (!data.email) validationErrors.email = "Email is required";
     if (!data.brandName) validationErrors.brandName = "Brand name is required";
@@ -57,14 +57,27 @@ const BrandRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
     const validationErrors = validateForm(formData);
     dispatch(setErrors(validationErrors));
   
     if (Object.keys(validationErrors).length === 0) {
-      console.log("✅ Posting this data to API:", formData);
+     
+      const payload = {
+        firstName: formData.firstName,
+        phone: formData.phone,
+        email: formData.email,
+        brandName: formData.brandName,
+        companyName: formData.companyName,
+        category: formData.category,
+        franchiseType: formData.franchiseType,
+        agreeToTerms: formData.agreeToTerms,
+      };
+  
+      console.log("✅ Sending this payload to API:", payload);
   
       try {
-        const response = await axios.post("https://reqres.in/api/users", formData);
+        const response = await axios.post("https://reqres.in/api/users", payload);
         console.log("✅ API Response:", response.data);
         navigate("/loginPage");
       } catch (error) {
@@ -146,7 +159,7 @@ const BrandRegister = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+              {/* <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
                 <TextField
                   fullWidth
                   name="lastName"
@@ -155,7 +168,7 @@ const BrandRegister = () => {
                   onChange={handleChange}
                   error={!!errors.lastName}
                 />
-              </Grid>
+              </Grid> */}
 
               <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
                 <TextField
@@ -212,29 +225,25 @@ const BrandRegister = () => {
               </Grid>
 
               <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
-                <FormControl fullWidth error={!!errors.category}>
-                  <InputLabel>Select Category</InputLabel>
-                  <Select
-                    name="category"
-                    value={formData.category}
-                    label="Select the Category"
-                    onChange={handleChange}
-                  >
-                    {[
-                      "Food & Beverage",
-                      "Retail",
-                      "Education",
-                      "Health & Wellness",
-                      "Technology",
-                    ].map((cat) => (
-                      <MenuItem key={cat} value={cat}>
-                        {cat}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {/* <FormHelperText>{errors.category}</FormHelperText> */}
-                </FormControl>
-              </Grid>
+  <FormControl fullWidth error={!!errors.category}>
+    <InputLabel>Select Category</InputLabel>
+    <Select
+      name="category"
+      value={formData.category}
+      label="Select the Category"
+      onChange={handleChange}
+    >
+      {categories.map((parentCategory) => (
+        <MenuItem key={parentCategory.name} value={parentCategory.name}>
+          {parentCategory.name}
+        </MenuItem>
+      ))}
+    </Select>
+    {errors.category && (
+      <FormHelperText>{errors.category}</FormHelperText>
+    )}
+  </FormControl>
+</Grid>
 
               <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
                 <FormControl fullWidth error={!!errors.franchiseType}>
