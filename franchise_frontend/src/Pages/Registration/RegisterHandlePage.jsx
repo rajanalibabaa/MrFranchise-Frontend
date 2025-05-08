@@ -42,7 +42,6 @@ function RegisterHandleUser() {
         borderRadius: 2,
       }}
     >
-      {/* Right Section - Logo */}
       <Grid
         item
         xs={12}
@@ -60,6 +59,7 @@ function RegisterHandleUser() {
           src={businessLogo}
           alt="Business Logo"
           sx={{
+            p: 50,
             maxWidth: "100%",
             height: "auto",
             borderRadius: 2,
@@ -68,7 +68,6 @@ function RegisterHandleUser() {
         />
       </Grid>
 
-      {/* Left Section - Buttons and Links */}
       <Grid
         item
         xs={12}
@@ -79,6 +78,8 @@ function RegisterHandleUser() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
+          height:"100%",
+          width: "100%",
         }}
       >
         <Typography

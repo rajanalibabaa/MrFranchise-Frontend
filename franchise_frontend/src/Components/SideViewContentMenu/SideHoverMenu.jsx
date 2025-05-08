@@ -17,6 +17,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
       onClose={onHoverLeave}
       PaperProps={{ sx: { height: 400 } }}
     >
+      
       <Box
         className="category-container"
         onMouseLeave={onHoverLeave}

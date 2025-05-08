@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Grid,
   Typography,
@@ -15,63 +16,88 @@ import {
   FormControl,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import brandImage from "../../assets/Images/BrandRegister.jpg"; 
+import { useDispatch, useSelector } from "react-redux";
+import { setField, setErrors } from "../../Redux/slices/brandRegisterSlice";
+import brandImage from "../../assets/Images/BrandRegister.jpg";
 
 const BrandRegister = () => {
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    phone: "",
-    email: "",
-    brandName: "",
-    companyName: "",
-    category: "",
-    franchiseType: "",
-    agreeToTerms: false,
-  });
-
-  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const formData = useSelector((state) => state.brandRegister.formData);
+  const errors = useSelector((state) => state.brandRegister.errors);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    dispatch(
+      setField({
+        name,
+        value: type === "checkbox" ? checked : value,
+      })
+    );
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.firstName) newErrors.firstName = "Required";
-    if (!formData.lastName) newErrors.lastName = "Required";
-    if (!formData.phone) newErrors.phone = "Required";
-    else if (!/^\d{10}$/.test(formData.phone))
-      newErrors.phone = "Invalid phone number";
-    if (!formData.email) newErrors.email = "Required";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = "Invalid email";
-    if (!formData.brandName) newErrors.brandName = "Required";
-    if (!formData.companyName) newErrors.companyName = "Required";
-    if (!formData.category) newErrors.category = "Required";
-    if (!formData.franchiseType) newErrors.franchiseType = "Required";
-    if (!formData.agreeToTerms) newErrors.agreeToTerms = "Required";
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const validateForm = (data) => {
+    const validationErrors = {};
+    if (!data.firstName) validationErrors.firstName = "First name is required";
+    if (!data.lastName) validationErrors.lastName = "Last name is required";
+    if (!data.phone) validationErrors.phone = "Phone number is required";
+    if (!data.email) validationErrors.email = "Email is required";
+    if (!data.brandName) validationErrors.brandName = "Brand name is required";
+    if (!data.companyName)
+      validationErrors.companyName = "Company name is required";
+    if (!data.category) validationErrors.category = "Category is required";
+    if (!data.franchiseType)
+      validationErrors.franchiseType = "Franchise type is required";
+    if (!data.agreeToTerms)
+      validationErrors.agreeToTerms = "You must agree to the terms";
+    return validationErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log("Form submitted:", formData);
-      navigate("/loginPage");
+    const validationErrors = validateForm(formData);
+    dispatch(setErrors(validationErrors));
+  
+    if (Object.keys(validationErrors).length === 0) {
+      console.log("✅ Posting this data to API:", formData);
+  
+      try {
+        const response = await axios.post("https://reqres.in/api/users", formData);
+        console.log("✅ API Response:", response.data);
+        navigate("/loginPage");
+      } catch (error) {
+        console.error("❌ API Error:", error);
+      }
+    } else {
+      console.warn("⚠️ Form has errors:", validationErrors);
     }
   };
+  
+
+  useEffect(() => {
+    const postFormData = async () => {
+      try {
+        const response = await axios.post(
+          "https://reqres.in/api/users",
+          formData
+        );
+        console.log("Success:", response.data);
+        navigate("/loginPage");
+      } catch (error) {
+        console.error("API Error:", error);
+      }
+    };
+
+    if (isSubmitted) {
+      postFormData();
+      setIsSubmitted(false);
+    }
+  }, [isSubmitted, formData, navigate]);
 
   return (
-    <Grid container sx={{ minHeight: "100vh",overflow: "hidden" }}>
-      {/* Left side: image */}
+    <Grid container sx={{ minHeight: "100vh", overflow: "hidden" }}>
       <Grid
         item
         xs={12}
@@ -87,13 +113,10 @@ const BrandRegister = () => {
           component="img"
           src={brandImage}
           alt="Brand Registration Illustration"
-          sx={{ maxWidth: "80%", 
-            maxHeight: "550px", 
-            objectFit: "contain",  }}
+          sx={{ maxWidth: "80%", maxHeight: "550px", objectFit: "contain" }}
         />
       </Grid>
 
-      {/* Right side: form */}
       <Grid
         item
         xs={12}
@@ -112,8 +135,7 @@ const BrandRegister = () => {
 
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
-              {/* Row 1 */}
-              <Grid item xs={12} sm={6} sx={{width:"48%"}}>
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
                 <TextField
                   fullWidth
                   name="firstName"
@@ -121,10 +143,10 @@ const BrandRegister = () => {
                   value={formData.firstName}
                   onChange={handleChange}
                   error={!!errors.firstName}
-                //   helperText={errors.firstName}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} sx={{width:"48%"}}>
+
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
                 <TextField
                   fullWidth
                   name="lastName"
@@ -132,12 +154,10 @@ const BrandRegister = () => {
                   value={formData.lastName}
                   onChange={handleChange}
                   error={!!errors.lastName}
-                //   helperText={errors.lastName}
                 />
               </Grid>
 
-              {/* Row 2 */}
-              <Grid item xs={12} sm={6} sx={{width:"48%"}}>
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
                 <TextField
                   fullWidth
                   name="phone"
@@ -145,10 +165,17 @@ const BrandRegister = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   error={!!errors.phone}
-                //   helperText={errors.phone}
+                  inputProps={{
+                    maxLength: 10,
+                    inputMode: "numeric",
+                  }}
+                  onInput={(e) => {
+                    e.target.value = e.target.value.replace(/\D/g, "");
+                  }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} sx={{width:"48%"}}>
+
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
                 <TextField
                   fullWidth
                   name="email"
@@ -156,12 +183,13 @@ const BrandRegister = () => {
                   value={formData.email}
                   onChange={handleChange}
                   error={!!errors.email}
-                //   helperText={errors.email}
+                  inputProps={{
+                    pattern:"^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+                  }}
                 />
               </Grid>
 
-              {/* Row 3 */}
-              <Grid item xs={12} sm={6} sx={{width:"48%"}}>
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
                 <TextField
                   fullWidth
                   name="brandName"
@@ -169,10 +197,10 @@ const BrandRegister = () => {
                   value={formData.brandName}
                   onChange={handleChange}
                   error={!!errors.brandName}
-                //   helperText={errors.brandName}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} sx={{width:"48%"}}>
+
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
                 <TextField
                   fullWidth
                   name="companyName"
@@ -180,52 +208,54 @@ const BrandRegister = () => {
                   value={formData.companyName}
                   onChange={handleChange}
                   error={!!errors.companyName}
-                //   helperText={errors.companyName}
                 />
               </Grid>
 
-             {/* Row 4 */}
-<Grid item xs={12}sx={{width:"48%"}}>
-  <FormControl fullWidth error={!!errors.category}>
-    <InputLabel>Select Category</InputLabel>
-    <Select
-      name="category"
-      value={formData.category}
-      label="Select the Category"
-      onChange={handleChange}
-    >
-      <MenuItem value="Food & Beverage">Food & Beverage</MenuItem>
-      <MenuItem value="Retail">Retail</MenuItem>
-      <MenuItem value="Education">Education</MenuItem>
-      <MenuItem value="Health & Wellness">Health & Wellness</MenuItem>
-      <MenuItem value="Technology">Technology</MenuItem>
-    </Select>
-    {/* {errors.category && (
-      <FormHelperText>{errors.category}</FormHelperText>
-    )} */}
-  </FormControl>
-</Grid>
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+                <FormControl fullWidth error={!!errors.category}>
+                  <InputLabel>Select Category</InputLabel>
+                  <Select
+                    name="category"
+                    value={formData.category}
+                    label="Select the Category"
+                    onChange={handleChange}
+                  >
+                    {[
+                      "Food & Beverage",
+                      "Retail",
+                      "Education",
+                      "Health & Wellness",
+                      "Technology",
+                    ].map((cat) => (
+                      <MenuItem key={cat} value={cat}>
+                        {cat}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {/* <FormHelperText>{errors.category}</FormHelperText> */}
+                </FormControl>
+              </Grid>
 
-<Grid item xs={12} sx={{width:"48%"}}>
-  <FormControl fullWidth error={!!errors.franchiseType}>
-    <InputLabel>Select Franchise Type</InputLabel>
-    <Select
-      name="franchiseType"
-      value={formData.franchiseType}
-      label="Select Franchise Type"
-      onChange={handleChange}
-    >
-      <MenuItem value="Single Unit">Single Unit</MenuItem>
-      <MenuItem value="Multi Unit">Multi Unit</MenuItem>
-    </Select>
-    {/* {errors.franchiseType && (
-      <FormHelperText>{errors.franchiseType}</FormHelperText>
-    )} */}
-  </FormControl>
-</Grid>
+              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+                <FormControl fullWidth error={!!errors.franchiseType}>
+                  <InputLabel>Select Franchise Type</InputLabel>
+                  <Select
+                    name="franchiseType"
+                    value={formData.franchiseType}
+                    label="Select Franchise Type"
+                    onChange={handleChange}
+                  >
+                    {["Single Unit", "Multi Unit"].map((type) => (
+                      <MenuItem key={type} value={type}>
+                        {type}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {/* <FormHelperText>{errors.franchiseType}</FormHelperText> */}
+                </FormControl>
+              </Grid>
 
-              {/* Terms Checkbox */}
-              <Grid item xs={12} sx={{width:"100%"}} >
+              <Grid item xs={12} sx={{ width: "100%" }}>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -245,8 +275,7 @@ const BrandRegister = () => {
                 )}
               </Grid>
 
-              {/* Submit Button */}
-              <Grid item xs={12}sx={{width:"100%"}}>
+              <Grid item xs={12} sx={{ width: "100%" }}>
                 <Button
                   type="submit"
                   fullWidth
@@ -257,8 +286,7 @@ const BrandRegister = () => {
                 </Button>
               </Grid>
 
-              {/* Sign In Link */}
-              <Grid item xs={12} sx={{width:"100%"}}>
+              <Grid item xs={12} sx={{ width: "100%" }}>
                 <Typography variant="body2" textAlign="center">
                   Already have an account?{" "}
                   <Link href="/loginPage" underline="hover">
