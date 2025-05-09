@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import bgimg from "../.././assets/Images/bgimg.jpg";
 import {
@@ -17,19 +17,42 @@ import TopIndusVdoSec from "../../Components/HomePage_VideoSection/TopIndusVdoSe
 import TopInvestVdoSec from "../../Components/HomePage_VideoSection/TopInvestVdoSec";
 import Navbar from "../../Components/Navbar/NavBar";
 import Footer from "../../Components/Footers/Footer";
+import LoginRegisterPopUp from "../../Components/PopUpModal/LoginRegisterPopUp";
+import PopupModal from "../../Components/PopUpModal/PopUpModal";
+
 
 const HomeBannerSec = () => {
-   
-
     const [industry, setIndustry] = useState("");
     const [sector, setSector] = useState("");
     const [service, setService] = useState("");
     const [open, setOpen] = useState(false);
+    const [isPopupOpen, setIsPopupOpen] = useState(false); 
+
     const navigate = useNavigate();
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    const handlePopupClose = () => setIsPopupOpen(false);
+   
+
+    useEffect(() => {
+      const navEntries = performance.getEntriesByType("navigation");
+      const isReload = navEntries[0]?.type === "reload";
+      const popupShown = sessionStorage.getItem("popup-shown");
+  
+      if (!popupShown || isReload) {
+        setIsPopupOpen(true);
+        sessionStorage.setItem("popup-shown", "true");
+      }
+    }, []);
+
+<PopupModal open={isPopupOpen} onClose={handlePopupClose} />
+
   return (
     <>
+ <PopupModal open={isPopupOpen} onClose={handlePopupClose} />
+
+    {/* login and register pop up */}
+    <LoginRegisterPopUp/>
     {/* navbarcontent */}
     <Navbar />
     <Box
