@@ -24,6 +24,7 @@ import BrandManageProfile from './Components/BrandProfile_Component/BrandManageP
 import BrandFeedBack from './Components/BrandProfile_Component/BrandFeedback';
 import BrandComplaint from './Components/BrandProfile_Component/BrandComplaint';
 import BrandAddVedios from './Components/BrandProfile_Component/BrandAddVedios';
+import AllCategoryMainPage from './Pages/AllCategoryPage/AllCategoryMainPage';
 
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
         <Route path='/registerhandleuser' element={<RegisterHandleUser />} />
         <Route path='/brandlistingform' element={<BrandListingFormPage />} />
         <Route path='/sideviewcontentmenu' element={<SideViewContent />} />
+        <Route path='/allcategories' element={<AllCategoryMainPage />} />
 
         <Route path="/investerdashboard" element={<ProfilePage />}>
           <Route index element={<DashBoard />} />

@@ -227,3 +227,5 @@ const HomeBannerSec = () => {
 }
 
 export default HomeBannerSec
+
+
