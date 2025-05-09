@@ -15,7 +15,7 @@ const ManageProfile = () => {
         const fetchData = async () => {
             try {
                 const response = await axios.get(
-                    `https://franchise-backend-wgp6.onrender.com/api/investor/getInvestor/${id}`,
+                    `https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor/${id}`,
                     {
                         headers: {
                             "Content-Type": "application/json",
