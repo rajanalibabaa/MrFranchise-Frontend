@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 
 const BrandAddVedios = () => {
-  const [videoFiles, setVideoFiles] = useState([null]); // array of File objects
+  const [videoFiles, setVideoFiles] = useState([null]); 
 
   const handleFileChange = (index, file) => {
     const updated = [...videoFiles];
@@ -68,10 +68,10 @@ const BrandAddVedios = () => {
             )}
           </Box>
         ))}
-        <Button onClick={handleAddField} variant="outlined" sx={{ mr: 2 }}>
+        <Button onClick={handleAddField}  sx={{ mr: 2,backgroundColor:"#ffa000",color:"#fff3e0" }}>
           Add More Video
         </Button>
-        <Button type="submit" variant="contained">
+        <Button type="submit" variant="contained" sx={{backgroundColor:"#558b2f"}}>
           Submit
         </Button>
       </form>

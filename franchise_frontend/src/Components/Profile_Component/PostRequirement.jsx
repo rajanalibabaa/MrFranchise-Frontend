@@ -46,14 +46,22 @@ const PostRequirement = () => {
 
   const handleSubmitRequirement = async () => {
     try {
-      console.log("postRequirementData : ",postRequirementData)
+      // Trim whitespace and filter out empty fields
+      const cleanData = Object.fromEntries(
+        Object.entries(postRequirementData).map(([key, value]) => [key, value.trim()])
+      );
+
+      console.log("Sending cleaned data:", cleanData);
+
       const response = await axios.post(
-        "http://localhost:5000/api/post/createPostRequirement",
-        postRequirementData,
+        "https://franchise-backend-wgp6.onrender.com/api/post/createPostRequirement",
+        cleanData,
         { headers: { "Content-Type": "application/json" } }
       );
+
       console.log("Requirement submitted:", response.data);
       alert("Requirement submitted successfully!");
+
       setPostRequirementData({
         name: "",
         address: "",
@@ -70,17 +78,18 @@ const PostRequirement = () => {
         timelineToStart: "",
         needLoan: ""
       });
+
       setPreviewData(null);
     } catch (error) {
-      console.error("Submission error:", error);
-      alert("Submission failed.");
+      console.error("Submission error:", error.response?.data || error.message);
+      alert("Submission failed: " + (error.response?.data?.message || "Check console for more info."));
     }
   };
 
   const getPreviewValue = (key) => previewData?.[key] || "N/A";
 
   return (
-    <Box sx={{ display: "flex", minHeight: "75vh", backgroundColor: "#fafafa", padding: 2, width: "99%" }}>
+    <Box sx={{ display: "flex", minHeight: "75vh", backgroundColor: "#fafafa", padding: 2, width: "97%" }}>
       <Box sx={{ flexGrow: 1, p: 2 }}>
         <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
           Post Requirement
@@ -100,7 +109,7 @@ const PostRequirement = () => {
                 <TextField
                   key={key}
                   name={key}
-                  label={key.replace(/_/g, " ")}
+                  label={key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                   value={value}
                   onChange={handlePostRequirementChange}
                   fullWidth
@@ -123,20 +132,12 @@ const PostRequirement = () => {
             </Typography>
 
             <Paper sx={{ p: 3, borderRadius: 2, backgroundColor: "#fff" }}>
-              <Typography><strong>Name:</strong> {getPreviewValue("name")}</Typography>
-              <Typography><strong>Email:</strong> {getPreviewValue("email")}</Typography>
-              <Typography><strong>Phone:</strong> {getPreviewValue("mobileNumber")}</Typography>
-              <Typography><strong>WhatsApp:</strong> {getPreviewValue("whatsappNumber")}</Typography>
-              <Typography><strong>Address:</strong> {getPreviewValue("address")}</Typography>
-              <Typography><strong>Industry Type:</strong> {getPreviewValue("industryType")}</Typography>
-              <Typography><strong>City:</strong> {getPreviewValue("city")}</Typography>
-              <Typography><strong>State:</strong> {getPreviewValue("state")}</Typography>
-              <Typography><strong>Pincode:</strong> {getPreviewValue("pincode")}</Typography>
-              <Typography><strong>Country:</strong> {getPreviewValue("country")}</Typography>
-              <Typography><strong>Investment Range:</strong> {getPreviewValue("investmentRange")}</Typography>
-              <Typography><strong>Floor Area Requirement:</strong> {getPreviewValue("floorAreaRequirement")}</Typography>
-              <Typography><strong>Timeline To Start:</strong> {getPreviewValue("timelineToStart")}</Typography>
-              <Typography><strong>Need Loan:</strong> {getPreviewValue("needLoan")}</Typography>
+              {Object.entries(postRequirementData).map(([key]) => (
+                <Typography key={key}>
+                  <strong>{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</strong>{" "}
+                  {getPreviewValue(key)}
+                </Typography>
+              ))}
             </Paper>
 
             <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 3 }}>

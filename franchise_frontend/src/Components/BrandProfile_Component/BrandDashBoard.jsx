@@ -7,7 +7,7 @@ import {
     Tab
 } from "@mui/material";
 import PersonIcon from '@mui/icons-material/Person';
-import img from "../../assets/images/brandLogo.jpg"; // Adjust the path as necessary
+import img from "../../assets/images/brandLogo.jpg"; 
 
 const BrandDashBoard = ({ selectedSection, sectionContent }) => {
     const [tabValue, setTabValue] = useState(0);
@@ -21,7 +21,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
             <Typography variant="h6" fontWeight={600} mb={2}>
                 Dashboard
             </Typography>
-            <Box sx={{ display: "flex", minHeight: "75vh", bgcolor: "#f4f6f8" }}>
+            <Box sx={{ display: "flex", minHeight: "85vh", bgcolor: "#f4f6f8" }}>
                 {/* Main Content */}
                 <Box sx={{ flex: 1, p: 3 }}>
                     {selectedSection ? (
@@ -63,7 +63,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                                         Welcome (Manikandan.M)
                                     </Typography>
                                     <Typography color="text.secondary" variant="h5">
-                                        Investor
+                                        Brand Investor
                                     </Typography>
                                     <Typography color="text.secondary" variant="h5" fontWeight={800}>
                                         ID(721720104305)
@@ -90,7 +90,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                                         <Tab label="Expressed Interest" />
                                         <Tab label="Viewed Brands" />
                                         <Tab label="Liked Brands" />
-                                        <Tab label="Short Brands" />
+                                        <Tab label="Short List" />
                                     </Tabs>
                                 </Box>
                             </Box>

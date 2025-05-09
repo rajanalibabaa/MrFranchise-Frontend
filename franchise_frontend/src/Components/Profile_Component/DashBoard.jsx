@@ -7,13 +7,48 @@ import {
     Tab
 } from "@mui/material";
 import PersonIcon from '@mui/icons-material/Person';
-import img from "../../assets/images/brandLogo.jpg"; // Adjust the path as necessary
+import img from "../../assets/images/brandLogo.jpg";
 
 const DashBoard = ({ selectedSection, sectionContent }) => {
     const [tabValue, setTabValue] = useState(0);
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
+    };
+
+    const renderTabContent = () => {
+        switch (tabValue) {
+            case 0:
+                return (
+                    <Box sx={{ p: 2 }}>
+                        <Typography variant="h6">Expressed Interest</Typography>
+                        <Typography>List of brands the user expressed interest in.</Typography>
+                    </Box>
+                );
+            case 1:
+                return (
+                    <Box sx={{ p: 2 }}>
+                        <Typography variant="h6">Viewed Brands</Typography>
+                        <Typography>List of brands the user has viewed.</Typography>
+                    </Box>
+                );
+            case 2:
+                return (
+                    <Box sx={{ p: 2 }}>
+                        <Typography variant="h6">Liked Brands</Typography>
+                        <Typography>List of brands the user has liked.</Typography>
+                    </Box>
+                );
+            case 3:
+                return (
+                    <Box sx={{ p: 2 }}>
+                        <Typography variant="h6">Short List</Typography>
+                        <Typography>Shortlisted brands for follow-up.</Typography>
+                    </Box>
+                );
+            default:
+                return null;
+        }
     };
 
     return (
@@ -35,13 +70,7 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                             }}>
                                 <Avatar sx={{
                                     width: 200, height: 200, mx: "auto", mb: 2,
-                                    bgcolor: "transparent", objectFit: "cover",
-                                    img: {
-                                        objectFit: 'cover',
-                                        width: '100%',
-                                        height: '100%',
-                                        borderRadius: '50%',
-                                    }
+                                    bgcolor: "transparent"
                                 }}>
                                     <img
                                         src={img}
@@ -52,7 +81,6 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                                 </Avatar>
                             </Box>
 
-                            {/* Profile Info */}
                             <Box sx={{ flex: 1 }}>
                                 <Box sx={{
                                     mb: 3, bgcolor: "#fff", p: 2, borderRadius: 2,
@@ -73,17 +101,16 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                         </Box>
                     )}
 
-
+                    {/* Dashboard Tabs Section */}
                     {!selectedSection || selectedSection === "Dashboard" ? (
                         <>
-
                             <Box sx={{ display: "flex", gap: 4, mt: -6, padding: 2 }}>
-
+                                {/* Placeholder for additional dashboard cards */}
                             </Box>
-
 
                             <Box sx={{ mt: 4 }}>
                                 <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+                                    {/* Placeholder for filters/stats */}
                                 </Box>
                                 <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
                                     <Tabs value={tabValue} onChange={handleTabChange} centered>
@@ -93,12 +120,14 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                                         <Tab label="Short List" />
                                     </Tabs>
                                 </Box>
+                                <Box>
+                                    {renderTabContent()}
+                                </Box>
                             </Box>
                         </>
                     ) : (
                         sectionContent[selectedSection]
                     )}
-
                 </Box>
             </Box>
         </div>

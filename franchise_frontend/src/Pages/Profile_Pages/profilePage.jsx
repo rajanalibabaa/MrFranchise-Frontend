@@ -69,7 +69,8 @@ const IconBreadcrumbs = () => {
 
 const ProfilePage = () => {
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", backgroundColor: "#f4f6f8" }}>
+    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      {/* Sidebar */}
       <Box
         sx={{
           width: 240,
@@ -81,6 +82,7 @@ const ProfilePage = () => {
           justifyContent: "space-between",
           height: "100vh",
           boxSizing: "border-box",
+          flexShrink: 0,
         }}
       >
         <Box>
@@ -107,13 +109,15 @@ const ProfilePage = () => {
         </Box>
       </Box>
 
-      <Box sx={{ flexGrow: 1, p: 3 }}>
+      {/* Right Content (scrollable) */}
+      <Box sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
         <IconBreadcrumbs />
         <Outlet />
       </Box>
     </Box>
   );
 };
+
 
 const navLinkStyle = {
   display: "block",

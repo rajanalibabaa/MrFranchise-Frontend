@@ -47,7 +47,7 @@ const BrandFeedBack = () => {
                     backgroundColor: "#ffffff",
                 }}
             >
-                <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center", color: "#1976d2" }}>
+                <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center", color: "#ffa000" }}>
                     Submit Your Feedback
                 </Typography>
 
