@@ -25,6 +25,9 @@ function LoginPage() {
   const [errors, setErrors] = useState({});
   const [isOtpSent, setIsOtpSent] = useState(false);
 
+  const handleSocialLogin = (provider) => {
+    window.location.href = `http://localhost:5000/api/v1/auth/${provider}`;
+  };
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -66,7 +69,7 @@ function LoginPage() {
   
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/investor/generateOTPforInvestor",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/login/investor/generateOTPforInvestor",
         {
           email,
           mobileNumber,
@@ -282,38 +285,126 @@ console.log("isOtpSent:", isOtpSent);
           </Typography>
 
           <Box sx={{ textAlign: "center", my: 4 }}>
-            <Typography variant="subtitle1" gutterBottom>
-              Sign In with
-            </Typography>
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-              {Object.entries(socialIcons).map(([platform, icon]) => (
-                <IconButton
-                  key={platform}
-                  onClick={() =>
-                    window.open(`https://${platform}.com/login`, "_blank")
-                  }
-                  sx={{
-                    p: 1.5,
-                    bgcolor: "background.paper",
-                    boxShadow: 1,
-                    "&:hover": {
-                      transform: "scale(1.1)",
-                      boxShadow: 3,
-                    },
-                  }}
-                >
-                  <Avatar
-                    src={icon}
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      "& img": { objectFit: "contain" },
-                    }}
-                  />
-                </IconButton>
-              ))}
-            </Box>
-          </Box>
+  <Typography variant="subtitle1" gutterBottom>
+    Sign In with
+  </Typography>
+  <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
+    {/* Facebook Icon */}
+    <IconButton
+      onClick={() => handleSocialLogin("facebook")}
+      sx={{
+        p: 1.5,
+        bgcolor: "background.paper",
+        boxShadow: 1,
+        "&:hover": {
+          transform: "scale(1.1)",
+          boxShadow: 3,
+        },
+      }}
+    >
+      <Avatar
+        src={FacebookIcon}
+        sx={{
+          width: 32,
+          height: 32,
+          "& img": { objectFit: "contain" },
+        }}
+      />
+    </IconButton>
+
+    {/* LinkedIn Icon */}
+    {/* <IconButton
+      onClick={() => window.open("https://linkedin.com/login", "_blank")}
+      sx={{
+        p: 1.5,
+        bgcolor: "background.paper",
+        boxShadow: 1,
+        "&:hover": {
+          transform: "scale(1.1)",
+          boxShadow: 3,
+        },
+      }}
+    >
+      <Avatar
+        src={LinkedInIcon}
+        sx={{
+          width: 32,
+          height: 32,
+          "& img": { objectFit: "contain" },
+        }}
+      />
+    </IconButton> */}
+
+    {/* Instagram Icon */}
+    {/* <IconButton
+      onClick={() => window.open("https://instagram.com/login", "_blank")}
+      sx={{
+        p: 1.5,
+        bgcolor: "background.paper",
+        boxShadow: 1,
+        "&:hover": {
+          transform: "scale(1.1)",
+          boxShadow: 3,
+        },
+      }}
+    >
+      <Avatar
+        src={InstagramIcon}
+        sx={{
+          width: 32,
+          height: 32,
+          "& img": { objectFit: "contain" },
+        }}
+      />
+    </IconButton> */}
+
+    {/* Twitter Icon */}
+    {/* <IconButton
+      onClick={() => window.open("https://twitter.com/login", "_blank")}
+      sx={{
+        p: 1.5,
+        bgcolor: "background.paper",
+        boxShadow: 1,
+        "&:hover": {
+          transform: "scale(1.1)",
+          boxShadow: 3,
+        },
+      }}
+    >
+      <Avatar
+        src={TwitterIcon}
+        sx={{
+          width: 32,
+          height: 32,
+          "& img": { objectFit: "contain" },
+        }}
+      />
+    </IconButton> */}
+
+    {/* Google Icon */}
+    <IconButton
+      onClick={() => handleSocialLogin("google")}
+      sx={{
+        p: 1.5,
+        bgcolor: "background.paper",
+        boxShadow: 1,
+        "&:hover": {
+          transform: "scale(1.1)",
+          boxShadow: 3,
+        },
+      }}
+    >
+      <Avatar
+        src={GoogleIcon}
+        sx={{
+          width: 32,
+          height: 32,
+          "& img": { objectFit: "contain" },
+        }}
+      />
+    </IconButton>
+  </Box>
+</Box>
         </Box>
       </Grid>
     </Grid>

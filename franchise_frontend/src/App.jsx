@@ -9,6 +9,11 @@ import HomeBannerSec from './Pages/HomePages/HomeBannerSec';
 import RegisterHandleUser from './Pages/Registration/RegisterHandlePage';
 import BrandListingFormPage from './Pages/BrandListingForm/BrandListingFormPage';
 import SideViewContent from './Components/SideViewContentMenu/SideHoverMenu';
+import AboutUs from './Components/QuickLinks/AboutUs';
+import ContactUs from './Components/QuickLinks/ContactUs';
+import Help from './Components/QuickLinks/Help';
+import Faq from './Components/QuickLinks/Faq';
+import TermsPolicies from './Components/QuickLinks/TermsPolicies';
 function App() {
 
   return (
@@ -23,6 +28,11 @@ function App() {
         <Route path='/registerhandleuser' element={<RegisterHandleUser/>}/>
         <Route path='/brandlistingform' element={<BrandListingFormPage/>}/>
         <Route path='/sideviewcontentmenu' element={<SideViewContent/>}/>
+        <Route path ='/aboutuspage' element={<AboutUs/>}/>
+        <Route path='/contactuspage' element={<ContactUs/>}/>
+        <Route path='/help' element={<Help/>}/>
+        <Route path='/faq' element={<Faq/>}/>
+        <Route path='/terms-policies' element={<TermsPolicies/>}/>
 </Routes>
 </>
     

@@ -41,6 +41,7 @@ const InvestorRegister = () => {
     setValue,
     watch,
     formState: { errors },
+    reset
   } = useForm();
 
   const navigate = useNavigate();
@@ -53,6 +54,18 @@ const InvestorRegister = () => {
   const selectedCountry = watch("country");
   const pincode = watch("pincode");
   useEffect(() => {
+    // const savedFormData = localStorage.getItem("investorFormData");
+    // if (savedFormData) {
+    //   const parsedData = JSON.parse(savedFormData);
+    //   reset(parsedData);
+    //   setSelectedCategory(parsedData.category || "");
+      
+    //   // Set phone prefix based on saved country
+    //   if (parsedData.country && phoneCodes[parsedData.country]) {
+    //     setPhonePrefix(phoneCodes[parsedData.country]);
+    //   }
+    // }
+
     // Disable scrolling on the page
     document.body.style.overflow = "hidden";
 
@@ -60,7 +73,15 @@ const InvestorRegister = () => {
       // Re-enable scrolling when the component is unmounted
       document.body.style.overflow = "auto";
     };
-  }, []);
+  }, );
+
+  // useEffect(() => {
+  //   const subscription = watch((value) => {
+  //     localStorage.setItem("investorFormData", JSON.stringify(value));
+  //   });
+  //   return () => subscription.unsubscribe();
+  // }, [watch]);
+
   useEffect(() => {
     if (selectedCountry && phoneCodes[selectedCountry]) {
       setPhonePrefix(phoneCodes[selectedCountry]);
@@ -108,6 +129,9 @@ const InvestorRegister = () => {
   const handleVerifyPhone = () => {
     console.log("Verify Phone clicked");
   };
+  const handleVerifyWhatsApp = () => {
+    console.log("Verify WhatsApp clicked"); 
+  };
   const handleCategorySelection = (mainCategory, subCategory, item) => {
     const selectedPath = `${mainCategory} > ${subCategory} > ${item}`;
     setSelectedCategory(selectedPath);
@@ -141,18 +165,18 @@ const InvestorRegister = () => {
   
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/investor/createInvestor",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
         formattedData,
         {
           headers: {
             "Content-Type": "application/json",
-
-
           },
         }
       );
   
       if (response.status === 200) {
+        // Clear saved form data on successful submission
+        localStorage.removeItem("investorFormData");
         navigate("/loginpage");
       } else {
         console.error("Unexpected response status:", response.status);
@@ -161,7 +185,12 @@ const InvestorRegister = () => {
       if (error.response) {
         console.error("Error Response:", error.response.data);
         console.error("Error Status:", error.response.status);
-        alert(`Error: ${JSON.stringify(error.response.data.errors)}`);
+  
+        if (error.response.status === 409 || error.response.data.message === "User already registered") {
+          alert("This user is already registered. Please log in.");
+        } else {
+          alert(`Error: ${JSON.stringify(error.response.data.errors)}`);
+        }
       } else if (error.request) {
         console.error("Error Request:", error.request);
         alert("No response from the server. Please check your connection.");
@@ -372,31 +401,42 @@ const InvestorRegister = () => {
               />
             </Grid>
             <Grid sx={{ width: "30%", xs: 12, sm: 4 }}>
-              <TextField
-                fullWidth
-                label="WhatsApp Number"
-                InputProps={{
-                  startAdornment: (
-                    <span style={{ marginRight: 8 }}>{phonePrefix}</span>
-                  ),
-                }}
-                {...register("whatsappNumber", {
-                  required: "WhatsApp number is required",
-                  pattern: {
-                    value: /^[0-9]{10}$/,
-                    message: "Invalid WhatsApp number",
-                  },
-                })}
-                error={!!errors.whatsappNumber}
-                helperText={<span style={{ minHeight: "0.5rem", display: "block" }}>{errors.whatsappNumber?.message}</span>}
-                inputProps={{ maxLength: 10 }}
-                onInput={(e) => {
-                  e.target.value = e.target.value
-                    .replace(/\D/g, "")
-                    .slice(0, 10);
-                }}
-              />
-            </Grid>
+  <TextField
+    fullWidth
+    label="WhatsApp Number"
+    InputProps={{
+      startAdornment: (
+        <span style={{ marginRight: 8 }}>{phonePrefix}</span>
+      ),
+      endAdornment: (
+        <InputAdornment position="end">
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={handleVerifyWhatsApp} 
+          >
+            Verify
+          </Button>
+        </InputAdornment>
+      ),
+    }}
+    {...register("whatsappNumber", {
+      required: "WhatsApp number is required",
+      pattern: {
+        value: /^[0-9]{10}$/,
+        message: "Invalid WhatsApp number",
+      },
+    })}
+    error={!!errors.whatsappNumber}
+    helperText={<span style={{ minHeight: "0.5rem", display: "block" }}>{errors.whatsappNumber?.message}</span>}
+    inputProps={{ maxLength: 10 }}
+    onInput={(e) => {
+      e.target.value = e.target.value
+        .replace(/\D/g, "")
+        .slice(0, 10);
+    }}
+  />
+</Grid>
 
             <Grid sx={{ width: "22%", xs: 12, sm: 4 }}>
               <TextField

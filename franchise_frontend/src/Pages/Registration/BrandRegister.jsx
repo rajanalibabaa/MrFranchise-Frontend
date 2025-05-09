@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 import {
   Grid,
@@ -17,15 +17,31 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setField, setErrors } from "../../Redux/slices/brandRegisterSlice";
+import { setField, setErrors, resetForm } from "../../Redux/slices/brandRegisterSlice";
 import brandImage from "../../assets/Images/BrandRegister.jpg";
-import { categories } from "../BrandListingForm/BrandCategories"; 
+import { categories } from "../BrandListingForm/BrandCategories";
 
 const BrandRegister = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const formData = useSelector((state) => state.brandRegister.formData);
   const errors = useSelector((state) => state.brandRegister.errors);
+
+  // Load saved form data from localStorage on component mount
+  useEffect(() => {
+    const savedFormData = localStorage.getItem("brandFormData");
+    if (savedFormData) {
+      const parsedData = JSON.parse(savedFormData);
+      Object.entries(parsedData).forEach(([name, value]) => {
+        dispatch(setField({ name, value }));
+      });
+    }
+  }, [dispatch]);
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("brandFormData", JSON.stringify(formData));
+  }, [formData]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -36,8 +52,6 @@ const BrandRegister = () => {
       })
     );
   };
-
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const validateForm = (data) => {
     const validationErrors = {};
@@ -62,9 +76,9 @@ const BrandRegister = () => {
     dispatch(setErrors(validationErrors));
   
     if (Object.keys(validationErrors).length === 0) {
-     
       const payload = {
         firstName: formData.firstName,
+        // lastName: formData.lastName,
         phone: formData.phone,
         email: formData.email,
         brandName: formData.brandName,
@@ -74,40 +88,39 @@ const BrandRegister = () => {
         agreeToTerms: formData.agreeToTerms,
       };
   
-      console.log("✅ Sending this payload to API:", payload);
-  
-      try {
-        const response = await axios.post("https://reqres.in/api/users", payload);
-        console.log("✅ API Response:", response.data);
-        navigate("/loginPage");
-      } catch (error) {
-        console.error("❌ API Error:", error);
-      }
-    } else {
-      console.warn("⚠️ Form has errors:", validationErrors);
-    }
-  };
-  
-
-  useEffect(() => {
-    const postFormData = async () => {
       try {
         const response = await axios.post(
-          "https://reqres.in/api/users",
-          formData
+          "https://franchise-backend-wgp6.onrender.com/createBrandRegister",
+          payload,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
         );
-        console.log("Success:", response.data);
-        navigate("/loginPage");
+        
+        if (response.status === 200 || response.status === 201) {
+          // Clear form and localStorage on successful submission
+          dispatch(resetForm());
+          navigate("/loginPage");
+        } else {
+          console.error("Unexpected response status:", response.status);
+          alert("Registration failed. Please try again.");
+        }
       } catch (error) {
         console.error("API Error:", error);
+        
+        if (error.response) {
+          console.error("Error Response:", error.response.data);
+          alert(`Error: ${error.response.data.message || "Registration failed"}`);
+        } else if (error.request) {
+          alert("No response from server. Please check your connection.");
+        } else {
+          alert("An error occurred. Please try again.");
+        }
       }
-    };
-
-    if (isSubmitted) {
-      postFormData();
-      setIsSubmitted(false);
     }
-  }, [isSubmitted, formData, navigate]);
+  };
 
   return (
     <Grid container sx={{ minHeight: "100vh", overflow: "hidden" }}>
@@ -148,36 +161,37 @@ const BrandRegister = () => {
 
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   name="firstName"
-                  label="Enter your first name"
-                  value={formData.firstName}
+                  label="First Name"
+                  value={formData.firstName || ""}
                   onChange={handleChange}
                   error={!!errors.firstName}
+                  helperText={errors.firstName}
                 />
               </Grid>
 
-              {/* <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+              {/* <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   name="lastName"
-                  label="Enter your last name"
-                  value={formData.lastName}
+                  label="Last Name"
+                  value={formData.lastName || ""}
                   onChange={handleChange}
-                  error={!!errors.lastName}
                 />
               </Grid> */}
 
-              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   name="phone"
-                  label="Enter your phone number"
-                  value={formData.phone}
+                  label="Phone Number"
+                  value={formData.phone || ""}
                   onChange={handleChange}
                   error={!!errors.phone}
+                  helperText={errors.phone}
                   inputProps={{
                     maxLength: 10,
                     inputMode: "numeric",
@@ -188,115 +202,113 @@ const BrandRegister = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   name="email"
-                  label="Enter your email"
-                  value={formData.email}
+                  label="Email"
+                  value={formData.email || ""}
                   onChange={handleChange}
                   error={!!errors.email}
+                  helperText={errors.email}
                   inputProps={{
-                    pattern:"^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+                    pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
                   }}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   name="brandName"
-                  label="Enter your brand name"
-                  value={formData.brandName}
+                  label="Brand Name"
+                  value={formData.brandName || ""}
                   onChange={handleChange}
                   error={!!errors.brandName}
+                  helperText={errors.brandName}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   name="companyName"
-                  label="Enter your company name"
-                  value={formData.companyName}
+                  label="Company Name"
+                  value={formData.companyName || ""}
                   onChange={handleChange}
                   error={!!errors.companyName}
+                  helperText={errors.companyName}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
-  <FormControl fullWidth error={!!errors.category}>
-    <InputLabel>Select Category</InputLabel>
-    <Select
-      name="category"
-      value={formData.category}
-      label="Select the Category"
-      onChange={handleChange}
-    >
-      {categories.map((parentCategory) => (
-        <MenuItem key={parentCategory.name} value={parentCategory.name}>
-          {parentCategory.name}
-        </MenuItem>
-      ))}
-    </Select>
-    {errors.category && (
-      <FormHelperText>{errors.category}</FormHelperText>
-    )}
-  </FormControl>
-</Grid>
-
-              <Grid item xs={12} sm={6} sx={{ width: "48%" }}>
-                <FormControl fullWidth error={!!errors.franchiseType}>
-                  <InputLabel>Select Franchise Type</InputLabel>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth error={!!errors.category}>
+                  <InputLabel>Category</InputLabel>
                   <Select
-                    name="franchiseType"
-                    value={formData.franchiseType}
-                    label="Select Franchise Type"
+                    name="category"
+                    value={formData.category || ""}
+                    label="Category"
                     onChange={handleChange}
                   >
-                    {["Single Unit", "Multi Unit"].map((type) => (
-                      <MenuItem key={type} value={type}>
-                        {type}
+                    {categories.map((category) => (
+                      <MenuItem key={category.name} value={category.name}>
+                        {category.name}
                       </MenuItem>
                     ))}
                   </Select>
-                  {/* <FormHelperText>{errors.franchiseType}</FormHelperText> */}
+                  {errors.category && (
+                    <FormHelperText>{errors.category}</FormHelperText>
+                  )}
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sx={{ width: "100%" }}>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth error={!!errors.franchiseType}>
+                  <InputLabel>Franchise Type</InputLabel>
+                  <Select
+                    name="franchiseType"
+                    value={formData.franchiseType || ""}
+                    label="Franchise Type"
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="Single Unit">Single Unit</MenuItem>
+                    <MenuItem value="Multi Unit">Multi Unit</MenuItem>
+                  </Select>
+                  {errors.franchiseType && (
+                    <FormHelperText>{errors.franchiseType}</FormHelperText>
+                  )}
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12}>
                 <FormControlLabel
                   control={
                     <Checkbox
                       name="agreeToTerms"
-                      checked={formData.agreeToTerms}
+                      checked={formData.agreeToTerms || false}
                       onChange={handleChange}
                     />
                   }
-                  label={
-                    <Typography variant="body2">
-                      I agree to the <strong>terms and conditions</strong>
-                    </Typography>
-                  }
+                  label="I agree to the terms and conditions"
                 />
                 {errors.agreeToTerms && (
                   <FormHelperText error>{errors.agreeToTerms}</FormHelperText>
                 )}
               </Grid>
 
-              <Grid item xs={12} sx={{ width: "100%" }}>
+              <Grid item xs={12}>
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
-                  sx={{ mt: 1, py: 1.5, fontWeight: 600 }}
+                  size="large"
                 >
                   Register
                 </Button>
               </Grid>
 
-              <Grid item xs={12} sx={{ width: "100%" }}>
-                <Typography variant="body2" textAlign="center">
+              <Grid item xs={12}>
+                <Typography textAlign="center">
                   Already have an account?{" "}
                   <Link href="/loginPage" underline="hover">
                     Sign In
