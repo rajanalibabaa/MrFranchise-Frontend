@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { TextField, MenuItem, Button, Chip } from "@mui/material";
+import { TextField, MenuItem, Button, Chip, Typography } from "@mui/material";
 
-const ExpansionPlans = ({ data, onChange }) => {
+const ExpansionPlans = ({ data, errors, onChange }) => {
   const [countriesData, setCountriesData] = useState([]);
   const [statesData, setStatesData] = useState({});
   const [citiesData, setCitiesData] = useState({});
   const [indianStatesWithDistricts] = useState({
     "Andhra Pradesh": ["Anantapur", "Chittoor", "East Godavari", "Guntur"],
-    "Karnataka": ["Bagalkot", "Bangalore Rural", "Bangalore Urban", "Belgaum"],
-    "Maharashtra": ["Ahmednagar", "Akola", "Amravati", "Aurangabad"],
+    Karnataka: ["Bagalkot", "Bangalore Rural", "Bangalore Urban", "Belgaum"],
+    Maharashtra: ["Ahmednagar", "Akola", "Amravati", "Aurangabad"],
     "Tamil Nadu": ["Chennai", "Coimbatore", "Cuddalore", "Dharmapuri"],
   });
 
@@ -34,13 +34,16 @@ const ExpansionPlans = ({ data, onChange }) => {
 
   const handleCountryToggle = (countryName) => {
     if (data.selectedCountries.includes(countryName)) {
-      onChange("selectedCountries", 
+      onChange(
+        "selectedCountries",
         data.selectedCountries.filter((c) => c !== countryName)
       );
-      onChange("selectedStates",
+      onChange(
+        "selectedStates",
         data.selectedStates.filter((s) => s.country !== countryName)
       );
-      onChange("selectedCities",
+      onChange(
+        "selectedCities",
         data.selectedCities.filter((c) => c.country !== countryName)
       );
     } else {
@@ -58,12 +61,14 @@ const ExpansionPlans = ({ data, onChange }) => {
       (s) => s.country === countryName && s.state === stateName
     );
     if (exists) {
-      onChange("selectedStates",
+      onChange(
+        "selectedStates",
         data.selectedStates.filter(
           (s) => !(s.country === countryName && s.state === stateName)
         )
       );
-      onChange("selectedCities",
+      onChange(
+        "selectedCities",
         data.selectedCities.filter(
           (c) => !(c.country === countryName && c.state === stateName)
         )
@@ -102,9 +107,11 @@ const ExpansionPlans = ({ data, onChange }) => {
       (c) => c.country === country && c.state === state && c.city === city
     );
     if (exists) {
-      onChange("selectedCities",
+      onChange(
+        "selectedCities",
         data.selectedCities.filter(
-          (c) => !(c.country === country && c.state === state && c.city === city)
+          (c) =>
+            !(c.country === country && c.state === state && c.city === city)
         )
       );
     } else {
@@ -117,14 +124,19 @@ const ExpansionPlans = ({ data, onChange }) => {
 
   const handleIndianStateToggle = (stateName) => {
     if (data.selectedIndianStates.includes(stateName)) {
-      onChange("selectedIndianStates",
+      onChange(
+        "selectedIndianStates",
         data.selectedIndianStates.filter((s) => s !== stateName)
       );
-      onChange("selectedIndianDistricts",
+      onChange(
+        "selectedIndianDistricts",
         data.selectedIndianDistricts.filter((d) => d.state !== stateName)
       );
     } else {
-      onChange("selectedIndianStates", [...data.selectedIndianStates, stateName]);
+      onChange("selectedIndianStates", [
+        ...data.selectedIndianStates,
+        stateName,
+      ]);
     }
   };
 
@@ -133,7 +145,8 @@ const ExpansionPlans = ({ data, onChange }) => {
       (d) => d.state === stateName && d.district === districtName
     );
     if (exists) {
-      onChange("selectedIndianDistricts",
+      onChange(
+        "selectedIndianDistricts",
         data.selectedIndianDistricts.filter(
           (d) => !(d.state === stateName && d.district === districtName)
         )
@@ -163,19 +176,28 @@ const ExpansionPlans = ({ data, onChange }) => {
         <p>Select Expansion Type:</p>
         <div>
           <Button
-            variant={data.expansionType === "international" ? "contained" : "outlined"}
+            variant={
+              data.expansionType === "international" ? "contained" : "outlined"
+            }
             onClick={() => handleExpansionTypeChange("international")}
             sx={{ mr: 2 }}
           >
             International Expansion
           </Button>
           <Button
-            variant={data.expansionType === "domestic" ? "contained" : "outlined"}
+            variant={
+              data.expansionType === "domestic" ? "contained" : "outlined"
+            }
             onClick={() => handleExpansionTypeChange("domestic")}
           >
             Domestic (India) Expansion
           </Button>
         </div>
+        {errors?.expansionType && (
+          <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+            {errors.expansionType}
+          </Typography>
+        )}
       </div>
 
       <div style={{ marginTop: "20px" }}>
@@ -234,6 +256,10 @@ const ExpansionPlans = ({ data, onChange }) => {
               onChange={(e) => handleCountryToggle(e.target.value)}
               size="small"
               fullWidth
+              error={!!errors?.selectedCountries}
+              helperText={
+                errors?.selectedCountries || "Select at least one country"
+              }
             >
               {countriesData.map((country) => (
                 <MenuItem key={country.name} value={country.name}>
@@ -246,13 +272,19 @@ const ExpansionPlans = ({ data, onChange }) => {
           {data.selectedCountries.map((countryName) => (
             <div key={countryName} style={{ marginTop: "20px" }}>
               <h5>States in {countryName}:</h5>
+              {errors?.selectedStates?.[countryName] && (
+                <Typography color="error" variant="body2" sx={{ mb: 1 }}>
+                  {errors.selectedStates[countryName]}
+                </Typography>
+              )}
               <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
                 {(statesData[countryName] || []).map((state) => (
                   <Button
                     key={state.name}
                     variant={
                       data.selectedStates.some(
-                        (s) => s.country === countryName && s.state === state.name
+                        (s) =>
+                          s.country === countryName && s.state === state.name
                       )
                         ? "contained"
                         : "outlined"
@@ -270,7 +302,9 @@ const ExpansionPlans = ({ data, onChange }) => {
                 .map((s) => (
                   <div key={s.state} style={{ marginTop: "15px" }}>
                     <h5>Cities in {s.state}:</h5>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                    <div
+                      style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}
+                    >
                       {(citiesData[`${countryName}-${s.state}`] || []).map(
                         (city) => (
                           <Button
@@ -306,6 +340,11 @@ const ExpansionPlans = ({ data, onChange }) => {
         <div>
           <div style={{ marginTop: "20px" }}>
             <h5>Select Indian States:</h5>
+            {errors?.selectedIndianStates && (
+              <Typography color="error" variant="body2" sx={{ mb: 1 }}>
+                {errors.selectedIndianStates}
+              </Typography>
+            )}
             <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
               {Object.keys(indianStatesWithDistricts).map((state) => (
                 <Button
@@ -327,6 +366,13 @@ const ExpansionPlans = ({ data, onChange }) => {
           {data.selectedIndianStates.map((stateName) => (
             <div key={stateName} style={{ marginTop: "15px" }}>
               <h5>Districts in {stateName}:</h5>
+              <div>
+                {errors?.selectedIndianDistricts?.[stateName] && (
+                  <Typography color="error" variant="body2" sx={{ mb: 1 }}>
+                    {errors.selectedIndianDistricts[stateName]}
+                  </Typography>
+                )}
+              </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
                 {(indianStatesWithDistricts[stateName] || []).map(
                   (district) => (

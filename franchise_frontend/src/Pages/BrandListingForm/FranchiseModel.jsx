@@ -1,4 +1,4 @@
-import React ,{useState}from "react";
+import React, { useState } from "react";
 import {
   Stepper,
   Step,
@@ -12,8 +12,9 @@ import {
   Button
 } from "@mui/material";
 
-const FranchiseModel = ({ data, onChange }) => {
+const FranchiseModel = ({ data, onChange,onFinish}) => {
   const [activeStep, setActiveStep] = useState(0);
+  const [errors, setErrors] = useState({});
 
   const investmentRanges = [
     "Less than ₹5 Lakhs",
@@ -32,10 +33,64 @@ const FranchiseModel = ({ data, onChange }) => {
 
   const handleFinancialChange = (field) => (event) => {
     onChange(field, event.target.value);
+    // Clear error when user types
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const validateCurrentStep = () => {
+    const newErrors = {};
+    
+    if (activeStep === 0) {
+      // Validate Investment Details
+      if (!data.totalInvestment) {
+        newErrors.totalInvestment = "Investment range is required";
+      }
+      const financialFields = [
+        'franchiseFee', 'royaltyFee', 'equipmentCost', 
+        'expectedRevenue', 'expectedProfit', 'spaceRequired',
+        'paybackPeriod', 'minimumCashRequired'
+      ];
+      financialFields.forEach(field => {
+        if (!data[field]) {
+          newErrors[field] = `${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} is required`;
+        }
+      });
+    } else if (activeStep === 1) {
+      // Validate Outlet Distribution
+      if (!data.companyOwnedOutlets) {
+        newErrors.companyOwnedOutlets = "Company outlets count is required";
+      }
+      if (!data.franchiseOutlets) {
+        newErrors.franchiseOutlets = "Franchise outlets count is required";
+      }
+      if (!data.totalOutlets) {
+        newErrors.totalOutlets = "Total outlets count is required";
+      }
+    } else if (activeStep === 2) {
+      // Validate Expansion Plans
+      if (!data.expansionFranchiseFee) {
+        newErrors.expansionFranchiseFee = "Franchise fee is required";
+      }
+      if (!data.expansionRoyalty) {
+        newErrors.expansionRoyalty = "Royalty percentage is required";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleNext = () => {
-    setActiveStep((prev) => prev + 1);
+    if (validateCurrentStep()) {
+      if (activeStep < modalSteps.length - 1) {
+        setActiveStep((prev) => prev + 1);
+      }else {
+        // Call the onFinish prop when we're on the last step
+        onFinish();
+      }
+    }
   };
 
   const handleBack = () => {
@@ -43,7 +98,9 @@ const FranchiseModel = ({ data, onChange }) => {
   };
 
   const handleStepClick = (index) => {
-    setActiveStep(index);
+    if (index < activeStep) {
+      setActiveStep(index);
+    }
   };
 
   const renderStepContent = (step) => {
@@ -53,17 +110,21 @@ const FranchiseModel = ({ data, onChange }) => {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Typography variant="h6" gutterBottom>
-                Investment Details
+                Investment Details:
               </Typography>
             </Grid>
+
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
+                sx={{ width: "150px" }}
                 select
                 size="small"
                 label="Investment Range"
                 value={data.totalInvestment}
                 onChange={handleFinancialChange("totalInvestment")}
+                error={!!errors.totalInvestment}
+                helperText={errors.totalInvestment}
                 required
               >
                 {investmentRanges.map((range, index) => (
@@ -102,6 +163,8 @@ const FranchiseModel = ({ data, onChange }) => {
                     size="small"
                     value={data[field]}
                     onChange={handleFinancialChange(field)}
+                    error={!!errors[field]}
+                    helperText={errors[field]}
                     InputProps={{
                       startAdornment:
                         field.includes("Fee") ||
@@ -132,7 +195,7 @@ const FranchiseModel = ({ data, onChange }) => {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Typography variant="h6" gutterBottom>
-                Outlet Distribution
+                Outlet Distribution:
               </Typography>
             </Grid>
             <Grid item xs={12} md={4}>
@@ -143,6 +206,8 @@ const FranchiseModel = ({ data, onChange }) => {
                 type="number"
                 value={data.companyOwnedOutlets}
                 onChange={handleFinancialChange("companyOwnedOutlets")}
+                error={!!errors.companyOwnedOutlets}
+                helperText={errors.companyOwnedOutlets}
                 required
               />
             </Grid>
@@ -154,6 +219,8 @@ const FranchiseModel = ({ data, onChange }) => {
                 type="number"
                 value={data.franchiseOutlets}
                 onChange={handleFinancialChange("franchiseOutlets")}
+                error={!!errors.franchiseOutlets}
+                helperText={errors.franchiseOutlets}
                 required
               />
             </Grid>
@@ -165,6 +232,8 @@ const FranchiseModel = ({ data, onChange }) => {
                 type="number"
                 value={data.totalOutlets}
                 onChange={handleFinancialChange("totalOutlets")}
+                error={!!errors.totalOutlets}
+                helperText={errors.totalOutlets}
                 required
               />
             </Grid>
@@ -176,7 +245,7 @@ const FranchiseModel = ({ data, onChange }) => {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Typography variant="h6" gutterBottom>
-                Expansion Plans & Payments
+                Expansion Plans & Payments:
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -211,6 +280,8 @@ const FranchiseModel = ({ data, onChange }) => {
                 size="small"
                 value={data.expansionFranchiseFee}
                 onChange={handleFinancialChange("expansionFranchiseFee")}
+                error={!!errors.expansionFranchiseFee}
+                helperText={errors.expansionFranchiseFee}
                 required
                 InputProps={{
                   startAdornment: (
@@ -227,6 +298,8 @@ const FranchiseModel = ({ data, onChange }) => {
                 size="small"
                 value={data.expansionRoyalty}
                 onChange={handleFinancialChange("expansionRoyalty")}
+                error={!!errors.expansionRoyalty}
+                helperText={errors.expansionRoyalty}
                 required
                 InputProps={{
                   endAdornment: (
