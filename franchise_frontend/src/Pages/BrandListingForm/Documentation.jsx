@@ -1,8 +1,9 @@
+// Documentation.jsx
 import React, { useState, useEffect } from "react";
 import { Grid, Paper, Typography, Button, Box, Stack } from "@mui/material";
 import { InsertDriveFile, Image } from "@mui/icons-material";
 
-const Documentation = ({ data, onChange }) => {
+const Documentation = ({ data, onChange, errors }) => {
   const [documentPreviews, setDocumentPreviews] = useState({
     brandLogo: null,
     businessRegistration: null,
@@ -66,7 +67,8 @@ const Documentation = ({ data, onChange }) => {
                   flexDirection: "column",
                   alignItems: "center",
                   borderRadius: 2,
-                  borderColor: documentPreviews[docType] ? "primary.main" : "divider",
+                  borderColor: errors?.[docType] ? 'error.main' : 
+                              documentPreviews[docType] ? "primary.main" : "divider",
                   transition: "border-color 0.3s ease",
                 }}
               >
@@ -80,8 +82,14 @@ const Documentation = ({ data, onChange }) => {
                     {formatLabel(docType)}
                   </Typography>
                   
+                  {errors?.[docType] && (
+                    <Typography variant="caption" color="error">
+                      {errors[docType]}
+                    </Typography>
+                  )}
+                  
                   <input
-                    accept="image/*,.pdf,.doc,.docx"
+                    accept="image/*,.pdf"
                     style={{ display: "none" }}
                     id={`${docType}-upload`}
                     type="file"
