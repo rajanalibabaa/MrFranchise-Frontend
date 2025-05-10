@@ -26,7 +26,7 @@ function LoginPage() {
   const [isOtpSent, setIsOtpSent] = useState(false);
 
   const handleSocialLogin = (provider) => {
-    window.location.href = `http://localhost:5000/api/v1/auth/${provider}`;
+    window.location.href = `https://franchise-backend-wgp6.onrender.com/api/v1/auth/${provider}`;
   };
   const handleChange = (e) => {
     const { id, value } = e.target;
