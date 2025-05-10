@@ -135,7 +135,7 @@ function Footer() {
                 display="block"
                 underline="hover"
               >
-                Terms & Policies
+                Terms & Conditions
               </Link>
             </Box>
           </Grid>
