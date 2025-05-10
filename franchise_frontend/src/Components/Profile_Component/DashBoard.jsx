@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -8,49 +8,48 @@ import {
 } from "@mui/material";
 import PersonIcon from '@mui/icons-material/Person';
 import img from "../../assets/images/brandLogo.jpg";
+import axios from 'axios';
 
 const DashBoard = ({ selectedSection, sectionContent }) => {
     const [tabValue, setTabValue] = useState(0);
+    const [brandData, setBrandData] = useState([]);
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
     };
 
+    // Axios GET API call
+    useEffect(() => {
+        const fetchBrandData = async () => {
+            try {
+                const response = await axios.get("http://localhost:5000/api/brand/list");
+                setBrandData(response.data); // assuming response.data is an array
+            } catch (error) {
+                console.error("API Error:", error);
+            }
+        };
+
+        fetchBrandData();
+    }, []);
+
     const renderTabContent = () => {
-        switch (tabValue) {
-            case 0:
-                return (
-                    <Box sx={{ p: 2 }}>
-                        <Typography variant="h6">Expressed Interest</Typography>
-                        <Typography>List of brands the user expressed interest in.</Typography>
-                    </Box>
-                );
-            case 1:
-                return (
-                    <Box sx={{ p: 2 }}>
-                        <Typography variant="h6">Viewed Brands</Typography>
-                        <Typography>List of brands the user has viewed.</Typography>
-                    </Box>
-                );
-            case 2:
-                return (
-                    <Box sx={{ p: 2 }}>
-                        <Typography variant="h6">Liked Brands</Typography>
-                        <Typography>List of brands the user has liked.</Typography>
-                    </Box>
-                );
-            case 3:
-                return (
-                    <Box sx={{ p: 2 }}>
-                        <Typography variant="h6">Short List</Typography>
-                        <Typography>Shortlisted brands for follow-up.</Typography>
-                    </Box>
-                );
-            default:
-                return null;
-        }
+        const label = ["Expressed Interest", "Viewed Brands", "Liked Brands", "Short List"][tabValue];
+
+        return (
+            <Box sx={{ p: 2 }}>
+                <Typography variant="h6">{label}</Typography>
+                {brandData.length > 0 ? (
+                    <ul>
+                        {brandData.map((item, idx) => (
+                            <li key={idx}>{item.name || JSON.stringify(item)}</li>
+                        ))}
+                    </ul>
+                ) : (
+                    <Typography>No data available.</Typography>
+                )}
+            </Box>
+        );
     };
-    
 
     return (
         <div>
@@ -58,13 +57,11 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                 Dashboard
             </Typography>
             <Box sx={{ display: "flex", minHeight: "85vh", bgcolor: "#f4f6f8" }}>
-                {/* Main Content */}
                 <Box sx={{ flex: 1, p: 3 }}>
                     {selectedSection ? (
                         sectionContent[selectedSection]
                     ) : (
                         <Box sx={{ display: "flex", gap: 4 }}>
-                            {/* Profile Avatar */}
                             <Box sx={{
                                 width: 240, height: 200, textAlign: "center",
                                 bgcolor: "#fff", p: 2, borderRadius: 2, boxShadow: 2
@@ -105,14 +102,7 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                     {/* Dashboard Tabs Section */}
                     {!selectedSection || selectedSection === "Dashboard" ? (
                         <>
-                            <Box sx={{ display: "flex", gap: 4, mt: -6, padding: 2 }}>
-                                {/* Placeholder for additional dashboard cards */}
-                            </Box>
-
                             <Box sx={{ mt: 4 }}>
-                                <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
-                                    {/* Placeholder for filters/stats */}
-                                </Box>
                                 <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
                                     <Tabs value={tabValue} onChange={handleTabChange} centered>
                                         <Tab label="Expressed Interest" />

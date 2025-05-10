@@ -19,7 +19,7 @@ import DashBoard from './Components/Profile_Component/DashBoard';
 import FeedBack from './Components/Profile_Component/FeedBack';
 import Complaint from './Components/Profile_Component/Complaint';
 import BrandDashBoard from './Components/BrandProfile_Component/BrandDashBoard';
-import Sidebar from './Pages/BrandProfile_Pages.jsx/Sidebar_page';
+import Sidebar from './Pages/BrandProfile_Pages/Sidebar_page';
 import BrandManageProfile from './Components/BrandProfile_Component/BrandManageProfile';
 import BrandFeedBack from './Components/BrandProfile_Component/BrandFeedback';
 import BrandComplaint from './Components/BrandProfile_Component/BrandComplaint';

@@ -98,6 +98,7 @@ function LoginPage() {
         { headers: { "Content-Type": "application/json" } }
       );
 
+      console.log("response :",response)
       if (response.data.success) {
         setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
         setTimeout(() => navigate("/"), 1500);
