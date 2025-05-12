@@ -31,7 +31,6 @@ import {
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "../../Pages/BrandListingForm/BrandCategories";
-import { Token } from "@mui/icons-material";
 
 const countries = ["India", "USA", "UK", "Canada", "Australia"];
 const phoneCodes = {
@@ -58,7 +57,7 @@ const InvestorRegister = () => {
   });
 
   const navigate = useNavigate();
-  const [phonePrefix, setPhonePrefix] = useState("+91");
+  const [phonePrefix, setPhonePrefix] = useState("");
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
