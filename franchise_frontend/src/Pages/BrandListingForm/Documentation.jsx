@@ -119,6 +119,8 @@ const Documentation = ({ data, onChange, errors }) => {
                   borderRadius: 2,
                   borderColor: errors?.[docType] ? 'error.main' : 
                               documentPreviews[docType] ? "primary.main" : "divider",
+                  borderColor: errors?.[docType] ? 'error.main' : 
+                              documentPreviews[docType] ? "primary.main" : "divider",
                   transition: "border-color 0.3s ease",
                 }}
               >

@@ -33,7 +33,6 @@ import BrandListingController from './Components/BrandProfile_Component/BrandLis
 
 
 function App() {
-
   return (
   
     <>
@@ -76,8 +75,7 @@ function App() {
   <Route path="/termscondition" element={<TermsCondition />} />
 </Routes>
     </>
-
-  )
+  );
 }
 
 export default App;
