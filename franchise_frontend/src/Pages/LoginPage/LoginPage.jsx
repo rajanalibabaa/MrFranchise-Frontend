@@ -8,7 +8,6 @@ import {
   Button,
   Link,
   IconButton,
-  Avatar,
   Alert,
   Snackbar,
   CircularProgress,
@@ -62,8 +61,7 @@ function LoginPage() {
 
     try {
       const response = await axios.post(
-        // "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
-        "https://localhost:5000/api/v1/login/generateOTPforLogin",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -130,10 +128,10 @@ function LoginPage() {
       </Grid>
 
       <Grid item xs={12} md={6} sx={{ p: 6, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <IconButton onClick={() => navigate("/")} sx={{ position: "absolute", // Position it absolutely
-      top: 16, // Distance from the top
-      left: 16, // Distance from the left
-      bgcolor: "#FFC107", // Background color
+        <IconButton onClick={() => navigate("/")} sx={{ position: "absolute", 
+      top: 16,
+      left: 16, 
+      bgcolor: "#FFC107", 
       '&:hover': { bgcolor: "#FFA000" }, }}>
           <ArrowBack sx={{ color: "white" }} />
         </IconButton>

@@ -21,6 +21,7 @@ import brandImage from "../../assets/Images/BrandRegister.jpg";
 import { categories } from "../BrandListingForm/BrandCategories";
 import axios from "axios";
 
+
 const BrandRegister = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -86,11 +87,11 @@ const handleSubmit = async (e) => {
       },
     };
 
-    console.log("Payload being sent:", payload); // Debug payload
+    console.log("Payload being sent:", payload); 
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/brand/register/creatBrandRegister",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/brand/register/creatBrandRegister",
         payload,
         {
           headers: {
@@ -119,7 +120,7 @@ const handleSubmit = async (e) => {
   return (
     <Grid container sx={{ minHeight: "100vh", overflow: "hidden" }}>
       <Grid
-        item
+        
         xs={12}
         md={6}
         sx={{
@@ -138,7 +139,6 @@ const handleSubmit = async (e) => {
       </Grid>
 
       <Grid
-        item
         xs={12}
         md={6}
         sx={{
@@ -155,7 +155,7 @@ const handleSubmit = async (e) => {
 
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} sx={{width: "48%"}}>
+              <Grid xs={12} sm={6} sx={{width: "48%"}}>
                 <TextField
                   fullWidth
                   name="firstName"
@@ -167,7 +167,7 @@ const handleSubmit = async (e) => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} sx={{width: "48%"}}>
+              <Grid xs={12} sm={6} sx={{width: "48%"}}>
                 <TextField
                   fullWidth
                   name="phone"
@@ -186,7 +186,7 @@ const handleSubmit = async (e) => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} sx={{width: "48%"}}>
+              <Grid  xs={12} sm={6} sx={{width: "48%"}}>
                 <TextField
                   fullWidth
                   name="email"
@@ -201,7 +201,7 @@ const handleSubmit = async (e) => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} sx={{width: "48%"}}>
+              <Grid  xs={12} sm={6} sx={{width: "48%"}}>
                 <TextField
                   fullWidth
                   name="brandName"
@@ -213,7 +213,7 @@ const handleSubmit = async (e) => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} sx={{width: "48%"}}>
+              <Grid xs={12} sm={6} sx={{width: "48%"}}>
                 <TextField
                   fullWidth
                   name="companyName"
@@ -225,7 +225,7 @@ const handleSubmit = async (e) => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} sx={{width: "48%"}}>
+              <Grid xs={12} sm={6} sx={{width: "48%"}}>
                 <FormControl fullWidth error={!!errors.category}>
                   <InputLabel>Category</InputLabel>
                   <Select
@@ -246,7 +246,7 @@ const handleSubmit = async (e) => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sm={6}sx={{width: "48%"}}>
+              <Grid  xs={12} sm={6}sx={{width: "48%"}}>
                 <FormControl fullWidth error={!!errors.franchiseType}>
                   <InputLabel>Franchise Type</InputLabel>
                   <Select
@@ -264,7 +264,7 @@ const handleSubmit = async (e) => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12}sx={{width: "60%", marginLeft: "20%"}}>
+              <Grid xs={12}sx={{width: "60%", marginLeft: "20%"}}>
                 <Button
                   type="submit"
                   fullWidth
@@ -275,7 +275,7 @@ const handleSubmit = async (e) => {
                 </Button>
               </Grid>
 
-              <Grid item xs={12} sx={{ marginLeft: "30%" }}>
+              <Grid  xs={12} sx={{ marginLeft: "30%" }}>
                 <Typography textAlign="center">
                   Already have an account?{" "}
                   <Link href="/loginPage" underline="hover">
