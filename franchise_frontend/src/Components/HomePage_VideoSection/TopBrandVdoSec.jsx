@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button, IconButton } from "@mui/material";
 // import img from "../../assets/Images/bgimg.jpg"
+import axios from "axios";
 
 
 const topbrandData = [
@@ -51,6 +52,23 @@ const TopBrandVdoSec = () => {
     const prevVideo = () => setCurrentVideo((prev) => (prev - 1 + topbrandData.length) % topbrandData.length);
   
     const currentItem = topbrandData[currentVideo];
+
+    
+
+    useEffect(() => {
+      const topbrandData = async () => {
+        try {
+          const response = await axios.get("http://localhost:5000/api/v1/admin/videoAdvertise/getAdminVideoAdvertise");
+          console.log(response.data);
+        } catch (error) {
+          console.error("Error fetching top brand data:", error);
+        }
+      };
+    
+      topbrandData();
+    }, []);
+    
+
   return (
     <Box sx={{ p: 2 }}>
       <Typography
@@ -96,25 +114,56 @@ const TopBrandVdoSec = () => {
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.5 }}
             style={{ position: "relative", height: "100%" }}
+            // onMouseEnter={(e) => {
+            //   const video = e.currentTarget.querySelector("video");
+            //   const img = e.currentTarget.querySelector("img");
+            //   if (video && img) {
+            //     video.style.display = "block";
+            //     img.style.display = "none";
+            //     video.play();
+            //   }
+            // }}
+            // onMouseLeave={(e) => {
+            //   const video = e.currentTarget.querySelector("video");
+            //   const img = e.currentTarget.querySelector("img");
+            //   if (video && img) {
+            //     video.pause();
+            //     video.currentTime = 0;
+            //     video.style.display = "none";
+            //     img.style.display = "block";
+            //   }
+            // }}
+
+
             onMouseEnter={(e) => {
               const video = e.currentTarget.querySelector("video");
               const img = e.currentTarget.querySelector("img");
+            
               if (video && img) {
                 video.style.display = "block";
                 img.style.display = "none";
-                video.play();
+            
+                // Try to play only if video is paused
+                if (video.paused) {
+                  video.play().catch(() => {});
+                }
               }
             }}
             onMouseLeave={(e) => {
               const video = e.currentTarget.querySelector("video");
               const img = e.currentTarget.querySelector("img");
+            
               if (video && img) {
-                video.pause();
-                video.currentTime = 0;
-                video.style.display = "none";
-                img.style.display = "block";
+                // Small delay to avoid interrupting play
+                setTimeout(() => {
+                  video.pause();
+                  video.currentTime = 0;
+                  video.style.display = "none";
+                  img.style.display = "block";
+                }, 100); // Delay 100ms
               }
             }}
+            
           >
             <img
               src={currentItem.poster}
@@ -241,7 +290,7 @@ const TopBrandVdoSec = () => {
           </Typography>
 
           <Button
-            onClick={() => navigate("/brandview")}
+            onClick={() => navigate("/brandViewPage")}
             variant="outlined"
             fullWidth
             sx={{ mt: 2, borderRadius: 2 }}
@@ -255,3 +304,51 @@ const TopBrandVdoSec = () => {
 }
 
 export default TopBrandVdoSec
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+onMouseEnter={(e) => {
+  const video = e.currentTarget.querySelector("video");
+  const img = e.currentTarget.querySelector("img");
+
+  if (video && img) {
+    video.style.display = "block";
+    img.style.display = "none";
+
+    // Try to play only if video is paused
+    if (video.paused) {
+      video.play().catch(() => {});
+    }
+  }
+}}
+onMouseLeave={(e) => {
+  const video = e.currentTarget.querySelector("video");
+  const img = e.currentTarget.querySelector("img");
+
+  if (video && img) {
+    // Small delay to avoid interrupting play
+    setTimeout(() => {
+      video.pause();
+      video.currentTime = 0;
+      video.style.display = "none";
+      img.style.display = "block";
+    }, 100); // Delay 100ms
+  }
+}}
+
+*/

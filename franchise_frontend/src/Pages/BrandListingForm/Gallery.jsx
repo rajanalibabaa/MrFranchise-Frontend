@@ -27,7 +27,6 @@ const StyledCard = styled(Card)(({ theme }) => ({
   transition: 'transform 0.2s',
   '&:hover': {
     transform: 'scale(1.03)',
-    boxShadow: theme.shadows[6],
   },
 }));
 
@@ -90,7 +89,7 @@ const MediaThumbnail = ({ media, onClick }) => {
   );
 };
 
-const Gallery = ({ data, onChange }) => {
+const Gallery = ({ data, onChange, errors }) => {
   const [mediaFiles, setMediaFiles] = useState(data || []);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -179,8 +178,13 @@ const Gallery = ({ data, onChange }) => {
           </Button>
         </label>
         <Typography variant="caption" color="textSecondary">
-          Supported formats: JPEG, PNG, GIF, MP4, WEBM
+          Supported formats: All image and video formats
         </Typography>
+        {errors?.mediaFiles && (
+          <Typography color="error" variant="caption">
+            {errors.mediaFiles}
+          </Typography>
+        )}
       </Box>
 
       {mediaFiles.length === 0 ? (
@@ -191,13 +195,13 @@ const Gallery = ({ data, onChange }) => {
             alignItems: 'center',
             minHeight: '200px',
             border: '2px dashed',
-            borderColor: 'divider',
+            borderColor: errors?.mediaFiles ? 'error.main' : 'divider',
             borderRadius: 1,
             p: 3,
           }}
         >
-          <Typography color="textSecondary">
-            No media files uploaded yet. Click "Upload Media" to add files.
+          <Typography color={errors?.mediaFiles ? "error" : "textSecondary"}>
+            {errors?.mediaFiles || "No media files uploaded yet. Click 'Upload Media' to add files."}
           </Typography>
         </Box>
       ) : (
