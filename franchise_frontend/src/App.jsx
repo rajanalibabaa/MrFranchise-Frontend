@@ -20,7 +20,7 @@ import DashBoard from './Components/Profile_Component/DashBoard';
 import FeedBack from './Components/Profile_Component/FeedBack';
 import Complaint from './Components/Profile_Component/Complaint';
 import BrandDashBoard from './Components/BrandProfile_Component/BrandDashBoard';
-import Sidebar from './Pages/BrandProfile_Pages.jsx/Sidebar_page';
+import Sidebar from './Pages/BrandProfile_Pages/Sidebar_page';
 import BrandManageProfile from './Components/BrandProfile_Component/BrandManageProfile';
 import BrandFeedBack from './Components/BrandProfile_Component/BrandFeedback';
 import BrandComplaint from './Components/BrandProfile_Component/BrandComplaint';
@@ -31,6 +31,7 @@ import Faq from './Components/QuickLinks/Faq.jsx';
 import Help from './Components/QuickLinks/Help.jsx';
 import ContactUs from './Components/QuickLinks/ContactUs.jsx';
 import AboutUs from './Components/QuickLinks/AboutUs.jsx';
+import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
 
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
     <Route path="brandfeedback" element={<BrandFeedBack />} />
     <Route path="brandcomplaint" element={<BrandComplaint />} />
     <Route path="brandmanageprofile" element={<BrandManageProfile />} />
+    <Route path='/brandDashboard/brandlistingcontrol' element={<BrandListingController />} />
   </Route>
 
   
