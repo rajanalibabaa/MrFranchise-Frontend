@@ -1015,8 +1015,8 @@ const handleVerifyGSTIN = async () => {
           onChange={(e) => onChange("franchiseSinceYear", e.target.value)}
           fullWidth
           size="small"
-          error={!!errors?.establishedYear}
-          helperText={errors?.establishedYear}
+          error={!!errors?.franchiseSinceYear}
+          helperText={errors?.franchiseSinceYear}
          
         >
           {years.map((year) => (

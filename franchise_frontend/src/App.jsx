@@ -1,10 +1,8 @@
-
-import React from 'react';
+import React from 'react'
 import { Route, Routes } from "react-router-dom"
 import InvestorRegister from './Pages/Registration/InvestorsRegister';
 import BrandRegister from './Pages/Registration/BrandRegister';
 import LoginPage from './Pages/LoginPage/LoginPage';
-import BrandViewPage from "./Pages/BrandViewPage/BrandViewPage";
 
 import './App.css';
 import HomeBannerSec from './Pages/HomePages/HomeBannerSec';
@@ -41,7 +39,7 @@ function App() {
     <>
       <Routes>
   <Route path="/" element={<HomeBannerSec />} />
-  <Route path="/brandViewPage" element={<BrandViewPage />} />
+  {/* <Route path="/brandViewPage" element={<BrandViewPage />} /> */}
   <Route path="/investor-register" element={<InvestorRegister />} />
   <Route path="/brand-register" element={<BrandRegister />} />
   <Route path="/loginpage" element={<LoginPage />} />
