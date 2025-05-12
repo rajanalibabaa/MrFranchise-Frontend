@@ -31,7 +31,7 @@ import {
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "../../Pages/BrandListingForm/BrandCategories";
-import { Token } from "@mui/icons-material";
+
 
 const countries = ["India", "USA", "UK", "Canada", "Australia"];
 const phoneCodes = {
@@ -63,32 +63,24 @@ const InvestorRegister = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("India");
+
+
   const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "info"
-  });
+  open: false,
+  message: "",
+  severity: "info"
+});
 
-  // OTP related states
-  const [otpModal, setOtpModal] = useState({
-    open: false,
-    type: null, // 'email', 'mobile', or 'whatsapp'
-    otp: "",
-    loading: false,
-    verified: false
-  });
+// OTP related states
+const [otpModal, setOtpModal] = useState({
+  open: false,
+  type: null, // 'email', 'mobile', or 'whatsapp'
+  otp: "",
+  loading: false,
+  verified: false
+});
 
-  const selectedCountry = watch("country");
-  const pincode = watch("pincode");
-
-  // Helper functions
-  const showSnackbar = (message, severity = "info") => {
-    setSnackbar({ open: true, message, severity });
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, open: false }));
-  };
 const [otpStates, setOtpStates] = useState({
   email: {
     sent: false,
@@ -109,26 +101,39 @@ const [otpStates, setOtpStates] = useState({
     token: ""
   }
 });
-  const openOtpModal = (type,token) => {
-    setOtpModal({
-      open: true,
-      type,
-      otp: "",
-      token
-    });
-  };
 
-  const closeOtpModal = () => {
-    setOtpModal({
-      open: false,
-      type: null,
-      otp: "",
-      token: ""
-    });
-  };
+// Helper functions
+const showSnackbar = (message, severity = "info") => {
+  setSnackbar({ open: true, message, severity });
+};
 
-  // Verification functions
-const sendOtp = async (type) => {
+const handleCloseSnackbar = () => {
+  setSnackbar(prev => ({ ...prev, open: false }));
+};
+
+const openOtpModal = (type) => {
+  setOtpModal({
+    open: true,
+    type,
+    otp: "",
+    loading: false,
+    verified: otpStates[type]?.verified || false
+  });
+};
+
+const closeOtpModal = () => {
+  setOtpModal({
+    open: false,
+    type: null,
+    otp: "",
+    loading: false,
+    verified: false
+  });
+};
+  
+
+
+  const sendOtp = async (type) => {
   let endpoint = "";
   let payload = {};
   let fieldName = "";
@@ -143,23 +148,23 @@ const sendOtp = async (type) => {
     payload = { mobile: `${phonePrefix}${watch("mobileNumber")}`, type: "mobile" };
   } else if (type === "whatsapp") {
     fieldName = "whatsappNumber";
-    endpoint = "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-whatsapp-otp";
+    endpoint = "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-whatsapp";
     payload = { mobile: `${phonePrefix}${watch("whatsappNumber")}`, type: "whatsapp" };
   }
 
+  // Validate the field first
   const isValid = await trigger(fieldName);
-  if (!isValid) return;
-
-  if (!watch(fieldName)) {
-    showSnackbar(`Please enter a valid ${type}`, "error");
+  if (!isValid) {
+    showSnackbar(`Please enter a valid ${type} address`, "error");
     return;
   }
 
-setOtpStates(prev => ({
+  setOtpStates(prev => ({
     ...prev,
     [type]: {
       ...prev[type],
-      loading: true
+      loading: true,
+      error: false
     }
   }));
 
@@ -167,113 +172,97 @@ setOtpStates(prev => ({
     const response = await axios.post(endpoint, payload, {
       headers: { "Content-Type": "application/json" },
     });
-    console.log("Response:", response.data);
-    
 
-    if (response.status === 200 && response.data.sent) {
-      showSnackbar(`${type} OTP sent successfully!`, "success");
-      const token = response.data.token;
-
-setOtpStates(prev => ({
+    if (response.status === 200 && response.data.message) {
+      showSnackbar(`OTP sent to your ${type} successfully!`, "success");
+      setOtpStates(prev => ({
         ...prev,
         [type]: {
           ...prev[type],
           sent: true,
-          token , // Make sure to capture the token
-          loading: false
-        }
-      }));
-      openOtpModal(type, token);
- }else{
-  showSnackbar(`Failed to send ${type} OTP.`, "error");
- } 
-} catch (error) {
-    console.error(`Error sending ${type} OTP:`, error);
-    showSnackbar(
-      error.response?.data?.message || `An error occurred while sending ${type} OTP.`,"error",
-    );
-  } finally {
-setOtpStates(prev => ({
-        ...prev,
-        [type]: {
-          ...prev[type],
-          loading: false
-        }
-      }));  }
-};
-
-const verifyOtp = async () => {
-  const { type, otp} = otpModal;
-
-if (!otp ) {
-    showSnackbar(" token is missing , pleaswe try again", "error");
-    return;
-  }
-  const token = otpStates[type]?.token;
- const identifier = 
-    type === "email" 
-      ? watch("email") 
-      : `${phonePrefix}${watch(type === "mobile" ? "mobileNumber" : "whatsappNumber")}`;
-
-console.log("Type:", type);
-  console.log("OTP:", otp);
-  console.log("Token:", token);
-  console.log("Identifier:", identifier);
-  
-if(!identifier || !otp || !token){
-  showSnackbar("Please enter a valid identifier, otp and token", "error");
-  return;
-}
-
-  const payload = {
-    identifier,
-    verifyOtp: otp,
-    type,
-    token
-  };
-
-  setOtpStates((prev) => ({
-    ...prev,
-    [type]: {
-      ...prev[type],
-      loading: true,
-    },
-  }));
-
-  try {
-    const response = await axios.post("https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/verify-otp",payload,{headers: { "Content-Type": "application/json" }},);
-console.log("Response:", response.data);
-
-    if (response.status === 200 && response.data.success) {
-      showSnackbar(`${type} verified successfully!`, "success");
-
-      setOtpStates((prev) => ({
-        ...prev,
-        [type]: {
-          ...prev[type],
-          verified: true,
           loading: false,
-        },
+          token: response.data.token
+        }
       }));
-      closeOtpModal();
+      openOtpModal(type);
     } else {
- showSnackbar(response.data.message || `Failed to verify ${type}. Please try again.`, "error");    }
+      throw new Error(response.data.message || `Failed to send ${type} OTP`);
+    }
   } catch (error) {
-    console.error(`Error verifying ${type}:`, error);
-    showSnackbar(
-      error.response?.data?.message || `An error occurred while verifying ${type}.`,
+    console.error(`Error sending ${type} OTP:`, error);
+    showSnackbar( 
+      error.response?.data?.message ||
+      `Failed to send ${type} OTP. Please try again.`,
       "error"
     );
-  } finally {
-    setOtpStates((prev) => ({
+    setOtpStates(prev => ({
       ...prev,
       [type]: {
         ...prev[type],
         loading: false,
-      },
+        error: true
+      }
     }));
   }
 };
+
+const verifyOtp = async () => {
+  const { type, otp } = otpModal;
+
+  if (!otp || otp.length < 6) {  // Assuming 4-6 digit OTP
+    showSnackbar("Please enter a valid OTP", "error");
+    return;
+  }
+
+  
+   console.log("Verifying OTP for type:", type);
+  console.log("OTP entered:", otp);
+  setOtpModal(prev => ({ ...prev, loading: true }));
+
+  try {
+    const response = await axios.post(
+      "http://localhost:5000/api/v1/otpverify/verify-otp",
+      {
+        identifier: type === "email" 
+          ? watch("email") 
+          : `${phonePrefix}${watch(type === "mobile" ? "mobileNumber" : "whatsappNumber")}`,
+        otp,
+        type
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${otpStates[type].token}`
+        }
+      }
+    );
+    console.log("OTP verification response:", response.data);
+
+    if (response.status === 200 || response.data.message) {
+      showSnackbar(`${type} verified successfully!`, "success");
+      setOtpStates(prev => ({
+        ...prev,
+        [type]: {
+          ...prev[type],
+          verified: true,
+          loading: false
+        }
+      }));
+      setOtpModal(prev => ({ ...prev, open: false, loading: false, verified: true }));
+    } else {
+      throw new Error(response.data.message || "Verification failed");
+    }
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    showSnackbar(
+      error.response?.data?.message || 
+      "Invalid OTP. Please try again.",
+      "error"
+    );
+    setOtpModal(prev => ({ ...prev, loading: false }));
+  }
+};
+  
 
   // Other handlers
   const handleCategorySelection = (mainCategory, subCategory, item) => {
@@ -311,8 +300,9 @@ console.log("Response:", response.data);
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
-
-      if (response.status === 200) {
+       
+      console.log("Registration response:", response.data);
+      if (response.status === 201) {
         showSnackbar("Registration successful! Redirecting to login...", "success");
         setTimeout(() => navigate("/loginpage"), 2000);
       } else {
@@ -346,9 +336,12 @@ console.log("Response:", response.data);
       setPhonePrefix("");
     }
   }, [selectedCountry]);
+  
+ const pincode = watch("pincode");
 
   useEffect(() => {
     const fetchLocationDetails = async () => {
+
       if (selectedCountry === "India" && pincode && pincode.length === 6) {
         try {
           const response = await axios.get(
@@ -520,257 +513,6 @@ console.log("Response:", response.data);
                 }
               />
             </Grid>
-
-            {/* Email Field with OTP */}
-            <Grid sx={{ width: "30%", xs: 12, sm: 6 }}>
-  <TextField
-    fullWidth
-    label="Email"
-    type="email"
-    {...register("email", {
-      required: "Email is required",
-      pattern: {
-        value: /^\S+@\S+$/i,
-        message: "Invalid email address",
-      },
-    })}
-    error={!!errors.email}
-    helperText={errors.email?.message || " "}
-    InputProps={{
-      endAdornment: (
-        <InputAdornment position="end">
-          <Button
-            size="small"
-            variant="outlined"
- onClick={() => {
-              if (otpStates.email.verified) return;
-              sendOtp("email").then(() => openOtpModal("email"));
-            }}            disabled={otpStates.email.loading || otpStates.email.verified}
-          >
-            {otpStates.email.loading ? (
-              <CircularProgress size={20} />
-            ) : otpStates.email.verified ? (
-              "Verified"
-            ) : otpStates.email.sent ? (
-              "Resend OTP"
-            ) : (
-              "Send OTP"
-            )}
-          </Button>
-        </InputAdornment>
-      ),
-    }}
-  />
-  {/* {otpModal.sent && otpModal.type === "email" && (
-    <TextField
-      fullWidth
-      label="Enter OTP"
-      value={otpModal.otp}
-      onChange={(e) => setOtpModal((prev) => ({ ...prev, otp: e.target.value }))}
-      InputProps={{
-        endAdornment: (
-          <InputAdornment position="end">
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={verifyOtp}
-              disabled={otpModal.verified || otpModal.loading}
-              color={otpModal.verified ? "success" : "primary"}
-            >
-              {otpModal.loading ? (
-                <CircularProgress size={20} />
-              ) : otpModal.verified ? (
-                "Verified"
-              ) : (
-                "Verify"
-              )}
-            </Button>
-          </InputAdornment>
-        ),
-      }}
-    />
-  )} */}
-</Grid>
-
-            {/* Mobile Field with OTP */}
-            <Grid sx={{ width: "30%", xs: 12, sm: 6 }}>
-  <TextField
-    fullWidth
-    label="Phone Number"
-    {...register("mobileNumber", {
-      required: "Phone number is required",
-      pattern: {
-        value: /^[0-9]{10}$/,
-        message: "Invalid phone number (10 digits required)",
-      },
-    })}
-    error={!!errors.mobileNumber}
-    helperText={errors.mobileNumber?.message || " "}
-    InputProps={{
-      startAdornment: <InputAdornment position="start">{phonePrefix}</InputAdornment>,
-      endAdornment: (
-        <InputAdornment position="end">
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => {
-              if (otpStates.mobile.verified) return;
-              sendOtp("mobile").then(() => openOtpModal("mobile"));
-            }}
-            disabled={otpStates.mobile.loading || otpStates.mobile.verified}
-          >
-            {otpStates.mobile.loading ? (
-              <CircularProgress size={20} />
-            ) : otpStates.mobile.verified ? (
-              "Verified"
-            ) : otpStates.mobile.sent ? (
-              "Resend OTP"
-            ) : (
-              "Send OTP"
-            )}
-          </Button>
-        </InputAdornment>
-      ),
-    }}
-  />
-  {/* {otpModal.sent && otpModal.type === "mobile" && (
-    <TextField
-      fullWidth
-      label="Enter OTP"
-      value={otpModal.otp}
-      onChange={(e) => setOtpModal((prev) => ({ ...prev, otp: e.target.value }))}
-      InputProps={{
-        endAdornment: (
-          <InputAdornment position="end">
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={verifyOtp}
-              disabled={otpModal.verified || otpModal.loading}
-              color={otpModal.verified ? "success" : "primary"}
-            >
-              {otpModal.loading ? (
-                <CircularProgress size={20} />
-              ) : otpModal.verified ? (
-                "Verified"
-              ) : (
-                "Verify"
-              )}
-            </Button>
-          </InputAdornment>
-        ),
-      }}
-    />
-  )} */}
-</Grid>
-
-            {/* WhatsApp Field with OTP */}
-           <Grid item xs={12} sm={6}>
-  <TextField
-    fullWidth
-    label="WhatsApp Number"
-    {...register("whatsappNumber", {
-      required: "WhatsApp number is required",
-      pattern: {
-        value: /^[0-9]{10}$/,
-        message: "Invalid WhatsApp number (10 digits required)",
-      },
-    })}
-    error={!!errors.whatsappNumber}
-    helperText={errors.whatsappNumber?.message || " "}
-    InputProps={{
-      startAdornment: <InputAdornment position="start">{phonePrefix}</InputAdornment>,
-      endAdornment: (
-        <InputAdornment position="end">
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => {
-              if(otpStates.whatsapp.verified) return;
-              sendOtp("whatsapp").then(() => openOtpModal("whatsapp"));
-            }}
-            disabled={otpStates.whatsapp.loading || otpStates.whatsapp.verified}
-          >
-            {otpStates.whatsapp.loading ? (
-              <CircularProgress size={20} />
-            ) : otpStates.whatsapp.verified ? (
-              "Verified"
-            ) : otpStates.whatsapp.sent ? (
-              "Resend OTP"
-            ) : (
-              "Send OTP"
-            )}
-          </Button>
-        </InputAdornment>
-      ),
-    }}
-  />
-  {/* {otpModal.sent && otpModal.type === "whatsapp" && (
-    <TextField
-      fullWidth
-      label="Enter OTP"
-      value={otpModal.otp}
-      onChange={(e) => setOtpModal((prev) => ({ ...prev, otp: e.target.value }))}
-      InputProps={{
-        endAdornment: (
-          <InputAdornment position="end">
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={verifyOtp}
-              disabled={otpModal.verified || otpModal.loading}
-              color={otpModal.verified ? "success" : "primary"}
-            >
-              {otpModal.loading ? (
-                <CircularProgress size={20} />
-              ) : otpModal.verified ? (
-                "Verified"
-              ) : (
-                "Verify"
-              )}
-            </Button>
-          </InputAdornment>
-        ),
-      }}
-    />
-  )} */}
-</Grid>
-
-<Dialog open={otpModal.open} onClose={closeOtpModal}>
-  <DialogTitle>
-    Verify {otpModal.type === "email" ? "Email" : 
-           otpModal.type === "mobile" ? "Mobile Number" : "WhatsApp Number"}
-  </DialogTitle>
-  <DialogContent>
-    <TextField
-      autoFocus
-      margin="dense"
-      label="Enter OTP"
-      type="text"
-      fullWidth
-      variant="standard"
-      value={otpModal.otp}
-      onChange={(e) => setOtpModal(prev => ({ ...prev, otp: e.target.value }))}
-      disabled={otpStates.verified}
-    />
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={closeOtpModal}>Cancel</Button>
-    <Button 
-      onClick={() => verifyOtp(otpModal.type)}
-      disabled={otpStates[otpModal.type]?.verified || otpStates[otpModal.type]?.loading}
-      color="primary"
-    >
-      {otpStates[otpModal.type]?.loading ? (
-        <CircularProgress size={24} />
-      ) : otpStates[otpModal.type]?.verified ? (
-        "Verified"
-      ) : (
-        "Verify"
-      )}
-    </Button>
-  </DialogActions>
-</Dialog>
 
             {/* Occupation Field */}
             <Grid sx={{ width: "22%", xs: 12, sm: 4 }}>
@@ -966,6 +708,134 @@ console.log("Response:", response.data);
                 </Paper>
               )}
             </Grid>
+            {/* Email Field with OTP */}
+<Grid sx={{ width: "30%", xs: 12, sm: 6 }}>
+  <TextField
+    fullWidth
+    label="Email"
+    type="email"
+    {...register("email", {
+      required: "Email is required",
+      pattern: {
+        value: /^\S+@\S+$/i,
+        message: "Invalid email address",
+      },
+    })}
+    error={!!errors.email}
+    helperText={errors.email?.message || " "}
+    InputProps={{
+      endAdornment: (
+        <InputAdornment position="end">
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => {
+              if (otpStates.email.verified) return;
+              sendOtp("email");
+            }}
+            disabled={otpStates.email.loading || otpStates.email.verified}
+          >
+            {otpStates.email.loading ? (
+              <CircularProgress size={20} />
+            ) : otpStates.email.verified ? (
+              "Verified"
+            ) : otpStates.email.sent ? (
+              "Resend OTP"
+            ) : (
+              "Send OTP"
+            )}
+          </Button>
+        </InputAdornment>
+      ),
+    }}
+  />
+</Grid>
+
+{/* Mobile Field with OTP */}
+<Grid sx={{ width: "30%", xs: 12, sm: 6 }}>
+  <TextField
+    fullWidth
+    label="Phone Number"
+    {...register("mobileNumber", {
+      required: "Phone number is required",
+      pattern: {
+        value: /^[0-9]{10}$/,
+        message: "Invalid phone number (10 digits required)",
+      },
+    })}
+    error={!!errors.mobileNumber}
+    helperText={errors.mobileNumber?.message || " "}
+    InputProps={{
+      startAdornment: <InputAdornment position="start">{phonePrefix}</InputAdornment>,
+      endAdornment: (
+        <InputAdornment position="end">
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => {
+              if (otpStates.mobile.verified) return;
+              sendOtp("mobile");
+            }}
+            disabled={otpStates.mobile.loading || otpStates.mobile.verified}
+          >
+            {otpStates.mobile.loading ? (
+              <CircularProgress size={20} />
+            ) : otpStates.mobile.verified ? (
+              "Verified"
+            ) : otpStates.mobile.sent ? (
+              "Resend OTP"
+            ) : (
+              "Send OTP"
+            )}
+          </Button>
+        </InputAdornment>
+      ),
+    }}
+  />
+</Grid>
+
+{/* WhatsApp Field with OTP */}
+<Grid item xs={12} sm={6}>
+  <TextField
+    fullWidth
+    label="WhatsApp Number"
+    {...register("whatsappNumber", {
+      required: "WhatsApp number is required",
+      pattern: {
+        value: /^[0-9]{10}$/,
+        message: "Invalid WhatsApp number (10 digits required)",
+      },
+    })}
+    error={!!errors.whatsappNumber}
+    helperText={errors.whatsappNumber?.message || " "}
+    InputProps={{
+      startAdornment: <InputAdornment position="start">{phonePrefix}</InputAdornment>,
+      endAdornment: (
+        <InputAdornment position="end">
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => {
+              if(otpStates.whatsapp.verified) return;
+              sendOtp("whatsapp");
+            }}
+            disabled={otpStates.whatsapp.loading || otpStates.whatsapp.verified}
+          >
+            {otpStates.whatsapp.loading ? (
+              <CircularProgress size={20} />
+            ) : otpStates.whatsapp.verified ? (
+              "Verified"
+            ) : otpStates.whatsapp.sent ? (
+              "Resend OTP"
+            ) : (
+              "Send OTP"
+            )}
+          </Button>
+        </InputAdornment>
+      ),
+    }}
+  />
+</Grid>
 
             {/* Investment Range Field */}
             <Grid sx={{ width: "22%", xs: 12, sm: 4 }}>
@@ -1098,48 +968,53 @@ console.log("Response:", response.data);
       </Paper>
 
       {/* OTP Verification Modal */}
-      <Dialog open={otpModal.open} onClose={closeOtpModal}>
-        <DialogTitle>
-          Verify {otpModal.type === "email" ? "Email" : 
-                 otpModal.type === "mobile" ? "Mobile Number" : "WhatsApp Number"}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Enter OTP"
-            type="text"
-            fullWidth
-            variant="standard"
-            value={otpModal.otp}
-            onChange={(e) => setOtpModal(prev => ({ ...prev, otp: e.target.value }))}
-            disabled={otpModal.verified}
-            InputProps={{
-              endAdornment: otpModal.verified && (
-                <InputAdornment position="end">
-                  <Typography color="success.main">Verified</Typography>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeOtpModal}>Cancel</Button>
-          <Button 
-            onClick={verifyOtp}
-            disabled={otpModal.verified || otpModal.loading}
-            color="primary"
-          >
-            {otpModal.loading ? (
-              <CircularProgress size={24} />
-            ) : otpModal.verified ? (
-              "Verified"
-            ) : (
-              "Verify"
-            )}
-          </Button>
-        </DialogActions>
-      </Dialog>
+<Dialog open={otpModal.open} onClose={closeOtpModal}>
+  <DialogTitle>
+    Verify {otpModal.type === "email" ? "Email" : 
+           otpModal.type === "mobile" ? "Mobile Number" : "WhatsApp Number"}
+  </DialogTitle>
+  <DialogContent>
+    <TextField
+      autoFocus
+      margin="dense"
+      label="Enter OTP"
+      type="text"
+      fullWidth
+      variant="standard"
+      value={otpModal.otp}
+      onChange={(e) => {
+        // Only allow numbers and limit length
+        const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+        setOtpModal(prev => ({ ...prev, otp: value }));
+      }}
+      disabled={otpModal.verified}
+      InputProps={{
+        endAdornment: otpModal.verified && (
+          <InputAdornment position="end">
+            <Typography color="success.main">Verified</Typography>
+          </InputAdornment>
+        ),
+      }}
+    />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={closeOtpModal}>Cancel</Button>
+    <Button 
+      onClick={verifyOtp}
+      disabled={otpModal.verified || otpModal.loading}
+      color="primary"
+      variant="contained"
+    >
+      {otpModal.loading ? (
+        <CircularProgress size={24} />
+      ) : otpModal.verified ? (
+        "Verified"
+      ) : (
+        "Verify"
+      )}
+    </Button>
+  </DialogActions>
+</Dialog>
 
       {/* Snackbar for notifications */}
       <Snackbar

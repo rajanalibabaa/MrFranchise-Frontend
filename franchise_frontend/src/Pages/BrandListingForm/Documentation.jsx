@@ -1,3 +1,4 @@
+// Documentation.jsx
 import React, { useState, useEffect } from "react";
 import { 
   Grid, 
@@ -111,6 +112,8 @@ const Documentation = ({ data, onChange, errors }) => {
                   flexDirection: "column",
                   alignItems: "center",
                   borderRadius: 2,
+                  borderColor: errors?.[docType] ? 'error.main' : 
+                              documentPreviews[docType] ? "primary.main" : "divider",
                   borderColor: errors?.[docType] ? 'error.main' : 
                               documentPreviews[docType] ? "primary.main" : "divider",
                   transition: "border-color 0.3s ease",
