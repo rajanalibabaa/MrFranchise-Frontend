@@ -3,14 +3,12 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   formData: {
     firstName: "",
-    lastName: "",
     phone: "",
     email: "",
     brandName: "",
     companyName: "",
     category: "",
     franchiseType: "",
-    agreeToTerms: false,
   },
   errors: {},
 };
@@ -22,12 +20,22 @@ const brandRegisterSlice = createSlice({
     setField: (state, action) => {
       const { name, value } = action.payload;
       state.formData[name] = value;
-      state.errors[name] = ""; 
     },
     setErrors: (state, action) => {
       state.errors = action.payload;
     },
-    resetForm: () => initialState
+    resetForm: (state) => {
+      state.formData = {
+        firstName: "",
+        phone: "",
+        email: "",
+        brandName: "",
+        companyName: "",
+        category: "",
+        franchiseType: "",
+      };
+      state.errors = {};
+    },
   },
 });
 

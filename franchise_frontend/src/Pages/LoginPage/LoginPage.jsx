@@ -8,18 +8,17 @@ import {
   Button,
   Link,
   IconButton,
-  Avatar,
   Alert,
   Snackbar,
   CircularProgress,
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 import illustration from "../../assets/Images/Login_illustration.jpg";
-import FacebookIcon from "../../assets/images/FacebookIcon.png";
-import LinkedInIcon from "../../assets/images/LinkedinIcon.png";
-import InstagramIcon from "../../assets/images/InstagramIcon.png";
-import TwitterIcon from "../../assets/images/TwitterIcon.png";
-import GoogleIcon from "../../assets/images/GoogleIcon.png";
+// import FacebookIcon from "../../assets/images/FacebookIcon.png";
+// import LinkedInIcon from "../../assets/images/LinkedinIcon.png";
+// import InstagramIcon from "../../assets/images/InstagramIcon.png";
+// import TwitterIcon from "../../assets/images/TwitterIcon.png";
+// import GoogleIcon from "../../assets/images/GoogleIcon.png";
 import axios from "axios";
 
 function LoginPage() {
@@ -57,6 +56,8 @@ function LoginPage() {
     const payload = isEmail
       ? { email: formData.username.trim() }
       : {mobileNumber: "+91" + formData.username.trim() };
+
+      console.log(payload);
 
     try {
       const response = await axios.post(
@@ -127,7 +128,11 @@ function LoginPage() {
       </Grid>
 
       <Grid item xs={12} md={6} sx={{ p: 6, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <IconButton onClick={() => navigate("/")} sx={{ alignSelf: "flex-start", mb: 2, bgcolor: "#FFC107" }}>
+        <IconButton onClick={() => navigate("/")} sx={{ position: "absolute", 
+      top: 16,
+      left: 16, 
+      bgcolor: "#FFC107", 
+      '&:hover': { bgcolor: "#FFA000" }, }}>
           <ArrowBack sx={{ color: "white" }} />
         </IconButton>
 
