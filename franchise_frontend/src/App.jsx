@@ -25,6 +25,7 @@ import BrandFeedBack from './Components/BrandProfile_Component/BrandFeedback';
 import BrandComplaint from './Components/BrandProfile_Component/BrandComplaint';
 import BrandAddVedios from './Components/BrandProfile_Component/BrandAddVedios';
 import AllCategoryMainPage from './Pages/AllCategoryPage/AllCategoryMainPage';
+import BrandListingControl from './Components/BrandProfile_Component/BrandListingController';
 
 
 function App() {
@@ -62,6 +63,7 @@ function App() {
           <Route path="brandfeedback" element={<BrandFeedBack />} />
           <Route path="brandcomplaint" element={<BrandComplaint />} />
           <Route path="brandmanageprofile" element={<BrandManageProfile />} />
+          <Route path="brandlistingcontrol" element={<BrandListingControl />} />
           
 
         </Route>

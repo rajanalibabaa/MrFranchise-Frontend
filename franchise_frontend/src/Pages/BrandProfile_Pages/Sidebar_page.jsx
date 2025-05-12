@@ -92,7 +92,7 @@ const Sidebar = () => {
           <RouterLink to="/brandDashboard/brandDashboard" style={navLinkStyle}>Dashboard</RouterLink>
           <RouterLink to="/brandDashboard/brandmanageprofile" style={navLinkStyle}>Manage Profile</RouterLink>
           <RouterLink to="/brandDashboard/brandaddvedios" style={navLinkStyle}>Add Videos</RouterLink>
-          <RouterLink to="/brandDashboard/brandaddvedios" style={navLinkStyle}>Brand Listing Controller</RouterLink>
+          <RouterLink to="/brandDashboard/brandlistingcontrol" style={navLinkStyle}>Brand Listing Controller</RouterLink>
         </Box>
 
         <Box sx={{ mt: "auto", textAlign: "center" }}>
