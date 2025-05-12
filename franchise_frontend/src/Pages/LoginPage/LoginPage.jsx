@@ -186,7 +186,7 @@ function LoginPage() {
             <Link href="/registerhandleuser" color="primary">Register here</Link>
           </Typography>
 
-          <Box textAlign="center" my={4}>
+          {/* <Box textAlign="center" my={4}>
             <Typography variant="subtitle1" gutterBottom>Sign In with</Typography>
             <Box display="flex" justifyContent="center" gap={2}>
               {[FacebookIcon, LinkedInIcon, InstagramIcon, TwitterIcon, GoogleIcon].map((icon, idx) => (
@@ -195,7 +195,7 @@ function LoginPage() {
                 </IconButton>
               ))}
             </Box>
-          </Box>
+          </Box> */}
         </Box>
       </Grid>
 
