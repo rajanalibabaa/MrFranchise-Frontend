@@ -14,11 +14,6 @@ import {
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 import illustration from "../../assets/Images/Login_illustration.jpg";
-// import FacebookIcon from "../../assets/images/FacebookIcon.png";
-// import LinkedInIcon from "../../assets/images/LinkedinIcon.png";
-// import InstagramIcon from "../../assets/images/InstagramIcon.png";
-// import TwitterIcon from "../../assets/images/TwitterIcon.png";
-// import GoogleIcon from "../../assets/images/GoogleIcon.png";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setUserId } from "../../Redux/Slices/AuthSlice/authSlice";
@@ -109,15 +104,10 @@ function LoginPage() {
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
-
-      // console.log("response :",response.data.data)
-      setdata(response.data)
-      console.log("data:",data)
-      if (data.statuscode === 200 ) {
-        console.log("Login successful!");
+      if (response.status === 200) {
         dispatch(setUserId(data.data));
         const a = localStorage.setItem("token", data.AccessToken);
-        console.log("=============: ",a)
+      
         setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
         setTimeout(() => navigate("/"), 1500);
       } else {
@@ -142,7 +132,7 @@ function LoginPage() {
   return (
     <Grid container sx={{ mt: 8, px: 3, py: 5 }}>
       <Grid item xs={12} md={6} sx={{ p: 6 }}>
-        <Box component="img" src={illustration} alt="Login Illustration" sx={{ width: "100%", maxWidth: 500 }} />
+        <Box component="img" src={illustration} alt="Login Illustration" loading="lazy" sx={{ width: "100%", maxWidth: 500 }} />
       </Grid>
 
       <Grid item xs={12} md={6} sx={{ p: 6, display: "flex", flexDirection: "column", alignItems: "center" }}>

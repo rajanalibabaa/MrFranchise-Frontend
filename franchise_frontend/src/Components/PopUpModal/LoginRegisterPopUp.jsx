@@ -58,6 +58,7 @@ const LoginRegisterPopUp = () => {
           <img
             src={illustration}
             alt="Illustration"
+            loading="lazy"
             style={{
               width: "100%",
               height: isSmallScreen ? "200px" : "100%",
@@ -72,6 +73,7 @@ const LoginRegisterPopUp = () => {
             <img
               src={franchiselogo}
               alt="MRFranchise Logo"
+              loading="lazy"
               style={{
                 width: isSmallScreen ? "60%" : "80%",
                 height: "auto",

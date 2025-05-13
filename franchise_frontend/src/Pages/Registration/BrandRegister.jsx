@@ -133,6 +133,7 @@ const handleSubmit = async (e) => {
       >
         <Box
           component="img"
+          loading="lazy"
           src={brandImage}
           alt="Brand Registration Illustration"
           sx={{ maxWidth: "80%", maxHeight: "550px", objectFit: "contain" }}
