@@ -5,22 +5,22 @@ import {
 import axios from "axios";
 import img from "../../assets/images/brandLogo.jpg";
 import PersonIcon from '@mui/icons-material/Person';
-import {useSelector} from "react-redux"
+import { useSelector } from "react-redux"
 
 const ManageProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [investorData, setInvestorData] = useState({});
-const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
 
-const user_id = useSelector((state) => {
-    console.log("Redux State:", state); // Debugging Redux state
-    return state.auth?.user_id;
-});
+    const user_id = useSelector((state) => {
+        console.log("Redux State:", state); // Debugging Redux state
+        return state.auth?.user_id;
+    });
     useEffect(() => {
         const fetchData = async () => {
             if (!user_id) {
                 console.log("No user ID found");
-                
+
                 return;
             }
             try {
@@ -37,7 +37,7 @@ const user_id = useSelector((state) => {
                 setInvestorData(response.data);
             } catch (error) {
                 console.error("Error fetching investor data:", error);
-            }finally{
+            } finally {
                 setLoading(false);
             }
         };
@@ -47,7 +47,7 @@ const user_id = useSelector((state) => {
 
     if (loading) {
         return <div>Loading...</div>;
-    }   
+    }
 
     if (!investorData) {
         return <div>no data found..........</div>;
@@ -60,7 +60,7 @@ const user_id = useSelector((state) => {
             [name]: value,
         }));
     };
-    
+
 
     const fieldLabels = [
         { key: "firstName", label: "First Name" },
@@ -81,7 +81,7 @@ const user_id = useSelector((state) => {
         { key: "lookingFor", label: "Looking For" },
         { key: "ownProperty", label: "Own Property" },
     ];
-    
+
     const renderTwoColumnForm = () => {
         const rows = [];
 
@@ -90,9 +90,9 @@ const user_id = useSelector((state) => {
             const field2 = fieldLabels[i + 1];
 
             rows.push(
-                
-                <Box key={i} sx={{ display: "flex", gap: 1, mb: 1,height: "100%" }}>
-                    
+
+                <Box key={i} sx={{ display: "flex", gap: 1, mb: 1, height: "100%" }}>
+
                     <TextField
                         fullWidth
                         label={field1.label}
@@ -119,8 +119,8 @@ const user_id = useSelector((state) => {
 
         return rows;
     };
-  
-   
+
+
     return (
         <div style={{ display: "flex", marginTop: -30 }}>
             <Box
@@ -146,11 +146,11 @@ const user_id = useSelector((state) => {
                 {isEditing ? (
                     <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                         {renderTwoColumnForm()}
-                        <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 2,marginTop: -1 }}>
+                        <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 2, marginTop: -1 }}>
                             <Button variant="contained" color="primary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00" }}>
                                 Update
                             </Button>
-                            <Button  color="secondary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00", color: "#fff" }}>
+                            <Button color="secondary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00", color: "#fff" }}>
                                 Cancel
                             </Button>
                         </Box>
