@@ -29,11 +29,14 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
+
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
     setErrors((prev) => ({ ...prev, [id]: "" }));
   };
+
+// const [data, setData] = useState('');
 
   const validateForm = () => {
     const newErrors = {};
