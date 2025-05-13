@@ -252,6 +252,7 @@ const Gallery = ({ data, onChange, errors }) => {
           ) : (
             <Box
               component="img"
+              loading="lazy"
               src={selectedMedia?.preview}
               sx={{
                 width: '100%',

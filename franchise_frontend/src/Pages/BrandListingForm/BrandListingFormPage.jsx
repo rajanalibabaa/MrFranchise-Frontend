@@ -873,6 +873,7 @@ const renderPreviewContent = () => {
                             <img
                               src={previewUrl}
                               alt={docType}
+                              loading="lazy"
                               style={{
                                 width: '100%',
                                 height: '100%',
@@ -940,6 +941,7 @@ const renderPreviewContent = () => {
                   ) : (
                     <CardMedia
                       component="img"
+                      loading="lazy"
                       image={media.preview || media.url}
                       alt={`Image ${index + 1}`}
                       sx={{
@@ -1003,6 +1005,7 @@ const renderPreviewContent = () => {
             ) : (
               <Box
                 component="img"
+                loading="lazy"
                 src={selectedMedia.preview || selectedMedia.url}
                 alt="Preview"
                 sx={{

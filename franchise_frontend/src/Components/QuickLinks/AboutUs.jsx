@@ -42,6 +42,7 @@ const AboutUs = () => {
         <Grid item xs={12} md={6}>
           <Box
             component="img"
+            loading="lazy"
             src={Missionimg}
             alt="Team Collaboration"
             sx={{

@@ -211,6 +211,7 @@ const Documentation = ({ data, onChange, errors }) => {
                           <img
                             src={documentPreviews[docType]}
                             alt={docType}
+                            loading="lazy"
                             style={{
                               position: "absolute",
                               top: 0,

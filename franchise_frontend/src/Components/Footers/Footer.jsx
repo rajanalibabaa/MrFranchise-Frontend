@@ -7,7 +7,10 @@ import {
   Link,
   IconButton,
 } from "@mui/material";
-import { Facebook, Instagram, LinkedIn, Twitter } from "@mui/icons-material";
+import Facebook from "@mui/icons-material/Facebook";
+import Instagram from "@mui/icons-material/Instagram";
+import  LinkedIn from "@mui/icons-material/LinkedIn";
+import  Twitter from "@mui/icons-material/Twitter";
 import logo from "../../assets/images/brandLogo.jpg";
 function Footer() {
   return (
@@ -24,6 +27,7 @@ function Footer() {
                   component="img"
                   src={logo}
                   alt="Company Logo"
+                  loading="lazy"
                   sx={{ height: 60, mb: 2 }}
                 />
               </Link>
