@@ -41,11 +41,13 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                                         width: '100%',
                                         height: '100%',
                                         borderRadius: '50%',
+                                        loading: 'lazy'
                                     }
                                 }}>
                                     <img
                                         src={img}
                                         alt="Profile"
+                                        loading="lazy"
                                         style={{ width: "140%", height: "105%", borderRadius: "50%" }}
                                     />
                                     <PersonIcon fontSize="large" />

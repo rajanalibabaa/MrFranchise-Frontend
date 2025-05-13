@@ -56,7 +56,7 @@ const PopupModal = ({ open, onClose }) => {
         <Typography id="popup-description" variant="h5" sx={{color:"#7ad03a"}}>
           World's highest visited franchise website network.
         </Typography>
-        <img src={pop1} alt="popup visual" style={imageStyle} />
+        <img src={pop1} alt="popup visual" style={imageStyle} loading='lazy' />
       </Box>
     </Modal>
   );

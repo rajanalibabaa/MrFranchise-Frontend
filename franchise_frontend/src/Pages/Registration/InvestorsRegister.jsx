@@ -221,7 +221,7 @@ const verifyOtp = async () => {
 
   try {
     const response = await axios.post(
-      "http://localhost:5000/api/v1/otpverify/verify-otp",
+      "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/verify-otp",
       {
         identifier: type === "email" 
           ? watch("email") 

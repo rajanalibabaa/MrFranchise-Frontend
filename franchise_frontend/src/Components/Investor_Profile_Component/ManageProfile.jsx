@@ -171,6 +171,7 @@ const user_id = useSelector((state) => {
                                 <img
                                     src={img}
                                     alt="Profile"
+                                    loading='lazy'
                                     style={{ width: "140%", height: "105%", borderRadius: "50%" }}
                                 />
                                 <PersonIcon fontSize="large" />

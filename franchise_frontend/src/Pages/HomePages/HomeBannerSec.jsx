@@ -58,6 +58,7 @@ const HomeBannerSec = () => {
             World's highest visited franchise website network
           </Typography>
 
+<<<<<<< HEAD
           <Box
             sx={{
               display: "flex",
@@ -66,6 +67,50 @@ const HomeBannerSec = () => {
               gap: 3,
               mb: 4,
             }}
+=======
+    {/* login and register pop up */}
+    <LoginRegisterPopUp/>
+    {/* navbarcontent */}
+    <Navbar />
+    <Box
+      sx={{
+      
+        minHeight: 350,
+        backgroundImage: `url(${bgimg })`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        textAlign: "center",
+        color: "white",
+        px: 2,
+        py: 5,
+        position: "relative",
+      }}
+    
+    >
+      <Box sx={{ maxWidth: 900, mx: "auto" }}>
+        <Typography variant="h4" sx={{ mb: 1 }}>
+         Welcome to <Box component="span" sx={{ color: "yellow", fontWeight: "bold" }}>Our Franchise</Box> Website
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 3 }}>
+          World's highest visited franchise website network
+        </Typography>
+   
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            gap: 3,
+            mb: 4,
+          }}
+        >
+          <Button variant="contained" sx={{ bgcolor: "#b00", '&:hover': { bgcolor: "darkred" } }}>Franchise</Button>
+          <Button
+            variant="contained"
+            sx={{ bgcolor: "#b00", '&:hover': { bgcolor: "darkred" } }}
+            onClick={() => navigate("/dealer")}
+>>>>>>> b078913d309bdf01ac3cfda8e0527e2d5b294ea7
           >
             <Button
               variant="contained"
@@ -171,6 +216,37 @@ const HomeBannerSec = () => {
           </Box>
         </Box>
 
+<<<<<<< HEAD
+=======
+      <Box
+        className="ask-experts"
+        sx={{
+          position: "fixed",
+          top: "60%",
+          left: "94%",
+          transform: "translate(-50%, -50%)",
+          zIndex: 1000,
+        }}
+      >
+        <Tooltip title="Ask Our Experts" arrow placement="left">
+          <Button onClick={handleOpen} sx={{ borderRadius: "50%", p: 0 }}>
+            <img
+              src={bgimg}
+              loading="lazy"
+              alt="bot"
+              style={{ width: 70, height: 80, borderRadius: "50%" }}
+            />
+          </Button>
+        </Tooltip>
+      </Box>
+
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+>>>>>>> b078913d309bdf01ac3cfda8e0527e2d5b294ea7
         <Box
           className="ask-experts"
           sx={{
