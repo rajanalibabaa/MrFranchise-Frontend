@@ -1,17 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import bgimg from "../.././assets/Images/bgimg.jpg";
-import {
-  Box,
-  Button,
-  Typography,
-  Modal,
-  Tooltip,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+import {Box, Button, Typography, Modal, Tooltip, Select, MenuItem, FormControl, InputLabel,} from "@mui/material";
 import TopBrandVdoSec from "../../Components/HomePage_VideoSection/TopBrandVdoSec";
 import TopIndusVdoSec from "../../Components/HomePage_VideoSection/TopIndusVdoSec";
 import TopInvestVdoSec from "../../Components/HomePage_VideoSection/TopInvestVdoSec";
@@ -149,7 +139,7 @@ const HomeBannerSec = () => {
                 label="Sector"
                 sx={{ color: "white" }}
               >
-                <MenuItem value="">Location</MenuItem>
+                <MenuItem value="Location">Location</MenuItem>
                 <MenuItem value="Health">Health</MenuItem>
                 <MenuItem value="Education">Education</MenuItem>
               </Select>
@@ -163,9 +153,9 @@ const HomeBannerSec = () => {
                 label="Service/Product"
                 sx={{ color: "white" }}
               >
-                <MenuItem value="">Select Service/Product</MenuItem>
-                <MenuItem value="Consulting">Consulting</MenuItem>
-                <MenuItem value="Software">Software</MenuItem>
+                <MenuItem value="Range">5 Lakh - 10 Lakh</MenuItem>
+                <MenuItem value="Range">20 Lakh - 50 Lakh</MenuItem>
+                <MenuItem value="Range">50 Lakh - 1 Crore</MenuItem>
               </Select>
             </FormControl>
           </Box>
