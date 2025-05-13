@@ -11,9 +11,9 @@ import {
 
 import businessLogo from "../../assets/images/Business_logo.png";
 import FacebookIcon from "../../Assets/Images/FacebookIcon.png";
-import LinkedInIcon from "../../Assets/Images/LinkedinIcon.png";
-import InstagramIcon from "../../Assets/Images/InstagramIcon.png";
-import TwitterIcon from "../../Assets/Images/TwitterIcon.png";
+// import LinkedInIcon from "../../Assets/Images/LinkedinIcon.png";
+// import InstagramIcon from "../../Assets/Images/InstagramIcon.png";
+// import TwitterIcon from "../../Assets/Images/TwitterIcon.png";
 import GoogleIcon from "../../Assets/Images/GoogleIcon.png";
 
 function RegisterHandleUser() {
@@ -24,9 +24,8 @@ function RegisterHandleUser() {
   const handleNavigation = (path) => {
     navigate(path);
   };
-
-  const openSocialMedia = (url) => {
-    window.open(url, "_blank");
+  const handleSocialLogin = (provider) => {
+    window.location.href = `https://franchise-backend-wgp6.onrender.com/api/v1/auth/${provider}`;
   };
 
   return (
@@ -42,7 +41,6 @@ function RegisterHandleUser() {
         borderRadius: 2,
       }}
     >
-      {/* Right Section - Logo */}
       <Grid
         item
         xs={12}
@@ -60,6 +58,7 @@ function RegisterHandleUser() {
           src={businessLogo}
           alt="Business Logo"
           sx={{
+            p: 50,
             maxWidth: "100%",
             height: "auto",
             borderRadius: 2,
@@ -68,7 +67,6 @@ function RegisterHandleUser() {
         />
       </Grid>
 
-      {/* Left Section - Buttons and Links */}
       <Grid
         item
         xs={12}
@@ -79,6 +77,8 @@ function RegisterHandleUser() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
+          height:"100%",
+          width: "100%",
         }}
       >
         <Typography
@@ -144,37 +144,108 @@ function RegisterHandleUser() {
 
         {/* Social Media Section */}
         <Box sx={{ mt: 4, textAlign: "center" }}>
-          <Typography variant="h6" sx={{ mb: 1, fontSize: isMobile ? 14 : 16 }}>
-            Follow us on:
-          </Typography>
-          <Grid container spacing={2} justifyContent="center">
-            {[
-              { icon: GoogleIcon, url: "https://accounts.google.com/" },
-              { icon: FacebookIcon, url: "https://www.facebook.com/login" },
-              { icon: InstagramIcon, url: "https://www.instagram.com/accounts/login/" },
-              { icon: LinkedInIcon, url: "https://www.linkedin.com/login" },
-              { icon: TwitterIcon, url: "https://twitter.com/login" },
-            ].map((item, index) => (
-              <Grid item key={index}>
-                <Box
-                  component="img"
-                  src={item.icon}
-                  alt="social icon"
-                  onClick={() => openSocialMedia(item.url)}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    cursor: "pointer",
-                    transition: "transform 0.3s ease",
-                    "&:hover": {
-                      transform: "scale(1.1)",
-                    },
-                  }}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
+  <Typography variant="h6" sx={{ mb: 1, fontSize: isMobile ? 14 : 16 }}>
+    Follow us on:
+  </Typography>
+  <Grid container spacing={2} justifyContent="center">
+    {/* Google Icon */}
+    <Grid item>
+      <Box
+        component="img"
+        src={GoogleIcon}
+        alt="Google"
+        onClick={() => handleSocialLogin("google")}
+        sx={{
+          width: 32,
+          height: 32,
+          cursor: "pointer",
+          transition: "transform 0.3s ease",
+          "&:hover": {
+            transform: "scale(1.1)",
+          },
+        }}
+      />
+    </Grid>
+
+    {/* Facebook Icon */}
+    <Grid item>
+      <Box
+        component="img"
+        src={FacebookIcon}
+        alt="Facebook"
+        onClick={() => handleSocialLogin("facebook")}
+        sx={{
+          width: 32,
+          height: 32,
+          cursor: "pointer",
+          transition: "transform 0.3s ease",
+          "&:hover": {
+            transform: "scale(1.1)",
+          },
+        }}
+      />
+    </Grid>
+
+    {/* Instagram Icon */}
+    {/* <Grid item>
+      <Box
+        component="img"
+        src={InstagramIcon}
+        alt="Instagram"
+        onClick={() =>
+          openSocialMedia("https://www.instagram.com/accounts/login/")
+        }
+        sx={{
+          width: 32,
+          height: 32,
+          cursor: "pointer",
+          transition: "transform 0.3s ease",
+          "&:hover": {
+            transform: "scale(1.1)",
+          },
+        }}
+      />
+    </Grid> */}
+
+    {/* LinkedIn Icon */}
+    {/* <Grid item>
+      <Box
+        component="img"
+        src={LinkedInIcon}
+        alt="LinkedIn"
+        onClick={() => openSocialMedia("https://www.linkedin.com/login")}
+        sx={{
+          width: 32,
+          height: 32,
+          cursor: "pointer",
+          transition: "transform 0.3s ease",
+          "&:hover": {
+            transform: "scale(1.1)",
+          },
+        }}
+      />
+    </Grid> */}
+
+    {/* Twitter Icon */}
+    {/* <Grid item>
+      <Box
+        component="img"
+        src={TwitterIcon}
+        alt="Twitter"
+        onClick={() => openSocialMedia("https://twitter.com/login")}
+        sx={{
+          width: 32,
+          height: 32,
+          cursor: "pointer",
+          transition: "transform 0.3s ease",
+          "&:hover": {
+            transform: "scale(1.1)",
+          },
+        }}
+      />
+    </Grid> */}
+  </Grid>
+</Box>
       </Grid>
     </Box>
   );
