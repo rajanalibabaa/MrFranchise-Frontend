@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import {
   Grid,
   Box,
@@ -20,6 +20,10 @@ import illustration from "../../assets/Images/Login_illustration.jpg";
 // import TwitterIcon from "../../assets/images/TwitterIcon.png";
 // import GoogleIcon from "../../assets/images/GoogleIcon.png";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setUserId } from "../../Redux/Slices/AuthSlice/authSlice";
+
+
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -36,7 +40,7 @@ function LoginPage() {
     setErrors((prev) => ({ ...prev, [id]: "" }));
   };
 
-// const [data, setData] = useState('');
+  const dispatch = useDispatch();
 
   const validateForm = () => {
     const newErrors = {};
@@ -72,6 +76,8 @@ function LoginPage() {
       if (response.data.success) {
         setSnackbar({ open: true, message: "OTP sent successfully!", severity: "success" });
         setIsOtpSent(true);
+        dispatch(setUserId(response.data.data._id));
+        localStorage.setItem("token", response.data.token);
       } else {
         throw new Error(response.data.message || "Failed to send OTP");
       }
@@ -81,6 +87,9 @@ function LoginPage() {
       setIsLoading(false);
     }
   };
+
+
+  const [data, setdata] = useState("")
 
   const handleVerifyOtp = async () => {
     if (!formData.otp) {
@@ -102,8 +111,14 @@ function LoginPage() {
         { headers: { "Content-Type": "application/json" } }
       );
 
-      console.log("response :",response)
-      if (response.data.success) {
+      // console.log("response :",response.data.data)
+      setdata(response.data)
+      console.log("data:",data)
+      if (data.statuscode === 200 ) {
+        console.log("Login successful!");
+        dispatch(setUserId(data.data));
+        const a = localStorage.setItem("token", data.AccessToken);
+        console.log("=============: ",a)
         setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
         setTimeout(() => navigate("/"), 1500);
       } else {

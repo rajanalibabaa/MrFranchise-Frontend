@@ -13,6 +13,7 @@ import {
   Box,
   InputLabel,
   FormControl,
+  InputAdornment
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -78,13 +79,13 @@ const handleSubmit = async (e) => {
     const payload = {
       formData: {
         firstName: formData.firstName.trim(),
-        phone: formData.phone.trim(),
+        phone: `${formData.countryCode}${formData.phone}`.trim(),
         email: formData.email.trim(),
         brandName: formData.brandName.trim(),
         companyName: formData.companyName.trim(),
         category: formData.category.trim(),
         franchiseType: formData.franchiseType.trim(),
-      },
+      }
     };
 
     console.log("Payload being sent:", payload); 
@@ -169,21 +170,41 @@ const handleSubmit = async (e) => {
 
               <Grid xs={12} sm={6} sx={{width: "48%"}}>
                 <TextField
-                  fullWidth
-                  name="phone"
-                  label="Phone Number"
-                  value={formData.phone || ""}
-                  onChange={handleChange}
-                  error={!!errors.phone}
-                  helperText={errors.phone}
-                  inputProps={{
-                    maxLength: 10,
-                    inputMode: "numeric",
-                  }}
-                  onInput={(e) => {
-                    e.target.value = e.target.value.replace(/\D/g, "");
-                  }}
-                />
+    fullWidth
+    name="phone"
+    label="Phone Number"
+    value={formData.phone || ""}
+    onChange={handleChange}
+    error={!!errors.phone}
+    helperText={errors.phone}
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <FormControl variant="standard" sx={{ minWidth: 70 }}>
+            <Select
+              name="countryCode"
+              value={formData.countryCode || "+91"}
+              onChange={handleChange}
+              disableUnderline
+              sx={{ fontSize: '0.9rem' }}
+            >
+              <MenuItem value="+91">+91</MenuItem>
+              <MenuItem value="+1">+1</MenuItem>
+              <MenuItem value="+44">+44</MenuItem>
+              <MenuItem value="+971">+971</MenuItem>
+            </Select> 
+          </FormControl>
+        </InputAdornment>
+      ),
+    }}
+    inputProps={{
+      maxLength: 10,
+      inputMode: "numeric",
+    }}
+    onInput={(e) => {
+      e.target.value = e.target.value.replace(/\D/g, "");
+    }}
+  />
               </Grid>
 
               <Grid  xs={12} sm={6} sx={{width: "48%"}}>

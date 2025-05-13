@@ -5,17 +5,28 @@ import {
 import axios from "axios";
 import img from "../../assets/images/brandLogo.jpg";
 import PersonIcon from '@mui/icons-material/Person';
+import {useSelector} from "react-redux"
 
 const ManageProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [investorData, setInvestorData] = useState({});
-    const id = "680606dacf204b491b61d764";
+const [loading, setLoading] = useState(true);
 
+const user_id = useSelector((state) => {
+    console.log("Redux State:", state); // Debugging Redux state
+    return state.auth?.user_id;
+});
     useEffect(() => {
         const fetchData = async () => {
+            if (!user_id) {
+                console.log("No user ID found");
+                
+                return;
+            }
             try {
+                setLoading(true);
                 const response = await axios.get(
-                    `https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor/${id}`,
+                    `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${user_id}`,
                     {
                         headers: {
                             "Content-Type": "application/json",
@@ -26,11 +37,21 @@ const ManageProfile = () => {
                 setInvestorData(response.data);
             } catch (error) {
                 console.error("Error fetching investor data:", error);
+            }finally{
+                setLoading(false);
             }
         };
 
         fetchData();
-    }, [id]);
+    }, [user_id]);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }   
+
+    if (!investorData) {
+        return <div>no data found..........</div>;
+    }
 
     const handleManageProfileChange = (e) => {
         const { name, value } = e.target;

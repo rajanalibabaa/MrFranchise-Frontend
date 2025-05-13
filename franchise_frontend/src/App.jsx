@@ -1,10 +1,8 @@
-
-import React from 'react';
+import React from 'react'
 import { Route, Routes } from "react-router-dom"
 import InvestorRegister from './Pages/Registration/InvestorsRegister';
 import BrandRegister from './Pages/Registration/BrandRegister';
 import LoginPage from './Pages/LoginPage/LoginPage';
-import BrandViewPage from "./Pages/BrandViewPage/BrandViewPage";
 
 import './App.css';
 import HomeBannerSec from './Pages/HomePages/HomeBannerSec';
@@ -13,12 +11,12 @@ import BrandListingFormPage from './Pages/BrandListingForm/BrandListingFormPage'
 import SideViewContent from './Components/SideViewContentMenu/SideHoverMenu';
 import ProfilePage from './Pages/Profile_Pages/profilePage';
 import IconBreadcrumbs from './Pages/Profile_Pages/IconBreadcrumbs';
-import ManageProfile from './Components/Profile_Component/ManageProfile';
-import PostRequirement from './Components/Profile_Component/PostRequirement';
-import ResponseManager from './Components/Profile_Component/ResponseManager';
-import DashBoard from './Components/Profile_Component/DashBoard';
-import FeedBack from './Components/Profile_Component/FeedBack';
-import Complaint from './Components/Profile_Component/Complaint';
+import ManageProfile from "../src/Components/Investor_Profile_Component/ManageProfile.jsx";
+import PostRequirement from '../src/Components/Investor_Profile_Component/PostRequirement.jsx';
+import ResponseManager from '../src/Components/Investor_Profile_Component/ResponseManager.jsx';
+import DashBoard from '../src/Components/Investor_Profile_Component/DashBoard.jsx';
+import FeedBack from '../src/Components/Investor_Profile_Component/FeedBack.jsx';
+import Complaint from '../src/Components/Investor_Profile_Component/Complaint.jsx';
 import BrandDashBoard from './Components/BrandProfile_Component/BrandDashBoard';
 import Sidebar from './Pages/BrandProfile_Pages/Sidebar_page';
 import BrandManageProfile from './Components/BrandProfile_Component/BrandManageProfile';
@@ -35,13 +33,12 @@ import BrandListingController from './Components/BrandProfile_Component/BrandLis
 
 
 function App() {
-
   return (
   
     <>
       <Routes>
   <Route path="/" element={<HomeBannerSec />} />
-  <Route path="/brandViewPage" element={<BrandViewPage />} />
+  {/* <Route path="/brandViewPage" element={<BrandViewPage />} /> */}
   <Route path="/investor-register" element={<InvestorRegister />} />
   <Route path="/brand-register" element={<BrandRegister />} />
   <Route path="/loginpage" element={<LoginPage />} />
@@ -78,8 +75,7 @@ function App() {
   <Route path="/termscondition" element={<TermsCondition />} />
 </Routes>
     </>
-
-  )
+  );
 }
 
 export default App;
