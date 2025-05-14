@@ -90,7 +90,7 @@ const BrandRegister = () => {
   
       try {
         const response = await axios.post(
-          "https://franchise-backend-wgp6.onrender.com/createBrandRegister",
+          "https://franchise-backend-wgp6.onrender.com/api/v1/brand/register/creatBrandRegister",
           payload,
           {
             headers: {

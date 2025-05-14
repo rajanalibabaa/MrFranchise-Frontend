@@ -49,7 +49,7 @@ const HomeBannerSec = () => {
 
   return (
     <>
- <PopupModal open={isPopupOpen} onClose={handlePopupClose} />
+ {/* <PopupModal open={isPopupOpen} onClose={handlePopupClose} /> */}
 
     {/* login and register pop up */}
     <LoginRegisterPopUp/>

@@ -24,6 +24,7 @@ import {
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "../../Pages/BrandListingForm/BrandCategories";
+import { toggleLogin } from "../../Redux/Slices/navbarSlice";
 
 const countries = ["India", "USA", "UK", "Canada", "Australia"];
 const phoneCodes = {
@@ -177,6 +178,7 @@ const InvestorRegister = () => {
       if (response.status === 200) {
         // Clear saved form data on successful submission
         localStorage.removeItem("investorFormData");
+        dispatch(toggleLogin(true));
         navigate("/loginpage");
       } else {
         console.error("Unexpected response status:", response.status);
