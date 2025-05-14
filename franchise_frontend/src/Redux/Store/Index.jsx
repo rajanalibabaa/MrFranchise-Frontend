@@ -6,7 +6,7 @@ import brandRegister from "../Slices/BrandRegisterSlice"
   reducer: {
     navbar: navbarReduces,
     brandRegister: brandRegister,
-    loginUser:authSlice
+    auth:authSlice
   },
 });
 export default store;

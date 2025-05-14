@@ -30,12 +30,18 @@ import Help from './Components/QuickLinks/Help.jsx';
 import ContactUs from './Components/QuickLinks/ContactUs.jsx';
 import AboutUs from './Components/QuickLinks/AboutUs.jsx';
 import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
+import { Provider } from 'react-redux';
+import store from "./Redux/Store/Index.jsx"
 
 
 function App() {
   return (
   
     <>
+
+    <Provider store={store}>
+
+    </Provider>
       <Routes>
   <Route path="/" element={<HomeBannerSec />} />
   {/* <Route path="/brandViewPage" element={<BrandViewPage />} /> */}
