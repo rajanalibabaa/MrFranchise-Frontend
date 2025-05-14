@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 import React from 'react';
 import { Route, Routes } from "react-router-dom"
@@ -26,10 +27,15 @@ import BrandComplaint from './Components/BrandProfile_Component/BrandComplaint';
 import BrandAddVedios from './Components/BrandProfile_Component/BrandAddVedios';
 import AllCategoryMainPage from './Pages/AllCategoryPage/AllCategoryMainPage';
 
+=======
+import react  from 'react'
+import './App.css'
+>>>>>>> caf0e5a4f3f3020d891d1d3b4647e0c8ec95ecb1
 
 function App() {
 
   return (
+<<<<<<< HEAD
 
     <>
       <Routes>
@@ -73,3 +79,12 @@ function App() {
 }
 
 export default App;
+=======
+    <>
+      <h1>Franchise</h1>
+    </>
+  )
+}
+
+export default App
+>>>>>>> caf0e5a4f3f3020d891d1d3b4647e0c8ec95ecb1
