@@ -59,15 +59,14 @@ function LoginPage() {
   const handleOtpRequest = async () => {
     if (!validateForm()) return;
     setIsLoading(true);
-   
-
-    try {
-       const isEmail = formData.username.includes("@");
+    const isEmail = formData.username.includes("@");
     const payload = isEmail
       ? { email: formData.username.trim() }
       : {mobileNumber: "+91" + formData.username.trim() };
+
       console.log(payload);
 
+    try {
       const response = await axios.post(
         "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
         payload,
@@ -83,11 +82,8 @@ function LoginPage() {
         throw new Error(response.data.message || "Failed to send OTP");
       }
     } catch (err) {
-setSnackbar({
-        open: true,
-        message: err.response?.data?.message || err.message || "Failed to send OTP",
-        severity: "error"
-      });    } finally {
+      setSnackbar({ open: true, message: err.message, severity: "error" });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -115,19 +111,15 @@ setSnackbar({
       );
       if (response.status === 200) {
         console.log(response.data);
-
-        const userData = {
-          ...response.data,
-          _id: response.data.investorUUID, // Add _id for consistency
-          investorUUID: response.data.investorUUID,
-          brandUserUUID: response.data.brandUserUUID
-        };
+        
        dispatch(setCredentials({
   user_id: response.data.investorUUID,  // or just response.data.investorUUID if not nested
   token: response.data.AccessToken,    // or response.data.AccessToken if not nested
-  user_data: userData 
+  user_data: {
+    investorUUID: response.data.investorUUID,
+    brandUserUUID: response.data.brandUserUUID
+  }
 }))
-     console.log(response.data);
       
         setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
         setTimeout(() => navigate("/investerdashboard"), 1500);
@@ -135,11 +127,8 @@ setSnackbar({
         throw new Error(response.data.message || "Invalid OTP");
       }
     } catch (err) {
-setSnackbar({
-        open: true,
-        message: err.response?.data?.message || err.message || "OTP verification failed",
-        severity: "error"
-      });    } finally {
+      setSnackbar({ open: true, message: err.message, severity: "error" });
+    } finally {
       setIsLoading(false);
     }
   };

@@ -32,6 +32,7 @@ import AboutUs from './Components/QuickLinks/AboutUs.jsx';
 import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
 import { Provider } from 'react-redux';
 import store from "./Redux/Store/Index.jsx"
+import BrandDocumentsViewer from './Pages/AllCategoryPage/AllCategroyView.jsx';
 
 
 function App() {
@@ -51,7 +52,7 @@ function App() {
   <Route path="/registerhandleuser" element={<RegisterHandleUser />} />
   <Route path="/brandlistingform" element={<BrandListingFormPage />} />
   <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
-  <Route path="/allcategories" element={<AllCategoryMainPage />} />
+  <Route path="/allcategories" element={<BrandDocumentsViewer />} />
 
   <Route path="/investerdashboard" element={<ProfilePage />}>
     <Route index element={<DashBoard />} />

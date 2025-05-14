@@ -63,7 +63,10 @@ const BrandLogo = styled('img')({
   '&:hover': {
     transform: 'scale(1.05)',
   },
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6a815791f24618bd1bad113d23503de2b49c4853
 });
 
 const TabButton = styled(Button)(({ active }) => ({

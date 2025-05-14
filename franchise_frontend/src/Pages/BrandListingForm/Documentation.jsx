@@ -62,11 +62,11 @@ const Documentation = ({ data, onChange, errors }) => {
   }, [documentPreviews]);
 
   // Calculate responsive grid columns
-  const getGridColumns = () => {
-    if (isMobile) return 12;
-    if (isTablet) return 6;
-    return 4;
-  };
+  // const getGridColumns = () => {
+  //   if (isMobile) return 12;
+  //   if (isTablet) return 6;
+  //   return 4;
+  // };
 
   return (
     <Grid container spacing={3} sx={{ p: 2 }}>

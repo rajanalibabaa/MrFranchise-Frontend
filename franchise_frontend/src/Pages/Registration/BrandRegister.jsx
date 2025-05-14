@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setField, setErrors, resetForm } from "../../Redux/slices/brandRegisterSlice";
+import { setField, setErrors, resetForm } from "../../Redux/Slices/brandRegisterSlice";
 import brandImage from "../../assets/Images/BrandRegister.jpg";
 import { categories } from "../BrandListingForm/BrandCategories";
 import axios from "axios";

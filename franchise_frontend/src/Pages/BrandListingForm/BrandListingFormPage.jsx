@@ -34,7 +34,8 @@ import {
   Card,
   CardActions,
   IconButton,
-  Grid
+  Grid,
+  formControlClasses
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 
@@ -113,6 +114,7 @@ const initialFormData = {
   },
   documentation: {
     brandLogo: null,
+
     businessRegistration: null,
     gstCertificate: null,
     franchiseAgreement: null,
@@ -126,6 +128,7 @@ const initialFormData = {
     mediaFiles: [],
   },
 };
+
 
 // Key for localStorage
 const FORM_DATA_KEY = "brandListingFormData";
@@ -145,6 +148,7 @@ const BrandListingFormPage = () => {
     documentation: {},
     gallery: {},
   });
+  console.log("Initial Form Data:", formData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeStep, setActiveStep] = useState(() => {
     const savedStep = localStorage.getItem(FORM_STEP_KEY);
@@ -291,90 +295,129 @@ const BrandListingFormPage = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  const handleSubmit = useCallback(
-    async (e) => {
-      e.preventDefault();
 
-      const isValid = validateStep(activeStep);
 
-      if (!isValid) {
+
+  const handleSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    
+    const isValid = validateStep(activeStep);
+    
+    if (!isValid) {
+      setSnackbar({
+        open: true,
+        message: "Please complete all required fields before submitting",
+        severity: "error",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+       
+
+      const submissionData = new FormData();
+    
+     
+
+     // Append gallery media files
+      // formData.gallery.mediaFiles.forEach((file, index) => {
+      //   submissionData.append('Gallery', file); // Note: Matches backend field name
+      // });
+
+      
+      // Append JSON data as strings
+      submissionData.append("brandDetails", JSON.stringify(formData.brandDetails));
+      submissionData.append("expansionPlans", JSON.stringify(formData.expansionPlans));
+      submissionData.append("FranchiseModal", JSON.stringify(formData.franchiseModal));
+      submissionData.append("brandLogo", formData.documentation.brandLogo );
+      submissionData.append("businessRegistration", formData.documentation.businessRegistration );
+      submissionData.append("gstCertificate", formData.documentation.gstCertificate );
+      submissionData.append("franchiseAgreement", formData.documentation.franchiseAgreement );
+      submissionData.append("menuCatalog", formData.documentation.menuCatalog );
+      submissionData.append("interiorPhotos", formData.documentation.interiorPhotos );
+      submissionData.append("fssaiLicense", formData.documentation.fssaiLicense );
+      submissionData.append("panCard", formData.documentation.panCard );
+      submissionData.append("aadhaarCard", formData.documentation.aadhaarCard );
+      submissionData.append("panCard", formData.documentation.panCard );
+      // submissionData.append("gallery", formData.gallery );
+
+       console.log("formData.gallery.mediaFiles:",formData.gallery.mediaFiles)
+    
+if (Array.isArray(formData.gallery.mediaFiles)) {
+  formData.gallery.mediaFiles.forEach((item) => {
+    if (item?.file) {
+      submissionData.append("gallery", item.file); 
+    }
+  });
+}
+
+// if (Array.isArray(formData.gallery.mediaFiles)) {
+//   formData.gallery.mediaFiles.forEach((file) => {
+//     submissionData.append("gallery", file); // ✅ No square brackets
+//   });
+// }
+
+      
+console.log("Gallery is array of Files:", formData.gallery.mediaFiles instanceof Array);
+console.log("First gallery file type:", formData.gallery.mediaFiles?.[0]?.type);
+
+      const response = await axios.post(
+        'https://franchise-backend-wgp6.onrender.com/api/v1/brand/createBrandListing',
+        
+        submissionData,
+        
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            // 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          },
+          timeout: 15000
+        }
+      );
+
+      console.log(response.data)
+      if (response.data.success) {
         setSnackbar({
           open: true,
-          message: "Please complete all required fields before submitting",
-          severity: "error",
+          message: "Form submitted successfully!",
+          severity: "success",
         });
-        return;
+        localStorage.removeItem(FORM_DATA_KEY);
+        localStorage.removeItem(FORM_STEP_KEY);
+        setFormData(initialFormData);
+        setActiveStep(0);
+        setHasUnsavedChanges(false);
+        // setTimeout(() => navigate("/success"), 1500);
+      } else {
+        throw new Error(response.data.message || "Submission failed");
+      }
+    } catch (error) {
+      let errorMessage = "Failed to submit form";
+      
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          errorMessage = error.response.data?.message || 
+                       `Server error: ${error.response.status}`;
+        } else if (error.request) {
+          errorMessage = "No response from server";
+        } else {
+          errorMessage = "Failed to setup request";
+        }
+      } else {
+        errorMessage = error.message;
       }
 
-      setIsSubmitting(true);
-
-      try {
-        const submissionData = {
-          brand: formData.brandDetails,
-          expansion: formData.expansionPlans,
-          franchise: formData.franchiseModal,
-          documents: formData.documentation,
-          gallery: formData.gallery,
-        };
-
-        console.log("Submission data:", submissionData);
-
-        const response = await axios.post(
-          "https://api.yourbackend.com/brand-listings",
-          submissionData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-            },
-            timeout: 15000,
-          }
-        );
-
-        if (response.data.success) {
-          setSnackbar({
-            open: true,
-            message: "Form submitted successfully!",
-            severity: "success",
-          });
-          localStorage.removeItem(FORM_DATA_KEY);
-          localStorage.removeItem(FORM_STEP_KEY);
-          setFormData(initialFormData);
-          setActiveStep(0);
-          setHasUnsavedChanges(false);
-          setTimeout(() => navigate("/success"), 1500);
-        } else {
-          throw new Error(response.data.message || "Submission failed");
-        }
-      } catch (error) {
-        let errorMessage = "Failed to submit form";
-
-        if (axios.isAxiosError(error)) {
-          if (error.response) {
-            errorMessage =
-              error.response.data?.message ||
-              `Server error: ${error.response.status}`;
-          } else if (error.request) {
-            errorMessage = "No response from server";
-          } else {
-            errorMessage = "Failed to setup request";
-          }
-        } else {
-          errorMessage = error.message;
-        }
-
-        setSnackbar({
-          open: true,
-          message: errorMessage,
-          severity: "error",
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [activeStep, formData, navigate, validateStep]
-  );
-
+      setSnackbar({
+        open: true,
+        message: errorMessage,
+        severity: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [activeStep, formData, navigate, validateStep]);
   const handleNavigationAttempt = useCallback(() => {
     if (hasUnsavedChanges) {
       setShowExitConfirm(true);
@@ -698,7 +741,7 @@ const renderPreviewContent = () => {
               <Typography variant="subtitle2">Indian Districts:</Typography>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                 {expansionPlans.selectedIndianDistricts.map((district, index) => (
-                  <Chip key={`indian-district-${index}`} label={district} size="small" />
+                  <Chip key={`indian-district-${index}`} label={district.district ||"unknown"} size="small" />
                 ))}
               </Box>
             </Box>
@@ -873,7 +916,6 @@ const renderPreviewContent = () => {
                             <img
                               src={previewUrl}
                               alt={docType}
-                              loading="lazy"
                               style={{
                                 width: '100%',
                                 height: '100%',
@@ -941,7 +983,6 @@ const renderPreviewContent = () => {
                   ) : (
                     <CardMedia
                       component="img"
-                      loading="lazy"
                       image={media.preview || media.url}
                       alt={`Image ${index + 1}`}
                       sx={{
@@ -1005,7 +1046,6 @@ const renderPreviewContent = () => {
             ) : (
               <Box
                 component="img"
-                loading="lazy"
                 src={selectedMedia.preview || selectedMedia.url}
                 alt="Preview"
                 sx={{
