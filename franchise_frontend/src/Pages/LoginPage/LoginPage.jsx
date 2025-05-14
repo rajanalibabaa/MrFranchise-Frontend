@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import {
   Grid,
   Box,
@@ -8,19 +8,22 @@ import {
   Button,
   Link,
   IconButton,
-  Avatar,
   Alert,
   Snackbar,
   CircularProgress,
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 import illustration from "../../assets/Images/Login_illustration.jpg";
-import FacebookIcon from "../../assets/images/FacebookIcon.png";
-import LinkedInIcon from "../../assets/images/LinkedinIcon.png";
-import InstagramIcon from "../../assets/images/InstagramIcon.png";
-import TwitterIcon from "../../assets/images/TwitterIcon.png";
-import GoogleIcon from "../../assets/images/GoogleIcon.png";
+// import FacebookIcon from "../../assets/images/FacebookIcon.png";
+// import LinkedInIcon from "../../assets/images/LinkedinIcon.png";
+// import InstagramIcon from "../../assets/images/InstagramIcon.png";
+// import TwitterIcon from "../../assets/images/TwitterIcon.png";
+// import GoogleIcon from "../../assets/images/GoogleIcon.png";
 import axios from "axios";
+import { useDispatch, useSelector} from "react-redux";
+import { setUUIDandTOKEN } from "../../Redux/Slices/AuthSlice/authSlice";
+
+// useSelector
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -29,6 +32,7 @@ function LoginPage() {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+ 
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -36,6 +40,8 @@ function LoginPage() {
     setErrors((prev) => ({ ...prev, [id]: "" }));
   };
 
+  const dispatch = useDispatch();
+const investorUUID = useSelector((state) => state.auth.investorUUID);
   const validateForm = () => {
     const newErrors = {};
     if (!formData.username) {
@@ -58,6 +64,8 @@ function LoginPage() {
       ? { email: formData.username.trim() }
       : {mobileNumber: "+91" + formData.username.trim() };
 
+      console.log(payload);
+
     try {
       const response = await axios.post(
         "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
@@ -68,6 +76,8 @@ function LoginPage() {
       if (response.data.success) {
         setSnackbar({ open: true, message: "OTP sent successfully!", severity: "success" });
         setIsOtpSent(true);
+        // dispatch(setUserId(response.data.data));
+        localStorage.setItem("token", response.data.token);
       } else {
         throw new Error(response.data.message || "Failed to send OTP");
       }
@@ -77,6 +87,9 @@ function LoginPage() {
       setIsLoading(false);
     }
   };
+
+
+  const [userdata, setUserdata] = useState("")
 
   const handleVerifyOtp = async () => {
     if (!formData.otp) {
@@ -93,15 +106,24 @@ function LoginPage() {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        "http://localhost:5000/api/v1/login/",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
 
-      console.log()
-      if (response.data.success) {
+      // console.log("response :",response.data.data)
+      setUserdata(response.data)
+      console.log("userdata:",userdata)
+      if (userdata.statuscode === 200 ) {
+        console.log("Login successful!");
+        dispatch(setUUIDandTOKEN({
+          investorUUID: userdata.data.investorUUID,
+          brandUUID: userdata.data.brandUUID,
+          token: userdata.AccessToken,
+          user_data: userdata.data,
+        }));
         setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
-        setTimeout(() => navigate("/"), 1500);
+        // setTimeout(() => navigate("/"), 1500);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
       }
@@ -128,7 +150,11 @@ function LoginPage() {
       </Grid>
 
       <Grid item xs={12} md={6} sx={{ p: 6, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <IconButton onClick={() => navigate("/")} sx={{ alignSelf: "flex-start", mb: 2, bgcolor: "#FFC107" }}>
+        <IconButton onClick={() => navigate("/")} sx={{ position: "absolute", 
+      top: 16,
+      left: 16, 
+      bgcolor: "#FFC107", 
+      '&:hover': { bgcolor: "#FFA000" }, }}>
           <ArrowBack sx={{ color: "white" }} />
         </IconButton>
 
@@ -187,7 +213,7 @@ function LoginPage() {
             <Link href="/registerhandleuser" color="primary">Register here</Link>
           </Typography>
 
-          <Box textAlign="center" my={4}>
+          {/* <Box textAlign="center" my={4}>
             <Typography variant="subtitle1" gutterBottom>Sign In with</Typography>
             <Box display="flex" justifyContent="center" gap={2}>
               {[FacebookIcon, LinkedInIcon, InstagramIcon, TwitterIcon, GoogleIcon].map((icon, idx) => (
@@ -196,13 +222,14 @@ function LoginPage() {
                 </IconButton>
               ))}
             </Box>
-          </Box>
+          </Box> */}
         </Box>
       </Grid>
 
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>{snackbar.message}</Alert>
       </Snackbar>
+       <p>Investor ID: {investorUUID}</p>
     </Grid>
   );
 }
