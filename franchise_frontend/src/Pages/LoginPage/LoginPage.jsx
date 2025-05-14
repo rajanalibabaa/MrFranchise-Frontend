@@ -14,11 +14,16 @@ import {
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 import illustration from "../../assets/Images/Login_illustration.jpg";
+// import FacebookIcon from "../../assets/images/FacebookIcon.png";
+// import LinkedInIcon from "../../assets/images/LinkedinIcon.png";
+// import InstagramIcon from "../../assets/images/InstagramIcon.png";
+// import TwitterIcon from "../../assets/images/TwitterIcon.png";
+// import GoogleIcon from "../../assets/images/GoogleIcon.png";
 import axios from "axios";
-import { useDispatch } from "react-redux";
-import { setUserId } from "../../Redux/Slices/AuthSlice/authSlice";
+import { useDispatch, useSelector} from "react-redux";
+import { setUUIDandTOKEN } from "../../Redux/Slices/AuthSlice/authSlice";
 
-
+// useSelector
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -27,7 +32,7 @@ function LoginPage() {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
-
+ 
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -36,7 +41,7 @@ function LoginPage() {
   };
 
   const dispatch = useDispatch();
-
+const investorUUID = useSelector((state) => state.auth.investorUUID);
   const validateForm = () => {
     const newErrors = {};
     if (!formData.username) {
@@ -71,7 +76,7 @@ function LoginPage() {
       if (response.data.success) {
         setSnackbar({ open: true, message: "OTP sent successfully!", severity: "success" });
         setIsOtpSent(true);
-        dispatch(setUserId(response.data.data._id));
+        // dispatch(setUserId(response.data.data));
         localStorage.setItem("token", response.data.token);
       } else {
         throw new Error(response.data.message || "Failed to send OTP");
@@ -84,7 +89,7 @@ function LoginPage() {
   };
 
 
-  const [data, setdata] = useState("")
+  const [userdata, setUserdata] = useState("")
 
   const handleVerifyOtp = async () => {
     if (!formData.otp) {
@@ -105,12 +110,20 @@ function LoginPage() {
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
-      if (response.status === 200) {
-        dispatch(setUserId(data.data));
-        const a = localStorage.setItem("token", data.AccessToken);
-      
+
+      // console.log("response :",response.data.data)
+      setUserdata(response.data)
+      console.log("userdata:",userdata)
+      if (userdata.statuscode === 200 ) {
+        console.log("Login successful!");
+        dispatch(setUUIDandTOKEN({
+          investorUUID: userdata.data.investorUUID,
+          brandUUID: userdata.data.brandUUID,
+          token: userdata.AccessToken,
+          user_data: userdata.data,
+        }));
         setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
-        setTimeout(() => navigate("/"), 1500);
+        // setTimeout(() => navigate("/"), 1500);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
       }
@@ -133,7 +146,7 @@ function LoginPage() {
   return (
     <Grid container sx={{ mt: 8, px: 3, py: 5 }}>
       <Grid item xs={12} md={6} sx={{ p: 6 }}>
-        <Box component="img" src={illustration} alt="Login Illustration" loading="lazy" sx={{ width: "100%", maxWidth: 500 }} />
+        <Box component="img" src={illustration} alt="Login Illustration" sx={{ width: "100%", maxWidth: 500 }} />
       </Grid>
 
       <Grid item xs={12} md={6} sx={{ p: 6, display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -216,6 +229,7 @@ function LoginPage() {
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>{snackbar.message}</Alert>
       </Snackbar>
+       <p>Investor ID: {investorUUID}</p>
     </Grid>
   );
 }

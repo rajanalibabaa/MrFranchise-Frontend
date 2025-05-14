@@ -47,7 +47,7 @@ function App() {
   <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
   <Route path="/allcategories" element={<AllCategoryMainPage />} />
 
-  <Route path="/investerdashboard" element={<ProfilePage />}>
+  <Route path="/investordashboard" element={<ProfilePage />}>
     <Route index element={<DashBoard />} />
     <Route path="iIconbreadcrumbs" element={<IconBreadcrumbs />} />
     <Route path="complaint" element={<Complaint />} />
