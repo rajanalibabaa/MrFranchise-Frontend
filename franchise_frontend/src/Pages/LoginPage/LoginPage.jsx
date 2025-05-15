@@ -42,6 +42,7 @@ function LoginPage() {
 
   const dispatch = useDispatch();
 const investorUUID = useSelector((state) => state.auth.investorUUID);
+const accessToken = useSelector((state) => state?.auth?.AccessToken)
   const validateForm = () => {
     const newErrors = {};
     if (!formData.username) {
@@ -68,7 +69,7 @@ const investorUUID = useSelector((state) => state.auth.investorUUID);
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
+        "http://localhost:5000/api/v1/login/generateOTPforLogin",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -111,19 +112,21 @@ const investorUUID = useSelector((state) => state.auth.investorUUID);
         { headers: { "Content-Type": "application/json" } }
       );
 
-      // console.log("response :",response.data.data)
+      console.log("response :",response.data.data)
       setUserdata(response.data)
-      console.log("userdata:",userdata)
+      console.log("userdata:",response)
+      // const local = localStorage.getItem("accessToken",response.data.data.AccessToken)
+      // console.log(local)
       if (userdata.statuscode === 200 ) {
         console.log("Login successful!");
-        dispatch(setUUIDandTOKEN({
-          investorUUID: userdata.data.investorUUID,
-          brandUUID: userdata.data.brandUUID,
-          token: userdata.AccessToken,
-          user_data: userdata.data,
+         dispatch(setUUIDandTOKEN({
+          investorUUID: response.data.data.investorUUID,
+          brandUUID: response.data.data.brandUserUUID,
+          token: response.data.data.AccessToken,
+          // user_data: userdata.data,
         }));
         setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
-        // setTimeout(() => navigate("/"), 1500);
+        setTimeout(() => navigate("/Demo"), 1500);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
       }
@@ -230,6 +233,7 @@ const investorUUID = useSelector((state) => state.auth.investorUUID);
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>{snackbar.message}</Alert>
       </Snackbar>
        <p>Investor ID: {investorUUID}</p>
+       <p>accessToken ID: {accessToken}</p>
     </Grid>
   );
 }
