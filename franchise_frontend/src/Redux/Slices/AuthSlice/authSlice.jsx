@@ -1,24 +1,39 @@
-import {createSlice} from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
+
 const initialState = {
-    user_id : null,
-    token:null
+  investorUUID: null,
+  brandUUID: null,
+  AccessToken: null,
+  userData: null,
 };
 
-const authSlice=createSlice({
-    name : "auth",
-    initialState,
-    reducers : {
-       setUserId : (state,action)=>{
-    state.user_id = action.payload;
-},
-        setUserData : (state,action)=>{
-    state.user_data = action.payload;
-},
-        logout:(state)=>{
-    state.user_id = null;
-    state.user_data = null;
-}
-    }
-})
-export const {setUserId,setUserData,logout} = authSlice.actions;
+const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    setUUIDandTOKEN: (state, action) => {
+      const { investorUUID, brandUUID, token, user_data } = action.payload;
+      state.investorUUID = investorUUID;
+      state.brandUUID = brandUUID;
+      state.AccessToken = token;
+      state.userData = user_data || null;
+
+      // Save token to localStorage for persistence
+      if (token) {
+        localStorage.setItem('accessToken', token);
+      }
+    },
+    logout: (state) => {
+      state.investorUUID = null;
+      state.brandUUID = null;
+      state.AccessToken = null;
+      state.userData = null;
+
+      localStorage.removeItem('accessToken');
+    },
+  },
+});
+
+export const { setUUIDandTOKEN, logout } = authSlice.actions;
+
 export default authSlice.reducer;

@@ -10,11 +10,41 @@ import {
   Select,
   MenuItem
 } from "@mui/material";
+import axios from 'axios';
 
 
 function BrandComplaint() {
   
   const [selectedTopic, setSelectedTopic] = useState('');
+  const [complaintText, setComplaintText] = useState('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formattedData = {
+      topic: selectedTopic,
+      complaint: complaintText,
+    };
+
+    console.log(formattedData)
+    try {
+      const response = await axios.post(
+        " https://franchise-backend-wgp6.onrender.com/api/complaint/createComplaint",
+        formattedData,
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+      console.log("Complaint submitted:", response.data);
+      alert("Complaint submitted successfully!");
+      // Clear the form
+      setSelectedTopic('');
+      setComplaintText('');
+    } catch (error) {
+      console.error("Submission error:", error);
+    }
+  };
 
   return (
     <Box sx={{ mt: 8, px: 2, marginLeft: -20, padding: 4 }}>
@@ -26,10 +56,7 @@ function BrandComplaint() {
         <Box
           component="form"
           sx={{ display: "flex", flexDirection: "column", gap: 3 }}
-          onSubmit={(e) => {
-            e.preventDefault();
-            // handle complaint submission
-          }}
+          onSubmit={ handleSubmit }
         >
           {/* Topic Dropdown */}
           <FormControl required fullWidth size="small">
@@ -74,3 +101,8 @@ function BrandComplaint() {
 }
 
 export default BrandComplaint;
+
+
+
+
+
