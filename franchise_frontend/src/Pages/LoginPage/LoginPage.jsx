@@ -42,6 +42,8 @@ function LoginPage() {
 
   const dispatch = useDispatch();
 const investorUUID = useSelector((state) => state.auth.investorUUID);
+  const brandUUID = useSelector((state) => state.auth.brandUUID);
+  const token = useSelector((state) => state.auth.token);
   const validateForm = () => {
     const newErrors = {};
     if (!formData.username) {
@@ -68,7 +70,7 @@ const investorUUID = useSelector((state) => state.auth.investorUUID);
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
+        "http://localhost:5000/api/v1/login/generateOTPforLogin",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -106,7 +108,7 @@ const investorUUID = useSelector((state) => state.auth.investorUUID);
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        "http://localhost:5000/api/v1/login/",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -119,11 +121,11 @@ const investorUUID = useSelector((state) => state.auth.investorUUID);
         dispatch(setUUIDandTOKEN({
           investorUUID: userdata.data.investorUUID,
           brandUUID: userdata.data.brandUUID,
-          token: userdata.AccessToken,
+          token: userdata.data.AccessToken,
           user_data: userdata.data,
         }));
         setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
-        // setTimeout(() => navigate("/"), 1500);
+        setTimeout(() => navigate("/investerdashboard/manageProfile"), 1500);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
       }
@@ -229,7 +231,9 @@ const investorUUID = useSelector((state) => state.auth.investorUUID);
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>{snackbar.message}</Alert>
       </Snackbar>
-       <p>Investor ID: {investorUUID}</p>
+       <p> {investorUUID}</p>
+       <p> {brandUUID}</p>
+       <p> {token}</p>
     </Grid>
   );
 }
