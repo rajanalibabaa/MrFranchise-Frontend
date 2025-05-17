@@ -18,11 +18,10 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
         setTabValue(newValue);
     };
 
-    // Axios GET API call
     useEffect(() => {
         const fetchBrandData = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/brand/list");
+                const response = await axios.get("https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID");
                 setBrandData(response.data); // assuming response.data is an array
             } catch (error) {
                 console.error("API Error:", error);
@@ -33,7 +32,7 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
     }, []);
 
     const renderTabContent = () => {
-        const label = ["Expressed Interest", "Viewed Brands", "Liked Brands", "Short List"][tabValue];
+        const label = [ "Viewed Brands", "Interested Brands", "Applied List"][tabValue];
 
         return (
             <Box sx={{ p: 2 }}>
@@ -53,7 +52,8 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
 
     return (
         <div>
-            <Typography variant="h6" fontWeight={600} mb={2}>
+            <Typography variant="h6" fontWeight={600} mb={2} sx={{ textAlign: "center", color: "#fafafa",
+                backgroundColor: "#689f38", padding: "10px", borderRadius: "5px" }}>
                 Dashboard
             </Typography>
             <Box sx={{ display: "flex", minHeight: "85vh", bgcolor: "#f4f6f8" }}>
@@ -67,14 +67,14 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                                 bgcolor: "#fff", p: 2, borderRadius: 2, boxShadow: 2
                             }}>
                                 <Avatar sx={{
-                                    width: 200, height: 200, mx: "auto", mb: 2,
+                                    width: 230, height: 210, mx: "auto", mb: 2,
                                     bgcolor: "transparent"
                                 }}>
                                     <img
                                         src={img}
                                         alt="Profile"
                                         loading='lazy'
-                                        style={{ width: "140%", height: "105%", borderRadius: "50%" }}
+                                        style={{ width: "90%", height: "110%", borderRadius: "40%",marginLeft: "30px",marginTop: "20px" }}
                                     />
                                     <PersonIcon fontSize="large" />
                                 </Avatar>
@@ -106,10 +106,10 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                             <Box sx={{ mt: 4 }}>
                                 <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
                                     <Tabs value={tabValue} onChange={handleTabChange} centered>
-                                        <Tab label="Expressed Interest" />
+                                        
                                         <Tab label="Viewed Brands" />
-                                        <Tab label="Liked Brands" />
-                                        <Tab label="Short List" />
+                                        <Tab label="Interested Brands" />
+                                        <Tab label="Applied List" />
                                     </Tabs>
                                 </Box>
                                 <Box>

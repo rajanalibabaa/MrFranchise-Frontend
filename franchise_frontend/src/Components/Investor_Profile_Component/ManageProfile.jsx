@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Box, Typography, Paper, Avatar, CircularProgress
-} from "@mui/material";
+import { Box, Typography, Paper, Avatar, CircularProgress} from "@mui/material";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom';
 
 const ManageProfile = () => {
-    const [investorData, setInvestorData] = useState(null);
+    const [investorData, setInvestorData] = useState({});
     const [loading, setLoading] = useState(true);
 const navigate = useNavigate();
     const investorUUID = useSelector((state) => state.auth?.investorUUID) 
@@ -26,7 +24,7 @@ const navigate = useNavigate();
             try {
                 setLoading(true);
                 const response = await axios.get(
-                    `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+                    `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
                     {
                         headers: {
                             "Content-Type": "application/json",
@@ -41,11 +39,12 @@ const navigate = useNavigate();
                 if (response.data && response.data.data) {
                     setInvestorData(response.data.data);
                 } else {
-                    setInvestorData(null);
+                    console.error("Error fetching investor data:", response.data.message);
+                    // setInvestorData(null);
                 }
             } catch (error) {
                 console.error("Error fetching investor data:", error);
-                setInvestorData(null);
+                // setInvestorData(null);
             } finally {
                 setLoading(false);
             }
@@ -71,6 +70,11 @@ const navigate = useNavigate();
     }
 
     return (
+        <box>
+             <Typography variant="h6" fontWeight={600} mb={2} sx={{ textAlign: "center", color: "#fafafa",
+                backgroundColor: "#689f38", padding: "10px", borderRadius: "5px" }}>
+                            Manage Profile
+                        </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
             <Paper elevation={3} sx={{ padding: 4, maxWidth: 600, width: '100%' }}>
                 <Typography variant="h5" gutterBottom>
@@ -97,6 +101,7 @@ const navigate = useNavigate();
                 <Typography variant="body1"><strong>propertytype:</strong> {investorData.propertytype}</Typography>
             </Paper>
         </Box>
+        </box>
     );
 };
 
