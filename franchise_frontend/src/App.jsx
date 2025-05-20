@@ -30,6 +30,7 @@ import Help from './Components/QuickLinks/Help.jsx';
 import ContactUs from './Components/QuickLinks/ContactUs.jsx';
 import AboutUs from './Components/QuickLinks/AboutUs.jsx';
 import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
+import TermsAndCondition from './Pages/TermsAndCondition/TermsAndCondition.jsx';
 
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
   <Route path="/brandlistingform" element={<BrandListingFormPage />} />
   <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
   <Route path="/allcategories" element={<AllCategoryMainPage />} />
+  <Route path="/termscondition" element={<TermsAndCondition/>} />
 
   <Route path="/investerdashboard" element={<ProfilePage />}>
     <Route index element={<DashBoard />} />

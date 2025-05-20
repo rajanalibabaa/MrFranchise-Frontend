@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Grid,
   Box,
@@ -11,30 +11,37 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
-import { ArrowBack } from "@mui/icons-material";
 import illustration from "../../assets/Images/Login_illustration.jpg";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setUserId } from "../../Redux/Slices/AuthSlice/authSlice";
+import { loginSuccess } from "../../Redux/Slices/navbarSlice";
+import CloseIcon from "@mui/icons-material/Close";
 
-
-
-function LoginPage() {
+function LoginPage({ open, onClose }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({ username: "", otp: "" });
   const [errors, setErrors] = useState({});
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const [resendDisabled, setResendDisabled] = useState(false);
+
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
     setErrors((prev) => ({ ...prev, [id]: "" }));
   };
-
-  const dispatch = useDispatch();
 
   const validateForm = () => {
     const newErrors = {};
@@ -53,12 +60,11 @@ function LoginPage() {
   const handleOtpRequest = async () => {
     if (!validateForm()) return;
     setIsLoading(true);
+
     const isEmail = formData.username.includes("@");
     const payload = isEmail
       ? { email: formData.username.trim() }
-      : {mobileNumber: "+91" + formData.username.trim() };
-
-      console.log(payload);
+      : { mobileNumber: "+91" + formData.username.trim() };
 
     try {
       const response = await axios.post(
@@ -68,10 +74,17 @@ function LoginPage() {
       );
 
       if (response.data.success) {
-        setSnackbar({ open: true, message: "OTP sent successfully!", severity: "success" });
+        setSnackbar({
+          open: true,
+          message: "OTP sent successfully!",
+          severity: "success",
+        });
         setIsOtpSent(true);
-        dispatch(setUserId(response.data.data._id));
         localStorage.setItem("token", response.data.token);
+        setResendDisabled(true);
+        setTimeout(() => {
+          setResendDisabled(false);
+        }, 30000);
       } else {
         throw new Error(response.data.message || "Failed to send OTP");
       }
@@ -81,9 +94,6 @@ function LoginPage() {
       setIsLoading(false);
     }
   };
-
-
-  const [data, setdata] = useState("")
 
   const handleVerifyOtp = async () => {
     if (!formData.otp) {
@@ -95,7 +105,9 @@ function LoginPage() {
     const isEmail = formData.username.includes("@");
     const payload = {
       verifyOtp: formData.otp,
-      [isEmail ? "email" : "phone"]: isEmail ? formData.username.trim() : "+91" + formData.username.trim(),
+      [isEmail ? "email" : "phone"]: isEmail
+        ? formData.username.trim()
+        : "+91" + formData.username.trim(),
     };
 
     try {
@@ -104,12 +116,27 @@ function LoginPage() {
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
+
       if (response.status === 200) {
-        dispatch(setUserId(data.data));
-        const a = localStorage.setItem("token", data.AccessToken);
-      
-        setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
-        setTimeout(() => navigate("/"), 1500);
+        dispatch(
+          loginSuccess({
+            user_id: response.data.data._id,
+            token: response.data.token,
+            user_data: response.data.data,
+          })
+        );
+
+        localStorage.setItem("token", response.data.token);
+        setSnackbar({
+          open: true,
+          message: "Login successful! Redirecting...",
+          severity: "success",
+        });
+
+        setTimeout(() => {
+          onClose(); // Close dialog
+          navigate("/"); // Navigate home
+        }, 1000);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
       }
@@ -130,92 +157,185 @@ function LoginPage() {
   };
 
   return (
-    <Grid container sx={{ mt: 8, px: 3, py: 5 }}>
-      <Grid item xs={12} md={6} sx={{ p: 6 }}>
-        <Box component="img" src={illustration} alt="Login Illustration" loading="lazy" sx={{ width: "100%", maxWidth: 500 }} />
-      </Grid>
+    <>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="md"
+        fullWidth
+        TransitionProps={{ timeout: 500 }}
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            overflow: "hidden",
+            color: "black",
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            bgcolor: "#ffba00",
+            color: "black",
+            px: 3,
+            py: 2,
+          }}
+        >
+          <Typography variant="h6">Login</Typography>
+          <IconButton onClick={onClose} sx={{ color: "white" }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
 
-      <Grid item xs={12} md={6} sx={{ p: 6, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <IconButton onClick={() => navigate("/")} sx={{ position: "absolute", 
-      top: 16,
-      left: 16, 
-      bgcolor: "#FFC107", 
-      '&:hover': { bgcolor: "#FFA000" }, }}>
-          <ArrowBack sx={{ color: "white" }} />
-        </IconButton>
-
-        <Box sx={{ width: "100%", maxWidth: 400 }}>
-          <Typography variant="h4" gutterBottom fontWeight={700} textAlign="center">Welcome Back!</Typography>
-          <Typography variant="body1" color="text.secondary" textAlign="center" mb={4}>Please log in to your account to continue.</Typography>
-
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Email or Phone Number"
-              id="username"
-              value={formData.username}
-              onChange={handleChange}
-              error={!!errors.username}
-              helperText={errors.username}
-              disabled={isOtpSent || isLoading}
-              sx={{ mb: 2 }}
-            />
-
-            {isOtpSent && (
-              <TextField
-                fullWidth
-                label="OTP"
-                id="otp"
-                value={formData.otp}
-                onChange={handleChange}
-                error={!!errors.otp}
-                helperText={errors.otp}
-                disabled={isLoading}
-                sx={{ mb: 2 }}
-              />
-            )}
-
-            <Button
-              fullWidth
-              type="submit"
-              variant="contained"
-              size="large"
-              disabled={isLoading}
-              sx={{ mb: 2, height: "48px", bgcolor: "#007BFF", '&:hover': { bgcolor: "#0056b3" } }}
+        <DialogContent sx={{ p: 0 }}>
+          <Grid container sx={{ minHeight: "65vh" }}>
+            <Grid
+              item
+              md={6}
+              sx={{
+                display: { xs: "none", md: "flex" },
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "white",
+                p: 0,
+              }}
             >
-              {isLoading ? <CircularProgress size={24} color="inherit" /> : isOtpSent ? "Verify OTP" : "Request OTP"}
-            </Button>
-          </form>
+              <Box
+                component="img"
+                src={illustration}
+                alt="Login Illustration"
+                sx={{ width: "100%", maxWidth: 400, borderRadius: 2 }}
+              />
+            </Grid>
 
-          {isOtpSent && (
-            <Typography variant="body2" textAlign="center" mb={2}>
-              Didn't receive OTP?{' '}
-              <Link component="button" onClick={handleOtpRequest} color="primary">Resend OTP</Link>
-            </Typography>
-          )}
+            <Grid
+              item
+              xs={12}
+              md={6}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                p: 4,
+              }}
+            >
+              <Box sx={{ width: "100%", maxWidth: 400 }}>
+                <Typography
+                  variant="h4"
+                  gutterBottom
+                  textAlign="center"
+                  fontWeight="bold"
+                >
+                  Welcome Back!
+                </Typography>
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  textAlign="center"
+                  mb={3}
+                >
+                  Please log in to your account to continue.
+                </Typography>
 
-          <Typography variant="body2" textAlign="center" my={2}>
-            Don't have an account?{' '}
-            <Link href="/registerhandleuser" color="primary">Register here</Link>
-          </Typography>
+                <form onSubmit={handleSubmit}>
+                  <TextField
+                    fullWidth
+                    label="Email or Phone Number"
+                    id="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    error={!!errors.username}
+                    helperText={errors.username}
+                    disabled={isOtpSent || isLoading}
+                    sx={{ mb: 2 }}
+                  />
 
-          {/* <Box textAlign="center" my={4}>
-            <Typography variant="subtitle1" gutterBottom>Sign In with</Typography>
-            <Box display="flex" justifyContent="center" gap={2}>
-              {[FacebookIcon, LinkedInIcon, InstagramIcon, TwitterIcon, GoogleIcon].map((icon, idx) => (
-                <IconButton key={idx} sx={{ bgcolor: "background.paper", boxShadow: 1 }}>
-                  <Avatar src={icon} sx={{ width: 32, height: 32 }} />
-                </IconButton>
-              ))}
-            </Box>
-          </Box> */}
-        </Box>
-      </Grid>
+                  {isOtpSent && (
+                    <TextField
+                      fullWidth
+                      label="OTP"
+                      id="otp"
+                      value={formData.otp}
+                      onChange={handleChange}
+                      error={!!errors.otp}
+                      helperText={errors.otp}
+                      disabled={isLoading}
+                      sx={{ mb: 2 }}
+                    />
+                  )}
 
-      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>{snackbar.message}</Alert>
+                  <Button
+                    fullWidth
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    disabled={isLoading}
+                    sx={{
+                      height: 48,
+                      mb: 2,
+                      bgcolor: "#007BFF",
+                      "&:hover": { bgcolor: "#0056b3" },
+                    }}
+                  >
+                    {isLoading ? (
+                      <CircularProgress size={24} color="inherit" />
+                    ) : isOtpSent ? (
+                      "Verify OTP"
+                    ) : (
+                      "Request OTP"
+                    )}
+                  </Button>
+                </form>
+
+                {isOtpSent && (
+                  <Typography variant="body2" textAlign="center" mb={2}>
+                    Didn’t receive OTP?{" "}
+                    <Link
+                      component="button"
+                      onClick={handleOtpRequest}
+                      disabled={resendDisabled}
+                    >
+                      Resend OTP
+                    </Link>
+                  </Typography>
+                )}
+
+                <Typography variant="body2" textAlign="center" mt={2}>
+                  Don’t have an account?{" "}
+                  <Link
+                    component="button"
+                    onClick={() => {
+                      onClose();
+                      navigate("/registerhandleuser");
+                    }}
+                    sx={{ fontWeight: 500 }}
+                  >
+                    Register here
+                  </Link>
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </DialogContent>
+      </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={5000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
       </Snackbar>
-    </Grid>
+    </>
   );
 }
 

@@ -4,27 +4,29 @@ const initialState = {
   isLoggedIn: false,
   sidebarView: false,
   menuOpen: false,
+  userData:null,
 };
 
 const navbarSlice = createSlice({
   name: "navbar",
   initialState,
   reducers: {
-    toggleLogin: (state, action) => {
-      state.isLoggedIn = action.payload;
+    loginSuccess: (state, action) => {
+      state.isLoggedIn = true;
+      state.userData = action.payload;
+    },
+    logout: (state) => {
+      state.isLoggedIn = false;
+      state.userData = null;
     },
     toggleSidebar: (state, action) => {
       state.sidebarView = action.payload;
     },
     toggleMenu: (state, action) => {
-      if (typeof action.payload === "boolean") {
-        state.menuOpen = action.payload;
-      } else {
-        state.menuOpen = !state.menuOpen;
-      }
+      state.menuOpen = typeof action.payload === "boolean" ? action.payload : !state.menuOpen;
     },
   },
 });
 
-export const { toggleLogin, toggleSidebar, toggleMenu } = navbarSlice.actions;
+export const { loginSuccess, logout, toggleSidebar, toggleMenu } = navbarSlice.actions;
 export default navbarSlice.reducer;
