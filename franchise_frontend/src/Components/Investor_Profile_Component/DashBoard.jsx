@@ -1,45 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Box,
-    Typography,
-    Avatar,
-    Tabs,
-    Tab
+    Box, Typography, Avatar, Tabs, Tab
 } from "@mui/material";
 import PersonIcon from '@mui/icons-material/Person';
 import img from "../../assets/images/brandLogo.jpg";
 import axios from 'axios';
+import { useSelector } from 'react-redux';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+
 
 const DashBoard = ({ selectedSection, sectionContent }) => {
     const [tabValue, setTabValue] = useState(0);
-    const [brandData, setBrandData] = useState([]);
+    const [investorInfo, setInvestorInfo] = useState(null);
+    const [brandList, setBrandList] = useState([]);
+    const investorUUID = useSelector((state) => state.auth?.investorUUID);
+    const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
+
+
+        if (investorInfo) {
+            if (newValue === 0) {
+                setBrandList(investorInfo.viewedBrands || []);
+            } else if (newValue === 1) {
+                setBrandList(investorInfo.interestedinvestor || []);
+            } else if (newValue === 2) {
+                setBrandList(investorInfo.appliedBrands || []);
+            }
+        }
     };
 
     useEffect(() => {
-        const fetchBrandData = async () => {
+        const fetchInvestor = async () => {
+            if (!investorUUID || !AccessToken) return;
+
             try {
-                const response = await axios.get("https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID");
-                setBrandData(response.data); // assuming response.data is an array
+                const response = await axios.get(
+                    `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${AccessToken}`,
+                        },
+                    }
+                );
+
+                const data = response?.data?.data;
+                if (data) {
+                    setInvestorInfo(data);
+                    setBrandList(data.interestedinvestor || []);
+                }
             } catch (error) {
                 console.error("API Error:", error);
             }
         };
 
-        fetchBrandData();
-    }, []);
+        fetchInvestor();
+    }, [investorUUID, AccessToken]);
 
     const renderTabContent = () => {
-        const label = [ "Viewed Brands", "Interested Brands", "Applied List"][tabValue];
+        const label = ["Viewed Brands", "Interested Brands", "Applied List"][tabValue];
 
         return (
             <Box sx={{ p: 2 }}>
                 <Typography variant="h6">{label}</Typography>
-                {brandData.length > 0 ? (
+                {brandList.length > 0 ? (
                     <ul>
-                        {brandData.map((item, idx) => (
+                        {brandList.map((item, idx) => (
                             <li key={idx}>{item.name || JSON.stringify(item)}</li>
                         ))}
                     </ul>
@@ -52,10 +82,13 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
 
     return (
         <div>
-            <Typography variant="h6" fontWeight={600} mb={2} sx={{ textAlign: "center", color: "#fafafa",
-                backgroundColor: "#689f38", padding: "10px", borderRadius: "5px" }}>
+            <Typography variant="h6" fontWeight={600} mb={2} sx={{
+                textAlign: "center", color: "#fafafa",
+                backgroundColor: "#689f38", padding: "10px", borderRadius: "5px"
+            }}>
                 Dashboard
             </Typography>
+
             <Box sx={{ display: "flex", minHeight: "85vh", bgcolor: "#f4f6f8" }}>
                 <Box sx={{ flex: 1, p: 3 }}>
                     {selectedSection ? (
@@ -74,7 +107,10 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                                         src={img}
                                         alt="Profile"
                                         loading='lazy'
-                                        style={{ width: "90%", height: "110%", borderRadius: "40%",marginLeft: "30px",marginTop: "20px" }}
+                                        style={{
+                                            width: "90%", height: "110%",
+                                            borderRadius: "40%", marginLeft: "30px", marginTop: "20px"
+                                        }}
                                     />
                                     <PersonIcon fontSize="large" />
                                 </Avatar>
@@ -87,13 +123,13 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                                     height: "40%", paddingTop: "65px", paddingBottom: "65px"
                                 }}>
                                     <Typography variant="h4" fontWeight={600}>
-                                        Welcome (Manikandan.M)
+                                        Welcome {investorInfo?.firstName || "Investor"}
                                     </Typography>
                                     <Typography color="text.secondary" variant="h5">
                                         Investor
                                     </Typography>
                                     <Typography color="text.secondary" variant="h5" fontWeight={800}>
-                                        ID(721720104305)
+                                        ID ({investorUUID || "N/A"})
                                     </Typography>
                                 </Box>
                             </Box>
@@ -106,10 +142,28 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                             <Box sx={{ mt: 4 }}>
                                 <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
                                     <Tabs value={tabValue} onChange={handleTabChange} centered>
-                                        
-                                        <Tab label="Viewed Brands" />
-                                        <Tab label="Interested Brands" />
-                                        <Tab label="Applied List" />
+                                        <Tab
+                                            label={
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <VisibilityIcon fontSize="small" />
+                                                    Viewed Brands
+                                                </Box>
+                                            }
+                                        />
+                                        <Tab label={
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <FavoriteIcon fontSize="small" />
+                                                Interested Brands
+                                            </Box>
+                                        } />
+                                        <Tab
+                                            label={
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <AssignmentTurnedInIcon fontSize="small" />
+                                                    Applied List
+                                                </Box>
+                                            }
+                                        />
                                     </Tabs>
                                 </Box>
                                 <Box>
