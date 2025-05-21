@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { useNavigate ,Link as RouterLink } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import axios from "axios";
 import {
   Container,
@@ -1151,8 +1151,6 @@ label={
             <Link
               component={RouterLink}
               to="/termscondition"
-              target="_blank"
-              rel="noopener noreferrer"
             >
               terms and conditions
             </Link>
