@@ -111,12 +111,12 @@ function Navbar() {
           </Typography>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Link to="/allcategories" style={{ 
+            <Link to="/brandsearchview" style={{ 
               textDecoration: 'none', 
               color: 'inherit',
               '&:hover': { color: 'primary.main' }
             }}>
-              CATEGORY
+              Find your Franchise
             </Link>
             
             <Button 

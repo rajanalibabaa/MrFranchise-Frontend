@@ -1,189 +1,168 @@
-import React, { useEffect } from "react";
-import { Box, Typography, Grid, Card, CardMedia, CardContent, Button, Avatar } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+} from "@mui/material";
+import { motion } from "framer-motion";
 
-const topInvestmentData = [
-    {
-        src: "speaking",
-        poster: "zudio",
-        name: "Zudio",
-        investment: "₹1 Cr. - 4 Cr",
-        area: "4000 - 6000",
-        outlets: "200-500",
-        description:
-          "Zudio offers budget-friendly fashion...",
-        logo: "zudio",
-      },
-      {
-        src: "speaking",
-        poster: "zudio",
-        name: "Starbucks",
-        investment: "₹1 Cr. - 3 Cr",
-        area: "1500 - 2500",
-        outlets: "300-600",
-        description:
-          "Starbucks India delivers premium coffee experiences...",
-        logo: "zudio",
-      },
-      {
-        src: "speaking",
-        poster: "zudio",
-        name: "Domino",
-        investment: "₹1.5 Cr. - 3.5 Cr",
-        area: "1200 - 1800",
-        outlets: "1000+",
-        description:
-          "Domino's brings delicious pizza and fast delivery...",
-        logo: "zudio",
-      },
-  ];
+const initialBrands = [
+  {
+    name: "Skale",
+    category: "Fitness Unlimited",
+    investment: "10-19 Lakhs",
+    image: "https://mrfranchise.in/wp-content/uploads/2024/10/skale-logo.png",
+  },
+  {
+    name: "Fresh2Day",
+    category: "Saloon & Spa, Health & Beauty",
+    investment: "15-25 Lakhs",
+    image:
+      "https://mrfranchise.in/wp-content/uploads/2024/11/fresh2day-mrfranchisein.png",
+  },
+  {
+    name: "Skale",
+    category: "Fitness Unlimited",
+    investment: "10-19 Lakhs",
+    image: "https://mrfranchise.in/wp-content/uploads/2024/10/skale-logo.png",
+  },
+];
 
-function TopInvestVdoSec() {
-    const navigate = useNavigate();
+const cardVariants = {
+  initial: { opacity: 0, y: 30 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+};
+
+const FoodAndBeverageSection = () => {
+  const [brands, setBrands] = useState(initialBrands);
+  const isPaused = useRef(false);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.style.transform = "translateY(0)";
-            entry.target.style.opacity = 1;
-          }
+    const interval = setInterval(() => {
+      if (!isPaused.current) {
+        setBrands((prev) => {
+          const newArr = [prev[1], prev[2], prev[0]];
+          return [...newArr];
         });
-      },
-      { threshold: 0.1 }
-    );
+      }
+    }, 5000);
 
-    const cards = document.querySelectorAll(".observe-card");
-    cards.forEach((card) => observer.observe(card));
-
-    return () => cards.forEach((card) => observer.unobserve(card));
+    return () => clearInterval(interval);
   }, []);
+
+  const handleMouseEnter = () => {
+    isPaused.current = true;
+  };
+
+  const handleMouseLeave = () => {
+    isPaused.current = false;
+  };
+
   return (
-    <Box sx={{ px: 4, py: 2, maxWidth: "1700px", mx: "auto", fontFamily: 'Segoe UI' }}>
-      <Typography
-        variant="h3"
+    <Box sx={{ p: 4, background: "#fff", maxWidth: 1200, mx: "auto" }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="h5" fontWeight={600}>
+          Invest Your Franchise
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Near You!
+        </Typography>
+      </Box>
+
+      <Box
+        component={motion.div}
+        initial="initial"
+        animate="animate"
         sx={{
-          fontWeight: 700,
-          mb: 2,
-          background: "linear-gradient(90deg, #3498db, #2ecc71, #e74c3c)",
-          backgroundSize: "200% auto",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          animation: "gradient 3s linear infinite",
-          "@keyframes gradient": {
-            "0%": { backgroundPosition: "0% center" },
-            "100%": { backgroundPosition: "200% center" },
-          },
+          display: "flex",
+          gap: 3,
+          backgroundColor: "#e8f5e9",
+          borderRadius: 3,
+          p: 2,
+          overflowX: "auto",
         }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
-        Investment Range in Franchise
-      </Typography>
-      <Grid container spacing={15}>
-        {topInvestmentData.map((item, index) => (
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
+        {/* Left Static Section */}
+        <Box
+          sx={{
+            minWidth: 200,
+            background: "#e0f2f1",
+            p: 2,
+            borderRadius: 2,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          <Typography variant="h6" fontWeight={600} mb={1}>
+            Invest Near You
+          </Typography>
+          <Button variant="contained" sx={{ background: "#4caf50" }}>
+            Popular in Franchise
+          </Button>
+        </Box>
+
+        {/* Rotating Cards */}
+        {brands.map((brand, index) => (
+          <motion.div
+            variants={cardVariants}
             key={index}
-            className="observe-card"
-            sx={{
-              transform: "translateY(30px)",
-              opacity: 0,
-              transition: `all 0.6s ease ${index * 0.1}s`,
-            }}
+            whileHover={{ scale: 1.03 }}
+            style={{ minWidth: 250 }}
           >
             <Card
               sx={{
-                borderRadius: 2,
-                boxShadow: 3,
+                display: "flex",
+                flexDirection: "column",
+                borderRadius: 3,
                 overflow: "hidden",
-                transition: "transform 0.3s",
-                '&:hover': { transform: "translateY(-5px)", boxShadow: 6 }
+                position: "relative",
+                height: "100%",
               }}
             >
-              <Box
-                sx={{ position: "relative", height: 230, width:400, cursor: "pointer" }}
-                onMouseEnter={(e) => {
-                  const video = e.currentTarget.querySelector("video");
-                  const img = e.currentTarget.querySelector("img");
-                  if (video && img) {
-                    video.style.display = "block";
-                    img.style.display = "none";
-                    video.play();
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  const video = e.currentTarget.querySelector("video");
-                  const img = e.currentTarget.querySelector("img");
-                  if (video && img) {
-                    video.pause();
-                    video.currentTime = 0;
-                    video.style.display = "none";
-                    img.style.display = "block";
-                  }
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  image={item.poster}
-                  alt="thumbnail"
-                  sx={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-                <Box
+              <CardMedia
+                component="img"
+                image={brand.image}
+                alt={brand.name}
+                sx={{ height: 140 }}
+              />
+              <CardContent>
+                <Typography variant="subtitle1" fontWeight={600}>
+                  {brand.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {brand.category}
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.5 }}>
+                  {brand.investment}
+                </Typography>
+              </CardContent>
+              <Box sx={{ px: 2, pb: 2, mt: "auto" }}>
+                <Button
+                  variant="contained"
+                  fullWidth
                   sx={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: 60,
-                    height: 60,
-                    backgroundColor: "rgba(255,255,255,0.9)",
-                    borderRadius: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 28,
-                    color: "#e74c3c",
-                    zIndex: 2,
-                    transition: "0.3s",
-                    '&:hover': { opacity: 0 }
+                    backgroundColor: "#ff6d00",
+                    "&:hover": { backgroundColor: "#ff8f00" },
+                  }}
+                  onClick={() => {
+                    isPaused.current = true;
                   }}
                 >
-                  ▶
-                </Box>
-                <video
-                  width="100%"
-                  height="100%"
-                  muted
-                  controls
-                  style={{ display: "none", objectFit: "cover" }}
-                >
-                  <source src={item.src} type="video/mp4" />
-                </video>
+                  Apply
+                </Button>
               </Box>
-              <CardContent sx={{ p: 2 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <Avatar src={item.logo} alt={item.name} sx={{ width: 50, height: 50 }} />
-                    <Typography variant="h6" sx={{ color: "#2c3e50" }}>{item.name}</Typography>
-                  </Box>
-                  <Button
-                    variant="outlined"
-                    sx={{ color: "#007bff", borderColor: "#007bff", '&:hover': { backgroundColor: "#007bff", color: "white" } }}
-                    onClick={() => navigate("/brandview")}
-                  >
-                    VISIT SITE
-                  </Button>
-                </Box>
-              </CardContent>
             </Card>
-          </Grid>
+          </motion.div>
         ))}
-      </Grid>
+      </Box>
     </Box>
-  )
-}
+  );
+};
 
-export default TopInvestVdoSec
+export default FoodAndBeverageSection;

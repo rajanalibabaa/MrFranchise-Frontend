@@ -1,210 +1,282 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Box, Button, TextField, Typography, Paper, Avatar
+  Box, Typography, Paper, Avatar, CircularProgress,
+  Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField
 } from "@mui/material";
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
 import axios from "axios";
-import img from "../../assets/images/brandLogo.jpg";
-import PersonIcon from '@mui/icons-material/Person';
-import {useSelector} from "react-redux"
+import { useSelector } from "react-redux";
+import { useNavigate } from 'react-router-dom';
 
 const ManageProfile = () => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [investorData, setInvestorData] = useState({});
-const [loading, setLoading] = useState(true);
+  const [investorData, setInvestorData] = useState({});
+  const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-const user_id = useSelector((state) => {
-    console.log("Redux State:", state); // Debugging Redux state
-    return state.auth?.user_id;
-});
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!user_id) {
-                console.log("No user ID found");
-                
-                return;
-            }
-            try {
-                setLoading(true);
-                const response = await axios.get(
-                    `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${user_id}`,
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${localStorage.getItem("token")}`,
-                        },
-                    }
-                );
-                setInvestorData(response.data);
-            } catch (error) {
-                console.error("Error fetching investor data:", error);
-            }finally{
-                setLoading(false);
-            }
-        };
+  const [otpDialogOpen, setOtpDialogOpen] = useState(false);
+  const [otpStep, setOtpStep] = useState(1);
+  const [contactValue, setContactValue] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
 
-        fetchData();
-    }, [user_id]);
+  const navigate = useNavigate();
+  const investorUUID = useSelector((state) => state.auth?.investorUUID);
+  const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }   
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!investorUUID || !AccessToken) {
+        setLoading(false);
+        return;
+      }
 
-    if (!investorData) {
-        return <div>no data found..........</div>;
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${AccessToken}`,
+            },
+          }
+        );
+        if (response.data && response.data.data) {
+          const data = response.data.data;
+          if (data.mobileNumber?.startsWith('+91')) {
+            data.mobileNumber = data.mobileNumber.replace('+91', '');
+          }
+          if (data.whatsappNumber?.startsWith('+91')) {
+            data.whatsappNumber = data.whatsappNumber.replace('+91', '');
+          }
+          setInvestorData(data);
+        }
+      } catch (error) {
+        console.error("Error fetching investor data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [investorUUID, AccessToken]);
+
+  const handleEditToggle = () => {
+    setOtpDialogOpen(true);
+    setOtpStep(1);
+    setOtp('');
+    setOtpError('');
+    setContactValue(investorData.email || investorData.mobileNumber || '');
+  };
+
+  const handleRequestOtp = () => {
+    if (!contactValue) return;
+    console.log("Sending OTP to:", contactValue);
+    setOtpStep(2);
+  };
+
+  const handleOtpVerify = () => {
+    if (otp === '123456') {
+      setEditMode(true);
+      setOtpDialogOpen(false);
+    } else {
+      setOtpError("Invalid OTP. Please try again.");
+    }
+  };
+
+  const handleSave = async () => {
+    const dataToUpdate = { ...investorData };
+    if (dataToUpdate.mobileNumber && !dataToUpdate.mobileNumber.startsWith('+91')) {
+      dataToUpdate.mobileNumber = '+91' + dataToUpdate.mobileNumber.trim();
+    }
+    if (dataToUpdate.whatsappNumber && !dataToUpdate.whatsappNumber.startsWith('+91')) {
+      dataToUpdate.whatsappNumber = '+91' + dataToUpdate.whatsappNumber.trim();
     }
 
-    const handleManageProfileChange = (e) => {
-        const { name, value } = e.target;
-        setInvestorData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
-    
-
-    const fieldLabels = [
-        { key: "firstName", label: "First Name" },
-        { key: "lastName", label: "Last Name" },
-        { key: "email", label: "Email" },
-        { key: "mobileNumber", label: "Phone" },
-        { key: "whatsappNumber", label: "WhatsApp" },
-        { key: "address", label: "Address" },
-        { key: "city", label: "City" },
-        { key: "district", label: "District" },
-        { key: "state", label: "State" },
-        { key: "country", label: "Country" },
-        { key: "pincode", label: "Pincode" },
-        { key: "occupation", label: "Occupation" },
-        { key: "category", label: "Category" },
-        { key: "investmentRange", label: "Investment Range" },
-        { key: "capital", label: "Capital" },
-        { key: "lookingFor", label: "Looking For" },
-        { key: "ownProperty", label: "Own Property" },
-    ];
-    
-    const renderTwoColumnForm = () => {
-        const rows = [];
-
-        for (let i = 0; i < fieldLabels.length; i += 2) {
-            const field1 = fieldLabels[i];
-            const field2 = fieldLabels[i + 1];
-
-            rows.push(
-                
-                <Box key={i} sx={{ display: "flex", gap: 1, mb: 1,height: "100%" }}>
-                    
-                    <TextField
-                        fullWidth
-                        label={field1.label}
-                        name={field1.key}
-                        value={investorData?.[field1.key] || ""}
-                        onChange={handleManageProfileChange}
-                        size="small"
-                    />
-                    {field2 ? (
-                        <TextField
-                            fullWidth
-                            label={field2.label}
-                            name={field2.key}
-                            value={investorData?.[field2.key] || ""}
-                            onChange={handleManageProfileChange}
-                            size="small"
-                        />
-                    ) : (
-                        <Box sx={{ flex: 1 }} />
-                    )}
-                </Box>
-            );
+    try {
+      await axios.patch(
+        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/updateInvestor/${investorUUID}`,
+        dataToUpdate,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
         }
+      );
+      setEditMode(false);
+    } catch (error) {
+      console.error("Error saving investor data:", error);
+    }
+  };
 
-        return rows;
-    };
-  
-   
+  const renderField = (label, key) => {
+    const isPhoneField = key === 'mobileNumber' || key === 'whatsappNumber';
+    const isReadOnly = key === 'country';
+
     return (
-        <div style={{ display: "flex", marginTop: -30 }}>
-            <Box
-                sx={{
-                    p: 3,
-                    backgroundColor: "#f9f9f9",
-                    borderRadius: 4,
-                    boxShadow: 3,
-                    mx: "auto",
-                    mt: 4,
-                    padding: 10,
-                    height: "90vh",
-                    width: "100%",
-                }}
-            >
-                <Typography
-                    variant="h4"
-                    sx={{ mb: 3, fontWeight: 700, textAlign: "center", color: "#333" }}
-                >
-                    Investor Profile
-                </Typography>
-
-                {isEditing ? (
-                    <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        {renderTwoColumnForm()}
-                        <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 2,marginTop: -1 }}>
-                            <Button variant="contained" color="primary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00" }}>
-                                Update
-                            </Button>
-                            <Button  color="secondary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00", color: "#fff" }}>
-                                Cancel
-                            </Button>
-                        </Box>
-                    </Box>
-                ) : (
-                    <>
-                        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-                            <Button variant="contained" onClick={() => setIsEditing(true)} sx={{ backgroundColor: "#ffab00" }}>
-                                Edit Profile
-                            </Button>
-                        </Box>
-
-                        <Box sx={{
-                            width: 200, height: 200, marginTop: -20, textAlign: "center", padding: 2,
-                            bgcolor: "#fff", p: 2, borderRadius: 2, boxShadow: 2, marginLeft: -5
-                        }}>
-                            <Avatar sx={{ width: 200, height: 200, mx: "auto", mb: 2 }}>
-                                <img
-                                    src={img}
-                                    alt="Profile"
-                                    loading='lazy'
-                                    style={{ width: "140%", height: "105%", borderRadius: "50%" }}
-                                />
-                                <PersonIcon fontSize="large" />
-                            </Avatar>
-                        </Box>
-
-                        <Paper sx={{ p: 2, backgroundColor: "#fff", borderRadius: 2, border: "1px solid #ddd", marginTop: 2, marginLeft: -5 }}>
-                            <Typography><strong>Name:</strong> {investorData.firstName} {investorData.lastName}</Typography>
-                            <Typography><strong>Email:</strong> {investorData.email}</Typography>
-                            <Typography><strong>Phone:</strong> {investorData.mobileNumber}</Typography>
-                            <Typography><strong>WhatsApp:</strong> {investorData.whatsappNumber}</Typography>
-                            <Typography><strong>Address:</strong> {investorData.address}</Typography>
-                            <Typography><strong>City:</strong> {investorData.city}</Typography>
-                            <Typography><strong>District:</strong> {investorData.district}</Typography>
-                            <Typography><strong>State:</strong> {investorData.state}</Typography>
-                            <Typography><strong>Country:</strong> {investorData.country}</Typography>
-                            <Typography><strong>Pincode:</strong> {investorData.pincode}</Typography>
-                            <Typography><strong>Occupation:</strong> {investorData.occupation}</Typography>
-                            <Typography><strong>Category:</strong> {investorData.category}</Typography>
-                            <Typography><strong>Investment Range:</strong> {investorData.investmentRange}</Typography>
-                            <Typography><strong>Capital:</strong> {investorData.capital}</Typography>
-                            <Typography><strong>Looking For:</strong> {investorData.lookingFor}</Typography>
-                            <Typography><strong>Own Property:</strong> {investorData.ownProperty}</Typography>
-                            {/* <Typography><strong>Property Type:</strong> {investorData.propertyType}</Typography>
-                            <Typography><strong>Min Area:</strong> {investorData.minArea}</Typography>
-                            <Typography><strong>Max Area:</strong> {investorData.maxArea}</Typography>
-                            <Typography><strong>Sqft:</strong> {investorData.sqft}</Typography> */}
-                        </Paper>
-                    </>
-                )}
-            </Box>
-        </div>
+      <Box mb={2}>
+        <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+          {label}
+        </Typography>
+        {editMode && !isReadOnly ? (
+          <Box display="flex" alignItems="center">
+            {isPhoneField && <Typography sx={{ mr: 1 }}>+91</Typography>}
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              value={investorData[key] || ''}
+              onChange={(e) =>
+                setInvestorData({ ...investorData, [key]: e.target.value })
+              }
+            />
+          </Box>
+        ) : (
+          <Typography variant="body1" sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}>
+            {isPhoneField ? `+91 ${investorData[key] || ''}` : investorData[key] || ''}
+          </Typography>
+        )}
+      </Box>
     );
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!investorData || Object.keys(investorData).length === 0) {
+    return (
+      <Typography variant="h6" align="center" mt={4}>
+        Unable to load profile. Please login again{' '}
+        <button onClick={() => navigate("/loginpage")}>Login</button>
+      </Typography>
+    );
+  }
+
+  return (
+    <Box px={2}>
+      <Typography
+        variant="h6"
+        fontWeight={600}
+        mb={3}
+        sx={{
+          textAlign: "center",
+          color: "#ffffff",
+          backgroundColor: "#689f38",
+          padding: "10px",
+          borderRadius: "6px",
+        }}
+      >
+        Manage Profile
+      </Typography>
+
+      <Box display="flex" justifyContent="center">
+        <Paper elevation={4} sx={{ padding: 4, borderRadius: 4, width: '100%', maxWidth: 700 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+            <Typography variant="h5" fontWeight={500}>Investor Profile</Typography>
+            <Button
+              variant="outlined"
+              startIcon={editMode ? <SaveIcon /> : <EditIcon />}
+              onClick={editMode ? handleSave : handleEditToggle}
+              sx={{
+                borderRadius: 3,
+                textTransform: "none",
+                fontWeight: 600,
+                px: 2.5,
+                py: 1,
+              }}
+            >
+              {editMode ? "Save" : "Edit"}
+            </Button>
+          </Box>
+
+          <Box display="flex" alignItems="center" mb={3}>
+            <Avatar
+              alt="Investor Avatar"
+              src={investorData.profileImage}
+              sx={{ width: 64, height: 64, mr: 2 }}
+            />
+            <Typography variant="h6">{investorData.firstName}</Typography>
+          </Box>
+
+          {/* Render Fields */}
+          {renderField("First Name", "firstName")}
+          {renderField("Email", "email")}
+          {renderField("Mobile Number", "mobileNumber")}
+          {renderField("Whatsapp Number", "whatsappNumber")}
+          {renderField("State", "state")}
+          {renderField("Address", "address")}
+          {renderField("Category", "category")}
+          {renderField("City", "city")}
+          {renderField("Country", "country")}
+          {renderField("District", "district")}
+          {renderField("Investment Range", "investmentRange")}
+          {renderField("Looking For", "lookingFor")}
+          {renderField("Occupation", "occupation")}
+          {renderField("Pincode", "pincode")}
+          {renderField("Property Type", "propertytype")}
+        </Paper>
+      </Box>
+
+      {/* OTP Dialog */}
+      <Dialog open={otpDialogOpen} onClose={() => setOtpDialogOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Verification Required</DialogTitle>
+        <DialogContent>
+          {otpStep === 1 ? (
+            <>
+              <TextField
+                fullWidth
+                label="Email or Phone Number"
+                value={contactValue}
+                onChange={(e) => setContactValue(e.target.value)}
+                margin="normal"
+              />
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={handleRequestOtp}
+                sx={{ mt: 2 }}
+              >
+                REQUEST OTP
+              </Button>
+            </>
+          ) : (
+            <>
+              <Typography variant="body2" mb={1}>
+                Enter the OTP sent to <strong>{contactValue}</strong>
+              </Typography>
+              <TextField
+                fullWidth
+                label="Enter OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                error={!!otpError}
+                helperText={otpError}
+                margin="normal"
+              />
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={handleOtpVerify}
+                sx={{ mt: 2 }}
+              >
+                VERIFY OTP
+              </Button>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOtpDialogOpen(false)}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
 };
 
 export default ManageProfile;

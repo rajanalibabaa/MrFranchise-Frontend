@@ -1,97 +1,50 @@
-import React, { useState } from 'react';
-import {Box, Button, TextField, Typography, Paper, Avatar
-} from "@mui/material";
-// import axios from "axios";
-import img from "../../assets/images/brandLogo.jpg";
-import PersonIcon from '@mui/icons-material/Person';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux';
+import {Box, Button, TextField, Typography, Paper, Avatar} from "@mui/material";
 
 const BrandManageProfile = () => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [BrandData] = useState({});
-    // const id = "6805dcbdfff4495f419cc07e";
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             const response = await axios.get(
-    //                 `http://localhost:5000/api/Brandr/getBrand/${id}`,
-    //                 {
-    //                     headers: {
-    //                         "Content-Type": "application/json",
-    //                         Authorization: `Bearer ${localStorage.getItem("token")}`,
-    //                     },
-    //                 }
-    //             );
-    //             setInvestorData(response.data);
-    //         } catch (error) {
-    //             console.error("Error fetching investor data:", error);
-    //         }
-    //     };
+  const [brandData, setBrandData] = useState({});
+  const brandUUID = useSelector((state) => state.auth?.brandUUID);
+  const token = useSelector((state) => state.auth?.AccessToken);
+  const [isEditing, setIsEditing] = useState(false);
 
-    //     fetchData();
-    // }, [id]);
-
-    // const handleManageProfileChange = (e) => {
-    //     const { name, value } = e.target;
-    //     setInvestorData((prevData) => ({
-    //         ...prevData,
-    //         [name]: value,
-    //     }));
-    // };
-
-    const fieldLabels = [
-        { key: "FirstName", label: "FirstName" },
-        { key: "LastName", label: "LastName" },
-        { key: "email", label: "Email" },
-        { key: "phoneNumber", label: "phoneNumber" },
-        { key: "brandName", label: "Brandname" },
-        { key: "companyname", label: "ComapanyName" },
-        { key: "city", label: "City" },
-        { key: "district", label: "District" },
-        { key: "Category", label: "Category" },
-        { key: "franchise", label: "Franchise" },
-        
-    ];
-
-    const renderTwoColumnForm = () => {
-        const rows = [];
-
-        for (let i = 0; i < fieldLabels.length; i += 2) {
-            const field1 = fieldLabels[i];
-            const field2 = fieldLabels[i + 1];
-
-            rows.push(
-                
-                <Box key={i} sx={{ display: "flex", gap: 1, mb: 1,height: "100%" }}>
-                    
-                    <TextField
-                        fullWidth
-                        label={field1.label}
-                        name={field1.key}
-                        value={BrandData?.[field1.key] || ""}
-                        // onChange={handleManageProfileChange}
-                        size="small"
-                    />
-                    {field2 ? (
-                        <TextField
-                            fullWidth
-                            label={field2.label}
-                            name={field2.key}
-                            value={BrandData?.[field2.key] || ""}
-                            // onChange={handleManageProfileChange}
-                            size="small"
-                        />
-                    ) : (
-                        <Box sx={{ flex: 1 }} />
-                    )}
-                </Box>
-            );
+  console.log('Brand UUID:', brandUUID);
+  console.log('Token:', token);
+  useEffect(() => {
+     
+    const fetchBrandDetails = async () => {
+        try {
+            const response = await axios.get(
+                `http://localhost:5000/api/v1/brand/register/getBrandByRegisterId/${brandUUID}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    withCredentials: true,
+                }
+            );  
+            console.log('Response:', response.data);
+            if (response.data.success) {
+                setBrandData( response.data.data);
+            } else {
+                console.error('Error fetching brand details:', response.data.message);
+            }
+        } catch (error) {
+            console.error('Error fetching brand details:', error);
         }
-
-        return rows;
     };
 
-    return (
-        <div style={{ display: "flex", marginTop: -30 }}>
+    if (brandUUID && token) {
+        fetchBrandDetails();
+    }
+    
+  }, [brandUUID, token]);
+
+  return (
+    <div>
+         <div style={{ display: "flex", marginTop: -30 }}>
             <Box
                 sx={{
                     p: 3,
@@ -114,7 +67,7 @@ const BrandManageProfile = () => {
 
                 {isEditing ? (
                     <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        {renderTwoColumnForm()}
+                        {/* {renderTwoColumnForm()} */}
                         <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 2,marginTop: -1 }}>
                             <Button  color="secondary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00", color: "#fff" }}>
                                 Cancel
@@ -138,42 +91,94 @@ const BrandManageProfile = () => {
                         }}>
                             <Avatar sx={{ width: 200, height: 200, mx: "auto", mb: 2 }}>
                                 <img
-                                    src={img}
-                                    alt="Profile"
+                                    src={"img"}
+                                    alt=""
                                     loading='lazy'
                                     style={{ width: "140%", height: "105%", borderRadius: "50%" }}
                                 />
-                                <PersonIcon fontSize="large" />
+                                {/* <PersonIcon fontSize="large" /> */}
                             </Avatar>
                         </Box>
 
-                        <Paper sx={{ p: 2, backgroundColor: "#fff", borderRadius: 2, border: "1px solid #ddd", marginTop: 2, marginLeft: -5 }}>
-                            <Typography><strong>FirstName:</strong> {BrandData.firstName} {BrandData.LastName}</Typography>
-                            <Typography><strong>Email:</strong> {BrandData.email}</Typography>
-                            <Typography><strong>phoneNumber:</strong> {BrandData.phoneNumber}</Typography>
-                            <Typography><strong>brandName:</strong> {BrandData.brandName}</Typography>
-                            <Typography><strong>companyname:</strong> {BrandData.address}</Typography>
-                            <Typography><strong>City:</strong> {BrandData.city}</Typography>
-                            <Typography><strong>District:</strong> {BrandData.district}</Typography>
-                            <Typography><strong>Category:</strong> {BrandData.state}</Typography>
-                            <Typography><strong>franchise:</strong> {BrandData.country}</Typography>
-                            {/* <Typography><strong>Pincode:</strong> {BrandData.pincode}</Typography> */}
-                            {/* <Typography><strong>Occupation:</strong> {investorData.occupation}</Typography>
-                            <Typography><strong>Category:</strong> {investorData.category}</Typography>
-                            <Typography><strong>Investment Range:</strong> {investorData.investmentRange}</Typography>
-                            <Typography><strong>Capital:</strong> {investorData.capital}</Typography>
-                            <Typography><strong>Looking For:</strong> {investorData.lookingFor}</Typography>
-                            <Typography><strong>Own Property:</strong> {investorData.ownProperty}</Typography>
-                            <Typography><strong>Property Type:</strong> {investorData.propertyType}</Typography>
-                            <Typography><strong>Min Area:</strong> {investorData.minArea}</Typography>
-                            <Typography><strong>Max Area:</strong> {investorData.maxArea}</Typography>
-                            <Typography><strong>Sqft:</strong> {investorData.sqft}</Typography> */}
+                         <Paper sx={{ p: 2, backgroundColor: "#fff", borderRadius: 2, border: "1px solid #ddd", marginTop: 2, marginLeft: -5 }}>
+                             <Typography><strong>FirstName:</strong> {brandData.firstName} {brandData.LastName}</Typography>
+                             <Typography><strong>Email:</strong> {brandData.email}</Typography>
+                             <Typography><strong>phoneNumber:</strong> {brandData.phone}</Typography>
+                             <Typography><strong>brandName:</strong> {brandData.brandName}</Typography>
+                             <Typography><strong>companyname:</strong> {brandData.companyName}</Typography>
+                             <Typography><strong>City:</strong> {brandData.city}</Typography>
+                             <Typography><strong>District:</strong> {brandData.city}</Typography>
+                             <Typography><strong>Category:</strong> {brandData.state}</Typography>
+                             <Typography><strong>franchise:</strong> {brandData.category}</Typography>
+                         {/* <Typography><strong>Pincode:</strong> {BrandData.pincode}</Typography> */}
+                             {/* <Typography><strong>Occupation:</strong> {investorData.occupation}</Typography>
+//                             <Typography><strong>Category:</strong> {investorData.category}</Typography>
+//                             <Typography><strong>Investment Range:</strong> {investorData.investmentRange}</Typography>
+//                             <Typography><strong>Capital:</strong> {investorData.capital}</Typography>
+//                             <Typography><strong>Looking For:</strong> {investorData.lookingFor}</Typography>
+//                             <Typography><strong>Own Property:</strong> {investorData.ownProperty}</Typography>
+//                             <Typography><strong>Property Type:</strong> {investorData.propertyType}</Typography>
+//                             <Typography><strong>Min Area:</strong> {investorData.minArea}</Typography>
+//                             <Typography><strong>Max Area:</strong> {investorData.maxArea}</Typography>
+//                             <Typography><strong>Sqft:</strong> {investorData.sqft}</Typography> */}
                         </Paper>
                     </>
-                )}
-            </Box>
+               )}
+           </Box>
         </div>
-    );
-};
+    </div>
+  )
+}
 
-export default BrandManageProfile;
+export default BrandManageProfile
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

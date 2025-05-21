@@ -1,54 +1,55 @@
-
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, Avatar, Tabs, Tab} from "@mui/material";
+import React, { useState } from 'react';
+import {
+    Box,
+    Typography,
+    Avatar,
+    Tabs,
+    Tab
+} from "@mui/material";
 import PersonIcon from '@mui/icons-material/Person';
-import img from "../../assets/images/brandLogo.jpg"; 
-import { useSelector } from 'react-redux';
-import axios from 'axios';
+import img from "../../assets/images/brandLogo.jpg";
 
-const BrandDashBoard = ({ selectedSection, sectionContent }) => {
+const DashBoard = ({ selectedSection, sectionContent }) => {
     const [tabValue, setTabValue] = useState(0);
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
     };
-    const [brandData, setBrandData] = useState({});
 
-    const brandUUID = useSelector((state) => state.auth.brandUUID);
-    const token = useSelector((state) => state.auth.AccessToken);
-     console.log('Brand UUID:', brandUUID);
-     console.log('Token:', token);
-    useEffect(() => {
-
-        const fetchBrandDetails = async () => {
-            try {
-                const response = await axios.get(
-                   `http://localhost:5000/api/v1/brand/register/getBrandByRegisterId/${brandUUID}`,
-                   {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    withCredentials: true,
-                   }
-
+    const renderTabContent = () => {
+        switch (tabValue) {
+            case 0:
+                return (
+                    <Box sx={{ p: 2 }}>
+                        <Typography variant="h6">Expressed Interest</Typography>
+                        <Typography>List of brands the user expressed interest in.</Typography>
+                    </Box>
                 );
-                if(response.data.success) {
-                    setBrandData( response.data.data);
-                }else{
-                    console.error("Error fetching brand details:", response.data.message);
-                }
-            } catch (error) {
-                console.error("Error fetching brand details:", error);
-            }
-        };
-
-        if (brandUUID && token) {
-            fetchBrandDetails();
+            case 1:
+                return (
+                    <Box sx={{ p: 2 }}>
+                        <Typography variant="h6">Viewed Brands</Typography>
+                        <Typography>List of brands the user has viewed.</Typography>
+                    </Box>
+                );
+            case 2:
+                return (
+                    <Box sx={{ p: 2 }}>
+                        <Typography variant="h6">Liked Brands</Typography>
+                        <Typography>List of brands the user has liked.</Typography>
+                    </Box>
+                );
+            case 3:
+                return (
+                    <Box sx={{ p: 2 }}>
+                        <Typography variant="h6">Short List</Typography>
+                        <Typography>Shortlisted brands for follow-up.</Typography>
+                    </Box>
+                );
+            default:
+                return null;
         }
-
-    }, [brandUUID, token]);
-    
+    };
 
     return (
         <div>
@@ -69,26 +70,17 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                             }}>
                                 <Avatar sx={{
                                     width: 200, height: 200, mx: "auto", mb: 2,
-                                    bgcolor: "transparent", objectFit: "cover",
-                                    img: {
-                                        objectFit: 'cover',
-                                        width: '100%',
-                                        height: '100%',
-                                        borderRadius: '50%',
-                                        loading: 'lazy'
-                                    }
+                                    bgcolor: "transparent"
                                 }}>
                                     <img
                                         src={img}
                                         alt="Profile"
-                                        loading="lazy"
                                         style={{ width: "140%", height: "105%", borderRadius: "50%" }}
                                     />
                                     <PersonIcon fontSize="large" />
                                 </Avatar>
                             </Box>
 
-                            {/* Profile Info */}
                             <Box sx={{ flex: 1 }}>
                                 <Box sx={{
                                     mb: 3, bgcolor: "#fff", p: 2, borderRadius: 2,
@@ -96,10 +88,10 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                                     height: "40%", paddingTop: "65px", paddingBottom: "65px"
                                 }}>
                                     <Typography variant="h4" fontWeight={600}>
-                                        Welcome {brandData.firstName}
+                                        Welcome (Manikandan.M)
                                     </Typography>
                                     <Typography color="text.secondary" variant="h5">
-                                        Brand Investor
+                                        Investor
                                     </Typography>
                                     <Typography color="text.secondary" variant="h5" fontWeight={800}>
                                         ID(721720104305)
@@ -109,17 +101,16 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                         </Box>
                     )}
 
-
+                    {/* Dashboard Tabs Section */}
                     {!selectedSection || selectedSection === "Dashboard" ? (
                         <>
-
                             <Box sx={{ display: "flex", gap: 4, mt: -6, padding: 2 }}>
-
+                                {/* Placeholder for additional dashboard cards */}
                             </Box>
-
 
                             <Box sx={{ mt: 4 }}>
                                 <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+                                    {/* Placeholder for filters/stats */}
                                 </Box>
                                 <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
                                     <Tabs value={tabValue} onChange={handleTabChange} centered>
@@ -129,27 +120,18 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                                         <Tab label="Short List" />
                                     </Tabs>
                                 </Box>
+                                <Box>
+                                    {renderTabContent()}
+                                </Box>
                             </Box>
                         </>
                     ) : (
                         sectionContent[selectedSection]
                     )}
-
                 </Box>
             </Box>
         </div>
     );
 };
 
-export default BrandDashBoard;
-
-
-
-
-
-
-
-
-
-
-
+export default DashBoard;

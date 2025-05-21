@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box, TextField, Typography, Paper, Button
-} from "@mui/material";
+import {Box, TextField, Typography, Paper, Button} from "@mui/material";
 
 const BrandListingController = ({ brandData = {} }) => {
   const navigate = useNavigate();
@@ -11,7 +9,7 @@ const BrandListingController = ({ brandData = {} }) => {
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState('');
   const [isOtpVerifyOpen, setIsOtpVerifyOpen] = useState(false);
-  const [correctOtp] = useState('123456'); // Replace with backend check
+  const [correctOtp] = useState('123456'); 
 
   const isValidPhone = (value) => /^[0-9]{10,}$/.test(value);
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
