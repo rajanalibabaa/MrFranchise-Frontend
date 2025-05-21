@@ -30,6 +30,8 @@ import Help from './Components/QuickLinks/Help.jsx';
 import ContactUs from './Components/QuickLinks/ContactUs.jsx';
 import AboutUs from './Components/QuickLinks/AboutUs.jsx';
 import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
+import BrandViewPage from "./Pages/BrandViewPage/BrandViewPage.jsx"
+
 
 
 function App() {
@@ -38,7 +40,7 @@ function App() {
     <>
       <Routes>
   <Route path="/" element={<HomeBannerSec />} />
-  {/* <Route path="/brandViewPage" element={<BrandViewPage />} /> */}
+  <Route path="/brandview" element={<BrandViewPage />} />
   <Route path="/investor-register" element={<InvestorRegister />} />
   <Route path="/brand-register" element={<BrandRegister />} />
   <Route path="/loginpage" element={<LoginPage />} />

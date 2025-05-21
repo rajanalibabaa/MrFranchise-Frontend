@@ -1,488 +1,317 @@
-import React, { useState } from "react";
-import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
-// eslint-disable-next-line no-unused-vars
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { Box, Typography, Button, IconButton } from "@mui/material";
-// import img from "../../assets/Images/bgimg.jpg"
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import {
+  Box,
+  Typography,
+  Card,
+  Button,
+  IconButton,
+  Avatar,
+} from "@mui/material";
+import { ChevronLeft, ChevronRight, Favorite, FavoriteBorder } from "@mui/icons-material";
+import { motion, AnimatePresence } from "framer-motion";
+
+const brandData = [
+  {
+    video: "https://www.w3schools.com/html/mov_bbb.mp4",
+    image: "https://mrfranchise.in/wp-content/uploads/2024/11/fresh2day-mrfranchisein.png",
+    name: "Fresh2Day",
+    logo: "https://via.placeholder.com/32x32?text=H",
+    category: "Saloon & Spa, Health & Beauty",
+    investment: "50 L – 75 L",
+    area: "3,000 - 5,000 Sq. Ft",
+    desc: "Fresh2Day is Chennai's best food and grocery store.   and Vegetables, Rice and Dals, Spices and Seasonings to Packaged products, Bakery Products, Beverages, – we have it all",
+  },
+  {
+    video: "https://www.w3schools.com/html/movie.mp4",
+    image: "https://mrfranchise.in/wp-content/uploads/2024/10/skale-logo.png",
+    name: "Skale",
+    logo: "https://via.placeholder.com/32x32?text=F",
+    category: "Skale Fitness",
+    investment: "₹1 Cr. – 2 Cr.",
+    area: "2,000 - 3,000 Sq. Ft",
+    desc: "Premium fitness brand with modern training equipment for Indian fitness. If we look around, we will find that weight loss advertisements are rampant everywhere.",
+  },
+];
+
+const variants = {
+  enter: (direction) => ({
+    x: direction > 0 ? 100 : -100,
+    opacity: 0,
+    scale: 0.95,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.6,
+      ease: "easeInOut",
+    },
+  },
+  exit: (direction) => ({
+    x: direction < 0 ? 100 : -100,
+    opacity: 0,
+    scale: 0.95,
+  }),
+};
+
+function TopBrandVdoSec() {
+  const [[index, direction], setIndex] = useState([0, 0]);
+  const [liked, setLiked] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const timeoutRef = useRef(null);
+  const videoRef = useRef(null);
+
+  // const handleNext = () => {
+  //   if (!isHovered && !isVideoPlaying) {
+  //     setIndex(([i]) => [(i + 1) % brandData.length, 1]);
+  //     setLiked(false);
+  //   }
+  // };
+
+    const handleNext = useCallback(() => {
+  if (!isHovered && !isVideoPlaying) {
+    setIndex(([i]) => [(i + 1) % brandData.length, 1]);
+    setLiked(false);
+  }
+}, [isHovered, isVideoPlaying]);
+
+  const handlePrev = () => {
+    setIndex(([i]) => [(i - 1 + brandData.length) % brandData.length, -1]);
+    setLiked(false);
+  };
+
+  // const startAutoSlide = () => {
+  //   clearTimeout(timeoutRef.current);
+  //   if (!isHovered && !isVideoPlaying) {
+  //     timeoutRef.current = setTimeout(() => handleNext(), 5000);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   startAutoSlide();
+  //   return () => clearTimeout(timeoutRef.current);
+  // }, [index, isHovered, isVideoPlaying]);
 
 
-const topbrandData = [
-    {
-      src: 'speaking',
-      poster: 'zudio',
-      name: "Zudio",
-      investment: "₹2 Cr. - 5 Cr",
-      area: "6000 - 8000",
-      outlets: "200-500",
-      description:
-        "Shop for the Best Men & Women Clothing at Zudio Store near you. Explore our wide range of Beauty, Ethnic Wear, Kids wear, Footwear and more at Zudio.",
-      logo: 'zudio',
-    },
-    {
-      src: 'speaking',
-      poster: 'zudio',
-      name: "Starbucks",
-      investment: "₹1 Cr. - 3 Cr",
-      area: "1500 - 2500",
-      outlets: "300-600",
-      description:
-        "Premium coffee and café experience available nationwide Shop for the Best Men & Women Clothing at Zudio Store near you. Explore our wide range of Beauty, Ethnic Wear, Kids wear, Footwear and more at Zudio.",
-      logo: 'zudio',
-    },
-    {
-      src: 'speaking',
-      poster: 'zudio',
-      name: "Tea Boy",
-      investment: "₹1.5 Cr. - 4 Cr",
-      area: "1000 - 2000",
-      outlets: "600-1000",
-      description:
-        "Global fast food chain known for fried chicken Shop for the Best Men & Women Clothing at Zudio Store near you. Explore our wide range of Beauty, Ethnic Wear, Kids wear, Footwear and more at Zudio.",
-      logo: 'zudio',
-    },
-  ];
 
-const TopBrandVdoSec = () => {
-    const [currentVideo, setCurrentVideo] = useState(0);
-    const navigate = useNavigate();
-  
-    const nextVideo = () => setCurrentVideo((prev) => (prev + 1) % topbrandData.length);
-    const prevVideo = () => setCurrentVideo((prev) => (prev - 1 + topbrandData.length) % topbrandData.length);
-  
-    const currentItem = topbrandData[currentVideo];
+const startAutoSlide = useCallback(() => {
+  clearTimeout(timeoutRef.current);
+  if (!isHovered && !isVideoPlaying) {
+    timeoutRef.current = setTimeout(() => handleNext(), 5000);
+  }
+}, [isHovered, isVideoPlaying, handleNext]);
+
+useEffect(() => {
+  startAutoSlide();
+  return () => clearTimeout(timeoutRef.current);
+}, [index, startAutoSlide]);
+
+  const handleVideoPlay = () => {
+    setIsVideoPlaying(true);
+    clearTimeout(timeoutRef.current);
+  };
+
+  const handleVideoPause = () => {
+    setIsVideoPlaying(false);
+    startAutoSlide();
+  };
+
+  const brand = brandData[index];
+
   return (
-    <Box sx={{ p: 2 }}>
+    <Box 
+      sx={{ p: 4, maxWidth: "1200px", mx: "auto" }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <Typography
-        variant="h3"
-        sx={{
-          mb: 2,
-          fontWeight: 700,
-          background: "linear-gradient(90deg, #3498db, #2ecc71, #e74c3c)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          animation: "gradient 3s linear infinite",
-          "@keyframes gradient": {
-            "0%": { backgroundPosition: "0% center" },
-            "100%": { backgroundPosition: "200% center" },
-          },
-          backgroundSize: "200% auto",
-        }}
+        variant="h5"
+        fontWeight="bold"
+        mb={2}
+        component={motion.div}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
       >
-        Top Brands in Franchise
+        Top Brand
       </Typography>
 
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "2fr 1.1fr" },
-          gap: 2,
-        }}
-      >
-        {/* Video Section */}
+      <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+        {/* Left Video Section */}
         <Box
           sx={{
+            flex: 1,
+            minWidth: 0,
             position: "relative",
-            backgroundColor: "#333",
             borderRadius: 2,
             overflow: "hidden",
-            height: { xs: 200, sm: 250, md: 440 },
+            boxShadow: 3,
+            height: 330,
           }}
         >
-          <motion.div
-            key={currentItem.src}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.5 }}
-            style={{ position: "relative", height: "100%" }}
-            onMouseEnter={(e) => {
-              const video = e.currentTarget.querySelector("video");
-              const img = e.currentTarget.querySelector("img");
-              if (video && img) {
-                video.style.display = "block";
-                img.style.display = "none";
-                video.play();
-              }
+          <motion.video
+            ref={videoRef}
+            key={brand.video}
+            src={brand.video}
+            controls
+            onPlay={handleVideoPlay}
+            onPause={handleVideoPause}
+            initial={{ opacity: 0.5, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              borderRadius: 8,
             }}
-            onMouseLeave={(e) => {
-              const video = e.currentTarget.querySelector("video");
-              const img = e.currentTarget.querySelector("img");
-              if (video && img) {
-                video.pause();
-                video.currentTime = 0;
-                video.style.display = "none";
-                img.style.display = "block";
-              }
+          />
+
+          {/* Arrows */}
+          <IconButton
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: 8,
+              transform: "translateY(-50%)",
+              bgcolor: "white",
+              zIndex: 10,
+              boxShadow: 1,
             }}
+            onClick={handlePrev}
           >
-            <img
-              src={currentItem.poster}
-              alt="thumbnail"
-              style={{
-                width: "100%",
+            <ChevronLeft />
+          </IconButton>
+          <IconButton
+            sx={{
+              position: "absolute",
+              top: "50%",
+              right: 8,
+              transform: "translateY(-50%)",
+              bgcolor: "white",
+              zIndex: 10,
+              boxShadow: 1,
+            }}
+            onClick={handleNext}
+          >
+            <ChevronRight />
+          </IconButton>
+        </Box>
+
+        {/* Right Card Section */}
+        <AnimatePresence mode="wait" custom={direction}>
+          <Card
+            key={brand.name}
+            component={motion.div}
+            custom={direction}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            variants={variants}
+            sx={{
+              flex: 1,
+              minWidth: 360,
+              height: 330,
+              display: "flex",
+              borderRadius: 3,
+              boxShadow: 4,
+              overflow: "hidden",
+
+              ":hover": {
+                boxShadow: 9,               
+            }}}
+          >
+            <Box
+              component="img"
+              src={brand.image}
+              alt={brand.name}
+              sx={{
+                width: "45%",
                 height: "100%",
-                objectFit: "cover",
-                borderRadius: 8,
-                display: "block",
+                objectFit: "fill",
               }}
             />
 
             <Box
-              className="top1-play-button"
               sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: 60,
-                height: 60,
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                borderRadius: "50%",
+                p: 2,
+                width: "55%",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "1.8rem",
-                color: "#e74c3c",
-                cursor: "pointer",
-                zIndex: 2,
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  opacity: 0,
-                },
+                flexDirection: "column",
+                justifyContent: "space-between",
               }}
             >
-              ▶
+              <Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    mb: 1,
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Avatar src={brand.logo} sx={{ width: 28, height: 28 }} />
+                    <Typography variant="h6" fontWeight="bold">
+                      {brand.name}
+                    </Typography>
+                  </Box>
+
+                  <IconButton
+                    onClick={() => setLiked(!liked)}
+                    size="small"
+                    sx={{ p: 0.5 }}
+                  >
+                    {liked ? (
+                      <Favorite sx={{ color: "red", fontSize: 25 }} />
+                    ) : (
+                      <FavoriteBorder sx={{ color: "gray", fontSize: 25 }} />
+                    )}
+                  </IconButton>
+                </Box>
+
+                <Typography variant="body2" color="text.secondary" mb={1}>
+                  {brand.category}
+                </Typography>
+
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                  💰 {brand.investment}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  📐 {brand.area}
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary">
+                  {brand.desc}
+                </Typography>
+              </Box>
+
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "#f29724",
+                  textTransform: "none",
+                  width: "fit-content",
+                  px: 3,
+                  borderRadius: 1,
+                  // fontWeight: "bold",
+                  mt: 1,
+                  "&:hover": {
+                    backgroundColor: "#e2faa7",
+                    color: "#000",
+                  },
+                }}
+              >
+                Apply
+              </Button>
             </Box>
-
-            <video
-              width="100%"
-              height="100%"
-              controls
-              muted
-              style={{
-                display: "none",
-                borderRadius: 8,
-                objectFit: "cover",
-                height: "100%",
-              }}
-            >
-              <source src={currentItem.src} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-
-            <IconButton
-              onClick={prevVideo}
-              sx={{
-                position: "absolute",
-                top: "50%",
-                left: 10,
-                transform: "translateY(-50%)",
-                color: "#fff",
-                backgroundColor: "rgba(0,0,0,0.5)",
-                "&:hover": { backgroundColor: "rgba(0,0,0,0.8)" },
-              }}
-            >
-              <ArrowBackIos />
-            </IconButton>
-
-            <IconButton
-              onClick={nextVideo}
-              sx={{
-                position: "absolute",
-                top: "50%",
-                right: 10,
-                transform: "translateY(-50%)",
-                color: "#fff",
-                backgroundColor: "rgba(0,0,0,0.5)",
-                "&:hover": { backgroundColor: "rgba(0,0,0,0.8)" },
-              }}
-            >
-              <ArrowForwardIos />
-            </IconButton>
-          </motion.div>
-        </Box>
-
-        {/* Info Panel */}
-        <Box
-          sx={{
-            borderRadius: 2,
-            p: 2,
-            backgroundColor: "#fff",
-            maxHeight: { xs: 250, sm: 300, md: 440 },
-            overflowY: "auto",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <Box sx={{ mb: 2, textAlign: "center" }}>
-            <img
-              src={currentItem.logo}
-              alt={currentItem.name}
-              style={{
-                width: "100%",
-                maxHeight: 200,
-                objectFit: "cover",
-                borderRadius: 8,
-              }}
-            />
-            <Typography variant="h6" sx={{ mt: 1 }}>
-              {currentItem.name}
-            </Typography>
-          </Box>
-
-          <Typography>
-            <strong>Investment range:</strong> {currentItem.investment}
-          </Typography>
-          <Typography>
-            <strong>Area Required:</strong> {currentItem.area}
-          </Typography>
-          <Typography>
-            <strong>Franchise Outlets:</strong> {currentItem.outlets}
-          </Typography>
-
-          <Button
-            onClick={() => navigate("/brandview")}
-            variant="outlined"
-            fullWidth
-            sx={{ mt: 2, borderRadius: 2 }}
-          >
-            VISIT SITE
-          </Button>
-        </Box>
+          </Card>
+        </AnimatePresence>
       </Box>
     </Box>
-  )
+  );
 }
 
-export default TopBrandVdoSec
-
-
-
-
-// import React, { useEffect, useState } from "react";
-// import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
-// import { motion } from "framer-motion";
-// import { useNavigate } from "react-router-dom";
-// import {
-//   Box,
-//   Typography,
-//   Button,
-//   IconButton,
-//   CircularProgress,
-// } from "@mui/material";
-// import axios from "axios";
-
-// const TopBrandVdoSec = () => {
-//   const [brandData, setBrandData] = useState([]);
-//   const [currentIndex, setCurrentIndex] = useState(0);
-//   // const [loading, setLoading] = useState(true);
-//   const navigate = useNavigate();
-
-//   const fetchBrands = async () => {
-//     try {
-//       const res = await axios.get(
-//         "http://localhost:5000/api/v1/admin/videoAdvertise/getAdminVideoAdvertise"
-//       );
-//       setBrandData(res.data || []);
-//     } catch (err) {
-//       console.error("API fetch error:", err);
-//     } finally {
-//       // setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchBrands();
-//   }, []);
-
-//   const handlePrev = () => {
-//     setCurrentIndex((prev) => (prev - 1 + brandData.length) % brandData.length);
-//   };
-
-//   const handleNext = () => {
-//     setCurrentIndex((prev) => (prev + 1) % brandData.length);
-//   };
-
-//   // if (loading) {
-//   //   return (
-//   //     <Box sx={{ p: 4, textAlign: "center" }}>
-//   //       <CircularProgress />
-//   //     </Box>
-//   //   );
-//   // }
-
-//   // if (brandData.length === 0) {
-//   //   return (
-//   //     <Box sx={{ p: 4, textAlign: "center" }}>
-//   //       <Typography>No brand data found.</Typography>
-//   //     </Box>
-//   //   );
-//   // }
-
-//   const current = brandData[currentIndex];
-
-//   return (
-//     <Box sx={{ p: 2 }}>
-//       <Typography
-//         variant="h3"
-//         sx={{
-//           mb: 3,
-//           fontWeight: 700,
-//           background: "linear-gradient(90deg, #3498db, #2ecc71, #e74c3c)",
-//           WebkitBackgroundClip: "text",
-//           WebkitTextFillColor: "transparent",
-//           backgroundSize: "200% auto",
-//           animation: "gradient 3s linear infinite",
-//           "@keyframes gradient": {
-//             "0%": { backgroundPosition: "0% center" },
-//             "100%": { backgroundPosition: "200% center" },
-//           },
-//         }}
-//       >
-//         Top Brands in Franchise
-//       </Typography>
-
-//       <Box
-//         sx={{
-//           display: "grid",
-//           gridTemplateColumns: { xs: "1fr", md: "2fr 1.1fr" },
-//           gap: 2,
-//         }}
-//       >
-//         {/* Video/Thumbnail Section */}
-//         <Box
-//           sx={{
-//             position: "relative",
-//             height: { xs: 250, sm: 300, md: 450 },
-//             borderRadius: 2,
-//             overflow: "hidden",
-//             backgroundColor: "#000",
-//           }}
-//         >
-//           <motion.div
-//             key={current._id}
-//             initial={{ opacity: 0, x: 30 }}
-//             animate={{ opacity: 1, x: 0 }}
-//             transition={{ duration: 0.5 }}
-//             onMouseEnter={(e) => {
-//               const vid = e.currentTarget.querySelector("video");
-//               const img = e.currentTarget.querySelector("img");
-//               if (vid && img) {
-//                 vid.style.display = "block";
-//                 img.style.display = "none";
-//                 vid.play().catch(() => {});
-//               }
-//             }}
-//             onMouseLeave={(e) => {
-//               const vid = e.currentTarget.querySelector("video");
-//               const img = e.currentTarget.querySelector("img");
-//               if (vid && img) {
-//                 vid.pause();
-//                 vid.currentTime = 0;
-//                 vid.style.display = "none";
-//                 img.style.display = "block";
-//               }
-//             }}
-//             style={{ height: "100%" }}
-//           >
-//             <img
-//               src={current.thumbnailUrl || "/placeholder.jpg"}
-//               alt="poster"
-//               style={{
-//                 width: "100%",
-//                 height: "100%",
-//                 objectFit: "cover",
-//                 display: "block",
-//               }}
-//             />
-
-//             <video
-//               muted
-//               controls
-//               style={{
-//                 display: "none",
-//                 width: "100%",
-//                 height: "100%",
-//                 objectFit: "cover",
-//               }}
-//             >
-//               <source src={current.videoUrl} type="video/mp4" />
-//               Your browser does not support the video tag.
-//             </video>
-//           </motion.div>
-
-//           {/* Navigation buttons */}
-//           <IconButton
-//             onClick={handlePrev}
-//             sx={{
-//               position: "absolute",
-//               top: "50%",
-//               left: 10,
-//               transform: "translateY(-50%)",
-//               color: "#fff",
-//               backgroundColor: "rgba(0,0,0,0.4)",
-//               "&:hover": { backgroundColor: "rgba(0,0,0,0.7)" },
-//             }}
-//           >
-//             <ArrowBackIos />
-//           </IconButton>
-
-//           <IconButton
-//             onClick={handleNext}
-//             sx={{
-//               position: "absolute",
-//               top: "50%",
-//               right: 10,
-//               transform: "translateY(-50%)",
-//               color: "#fff",
-//               backgroundColor: "rgba(0,0,0,0.4)",
-//               "&:hover": { backgroundColor: "rgba(0,0,0,0.7)" },
-//             }}
-//           >
-//             <ArrowForwardIos />
-//           </IconButton>
-//         </Box>
-
-//         {/* Info Panel */}
-//         <Box
-//           sx={{
-//             p: 2,
-//             backgroundColor: "#fff",
-//             borderRadius: 2,
-//             boxShadow: 3,
-//             overflowY: "auto",
-//             maxHeight: { xs: 250, sm: 300, md: 450 },
-//           }}
-//         >
-//           <Typography variant="h6" gutterBottom>
-//             {current.brandName}
-//           </Typography>
-//           <Typography>
-//             <strong>Investment:</strong> {current.investmentRange}
-//           </Typography>
-//           <Typography>
-//             <strong>Area Required:</strong> {current.areaRequired}
-//           </Typography>
-//           <Typography>
-//             <strong>Outlets:</strong> {current.outletCount}
-//           </Typography>
-//           <Typography sx={{ mt: 1 }}>{current.description}</Typography>
-//           <Button
-//             fullWidth
-//             variant="outlined"
-//             sx={{ mt: 2 }}
-//             onClick={() => navigate("/brandViewPage")}
-//           >
-//             Visit Site
-//           </Button>
-//         </Box>
-//       </Box>
-//     </Box>
-//   );
-// };
-
-// export default TopBrandVdoSec;
-
-
-
-
+export default TopBrandVdoSec;
