@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   formData: {
     firstName: "",
+    countryCode: "+91",
     phone: "",
     email: "",
     brandName: "",
@@ -21,12 +22,14 @@ const brandRegisterSlice = createSlice({
       const { name, value } = action.payload;
       state.formData[name] = value;
     },
+
     setErrors: (state, action) => {
       state.errors = action.payload;
     },
     resetForm: (state) => {
       state.formData = {
         firstName: "",
+        countryCode: "+91",
         phone: "",
         email: "",
         brandName: "",

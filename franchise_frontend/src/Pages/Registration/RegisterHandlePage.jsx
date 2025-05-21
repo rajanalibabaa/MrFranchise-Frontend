@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState} from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -7,6 +7,7 @@ import {
   Button,
   useTheme,
   useMediaQuery,
+  Dialog
 } from "@mui/material";
 
 import businessLogo from "../../assets/images/Business_logo.png";
@@ -15,11 +16,22 @@ import FacebookIcon from "../../Assets/Images/FacebookIcon.png";
 // import InstagramIcon from "../../Assets/Images/InstagramIcon.png";
 // import TwitterIcon from "../../Assets/Images/TwitterIcon.png";
 import GoogleIcon from "../../Assets/Images/GoogleIcon.png";
+import LoginPage from "../../Pages/LoginPage/LoginPage"
 
 function RegisterHandleUser() {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const [loginOpen, setLoginOpen] = useState(false);
+
+  const openLoginPopup = () => {
+    setLoginOpen(true);
+  };
+
+  const closeLoginPopup = () => {
+    setLoginOpen(false);
+  };
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -99,9 +111,9 @@ function RegisterHandleUser() {
           onClick={() => handleNavigation("/investor-register")}
           sx={{
             mb: 2,
-            bgcolor: "#e99830",
+            bgcolor: "#7ad03a",
             "&:hover": {
-              bgcolor: "#7ad03a",
+              bgcolor: "#e99830",
             },
             width: "100%",
             maxWidth: 250,
@@ -127,12 +139,13 @@ function RegisterHandleUser() {
         </Button>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
-          Don't have an account?{" "}
+          Already have an account?{" "}
           <Box
-            component="a"
-            href="/loginpage"
+            component="span"
+            onClick={openLoginPopup}
             sx={{
               textDecoration: "none",
+              cursor: "pointer",
               color: "#007bff",
               "&:hover": {
                 color: "#0056b3",
@@ -248,6 +261,10 @@ function RegisterHandleUser() {
       />
     </Grid> */}
   </Grid>
+  {/* Login Popup Dialog */}
+      <Dialog open={loginOpen} onClose={closeLoginPopup} maxWidth="sm" fullWidth>
+        <LoginPage open={loginOpen} onClose={closeLoginPopup} />
+      </Dialog>
 </Box>
       </Grid>
     </Box>

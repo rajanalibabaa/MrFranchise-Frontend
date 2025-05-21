@@ -30,6 +30,9 @@ import ContactUs from './Components/QuickLinks/ContactUs.jsx';
 import AboutUs from './Components/QuickLinks/AboutUs.jsx';
 import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
 import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccount.jsx';
+import { Provider } from 'react-redux';
+import store from './Redux/Store/Index.jsx';
+import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
 
 
 function App() {
@@ -47,7 +50,7 @@ function App() {
   <Route path="/registerhandleuser" element={<RegisterHandleUser />} />
   <Route path="/brandlistingform" element={<BrandListingFormPage />} />
   <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
-  <Route path='brandviewpage' element={<BrandViewPage />} />
+  <Route path='/brandviewpage' element={<BrandCategroyViewPage />} />
 
   <Route path="/investordashboard" element={<ProfilePage />}>
     <Route index element={<DashBoard />} />

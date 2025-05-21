@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setField, setErrors, resetForm } from "../../Redux/Slices/brandRegisterSlice";
+import { setField, setErrors, resetForm } from "../../Redux/Slices/BrandRegisterSlice";
 import brandImage from "../../assets/Images/BrandRegister.jpg";
 import { categories } from "../BrandListingForm/BrandCategories";
 import axios from "axios";
@@ -104,7 +104,7 @@ const handleSubmit = async (e) => {
       console.log("Response Data:", response.data);
       dispatch(resetForm());
       localStorage.removeItem("brandFormData");
-      navigate("/loginPage");
+      navigate("/brandlistingform");
     } catch (error) {
       if (error.response) {
         console.error("Error Response:", error.response.data);
