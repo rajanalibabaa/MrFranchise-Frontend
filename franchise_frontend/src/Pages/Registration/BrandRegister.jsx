@@ -285,7 +285,9 @@ const handleSubmit = async (e) => {
                   )}
                 </FormControl>
               </Grid>
-
+<Grid>
+  <Button  onClick={() => navigate("/brandListingForm")} variant="contained" > Add Brands to Listing</Button>
+</Grid>
               <Grid xs={12}sx={{width: "60%", marginLeft: "20%"}}>
                 <Button
                   type="submit"

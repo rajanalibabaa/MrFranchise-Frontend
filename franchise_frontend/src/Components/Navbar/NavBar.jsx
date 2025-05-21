@@ -56,7 +56,7 @@ function Navbar() {
           </IconButton>
           <Typography variant="h6">MR FRANCHISE</Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Link to="/allcategories">CATEGORY</Link>
+            <Link to="/brandsearchview">Find Your Brands</Link>
             <Button variant="outlined" onClick={() => handleNavigate("/brandlistingform")}>ADD LISTING</Button>
             <Box sx={{ position: "relative" }} onClick={() => setMenuOpen(!menuOpen)}>
               {isLoggedIn ? <User /> : <Avatar src="/broken-image.jpg" />}

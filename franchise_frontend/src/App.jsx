@@ -23,7 +23,6 @@ import BrandManageProfile from './Components/BrandProfile_Component/BrandManageP
 import BrandFeedBack from './Components/BrandProfile_Component/BrandFeedback';
 import BrandComplaint from './Components/BrandProfile_Component/BrandComplaint';
 import BrandAddVedios from './Components/BrandProfile_Component/BrandAddVedios';
-import AllCategoryMainPage from './Pages/AllCategoryPage/AllCategoryMainPage';
 import TermsCondition from './Components/QuickLinks/TermsCondition.jsx';
 import Faq from './Components/QuickLinks/Faq.jsx';
 import Help from './Components/QuickLinks/Help.jsx';
@@ -32,7 +31,9 @@ import AboutUs from './Components/QuickLinks/AboutUs.jsx';
 import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
 import { Provider } from 'react-redux';
 import store from "./Redux/Store/Index.jsx"
-import BrandDocumentsViewer from './Pages/AllCategoryPage/AllCategroyView.jsx';
+import BrandViewPage from './Pages/BrandViewPage/BrandViewPage.jsx';
+import BrandList from './Pages/AllCategoryPage/AllCategoryBrandDetail.jsx';
+import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
 
 
 function App() {
@@ -41,8 +42,6 @@ function App() {
     <>
 
     <Provider store={store}>
-
-    </Provider>
       <Routes>
   <Route path="/" element={<HomeBannerSec />} />
   {/* <Route path="/brandViewPage" element={<BrandViewPage />} /> */}
@@ -52,7 +51,7 @@ function App() {
   <Route path="/registerhandleuser" element={<RegisterHandleUser />} />
   <Route path="/brandlistingform" element={<BrandListingFormPage />} />
   <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
-  <Route path="/allcategories" element={<BrandDocumentsViewer />} />
+  <Route path='brandviewpage' element={<BrandViewPage />} />
 
   <Route path="/investerdashboard" element={<ProfilePage />}>
     <Route index element={<DashBoard />} />
@@ -80,7 +79,18 @@ function App() {
   <Route path="/help" element={<Help />} />
   <Route path="/faq" element={<Faq />} />
   <Route path="/termscondition" element={<TermsCondition />} />
+
+  <Route path="/brandsearchview" element={<BrandCategroyViewPage />} />
+  {/* <Route path='/AllCategorybrands' element={<BrandList />} /> */}
+
+
+  
+
+
+  
 </Routes>
+    </Provider>
+
     </>
   );
 }

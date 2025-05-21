@@ -389,6 +389,7 @@ console.log("First gallery file type:", formData.gallery.mediaFiles?.[0]?.type);
         setFormData(initialFormData);
         setActiveStep(0);
         setHasUnsavedChanges(false);
+        navigate("/brand-register")
         // setTimeout(() => navigate("/success"), 1500);
       } else {
         throw new Error(response.data.message || "Submission failed");

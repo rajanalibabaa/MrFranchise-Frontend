@@ -17,13 +17,20 @@ const FranchiseModel = ({ data, onChange,onFinish}) => {
   const [errors, setErrors] = useState({});
 
   const investmentRanges = [
-    "Less than ₹5 Lakhs",
-    "₹5 - ₹10 Lakhs",
-    "₹10 - ₹20 Lakhs",
-    "₹20 - ₹50 Lakhs",
-    "₹50 Lakhs - ₹1 Cr",
-    "Above ₹1 Cr",
+    "Below - Rs.50K",
+    "Rs.50 K - 2 L",
+    "Rs.2 L - 5 L",
+    "Rs.5 L - 10 L",
+    "Rs.10 L - 20 L",
+    "Rs.20 L - 30 L",
+    "Rs.30 L - 50 L",
+    "Rs.50 L - 1 Cr",
+    "Rs.1 Cr - 2 Cr",
+    "Rs.2 Cr - 5 Cr",
+    "Rs.5 Cr - Above"
+
   ];
+
 
   const modalSteps = [
     "Investment Details",
@@ -120,7 +127,7 @@ const FranchiseModel = ({ data, onChange,onFinish}) => {
                 sx={{ width: "150px" }}
                 select
                 size="small"
-                label="Investment Range"
+                label="InvestmentRange"
                 value={data.totalInvestment}
                 onChange={handleFinancialChange("totalInvestment")}
                 error={!!errors.totalInvestment}
@@ -135,6 +142,7 @@ const FranchiseModel = ({ data, onChange,onFinish}) => {
               </TextField>
             </Grid>
             {[
+            
               "franchiseFee",
               "royaltyFee",
               "equipmentCost",
