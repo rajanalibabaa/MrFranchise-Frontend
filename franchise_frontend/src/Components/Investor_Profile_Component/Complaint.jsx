@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 
 function Complaint() {
-  const [selectedTopic, setSelectedTopic] = useState('');
+    const [selectedTopic, setSelectedTopic] = useState('');
   const [complaintText, setComplaintText] = useState('');
 
   const handleSubmit = async (e) => {
@@ -24,11 +24,11 @@ function Complaint() {
       complaint: complaintText,
     };
 
-    console.log(formattedData)
+    console.log(formattedData);
 
     try {
       const response = await axios.post(
-        " https://franchise-backend-wgp6.onrender.com/api/complaint/createComplaint",
+        "https://franchise-backend-wgp6.onrender.com/api/complaint/createComplaint",
         formattedData,
         {
           headers: {
@@ -38,7 +38,6 @@ function Complaint() {
       );
       console.log("Complaint submitted:", response.data);
       alert("Complaint submitted successfully!");
-      // Clear the form
       setSelectedTopic('');
       setComplaintText('');
     } catch (error) {
@@ -47,7 +46,7 @@ function Complaint() {
   };
 
   return (
-    <Box sx={{ mt: 8, px: 2, marginLeft: -20, padding: 4 }}>
+     <Box sx={{ mt: 8, px: 2, marginLeft: -20, padding: 4 }}>
       <Paper elevation={4} sx={{ p: 4, maxWidth: 700, mx: "auto", borderRadius: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center", color: "#ffa000" }}>
           Submit a Complaint
@@ -75,6 +74,7 @@ function Complaint() {
             </Select>
           </FormControl>
 
+          {/* ✅ Bind the TextField to complaintText */}
           <TextField
             required
             label="Complaint"

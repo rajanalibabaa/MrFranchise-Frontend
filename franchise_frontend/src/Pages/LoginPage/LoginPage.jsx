@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import {  useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Grid,
   Box,
@@ -15,21 +15,26 @@ import {
 import { ArrowBack } from "@mui/icons-material";
 import illustration from "../../assets/Images/Login_illustration.jpg";
 import axios from "axios";
-import { useDispatch } from "react-redux";
-import { loadFromStorage, setCredentials } from "../../Redux/Slices/AuthSlice/authSlice";
-
-
+import { useDispatch, useSelector } from "react-redux";
+import { setUUIDandTOKEN } from "../../Redux/Slices/AuthSlice/authSlice";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-    const dispatch = useDispatch();
+  const investorUUID = useSelector((state) => state.auth.investorUUID);
+  const brandUUID = useSelector((state) => state.auth.brandUUID);
+  const token = useSelector((state) => state.auth.token);
 
   const [formData, setFormData] = useState({ username: "", otp: "" });
   const [errors, setErrors] = useState({});
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
 
   useEffect(()=>{
@@ -40,7 +45,6 @@ function LoginPage() {
     setFormData((prev) => ({ ...prev, [id]: value }));
     setErrors((prev) => ({ ...prev, [id]: "" }));
   };
-
 
   const validateForm = () => {
     const newErrors = {};
@@ -62,9 +66,7 @@ function LoginPage() {
     const isEmail = formData.username.includes("@");
     const payload = isEmail
       ? { email: formData.username.trim() }
-      : {mobileNumber: "+91" + formData.username.trim() };
-
-      console.log(payload);
+      : { mobileNumber: "+91" + formData.username.trim() };
 
     try {
       const response = await axios.post(
@@ -74,21 +76,26 @@ function LoginPage() {
       );
 
       if (response.data.success) {
-        setSnackbar({ open: true, message: "OTP sent successfully!", severity: "success" });
+        setSnackbar({
+          open: true,
+          message: "OTP sent successfully!",
+          severity: "success",
+        });
         setIsOtpSent(true);
-        dispatch(setCredentials({ user_id:response.data.data._id,token:response.data.token,user_data:response.data.data }))
-
+        localStorage.setItem("token", response.data.token);
       } else {
         throw new Error(response.data.message || "Failed to send OTP");
       }
     } catch (err) {
-      setSnackbar({ open: true, message: err.message, severity: "error" });
+      setSnackbar({
+        open: true,
+        message: err.message,
+        severity: "error",
+      });
     } finally {
       setIsLoading(false);
     }
   };
-
-
 
   const handleVerifyOtp = async () => {
     if (!formData.otp) {
@@ -100,34 +107,45 @@ function LoginPage() {
     const isEmail = formData.username.includes("@");
     const payload = {
       verifyOtp: formData.otp,
-      [isEmail ? "email" : "phone"]: isEmail ? formData.username.trim() : "+91" + formData.username.trim(),
+      [isEmail ? "email" : "phone"]: isEmail
+        ? formData.username.trim()
+        : "+91" + formData.username.trim(),
     };
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        "http://localhost:5000/api/v1/login/",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
-      if (response.status === 200) {
-        console.log(response.data);
-        
-       dispatch(setCredentials({
-  user_id: response.data.investorUUID,  // or just response.data.investorUUID if not nested
-  token: response.data.AccessToken,    // or response.data.AccessToken if not nested
-  user_data: {
-    investorUUID: response.data.investorUUID,
-    brandUserUUID: response.data.brandUserUUID
-  }
-}))
-      
-        setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
-        setTimeout(() => navigate("/investerdashboard"), 1500);
+
+      const responseData = response.data;
+      console.log("Login response:", responseData);
+
+      if (responseData.statuscode === 200) {
+        dispatch(
+          setUUIDandTOKEN({
+            investorUUID: responseData.data.investorUUID,
+            brandUUID: responseData.data.brandUUID,
+            token: responseData.data.AccessToken,
+            user_data: responseData.data,
+          })
+        );
+        setSnackbar({
+          open: true,
+          message: "Login successful! Redirecting...",
+          severity: "success",
+        });
+        setTimeout(() => navigate("/investordashboard/manageProfile"), 1500);
       } else {
-        throw new Error(response.data.message || "Invalid OTP");
+        throw new Error(responseData.message || "Invalid OTP");
       }
     } catch (err) {
-      setSnackbar({ open: true, message: err.message, severity: "error" });
+      setSnackbar({
+        open: true,
+        message: err.message,
+        severity: "error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -145,21 +163,45 @@ function LoginPage() {
   return (
     <Grid container sx={{ mt: 8, px: 3, py: 5 }}>
       <Grid item xs={12} md={6} sx={{ p: 6 }}>
-        <Box component="img" src={illustration} alt="Login Illustration" loading="lazy" sx={{ width: "100%", maxWidth: 500 }} />
+        <Box
+          component="img"
+          src={illustration}
+          alt="Login Illustration"
+          sx={{ width: "100%", maxWidth: 500 }}
+        />
       </Grid>
 
-      <Grid item xs={12} md={6} sx={{ p: 6, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <IconButton onClick={() => navigate("/")} sx={{ position: "absolute", 
-      top: 16,
-      left: 16, 
-      bgcolor: "#FFC107", 
-      '&:hover': { bgcolor: "#FFA000" }, }}>
+      <Grid
+        item
+        xs={12}
+        md={6}
+        sx={{
+          p: 6,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <IconButton
+          onClick={() => navigate("/")}
+          sx={{
+            position: "absolute",
+            top: 16,
+            left: 16,
+            bgcolor: "#FFC107",
+            "&:hover": { bgcolor: "#FFA000" },
+          }}
+        >
           <ArrowBack sx={{ color: "white" }} />
         </IconButton>
 
         <Box sx={{ width: "100%", maxWidth: 400 }}>
-          <Typography variant="h4" gutterBottom fontWeight={700} textAlign="center">Welcome Back!</Typography>
-          <Typography variant="body1" color="text.secondary" textAlign="center" mb={4}>Please log in to your account to continue.</Typography>
+          <Typography variant="h4" gutterBottom fontWeight={700} textAlign="center">
+            Welcome Back!
+          </Typography>
+          <Typography variant="body1" color="text.secondary" textAlign="center" mb={4}>
+            Please log in to your account to continue.
+          </Typography>
 
           <form onSubmit={handleSubmit}>
             <TextField
@@ -194,40 +236,60 @@ function LoginPage() {
               variant="contained"
               size="large"
               disabled={isLoading}
-              sx={{ mb: 2, height: "48px", bgcolor: "#007BFF", '&:hover': { bgcolor: "#0056b3" } }}
+              sx={{
+                mb: 2,
+                height: "48px",
+                bgcolor: "#007BFF",
+                "&:hover": { bgcolor: "#0056b3" },
+              }}
             >
-              {isLoading ? <CircularProgress size={24} color="inherit" /> : isOtpSent ? "Verify OTP" : "Request OTP"}
+              {isLoading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : isOtpSent ? (
+                "Verify OTP"
+              ) : (
+                "Request OTP"
+              )}
             </Button>
           </form>
 
           {isOtpSent && (
             <Typography variant="body2" textAlign="center" mb={2}>
-              Didn't receive OTP?{' '}
-              <Link component="button" onClick={handleOtpRequest} color="primary">Resend OTP</Link>
+              Didn't receive OTP?{" "}
+              <Link component="button" onClick={handleOtpRequest} color="primary">
+                Resend OTP
+              </Link>
             </Typography>
           )}
 
           <Typography variant="body2" textAlign="center" my={2}>
-            Don't have an account?{' '}
-            <Link href="/registerhandleuser" color="primary">Register here</Link>
+            Don't have an account?{" "}
+            <Link href="/registerhandleuser" color="primary">
+              Register here
+            </Link>
           </Typography>
-
-          {/* <Box textAlign="center" my={4}>
-            <Typography variant="subtitle1" gutterBottom>Sign In with</Typography>
-            <Box display="flex" justifyContent="center" gap={2}>
-              {[FacebookIcon, LinkedInIcon, InstagramIcon, TwitterIcon, GoogleIcon].map((icon, idx) => (
-                <IconButton key={idx} sx={{ bgcolor: "background.paper", boxShadow: 1 }}>
-                  <Avatar src={icon} sx={{ width: 32, height: 32 }} />
-                </IconButton>
-              ))}
-            </Box>
-          </Box> */}
         </Box>
       </Grid>
 
-      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>{snackbar.message}</Alert>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
       </Snackbar>
+
+      {/* Debug output */}
+      <p>{investorUUID}</p>
+      <p>{brandUUID}</p>
+      <p>{token}</p>
     </Grid>
   );
 }

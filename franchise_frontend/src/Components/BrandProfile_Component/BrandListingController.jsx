@@ -11,7 +11,7 @@ const BrandListingController = ({ brandData = {} }) => {
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState('');
   const [isOtpVerifyOpen, setIsOtpVerifyOpen] = useState(false);
-  const [correctOtp] = useState('123456'); // Replace with backend check
+  const [correctOtp] = useState('123456'); 
 
   const isValidPhone = (value) => /^[0-9]{10,}$/.test(value);
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);

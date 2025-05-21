@@ -1,73 +1,11 @@
 import React from "react";
-import { Link as RouterLink, Outlet, useLocation } from "react-router-dom";
-import { Box, Button, Breadcrumbs, Typography, Link } from "@mui/material";
-import HomeIcon from '@mui/icons-material/Home';
-import WhatshotIcon from '@mui/icons-material/Whatshot';
-
-const IconBreadcrumbs = () => {
-  const location = useLocation();
-  const pathnames = location.pathname.split("/").filter((x) => x);
-
-  return (
-    <Box
-      sx={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 1000,
-        pb: 1,
-        mb: 2,
-        borderBottom: '1px solid #e0e0e0',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-        backgroundColor: "#558b2f",
-        padding: 2,
-      }}
-    >
-      <Breadcrumbs aria-label="breadcrumb" sx={{ px: 1, color: "#fff" }}>
-        <Link
-          component={RouterLink}
-          underline="hover"
-          to="/"
-          sx={{ display: "flex", alignItems: "center", color: "inherit" }}
-        >
-          <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-          HOME
-        </Link>
-
-        {pathnames.map((value, index) => {
-          const to = `/${pathnames.slice(0, index + 1).join("/")}`;
-          const isLast = index === pathnames.length - 1;
-          const label = value
-            .replace(/-/g, " ")
-            .replace(/\b\w/g, (l) => l.toUpperCase());
-
-          return isLast ? (
-            <Typography
-              key={to}
-              color="text.primary"
-              sx={{ display: "flex", alignItems: "center" }}
-            >
-              <WhatshotIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-              {label}
-            </Typography>
-          ) : (
-            <Link
-              component={RouterLink}
-              underline="hover"
-              to={to}
-              key={to}
-              sx={{ display: "flex", alignItems: "center", color: "inherit" }}
-            >
-              <WhatshotIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-              {label}
-            </Link>
-          );
-        })}
-      </Breadcrumbs>
-    </Box>
-  );
-};
+import { Link as RouterLink, Outlet } from "react-router-dom";
+import { Box, Button } from "@mui/material";
+import img from "../../assets/Images/brandLogo.jpg";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       {/* Sidebar */}
@@ -86,38 +24,97 @@ const ProfilePage = () => {
         }}
       >
         <Box>
-          <Button
+          {/* Clickable Logo */}
+          <Box sx={{ textAlign: "center", mb: 2, borderRadius: 2 }}>
+            <RouterLink to="/" style={{ textDecoration: "none" }}>
+              <Box
+                sx={{
+                  width: "100%",
+                  maxWidth: 250,
+                  mx: "1px",
+                  my: 3,
+                  ml: -1,
+                  mt: 1,
+                  p: 1,
+                  textAlign: "center",
+                  backgroundColor: "#ffffff",
+                  borderRadius: "5px",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                  cursor: "pointer",
+                  border: "2px solid transparent",
+                  // backgroundImage:
+                  //   "linear-gradient(white, white), linear-gradient(90deg, #f29724, #e2faa7)",
+                  backgroundOrigin: "border-box",
+                  backgroundClip: "content-box, border-box",
+                  transition: "transform 0.4s ease, box-shadow 0.4s ease",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: "0 6px 25px rgba(0,0,0,0.15)",
+                  },
+                }}
+              >
+                <img
+                  src={img}
+                  alt="Profile"
+                  loading="lazy"
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    objectFit: "contain",
+                    borderRadius: "12px",
+                  }}
+                />
+              </Box>
+
+            </RouterLink>
+          </Box>
+
+          {/* Upgrade and Nav Links */}
+          {/* <Button
             variant="contained"
             color="secondary"
-            sx={{ width: "100%", mb: 2, backgroundColor: "#ffab00" }}
+            sx={{ width: "100%", mb: 2, backgroundColor: "#f29724" }}
           >
             Upgrade Account
-          </Button>
-          <RouterLink to="/investerdashboard" style={navLinkStyle}>Dashboard</RouterLink>
-          <RouterLink to="/investerdashboard/PostRequirement" style={navLinkStyle}>Post Requirement</RouterLink>
-          <RouterLink to="/investerdashboard/manageProfile" style={navLinkStyle}>Manage Profile</RouterLink>
-          <RouterLink to="/investerdashboard/respondemanager" style={navLinkStyle}>Response Manager</RouterLink>
-        </Box>
+          </Button> */}
 
-        <Box sx={{ mt: "auto", textAlign: "center" }}>
-          <RouterLink to="/investerdashboard/feedBack" style={{ ...navLinkStyle, color: "#fafafa", backgroundColor: "#ffab00" }}>
+          <RouterLink to="/investordashboard" style={navLinkStyle}>Dashboard</RouterLink>
+          <RouterLink to="/investordashboard/manageProfile" style={navLinkStyle}>Manage Profile</RouterLink>
+          <RouterLink to="/investordashboard/respondemanager" style={navLinkStyle}>Searches</RouterLink>
+          {/* <RouterLink to="/investordashboard/upgradeaccount" style={navLinkStyle}> Upgrade Account</RouterLink> */}
+        </Box>
+        <Button
+          variant="contained"
+          color="secondary"
+          sx={{ width: "100%", mb: 2, backgroundColor: "#f29724" }}
+          onClick={() => navigate('/investordashboard/upgradeaccount')}
+        >
+          Upgrade Account
+        </Button>
+        {/* Footer Links */}
+        {/* <Box sx={{ mt: "auto", textAlign: "center" }}>
+          <RouterLink
+            to="/investordashboard/feedBack"
+            style={{ ...navLinkStyle, color: "#fafafa", backgroundColor: "#ffab00" }}
+          >
             Feedback
           </RouterLink>
-          <RouterLink to="/investerdashboard/complaint" style={{ ...navLinkStyle, color: "#fafafa", backgroundColor: "#ffab00" }}>
+          <RouterLink
+            to="/investordashboard/complaint"
+            style={{ ...navLinkStyle, color: "#fafafa", backgroundColor: "#ffab00" }}
+          >
             Complaint
           </RouterLink>
-        </Box>
+        </Box> */}
       </Box>
 
-      {/* Right Content (scrollable) */}
+      {/* Right Content */}
       <Box sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
-        <IconBreadcrumbs />
         <Outlet />
       </Box>
     </Box>
   );
 };
-
 
 const navLinkStyle = {
   display: "block",
