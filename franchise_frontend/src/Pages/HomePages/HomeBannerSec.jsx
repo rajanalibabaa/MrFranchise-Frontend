@@ -1,6 +1,7 @@
 import React, { useState,useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import bgimg from "../.././assets/Images/bgimg.jpg";
+// import { useNavigate } from "react-router-dom";
+// import bgimg from "../.././assets/Images/bgimg.jpg";
+import logo from "../.././assets/Images/logo.png";
 import {
   Box,
   Button,
@@ -19,6 +20,9 @@ import Navbar from "../../Components/Navbar/NavBar";
 import Footer from "../../Components/Footers/Footer";
 import LoginRegisterPopUp from "../../Components/PopUpModal/LoginRegisterPopUp";
 import PopupModal from "../../Components/PopUpModal/PopUpModal";
+import TopBrandVdoCards from "../../Components/HomePage_VideoSection/TopBrandVdoCards";
+import TopInvestVdo2 from "../../Components/HomePage_VideoSection/TopInvestVdo2";
+import TopInvestVdo3 from "../../Components/HomePage_VideoSection/TopInvestVdo3";
 
 
 const HomeBannerSec = () => {
@@ -28,7 +32,7 @@ const HomeBannerSec = () => {
     const [open, setOpen] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false); 
 
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const handlePopupClose = () => setIsPopupOpen(false);
@@ -55,31 +59,47 @@ const HomeBannerSec = () => {
     <LoginRegisterPopUp/>
     {/* navbarcontent */}
     <Navbar />
+    
     <Box
       sx={{
       
-        minHeight: 350,
-        backgroundImage: `url(${bgimg })`,
+        minHeight: 150,
+        maxWidth:1200,
+        justifyContent:"center",
+        backgroundImage: `url(${"bgimg"})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         textAlign: "center",
         color: "white",
-        px: 2,
+        px: 4,
         py: 5,
+        mx:"auto",
         position: "relative",
       }}
     
     >
-      <Box sx={{ maxWidth: 900, mx: "auto" }}>
-        <Typography variant="h4" sx={{ mb: 1 }}>
+      <Box
+      sx={{display:"flex",
+        
+        justifyContent: "space-between",
+        alignItems: "left",
+        backgroundColor: "#ffff",
+        padding: 2,
+        borderRadius: 1,
+        boxShadow: 1,
+      }}>
+        
+        <img style={{width:300,}} src={logo} alt="logo" />
+        <Box sx={{ maxWidth: 900, mx: "auto" }}>
+        <Typography variant="h4" sx={{ mb: 1, color: "black" }}>
          Welcome to <Box component="span" sx={{ color: "yellow", fontWeight: "bold" }}>Our Franchise</Box> Website
         </Typography>
-        <Typography variant="body1" sx={{ mb: 3 }}>
+        <Typography variant="body1" sx={{ mb: 3, color: "black" }}>
           World's highest visited franchise website network
         </Typography>
    
 
-        <Box
+        {/* <Box
           sx={{
             display: "flex",
             justifyContent: "center",
@@ -103,7 +123,7 @@ const HomeBannerSec = () => {
           >
            Channel Partner
           </Button>
-        </Box>
+        </Box> */}
 
         <Box
           sx={{
@@ -114,7 +134,7 @@ const HomeBannerSec = () => {
           }}
         >
           <FormControl sx={{ minWidth: 220 }}>
-            <InputLabel sx={{ color: "white" }}>Industry</InputLabel>
+            <InputLabel sx={{ color: "black" }}>Industry</InputLabel>
             <Select
               value={industry}
               onChange={(e) => setIndustry(e.target.value)}
@@ -127,8 +147,8 @@ const HomeBannerSec = () => {
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 220 }}>
-            <InputLabel sx={{ color: "white" }}>Sector</InputLabel>
+          <FormControl sx={{ minWidth: 220, }}>
+            <InputLabel sx={{ color: "black" }}>Sector</InputLabel>
             <Select
               value={sector}
               onChange={(e) => setSector(e.target.value)}
@@ -142,7 +162,7 @@ const HomeBannerSec = () => {
           </FormControl>
 
           <FormControl sx={{ minWidth: 220 }}>
-            <InputLabel sx={{ color: "white" }}>Service/Product</InputLabel>
+            <InputLabel sx={{ color: "black" }}>Service/Product</InputLabel>
             <Select
               value={service}
               onChange={(e) => setService(e.target.value)}
@@ -154,8 +174,29 @@ const HomeBannerSec = () => {
               <MenuItem value="Software">Software</MenuItem>
             </Select>
           </FormControl>
+          {/* Search Button */}
+  <Button
+    variant="contained"
+    sx={{
+      bgcolor: "#f29724",
+      color: "#000",
+      px: 4,
+      height: "45px",
+      mt: 1,
+      textTransform: "none",
+    }}
+    onClick={() => {
+      // Add your search logic here
+      console.log({ industry, sector, service });
+    }}
+  >
+    Search
+  </Button>
         </Box>
       </Box>
+      </Box>
+
+      
 
       <Box
         className="ask-experts"
@@ -170,7 +211,7 @@ const HomeBannerSec = () => {
         <Tooltip title="Ask Our Experts" arrow placement="left">
           <Button onClick={handleOpen} sx={{ borderRadius: "50%", p: 0 }}>
             <img
-              src={bgimg}
+              src={"bgimg"}
               loading="lazy"
               alt="bot"
               style={{ width: 70, height: 80, borderRadius: "50%" }}
@@ -216,10 +257,13 @@ const HomeBannerSec = () => {
     </Box>
     {/* top single vido section */}
      <TopBrandVdoSec/>
+     <TopBrandVdoCards/>
      {/* top double video section */}
      <TopIndusVdoSec/>
      {/* top triple video section */}
      <TopInvestVdoSec/>
+     <TopInvestVdo2/>
+     <TopInvestVdo3/>
 {/* footer sections */}
      <Footer/>
      </>
@@ -228,5 +272,14 @@ const HomeBannerSec = () => {
 }
 
 export default HomeBannerSec
+
+
+
+
+
+
+
+
+
 
 

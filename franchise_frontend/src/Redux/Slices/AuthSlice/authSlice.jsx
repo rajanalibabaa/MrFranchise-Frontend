@@ -1,6 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+
 const initialState = {
+  investorUUID: null,
+  brandUUID: null,
+  AccessToken: null,
+  userData: null,
   investorUUID: null,
   brandUUID: null,
   AccessToken: null,

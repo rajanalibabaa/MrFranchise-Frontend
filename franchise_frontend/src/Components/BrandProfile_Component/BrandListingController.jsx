@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box, TextField, Typography, Paper, Button
-} from "@mui/material";
+import {Box, TextField, Typography, Paper, Button} from "@mui/material";
 
 const BrandListingController = ({ brandData = {} }) => {
   const navigate = useNavigate();

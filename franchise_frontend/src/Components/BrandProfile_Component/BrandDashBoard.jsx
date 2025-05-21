@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
-import {
-    Box,
-    Typography,
-    Avatar,
-    Tabs,
-    Tab
-} from "@mui/material";
+
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, Avatar, Tabs, Tab} from "@mui/material";
 import PersonIcon from '@mui/icons-material/Person';
 import img from "../../assets/images/brandLogo.jpg"; 
+import { useSelector } from 'react-redux';
+import axios from 'axios';
 
 const BrandDashBoard = ({ selectedSection, sectionContent }) => {
     const [tabValue, setTabValue] = useState(0);
@@ -15,6 +12,43 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
     };
+    const [brandData, setBrandData] = useState({});
+
+    const brandUUID = useSelector((state) => state.auth.brandUUID);
+    const token = useSelector((state) => state.auth.AccessToken);
+     console.log('Brand UUID:', brandUUID);
+     console.log('Token:', token);
+    useEffect(() => {
+
+        const fetchBrandDetails = async () => {
+            try {
+                const response = await axios.get(
+                   `http://localhost:5000/api/v1/brand/register/getBrandByRegisterId/${brandUUID}`,
+                   {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: true,
+                   }
+
+                );
+                if(response.data.success) {
+                    setBrandData( response.data.data);
+                }else{
+                    console.error("Error fetching brand details:", response.data.message);
+                }
+            } catch (error) {
+                console.error("Error fetching brand details:", error);
+            }
+        };
+
+        if (brandUUID && token) {
+            fetchBrandDetails();
+        }
+
+    }, [brandUUID, token]);
+    
 
     return (
         <div>
@@ -62,7 +96,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                                     height: "40%", paddingTop: "65px", paddingBottom: "65px"
                                 }}>
                                     <Typography variant="h4" fontWeight={600}>
-                                        Welcome (Manikandan.M)
+                                        Welcome {brandData.firstName}
                                     </Typography>
                                     <Typography color="text.secondary" variant="h5">
                                         Brand Investor
@@ -108,3 +142,14 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
 };
 
 export default BrandDashBoard;
+
+
+
+
+
+
+
+
+
+
+

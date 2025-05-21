@@ -43,7 +43,7 @@ function App() {
     <Provider store={store}>
       <Routes>
   <Route path="/" element={<HomeBannerSec />} />
-  {/* <Route path="/brandViewPage" element={<BrandViewPage />} /> */}
+  {/* <Route path="/brandview" element={<BrandViewPage />} /> */}
   <Route path="/investor-register" element={<InvestorRegister />} />
   <Route path="/brand-register" element={<BrandRegister />} />
   <Route path="/loginpage" element={<LoginPage />} />
@@ -81,8 +81,6 @@ function App() {
   <Route path="/termscondition" element={<TermsCondition />} />
 
   <Route path="/brandsearchview" element={<BrandCategroyViewPage />} />
-  {/* <Route path='/AllCategorybrands' element={<BrandList />} /> */}
-
 
   
 
