@@ -39,7 +39,7 @@ import {
 } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { categories } from "../../Pages/BrandListingForm/BrandCategories";
+import { categories } from "./BrandLIstingRegister/BrandCategories";
 import backgroundImage from "../../assets/Images/investor image.jpg";
 import LoginPage from "../../Pages/LoginPage/LoginPage"
 

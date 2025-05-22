@@ -1,11 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-
 const initialState = {
-  investorUUID: null,
-  brandUUID: null,
-  AccessToken: null,
-  userData: null,
   investorUUID: null,
   brandUUID: null,
   AccessToken: null,
@@ -18,13 +13,6 @@ const authSlice = createSlice({
   reducers: {
     setUUIDandTOKEN: (state, action) => {
       const { investorUUID, brandUUID, token, user_data } = action.payload;
-      console.log('Setting UUID and token:', {
-        investorUUID,
-        brandUUID,
-        token,
-        user_data,
-      }); 
-  
       state.investorUUID = investorUUID;
       state.brandUUID = brandUUID;
       state.AccessToken = token;
