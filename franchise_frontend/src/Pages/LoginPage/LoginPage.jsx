@@ -121,12 +121,12 @@ function LoginPage({ open, onClose }) {
         dispatch(
           loginSuccess({
             user_id: response.data.data._id,
-            token: response.data.token,
+            token: response.data.data.AccessToken,
             user_data: response.data.data,
           })
         );
-
-        localStorage.setItem("token", response.data.token);
+  console.log("Login successful:", response.data.data);
+        localStorage.setItem("token", response.data.data.AccessToken);
         setSnackbar({
           open: true,
           message: "Login successful! Redirecting...",

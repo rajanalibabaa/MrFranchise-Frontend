@@ -197,7 +197,7 @@ function Navbar() {
                           color: 'text.primary',
                           '&:hover': { bgcolor: 'action.hover' }
                         }}
-                        onClick={() => handleNavigate("/profile")}
+                        onClick={() => handleNavigate("/investordashboard")}
                       >
                         My Profile
                       </Button>
