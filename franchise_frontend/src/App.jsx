@@ -23,7 +23,6 @@ import BrandManageProfile from './Components/BrandProfile_Component/BrandManageP
 // import BrandFeedBack from './Components/BrandProfile_Component/BrandFeedback';
 // import BrandComplaint from './Components/BrandProfile_Component/BrandComplaint';
 import BrandAddVedios from './Components/BrandProfile_Component/BrandAddVedios';
-import TermsCondition from './Components/QuickLinks/TermsCondition.jsx';
 import Faq from './Components/QuickLinks/Faq.jsx';
 import Help from './Components/QuickLinks/Help.jsx';
 import ContactUs from './Components/QuickLinks/ContactUs.jsx';
@@ -33,6 +32,8 @@ import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccou
 import { Provider } from 'react-redux';
 import store from './Redux/Store/Index.jsx';
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
+import TermsAndCondition from './Components/QuickLinks/TermsAndCondition.jsx';
+import Reels from './Pages/Reels/Reels.jsx';
 
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
   <Route path="/brandlistingform" element={<BrandListingFormPage />} />
   <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
   <Route path='/brandviewpage' element={<BrandCategroyViewPage />} />
+  <Route path='/reels' element={<Reels/>}/>
 
   <Route path="/investordashboard" element={<ProfilePage />}>
     <Route index element={<DashBoard />} />
@@ -78,10 +80,8 @@ function App() {
   <Route path="/contactuspage" element={<ContactUs />} />
   <Route path="/help" element={<Help />} />
   <Route path="/faq" element={<Faq />} />
-  <Route path="/termscondition" element={<TermsCondition />} />
-
+  <Route path="/termscondition" element={<TermsAndCondition/>} />
   <Route path="/brandsearchview" element={<BrandCategroyViewPage />} />
-
   
 
 

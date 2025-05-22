@@ -488,21 +488,16 @@ useEffect(() => {
   );
 
   return (
-   <Box sx={{backgroundImage: `url(${backgroundImage})`, backgroundSize: "cover"}}>
-
-
-  
-
-
+   <Box sx={{backgroundImage: `url(${backgroundImage})`, backgroundSize: "cover", height: "100vh"}}>
     <Container
       sx={{
-        maxWidth: "lg",
-        overflow: "auto",
+        // maxWidth: "lg",
+        // overflow: "auto",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         py: 2,
-         height: "100vh"
+        //  height: "100vh"
        
       }}
     >
@@ -543,9 +538,16 @@ useEffect(() => {
           >
             Personal Details
           </Typography>
-          <Grid container spacing={2} >
-            {/* Name Field */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 6, mb:-2}}>
+<Grid
+          container
+          spacing={2}
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+            gap: 2,
+          }}
+        >            {/* Name Field */}
+            <Grid sx={{xs: 12, sm: 6, mb:-2}}>
               <TextField
                 fullWidth
                 label="Name"
@@ -557,7 +559,7 @@ useEffect(() => {
               />
             </Grid>
             {/* {email field} */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 6, mb:-2 }}>
+            <Grid sx={{  xs: 12, sm: 6, mb:-2 }}>
               <TextField
                 fullWidth
                 label="Email"
@@ -599,7 +601,7 @@ useEffect(() => {
               />
             </Grid>
             {/* Mobile number field */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 6 , mb:-2}}>
+            <Grid sx={{  xs: 12, sm: 6 , mb:-2}}>
               <TextField
                 fullWidth
                 label="Phone Number"
@@ -642,7 +644,7 @@ useEffect(() => {
             </Grid>
 
             {/* WhatsApp Field */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 6, mb:-2 }}>
+            <Grid sx={{ xs: 12, sm: 6, mb:-2 }}>
               <TextField
                 fullWidth
                 label="WhatsApp Number"
@@ -705,7 +707,7 @@ useEffect(() => {
 
 
             {/* {address} */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 6 }}>
+            <Grid sx={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Address"
@@ -713,7 +715,7 @@ useEffect(() => {
               />
             </Grid>
             {/* {pincode} */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 3, mb:-2 }}>
+            <Grid sx={{ xs: 12, sm: 3, mb:-2 }}>
               <TextField
                 fullWidth
                 label="Pincode"
@@ -729,7 +731,7 @@ useEffect(() => {
               />
             </Grid>
             {/* {state} */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 3 }}>
+            <Grid sx={{ xs: 12, sm: 3 }}>
               <TextField
                 fullWidth
                 label="State"
@@ -740,7 +742,7 @@ useEffect(() => {
               />
             </Grid>
             {/* {city} */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 6 }}>
+            <Grid sx={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="City"
@@ -762,7 +764,7 @@ useEffect(() => {
               />
             </Grid> */}
             {/* Occupation Field */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 4 }}>
+            <Grid sx={{  xs: 12, sm: 4 }}>
               <TextField
                 select
                 fullWidth
@@ -786,7 +788,7 @@ useEffect(() => {
               </TextField>
             </Grid>
             {occupationValue === "Other" && (
-              <Grid item sx={{ width: "21%", xs: 12, sm: 4 }}>
+              <Grid item sx={{xs: 12, sm: 4 }}>
                 <TextField
                   fullWidth
                   label="Specify Occupation"
@@ -809,9 +811,16 @@ useEffect(() => {
             Preferences
           </Typography>
 
-          <Grid container spacing={2}>         
-{/* Category Field */}
-<Grid sx={{ width: "21%", position: "relative" }}>
+<Grid
+          container
+          spacing={2}
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+            gap: 2,
+          }}
+        >{/* Category Field */}
+<Grid sx={{ position: "relative" }}>
   <Stack direction="row" alignItems="center" spacing={1}>
 
   <TextField
@@ -996,7 +1005,7 @@ useEffect(() => {
 </Grid>
 
             {/* {preferred investment range field} */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 4 }}>
+            <Grid sx={{  xs: 12, sm: 4 }}>
               <TextField
                 select
                 fullWidth
@@ -1017,7 +1026,7 @@ useEffect(() => {
               </TextField>
             </Grid>
             {selectedRange && (
-              <Grid item sx={{ width: "21%", xs: 12, sm: 4 }}>
+              <Grid item sx={{  xs: 12, sm: 4 }}>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <TextField
                     select
@@ -1056,7 +1065,7 @@ useEffect(() => {
 
           
 {/* Preferred State Field (changed to text input) */}
-                <Grid item xs={12} sm={6} sx={{width:"21%"}}>
+                <Grid item xs={12} sm={6} >
                   <TextField
                     fullWidth
                     label="Preferred State "
@@ -1069,7 +1078,7 @@ useEffect(() => {
                 </Grid>
 
                 {/* Preferred City Field (changed to text input) */}
-                <Grid item xs={12} sm={6} sx={{width:"21%"}}>
+                <Grid item xs={12} sm={6} >
                   <TextField
                     fullWidth
                     label="Preferred City "
@@ -1111,7 +1120,7 @@ useEffect(() => {
               </FormControl>
             </Grid>
             {watch ("propertyType") === "own property" && (
-              <Grid item xs={12} sm={6} md={4} sx={{ width: "21%" }}>
+              <Grid item xs={12} sm={6} md={4} >
                 <TextField
                   select
                   fullWidth
@@ -1151,6 +1160,7 @@ label={
             <Link
               component={RouterLink}
               to="/termscondition"
+             
             >
               terms and conditions
             </Link>

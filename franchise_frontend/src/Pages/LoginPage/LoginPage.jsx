@@ -189,24 +189,49 @@ function LoginPage({ open, onClose }) {
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ p: 0 }}>
-          <Grid container sx={{ minHeight: "65vh" }}>
+        <DialogContent sx={{ p: 0 ,padding: { sm: 2, md: 0 } }}>
+          <Grid
+            container
+            sx={{
+              minHeight: { xs: "auto", 
+        sm: "55vh",  
+        md: "65vh"  },
+              flexDirection: { xs: "column", md: "row" },
+            }}
+          >
             <Grid
               item
+              xs={12}
               md={6}
               sx={{
-                display: { xs: "none", md: "flex" },
+                display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 bgcolor: "white",
-                p: 0,
+                p: { xs: 1, md: 0 },
+               pt: { sm: 4, md: 4 },  
+    pb: { sm: 2, md: 2 },
+    minHeight: { sm: "40vh", md: "auto" }
               }}
             >
               <Box
                 component="img"
                 src={illustration}
                 alt="Login Illustration"
-                sx={{ width: "100%", maxWidth: 400, borderRadius: 2 }}
+                sx={{
+                  width: {
+      xs: "60%",   
+      sm: "50%",   
+      md: "80%",  
+    },                 
+     maxWidth: {xs: 250,
+      sm: 350,
+      md: 400, },
+                  borderRadius: 2,
+                  objectFit: "contain",
+                   mt: { sm: 2, md: 0 },  
+      mb: { sm: 2, md: 0 } 
+                }}
               />
             </Grid>
 
@@ -218,10 +243,10 @@ function LoginPage({ open, onClose }) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                p: 4,
+                p: { xs: 3, sm: 4 },
               }}
             >
-              <Box sx={{ width: "100%", maxWidth: 400 }}>
+              <Box sx={{ width: "100%", maxWidth: { xs: "100%", sm: 400 } }}>
                 <Typography
                   variant="h4"
                   gutterBottom
@@ -320,7 +345,6 @@ function LoginPage({ open, onClose }) {
           </Grid>
         </DialogContent>
       </Dialog>
-
       <Snackbar
         open={snackbar.open}
         autoHideDuration={5000}

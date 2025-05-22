@@ -68,23 +68,42 @@ function Navbar() {
   return (
     <>
       {/* Top Bar */}
-      <Box sx={{ 
+       <Box sx={{ 
         background: "#eee", 
         p: 1, 
-        display: "flex", 
+        display: { xs: "none", sm: "flex" },
         justifyContent: "space-between",
         alignItems: "center"
       }}>
-        <Box>
+        <Box sx={{ display: "flex", gap: { xs: 0.5, sm: 1, md: 2 } }}>
           {["Expand Your Franchise", "Investor", "Advertise", "Sell Your Business"].map((text) => (
-            <Button key={text} size="small" sx={{ textTransform: 'none' }}>{text}</Button>
+            <Button 
+              key={text} 
+              size="small" 
+              sx={{ 
+                textTransform: 'none',
+                fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' },
+                display: {
+                  xs: text === "Advertise" ? 'none' : 'inline-flex',
+                  md: 'inline-flex'
+                }
+              }}
+            >
+              {text.startsWith("Expand") ? "Expand Franchise" : text}
+            </Button>
           ))}
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography sx={{ mr: 1 }}>💬</Typography>
+          <Typography sx={{ display: { xs: "none", md: "block" }, mr: 1 }}>💬</Typography>
           <FormControl variant="standard" size="small">
-            <Select value="en" disableUnderline>
-              <MenuItem value="en">EN - English</MenuItem>
+            <Select 
+              value="en" 
+              disableUnderline
+              sx={{ fontSize: { xs: "0.75rem", sm: "0.875rem" } }}
+            >
+              <MenuItem value="en" sx={{ fontSize: { xs: "0.75rem", sm: "0.875rem" } }}>
+                EN{false ? " - English" : ""}
+              </MenuItem>
             </Select>
           </FormControl>
         </Box>
@@ -95,25 +114,28 @@ function Navbar() {
         <Toolbar sx={{ 
           display: "flex", 
           justifyContent: "space-between",
-          px: { xs: 1, sm: 2 },
-          minHeight: '64px !important'
+          px: { xs: 1, sm: 2, md: 4 },
+          minHeight: { xs: '56px !important', sm: '64px !important' }
         }}>
           <IconButton edge="start" onClick={() => dispatch(toggleSidebar(true))}>
-            <MenuIcon />
+            <MenuIcon fontSize="small" />
           </IconButton>
           
           <Typography variant="h6" sx={{ 
             fontWeight: 'bold', 
             cursor: 'pointer',
+            fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" },
             '&:hover': { color: 'primary.main' }
           }} onClick={() => navigate("/")}>
             MR FRANCHISE
           </Typography>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Link to="/brandsearchview" style={{ 
+            <Link to="/brandsearchview" sx={{ 
+              display: { xs: "none", sm: "block" },
               textDecoration: 'none', 
               color: 'inherit',
+              fontSize: { sm: "0.9rem", md: "1rem" },
               '&:hover': { color: 'primary.main' }
             }}>
               Find your Franchise
@@ -121,8 +143,13 @@ function Navbar() {
             
             <Button 
               variant="outlined" 
-              sx={{ textTransform: 'none' }}
-              onClick={() => handleNavigate("/brandlistingform")}
+              sx={{ 
+                textTransform: 'none',
+                display: { xs: "none", sm: "inline-flex" },
+                fontSize: { sm: "0.8rem", md: "0.875rem" },
+                px: { sm: 1, md: 2 }
+              }}
+              onClick={() => navigate("/brandlistingform")}
             >
               ADD LISTING
             </Button>
@@ -131,8 +158,8 @@ function Navbar() {
               <IconButton onClick={() => dispatch(toggleMenu())} sx={{ p: 0 }}>
                 <Avatar sx={{ 
                   bgcolor: 'primary.main', 
-                  width: 32, 
-                  height: 32,
+                  width: { xs: 28, sm: 32 }, 
+                  height: { xs: 28, sm: 32 },
                   '&:hover': { bgcolor: 'primary.dark' }
                 }}>
                   <User size={18} />
@@ -149,7 +176,7 @@ function Navbar() {
                     bgcolor: 'background.paper',
                     boxShadow: 3,
                     borderRadius: 1,
-                    minWidth: 160,
+                    minWidth: { xs: 140, sm: 160 },
                     py: 1,
                     zIndex: 9999
                   }}
@@ -160,15 +187,13 @@ function Navbar() {
                         fullWidth
                         sx={{ 
                           justifyContent: 'flex-start',
-                          px: 3,
+                          px: { xs: 2, sm: 3 },
                           py: 1,
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
                           color: 'text.primary',
                           '&:hover': { bgcolor: 'action.hover' }
                         }}
-                        onClick={() => {
-                          setLoginModalOpen(true);
-                          dispatch(toggleMenu(false));
-                        }}
+                        onClick={() => setLoginModalOpen(true)}
                       >
                         Sign In
                       </Button>
@@ -176,12 +201,13 @@ function Navbar() {
                         fullWidth
                         sx={{
                           justifyContent: 'flex-start',
-                          px: 3,
+                          px: { xs: 2, sm: 3 },
                           py: 1,
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
                           color: 'text.primary',
                           '&:hover': { bgcolor: 'action.hover' }
                         }}
-                        onClick={() => handleNavigate("/registerhandleuser")}
+                        onClick={() => navigate("/registerhandleuser")}
                       >
                         Register
                       </Button>
@@ -192,12 +218,13 @@ function Navbar() {
                         fullWidth
                         sx={{
                           justifyContent: 'flex-start',
-                          px: 3,
+                          px: { xs: 2, sm: 3 },
                           py: 1,
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
                           color: 'text.primary',
                           '&:hover': { bgcolor: 'action.hover' }
                         }}
-                        onClick={() => handleNavigate("/profile")}
+                        onClick={() => navigate("/profile")}
                       >
                         My Profile
                       </Button>
@@ -205,12 +232,13 @@ function Navbar() {
                         fullWidth
                         sx={{
                           justifyContent: 'flex-start',
-                          px: 3,
+                          px: { xs: 2, sm: 3 },
                           py: 1,
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
                           color: 'text.primary',
                           '&:hover': { bgcolor: 'action.hover' }
                         }}
-                        onClick={handleSignOut}
+                        onClick={() => dispatch(logout())}
                       >
                         Sign Out
                       </Button>
@@ -223,11 +251,16 @@ function Navbar() {
         </Toolbar>
       </AppBar>
 
-      {/* Sidebar Drawer */}
+      {/* Responsive Sidebar */}
       <Drawer
         anchor="left"
         open={sidebarView}
         onClose={() => dispatch(toggleSidebar(false))}
+        PaperProps={{
+          sx: {
+            width: { xs: "80%", sm: "320px", md: "360px" }
+          }
+        }}
       >
         <SideViewContent 
           hoverCategory="open" 
