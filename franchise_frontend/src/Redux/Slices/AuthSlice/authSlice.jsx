@@ -1,39 +1,47 @@
+
 import { createSlice } from '@reduxjs/toolkit';
 
+// Get token and UUIDs from localStorage
+const tokenFromStorage = localStorage.getItem("accessToken");
+const investorFromStorage = localStorage.getItem("investorUUID");
+const brandFromStorage = localStorage.getItem("brandUUID");
+
 const initialState = {
-  investorUUID: null,
-  brandUUID: null,
-  AccessToken: null,
-  userData: null,
+  investorUUID: investorFromStorage || null,
+  brandUUID: brandFromStorage || null,
+  AccessToken: tokenFromStorage || null,
+  isLogin: !!tokenFromStorage,
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     setUUIDandTOKEN: (state, action) => {
-      const { investorUUID, brandUUID, token, user_data } = action.payload;
+      const { investorUUID, brandUUID, token } = action.payload;
       state.investorUUID = investorUUID;
       state.brandUUID = brandUUID;
       state.AccessToken = token;
-      state.userData = user_data || null;
+      state.isLogin = true;
 
-      // Save token to localStorage for persistence
       if (token) {
-        localStorage.setItem('accessToken', token);
+        localStorage.setItem("accessToken", token);
+        if (investorUUID) localStorage.setItem("investorUUID", investorUUID);
+        if (brandUUID) localStorage.setItem("brandUUID", brandUUID);
       }
     },
     logout: (state) => {
       state.investorUUID = null;
       state.brandUUID = null;
       state.AccessToken = null;
-      state.userData = null;
+      state.isLogin = false;
 
-      localStorage.removeItem('accessToken');
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("investorUUID");
+      localStorage.removeItem("brandUUID");
     },
   },
 });
 
 export const { setUUIDandTOKEN, logout } = authSlice.actions;
-
 export default authSlice.reducer;

@@ -9,9 +9,3 @@ import navReducer from "../Slices/navbarSlice";
   },
 });
 export default store;
-
-
-
-
-
-

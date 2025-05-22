@@ -33,11 +33,8 @@ import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccou
 import { Provider } from 'react-redux';
 import store from './Redux/Store/Index.jsx';
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
-<<<<<<< HEAD
 import BrandSearchus from './Components/BrandProfile_Component/BrandSearches.jsx';
-=======
 import BrandRegisterForm from './Pages/Registration/BrandLIstingRegister/BrandRegisterForm.jsx';
->>>>>>> 4c00b812e65e0227582b699a99ffb38f6101fb7d
 
 
 function App() {

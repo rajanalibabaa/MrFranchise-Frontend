@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Grid,
@@ -12,23 +12,19 @@ import {
   Snackbar,
   CircularProgress,
   Dialog,
-  DialogTitle,
   DialogContent,
-
+  DialogTitle,
 } from "@mui/material";
-import { Close } from "@mui/icons-material";
 import illustration from "../../assets/Images/Login_illustration.jpg";
-// import FacebookIcon from "../../assets/images/FacebookIcon.png";
-// import LinkedInIcon from "../../assets/images/LinkedinIcon.png";
-// import InstagramIcon from "../../assets/images/InstagramIcon.png";
-// import TwitterIcon from "../../assets/images/TwitterIcon.png";
-// import GoogleIcon from "../../assets/images/GoogleIcon.png";
 import axios from "axios";
-import { useDispatch, useSelector} from "react-redux";
+import { useDispatch } from "react-redux";
 import { setUUIDandTOKEN } from "../../Redux/Slices/AuthSlice/authSlice";
+import CloseIcon from "@mui/icons-material/Close";
 
 function LoginPage({ open, onClose }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({ username: "", otp: "" });
   const [errors, setErrors] = useState({});
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -38,15 +34,26 @@ function LoginPage({ open, onClose }) {
     message: "",
     severity: "success",
   });
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [timer, setTimer] = useState(30);
+
+  useEffect(() => {
+    if (resendDisabled && timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else if (timer === 0) {
+      setResendDisabled(false);
+      setTimer(30); // Reset timer
+    }
+  }, [resendDisabled, timer]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
     setErrors((prev) => ({ ...prev, [id]: "" }));
   };
- const dispatch = useDispatch();
-const investorUUID = useSelector((state) => state.auth.investorUUID);
-const accessToken = useSelector((state) => state?.auth?.AccessToken);
 
   const validateForm = () => {
     const newErrors = {};
@@ -65,16 +72,16 @@ const accessToken = useSelector((state) => state?.auth?.AccessToken);
   const handleOtpRequest = async () => {
     if (!validateForm()) return;
     setIsLoading(true);
+
     const isEmail = formData.username.includes("@");
     const payload = isEmail
       ? { email: formData.username.trim() }
       : { mobileNumber: "+91" + formData.username.trim() };
 
-    console.log(payload);
-
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/login/generateOTPforLogin",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
+        // "http://localhost:5000/api/v1/login/generateOTPforLogin",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -86,9 +93,7 @@ const accessToken = useSelector((state) => state?.auth?.AccessToken);
           severity: "success",
         });
         setIsOtpSent(true);
- // dispatch(setUserId(response.data.data));
-        localStorage.setItem("token", response.data.token);
-
+        setResendDisabled(true);
       } else {
         throw new Error(response.data.message || "Failed to send OTP");
       }
@@ -98,8 +103,6 @@ const accessToken = useSelector((state) => state?.auth?.AccessToken);
       setIsLoading(false);
     }
   };
-
-   const [userdata, setUserdata] = useState("");
 
   const handleVerifyOtp = async () => {
     if (!formData.otp) {
@@ -118,30 +121,50 @@ const accessToken = useSelector((state) => state?.auth?.AccessToken);
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/login/",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        // "http://localhost:5000/api/v1/login/",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
 
       if (response.status === 200) {
         dispatch(
-          loginSuccess({
-            user_id: response.data.data._id,
-            token: response.data.token,
-            user_data: response.data.data,
+          setUUIDandTOKEN({
+            investorUUID: response.data.data.investorUUID,
+            brandUUID: response.data.data.brandUserUUID,
+            token: response.data.data.AccessToken,
           })
         );
 
-        localStorage.setItem("token", response.data.token);
+        // console.log("======= :", response.data.data)
+
+        // localStorage.setItem("token", response.data.data.AccessToken);
         setSnackbar({
           open: true,
           message: "Login successful! Redirecting...",
           severity: "success",
         });
 
+        // sessionStorage.setItem("authToken", response.data.data.AccessToken);
+        
         setTimeout(() => {
-          onClose();
-          navigate("/")}, 1500);
+          onClose(); // Close the modal
+          setFormData({ username: "", otp: "" });
+          setIsOtpSent(false);
+          setResendDisabled(false);
+          setTimer(30);
+          setErrors({});
+          setIsLoading(false); // optional safety
+          if (response.data.data.investorUUID) {
+            navigate("/investordashboard")
+          } else if (response.data.data.brandUserUUID) {
+            navigate("/brandDashboard")
+      
+          }else {
+            navigate("/");
+          }
+          ; // Navigate home
+        }, 1000);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
       }
@@ -163,7 +186,7 @@ const accessToken = useSelector((state) => state?.auth?.AccessToken);
 
   return (
     <>
-   <Dialog
+      <Dialog
         open={open}
         onClose={onClose}
         maxWidth="md"
@@ -188,9 +211,10 @@ const accessToken = useSelector((state) => state?.auth?.AccessToken);
             py: 2,
           }}
         >
-          <Typography variant="h6" component={"div"}>Login</Typography>
+          {/* Corrected Heading Structure */}
+          <Typography variant="h5">Login</Typography>
           <IconButton onClick={onClose} sx={{ color: "white" }}>
-            <Close />
+            <CloseIcon />
           </IconButton>
         </DialogTitle>
 
@@ -229,7 +253,6 @@ const accessToken = useSelector((state) => state?.auth?.AccessToken);
               <Box sx={{ width: "100%", maxWidth: 400 }}>
                 <Typography
                   variant="h4"
-                  component={"div"}
                   gutterBottom
                   textAlign="center"
                   fontWeight="bold"
@@ -301,9 +324,9 @@ const accessToken = useSelector((state) => state?.auth?.AccessToken);
                     <Link
                       component="button"
                       onClick={handleOtpRequest}
-                      // disabled={resendDisabled}
+                      disabled={resendDisabled}
                     >
-                      Resend OTP
+                      {resendDisabled ? `Resend in ${timer}s` : "Resend OTP"}
                     </Link>
                   </Typography>
                 )}

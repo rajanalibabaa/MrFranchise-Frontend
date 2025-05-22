@@ -277,6 +277,7 @@ const BrandRegisterForm = () => {
         localStorage.removeItem(FORM_STEP_KEY);
         setFormData(initialFormData);
         setActiveStep(0);
+      // eslint-disable-next-line no-unused-vars
       } catch (error) {
         setSnackbar({
           open: true,
@@ -744,7 +745,7 @@ const BrandRegisterForm = () => {
       {ficoModels.map((model, index) => {
         // Filter out empty/null/undefined fields
         const modelFields = Object.entries(model).filter(
-          ([_, value]) => value !== "" && value !== null && value !== undefined
+          ([, value]) => value !== "" && value !== null && value !== undefined
         );
 
         if (modelFields.length === 0) {

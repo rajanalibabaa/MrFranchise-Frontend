@@ -218,7 +218,7 @@ const ManageProfile = () => {
           {renderField("Category", "category")}
           {renderField("City", "city")}
           {renderField("Country", "country")}
-          {renderField("District", "district")}
+          {/* {renderField("District", "district")} */}
           {renderField("Investment Range", "investmentRange")}
           {renderField("Looking For", "lookingFor")}
           {renderField("Occupation", "occupation")}
