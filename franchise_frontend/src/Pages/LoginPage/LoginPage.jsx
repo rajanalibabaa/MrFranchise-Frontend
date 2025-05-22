@@ -12,19 +12,23 @@ import {
   Snackbar,
   CircularProgress,
   Dialog,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+
 } from "@mui/material";
+import { Close } from "@mui/icons-material";
 import illustration from "../../assets/Images/Login_illustration.jpg";
+// import FacebookIcon from "../../assets/images/FacebookIcon.png";
+// import LinkedInIcon from "../../assets/images/LinkedinIcon.png";
+// import InstagramIcon from "../../assets/images/InstagramIcon.png";
+// import TwitterIcon from "../../assets/images/TwitterIcon.png";
+// import GoogleIcon from "../../assets/images/GoogleIcon.png";
 import axios from "axios";
-import { useDispatch } from "react-redux";
-import { loginSuccess } from "../../Redux/Slices/navbarSlice";
-import CloseIcon from "@mui/icons-material/Close";
+import { useDispatch, useSelector} from "react-redux";
+import { setUUIDandTOKEN } from "../../Redux/Slices/AuthSlice/authSlice";
 
 function LoginPage({ open, onClose }) {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
   const [formData, setFormData] = useState({ username: "", otp: "" });
   const [errors, setErrors] = useState({});
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -34,14 +38,15 @@ function LoginPage({ open, onClose }) {
     message: "",
     severity: "success",
   });
-  const [resendDisabled, setResendDisabled] = useState(false);
-
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
     setErrors((prev) => ({ ...prev, [id]: "" }));
   };
+ const dispatch = useDispatch();
+const investorUUID = useSelector((state) => state.auth.investorUUID);
+const accessToken = useSelector((state) => state?.auth?.AccessToken);
 
   const validateForm = () => {
     const newErrors = {};
@@ -60,15 +65,16 @@ function LoginPage({ open, onClose }) {
   const handleOtpRequest = async () => {
     if (!validateForm()) return;
     setIsLoading(true);
-
     const isEmail = formData.username.includes("@");
     const payload = isEmail
       ? { email: formData.username.trim() }
       : { mobileNumber: "+91" + formData.username.trim() };
 
+    console.log(payload);
+
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
+        "http://localhost:5000/api/v1/login/generateOTPforLogin",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -80,11 +86,9 @@ function LoginPage({ open, onClose }) {
           severity: "success",
         });
         setIsOtpSent(true);
+ // dispatch(setUserId(response.data.data));
         localStorage.setItem("token", response.data.token);
-        setResendDisabled(true);
-        setTimeout(() => {
-          setResendDisabled(false);
-        }, 30000);
+
       } else {
         throw new Error(response.data.message || "Failed to send OTP");
       }
@@ -94,6 +98,8 @@ function LoginPage({ open, onClose }) {
       setIsLoading(false);
     }
   };
+
+   const [userdata, setUserdata] = useState("");
 
   const handleVerifyOtp = async () => {
     if (!formData.otp) {
@@ -112,31 +118,28 @@ function LoginPage({ open, onClose }) {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        "http://localhost:5000/api/v1/login/",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
 
-      if (response.status === 200) {
-        dispatch(
-          loginSuccess({
-            user_id: response.data.data._id,
-            token: response.data.token,
-            user_data: response.data.data,
-          })
-        );
+      console.log("response :", response.data.data);
+      setUserdata(response.data.data);
+      console.log("userdata", response);
+      
 
-        localStorage.setItem("token", response.data.token);
-        setSnackbar({
-          open: true,
-          message: "Login successful! Redirecting...",
-          severity: "success",
-        });
-
+       if (response.status === 200) {
+        console.log("Login successful!");
+         dispatch(setUUIDandTOKEN({
+          investorUUID: response.data.data.investorUUID,
+          brandUUID: response.data.data.brandUserUUID,
+          token: response.data.data.AccessToken,
+          // user_data: userdata.data,
+        }));
+        setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success" });
         setTimeout(() => {
-          onClose(); // Close dialog
-          navigate("/"); // Navigate home
-        }, 1000);
+          onClose();
+          navigate("/")}, 1500);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
       }
@@ -158,7 +161,7 @@ function LoginPage({ open, onClose }) {
 
   return (
     <>
-      <Dialog
+   <Dialog
         open={open}
         onClose={onClose}
         maxWidth="md"
@@ -183,9 +186,9 @@ function LoginPage({ open, onClose }) {
             py: 2,
           }}
         >
-          <Typography variant="h6">Login</Typography>
+          <Typography variant="h6" component={"div"}>Login</Typography>
           <IconButton onClick={onClose} sx={{ color: "white" }}>
-            <CloseIcon />
+            <Close />
           </IconButton>
         </DialogTitle>
 
@@ -224,6 +227,7 @@ function LoginPage({ open, onClose }) {
               <Box sx={{ width: "100%", maxWidth: 400 }}>
                 <Typography
                   variant="h4"
+                  component={"div"}
                   gutterBottom
                   textAlign="center"
                   fontWeight="bold"
@@ -295,7 +299,7 @@ function LoginPage({ open, onClose }) {
                     <Link
                       component="button"
                       onClick={handleOtpRequest}
-                      disabled={resendDisabled}
+                      // disabled={resendDisabled}
                     >
                       Resend OTP
                     </Link>

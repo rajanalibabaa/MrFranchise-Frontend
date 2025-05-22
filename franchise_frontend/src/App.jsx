@@ -1,13 +1,13 @@
 import React from 'react'
 import { Route, Routes } from "react-router-dom"
 import InvestorRegister from './Pages/Registration/InvestorsRegister';
-import BrandRegister from './Pages/Registration/BrandRegister';
+// import BrandRegister from './Pages/Registration/BrandRegister';
 import LoginPage from './Pages/LoginPage/LoginPage';
 
 import './App.css';
 import HomeBannerSec from './Pages/HomePages/HomeBannerSec';
 import RegisterHandleUser from './Pages/Registration/RegisterHandlePage';
-import BrandListingFormPage from './Pages/BrandListingForm/BrandListingFormPage';
+// import BrandListingFormPage from './Pages/BrandListingForm/BrandListingFormPage';
 import SideViewContent from './Components/SideViewContentMenu/SideHoverMenu';
 import ProfilePage from './Pages/Profile_Pages/profilePage';
 import IconBreadcrumbs from './Pages/Profile_Pages/IconBreadcrumbs';
@@ -33,6 +33,7 @@ import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccou
 import { Provider } from 'react-redux';
 import store from './Redux/Store/Index.jsx';
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
+import BrandRegisterForm from './Pages/Registration/BrandLIstingRegister/BrandRegisterForm.jsx';
 
 
 function App() {
@@ -45,10 +46,10 @@ function App() {
   <Route path="/" element={<HomeBannerSec />} />
   {/* <Route path="/brandview" element={<BrandViewPage />} /> */}
   <Route path="/investor-register" element={<InvestorRegister />} />
-  <Route path="/brand-register" element={<BrandRegister />} />
+  {/* <Route path="/brand-register" element={<BrandRegister />} /> */}
   <Route path="/loginpage" element={<LoginPage />} />
   <Route path="/registerhandleuser" element={<RegisterHandleUser />} />
-  <Route path="/brandlistingform" element={<BrandListingFormPage />} />
+  <Route path="/brandlistingform" element={<BrandRegisterForm />} />
   <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
   <Route path='/brandviewpage' element={<BrandCategroyViewPage />} />
 
