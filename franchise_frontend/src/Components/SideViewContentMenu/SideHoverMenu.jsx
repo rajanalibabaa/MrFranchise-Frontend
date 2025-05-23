@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import { Box, Typography, Avatar,  } from "@mui/material";
-import { categories } from "../../Pages/BrandListingForm/BrandCategories";
+import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
 
 const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
   const [activeCategory, setActiveCategory] = useState(null);

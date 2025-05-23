@@ -35,6 +35,7 @@ function Footer() {
               <Typography
                 variant="subtitle2"
                 sx={{
+                  color: "#ffba00",
                   fontWeight: "bold",
                   mt: 1,
                   fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
@@ -69,6 +70,7 @@ function Footer() {
             <Typography
               variant="h6"
               sx={{
+                color: "#ffba00",
                 fontWeight: "bold",
                 mb: 2,
                 fontSize: { xs: "1.1rem", sm: "1.2rem", md: "1.3rem" },
@@ -76,9 +78,9 @@ function Footer() {
             >
               QUICK LINKS
             </Typography>
-            <Box>
+            <Box sx={{marginLeft:1}}>
               <Link
-                href="/add-listing"
+                href="/addlisting"
                 color="inherit"
                 underline="hover"
                 display="block"
@@ -90,7 +92,7 @@ function Footer() {
                 Add Listing
               </Link>
               <Link
-                href="/expand-brand"
+                href="/expandyourbrand"
                 color="inherit"
                 underline="hover"
                 display="block"
@@ -102,7 +104,7 @@ function Footer() {
                 Expand Your Brand
               </Link>
               <Link
-                href="/invest"
+                href="/investfranchise"
                 color="inherit"
                 underline="hover"
                 display="block"
@@ -114,7 +116,7 @@ function Footer() {
                 Invest in a Franchise
               </Link>
               <Link
-                href="/advertise"
+                href="/advertisewithus"
                 color="inherit"
                 underline="hover"
                 display="block"
@@ -126,7 +128,7 @@ function Footer() {
                 Advertise With Us
               </Link>
               <Link
-                href="/categories"
+                href="/allbusinesscategory"
                 color="inherit"
                 underline="hover"
                 display="block"
@@ -138,7 +140,7 @@ function Footer() {
                 All Business Categories
               </Link>
               <Link
-                href="/consulting"
+                href="/franchiseconsulting"
                 color="inherit"
                 underline="hover"
                 display="block"
@@ -163,6 +165,7 @@ function Footer() {
             <Typography
               variant="h6"
               sx={{
+                color: "#ffba00",
                 fontWeight: "bold",
                 mb: 2,
                 fontSize: { xs: "1.1rem", sm: "1.2rem", md: "1.3rem" },
@@ -170,9 +173,9 @@ function Footer() {
             >
               HELP & SUPPORT
             </Typography>
-            <Box>
+            <Box sx={{marginLeft:2}}>
               <Link
-                href="/aboutuspage"
+                href="/aboutus"
                 color="inherit"
                 underline="hover"
                 display="block"
@@ -184,7 +187,7 @@ function Footer() {
                 About Us
               </Link>
               <Link
-                href="/contactuspage"
+                href="/contactus"
                 color="inherit"
                 underline="hover"
                 display="block"
@@ -220,7 +223,7 @@ function Footer() {
                 Help
               </Link>
               <Link
-                href="/termscondition"
+                href="/termsandconditions"
                 color="inherit"
                 underline="hover"
                 display="block"
@@ -232,7 +235,7 @@ function Footer() {
                 Terms & Conditions
               </Link>
               <Link
-                href="/privacy-policy"
+                href="/privacypolicy"
                 color="inherit"
                 underline="hover"
                 display="block"

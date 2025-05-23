@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Grid,
@@ -18,7 +18,7 @@ import {
 import illustration from "../../assets/Images/Login_illustration.jpg";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { loginSuccess } from "../../Redux/Slices/navbarSlice";
+import { setUUIDandTOKEN } from "../../Redux/Slices/AuthSlice/authSlice";
 import CloseIcon from "@mui/icons-material/Close";
 
 function LoginPage({ open, onClose }) {
@@ -35,7 +35,19 @@ function LoginPage({ open, onClose }) {
     severity: "success",
   });
   const [resendDisabled, setResendDisabled] = useState(false);
+  const [timer, setTimer] = useState(30);
 
+  useEffect(() => {
+    if (resendDisabled && timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else if (timer === 0) {
+      setResendDisabled(false);
+      setTimer(30); // Reset timer
+    }
+  }, [resendDisabled, timer]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -69,6 +81,7 @@ function LoginPage({ open, onClose }) {
     try {
       const response = await axios.post(
         "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
+        // "http://localhost:5000/api/v1/login/generateOTPforLogin",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -80,11 +93,7 @@ function LoginPage({ open, onClose }) {
           severity: "success",
         });
         setIsOtpSent(true);
-        localStorage.setItem("token", response.data.token);
         setResendDisabled(true);
-        setTimeout(() => {
-          setResendDisabled(false);
-        }, 30000);
       } else {
         throw new Error(response.data.message || "Failed to send OTP");
       }
@@ -113,29 +122,48 @@ function LoginPage({ open, onClose }) {
     try {
       const response = await axios.post(
         "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        // "http://localhost:5000/api/v1/login/",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
 
       if (response.status === 200) {
         dispatch(
-          loginSuccess({
-            user_id: response.data.data._id,
-            token: response.data.token,
-            user_data: response.data.data,
+          setUUIDandTOKEN({
+            investorUUID: response.data.data.investorUUID,
+            brandUUID: response.data.data.brandUserUUID,
+            token: response.data.data.AccessToken,
           })
         );
 
-        localStorage.setItem("token", response.data.token);
+        // console.log("======= :", response.data.data)
+
+        // localStorage.setItem("token", response.data.data.AccessToken);
         setSnackbar({
           open: true,
           message: "Login successful! Redirecting...",
           severity: "success",
         });
 
+        // sessionStorage.setItem("authToken", response.data.data.AccessToken);
+        
         setTimeout(() => {
-          onClose(); // Close dialog
-          navigate("/"); // Navigate home
+          onClose(); // Close the modal
+          setFormData({ username: "", otp: "" });
+          setIsOtpSent(false);
+          setResendDisabled(false);
+          setTimer(30);
+          setErrors({});
+          setIsLoading(false); // optional safety
+          if (response.data.data.investorUUID) {
+            navigate("/investordashboard")
+          } else if (response.data.data.brandUserUUID) {
+            navigate("/brandDashboard")
+      
+          }else {
+            navigate("/");
+          }
+          ; // Navigate home
         }, 1000);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
@@ -183,55 +211,31 @@ function LoginPage({ open, onClose }) {
             py: 2,
           }}
         >
-          <Typography variant="h6">Login</Typography>
+          {/* Corrected Heading Structure */}
+          <Typography variant="h5">Login</Typography>
           <IconButton onClick={onClose} sx={{ color: "white" }}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ p: 0 ,padding: { sm: 2, md: 0 } }}>
-          <Grid
-            container
-            sx={{
-              minHeight: { xs: "auto", 
-        sm: "55vh",  
-        md: "65vh"  },
-              flexDirection: { xs: "column", md: "row" },
-            }}
-          >
+        <DialogContent sx={{ p: 0 }}>
+          <Grid container sx={{ minHeight: "65vh" }}>
             <Grid
               item
-              xs={12}
               md={6}
               sx={{
-                display: "flex",
+                display: { xs: "none", md: "flex" },
                 alignItems: "center",
                 justifyContent: "center",
                 bgcolor: "white",
-                p: { xs: 1, md: 0 },
-               pt: { sm: 4, md: 4 },  
-    pb: { sm: 2, md: 2 },
-    minHeight: { sm: "40vh", md: "auto" }
+                p: 0,
               }}
             >
               <Box
                 component="img"
                 src={illustration}
                 alt="Login Illustration"
-                sx={{
-                  width: {
-      xs: "60%",   
-      sm: "50%",   
-      md: "80%",  
-    },                 
-     maxWidth: {xs: 250,
-      sm: 350,
-      md: 400, },
-                  borderRadius: 2,
-                  objectFit: "contain",
-                   mt: { sm: 2, md: 0 },  
-      mb: { sm: 2, md: 0 } 
-                }}
+                sx={{ width: "100%", maxWidth: 400, borderRadius: 2 }}
               />
             </Grid>
 
@@ -243,10 +247,10 @@ function LoginPage({ open, onClose }) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                p: { xs: 3, sm: 4 },
+                p: 4,
               }}
             >
-              <Box sx={{ width: "100%", maxWidth: { xs: "100%", sm: 400 } }}>
+              <Box sx={{ width: "100%", maxWidth: 400 }}>
                 <Typography
                   variant="h4"
                   gutterBottom
@@ -322,7 +326,7 @@ function LoginPage({ open, onClose }) {
                       onClick={handleOtpRequest}
                       disabled={resendDisabled}
                     >
-                      Resend OTP
+                      {resendDisabled ? `Resend in ${timer}s `: "Resend OTP"}
                     </Link>
                   </Typography>
                 )}
@@ -345,6 +349,7 @@ function LoginPage({ open, onClose }) {
           </Grid>
         </DialogContent>
       </Dialog>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={5000}
