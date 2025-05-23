@@ -1,79 +1,12 @@
 import React from "react";
-import { Link as RouterLink, Outlet, useLocation } from "react-router-dom";
-import { Box, Button, Breadcrumbs, Typography, Link } from "@mui/material";
-import HomeIcon from "@mui/icons-material/Home";
-import WhatshotIcon from "@mui/icons-material/Whatshot";
-
-const IconBreadcrumbs = () => {
-  const location = useLocation();
-  const pathnames = location.pathname.split("/").filter((x) => x);
-
-
-  return (
-    <Box
-      sx={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 1000,
-        pb: 1,
-        mb: 2,
-        borderBottom: '1px solid #e0e0e0',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-        backgroundColor: "#558b2f",
-        padding: 2,
-      }}
-    >
-      <Breadcrumbs aria-label="breadcrumb" sx={{ px: 1, color: "#fff" }}>
-        {/* Home breadcrumb */}
-        <Link
-          component={RouterLink}
-          underline="hover"
-          to="/"
-          sx={{ display: "flex", alignItems: "center", color: "inherit" }}
-        >
-          <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-          HOME
-        </Link>
-
-        {/* Dynamic breadcrumbs */}
-        {pathnames.map((value, index) => {
-          const to = `/${pathnames.slice(0, index + 1).join("/")}`;
-          const isLast = index === pathnames.length - 1;
-          const label = value
-            .replace(/-/g, " ")
-            .replace(/\b\w/g, (l) => l.toUpperCase());
-
-          return isLast ? (
-            <Typography
-              key={to}
-              color="text.primary"
-              sx={{ display: "flex", alignItems: "center" }}
-            >
-              <WhatshotIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-              {label}
-            </Typography>
-          ) : (
-            <Link
-              component={RouterLink}
-              underline="hover"
-              to={to}
-              key={to}
-              sx={{ display: "flex", alignItems: "center", color: "inherit" }}
-            >
-              <WhatshotIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-              {label}
-            </Link>
-          );
-        })}
-      </Breadcrumbs>
-    </Box>
-  );
-};
+import { Link as RouterLink, Outlet } from "react-router-dom";
+import { Box, Button } from "@mui/material";
+import img from "../../assets/Images/brandLogo.jpg";
 
 const Sidebar = () => {
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      {/* Sidebar (fixed height, non-scrollable) */}
+      {/* Sidebar (Fixed width and non-scrollable) */}
       <Box
         sx={{
           width: 240,
@@ -88,14 +21,62 @@ const Sidebar = () => {
           flexShrink: 0,
         }}
       >
-        <Box>
-          <RouterLink to="/brandDashboard/brandDashboard" style={navLinkStyle}>Dashboard</RouterLink>
-          <RouterLink to="/brandDashboard/brandmanageprofile" style={navLinkStyle}>Manage Profile</RouterLink>
-          <RouterLink to="/brandDashboard/brandaddvedios" style={navLinkStyle}>Add Videos</RouterLink>
-          <RouterLink to="/brandDashboard/brandlistingcontrol" style={navLinkStyle}>Brand Listing Controller</RouterLink>
+        {/* Clickable Logo */}
+        <Box sx={{ textAlign: "center", mb: 2 }}>
+          <RouterLink to="/" style={{ textDecoration: "none" }}>
+            <Box
+              sx={{
+                maxWidth: 220,
+                mx: "auto",
+                p: 1,
+                textAlign: "center",
+                backgroundColor: "#ffffff",
+                borderRadius: "5px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                cursor: "pointer",
+                transition: "transform 0.4s ease, box-shadow 0.4s ease",
+                "&:hover": {
+                  transform: "translateY(-8px)",
+                  boxShadow: "0 6px 25px rgba(0,0,0,0.15)",
+                },
+              }}
+            >
+              <img
+                src={img}
+                alt="Brand Logo"
+                loading="lazy"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  objectFit: "contain",
+                  borderRadius: "12px",
+                }}
+              />
+            </Box>
+          </RouterLink>
         </Box>
 
-        <Box sx={{ mt: "auto", textAlign: "center" }}>
+        {/* Navigation Links */}
+        <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <RouterLink to="/brandDashboard/brandDashboard" style={navLinkStyle}>
+            Dashboard
+          </RouterLink>
+          <RouterLink to="/brandDashboard/brandmanageprofile" style={navLinkStyle}>
+            Manage Profile
+          </RouterLink>
+          <RouterLink to="/brandDashboard/brandaddvedios" style={navLinkStyle}>
+            Add Videos
+          </RouterLink>
+          <RouterLink to="/brandDashboard/brandlistingcontrol" style={navLinkStyle}>
+            Brand Listing Controller
+          </RouterLink>
+          <RouterLink to="/brandDashboard/brandsearchus" style={navLinkStyle}>
+            SearchUs
+          </RouterLink>
+        </Box>
+
+        {/* Optional: Feedback & Complaint buttons */}
+        {/* <Box sx={{ mt: 3, textAlign: "center" }}>
           <Button
             component={RouterLink}
             to="/brandDashboard/brandfeedback"
@@ -112,7 +93,6 @@ const Sidebar = () => {
           >
             Feedback
           </Button>
-
           <Button
             component={RouterLink}
             to="/brandDashboard/brandcomplaint"
@@ -128,18 +108,16 @@ const Sidebar = () => {
           >
             Complaint
           </Button>
-        </Box>
+        </Box> */}
       </Box>
 
-      {/* Scrollable main content */}
+      {/* Scrollable Main Content Area */}
       <Box sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
-        <IconBreadcrumbs />
         <Outlet />
       </Box>
     </Box>
   );
 };
-
 
 const navLinkStyle = {
   display: "block",

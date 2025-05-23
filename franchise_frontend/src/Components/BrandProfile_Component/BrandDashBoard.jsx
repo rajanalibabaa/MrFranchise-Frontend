@@ -52,7 +52,10 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
 
     return (
         <div>
-            <Typography variant="h6" fontWeight={600} mb={2}>
+             <Typography variant="h6" fontWeight={600} mb={2} sx={{
+                            textAlign: "center", color: "#fafafa",
+                            backgroundColor: "#689f38", padding: "10px", borderRadius: "5px"
+                        }}>
                 Dashboard
             </Typography>
             <Box sx={{ display: "flex", minHeight: "85vh", bgcolor: "#f4f6f8" }}>
@@ -67,22 +70,18 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                                 width: 240, height: 200, textAlign: "center",
                                 bgcolor: "#fff", p: 2, borderRadius: 2, boxShadow: 2
                             }}>
-                                <Avatar sx={{
-                                    width: 200, height: 200, mx: "auto", mb: 2,
-                                    bgcolor: "transparent", objectFit: "cover",
-                                    img: {
-                                        objectFit: 'cover',
-                                        width: '100%',
-                                        height: '100%',
-                                        borderRadius: '50%',
-                                        loading: 'lazy'
-                                    }
+                                 <Avatar sx={{
+                                    width: 230, height: 210, mx: "auto", mb: 2,
+                                    bgcolor: "transparent"
                                 }}>
                                     <img
                                         src={img}
                                         alt="Profile"
-                                        loading="lazy"
-                                        style={{ width: "140%", height: "105%", borderRadius: "50%" }}
+                                        loading='lazy'
+                                        style={{
+                                            width: "90%", height: "110%",
+                                            borderRadius: "40%", marginLeft: "30px", marginTop: "20px"
+                                        }}
                                     />
                                     <PersonIcon fontSize="large" />
                                 </Avatar>
@@ -123,10 +122,10 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                                 </Box>
                                 <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
                                     <Tabs value={tabValue} onChange={handleTabChange} centered>
-                                        <Tab label="Expressed Interest" />
-                                        <Tab label="Viewed Brands" />
-                                        <Tab label="Liked Brands" />
-                                        <Tab label="Short List" />
+                                        <Tab label="Your Enqueries" />
+                                        <Tab label="Total View" />
+                                        <Tab label="Total Like" />
+                                        <Tab label="Enqueries" />
                                     </Tabs>
                                 </Box>
                             </Box>

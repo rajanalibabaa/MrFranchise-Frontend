@@ -861,7 +861,7 @@ if (!files || !Array.isArray(files) || files.length === 0) return "No files uplo
       {ficoModels.map((model, index) => {
         // Filter out empty/null/undefined fields
         const modelFields = Object.entries(model).filter(
-          ([_, value]) => value !== "" && value !== null && value !== undefined
+          ([, value]) => value !== "" && value !== null && value !== undefined
         );
 
         if (modelFields.length === 0) {

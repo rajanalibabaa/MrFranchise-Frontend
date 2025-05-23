@@ -23,7 +23,8 @@ const ManageProfile = () => {
   const navigate = useNavigate();
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
-
+ console.log('Investor UUID:', investorUUID);
+  console.log('Access Token:', AccessToken);
   useEffect(() => {
     const fetchData = async () => {
       if (!investorUUID || !AccessToken) {
@@ -61,6 +62,8 @@ const ManageProfile = () => {
 
     fetchData();
   }, [investorUUID, AccessToken]);
+
+   console.log('Investor Data:', investorData);
 
   const handleEditToggle = () => {
     setOtpDialogOpen(true);
@@ -215,7 +218,7 @@ const ManageProfile = () => {
           {renderField("Category", "category")}
           {renderField("City", "city")}
           {renderField("Country", "country")}
-          {renderField("District", "district")}
+          {/* {renderField("District", "district")} */}
           {renderField("Investment Range", "investmentRange")}
           {renderField("Looking For", "lookingFor")}
           {renderField("Occupation", "occupation")}

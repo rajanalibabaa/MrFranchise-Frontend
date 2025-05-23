@@ -230,12 +230,12 @@ const ContactUs = () => {
   You can reach us by email at{' '}
  
   <a
-    href="https://mail.google.com/mail/?view=cm&fs=1&to=mrfranchisc22@gmail.com"
+    href="https://mail.google.com/mail/?view=cm&fs=1&to=arul03sekar@gmail.com"
     target="_blank"
     rel="noopener noreferrer"
     style={{ color: "#1976d2", textDecoration: "underline" }}
   >
-    mrfranchisc22@gmail.com
+    arul03sekar@gmail.com
   </a>
 </Typography>
 
@@ -248,7 +248,7 @@ const data = {
   Category: ["Contact Us", "Feedback", "Complaint"],
 };
 
-const ResponseManager = () => {
+const BrandSearchus = () => {
   const [openCategory, setOpenCategory] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -329,4 +329,4 @@ const ResponseManager = () => {
 };
 
 
-export default ResponseManager;
+export default BrandSearchus;

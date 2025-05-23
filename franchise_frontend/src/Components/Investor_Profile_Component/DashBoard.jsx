@@ -96,8 +96,8 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                     ) : (
                         <Box sx={{ display: "flex", gap: 4 }}>
                             <Box sx={{
-                                width: 240, height: 200, textAlign: "center",
-                                bgcolor: "#fff", p: 2, borderRadius: 2, boxShadow: 2
+                                // width: 240, height: 200, textAlign: "center",
+                                // bgcolor: "#fff", p: 2, borderRadius: 2, boxShadow: 2
                             }}>
                                 <Avatar sx={{
                                     width: 230, height: 210, mx: "auto", mb: 2,
@@ -118,19 +118,19 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
 
                             <Box sx={{ flex: 1 }}>
                                 <Box sx={{
-                                    mb: 3, bgcolor: "#fff", p: 2, borderRadius: 2,
-                                    boxShadow: 2, width: "90%", textAlign: "center",
-                                    height: "40%", paddingTop: "65px", paddingBottom: "65px"
+                                    // mb: 3, bgcolor: "#fff", p: 2, borderRadius: 2,
+                                    // boxShadow: 2, width: "90%", textAlign: "center",
+                                    // height: "40%", paddingTop: "65px", paddingBottom: "65px"
                                 }}>
-                                    <Typography variant="h4" fontWeight={600}>
+                                    <Typography variant="h4" fontWeight={600}sx={{ mb: 1,mt: 8 }}>
                                         Welcome {investorInfo?.firstName || "Investor"}
                                     </Typography>
                                     <Typography color="text.secondary" variant="h5">
                                         Investor
                                     </Typography>
-                                    <Typography color="text.secondary" variant="h5" fontWeight={800}>
+                                    {/* <Typography color="text.secondary" variant="h5" fontWeight={800}>
                                         ID ({investorUUID || "N/A"})
-                                    </Typography>
+                                    </Typography> */}
                                 </Box>
                             </Box>
                         </Box>
