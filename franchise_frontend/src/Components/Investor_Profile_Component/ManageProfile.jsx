@@ -19,12 +19,13 @@ const ManageProfile = () => {
   const [contactValue, setContactValue] = useState('');
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState('');
+  const [reguestOTP, setreguestOTP] = useState(false);
+  const [ErrorMSG, setErrorMSG] = useState('');
 
   const navigate = useNavigate();
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
- console.log('Investor UUID:', investorUUID);
-  console.log('Access Token:', AccessToken);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!investorUUID || !AccessToken) {
@@ -43,14 +44,10 @@ const ManageProfile = () => {
             },
           }
         );
-        if (response.data && response.data.data) {
+        if (response.data?.data) {
           const data = response.data.data;
-          if (data.mobileNumber?.startsWith('+91')) {
-            data.mobileNumber = data.mobileNumber.replace('+91', '');
-          }
-          if (data.whatsappNumber?.startsWith('+91')) {
-            data.whatsappNumber = data.whatsappNumber.replace('+91', '');
-          }
+          data.mobileNumber = data.mobileNumber?.replace('+91', '') || '';
+          data.whatsappNumber = data.whatsappNumber?.replace('+91', '') || '';
           setInvestorData(data);
         }
       } catch (error) {
@@ -63,28 +60,79 @@ const ManageProfile = () => {
     fetchData();
   }, [investorUUID, AccessToken]);
 
-   console.log('Investor Data:', investorData);
-
   const handleEditToggle = () => {
     setOtpDialogOpen(true);
     setOtpStep(1);
     setOtp('');
     setOtpError('');
+    setErrorMSG('');
     setContactValue(investorData.email || investorData.mobileNumber || '');
   };
 
-  const handleRequestOtp = () => {
+  const handleRequestOtp = async () => {
     if (!contactValue) return;
-    console.log("Sending OTP to:", contactValue);
-    setOtpStep(2);
+
+    setErrorMSG('');
+    setreguestOTP(true);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/otp/existingEmailOTP",
+        { email: investorData.email },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      if (response.data.success) {
+        setOtpStep(2);
+      } else {
+        setErrorMSG(response.data.message || "Failed to send OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("OTP request error:", error);
+      setErrorMSG("An error occurred while requesting OTP.");
+    } finally {
+      setreguestOTP(false);
+    }
   };
 
-  const handleOtpVerify = () => {
-    if (otp === '123456') {
-      setEditMode(true);
-      setOtpDialogOpen(false);
-    } else {
-      setOtpError("Invalid OTP. Please try again.");
+  const handleOtpVerify = async () => {
+    console.log("======= : ",otp.length)
+     if (!otp || otp.length === 0) {
+    setOtpError("Please enter the OTP");
+    return; 
+  }
+    setOtpError('');
+    setErrorMSG('');
+    setreguestOTP(true);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/otp/verifyExistingEmailOTP",
+        {
+          email: investorData.email,
+          verifyOTP: otp
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("response.data.success :",response.data.success)
+
+      if (response.data.success) {
+        setEditMode(true);
+        setOtpDialogOpen(false);
+        setOtpStep(2);
+      } else {
+        setOtpError("Failed to verify OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      setOtpError("An error occurred during OTP verification.");
+    } finally {
+      setreguestOTP(false);
     }
   };
 
@@ -131,9 +179,7 @@ const ManageProfile = () => {
               variant="outlined"
               size="small"
               value={investorData[key] || ''}
-              onChange={(e) =>
-                setInvestorData({ ...investorData, [key]: e.target.value })
-              }
+              onChange={(e) => setInvestorData({ ...investorData, [key]: e.target.value })}
             />
           </Box>
         ) : (
@@ -208,7 +254,6 @@ const ManageProfile = () => {
             <Typography variant="h6">{investorData.firstName}</Typography>
           </Box>
 
-          {/* Render Fields */}
           {renderField("First Name", "firstName")}
           {renderField("Email", "email")}
           {renderField("Mobile Number", "mobileNumber")}
@@ -218,7 +263,6 @@ const ManageProfile = () => {
           {renderField("Category", "category")}
           {renderField("City", "city")}
           {renderField("Country", "country")}
-          {/* {renderField("District", "district")} */}
           {renderField("Investment Range", "investmentRange")}
           {renderField("Looking For", "lookingFor")}
           {renderField("Occupation", "occupation")}
@@ -230,23 +274,41 @@ const ManageProfile = () => {
       {/* OTP Dialog */}
       <Dialog open={otpDialogOpen} onClose={() => setOtpDialogOpen(false)} fullWidth maxWidth="xs">
         <DialogTitle>Verification Required</DialogTitle>
-        <DialogContent>
+        <DialogContent
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (otpStep === 1) {
+                handleRequestOtp();
+              } else if (otpStep === 2) {
+                handleOtpVerify();
+              }
+            }
+          }}
+        >
+          {ErrorMSG && (
+            <Typography color="error" align="center" sx={{ mb: 2 }}>
+              {ErrorMSG}
+            </Typography>
+          )}
+
           {otpStep === 1 ? (
             <>
               <TextField
                 fullWidth
-                label="Email or Phone Number"
+                label="Email"
                 value={contactValue}
-                onChange={(e) => setContactValue(e.target.value)}
                 margin="normal"
+                disabled
               />
               <Button
                 fullWidth
                 variant="contained"
                 onClick={handleRequestOtp}
                 sx={{ mt: 2 }}
+                disabled={reguestOTP}
               >
-                REQUEST OTP
+                {reguestOTP ? "LOADING..." : "REQUEST OTP"}
               </Button>
             </>
           ) : (
@@ -268,12 +330,14 @@ const ManageProfile = () => {
                 variant="contained"
                 onClick={handleOtpVerify}
                 sx={{ mt: 2 }}
+                disabled={reguestOTP}
               >
-                VERIFY OTP
+                {reguestOTP ? "VERIFYING..." : "VERIFY OTP"}
               </Button>
             </>
           )}
         </DialogContent>
+
         <DialogActions>
           <Button onClick={() => setOtpDialogOpen(false)}>Cancel</Button>
         </DialogActions>
