@@ -59,6 +59,7 @@ import {
   LinkedIn,
   AccountTree,
   Support,
+  Favorite
 } from "@mui/icons-material";
 import { CheckCircleOutline } from "@mui/icons-material";
 
@@ -73,22 +74,22 @@ function BrandList() {
   const [openDialog, setOpenDialog] = useState(false);
 
   // Filter states
- const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedModelType, setSelectedModelType] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  
+
   const [availableCategories, setAvailableCategories] = useState([]);
   const [availableModelTypes, setAvailableModelTypes] = useState([]);
   const [availableStates, setAvailableStates] = useState([]);
   const [availableCities, setAvailableCities] = useState([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
-const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
- const investmentRangeOptions = [
+  const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
+  const investmentRangeOptions = [
     { label: "All Ranges", value: "" },
-    { label: "Rs.10,000-50,000", value:"Below - Rs.50 " },
+    { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
     { label: "Rs.2L-5L", value: "Rs.2L-5L" },
     { label: "Rs.5L-10L", value: "Rs.5 L - 10 L" },
     { label: "Rs.10L-20L", value: "Rs.10 L - 20 L" },
@@ -107,7 +108,7 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
         {
           headers: {
             "Content-Type": "application/json",
@@ -124,27 +125,38 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
       // Extract unique categories and locations
       const categories = [
         ...new Set(
-          brandsData.flatMap(brand => brand.personalDetails?.brandCategories?.map(category => category.main) || [])
+          brandsData.flatMap(
+            (brand) =>
+              brand.personalDetails?.brandCategories?.map(
+                (category) => category.main
+              ) || []
+          )
         ),
       ];
 
-         const modelTypes = [
+      const modelTypes = [
         ...new Set(
-          brandsData.flatMap(brand => 
-            brand.franchiseDetails?.modelsOfFranchise?.map(model => model.franchiseType) || []
+          brandsData.flatMap(
+            (brand) =>
+              brand.franchiseDetails?.modelsOfFranchise?.map(
+                (model) => model.franchiseType
+              ) || []
           )
-      )];
-      
+        ),
+      ];
+
       const states = [
         ...new Set(
-          brandsData.map(brand => brand.personalDetails?.state).filter(Boolean)
-        )
+          brandsData
+            .map((brand) => brand.personalDetails?.state)
+            .filter(Boolean)
+        ),
       ];
-      
+
       const cities = [
         ...new Set(
-          brandsData.map(brand => brand.personalDetails?.city).filter(Boolean)
-        )
+          brandsData.map((brand) => brand.personalDetails?.city).filter(Boolean)
+        ),
       ];
       setAvailableCategories(categories);
       setAvailableModelTypes(modelTypes);
@@ -182,54 +194,63 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
     // Apply category filter
     if (selectedCategory) {
       result = result.filter((brand) =>
-        brand.personalDetails?.brandCategories?.some(cat=> cat.main === selectedCategory)
-      );
-    }
-
-
-    
-    // Apply model type filter
-    if (selectedModelType) {
-      result = result.filter(brand => 
-        brand.franchiseDetails?.modelsOfFranchise?.some(model => 
-          model.franchiseType === selectedModelType
+        brand.personalDetails?.brandCategories?.some(
+          (cat) => cat.main === selectedCategory
         )
       );
     }
 
+    // Apply model type filter
+    if (selectedModelType) {
+      result = result.filter((brand) =>
+        brand.franchiseDetails?.modelsOfFranchise?.some(
+          (model) => model.franchiseType === selectedModelType
+        )
+      );
+    }
 
     // Apply state filter
     if (selectedState) {
-      result = result.filter(brand => 
-        brand.personalDetails?.state === selectedState ||
-        brand.personalDetails?.expansionLocation?.some(loc => 
-          loc.state === selectedState
-        )
+      result = result.filter(
+        (brand) =>
+          brand.personalDetails?.state === selectedState ||
+          brand.personalDetails?.expansionLocation?.some(
+            (loc) => loc.state === selectedState
+          )
       );
     }
 
-
-       // Apply city filter
+    // Apply city filter
     if (selectedCity) {
-      result = result.filter(brand => 
-        brand.personalDetails?.city === selectedCity ||
-        brand.personalDetails?.expansionLocation?.some(loc => 
-          loc.city === selectedCity
-        )
+      result = result.filter(
+        (brand) =>
+          brand.personalDetails?.city === selectedCity ||
+          brand.personalDetails?.expansionLocation?.some(
+            (loc) => loc.city === selectedCity
+          )
       );
     }
 
     // Apply investment range filter
     if (selectedInvestmentRange) {
-      const [min, max] = selectedInvestmentRange.split('-').map(Number);
+      const [min, max] = selectedInvestmentRange.split("-").map(Number);
       result = result.filter((brand) => {
-        const franchiseFee = parseFloat(brand.franchiseDetails?.franchiseFee) || 0;
+        const franchiseFee =
+          parseFloat(brand.franchiseDetails?.franchiseFee) || 0;
         return franchiseFee >= min && franchiseFee <= max;
       });
     }
 
     setFilteredBrands(result);
-  }, [brands, searchTerm, selectedCategory, selectedModelType, selectedState, selectedCity, selectedInvestmentRange]);
+  }, [
+    brands,
+    searchTerm,
+    selectedCategory,
+    selectedModelType,
+    selectedState,
+    selectedCity,
+    selectedInvestmentRange,
+  ]);
 
   useEffect(() => {
     applyFilters();
@@ -239,7 +260,6 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
     setSelectedBrand(brand);
     setOpenDialog(true);
     setTabValue(0);
-    setFormSubmitted(false);
   };
 
   const handleCloseDialog = () => {
@@ -255,7 +275,7 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
     }).format(value);
   };
 
-    const clearFilters = () => {
+  const clearFilters = () => {
     setSearchTerm("");
     setSelectedCategory("");
     setSelectedModelType("");
@@ -264,7 +284,7 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
     setSelectedInvestmentRange("");
   };
 
-   const activeFilterCount = [
+  const activeFilterCount = [
     searchTerm,
     selectedCategory,
     selectedModelType,
@@ -273,10 +293,7 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
     selectedInvestmentRange,
   ].filter(Boolean).length;
 
-
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
+  
 
   const FilterPanel = () => (
     <Box sx={{ width: 280, p: 2 }}>
@@ -409,22 +426,22 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
         Investment Range
       </Typography>
       <Select
-          value={selectedInvestmentRange}
-          onChange={(e) => setSelectedInvestmentRange(e.target.value)}
-          label="Investment Range"
-          sx={{
-            "& .MuiSelect-icon": {
-              color: "#ff9800",
-            },
-            width: "100%",
-          }}
-        >
-          {investmentRangeOptions.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </Select>
+        value={selectedInvestmentRange}
+        onChange={(e) => setSelectedInvestmentRange(e.target.value)}
+        label="Investment Range"
+        sx={{
+          "& .MuiSelect-icon": {
+            color: "#ff9800",
+          },
+          width: "100%",
+        }}
+      >
+        {investmentRangeOptions.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </Select>
 
       <Typography variant="body2" sx={{ color: "#4caf50" }}>
         Showing {filteredBrands.length} of {brands.length} brands
@@ -457,14 +474,19 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
         }}
       />
       <CardContent sx={{ flexGrow: 1 }}>
-        <Typography
+        <Box>
+           <Typography
           gutterBottom
           variant="h5"
           component="div"
           sx={{ color: "black" }}
         >
-          {brand.personalDetails?.brandName}
+          {brand.personalDetails?.brandName} 
         </Typography>
+        <Typography>      <Favorite/>
+</Typography>
+        </Box>
+       
 
         <Box display="flex" alignItems="center" mb={1}>
           <Rating
@@ -514,6 +536,10 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
           <AttachMoney sx={{ mr: 1, fontSize: "1rem", color: "black" }} />
           Investment:{" "}
           {formatCurrency(brand.franchiseDetails?.franchiseFee || 0)}
+        </Typography>
+        <Typography>
+          Area Required :{brand.franchiseDetails?.modelsOfFranchise.map((model) => model.areaRequired)}
+            
         </Typography>
       </CardContent>
       <CardActions sx={{ p: 2 }}>
@@ -687,19 +713,24 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
           },
           {
             label: "Categories",
-            value: brand.personalDetails?.brandCategories.map((categories,index)=>(
-              <Box key={index}>
-                <Typography variant="body2">
-                  <strong>Main Category:</strong> {categories.main || "Not specified"}
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Sub Category:</strong> {categories.sub || "Not specified"}
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Child Category:</strong> {categories.child || "Not specified"}
-                </Typography>
-              </Box>
-            ))
+            value: brand.personalDetails?.brandCategories?.map(
+              (categories, index) => (
+                <Box key={index}>
+                  <Typography variant="body2">
+                    <strong>Main Category:</strong>{" "}
+                    {categories.main || "Not specified"}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Sub Category:</strong>{" "}
+                    {categories.sub || "Not specified"}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Child Category:</strong>{" "}
+                    {categories.child || "Not specified"}
+                  </Typography>
+                </Box>
+              )
+            ),
           },
           {
             label: "Website",
@@ -1186,14 +1217,15 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
           },
           {
             label: "Expansion Locations",
-            value: brand.personalDetails?.expansionLocation.map((location,index)=>(
-              <Box key={index}>
-                <Typography>{location.city}</Typography>
-                <Typography>{location.state}</Typography>
-                <Typography>{location.country}</Typography>
-
-              </Box>
-            )),
+            value: brand.personalDetails?.expansionLocation?.map(
+              (location, index) => (
+                <Box key={index}>
+                  <Typography>{location.city}</Typography>
+                  <Typography>{location.state}</Typography>
+                  <Typography>{location.country}</Typography>
+                </Box>
+              )
+            ),
           },
         ],
       },
@@ -1604,7 +1636,7 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
               }}
             >
               {selectedBrand?.personalDetails?.brandName}
-              
+
               <Box display="flex" alignItems="center" mb={1}>
                 <Rating
                   value={3.5}
@@ -1645,35 +1677,38 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
 
         {/* Dialog Content */}
         <Typography
-                variant="subtitle1"
-                sx={{
-                  color: "#4caf50",
-                }}
-              >
-                {selectedBrand?.personalDetails?.companyName}
-              </Typography>
+          variant="subtitle1"
+          sx={{
+            color: "#4caf50",
+          }}
+        >
+          {selectedBrand?.personalDetails?.companyName}
+        </Typography>
         <Typography
-                variant="subtitle1"
-                sx={{
-                  color: "#4caf50",
-                }}
-              >
-                {selectedBrand?.personalDetails?.brandCategories && selectedBrand.personalDetails.brandCategories.length>0 && (
-                   <Box>
-      {selectedBrand.personalDetails.brandCategories.map((category, index) => (
-        <Box key={index} sx={{ mb: 1 }}>
-          <Typography>Main: {category.main}</Typography>
-          <Typography>Sub: {category.sub}</Typography>
-          <Typography>Child: {category.child}</Typography>
-        </Box>
-      ))}
-    </Box>
-  )}
-              </Typography>
-              <Typography>
-                {selectedBrand?.personalDetails?.state},
-                {selectedBrand?.personalDetails?.city}
-              </Typography>
+          variant="subtitle1"
+          sx={{
+            color: "#4caf50",
+          }}
+        >
+          {selectedBrand?.personalDetails?.brandCategories &&
+            selectedBrand.personalDetails.brandCategories.length > 0 && (
+              <Box>
+                {selectedBrand.personalDetails.brandCategories.map(
+                  (category, index) => (
+                    <Box key={index} sx={{ mb: 1 }}>
+                      <Typography>Main: {category.main}</Typography>
+                      <Typography>Sub: {category.sub}</Typography>
+                      <Typography>Child: {category.child}</Typography>
+                    </Box>
+                  )
+                )}
+              </Box>
+            )}
+        </Typography>
+        <Typography>
+          {selectedBrand?.personalDetails?.state},
+          {selectedBrand?.personalDetails?.city}
+        </Typography>
         <DialogContent
           dividers
           sx={{
@@ -1683,7 +1718,6 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
             flexDirection: { xs: "column", md: "row" },
           }}
         >
-          
           {/* Main Content Area */}
           <Box
             sx={{
@@ -1982,20 +2016,6 @@ const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
                         mt={1}
                         ml={6}
                       >
-                        {/* <Button
-                    variant="outlined"
-                    onClick={handleModalClose}
-                    sx={{
-                      px: 4,
-                      borderColor: '#ff9800',
-                      color: '#ff9800',
-                      '&:hover': {
-                        borderColor: '#fb8c00',
-                      }
-                    }}
-                  >
-                    Cancel
-                  </Button> */}
                         <Button
                           type="submit"
                           variant="contained"

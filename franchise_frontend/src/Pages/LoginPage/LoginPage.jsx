@@ -155,15 +155,7 @@ function LoginPage({ open, onClose }) {
           setTimer(30);
           setErrors({});
           setIsLoading(false); // optional safety
-          if (response.data.data.investorUUID) {
-            navigate("/investordashboard")
-          } else if (response.data.data.brandUserUUID) {
-            navigate("/brandDashboard")
-      
-          }else {
-            navigate("/");
-          }
-          ; // Navigate home
+          navigate("/"); // Navigate home
         }, 1000);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
