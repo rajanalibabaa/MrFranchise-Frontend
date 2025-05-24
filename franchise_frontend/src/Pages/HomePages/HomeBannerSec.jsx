@@ -256,10 +256,10 @@ const HomeBannerSec = () => {
      
     </Box>
     {/* top single vido section */}
-     <TopBrandVdoSec/>
-     <TopBrandVdoCards/>
+     {/* <TopBrandVdoSec/> */}
+     {/* <TopBrandVdoCards/> */}
      {/* top double video section */}
-     <TopIndusVdoSec/>
+     {/* <TopIndusVdoSec/> */}
      {/* top triple video section */}
      <TopInvestVdoSec/>
      <TopInvestVdo2/>

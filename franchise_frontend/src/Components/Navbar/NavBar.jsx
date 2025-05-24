@@ -109,6 +109,16 @@ function Navbar() {
     }
   };
 
+  const handleMyProfileNavigate = () => {
+    if(localStorage.getItem("investorUUID")){
+      navigate("/investordashboard")
+    }else if(localStorage.getItem("brandUUID")){
+      navigate("/brandDashboard")
+    }else{
+      navigate("/")
+    }
+  }
+
   return (
     <>
       {/* Top Bar */}
@@ -257,7 +267,7 @@ function Navbar() {
                           color: "text.primary",
                           "&:hover": { bgcolor: "action.hover" },
                         }}
-                        onClick={() => handleNavigate("/investordashboard")}
+                        onClick={() => handleMyProfileNavigate()}
                       >
                         My Profile
                       </Button>
