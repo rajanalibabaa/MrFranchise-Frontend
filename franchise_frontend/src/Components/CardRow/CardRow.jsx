@@ -1,123 +1,160 @@
 import React from 'react';
-import { Grid, Paper, Typography, Button, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardMedia,
+  Typography,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Button,
+} from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 
-const CardsRow = () => {
-  return (
-    <Grid container spacing={3} sx={{ padding: '20px' }}>
-      {/* Card 1 */}
-      <Grid item xs={12} sm={4}>
-        <Paper elevation={3} sx={{ padding: '20px', height: '100%' }}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Skale Fitness
-          </Typography>
-          
-          <List dense>
-            <ListItem sx={{ padding: '4px 0' }}>
-              <ListItemIcon sx={{ minWidth: '32px' }}>
-                <CheckCircleIcon color="success" fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary="1 Cr. – 2 Cr." />
-            </ListItem>
-            
-            <ListItem sx={{ padding: '4px 0' }}>
-              <ListItemIcon sx={{ minWidth: '32px' }}>
-                <ArrowRightAltIcon color="action" fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary="2,000 - 3,000 Sq. Ft" />
-            </ListItem>
-          </List>
+const CARD_DATA = [
+  {
+    id: 1,
+    title: 'Skale Fitness',
+    price: '1 Cr. – 2 Cr.',
+    size: '2,000 - 3,000 Sq. Ft',
+    videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo_TV_2015.png', // sample logo
+  },
+  {
+    id: 2,
+    title: 'Urban Wellness',
+    price: '50 L - 1 Cr.',
+    size: '1,500 - 2,500 Sq. Ft',
+    videoUrl: 'https://www.w3schools.com/html/movie.mp4',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg',
+  },
+  {
+    id: 3,
+    title: 'Tech Gym',
+    price: '2 Cr. – 5 Cr.',
+    size: '3,000 - 5,000 Sq. Ft',
+    videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg',
+  },
+];
 
-          <Typography variant="body2" paragraph sx={{ color: 'text.secondary' }}>
-            Premium fitness brand with modern training equipment for Indian fitness. If we look around, we will find that weight loss advertisements are rampant everywhere.
-          </Typography>
+const CardsRow = () => (
+  <Box
+    component="section"
+    sx={{
+      display: 'flex',
+      overflowX: 'auto',
+      p: 2,
+      '& > *': {
+        flex: '0 0 400px',
+        mr: 2,
+        scrollSnapAlign: 'start',
+      },
+      scrollSnapType: 'x mandatory',
+      '&::-webkit-scrollbar': { height: 6 },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: '#1976d2',
+        borderRadius: 4,
+      },
+    }}
+  >
+    {CARD_DATA.map((card) => (
+      <Card
+        key={card.id}
+        elevation={3}
+        sx={{
+          position: 'relative',
+          height: 550,
+          width: '70%',
+          color: '#fff',
+          overflow: 'hidden',
+          scrollSnapAlign: 'start',
+          borderRadius: 2,
+        }}
+      >
+        {/* VIDEO AS BACKGROUND */}
+        <CardMedia
+          component="video"
+          src={card.videoUrl}
+          autoPlay
+          loop
+          muted
+          controls={false}
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
 
-          <Button 
-            variant="contained" 
-            fullWidth
-            sx={{ mt: 2, backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-          >
-            Apply
-          </Button>
-        </Paper>
-      </Grid>
+        {/* OVERLAY WITH CONTENT */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.45)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+            p: 2,
+          }}
+        >
+          <Box>
+            {/* Logo + Title */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <Box
+                component="img"
+                src={card.logoUrl}
+                alt={`${card.title} logo`}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  backgroundColor: '#fff',
+                }}
+              />
+              <Typography variant="h6" fontWeight="bold">
+                {card.title}
+              </Typography>
+            </Box>
 
-      {/* Card 2 */}
-      <Grid item xs={12} sm={4}>
-        <Paper elevation={3} sx={{ padding: '20px', height: '100%' }}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Urban Wellness
-          </Typography>
-          
-          <List dense>
-            <ListItem sx={{ padding: '4px 0' }}>
-              <ListItemIcon sx={{ minWidth: '32px' }}>
-                <CheckCircleIcon color="success" fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary="50 L - 1 Cr." />
-            </ListItem>
-            
-            <ListItem sx={{ padding: '4px 0' }}>
-              <ListItemIcon sx={{ minWidth: '32px' }}>
-                <ArrowRightAltIcon color="action" fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary="1,500 - 2,500 Sq. Ft" />
-            </ListItem>
-          </List>
+            <List dense>
+              <ListItem sx={{ py: 0.5 }}>
+                <ListItemIcon sx={{ minWidth: 32, color: '#fff' }}>
+                  <CheckCircleIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary={card.price} />
+              </ListItem>
+              <ListItem sx={{ py: 0.5 }}>
+                <ListItemIcon sx={{ minWidth: 32, color: '#fff' }}>
+                  <ArrowRightAltIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary={card.size} />
+              </ListItem>
+            </List>
 
-          <Typography variant="body2" paragraph sx={{ color: 'text.secondary' }}>
-            Holistic wellness center offering yoga, meditation, and organic nutrition counseling in urban locations.
-          </Typography>
-
-          <Button 
-            variant="contained" 
-            fullWidth
-            sx={{ mt: 2, backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-          >
-            Apply
-          </Button>
-        </Paper>
-      </Grid>
-
-      {/* Card 3 */}
-      <Grid item xs={12} sm={4}>
-        <Paper elevation={3} sx={{ padding: '20px', height: '100%' }}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Tech Gym
-          </Typography>
-          
-          <List dense>
-            <ListItem sx={{ padding: '4px 0' }}>
-              <ListItemIcon sx={{ minWidth: '32px' }}>
-                <CheckCircleIcon color="success" fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary="2 Cr. – 5 Cr." />
-            </ListItem>
-            
-            <ListItem sx={{ padding: '4px 0' }}>
-              <ListItemIcon sx={{ minWidth: '32px' }}>
-                <ArrowRightAltIcon color="action" fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary="3,000 - 5,000 Sq. Ft" />
-            </ListItem>
-          </List>
-
-          <Typography variant="body2" paragraph sx={{ color: 'text.secondary' }}>
-            High-tech gymnasium featuring AI-powered equipment and virtual reality fitness programs.
-          </Typography>
-
-          <Button 
-            variant="contained" 
-            fullWidth
-            sx={{ mt: 2, backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
-          >
-            Apply
-          </Button>
-        </Paper>
-      </Grid>
-    </Grid>
-  );
-};
+            <Button
+              variant="contained"
+              fullWidth
+              sx={{
+                mt: 2,
+                backgroundColor: '#1976d2',
+                '&:hover': { backgroundColor: '#1565c0' },
+              }}
+            >
+              Apply
+            </Button>
+          </Box>
+        </Box>
+      </Card>
+    ))}
+  </Box>
+);
 
 export default CardsRow;
