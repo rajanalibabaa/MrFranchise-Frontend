@@ -24,7 +24,7 @@ const ManageProfile = () => {
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
  console.log('Investor UUID:', investorUUID);
-  console.log('Access Token:', AccessToken);
+ console.log('Access Token:', AccessToken);
   useEffect(() => {
     const fetchData = async () => {
       if (!investorUUID || !AccessToken) {
