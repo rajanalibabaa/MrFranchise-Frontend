@@ -59,10 +59,11 @@ import {
   LinkedIn,
   AccountTree,
   Support,
-  Favorite
+  Favorite,
+  AreaChart,
 } from "@mui/icons-material";
 import { CheckCircleOutline } from "@mui/icons-material";
-
+import {motion} from "framer-motion"
 import axios from "axios";
 
 function BrandList() {
@@ -108,7 +109,7 @@ function BrandList() {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+        "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
         {
           headers: {
             "Content-Type": "application/json",
@@ -293,8 +294,6 @@ function BrandList() {
     selectedInvestmentRange,
   ].filter(Boolean).length;
 
-  
-
   const FilterPanel = () => (
     <Box sx={{ width: 280, p: 2 }}>
       <Box
@@ -473,20 +472,20 @@ function BrandList() {
           width: "100%",
         }}
       />
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Box>
-           <Typography
-          gutterBottom
-          variant="h5"
-          component="div"
-          sx={{ color: "black" }}
-        >
-          {brand.personalDetails?.brandName} 
-        </Typography>
-        <Typography>      <Favorite/>
-</Typography>
+      <CardContent sx={{ flexGrow: 1 }} >
+        <Box >
+          <Typography
+            gutterBottom
+            variant="h5"
+            component="div"
+            sx={{ color: "black" }}
+          >
+            {brand.personalDetails?.brandName}
+          </Typography>
+          <Typography>
+            <Favorite />
+          </Typography>
         </Box>
-       
 
         <Box display="flex" alignItems="center" mb={1}>
           <Rating
@@ -525,7 +524,7 @@ function BrandList() {
           sx={{ mb: 1, display: "flex", alignItems: "center", color: "black" }}
         >
           <LocationOn sx={{ mr: 1, fontSize: "1rem", color: "black" }} />
-          {brand.personalDetails?.city?.split(",").pop() ||
+           Location: {brand.personalDetails?.city?.split(",").pop() ||
             "Multiple locations"}
         </Typography>
 
@@ -534,12 +533,16 @@ function BrandList() {
           sx={{ mb: 1, display: "flex", alignItems: "center", color: "black" }}
         >
           <AttachMoney sx={{ mr: 1, fontSize: "1rem", color: "black" }} />
-          Investment:{" "}
-          {formatCurrency(brand.franchiseDetails?.franchiseFee || 0)}
+          Investment:{brand.franchiseDetails?.modelsOfFranchise.map(
+            (model) => model.investmentRange
+          )}
         </Typography>
         <Typography>
-          Area Required :{brand.franchiseDetails?.modelsOfFranchise.map((model) => model.areaRequired)}
-            
+          <AreaChart/>
+          Area Required :
+          {brand.franchiseDetails?.modelsOfFranchise.map(
+            (model) => model.areaRequired
+          )}
         </Typography>
       </CardContent>
       <CardActions sx={{ p: 2 }}>
@@ -562,6 +565,8 @@ function BrandList() {
       </CardActions>
     </Card>
   );
+
+  
   const OverviewTab = React.memo(({ brand }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -569,86 +574,145 @@ function BrandList() {
     const formRef = useRef(null);
     const [selectedModel, setSelectedModel] = useState(null);
     const [formData, setFormData] = useState({
-      fullName: "",
-      franchiseModel: "",
-      franchiseType: "",
-      investmentRange: "",
-      location: "",
-      planToInvest: "",
-      readyToInvest: "",
+        fullName: "",
+        franchiseModel: "",
+        franchiseType: "",
+        investmentRange: "",
+        location: "",
+        planToInvest: "",
+        readyToInvest: "",
     });
+
+    // Animation variants
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: {
+                duration: 0.5,
+                ease: "easeOut"
+            }
+        }
+    };
+
+    const cardHoverVariants = {
+        hover: {
+            y: -5,
+            boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+            transition: {
+                duration: 0.3,
+                ease: "easeOut"
+            }
+        }
+    };
+
     const franchiseModels = [
-      ...new Set(
-        brand?.franchiseDetails?.modelsOfFranchise?.map(
-          (m) => m.franchiseModel
-        ) || []
-      ),
+        ...new Set(
+            brand?.franchiseDetails?.modelsOfFranchise?.map(
+                (m) => m.franchiseModel
+            ) || []
+        ),
     ];
     const franchiseTypes = [
-      ...new Set(
-        brand?.franchiseDetails?.modelsOfFranchise?.map(
-          (m) => m.franchiseType
-        ) || []
-      ),
+        ...new Set(
+            brand?.franchiseDetails?.modelsOfFranchise?.map(
+                (m) => m.franchiseType
+            ) || []
+        ),
     ];
     const investmentRanges = [
-      ...new Set(
-        brand?.franchiseDetails?.modelsOfFranchise?.map(
-          (m) => m.investmentRange
-        ) || []
-      ),
+        ...new Set(
+            brand?.franchiseDetails?.modelsOfFranchise?.map(
+                (m) => m.investmentRange
+            ) || []
+        ),
     ];
     const investmentTimings = [
-      "Immediately",
-      "1-3 months",
-      "3-6 months",
-      "6+ months",
+        "Immediately",
+        "1-3 months",
+        "3-6 months",
+        "6+ months",
     ];
     const readyToInvestOptions = [
-      "Own Investment",
-      "Going To Loan",
-      "Need Loan Assistance",
+        "Own Investment",
+        "Going To Loan",
+        "Need Loan Assistance",
     ];
-    const handleModelSelect = (model) => {
-      setSelectedModel(model);
-      setFormData((prev) => ({
-        ...prev,
-        franchiseModel: model.franchiseModel || prev.franchiseModel,
-        franchiseType: model.franchiseType || prev.franchiseType,
-        investmentRange: model.investmentRange || prev.investmentRange,
-      }));
-    };
-    // Handle form changes
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    };
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      setIsSubmitting(true);
-      try {
-        const payload = {
-          ...formData,
-          brandId: brand?._id,
-          brandName: brand?.personalDetails?.brandName || "",
-        };
 
-        const response = await axios.post(
-          "http://localhost:5000/api/v1/brandlisting/createInstaApply",
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (response.data.success) {
-          alert("✅ Your application has been submitted successfully!");
-          setSubmitSuccess(true);
-          setFormData({
+    const handleModelSelect = (model) => {
+        setSelectedModel(model);
+        setFormData((prev) => ({
+            ...prev,
+            franchiseModel: model.franchiseModel || prev.franchiseModel,
+            franchiseType: model.franchiseType || prev.franchiseType,
+            investmentRange: model.investmentRange || prev.investmentRange,
+        }));
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            const payload = {
+                ...formData,
+                brandId: brand?._id,
+                brandName: brand?.personalDetails?.brandName || "",
+            };
+
+            const response = await axios.post(
+                "http://localhost:5000/api/v1/brandlisting/createInstaApply",
+                payload,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            if (response.data.success) {
+                alert("✅ Your application has been submitted successfully!");
+                setSubmitSuccess(true);
+                setFormData({
+                    fullName: "",
+                    location: "",
+                    franchiseModel: "",
+                    franchiseType: "",
+                    investmentRange: "",
+                    planToInvest: "",
+                    readyToInvest: "",
+                });
+                setIsModalOpen(false);
+            }
+        } catch (error) {
+            console.error("Submission error:", error);
+            alert("❌Failed to submit application.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        setFormData({
             fullName: "",
             location: "",
             franchiseModel: "",
@@ -656,657 +720,687 @@ function BrandList() {
             investmentRange: "",
             planToInvest: "",
             readyToInvest: "",
-          });
-          // formRef.current?.scrollIntoView({ behavior: 'smooth' });
-          setIsModalOpen(false);
-        }
-      } catch (error) {
-        console.error("Submission error:", error);
-        alert("❌Failed to submit application.");
-      } finally {
-        setIsSubmitting(false);
-      }
+        });
+        setSubmitSuccess(false);
     };
-    const handleModalClose = () => {
-      setIsModalOpen(false);
-      setFormData({
-        fullName: "",
-        location: "",
-        franchiseModel: "",
-        franchiseType: "",
-        investmentRange: "",
-        planToInvest: "",
-        readyToInvest: "",
-      });
-      setSubmitSuccess(false);
-    };
+
     const formatCurrency = (value) =>
-      new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR",
-        maximumFractionDigits: 0,
-      }).format(value || 0);
+        new Intl.NumberFormat("en-IN", {
+            style: "currency",
+            currency: "INR",
+            maximumFractionDigits: 0,
+        }).format(value || 0);
 
     const formatList = (items) => items?.join(", ") || "Not specified";
     const toArray = (val) => (Array.isArray(val) ? val : val ? [val] : []);
     const {
-      companyImage,
-      exteriorOutlet = [],
-      interiorOutlet = [],
+        companyImage,
+        exteriorOutlet = [],
+        interiorOutlet = [],
     } = brand.brandDetails || {};
     const allImages = [
-      ...toArray(companyImage),
-      ...toArray(exteriorOutlet),
-      ...toArray(interiorOutlet),
+        ...toArray(companyImage),
+        ...toArray(exteriorOutlet),
+        ...toArray(interiorOutlet),
     ];
 
     const sections = [
-      {
-        title: "Brand Overview",
-        icon: <DescriptionIcon sx={{ color: "#ff9800" }} />,
-        items: [
-          { label: "Brand Name", value: brand.personalDetails?.brandName },
-          // {label:"company name",value:brand.personalDetails?.companyName},
-          {
-            label: "Description",
-            value: brand.personalDetails?.brandDescription,
-          },
-          {
-            label: "Categories",
-            value: brand.personalDetails?.brandCategories?.map(
-              (categories, index) => (
-                <Box key={index}>
-                  <Typography variant="body2">
-                    <strong>Main Category:</strong>{" "}
-                    {categories.main || "Not specified"}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Sub Category:</strong>{" "}
-                    {categories.sub || "Not specified"}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Child Category:</strong>{" "}
-                    {categories.child || "Not specified"}
-                  </Typography>
-                </Box>
-              )
-            ),
-          },
-          {
-            label: "Website",
-            value: brand.personalDetails?.website ? (
-              <Link
-                href={brand.personalDetails.website}
-                target="_blank"
-                rel="noopener"
-                sx={{ color: "#1976d2" }}
-              >
-                {brand.personalDetails.website}
-              </Link>
-            ) : (
-              "Not specified"
-            ),
-          },
-        ],
-      },
-      {
-        title: "Franchise Models",
-        icon: <AccountTree sx={{ color: "#ff9800" }} />,
-        content: (
-          <>
-            <TableContainer component={Paper} sx={{ mb: 3 }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: "#f5f5f5" }}>
-                    <TableCell sx={{ fontWeight: "bold", width: "8%" }}>
-                      Model
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", width: "8%" }}>
-                      Type
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", width: "8%" }}>
-                      Investment
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", width: "8%" }}>
-                      Area
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", width: "8%" }}>
-                      Franchise
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", width: "8%" }}>
-                      Royalty
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", width: "8%" }}>
-                      Interior
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", width: "8%" }}>
-                      Exterior
-                    </TableCell>
-                    {/* <TableCell sx={{ fontWeight: 'bold' ,width: '8%'}}>Other Cost</TableCell> */}
-                    <TableCell sx={{ fontWeight: "bold", width: "8%" }}>
-                      ROI
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", width: "8%" }}>
-                      BreakEven
-                    </TableCell>
-                    {/* <TableCell sx={{ fontWeight: 'bold' ,width: '8%'}}>Required Capital</TableCell> */}
-                    {/* <TableCell sx={{ fontWeight: 'bold' ,width: '8%'}}>Property Type</TableCell> */}
-                    <TableCell sx={{ fontWeight: "bold", width: "8%" }}>
-                      Select Your Invest
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {brand.franchiseDetails?.modelsOfFranchise?.map(
-                    (model, index) => (
-                      <TableRow
-                        key={index}
-                        sx={{
-                          "&:hover": { backgroundColor: "#fff8e1" },
-                          backgroundColor:
-                            selectedModel?._id === model._id
-                              ? "#fff3e0"
-                              : "inherit",
-                        }}
-                      >
-                        <TableCell>
-                          {model.franchiseModel || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.franchiseType || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.investmentRange || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.areaRequired || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.franchiseFee || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.royaltyFee || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.interiorCost || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.exteriorCost || "Not specified"}
-                        </TableCell>
-                        {/* <TableCell>{model.otherCost || "Not specified"}</TableCell> */}
-                        <TableCell>{model.roi || "Not specified"}</TableCell>
-                        <TableCell>
-                          {model.breakEven || "Not specified"}
-                        </TableCell>
-                        {/* <TableCell>{model.requiredCapital || "Not specified"}</TableCell> */}
-                        {/* <TableCell>{model.propertyType || "Not specified"}</TableCell> */}
-                        <TableCell>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={() => handleModelSelect(model)}
-                            sx={{
-                              color: "#ff9800",
-                              minWidth: 100,
-                              borderColor: "#ff9800",
-                              "&:hover": {
-                                backgroundColor: "#ff9800",
-                                color: "white",
-                                borderColor: "#ff9800",
-                              },
+        {
+            title: "Brand Overview",
+            icon: <DescriptionIcon sx={{ color: "#ff9800" }} />,
+            items: [
+                { label: "Brand Name", value: brand.personalDetails?.brandName },
+                {
+                    label: "Description",
+                    value: brand.personalDetails?.brandDescription,
+                },
+                {
+                    label: "Categories",
+                    value: brand.personalDetails?.brandCategories?.map(
+                        (categories, index) => (
+                            <Box key={index} display={"flex"} flexDirection="row" gap={1}>
+                                <Typography variant="body2">
+                                
+                                    {categories.main || "Not specified"} & {categories.child || "Not specified"} & {categories.sub || "Not specified"}
+                                  
+                                </Typography>
+                            </Box>
+                        )
+                    ),
+                },
+            ],
+        },
+        {
+            title: "Franchise Models",
+            icon: <AccountTree sx={{ color: "#ff9800" }} />,
+            content: (
+                <>
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <TableContainer 
+                            component={Paper} 
+                            sx={{ 
+                                mb: 3,
+                                overflow: "hidden",
+                                borderRadius: "12px",
+                                border: "1px solid rgba(0,0,0,0.1)"
                             }}
-                          >
-                            {selectedModel?._id === model._id
-                              ? "Select"
-                              : "Selected"}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                        >
+                            <Table>
+                                <TableHead>
+                                    <TableRow sx={{ 
+                                        bgcolor: "#7ad03a",
+                                        "& th": {
+                                            fontWeight: "bold",
+                                            fontSize: "0.875rem",
+                                        }
+                                    }}>
+                                        <TableCell sx={{ width: "8%" }}>Model</TableCell>
+                                        <TableCell sx={{ width: "8%" }}>Type</TableCell>
+                                        <TableCell sx={{ width: "8%" }}>Investment</TableCell>
+                                        <TableCell sx={{ width: "8%" }}>Area</TableCell>
+                                        <TableCell sx={{ width: "8%" }}>Franchise</TableCell>
+                                        <TableCell sx={{ width: "8%" }}>Royalty</TableCell>
+                                        <TableCell sx={{ width: "8%" }}>Interior</TableCell>
+                                        <TableCell sx={{ width: "8%" }}>Exterior</TableCell>
+                                        <TableCell sx={{ width: "8%" }}>ROI</TableCell>
+                                        <TableCell sx={{ width: "8%" }}>BreakEven</TableCell>
+                                        <TableCell sx={{ width: "8%" }}>Select</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {brand.franchiseDetails?.modelsOfFranchise?.map(
+                                        (model, index) => (
+                                            <motion.tr
+                                                key={index}
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                transition={{ delay: index * 0.05 }}
+                                                sx={{
+                                                    "&:hover": { backgroundColor: "#fff8e1" },
+                                                    backgroundColor:
+                                                        selectedModel?._id === model._id
+                                                            ? "#fff3e0"
+                                                            : "inherit",
+                                                }}
+                                            >
+                                                <TableCell>
+                                                    {model.franchiseModel || "Not specified"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {model.franchiseType || "Not specified"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {model.investmentRange || "Not specified"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {model.areaRequired || "Not specified"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {model.franchiseFee || "Not specified"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {model.royaltyFee || "Not specified"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {model.interiorCost || "Not specified"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {model.exteriorCost || "Not specified"}
+                                                </TableCell>
+                                                <TableCell>{model.roi || "Not specified"}</TableCell>
+                                                <TableCell>
+                                                    {model.breakEven || "Not specified"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <motion.div whileHover={{ scale: 1.05 }}>
+                                                        <Button
+                                                            variant="outlined"
+                                                            size="small"
+                                                            onClick={() => handleModelSelect(model)}
+                                                            sx={{
+                                                                color: "#ff9800",
+                                                                minWidth: 100,
+                                                                borderColor: "#ff9800",
+                                                                "&:hover": {
+                                                                    backgroundColor: "#ff9800",
+                                                                    color: "white",
+                                                                    borderColor: "#ff9800",
+                                                                },
+                                                            }}
+                                                        >
+                                                            {selectedModel?._id === model._id
+                                                                ? "Selected"
+                                                                : "Select"}
+                                                        </Button>
+                                                    </motion.div>
+                                                </TableCell>
+                                            </motion.tr>
+                                        )
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </motion.div>
 
-            {/* Detailed view of selected model */}
-            {/* {selectedModel && (
-            <Paper elevation={3} sx={{ p: 3, mb: 3, borderLeft: '4px solid #ff9800' }}>
-              <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Info sx={{ color: '#ff9800' }} />
-                Selected Model Details
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
-                  <Typography><strong>Model:</strong> {selectedModel.franchiseModel}</Typography>
-                  <Typography><strong>Type:</strong> {selectedModel.franchiseType}</Typography>
-                  <Typography><strong>Investment Range:</strong> {selectedModel.investmentRange}</Typography>
-                  <Typography><strong>Area Required:</strong> {selectedModel.areaRequired}</Typography>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Typography><strong>Franchise Fee:</strong> {selectedModel.franchiseFee}</Typography>
-                  <Typography><strong>Royalty Fee:</strong> {selectedModel.royaltyFee}</Typography>
-                  <Typography><strong>ROI:</strong> {selectedModel.roi}</Typography>
-                  <Typography><strong>Break Even:</strong> {selectedModel.breakEven}</Typography>
-                </Grid>
-              </Grid>
-            </Paper>
-          )} */}
-
-            <Button variant="contained" onClick={() => setIsModalOpen(true)}>
-              Apply for Franchise
-            </Button>
-
-            {/* Application Form */}
-            <Dialog
-              open={isModalOpen}
-              onClose={handleModalClose}
-              maxWidth="md"
-              fullWidth
-            >
-              <DialogTitle>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      <DescriptionIcon sx={{ color: "#ff9800", mr: 1 }} />{" "}
-                      Franchise Application
-                    </Typography>
-                  </Box>
-
-                  <Box>
-                    <IconButton onClick={handleModalClose}>
-                      <Close />
-                    </IconButton>
-                  </Box>
-                </Box>
-              </DialogTitle>
-
-              <DialogContent>
-                {submitSuccess ? (
-                  <Box sx={{ textAlign: "center", py: 4 }}>
-                    <CheckCircleOutline
-                      sx={{ fontSize: 60, color: "#4caf50", mb: 2 }}
-                    />
-                    <Typography variant="h6" sx={{ mb: 2 }}>
-                      Application Submitted Successfully!
-                    </Typography>
-                    <Typography variant="body1">
-                      We'll contact you soon regarding your franchise
-                      application.
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      onClick={handleModalClose}
-                      sx={{ mt: 2, bgcolor: "#4caf50" }}
+                    <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                     >
-                      Close
-                    </Button>
-                  </Box>
-                ) : (
-                  <form onSubmit={handleSubmit}>
-                    <Grid
-                      container
-                      spacing={2}
-                      sx={{
-                        display: "grid",
-                        pt: 2,
-                        gridTemplateColumns: "repeat(5, 1fr)",
-                      }}
-                    >
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Full Name"
-                          name="fullName"
-                          value={formData.fullName}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Location"
-                          name="location"
-                          value={formData.location}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} md={4}>
-                        <TextField
-                          select
-                          fullWidth
-                          label="Franchise Model"
-                          name="franchiseModel"
-                          value={formData.franchiseModel}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
+                        <Button 
+                            variant="outlined" 
+                            sx={{ 
+                                color: "#ff9800", 
+                                borderColor: "#ff9800",
+                                fontWeight: 600,
+                                px: 4,
+                                py: 1.5,
+                                borderRadius: "8px",
+                                textTransform: "none",
+                                fontSize: "1rem"
+                            }} 
+                            onClick={() => setIsModalOpen(true)}
                         >
-                          {franchiseModels.map((model, i) => (
-                            <MenuItem key={i} value={model}>
-                              {model}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </Grid>
-
-                      <Grid item xs={12} md={4}>
-                        <TextField
-                          select
-                          fullWidth
-                          label="Franchise Type"
-                          name="franchiseType"
-                          value={formData.franchiseType}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        >
-                          {franchiseTypes.map((type, i) => (
-                            <MenuItem key={i} value={type}>
-                              {type}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </Grid>
-
-                      <Grid item xs={12} md={4}>
-                        <TextField
-                          select
-                          fullWidth
-                          label="Investment Range"
-                          name="investmentRange"
-                          value={formData.investmentRange}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        >
-                          {investmentRanges.map((range, i) => (
-                            <MenuItem key={i} value={range}>
-                              {range}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <TextField
-                          select
-                          fullWidth
-                          label="Plan to Invest"
-                          name="planToInvest"
-                          value={formData.planToInvest}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        >
-                          {investmentTimings.map((option, i) => (
-                            <MenuItem key={i} value={option}>
-                              {option}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          select
-                          fullWidth
-                          label="Ready to Invest"
-                          name="readyToInvest"
-                          value={formData.readyToInvest}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        >
-                          {readyToInvestOptions.map((option, i) => (
-                            <MenuItem key={i} value={option}>
-                              {option}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <Button
-                          type="submit"
-                          variant="contained"
-                          fullWidth
-                          size="large"
-                          disabled={isSubmitting}
-                          sx={{
-                            bgcolor: "#ff9800",
-                            fontWeight: 600,
-                            "&:hover": {
-                              bgcolor: "#fb8c00",
-                            },
-                            ml: 0,
-                          }}
-                        >
-                          {isSubmitting ? (
-                            <CircularProgress size={24} color="inherit" />
-                          ) : (
-                            "Submit"
-                          )}
+                            Apply for Franchise
                         </Button>
-                      </Grid>
-                    </Grid>
-                  </form>
-                )}
-              </DialogContent>
-            </Dialog>
-          </>
-        ),
-      },
+                    </motion.div>
 
-      {
-        title: "Company Details",
-        icon: <Business sx={{ color: "#ff9800" }} />,
-        items: [
-          { label: "Company Name", value: brand.personalDetails?.companyName },
-          {
-            label: "Established Year",
-            value: brand.personalDetails?.establishedYear,
-          },
-          {
-            label: "Franchising Since",
-            value: brand.personalDetails?.franchiseSinceYear,
-          },
-          // { label: "Head Office", value: `${brand.personalDetails?.headOfficeAddress}, ${brand.personalDetails?.city}, ${brand.personalDetails?.state}, ${brand.personalDetails?.country}` },
-          // { label: "Contact", value: `${brand.personalDetails?.fullName} | ${brand.personalDetails?.mobileNumber} | ${brand.personalDetails?.email}` },
-          {
-            label: "Social Media",
-            value: (
-              <Box sx={{ display: "flex", gap: 1 }}>
-                {brand.personalDetails?.facebook && (
-                  <IconButton
-                    href={brand.personalDetails.facebook}
-                    target="_blank"
-                  >
-                    <Facebook sx={{ color: "#1877F2" }} />
-                  </IconButton>
-                )}
-                {brand.personalDetails?.instagram && (
-                  <IconButton
-                    href={brand.personalDetails.instagram}
-                    target="_blank"
-                  >
-                    <Instagram sx={{ color: "#E4405F" }} />
-                  </IconButton>
-                )}
-                {brand.personalDetails?.linkedin && (
-                  <IconButton
-                    href={brand.personalDetails.linkedin}
-                    target="_blank"
-                  >
-                    <LinkedIn sx={{ color: "#0A66C2" }} />
-                  </IconButton>
-                )}
-              </Box>
-            ),
-          },
-        ],
-      },
+                    <Dialog
+                        open={isModalOpen}
+                        onClose={handleModalClose}
+                        maxWidth="md"
+                        fullWidth
+                        PaperProps={{
+                            sx: {
+                                borderRadius: "12px",
+                                overflow: "hidden"
+                            }
+                        }}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                        >
+                            <DialogTitle>
+                                <Box
+                                    display="flex"
+                                    alignItems="center"
+                                    justifyContent="space-between"
+                                >
+                                    <Box>
+                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                            <DescriptionIcon sx={{ color: "#ff9800", mr: 1 }} />{" "}
+                                            Franchise Application
+                                        </Typography>
+                                    </Box>
 
-      {
-        title: "Franchise Details",
-        icon: <AttachMoney sx={{ color: "#ff9800" }} />,
-        content: (
-          <TableContainer component={Paper}>
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell>Agreement Period</TableCell>
-                  <TableCell>
-                    {brand?.franchiseDetails?.agreementPeriod ||
-                      "Not specified"}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>companyOwned Outlets</TableCell>
-                  <TableCell>
-                    {brand?.franchiseDetails?.franchiseOutlets ||
-                      "Not specified"}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Franchise Outlets</TableCell>
-                  <TableCell>
-                    {brand?.franchiseDetails?.companyOwnedOutlets ||
-                      "Not specified"}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ),
-      },
-      {
-        title: "Support & Training",
-        icon: <Support sx={{ color: "#ff9800" }} />,
-        items: [
-          {
-            label: "Training Provided By",
-            value: brand.franchiseDetails?.trainingProvidedBy,
-          },
-          {
-            label: "Requirement Support",
-            value: brand.franchiseDetails?.requirementSupport,
-          },
-          {
-            label: "Expansion Locations",
-            value: brand.personalDetails?.expansionLocation?.map(
-              (location, index) => (
-                <Box key={index}>
-                  <Typography>{location.city}</Typography>
-                  <Typography>{location.state}</Typography>
-                  <Typography>{location.country}</Typography>
-                </Box>
-              )
+                                    <Box>
+                                        <IconButton onClick={handleModalClose}>
+                                            <Close />
+                                        </IconButton>
+                                    </Box>
+                                </Box>
+                            </DialogTitle>
+
+                            <DialogContent>
+                                {submitSuccess ? (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ delay: 0.2 }}
+                                    >
+                                        <Box sx={{ textAlign: "center", py: 4 }}>
+                                            <CheckCircleOutline
+                                                sx={{ fontSize: 60, color: "#4caf50", mb: 2 }}
+                                            />
+                                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                                Application Submitted Successfully!
+                                            </Typography>
+                                            <Typography variant="body1">
+                                                We'll contact you soon regarding your franchise
+                                                application.
+                                            </Typography>
+                                            <motion.div whileHover={{ scale: 1.03 }}>
+                                                <Button
+                                                    variant="contained"
+                                                    onClick={handleModalClose}
+                                                    sx={{ 
+                                                        mt: 2, 
+                                                        bgcolor: "#4caf50",
+                                                        borderRadius: "8px",
+                                                        px: 4,
+                                                        py: 1.5,
+                                                        fontWeight: 600
+                                                    }}
+                                                >
+                                                    Close
+                                                </Button>
+                                            </motion.div>
+                                        </Box>
+                                    </motion.div>
+                                ) : (
+                                    <form onSubmit={handleSubmit}>
+                                        <Grid
+                                            container
+                                            spacing={2}
+                                            sx={{
+                                                display: "grid",
+                                                pt: 2,
+                                                gridTemplateColumns: "repeat(5, 1fr)",
+                                            }}
+                                        >
+                                            <Grid item xs={12} md={6}>
+                                                <motion.div variants={itemVariants}>
+                                                    <TextField
+                                                        fullWidth
+                                                        label="Full Name"
+                                                        name="fullName"
+                                                        value={formData.fullName}
+                                                        onChange={handleChange}
+                                                        required
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{ mb: 2 }}
+                                                    />
+                                                </motion.div>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={6}>
+                                                <motion.div variants={itemVariants}>
+                                                    <TextField
+                                                        fullWidth
+                                                        label="Location"
+                                                        name="location"
+                                                        value={formData.location}
+                                                        onChange={handleChange}
+                                                        required
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{ mb: 2 }}
+                                                    />
+                                                </motion.div>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={4}>
+                                                <motion.div variants={itemVariants}>
+                                                    <TextField
+                                                        select
+                                                        fullWidth
+                                                        label="Franchise Model"
+                                                        name="franchiseModel"
+                                                        value={formData.franchiseModel}
+                                                        onChange={handleChange}
+                                                        required
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{ mb: 2 }}
+                                                    >
+                                                        {franchiseModels.map((model, i) => (
+                                                            <MenuItem key={i} value={model}>
+                                                                {model}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                </motion.div>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={4}>
+                                                <motion.div variants={itemVariants}>
+                                                    <TextField
+                                                        select
+                                                        fullWidth
+                                                        label="Franchise Type"
+                                                        name="franchiseType"
+                                                        value={formData.franchiseType}
+                                                        onChange={handleChange}
+                                                        required
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{ mb: 2 }}
+                                                    >
+                                                        {franchiseTypes.map((type, i) => (
+                                                            <MenuItem key={i} value={type}>
+                                                                {type}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                </motion.div>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={4}>
+                                                <motion.div variants={itemVariants}>
+                                                    <TextField
+                                                        select
+                                                        fullWidth
+                                                        label="Investment Range"
+                                                        name="investmentRange"
+                                                        value={formData.investmentRange}
+                                                        onChange={handleChange}
+                                                        required
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{ mb: 2 }}
+                                                    >
+                                                        {investmentRanges.map((range, i) => (
+                                                            <MenuItem key={i} value={range}>
+                                                                {range}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                </motion.div>
+                                            </Grid>
+
+                                            <Grid item xs={12}>
+                                                <motion.div variants={itemVariants}>
+                                                    <TextField
+                                                        select
+                                                        fullWidth
+                                                        label="Plan to Invest"
+                                                        name="planToInvest"
+                                                        value={formData.planToInvest}
+                                                        onChange={handleChange}
+                                                        required
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{ mb: 2 }}
+                                                    >
+                                                        {investmentTimings.map((option, i) => (
+                                                            <MenuItem key={i} value={option}>
+                                                                {option}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                </motion.div>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={6}>
+                                                <motion.div variants={itemVariants}>
+                                                    <TextField
+                                                        select
+                                                        fullWidth
+                                                        label="Ready to Invest"
+                                                        name="readyToInvest"
+                                                        value={formData.readyToInvest}
+                                                        onChange={handleChange}
+                                                        required
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{ mb: 2 }}
+                                                    >
+                                                        {readyToInvestOptions.map((option, i) => (
+                                                            <MenuItem key={i} value={option}>
+                                                                {option}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                </motion.div>
+                                            </Grid>
+
+                                            <Grid item xs={12}>
+                                                <motion.div
+                                                    whileHover={{ scale: 1.01 }}
+                                                    whileTap={{ scale: 0.99 }}
+                                                >
+                                                    <Button
+                                                        type="submit"
+                                                        variant="contained"
+                                                        fullWidth
+                                                        size="large"
+                                                        disabled={isSubmitting}
+                                                        sx={{
+                                                            bgcolor: "#ff9800",
+                                                            fontWeight: 600,
+                                                            "&:hover": {
+                                                                bgcolor: "#fb8c00",
+                                                            },
+                                                            ml: 0,
+                                                            borderRadius: "8px",
+                                                            py: 1.5,
+                                                            fontSize: "1rem"
+                                                        }}
+                                                    >
+                                                        {isSubmitting ? (
+                                                            <CircularProgress size={24} color="inherit" />
+                                                        ) : (
+                                                            "Submit Application"
+                                                        )}
+                                                    </Button>
+                                                </motion.div>
+                                            </Grid>
+                                        </Grid>
+                                    </form>
+                                )}
+                            </DialogContent>
+                        </motion.div>
+                    </Dialog>
+                </>
             ),
-          },
-        ],
-      },
+        },
+
+        {
+            title: "Company Details",
+            icon: <Business sx={{ color: "#ff9800" }} />,
+            items: [
+                { label: "Company Name", value: brand.personalDetails?.companyName },
+                {
+                    label: "Established Year",
+                    value: brand.personalDetails?.establishedYear,
+                },
+                {
+                    label: "Franchising Since",
+                    value: brand.personalDetails?.franchiseSinceYear,
+                },
+                // {
+                //     label: "Social Media",
+                //     value: (
+                //         <Box sx={{ display: "flex", gap: 1 }}>
+                //             {brand.personalDetails?.facebook && (
+                //                 <motion.div whileHover={{ y: -2 }}>
+                //                     <IconButton
+                //                         href={brand.personalDetails.facebook}
+                //                         target="_blank"
+                //                     >
+                //                         <Facebook sx={{ color: "#1877F2" }} />
+                //                     </IconButton>
+                //                 </motion.div>
+                //             )}
+                //             {brand.personalDetails?.instagram && (
+                //                 <motion.div whileHover={{ y: -2 }}>
+                //                     <IconButton
+                //                         href={brand.personalDetails.instagram}
+                //                         target="_blank"
+                //                     >
+                //                         <Instagram sx={{ color: "#E4405F" }} />
+                //                     </IconButton>
+                //                 </motion.div>
+                //             )}
+                //             {brand.personalDetails?.linkedin && (
+                //                 <motion.div whileHover={{ y: -2 }}>
+                //                     <IconButton
+                //                         href={brand.personalDetails.linkedin}
+                //                         target="_blank"
+                //                     >
+                //                         <LinkedIn sx={{ color: "#0A66C2" }} />
+                //                     </IconButton>
+                //                 </motion.div>
+                //             )}
+                //         </Box>
+                //     ),
+                // },
+            ],
+        },
+
+        {
+            title: "Franchise Details",
+            icon: <AttachMoney sx={{ color: "#ff9800" }} />,
+            content: (
+                <motion.div variants={itemVariants}>
+                    <TableContainer 
+                        component={Paper}
+                        sx={{
+                            borderRadius: "12px",
+                            overflow: "hidden",
+                            border: "1px solid rgba(0,0,0,0.1)"
+                        }}
+                    >
+                        <Table>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell sx={{ fontWeight: 500 }}>Agreement Period</TableCell>
+                                    <TableCell>
+                                        {brand?.franchiseDetails?.agreementPeriod ||
+                                            "Not specified"}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell sx={{ fontWeight: 500 }}>companyOwned Outlets</TableCell>
+                                    <TableCell>
+                                        {brand?.franchiseDetails?.franchiseOutlets ||
+                                            "Not specified"}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell sx={{ fontWeight: 500 }}>Franchise Outlets</TableCell>
+                                    <TableCell>
+                                        {brand?.franchiseDetails?.companyOwnedOutlets ||
+                                            "Not specified"}
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </motion.div>
+            ),
+        },
+        {
+            title: "Support & Training",
+            icon: <Support sx={{ color: "#ff9800" }} />,
+            items: [
+                {
+                    label: "Training Provided By",
+                    value: brand.franchiseDetails?.trainingProvidedBy,
+                },
+                {
+                    label: "Requirement Support",
+                    value: brand.franchiseDetails?.requirementSupport,
+                },
+                {
+                    label: "Expansion Locations",
+                    value: brand.personalDetails?.expansionLocation?.map(
+                        (location, index) => (
+                            <Box key={index} sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+                                <Typography>{location.city}</Typography> ,
+                                <Typography>{location.state}</Typography> ,
+                                <Typography>{location.country}</Typography>
+                            </Box>
+                        )
+                    ),
+                },
+            ],
+        },
     ];
 
-    // ... (keep your existing TabPanel, Modal, and other JSX)
-
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-        {/* Tabs and other components remain the same */}
-
-        {/* Main Content Area */}
-        <Box
-          display="flex"
-          flexDirection={{ xs: "column", lg: "row" }}
-          gap={4}
-          sx={{ mt: 2 }}
-        >
-          <Box flex={1}>
-            {sections.map((section, index) => (
-              <Box
-                key={index}
-                sx={{
-                  mb: 4,
-                  bgcolor: "background.paper",
-                  borderRadius: 2,
-                  boxShadow: 1,
-                  p: 3,
-                  borderLeft: "3px solid #ff9800",
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    mb: 2,
-                    color: "text.primary",
-                    pb: 1,
-                    borderBottom: "2px solid #ff9800",
-                  }}
-                >
-                  {section.icon}
-                  {section.title}
-                </Typography>
-
-                {section.content || (
-                  <TableContainer component={Paper}>
-                    <Table size="medium">
-                      <TableBody>
-                        {section.items.map((item, itemIndex) => (
-                          <TableRow key={itemIndex}>
-                            <TableCell
-                              sx={{
-                                fontWeight: 500,
-                                color: "black",
-                                width: "30%",
-                              }}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <Box
+                display="flex"
+                flexDirection={{ xs: "column", lg: "row" }}
+                gap={4}
+                sx={{ mt: 2 }}
+            >
+                <Box flex={1}>
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                    >
+                        {sections.map((section, index) => (
+                            <motion.div
+                                key={index}
+                                variants={itemVariants}
+                                whileHover="hover"
                             >
-                              {item.label}
-                            </TableCell>
-                            <TableCell
-                              sx={{ color: "black", wordBreak: "break-word" }}
-                            >
-                              {item.value || "Not specified"}
-                            </TableCell>
-                          </TableRow>
+                                <Box
+                                    sx={{
+                                        mb: 4,
+                                        bgcolor: "background.paper",
+                                        borderRadius: "12px",
+                                        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                                        p: 3,
+                                        borderLeft: "4px solid #ff9800",
+                                        transition: "all 0.3s ease",
+                                        "&:hover": {
+                                            boxShadow: "0 8px 24px rgba(0,0,0,0.1)"
+                                        }
+                                    }}
+                                >
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            fontWeight: 600,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 1,
+                                            mb: 2,
+                                            color: "text.primary",
+                                            pb: 1,
+                                            borderBottom: "2px solid #ff9800",
+                                        }}
+                                    >
+                                        {section.icon}
+                                        {section.title}
+                                    </Typography>
+
+                                    {section.content || (
+                                        <TableContainer 
+                                            component={Paper}
+                                            sx={{
+                                                borderRadius: "8px",
+                                                overflow: "hidden"
+                                            }}
+                                        >
+                                            <Table size="medium">
+                                                <TableBody>
+                                                    {section.items.map((item, itemIndex) => (
+                                                        <TableRow key={itemIndex}>
+                                                            <TableCell
+                                                                sx={{
+                                                                    fontWeight: 600,
+                                                                    color: "text.secondary",
+                                                                    width: "30%",
+                                                                    fontSize: "0.875rem"
+                                                                }}
+                                                            >
+                                                                {item.label}
+                                                            </TableCell>
+                                                            <TableCell
+                                                                sx={{ 
+                                                                    color: "text.primary", 
+                                                                    wordBreak: "break-word",
+                                                                    fontSize: "0.875rem"
+                                                                }}
+                                                            >
+                                                                {item.value || "Not specified"}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </TableContainer>
+                                    )}
+                                </Box>
+                            </motion.div>
                         ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                )}
-              </Box>
-            ))}
-          </Box>
+                    </motion.div>
+                </Box>
+            </Box>
         </Box>
-      </Box>
     );
-  });
+});
 
   const BrandDetailsDialog = React.memo(({}) => {
     const [tabIndex, setTabIndex] = useState(0);
@@ -1563,17 +1657,18 @@ function BrandList() {
         fullWidth
         scroll="paper"
         sx={{
-          "& .MuiDialog-paper": {
-            overflow: "hidden",
-            transition: "none",
-          },
-        }}
+        "& .MuiDialog-paper": {
+          borderRadius: 3,
+          overflow: "hidden",
+          background: "linear-gradient(145deg, #f5f7fa 0%, #ffffff 100%)",
+        },
+      }}
       >
         {/* Dialog Title */}
         <DialogTitle
           sx={{
             position: "sticky",
-            padding: 1.5,
+            padding: 1,
             top: 0,
             zIndex: 1,
             bgcolor: "background.paper",
@@ -1583,8 +1678,7 @@ function BrandList() {
             alignItems: "center",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Fade in={true} timeout={500}>
+          <Box sx={{ display: "flex", alignItems: "center" }} gap={2}>
               <Box
                 sx={{
                   position: "relative",
@@ -1599,7 +1693,7 @@ function BrandList() {
                     width: 100,
                     height: 100,
                     borderRadius: "50%",
-                    objectFit: "contain",
+                    objectFit: "cover",
                     ml: 2,
                   }}
                 />
@@ -1623,9 +1717,8 @@ function BrandList() {
                   <BusinessIcon fontSize="small" />
                 </Box>
               </Box>
-            </Fade>
             <Typography
-              variant="h5"
+              variant="h4"
               component="div"
               sx={{
                 fontWeight: 700,
@@ -1676,39 +1769,62 @@ function BrandList() {
         </DialogTitle>
 
         {/* Dialog Content */}
-        <Typography
-          variant="subtitle1"
-          sx={{
-            color: "#4caf50",
-          }}
-        >
-          {selectedBrand?.personalDetails?.companyName}
-        </Typography>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            color: "#4caf50",
-          }}
-        >
+        <Typography variant="subtitle1" m={2}>
           {selectedBrand?.personalDetails?.brandCategories &&
             selectedBrand.personalDetails.brandCategories.length > 0 && (
               <Box>
                 {selectedBrand.personalDetails.brandCategories.map(
                   (category, index) => (
-                    <Box key={index} sx={{ mb: 1 }}>
-                      <Typography>Main: {category.main}</Typography>
-                      <Typography>Sub: {category.sub}</Typography>
-                      <Typography>Child: {category.child}</Typography>
+                    <Box
+                      key={index}
+                      sx={{ mb: 1 }}
+                      display={"flex"}
+                      justifyContent={"flex-start"} gap={20} 
+                    >
+                      {/* <Typography>Main: {category.main}</Typography>
+                      <Typography>Sub: {category.sub}</Typography> */}
+                      <Typography sx={{ fontWeight: "bold" }}>
+                        Category:{" "}
+                        <label style={{ color: "#ff9800" }}>
+                          {category.child}
+                        </label>
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ fontWeight: "bold" }}
+                      >
+                        Investment Range :
+                        <label style={{ color: "#ff9800" }}>
+                          {selectedBrand?.franchiseDetails?.modelsOfFranchise?.map(
+                            (model) => model.investmentRange
+                          )}
+                        </label>
+                      </Typography>
+                      <Typography sx={{ fontWeight: "bold" }}>
+                        Arearequired :
+                        <label style={{ color: "#ff9800" }}>
+                          {selectedBrand?.franchiseDetails?.modelsOfFranchise?.map(
+                            (model) => model.areaRequired
+                          )}
+                        </label>
+                      </Typography>
                     </Box>
                   )
                 )}
               </Box>
             )}
+             {selectedBrand?.personalDetails?.expansionLocation.length > 0 && (
+         <Typography sx={{ fontWeight: "bold" }}>
+           Expansion Locations :
+           <label style={{ color: "#ff9800" }}>
+             {selectedBrand?.personalDetails?.expansionLocation?.map(
+               (location) => `${location.city}, ${location.state}`
+             )}
+           </label>
+         </Typography>
+       )}
         </Typography>
-        <Typography>
-          {selectedBrand?.personalDetails?.state},
-          {selectedBrand?.personalDetails?.city}
-        </Typography>
+      
         <DialogContent
           dividers
           sx={{
@@ -1856,7 +1972,17 @@ function BrandList() {
           >
             Share
           </Button>
-          <Button variant="contained" onClick={() => setIsModalOpen(true)}>
+          <Button variant="outlined" sx={{
+              borderRadius: 2,
+              px: 3,
+              borderColor: "#ff9800",
+              color: "#ff9800",
+              "&:hover": {
+                borderColor: "#fb8c00",
+                bgcolor: "rgba(255,152,0,0.08)",
+              },
+              transition: "all 0.3s ease",
+            }} onClick={() => setIsModalOpen(true)}>
             Apply for Franchise
           </Button>
           <Dialog
