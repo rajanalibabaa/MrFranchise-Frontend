@@ -1166,7 +1166,7 @@ function BrandList() {
                                                         {isSubmitting ? (
                                                             <CircularProgress size={24} color="inherit" />
                                                         ) : (
-                                                            "Submit Application"
+                                                            "Submit"
                                                         )}
                                                     </Button>
                                                 </motion.div>

@@ -262,6 +262,7 @@ const HomeBannerSec = () => {
      <TopIndusVdoSec/>
      {/* top triple video section */}
      <TopInvestVdoSec/>
+     
      <TopInvestVdo2/>
      <TopInvestVdo3/>
 {/* footer sections */}
