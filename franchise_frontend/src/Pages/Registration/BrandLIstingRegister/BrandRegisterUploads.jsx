@@ -282,11 +282,11 @@ const Uploads = ({
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel shrink>
-                Brand Promotion Videos (2-5 videos)
+                Brand Promotion Videos
               </InputLabel>
               <FileUploadCard>
                 <Typography variant="body2" color="textSecondary" gutterBottom>
-                  Accepted formats: MP4, MOV (Max 10MB each)
+                  Accepted formats: MP4, MOV (Max 50MB each)
                 </Typography>
                 <Button
                   component="label"
@@ -300,9 +300,9 @@ const Uploads = ({
                     accept="video/mp4,video/quicktime"
                     multiple
                     onChange={handleFileChange("brandPromotionVideo", {
-                      maxFiles: 5,
+                      maxFiles: 1,
                       allowedTypes: ["video/mp4", "video/quicktime"],
-                      maxSize: 10,
+                      maxSize: 50,
                     })}
                   />
                 </Button>
@@ -357,11 +357,11 @@ const Uploads = ({
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel shrink>
-                Franchise Promotion Videos (2-5 videos)
+                Franchise Promotion Videos 
               </InputLabel>
               <FileUploadCard>
                 <Typography variant="body2" color="textSecondary" gutterBottom>
-                  Accepted formats: MP4, MOV (Max 10MB each)
+                  Accepted formats: MP4, MOV (Max 50MB each)
                 </Typography>
                 <Button
                   component="label"
@@ -375,9 +375,9 @@ const Uploads = ({
                     accept="video/mp4,video/quicktime"
                     multiple
                     onChange={handleFileChange("franchisePromotionVideo", {
-                      maxFiles: 5,
+                      maxFiles: 1,
                       allowedTypes: ["video/mp4", "video/quicktime"],
-                      maxSize: 10,
+                      maxSize: 50,
                     })}
                   />
                 </Button>

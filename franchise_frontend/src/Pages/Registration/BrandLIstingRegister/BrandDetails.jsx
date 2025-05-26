@@ -218,7 +218,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
 
   const handleAddCategory = () => {
     if (selectedCategory.child) {
-      const isDuplicate = data.brandCategories.some(
+      const isDuplicate = Array.isArray(data.brandCategories) && data.brandCategories.some(
         (cat) =>
           cat.main === selectedCategory.main &&
           cat.sub === selectedCategory.sub &&
@@ -227,9 +227,8 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
 
       if (!isDuplicate) {
         const updatedCategories = [
-          ...data.brandCategories,
-          { ...selectedCategory },
-        ];
+ ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
+  { ...selectedCategory },        ];
         onChange({ brandCategories: updatedCategories });
         setSelectedCategory((prev) => ({ ...prev, child: "" }));
       }

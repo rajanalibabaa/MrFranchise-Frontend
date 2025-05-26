@@ -1,4 +1,3 @@
-
 import { createSlice } from '@reduxjs/toolkit';
 
 const tokenFromStorage = localStorage.getItem("accessToken");

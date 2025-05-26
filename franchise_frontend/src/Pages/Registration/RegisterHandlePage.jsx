@@ -201,65 +201,6 @@ function RegisterHandleUser() {
         }}
       />
     </Grid>
-
-    {/* Instagram Icon */}
-    {/* <Grid item>
-      <Box
-        component="img"
-        src={InstagramIcon}
-        alt="Instagram"
-        onClick={() =>
-          openSocialMedia("https://www.instagram.com/accounts/login/")
-        }
-        sx={{
-          width: 32,
-          height: 32,
-          cursor: "pointer",
-          transition: "transform 0.3s ease",
-          "&:hover": {
-            transform: "scale(1.1)",
-          },
-        }}
-      />
-    </Grid> */}
-
-    {/* LinkedIn Icon */}
-    {/* <Grid item>
-      <Box
-        component="img"
-        src={LinkedInIcon}
-        alt="LinkedIn"
-        onClick={() => openSocialMedia("https://www.linkedin.com/login")}
-        sx={{
-          width: 32,
-          height: 32,
-          cursor: "pointer",
-          transition: "transform 0.3s ease",
-          "&:hover": {
-            transform: "scale(1.1)",
-          },
-        }}
-      />
-    </Grid> */}
-
-    {/* Twitter Icon */}
-    {/* <Grid item>
-      <Box
-        component="img"
-        src={TwitterIcon}
-        alt="Twitter"
-        onClick={() => openSocialMedia("https://twitter.com/login")}
-        sx={{
-          width: 32,
-          height: 32,
-          cursor: "pointer",
-          transition: "transform 0.3s ease",
-          "&:hover": {
-            transform: "scale(1.1)",
-          },
-        }}
-      />
-    </Grid> */}
   </Grid>
   {/* Login Popup Dialog */}
       <Dialog open={loginOpen} onClose={closeLoginPopup} maxWidth="sm" fullWidth>

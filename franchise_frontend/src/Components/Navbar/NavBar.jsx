@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
@@ -109,6 +108,16 @@ function Navbar() {
       console.error("Logout error:", error.message || error);
     }
   };
+
+  const handleMyProfileNavigate = () => {
+    if(localStorage.getItem("investorUUID")){
+      navigate("/investordashboard")
+    }else if(localStorage.getItem("brandUUID")){
+      navigate("/brandDashboard")
+    }else{
+      navigate("/")
+    }
+  }
 
   return (
     <>
@@ -258,7 +267,7 @@ function Navbar() {
                           color: "text.primary",
                           "&:hover": { bgcolor: "action.hover" },
                         }}
-                        onClick={() => handleNavigate("/investordashboard")}
+                        onClick={() => handleMyProfileNavigate()}
                       >
                         My Profile
                       </Button>

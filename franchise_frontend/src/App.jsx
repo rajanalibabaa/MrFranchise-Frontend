@@ -22,11 +22,7 @@ import Sidebar from './Pages/BrandProfile_Pages/Sidebar_page';
 import BrandFeedBack from './Components/BrandProfile_Component/BrandFeedback';
 import BrandComplaint from './Components/BrandProfile_Component/BrandComplaint';
 import BrandAddVedios from './Components/BrandProfile_Component/BrandAddVedios';
-import TermsCondition from './Components/QuickLinks/TermsCondition.jsx';
-import Faq from './Components/QuickLinks/Faq.jsx';
-import Help from './Components/QuickLinks/Help.jsx';
-import ContactUs from './Components/QuickLinks/ContactUs.jsx';
-import AboutUs from './Components/QuickLinks/AboutUs.jsx';
+
 import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
 import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccount.jsx';
 import { Provider } from 'react-redux';
@@ -34,6 +30,19 @@ import store from './Redux/Store/Index.jsx';
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
 import BrandSearchus from './Components/BrandProfile_Component/BrandSearches.jsx';
 import BrandRegisterForm from './Pages/Registration/BrandLIstingRegister/BrandRegisterForm.jsx';
+import AboutUs from './Components/Footers/HelpAndSupport/AboutUs.jsx';
+import ContactUs from './Components/Footers/HelpAndSupport/ContactUs.jsx';
+import FAQs from './Components/Footers/HelpAndSupport/FAQs.jsx';
+import Help from './Components/Footers/HelpAndSupport/Help.jsx';
+import PrivacyPolicy from './Components/Footers/HelpAndSupport/PrivacyPolicy.jsx';
+import TermsAndConditions from './Components/Footers/HelpAndSupport/TermsAndConditions.jsx';
+import AddListing from './Components/Footers/QuickLinks/AddListing.jsx';
+import AdvertiseWithUs from './Components/Footers/QuickLinks/AdvertiseWithUs.jsx';
+import AllBusinessCategories from './Components/Footers/QuickLinks/AllBusinessCategories.jsx';
+import ExpandYourBrand from './Components/Footers/QuickLinks/ExpandYourBrand.jsx';
+import FranchiseConsulting from './Components/Footers/QuickLinks/FranchiseConsulting.jsx';
+import InvestFranchise from './Components/Footers/QuickLinks/InvestFranchise.jsx';
+import CardsRow from './Components/CardRow/CardRow.jsx';
 
 
 function App() {
@@ -74,17 +83,27 @@ function App() {
     <Route path='/brandDashboard/brandlistingcontrol' element={<BrandListingController />} />
   </Route>
 
+
+ <Route path="/brandsearchview" element={<BrandCategroyViewPage />} />
+ 
+ 
+  {/* {Footer paths} */}
+  <Route path='/aboutus' element={<AboutUs/>}/>
+  <Route path='/contactus' element={<ContactUs/>}/>
+  <Route path='/faq' element={<FAQs/>}/>
+  <Route path='/help' element={<Help/>}/>
+  <Route path='/privacypolicy' element={<PrivacyPolicy/>}/>
+  <Route path='/termsandconditions' element={<TermsAndConditions/>}/>
+
+  <Route path='/addlisting' element={<AddListing/>}/>
+  <Route path='/advertisewithus' element={<AdvertiseWithUs/>}/>
+  <Route path='/allbusinesscategory' element={<AllBusinessCategories/>}/>
+  <Route path='/expandyourbrand' element={<ExpandYourBrand/>}/>
+  <Route path='/franchiseconsulting' element={<FranchiseConsulting/>}/>
+  <Route path='/investfranchise' element={<InvestFranchise/>}/>
+ 
   
-  <Route path="/aboutuspage" element={<AboutUs />} />
-  <Route path="/contactuspage" element={<ContactUs />} />
-  <Route path="/help" element={<Help />} />
-  <Route path="/faq" element={<Faq />} />
-  <Route path="/termscondition" element={<TermsCondition />} />
-
-  <Route path="/brandsearchview" element={<BrandCategroyViewPage />} />
-
-  
-
+<Route path='/cardrow' element={<CardsRow/>}/>
 
   
 </Routes>

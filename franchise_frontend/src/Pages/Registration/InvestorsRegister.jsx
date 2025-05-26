@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useForm, useWatch } from "react-hook-form";
-import { useNavigate ,Link as RouterLink } from "react-router-dom";
+import { useForm, useWatch ,Controller} from "react-hook-form";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import axios from "axios";
 import {
   Container,
@@ -371,8 +371,10 @@ useEffect(() => {
     investmentAmount: data.investmentAmount || "",
     occupation: data.occupation || "",
     ...(data.occupation === "Other" && { specifyOccupation: data.otherOccupation || "" }),
-    propertyType: data.propertyType || "",
-    propertySize: data.propertySize || "",
+   propertyType: data.propertyType || "",
+  ...(data.propertyType === "Own Property" && { 
+    propertySize: data.propertySize || "" 
+  }),
     preferredState: data.preferredState || "", 
     preferredCity: data.preferredCity || "",
     };
@@ -391,7 +393,7 @@ useEffect(() => {
           "Registration successful! Redirecting to login...",
           "success"
         );
-        setTimeout(() => navigate("/"), 2000);
+        // setTimeout(() => navigate("/"), 2000);
       } else {
         showSnackbar(
           "An unexpected error occurred. Please try again.",
@@ -488,21 +490,16 @@ useEffect(() => {
   // );
 
   return (
-   <Box sx={{backgroundImage: `url(${backgroundImage})`, backgroundSize: "cover"}}>
-
-
-  
-
-
+   <Box sx={{backgroundImage: `url(${backgroundImage})`, backgroundSize: "cover", height: "100vh"}}>
     <Container
       sx={{
-        maxWidth: "lg",
-        overflow: "auto",
+        // maxWidth: "lg",
+        // overflow: "auto",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         py: 2,
-         height: "100vh"
+        //  height: "100vh"
        
       }}
     >
@@ -543,9 +540,16 @@ useEffect(() => {
           >
             Personal Details
           </Typography>
-          <Grid container spacing={2} >
-            {/* Name Field */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 6, mb:-2}}>
+<Grid
+          container
+          spacing={2}
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+            gap: 2,
+          }}
+        >            {/* Name Field */}
+            <Grid sx={{xs: 12, sm: 6, mb:-2}}>
               <TextField
                 fullWidth
                 label="Name"
@@ -557,7 +561,7 @@ useEffect(() => {
               />
             </Grid>
             {/* {email field} */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 6, mb:-2 }}>
+            <Grid sx={{  xs: 12, sm: 6, mb:-2 }}>
               <TextField
                 fullWidth
                 label="Email"
@@ -599,7 +603,7 @@ useEffect(() => {
               />
             </Grid>
             {/* Mobile number field */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 6 , mb:-2}}>
+            <Grid sx={{  xs: 12, sm: 6 , mb:-2}}>
               <TextField
                 fullWidth
                 label="Phone Number"
@@ -642,7 +646,7 @@ useEffect(() => {
             </Grid>
 
             {/* WhatsApp Field */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 6, mb:-2 }}>
+            <Grid sx={{ xs: 12, sm: 6, mb:-2 }}>
               <TextField
                 fullWidth
                 label="WhatsApp Number"
@@ -705,7 +709,7 @@ useEffect(() => {
 
 
             {/* {address} */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 6 }}>
+            <Grid sx={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Address"
@@ -713,7 +717,7 @@ useEffect(() => {
               />
             </Grid>
             {/* {pincode} */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 3, mb:-2 }}>
+            <Grid sx={{ xs: 12, sm: 3, mb:-2 }}>
               <TextField
                 fullWidth
                 label="Pincode"
@@ -729,7 +733,7 @@ useEffect(() => {
               />
             </Grid>
             {/* {state} */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 3 }}>
+            <Grid sx={{ xs: 12, sm: 3 }}>
               <TextField
                 fullWidth
                 label="State"
@@ -740,7 +744,7 @@ useEffect(() => {
               />
             </Grid>
             {/* {city} */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 6 }}>
+            <Grid sx={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="City"
@@ -762,7 +766,7 @@ useEffect(() => {
               />
             </Grid> */}
             {/* Occupation Field */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 4 }}>
+            <Grid sx={{  xs: 12, sm: 4 }}>
               <TextField
                 select
                 fullWidth
@@ -786,7 +790,7 @@ useEffect(() => {
               </TextField>
             </Grid>
             {occupationValue === "Other" && (
-              <Grid item sx={{ width: "21%", xs: 12, sm: 4 }}>
+              <Grid item sx={{xs: 12, sm: 4 }}>
                 <TextField
                   fullWidth
                   label="Specify Occupation"
@@ -809,9 +813,16 @@ useEffect(() => {
             Preferences
           </Typography>
 
-          <Grid container spacing={2}>         
-{/* Category Field */}
-<Grid sx={{ width: "21%", position: "relative" }}>
+<Grid
+          container
+          spacing={2}
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+            gap: 2,
+          }}
+        >{/* Category Field */}
+<Grid sx={{ position: "relative" }}>
   <Stack direction="row" alignItems="center" spacing={1}>
 
   <TextField
@@ -996,7 +1007,7 @@ useEffect(() => {
 </Grid>
 
             {/* {preferred investment range field} */}
-            <Grid sx={{ width: "21%", xs: 12, sm: 4 }}>
+            <Grid sx={{  xs: 12, sm: 4 }}>
               <TextField
                 select
                 fullWidth
@@ -1017,7 +1028,7 @@ useEffect(() => {
               </TextField>
             </Grid>
             {selectedRange && (
-              <Grid item sx={{ width: "21%", xs: 12, sm: 4 }}>
+              <Grid item sx={{  xs: 12, sm: 4 }}>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <TextField
                     select
@@ -1056,7 +1067,7 @@ useEffect(() => {
 
           
 {/* Preferred State Field (changed to text input) */}
-                <Grid item xs={12} sm={6} sx={{width:"21%"}}>
+                <Grid item xs={12} sm={6} >
                   <TextField
                     fullWidth
                     label="Preferred State "
@@ -1069,7 +1080,7 @@ useEffect(() => {
                 </Grid>
 
                 {/* Preferred City Field (changed to text input) */}
-                <Grid item xs={12} sm={6} sx={{width:"21%"}}>
+                <Grid item xs={12} sm={6} >
                   <TextField
                     fullWidth
                     label="Preferred City "
@@ -1081,66 +1092,77 @@ useEffect(() => {
                   />
                 </Grid>
 {/* Property Type Field */}
-            <Grid xs={12} sm={6} md={4}>
-              <FormControl
-                component="fieldset"
-                fullWidth
-              >
-                <FormLabel component="legend">Property Type</FormLabel>
-                <RadioGroup
-                  row
-                  {...register("propertyType"
-                  )}
-                >
-                  <FormControlLabel
-                    value="own property"
-                    control={<Radio />}
-                    label="Own Property"
-                  />
-                  <FormControlLabel
-                    value="rental"
-                    control={<Radio />}
-                    label="Rental Property"
-                  />
-                </RadioGroup>
-                {errors.propertyType && (
-                  <Typography color="error" variant="caption">
-                    {errors.propertyType.message}
-                  </Typography>
-                )}
-              </FormControl>
-            </Grid>
-            {watch ("propertyType") === "own property" && (
-              <Grid item xs={12} sm={6} md={4} sx={{ width: "21%" }}>
-                <TextField
-                  select
-                  fullWidth
-                  // label="Property Size"
-                  defaultValue=""
-                  error={!!errors.propertySize}
-                  helperText={errors.propertySize?.message}
-                  SelectProps={{ native: true }}
-                  {...register("propertySize")}
-                >
-                  <option value="">Select Total Area</option>
-                  <option value="below-100">Below - 100 sq ft</option>
-                  <option value="100-200">100 sq ft - 200sq ft</option>
-                  <option value="200-500">200 sq ft - 500sq ft</option>
-                  <option value="500-1000">500 sq ft - 1000sq ft</option>
-                  <option value="1000-1500">1000 sq ft - 1500sq ft</option>
-                  <option value="1500-2000">1500 sq ft - 2000sq ft</option>
-                  <option value="2000-3000">2000 sq ft - 300sq ft</option>
-                  <option value="3000-5000">3000 sq ft - 5000sq ft</option>
-                  <option value="5000-7000">5000 sq ft - 7000sq ft</option>
-                  <option value="7000-10000">7000 sq ft - 10000sq ft</option>
-                  <option value="Above-10000">10000sq ft- Above</option>
-                </TextField>
-              </Grid>
-            )}
+          <Grid xs={12} sm={6} md={4}>
+  <FormControl component="fieldset" fullWidth error={!!errors.propertyType}>
+    <FormLabel component="legend">Property Type *</FormLabel>
+    <Controller
+      name="propertyType"
+      control={control}
+      rules={{ required: "Property type is required" }}
+      render={({ field }) => (
+        <RadioGroup
+          row
+          {...field}
+          value={field.value || ""}
+          onChange={(e) => {
+            field.onChange(e.target.value);
+            if (e.target.value !== "Own Property") {
+              setValue("propertySize", "");
+            }
+          }}
+        >
+          <FormControlLabel
+            value="Own Property"
+            control={<Radio />}
+            label="Own Property"
+          />
+          <FormControlLabel
+            value="Rental Property"
+            control={<Radio />}
+            label="Rental Property"
+          />
+        </RadioGroup>
+      )}
+    />
+    {errors.propertyType && (
+      <Typography color="error" variant="caption">
+        {errors.propertyType.message}
+      </Typography>
+    )}
+  </FormControl>
+</Grid>
 
+{/* Property Size Field - Only show for Own Property */}
+{watch("propertyType") === "Own Property" && (
+  <Grid item xs={12} sm={6} md={4}>
+    <TextField
+      select
+      fullWidth
+      label="Property Size *"
+      {...register("propertySize", {
+        required: "Property size is required for own property"
+      })}
+      error={!!errors.propertySize}
+      helperText={errors.propertySize?.message}
+    >
+      <MenuItem value="">Select Total Area</MenuItem>
+      <MenuItem value="Below - 100 sq ft">Below - 100 sq ft</MenuItem>
+      <MenuItem value="100 sq ft - 200 sq ft">100 sq ft - 200 sq ft</MenuItem>
+      <MenuItem value="200 sq ft - 500 sq ft">200 sq ft - 500 sq ft</MenuItem>
+      <MenuItem value="500 sq ft - 1000 sq ft">500 sq ft - 1000 sq ft</MenuItem>
+      <MenuItem value="1000 sq ft - 1500 sq ft">1000 sq ft - 1500 sq ft</MenuItem>
+      <MenuItem value="1500 sq ft - 2000 sq ft">1500 sq ft - 2000 sq ft</MenuItem>
+      <MenuItem value="2000 sq ft - 3000 sq ft">2000 sq ft - 3000 sq ft</MenuItem>
+      <MenuItem value="3000 sq ft - 5000 sq ft">3000 sq ft - 5000 sq ft</MenuItem>
+      <MenuItem value="5000 sq ft - 7000 sq ft">5000 sq ft - 7000 sq ft</MenuItem>
+      <MenuItem value="7000 sq ft - 10000 sq ft">7000 sq ft - 10000 sq ft</MenuItem>
+      <MenuItem value="Above 10000 sq ft">Above 10000 sq ft</MenuItem>
+    </TextField>
+  </Grid>
+)}
 
             {/* Terms and Conditions */}
-            <Grid sx={{ width: "100%", xs: 12 }}>
+            <Grid sx={{  xs: 12 }}>
               <FormControlLabel
                 control={
                   <Checkbox {...register("terms", { required: true })} />
@@ -1151,8 +1173,7 @@ label={
             <Link
               component={RouterLink}
               to="/termscondition"
-              target="_blank"
-              rel="noopener noreferrer"
+             
             >
               terms and conditions
             </Link>
@@ -1166,7 +1187,16 @@ label={
             </Grid>
 
             {/* Submit Button */}
-            <Grid
+            <Grid component="span"
+      onClick={openLoginPopup}
+      // sx={{
+      //   textDecoration: "none",
+      //   cursor: "pointer",
+      //   color: "primary.main",
+      //   "&:hover": {
+      //     color: "primary.dark",
+      //   },
+      // }}
               sx={{
                 width: "70%",
                 display: "flex",
@@ -1181,7 +1211,7 @@ label={
               </Button>
             </Grid>
 
-            <Grid sx={{ width: "100%", xs: 12 }}>
+            <Grid sx={{  xs: 12 }}>
   <Typography textAlign="center">
     Already have an account?{" "}
     <Box

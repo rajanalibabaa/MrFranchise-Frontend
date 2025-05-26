@@ -43,6 +43,7 @@ import BrandDetails from "./BrandDetails";
 import FranchiseDetails from "./FranchiseDetails";
 import Uploads from "../BrandLIstingRegister/BrandRegisterUploads";
 import{ validateBrandDetails,validateFranchiseDetails } from "./BrandRegisterValidation";
+import axios from "axios";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
 const FORM_STEP_KEY = "brandRegistrationActiveStep";
@@ -171,7 +172,7 @@ const BrandRegisterForm = () => {
   });
 
 
-  console.log("Form Data:", formData);  
+  // console.log("Form Data:", formData);  
 
   const [validationErrors, setValidationErrors] = useState({
     brandDetails: {},
@@ -263,9 +264,118 @@ const BrandRegisterForm = () => {
 
   const handleSubmit = async () => {
     const isValid = validateStep(activeStep);
+    
     if (isValid) {
       try {
         // Your submit logic here
+        //form data to submit 
+        const formDataSend = new FormData();
+
+        formDataSend.append('personalDetails', JSON.stringify({
+          fullName: formData.brandDetails.fullName,
+          email: formData.brandDetails.email,
+          mobileNumber: formData.brandDetails.mobileNumber,
+          brandName: formData.brandDetails.brandName,
+          companyName: formData.brandDetails.companyName,
+          country: countries.find(c => c.code === formData.brandDetails.country)?.name || formData.brandDetails.country,
+          pincode: formData.brandDetails.pincode,
+          headOfficeAddress: formData.brandDetails.headOfficeAddress,
+          state: formData.brandDetails.state,
+          city: formData.brandDetails.city,
+          establishedYear: formData.brandDetails.establishedYear,
+          franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
+          brandCategories: formData.brandDetails.brandCategories,
+          brandDescription: formData.brandDetails.brandDescription,
+          expansionLocation: formData.brandDetails.expansionLocation,
+          pancardNumber: formData.brandDetails.pancardNumber,
+          gstNumber: formData.brandDetails.gstNumber,
+          website: formData.brandDetails.website,
+          facebook: formData.brandDetails.facebook,
+          instagram: formData.brandDetails.instagram,
+          linkedin: formData.brandDetails.linkedin,   
+             }));
+             formDataSend.append('franchiseDetails', JSON.stringify({
+               modelsOfFranchise: formData.franchiseDetails.fico,
+          companyOwnedOutlets: formData.franchiseDetails.companyOwnedOutlets,
+          franchiseOutlets: formData.franchiseDetails.franchiseOutlets,
+          totalOutlets: formData.franchiseDetails.totalOutlets,
+          requirementSupport: formData.franchiseDetails.requirementSupport,
+          trainingProvidedBy: formData.franchiseDetails.trainingProvidedBy,
+          agreementPeriod: formData.franchiseDetails.agreementPeriod,
+
+             }))
+             formDataSend.append('brandDetails', JSON.stringify({
+               
+             }))
+              // Add files to formData
+      const fileFields = {
+        brandLogo: formData.uploads.brandLogo,
+        gstCertificate: formData.uploads.gstCertificate,
+        pancard: formData.uploads.pancard,
+        exteriorOutlet: formData.uploads.exteriorOutlet,
+        interiorOutlet: formData.uploads.interiorOutlet,
+        franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
+        brandPromotionVideo: formData.uploads.brandPromotionVideo
+      };
+      Object.entries(fileFields).forEach(([fieldName, files]) => {
+        if (files && files.length > 0) {
+          files.forEach(file => {
+            formDataSend.append(fieldName, file);
+          });
+        }
+      });
+      //   const apiData = {
+      //   personalDetails: {
+      //     fullName: formData.brandDetails.fullName,
+      //     email: formData.brandDetails.email,
+      //     mobileNumber: formData.brandDetails.mobileNumber,
+      //     brandName: formData.brandDetails.brandName,
+      //     companyName: formData.brandDetails.companyName,
+      //     country: countries.find(c => c.code === formData.brandDetails.country)?.name || formData.brandDetails.country,
+      //     pincode: formData.brandDetails.pincode,
+      //     headOfficeAddress: formData.brandDetails.headOfficeAddress,
+      //     state: formData.brandDetails.state,
+      //     city: formData.brandDetails.city,
+      //     establishedYear: formData.brandDetails.establishedYear,
+      //     franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
+      //     brandCategories: formData.brandDetails.brandCategories,
+      //     brandDescription: formData.brandDetails.brandDescription,
+      //     expansionLocation: formData.brandDetails.expansionLocation,
+      //     pancardNumber: formData.brandDetails.pancardNumber,
+      //     gstNumber: formData.brandDetails.gstNumber,
+      //     website: formData.brandDetails.website,
+      //     facebook: formData.brandDetails.facebook,
+      //     instagram: formData.brandDetails.instagram,
+      //     linkedin: formData.brandDetails.linkedin,
+      //   },
+      //   franchiseDetails: {
+      //             },
+      //   brandDetails: {
+      //     pancard: formData.uploads.pancard,
+      //     gstCertificate: formData.uploads.gstCertificate,
+      //     brandLogo: formData.uploads.brandLogo,
+      //     exterioroutlet: formData.uploads.exteriorOutlet,
+      //     interiorOutlet: formData.uploads.interiorOutlet,
+      //     franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
+      //     brandPromotionVideo: formData.uploads.brandPromotionVideo,
+      //   }
+      // };
+
+
+
+        const response = await axios.post('http://localhost:5000/api/v1/brandlisting/createBrandListing', formDataSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+        );
+
+        console.log(response.data);
+
+      // if (response.status !== 200 && response.status !== 201) {
+      //   throw new Error(response.data.message || "Submission failed");
+      // }
         setSnackbar({
           open: true,
           message: "Form submitted successfully!",
@@ -277,8 +387,9 @@ const BrandRegisterForm = () => {
         localStorage.removeItem(FORM_STEP_KEY);
         setFormData(initialFormData);
         setActiveStep(0);
-      // eslint-disable-next-line no-unused-vars
-      } catch (error) {
+      } catch (error) {     
+        console.log('submission error',error);
+           
         setSnackbar({
           open: true,
           message: "Submission failed. Please try again.",
@@ -612,9 +723,14 @@ const BrandRegisterForm = () => {
     return value || "Not provided";
   };
  const renderPreviewContent = () => {
+  // Add null checks for all form data sections
+  const brandDetails = formData.brandDetails || {};
+  const franchiseDetails = formData.franchiseDetails || {};
+  const uploads = formData.uploads || {};
+
   // Helper function to render file previews
   const renderFilePreviews = (files) => {
-    if (!files || files.length === 0) return "No files uploaded";
+if (!files || !Array.isArray(files) || files.length === 0) return "No files uploaded";
 
     return (
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
@@ -810,7 +926,7 @@ const BrandRegisterForm = () => {
         </Typography>
         <Table size="small">
           <TableBody>
-            {Object.entries(formData.brandDetails).map(([key, value]) => {
+            {Object.entries(brandDetails).map(([key, value]) => {
               // Skip brandCategories and expansionLocation as we'll render them separately
               if (key === "brandCategories" || key === "expansionLocation") {
                 return null;
@@ -831,7 +947,7 @@ const BrandRegisterForm = () => {
                 Brand Categories
               </TableCell>
               <TableCell>
-                {renderBrandCategories(formData.brandDetails.brandCategories)}
+                {renderBrandCategories(brandDetails.brandCategories)}
               </TableCell>
             </TableRow>
             
@@ -841,7 +957,7 @@ const BrandRegisterForm = () => {
                 Expansion Locations
               </TableCell>
               <TableCell>
-                {renderExpansionLocations(formData.brandDetails.expansionLocation)}
+                {renderExpansionLocations(brandDetails.expansionLocation)}
               </TableCell>
             </TableRow>
           </TableBody>
@@ -857,7 +973,7 @@ const BrandRegisterForm = () => {
         </Typography>
         <Table size="small">
           <TableBody>
-            {Object.entries(formData.franchiseDetails).map(([key, value]) => (
+            {Object.entries(franchiseDetails).map(([key, value]) => (
               <TableRow key={key}>
                 <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
                   {formatFieldName(key)}
@@ -884,7 +1000,7 @@ const BrandRegisterForm = () => {
         </Typography>
         <Table size="small">
           <TableBody>
-            {Object.entries(formData.uploads).map(([key, value]) => (
+            {Object.entries(uploads).map(([key, value]) => (
               <TableRow key={key}>
                 <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
                   {formatFieldName(key)}
