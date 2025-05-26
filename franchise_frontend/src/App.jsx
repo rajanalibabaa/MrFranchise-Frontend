@@ -20,8 +20,8 @@ import Complaint from '../src/Components/Investor_Profile_Component/Complaint.js
 import BrandDashBoard from './Components/BrandProfile_Component/BrandDashBoard';
 import Sidebar from './Pages/BrandProfile_Pages/Sidebar_page';
 import BrandManageProfile from './Components/BrandProfile_Component/BrandManageProfile';
-// import BrandFeedBack from './Components/BrandProfile_Component/BrandFeedback';
-// import BrandComplaint from './Components/BrandProfile_Component/BrandComplaint';
+import BrandFeedBack from './Components/BrandProfile_Component/BrandFeedback';
+import BrandComplaint from './Components/BrandProfile_Component/BrandComplaint';
 import BrandAddVedios from './Components/BrandProfile_Component/BrandAddVedios';
 
 import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
@@ -29,6 +29,7 @@ import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccou
 import { Provider } from 'react-redux';
 import store from './Redux/Store/Index.jsx';
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
+import BrandSearchus from './Components/BrandProfile_Component/BrandSearches.jsx';
 import BrandRegisterForm from './Pages/Registration/BrandLIstingRegister/BrandRegisterForm.jsx';
 import AboutUs from './Components/Footers/HelpAndSupport/AboutUs.jsx';
 import ContactUs from './Components/Footers/HelpAndSupport/ContactUs.jsx';
@@ -77,9 +78,10 @@ function App() {
     <Route index element={<BrandDashBoard />} />
     <Route path="brandDashboard" element={<BrandDashBoard />} />
     <Route path="brandaddvedios" element={<BrandAddVedios />} />
-    {/* <Route path="brandfeedback" element={<BrandFeedBack />} /> */}
-    {/* <Route path="brandcomplaint" element={<BrandComplaint />} /> */}
+    <Route path="brandfeedback" element={<BrandFeedBack />} />
+    <Route path="brandcomplaint" element={<BrandComplaint />} />
     <Route path="brandmanageprofile" element={<BrandManageProfile />} />
+    <Route path="brandsearchus" element={<BrandSearchus />} />
     <Route path='/brandDashboard/brandlistingcontrol' element={<BrandListingController />} />
   </Route>
 

@@ -40,6 +40,11 @@ const BrandFeedBack = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!feedbackText.trim()) {
+            console.error("Feedback cannot be empty");
+            return;
+        }
+
         const formattedData = {
             topic: selectedTopic,
             rating: value,
@@ -50,16 +55,22 @@ const BrandFeedBack = () => {
             const response = await axios.post(
                 "https://franchise-backend-wgp6.onrender.com/api/feedback/createFeedback",
                 formattedData,
-                { headers: { "Content-Type": "application/json" } }
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
             );
             console.log("Feedback submitted:", response.data);
+            alert("Feedback submitted successfully!");
             setFeedbackText('');
             setSelectedTopic('');
             setValue(2);
         } catch (error) {
             console.error("Error submitting feedback:", error);
+            alert("Error submitting feedback");
         }
-    }
+    };
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10, px: 2, marginLeft: -20 }}>
@@ -100,12 +111,8 @@ const BrandFeedBack = () => {
                 <Box
                     component="form"
                     sx={{ display: "flex", flexDirection: "column", gap: 3 }}
-                    onSubmit={handleSubmit
-                        // e.preventDefault();
-
-                    }
+                    onSubmit={handleSubmit}
                 >
-
                     <FormControl required fullWidth size="medium">
                         <InputLabel id="topic-label">Topic</InputLabel>
                         <Select
@@ -134,8 +141,9 @@ const BrandFeedBack = () => {
                         rows={5}
                         fullWidth
                         size="medium"
+                        value={feedbackText} // ✅ bind value
+                        onChange={(e) => setFeedbackText(e.target.value)} // ✅ bind onChange
                     />
-
 
                     <Button
                         type="submit"

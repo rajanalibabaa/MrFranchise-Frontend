@@ -67,7 +67,7 @@ const InvestorRegister = () => {
     watch,
     control,
     formState: { errors },
-    trigger,
+    // trigger,
   } = useForm({
     defaultValues: {
       country: "India",
@@ -137,9 +137,9 @@ useEffect(() => {
     name: "occupation",
     defaultValue: "",
   });
-  const propertyType = useWatch({ control, name: "propertyType" });
+  // const propertyType = useWatch({ control, name: "propertyType" });
   const selectedRange = useWatch({ control, name: "investmentRange" });
-  const selectedState = watch("preferredState");
+  // const selectedState = watch("preferredState");
 
   const [otpStates, setOtpStates] = useState({
     email: {
@@ -177,15 +177,15 @@ useEffect(() => {
     setCategoryDropdownOpen(false);
   };
 
-  const openOtpModal = (type) => {
-    setOtpModal({
-      open: true,
-      type,
-      otp: "",
-      loading: false,
-      verified: otpStates[type]?.verified || false,
-    });
-  };
+  // const openOtpModal = (type) => {
+  //   setOtpModal({
+  //     open: true,
+  //     type,
+  //     otp: "",
+  //     loading: false,
+  //     verified: otpStates[type]?.verified || false,
+  //   });
+  // };
 
   const closeOtpModal = () => {
     setOtpModal({
@@ -197,97 +197,97 @@ useEffect(() => {
     });
   };
 
-  const sendOtp = async (type) => {
-    let endpoint = "";
-    let payload = {};
-    let fieldName = "";
+  // const sendOtp = async (type) => {
+  //   let endpoint = "";
+  //   let payload = {};
+  //   let fieldName = "";
 
-    if (type === "email") {
-      fieldName = "email";
-      endpoint =
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-email";
-      payload = { email: watch("email"), type: "email" };
-    } else if (type === "mobile") {
-      fieldName = "mobileNumber";
-      endpoint =
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-mobile";
-      payload = {
-        mobile: `${phonePrefix}${watch("mobileNumber")}`,
-        type: "mobile",
-      };
-    } else if (type === "whatsapp") {
-      fieldName = "whatsappNumber";
-      endpoint =
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-whatsapp";
-      payload = {
-        mobile: `${phonePrefix}${watch("whatsappNumber")}`,
-        type: "whatsapp",
-      };
-    }
+  //   if (type === "email") {
+  //     fieldName = "email";
+  //     endpoint =
+  //       "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-email";
+  //     payload = { email: watch("email"), type: "email" };
+  //   } else if (type === "mobile") {
+  //     fieldName = "mobileNumber";
+  //     endpoint =
+  //       "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-mobile";
+  //     payload = {
+  //       mobile: `${phonePrefix}${watch("mobileNumber")}`,
+  //       type: "mobile",
+  //     };
+  //   } else if (type === "whatsapp") {
+  //     fieldName = "whatsappNumber";
+  //     endpoint =
+  //       "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-whatsapp";
+  //     payload = {
+  //       mobile: `${phonePrefix}${watch("whatsappNumber")}`,
+  //       type: "whatsapp",
+  //     };
+  //   }
 
-    const selectedCountry=useWatch({
-      control,
-      name:"country",
-      defaultValue:"IN"
-    })
-
-
+  //   const selectedCountry=useWatch({
+  //     control,
+  //     name:"country",
+  //     defaultValue:"IN"
+  //   })
 
 
 
-    // Validate the field first
-    const isValid = await trigger(fieldName);
-    if (!isValid) {
-      showSnackbar(`Please enter a valid ${type} address`, "error");
-      return;
-    }
 
-    setOtpStates((prev) => ({
-      ...prev,
-      [type]: {
-        ...prev[type],
-        loading: true,
-        error: false,
-      },
-    }));
 
-    try {
-      const response = await axios.post(endpoint, payload, {
-        headers: { "Content-Type": "application/json" },
-      });
+  //   // Validate the field first
+  //   const isValid = await trigger(fieldName);
+  //   if (!isValid) {
+  //     showSnackbar(`Please enter a valid ${type} address`, "error");
+  //     return;
+  //   }
 
-      if (response.status === 200 && response.data.message) {
-        showSnackbar(`OTP sent to your ${type} successfully!`, "success");
-        setOtpStates((prev) => ({
-          ...prev,
-          [type]: {
-            ...prev[type],
-            sent: true,
-            loading: false,
-            token: response.data.token,
-          },
-        }));
-        openOtpModal(type);
-      } else {
-        throw new Error(response.data.message || `Failed to send ${type} OTP`);
-      }
-    } catch (error) {
-      console.error(`Error sending ${type} OTP:`, error);
-      showSnackbar(
-        error.response?.data?.message ||
-          `Failed to send ${type} OTP. Please try again.`,
-        "error"
-      );
-      setOtpStates((prev) => ({
-        ...prev,
-        [type]: {
-          ...prev[type],
-          loading: false,
-          error: true,
-        },
-      }));
-    }
-  };
+  //   setOtpStates((prev) => ({
+  //     ...prev,
+  //     [type]: {
+  //       ...prev[type],
+  //       loading: true,
+  //       error: false,
+  //     },
+  //   }));
+
+  //   try {
+  //     const response = await axios.post(endpoint, payload, {
+  //       headers: { "Content-Type": "application/json" },
+  //     });
+
+  //     if (response.status === 200 && response.data.message) {
+  //       showSnackbar(`OTP sent to your ${type} successfully!`, "success");
+  //       setOtpStates((prev) => ({
+  //         ...prev,
+  //         [type]: {
+  //           ...prev[type],
+  //           sent: true,
+  //           loading: false,
+  //           token: response.data.token,
+  //         },
+  //       }));
+  //       openOtpModal(type);
+  //     } else {
+  //       throw new Error(response.data.message || `Failed to send ${type} OTP`);
+  //     }
+  //   } catch (error) {
+  //     console.error(`Error sending ${type} OTP:`, error);
+  //     showSnackbar(
+  //       error.response?.data?.message ||
+  //         `Failed to send ${type} OTP. Please try again.`,
+  //       "error"
+  //     );
+  //     setOtpStates((prev) => ({
+  //       ...prev,
+  //       [type]: {
+  //         ...prev[type],
+  //         loading: false,
+  //         error: true,
+  //       },
+  //     }));
+  //   }
+  // };
 
   const verifyOtp = async () => {
     const { type, otp } = otpModal;
@@ -462,32 +462,32 @@ useEffect(() => {
   }, [selectedCountry, pincode, setValue]);
 
   // Render functions
-  const renderSelectField = (
-    label,
-    name,
-    options,
-    requiredMsg = "This field is required"
-  ) => (
-    <FormControl fullWidth error={!!errors[name]}>
-      <InputLabel>{label}</InputLabel>
-      <Select
-        label={label}
-        defaultValue=""
-        {...register(name, { required: requiredMsg })}
-      >
-        {options.map((opt) => (
-          <MenuItem key={opt} value={opt}>
-            {opt}
-          </MenuItem>
-        ))}
-      </Select>
-      {errors[name] && (
-        <Typography variant="body2" color="error">
-          {errors[name]?.message}
-        </Typography>
-      )}
-    </FormControl>
-  );
+  // const renderSelectField = (
+  //   label,
+  //   name,
+  //   options,
+  //   requiredMsg = "This field is required"
+  // ) => (
+  //   <FormControl fullWidth error={!!errors[name]}>
+  //     <InputLabel>{label}</InputLabel>
+  //     <Select
+  //       label={label}
+  //       defaultValue=""
+  //       {...register(name, { required: requiredMsg })}
+  //     >
+  //       {options.map((opt) => (
+  //         <MenuItem key={opt} value={opt}>
+  //           {opt}
+  //         </MenuItem>
+  //       ))}
+  //     </Select>
+  //     {errors[name] && (
+  //       <Typography variant="body2" color="error">
+  //         {errors[name]?.message}
+  //       </Typography>
+  //     )}
+  //   </FormControl>
+  // );
 
   return (
    <Box sx={{backgroundImage: `url(${backgroundImage})`, backgroundSize: "cover", height: "100vh"}}>

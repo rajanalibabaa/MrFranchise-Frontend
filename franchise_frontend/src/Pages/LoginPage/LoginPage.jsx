@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Grid,
@@ -80,8 +80,8 @@ function LoginPage({ open, onClose }) {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
-        // "http://localhost:5000/api/v1/login/generateOTPforLogin",
+        // "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
+        "http://localhost:5000/api/v1/login/generateOTPforLogin",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -121,8 +121,8 @@ function LoginPage({ open, onClose }) {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
-        // "http://localhost:5000/api/v1/login/",
+        // "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        "http://localhost:5000/api/v1/login/",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -155,15 +155,7 @@ function LoginPage({ open, onClose }) {
           setTimer(30);
           setErrors({});
           setIsLoading(false); // optional safety
-          if (response.data.data.investorUUID) {
-            navigate("/investordashboard")
-          } else if (response.data.data.brandUserUUID) {
-            navigate("/brandDashboard")
-      
-          }else {
-            navigate("/");
-          }
-          ; // Navigate home
+          navigate("/"); // Navigate home
         }, 1000);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
@@ -326,7 +318,7 @@ function LoginPage({ open, onClose }) {
                       onClick={handleOtpRequest}
                       disabled={resendDisabled}
                     >
-                      {resendDisabled ? `Resend in ${timer}s `: "Resend OTP"}
+                      {resendDisabled ? `Resend in ${timer}s` : "Resend OTP"}
                     </Link>
                   </Typography>
                 )}
