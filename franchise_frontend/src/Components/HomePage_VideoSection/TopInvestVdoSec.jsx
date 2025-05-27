@@ -31,17 +31,29 @@ const FoodAndBeverageSection = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState(null);
 
+  const handleClick = () => {
+    alert("Apply button clicked!");
+  };
+
+   const handleMouseEnter = () => {
+            isPaused.current = true;
+          };
+        
+          const handleMouseLeave = () => {
+            isPaused.current = false;
+          };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/v1/homepage/getAllnewRegisterBrands",
+          "https://franchise-backend-wgp6.onrender.com/api/v1/homepage/getAllnewRegisterBrands",
           { headers: { "Content-Type": "application/json" } }
         );
 
         if (response.data?.data?.length) {
           setBrands(response.data.data);
-          console.log("data :",brands)
+          // console.log("data :",brands)
           setError(null);
         } else {
           setBrands([]);
@@ -96,7 +108,7 @@ const FoodAndBeverageSection = () => {
     );
 
   return (
-    <Box sx={{ p: 4, background: "#fff", maxWidth: 1200, mx: "auto" }}>
+    <Box sx={{ p: 4, background: "#fff", maxWidth: 1800, mx: "auto" }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Typography variant="h5" fontWeight={600}>
           Invest Your Franchise
@@ -113,14 +125,18 @@ const FoodAndBeverageSection = () => {
         sx={{
           display: "flex",
           gap: 3,
-          backgroundColor: "#e8f5e9",
+          // backgroundColor: "#e8f5e9",
           borderRadius: 3,
           p: 2,
-          overflowX: "auto",
+          overflowX: "scroll",
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" }
         }}
+        onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
       >
         {/* Static Left Card */}
-        <Box
+        {/* <Box
           sx={{
             minWidth: 200,
             background: "#e0f2f1",
@@ -137,7 +153,7 @@ const FoodAndBeverageSection = () => {
           <Button variant="contained" sx={{ background: "#4caf50" }}>
             Popular in Franchise
           </Button>
-        </Box>
+        </Box> */}
 
         {/* Dynamic Brand Cards */}
         {brands.map((brand) => {
@@ -150,7 +166,7 @@ const FoodAndBeverageSection = () => {
               key={brandId}
               variants={cardVariants}
               whileHover={{ scale: 1.03 }}
-              style={{ minWidth: 250 }}
+              style={{ minWidth: 370 }}
             >
               <Card
                 sx={{
@@ -159,18 +175,20 @@ const FoodAndBeverageSection = () => {
                   borderRadius: 3,
                   overflow: "hidden",
                   height: "100%",
+                  border: "0.1px solid #ddd",
+                  boxShadow: "0px 2px 5px rgba(0,0,0,0.1)",
                 }}
               >
                <CardMedia
                   component="video"
                   src={brand.brandDetails?.brandPromotionVideo}
                   alt={brand.personalDetails?.brandName || "Brand"}
-                  sx={{ height: 140 }}
+                  sx={{ height: 450, objectFit: "contain" }}
                   controls
                 />
 
                 <CardContent>
-                  <Typography variant="subtitle1" fontWeight={600}>
+                  <Typography variant="subtitle1" fontWeight={600} fontSize={25}>
                     {brand.personalDetails?.brandName}
                   </Typography>
 
@@ -180,7 +198,7 @@ const FoodAndBeverageSection = () => {
                     justifyContent="space-between"
                     mt={1}
                   >
-                    <Typography variant="body2" fontWeight={600}>
+                    <Typography variant="body2" fontWeight={600} fontSize={15}>
                       Franchise Model: {franchiseModels.length}
                     </Typography>
 
@@ -196,11 +214,11 @@ const FoodAndBeverageSection = () => {
                 </CardContent>
                 <Box sx={{ px: 2, pb: 2, mt: "auto" }}>
                   <Button
-                    variant="contained"
+                    variant="contained" onClick ={handleClick}
                     fullWidth
                     sx={{
-                      backgroundColor: "#ff6d00",
-                      "&:hover": { backgroundColor: "#ff8f00" },
+                      backgroundColor: "#f29724",
+                      "&:hover": { backgroundColor: "#e2faa7", color: "#000" },
                     }}
                   >
                     Apply

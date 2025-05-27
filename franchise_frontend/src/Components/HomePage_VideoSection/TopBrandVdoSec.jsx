@@ -6,32 +6,16 @@ import {
   Button,
   IconButton,
   Avatar,
+  Modal,
 } from "@mui/material";
-import { ChevronLeft, ChevronRight, Favorite, FavoriteBorder } from "@mui/icons-material";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Favorite,
+  FavoriteBorder,
+} from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
-
-const brandData = [
-  {
-    video: "https://www.w3schools.com/html/mov_bbb.mp4",
-    image: "https://mrfranchise.in/wp-content/uploads/2024/11/fresh2day-mrfranchisein.png",
-    name: "Fresh2Day",
-    // logo: "https://via.placeholder.com/32x32?text=H",
-    category: "Saloon & Spa, Health & Beauty",
-    investment: "50 L – 75 L",
-    area: "3,000 - 5,000 Sq. Ft",
-    desc: "Fresh2Day is Chennai's best food and grocery store.   and Vegetables, Rice and Dals, Spices and Seasonings to Packaged products, Bakery Products, Beverages, – we have it all",
-  },
-  {
-    video: "https://www.w3schools.com/html/movie.mp4",
-    image: "https://mrfranchise.in/wp-content/uploads/2024/10/skale-logo.png",
-    name: "Skale",
-    // logo: "https://via.placeholder.com/32x32?text=F",
-    category: "Skale Fitness",
-    investment: "₹1 Cr. – 2 Cr.",
-    area: "2,000 - 3,000 Sq. Ft",
-    desc: "Premium fitness brand with modern training equipment for Indian fitness. If we look around, we will find that weight loss advertisements are rampant everywhere.",
-  },
-];
+import axios from "axios";
 
 const variants = {
   enter: (direction) => ({
@@ -60,53 +44,37 @@ function TopBrandVdoSec() {
   const [liked, setLiked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [brandData, setBrandData] = useState([]);
+  const [open, setOpen] = useState(false);
+  
   const timeoutRef = useRef(null);
   const videoRef = useRef(null);
 
-  // const handleNext = () => {
-  //   if (!isHovered && !isVideoPlaying) {
-  //     setIndex(([i]) => [(i + 1) % brandData.length, 1]);
-  //     setLiked(false);
-  //   }
-  // };
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  
 
-    const handleNext = useCallback(() => {
-  if (!isHovered && !isVideoPlaying) {
-    setIndex(([i]) => [(i + 1) % brandData.length, 1]);
-    setLiked(false);
-  }
-}, [isHovered, isVideoPlaying]);
+
+  const handleNext = useCallback(() => {
+    if (!isHovered && !isVideoPlaying && brandData.length > 0) {
+      setIndex(([i]) => [(i + 1) % brandData.length, 1]);
+      setLiked(false);
+    }
+  }, [isHovered, isVideoPlaying, brandData]);
 
   const handlePrev = () => {
-    setIndex(([i]) => [(i - 1 + brandData.length) % brandData.length, -1]);
-    setLiked(false);
+    if (brandData.length > 0) {
+      setIndex(([i]) => [(i - 1 + brandData.length) % brandData.length, -1]);
+      setLiked(false);
+    }
   };
 
-  // const startAutoSlide = () => {
-  //   clearTimeout(timeoutRef.current);
-  //   if (!isHovered && !isVideoPlaying) {
-  //     timeoutRef.current = setTimeout(() => handleNext(), 5000);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   startAutoSlide();
-  //   return () => clearTimeout(timeoutRef.current);
-  // }, [index, isHovered, isVideoPlaying]);
-
-
-
-const startAutoSlide = useCallback(() => {
-  clearTimeout(timeoutRef.current);
-  if (!isHovered && !isVideoPlaying) {
-    timeoutRef.current = setTimeout(() => handleNext(), 5000);
-  }
-}, [isHovered, isVideoPlaying, handleNext]);
-
-useEffect(() => {
-  startAutoSlide();
-  return () => clearTimeout(timeoutRef.current);
-}, [index, startAutoSlide]);
+  const startAutoSlide = useCallback(() => {
+    clearTimeout(timeoutRef.current);
+    if (!isHovered && !isVideoPlaying && brandData.length > 0) {
+      timeoutRef.current = setTimeout(() => handleNext(), 5000);
+    }
+  }, [isHovered, isVideoPlaying, handleNext, brandData]);
 
   const handleVideoPlay = () => {
     setIsVideoPlaying(true);
@@ -118,11 +86,51 @@ useEffect(() => {
     startAutoSlide();
   };
 
+  useEffect(() => {
+    const fetchBrandData = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopOne"
+        );
+        const fetchedData = response.data?.data;
+
+        // Ensure it's always an array for consistent behavior
+        if (fetchedData) {
+          setBrandData(Array.isArray(fetchedData) ? fetchedData : [fetchedData]);
+        }
+
+        // console.log("Fetched brand data:", brandData);
+      } catch (error) {
+        console.error("Error fetching brand data:", error);
+      }
+    };
+
+    fetchBrandData();
+  }, []);
+
+  useEffect(() => {
+    startAutoSlide();
+    return () => clearTimeout(timeoutRef.current);
+  }, [index, startAutoSlide]);
+
+  if (!brandData || brandData.length === 0) {
+    return <div>Loading...</div>;
+  }
+
   const brand = brandData[index];
 
+  const handleLike = () => {
+    setLiked((prev) => !prev);
+    if(liked) {
+      //api
+    } else {
+      //api
+    }
+  }
+
   return (
-    <Box 
-      sx={{ p: 4, maxWidth: "1400px", mx: "auto" }}
+    <Box
+      sx={{ p: 4, maxWidth: "1800px", mx: "auto" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -148,13 +156,13 @@ useEffect(() => {
             borderRadius: 2,
             overflow: "hidden",
             boxShadow: 3,
-            height: 430,
+            height: 450,
           }}
         >
           <motion.video
             ref={videoRef}
-            key={brand.video}
-            src={brand.video}
+            key={brand.videoUrl}
+            src={brand.videoUrl}
             controls
             onPlay={handleVideoPlay}
             onPause={handleVideoPause}
@@ -168,8 +176,6 @@ useEffect(() => {
               borderRadius: 8,
             }}
           />
-
-          {/* Arrows */}
           <IconButton
             sx={{
               position: "absolute",
@@ -203,7 +209,7 @@ useEffect(() => {
         {/* Right Card Section */}
         <AnimatePresence mode="wait" custom={direction}>
           <Card
-            key={brand.name}
+            key={brand.title}
             component={motion.div}
             custom={direction}
             initial="enter"
@@ -213,20 +219,20 @@ useEffect(() => {
             sx={{
               flex: 1,
               minWidth: 360,
-              height: 330,
+              height: 450,
               display: "flex",
               borderRadius: 3,
               boxShadow: 4,
               overflow: "hidden",
-
               ":hover": {
-                boxShadow: 9,               
-            }}}
+                boxShadow: 9,
+              },
+            }}
           >
             <Box
               component="img"
-              src={brand.image}
-              alt={brand.name}
+              src={brand.thumbnailUrl}
+              alt={brand.title}
               sx={{
                 width: "45%",
                 height: "100%",
@@ -255,12 +261,11 @@ useEffect(() => {
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Avatar src={brand.logo} sx={{ width: 28, height: 28 }} />
                     <Typography variant="h6" fontWeight="bold">
-                      {brand.name}
+                      {brand.title}
                     </Typography>
                   </Box>
-
                   <IconButton
-                    onClick={() => setLiked(!liked)}
+                    onClick={handleLike}
                     size="small"
                     sx={{ p: 0.5 }}
                   >
@@ -273,31 +278,31 @@ useEffect(() => {
                 </Box>
 
                 <Typography variant="body2" color="text.secondary" mb={1}>
-                  {brand.category}
+                  {brand.description}
                 </Typography>
 
                 <Typography variant="body2" sx={{ mb: 0.5 }}>
-                  💰 {brand.investment}
+                  💰 {brand.description}
                 </Typography>
                 <Typography variant="body2" sx={{ mb: 1 }}>
-                  📐 {brand.area}
+                  📐 {brand.description}
                 </Typography>
 
                 <Typography variant="body2" color="text.secondary">
-                  {brand.desc}
+                  {brand.description}
                 </Typography>
               </Box>
 
               <Button
-                variant="contained"
+                variant="contained" onClick={handleOpen}
                 sx={{
                   backgroundColor: "#f29724",
                   textTransform: "none",
                   width: "fit-content",
                   px: 3,
                   borderRadius: 1,
-                  // fontWeight: "bold",
                   mt: 1,
+                  ml: 42,
                   "&:hover": {
                     backgroundColor: "#e2faa7",
                     color: "#000",
@@ -306,6 +311,39 @@ useEffect(() => {
               >
                 Apply
               </Button>
+              <Modal
+                      open={open}
+                      onClose={handleClose}
+                      aria-labelledby="modal-modal-title"
+                      aria-describedby="modal-modal-description"
+                    >
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: "50%",
+                          left: "50%",
+                          transform: "translate(-50%, -50%)",
+                          width: 400,
+                          bgcolor: "background.paper",
+                          border: "2px solid #000",
+                          boxShadow: 24,
+                          p: 4,
+                        }}
+                      >
+                        <Typography id="modal-modal-title" variant="h6" component="h2">
+                          Why Should We Ask?
+                        </Typography>
+                        <Typography sx={{ mt: 2 }}>
+                          Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic,
+                          quibusdam. Inventore quam, commodi quo perspiciatis ut voluptatem
+                          corporis, laudantium ullam eaque voluptates aliquid totam temporibus
+                          iste molestiae deserunt quod ipsam.
+                        </Typography>
+                        <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                          Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+                        </Typography>
+                      </Box>
+                    </Modal>
             </Box>
           </Card>
         </AnimatePresence>
