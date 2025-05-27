@@ -201,7 +201,7 @@ const Uploads = ({
               <InputLabel shrink>Brand Logo *</InputLabel>
               <FileUploadCard>
                 <Typography variant="body2" color="textSecondary" gutterBottom>
-                  Accepted formats: JPG, PNG (Max 2MB)
+                  Accepted formats: JPG, PNG (Max 10MB)
                 </Typography>
                 <Button
                   component="label"
@@ -216,7 +216,7 @@ const Uploads = ({
                     onChange={handleFileChange("brandLogo", {
                       maxFiles: 1,
                       allowedTypes: ["image/jpeg", "image/png"],
-                      maxSize: 2,
+                      maxSize: 10,
                     })}
                   />
                 </Button>
@@ -286,7 +286,7 @@ const Uploads = ({
               </InputLabel>
               <FileUploadCard>
                 <Typography variant="body2" color="textSecondary" gutterBottom>
-                  Accepted formats: MP4, MOV (Max 50MB each)
+                  Accepted formats: MP4, MOV (Max 100MB each)
                 </Typography>
                 <Button
                   component="label"
@@ -302,7 +302,7 @@ const Uploads = ({
                     onChange={handleFileChange("brandPromotionVideo", {
                       maxFiles: 1,
                       allowedTypes: ["video/mp4", "video/quicktime"],
-                      maxSize: 50,
+                      maxSize: 100 * 1024 * 1024, // 100MB
                     })}
                   />
                 </Button>
@@ -341,7 +341,7 @@ const Uploads = ({
                             fontSize="small"
                             sx={{ mr: 0.5 }}
                           />
-                          Minimum 2 videos required (currently{" "}
+                          Minimum 1 videos required (currently{" "}
                           {safeData.brandPromotionVideo.length})
                         </Box>
                       ) : (
@@ -361,7 +361,7 @@ const Uploads = ({
               </InputLabel>
               <FileUploadCard>
                 <Typography variant="body2" color="textSecondary" gutterBottom>
-                  Accepted formats: MP4, MOV (Max 50MB each)
+                  Accepted formats: MP4, MOV (Max 100MB each)
                 </Typography>
                 <Button
                   component="label"
@@ -377,7 +377,7 @@ const Uploads = ({
                     onChange={handleFileChange("franchisePromotionVideo", {
                       maxFiles: 1,
                       allowedTypes: ["video/mp4", "video/quicktime"],
-                      maxSize: 50,
+                      maxSize:  100 * 1024 * 1024, // 100MB
                     })}
                   />
                 </Button>
@@ -416,7 +416,7 @@ const Uploads = ({
                             fontSize="small"
                             sx={{ mr: 0.5 }}
                           />
-                          Minimum 2 videos required (currently{" "}
+                          Minimum 1 videos required (currently{" "}
                           {safeData.franchisePromotionVideo.length})
                         </Box>
                       ) : (
@@ -519,7 +519,7 @@ const Uploads = ({
               <InputLabel shrink>GST Certificate *</InputLabel>
               <FileUploadCard>
                 <Typography variant="body2" color="textSecondary" gutterBottom>
-                  Accepted formats: PDF, JPG, PNG (Max 5MB)
+                  Accepted formats: PDF, JPG, PNG (Max 10MB)
                 </Typography>
                 <Button
                   component="label"
@@ -538,7 +538,7 @@ const Uploads = ({
                         "image/jpeg",
                         "image/png",
                       ],
-                      maxSize: 5,
+                      maxSize: 10 * 1024 * 1024, // 10MB
                     })}
                   />
                 </Button>
@@ -576,7 +576,7 @@ const Uploads = ({
               </InputLabel>
               <FileUploadCard>
                 <Typography variant="body2" color="textSecondary" gutterBottom>
-                  Accepted formats: JPG, PNG (Max 2MB each)
+                  Accepted formats: JPG, PNG (Max 10MB each)
                 </Typography>
                 <Button
                   component="label"
@@ -590,9 +590,9 @@ const Uploads = ({
                     accept="image/jpeg,image/png"
                     multiple
                     onChange={handleFileChange("exteriorOutlet", {
-                      maxFiles: 5,
+                      maxFiles: 10,
                       allowedTypes: ["image/jpeg", "image/png"],
-                      maxSize: 2,
+                      maxSize: 10 * 1024 * 1024, // 10MB
                     })}
                   />
                 </Button>
@@ -663,7 +663,7 @@ const Uploads = ({
               </InputLabel>
               <FileUploadCard>
                 <Typography variant="body2" color="textSecondary" gutterBottom>
-                  Accepted formats: JPG, PNG (Max 2MB each)
+                  Accepted formats: JPG, PNG (Max 10MB each)
                 </Typography>
                 <Button
                   component="label"
@@ -677,9 +677,9 @@ const Uploads = ({
                     accept="image/jpeg,image/png"
                     multiple
                     onChange={handleFileChange("interiorOutlet", {
-                      maxFiles: 5,
+                      maxFiles: 10,
                       allowedTypes: ["image/jpeg", "image/png"],
-                      maxSize: 2,
+                      maxSize: 10 * 1024 * 1024, // 10MB
                     })}
                   />
                 </Button>

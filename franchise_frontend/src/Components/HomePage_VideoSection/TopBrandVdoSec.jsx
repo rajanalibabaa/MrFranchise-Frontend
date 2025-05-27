@@ -122,7 +122,7 @@ useEffect(() => {
 
   return (
     <Box 
-      sx={{ p: 4, maxWidth: "1200px", mx: "auto" }}
+      sx={{ p: 4, maxWidth: "1400px", mx: "auto" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -148,7 +148,7 @@ useEffect(() => {
             borderRadius: 2,
             overflow: "hidden",
             boxShadow: 3,
-            height: 330,
+            height: 430,
           }}
         >
           <motion.video
