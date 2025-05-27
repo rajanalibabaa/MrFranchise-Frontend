@@ -1166,7 +1166,7 @@ function BrandList() {
                                                         {isSubmitting ? (
                                                             <CircularProgress size={24} color="inherit" />
                                                         ) : (
-                                                            "Submit Application"
+                                                            "Submit"
                                                         )}
                                                     </Button>
                                                 </motion.div>
@@ -1467,38 +1467,38 @@ function BrandList() {
     };
 
     // Enhanced franchise type options based on selected model
-    const getFranchiseTypeOptions = () => {
-      if (!formData.franchiseModel) return [];
-      const selectedModel = franchiseModelsData.find(
-        (model) => model.franchiseModel === formData.franchiseModel
-      );
-      return selectedModel
-        ? [
-            {
-              label: selectedModel.franchiseType,
-              value: selectedModel.franchiseType,
-              fullData: selectedModel,
-            },
-          ]
-        : [];
-    };
+  const getFranchiseTypeOptions = () => {
+  if (!formData.franchiseModel) return [];
+  const selectedModel = franchiseModelsData.find(
+    (model) => model.franchiseModel === formData.franchiseModel
+  );
+  return selectedModel
+    ? [
+        {
+          label: selectedModel.franchiseType,
+          value: selectedModel.franchiseType,
+          fullData: selectedModel,
+        },
+      ]
+    : [];
+};
 
     // Enhanced investment range options based on selected model
-    const getInvestmentRangeOptions = () => {
-      if (!formData.franchiseModel) return [];
-      const selectedModel = franchiseModelsData.find(
-        (model) => model.franchiseModel === formData.franchiseModel
-      );
-      return selectedModel
-        ? [
-            {
-              label: selectedModel.investmentRange,
-              value: selectedModel.investmentRange,
-              fullData: selectedModel,
-            },
-          ]
-        : [];
-    };
+   const getInvestmentRangeOptions = () => {
+  if (!formData.franchiseModel) return [];
+  const selectedModel = franchiseModelsData.find(
+    (model) => model.franchiseModel === formData.franchiseModel
+  );
+  return selectedModel
+    ? [
+        {
+          label: selectedModel.investmentRange,
+          value: selectedModel.investmentRange,
+          fullData: selectedModel,
+        },
+      ]
+    : [];
+};
     // Other options (unchanged)
     const investmentTimings = [
       "Immediately",
