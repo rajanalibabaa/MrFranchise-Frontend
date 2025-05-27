@@ -28,7 +28,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import categories from "../BrandLIstingRegister/BrandCategories";
+import categories from "./BrandCategories.jsx";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";

@@ -6,7 +6,7 @@ import React from 'react';
           children: [
             {
               name: "Automobile Related",
-              children: [
+              subChild: [
                 "Automobile Accessories",
                 "Automobile Garage Related",
                 "Automobile Maintanance Related",
@@ -18,7 +18,7 @@ import React from 'react';
             },
             {
               name: "Commercial Vehicles",
-              children: [
+              subChild: [
                 "Commercial Vehicles Bus/Trucks",
                 "Commercial Electric Vehicles (EV)",
                 "Off Road / All Terrain Vehicles",
@@ -28,7 +28,7 @@ import React from 'react';
             },
             {
               name: "Four Wheeler",
-              children: [
+              subChild: [
                 "Car Exterior Parts",
                 "Car Interior Accessories",
                 "Car Interior Spare Parts",
@@ -42,7 +42,7 @@ import React from 'react';
             },
             {
               name: "Two Wheeler",
-              children: [
+              subChild: [
                 "Bicycle",
                 "Bike Maintanance & Repair Services",
                 "Bike Rental",
@@ -59,7 +59,7 @@ import React from 'react';
           children: [
             {
               name: "Beauty Aesthetics & Supplies",
-              children: [
+              subChild: [
                 "Bath Products",
                 "Beauty Equipments",
                 "Beauty Salons/ Unisex Salons/ Spa",
@@ -71,7 +71,7 @@ import React from 'react';
             },
             {
               name: "Health Care",
-              children: [
+              subChild: [
                 "Ayurvedic & Herbal Products",
                 "Fitness & Gym Equipments",
                 "Fitness Centres",
@@ -84,7 +84,7 @@ import React from 'react';
             },
             {
               name: "Wellness",
-              children: [
+              subChild: [
                 "Fitness & Gym Equipments",
                 "Health & Wellness Centres",
                 "Health Care Services",
@@ -100,7 +100,7 @@ import React from 'react';
           children: [
             {
               name: "Advertising & Marketing",
-              children: [
+              subChild: [
                 "Advertising & Marketing Agencies",
                 "Digital Marketing",
                 "Event Management",
@@ -110,7 +110,7 @@ import React from 'react';
             },
             {
               name: "Business Consulting",
-              children: [
+              subChild: [
                 "BPO",
                 "Business",
                 "Career Counseling",
@@ -127,7 +127,7 @@ import React from 'react';
             },
             {
               name: "Financial Services",
-              children: [
+              subChild: [
                 "Accounting & Auditing Services",
                 "Equity & Debt Providers",
                 "Finance Advisors & Brokers",
@@ -145,7 +145,7 @@ import React from 'react';
             },
             {
               name: "Household Services",
-              children: [
+              subChild: [
                 "Electrical & Plumbing Services",
                 "Facility Management",
                 "Gardening Services",
@@ -161,7 +161,7 @@ import React from 'react';
             },
             {
               name: "IT Services",
-              children: [
+              subChild: [
                 "Application Development",
                 "Cloud Services",
                 "Computer Hardware & Software",
@@ -178,7 +178,7 @@ import React from 'react';
             },
             {
               name: "Logistics & Transportation",
-              children: [
+              subChild: [
                 "Cargo & Freight Services",
                 "Courier Services",
                 "Freight Forwarding",
@@ -190,11 +190,11 @@ import React from 'react';
             },
             {
               name: "Real Estate",
-              children: ["Commercial Real Estate", "Residential Real Estate"],
+              subChild: ["Commercial Real Estate", "Residential Real Estate"],
             },
             {
               name: "Travel & Tourism",
-              children: [
+              subChild: [
                 "Adventure Tourism",
                 "Air Ticketing Services",
                 "Car Rentals",
@@ -208,7 +208,7 @@ import React from 'react';
             },
             {
               name: "waste Management & Recycling",
-              children: [
+              subChild: [
                 "E-Waste Recycling",
                 "Hazardous Waste Management",
                 "Plastic Waste Management",
@@ -223,7 +223,7 @@ import React from 'react';
           children: [
             {
               name: "Coaching & Tutoring",
-              children: [
+              subChild: [
                 "CAD/CAM/CAE & Multimedia",
                 "Competitive Exam Coaching Institute",
                 "Online Coaching",
@@ -233,15 +233,15 @@ import React from 'react';
             },
             {
               name: "Early Education",
-              children: ["Day Care", "Montessori Schools", "Preschools/Play Schools"],
+              subChild: ["Day Care", "Montessori Schools", "Preschools/Play Schools"],
             },
             {
               name: "Education Consultants",
-              children: ["Education Consultants", "Overseas Education Consultants"],
+              subChild: ["Education Consultants", "Overseas Education Consultants"],
             },
             {
               name: "Education Services",
-              children: [
+              subChild: [
                 "Education Services",
                 "Educational Institutions",
                 "Educational Software & Apps",
@@ -250,7 +250,7 @@ import React from 'react';
             },
             {
               name: "Higher Education",
-              children: [
+              subChild: [
                 "Degree/Diploma Colleges",
                 "Distance Learning Centres",
                 "Professional Education Colleges",
@@ -259,7 +259,7 @@ import React from 'react';
             },
             {
               name: "online Learning",
-              children: [
+              subChild: [
                 "Certification Course Coaching",
                 "Corporate Training",
                 "Entrance Examination Coaching",
@@ -271,7 +271,7 @@ import React from 'react';
             },
             {
               name: "Vocational Training",
-              children: [
+              subChild: [
                 "Aviation & Hospitality Training Institute",
                 "BPO/KPO Training Institutes",
                 "Banking & Insurance Training Institute",
@@ -293,7 +293,7 @@ import React from 'react';
           children: [
             {
               name: "Accessories",
-              children: [
+              subChild: [
                 "Bags & Luggage",
                 "Belt & Wallets",
                 "Eyewear",
@@ -305,7 +305,7 @@ import React from 'react';
             },
             {
               name: "Clothing",
-              children: [
+              subChild: [
                 "Apparel & Garments",
                 "Clothing Accessories",
                 "Fabric & Textile",
@@ -318,7 +318,7 @@ import React from 'react';
             },
             {
               name: "Cosmetics & Beauty Products",
-              children: [
+              subChild: [
                 "Beauty & Personal Care",
                 "Cosmetics & Beauty Products",
                 "Cosmetics & Beauty Product Stores",
@@ -333,7 +333,7 @@ import React from 'react';
           children: [
             {
               name: "Bakery, Sweets & Ice Cream",
-              children: [
+              subChild: [
                 "Bakery",
                 "Bakery Equipment & Supplies",
                 "Bakery Ingredients",
@@ -347,7 +347,7 @@ import React from 'react';
             },
             {
               name: "Catering & Food Services",
-              children: [
+              subChild: [
                 "Catering Services",
                 "Catering Equipment & Supplies",
                 "Catering Ingredients",
@@ -357,7 +357,7 @@ import React from 'react';
             },
             {
               name: "Cafe & Parlors",
-              children: [
+              subChild: [
                 "Cafe",
                 "Cafe Equipment & Supplies",
                 "Cafe Ingredients",
@@ -367,7 +367,7 @@ import React from 'react';
             },
             {
               name: "Food & Beverage",
-              children: [
+              subChild: [
                 "Beverages",
                 "Beverages Equipment & Supplies",
                 "Beverages Ingredients",
@@ -377,7 +377,7 @@ import React from 'react';
             },
             {
               name: "Restaurant & Night Clubs",
-              children: [
+              subChild: [
                 "Restaurant",
                 "Restaurant Equipment & Supplies",
                 "Restaurant Ingredients",
@@ -392,7 +392,7 @@ import React from 'react';
           children: [
             {
               name: "Beauty & Personal Care",
-              children: [
+              subChild: [
                 "Beauty & Personal Care",
                 "Cosmetics & Beauty Products",
                 "Cosmetics & Beauty Product Stores",
@@ -402,7 +402,7 @@ import React from 'react';
             },
             {
               name: "Business Services",
-              children: [
+              subChild: [
                 "Accounting & Auditing Services",
                 "Equity & Debt Providers",
                 "Finance Advisors & Brokers",
@@ -420,7 +420,7 @@ import React from 'react';
             },
             {
               name: "repair & Maintenance",
-              children: [
+              subChild: [
                 "Electrical & Plumbing Services",
                 "Facility Management",
                 "Gardening Services",
@@ -436,7 +436,7 @@ import React from 'react';
             },
             {
               name: "technology & Releated",
-              children: [
+              subChild: [
                 "Application Development",
                 "Cloud Services",
                 "Computer Hardware & Software",
@@ -458,15 +458,15 @@ import React from 'react';
           children: [
             {
               name: "Hotels",
-              children: ["Hotel Booking Services", "Hotels & Resorts"],
+              subChild: ["Hotel Booking Services", "Hotels & Resorts"],
             },
             {
               name: "Resorts",
-              children: ["Hotel Booking Services", "Hotels & Resorts"],
+              subChild: ["Hotel Booking Services", "Hotels & Resorts"],
             },
             {
               name: "Travel & Tourism",
-              children: [
+              subChild: [
                 "Adventure Tourism",
                 "Air Ticketing Services",
                 "Car Rentals",
@@ -480,7 +480,7 @@ import React from 'react';
             },
             {
               name: "Travel Agents",
-              children: ["Travel Agents", "Travel Booking Services"],
+              subChild: ["Travel Agents", "Travel Booking Services"],
             },
           ],
         },
@@ -489,11 +489,11 @@ import React from 'react';
           children: [
             {
               name: "Books & Stationery",
-              children: ["Books & Stationery", "Books & Stationery Stores"],
+              subChild: ["Books & Stationery", "Books & Stationery Stores"],
             },
             {
               name: "consumer Durables",
-              children: [
+              subChild: [
                 "Consumer Electronics",
                 "Consumer Electronics Stores",
                 "Consumer Goods",
@@ -502,11 +502,11 @@ import React from 'react';
             },
             {
               name: "E-Reatail",
-              children: ["E-Commerce", "E-Commerce Stores"],
+              subChild: ["E-Commerce", "E-Commerce Stores"],
             },
             {
               name: "Fashion",
-              children: [
+              subChild: [
                 "Apparel & Garments",
                 "Clothing Accessories",
                 "Fabric & Textile",
@@ -519,14 +519,14 @@ import React from 'react';
             },
             {
               name: "Home & Office",
-              children: [
+              subChild: [
                 "Home & Office Appliances",
                 "Home & Office Appliances Stores",
               ],
             },
             {
               name: "supermarket & Grocery",
-              children: [
+              subChild: [
                 "Dairy/F&V Stores",
                 "Department & Convenience Stores",
                 "Food Marts",
@@ -547,7 +547,7 @@ import React from 'react';
           children: [
             {
               name: "Fitness & Gym",
-              children: [
+              subChild: [
                 "Fitness & Gym Equipments",
                 "Fitness Centres",
                 "Health & Wellness Centres",
@@ -559,7 +559,7 @@ import React from 'react';
             },
             {
               name: "Sports & Games",
-              children: [
+              subChild: [
                 "Sports & Games Accessories",
                 "Sports & Games Equipments",
                 "Sports & Games Stores",
@@ -567,7 +567,7 @@ import React from 'react';
             },
             {
               name: "entertainment",
-              children: [
+              subChild: [
                 "Event Management",
                 "Event Organizers",
                 "Event Planning",
