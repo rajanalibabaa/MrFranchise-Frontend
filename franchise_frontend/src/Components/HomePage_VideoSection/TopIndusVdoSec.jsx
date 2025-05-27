@@ -10,49 +10,13 @@ import {
 } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos, PlayArrow, Pause, VolumeOff, VolumeUp } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
-const brandList = [
-  {
-    video: 'https://www.w3schools.com/html/mov_bbb.mp4',
-    name: 'Brand D',
-    category: 'Food & Beverage',
-    investment: '20–25 Lakhs',
-    color: '#f0fce2',
-  },
-  {
-    video: 'https://www.w3schools.com/html/movie.mp4',
-    name: 'Brand E',
-    category: 'Education',
-    investment: '10–29 Lakhs',
-    color: '#f0fce2',
-  },
-  {
-    video: 'https://www.w3schools.com/html/mov_bbb.mp4',
-    name: 'Brand F',
-    category: 'Retail',
-    investment: '20–15 Lakhs',
-    color: '#f0fce2',
-  },
-  // Add more brands if needed for testing
-  {
-    video: 'https://www.w3schools.com/html/mov_bbb.mp4',
-    name: 'Brand G',
-    category: 'Health',
-    investment: '15–30 Lakhs',
-    color: '#f0fce2',
-  },
-  {
-    video: 'https://www.w3schools.com/html/movie.mp4',
-    name: 'Brand H',
-    category: 'Fitness',
-    investment: '25–40 Lakhs',
-    color: '#f0fce2',
-  },
-];
 
 const BestBrandSlider = () => {
   const videoRefs = useRef([]);
   const scrollRef = useRef(null);
+  const [brandList, setBrandList] = useState([]);
   const [muteState, setMuteState] = useState(Array(brandList.length).fill(true));
   const [playState, setPlayState] = useState(Array(brandList.length).fill(true));
   const [isHovered, setIsHovered] = useState(false);
@@ -95,6 +59,10 @@ const BestBrandSlider = () => {
     }
   }, []);
 
+  const handleClick = () => {
+    alert("Apply button clicked!");
+  };
+
   const handleNext = useCallback(() => {
     const nextSlide = (currentSlide + 1) % totalSlides;
     scrollToSlide(nextSlide);
@@ -114,14 +82,38 @@ const BestBrandSlider = () => {
     }
   }, [isHovered, handleNext]);
 
+  useEffect (() => {
+    const fetchBrandData = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopThree");
+        const fetchedData = response.data?.data;
+        // Ensure it's always an array for consistent behavior
+        if (fetchedData) {
+          const dataArray = Array.isArray(fetchedData) ? fetchedData : [fetchedData];
+          setBrandList(dataArray);
+           setMuteState(Array(dataArray.length).fill(true));
+           setPlayState(Array(dataArray.length).fill(false));
+      }
+      console.log("Fetched brand data:", fetchedData);
+
+      } catch (error) {
+        console.error("Error fetching brand data:", error);
+      }
+    };
+
+    fetchBrandData();
+  }, []);
+
   useEffect(() => {
     startAutoSlide();
     return () => clearTimeout(timeoutRef.current);
   }, [currentSlide, startAutoSlide]);
 
+  
+
   return (
     <Box 
-      sx={{ px: 4, py: 6, maxWidth: '1200px', mx: 'auto' }}
+      sx={{ px: 4, py: 6, maxWidth: '1800px', mx: 'auto', }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -158,8 +150,8 @@ const BestBrandSlider = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: i * 0.1 }}
             sx={{
-              minWidth: 350,
-              height: 340,
+              minWidth: 380,
+              height: 370,
               borderRadius: 4,
               overflow: 'hidden',
               backgroundColor: brand.color,
@@ -172,10 +164,10 @@ const BestBrandSlider = () => {
               flexShrink: 0,
             }}
           >
-            <Box sx={{ position: 'relative', height: 180 }}>
+            <Box sx={{ position: 'relative', height: 200 }}>
               <video
                 ref={(el) => (videoRefs.current[i] = el)}
-                src={brand.video}
+                src={brand.videoUrl}
                 controls
                 muted
                 autoPlay
@@ -202,17 +194,17 @@ const BestBrandSlider = () => {
 
             <CardContent sx={{ bgcolor: '#ffff', px: 2, pb: 2 }}>
               <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 0.5 }}>
-                {brand.name}
+                {brand.title}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {brand.category}
+                {brand.title}
               </Typography>
               <Typography variant="body2" fontWeight="medium" sx={{ my: 1 }}>
-                {brand.investment}
+                {brand.title}
               </Typography>
               <Button
                 fullWidth
-                variant="contained"
+                variant="contained" onClick={handleClick}
                 sx={{
                   backgroundColor: '#f29724',
                   borderRadius: 1,

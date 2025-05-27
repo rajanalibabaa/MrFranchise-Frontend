@@ -109,7 +109,7 @@ function BrandList() {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
         {
           headers: {
             "Content-Type": "application/json",
