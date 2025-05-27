@@ -109,7 +109,7 @@ function BrandList() {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
         {
           headers: {
             "Content-Type": "application/json",
@@ -1472,38 +1472,38 @@ function BrandList() {
     };
 
     // Enhanced franchise type options based on selected model
-    const getFranchiseTypeOptions = () => {
-      if (!formData.franchiseModel) return [];
-      const selectedModel = franchiseModelsData.find(
-        (model) => model.franchiseModel === formData.franchiseModel
-      );
-      return selectedModel
-        ? [
-            {
-              label: selectedModel.franchiseType,
-              value: selectedModel.franchiseType,
-              fullData: selectedModel,
-            },
-          ]
-        : [];
-    };
+  const getFranchiseTypeOptions = () => {
+  if (!formData.franchiseModel) return [];
+  const selectedModel = franchiseModelsData.find(
+    (model) => model.franchiseModel === formData.franchiseModel
+  );
+  return selectedModel
+    ? [
+        {
+          label: selectedModel.franchiseType,
+          value: selectedModel.franchiseType,
+          fullData: selectedModel,
+        },
+      ]
+    : [];
+};
 
     // Enhanced investment range options based on selected model
-    const getInvestmentRangeOptions = () => {
-      if (!formData.franchiseModel) return [];
-      const selectedModel = franchiseModelsData.find(
-        (model) => model.franchiseModel === formData.franchiseModel
-      );
-      return selectedModel
-        ? [
-            {
-              label: selectedModel.investmentRange,
-              value: selectedModel.investmentRange,
-              fullData: selectedModel,
-            },
-          ]
-        : [];
-    };
+   const getInvestmentRangeOptions = () => {
+  if (!formData.franchiseModel) return [];
+  const selectedModel = franchiseModelsData.find(
+    (model) => model.franchiseModel === formData.franchiseModel
+  );
+  return selectedModel
+    ? [
+        {
+          label: selectedModel.investmentRange,
+          value: selectedModel.investmentRange,
+          fullData: selectedModel,
+        },
+      ]
+    : [];
+};
     // Other options (unchanged)
     const investmentTimings = [
       "Immediately",
