@@ -61,6 +61,7 @@ import {
   Support,
   Favorite,
   AreaChart,
+  Email,
 } from "@mui/icons-material";
 import { CheckCircleOutline } from "@mui/icons-material";
 import {motion} from "framer-motion"
@@ -258,6 +259,7 @@ function BrandList() {
   }, [applyFilters]);
 
   const handleOpenBrand = (brand) => {
+    // console.log(brand)
     setSelectedBrand(brand);
     setOpenDialog(true);
     setTabValue(0);
@@ -575,6 +577,8 @@ function BrandList() {
     const [selectedModel, setSelectedModel] = useState(null);
     const [formData, setFormData] = useState({
         fullName: "",
+        investorEmail:"",
+        mobileNumber:"",
         franchiseModel: "",
         franchiseType: "",
         investmentRange: "",
@@ -582,6 +586,7 @@ function BrandList() {
         planToInvest: "",
         readyToInvest: "",
     });
+    console.log("formdata.",formData)
 
     // Animation variants
     const containerVariants = {
@@ -1000,6 +1005,36 @@ function BrandList() {
                                                         label="Full Name"
                                                         name="fullName"
                                                         value={formData.fullName}
+                                                        onChange={handleChange}
+                                                        required
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{ mb: 2 }}
+                                                    />
+                                                </motion.div>
+                                            </Grid>
+                                            <Grid item xs={12} md={6}>
+                                                <motion.div variants={itemVariants}>
+                                                    <TextField
+                                                        fullWidth
+                                                        label="Email"
+                                                        name="email"
+                                                        value={formData.investorEmail}
+                                                        onChange={handleChange}
+                                                        required
+                                                        variant="outlined"
+                                                        size="small"
+                                                        sx={{ mb: 2 }}
+                                                    />
+                                                </motion.div>
+                                            </Grid>
+                                            <Grid item xs={12} md={6}>
+                                                <motion.div variants={itemVariants}>
+                                                    <TextField
+                                                        fullWidth
+                                                        label="MobileNumber"
+                                                        name="mobileNumber"
+                                                        value={formData.mobileNumber}
                                                         onChange={handleChange}
                                                         required
                                                         variant="outlined"
@@ -1428,6 +1463,8 @@ function BrandList() {
 
     const [formData, setFormData] = useState({
       fullName: "",
+      investorEmail:"",
+      mobileNumber:"",
       franchiseModel: "",
       franchiseType: "",
       investmentRange: "",
@@ -1435,6 +1472,7 @@ function BrandList() {
       planToInvest: "",
       readyToInvest: "",
     });
+    console.log("formdata.....",formData)
 
     const handleMediaClick = (media, index) => {
       // If it's a video and we're clicking the controls, don't open full screen
@@ -1532,6 +1570,18 @@ function BrandList() {
         name: "fullName",
         label: "Full Name",
         type: "text",
+        required: true,
+      },
+       {
+        name: "investorEmail",
+        label: "Email",
+        type: "email",
+        required: true,
+      },
+       {
+        name: "mobileNumber",
+        label: "Mobile number",
+        type: "number",
         required: true,
       },
       {
