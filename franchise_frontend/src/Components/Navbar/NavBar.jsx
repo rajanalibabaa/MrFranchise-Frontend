@@ -131,15 +131,41 @@ function Navbar() {
           alignItems: "center",
         }}
       >
-        <Box>
-          {["Expand Your Franchise", "Investor", "Advertise", "Sell Your Business"].map(
-            (text) => (
-              <Button key={text} size="small" sx={{ textTransform: "none" }}>
-                {text}
-              </Button>
-            )
-          )}
-        </Box>
+       <Box>
+ <Button
+  component={Link}
+  to="/expandyourbrand"
+  size="small"
+  sx={{ textTransform: 'none' }}
+>
+  Expand Your Franchise
+</Button>
+  <Button
+  component={Link}
+  to="/expand-franchise"
+  size="small"
+  sx={{ textTransform: 'none' }}
+>
+ Investor
+</Button>
+ <Button
+  component={Link}
+  to="/advertisewithus"
+  size="small"
+  sx={{ textTransform: 'none' }}
+>
+  Advertise
+</Button>
+  <Button
+  component={Link}
+  to="/expand-franchise"
+  size="small"
+  sx={{ textTransform: 'none' }}
+>
+  Sell Your Business
+</Button>
+</Box>
+
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography sx={{ mr: 1 }}>💬</Typography>
           <FormControl variant="standard" size="small">

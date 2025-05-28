@@ -70,6 +70,7 @@ const InvestorRegister = () => {
     // trigger,
   } = useForm({
     defaultValues: {
+      category: [],
       country: "India",
       preferredState:"",
       preferredCity: "",
@@ -86,7 +87,7 @@ const dropdownRef = useRef(null);
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
- 
+ const [selectedCategories, setSelectedCategories] = useState([]);
 const [loginOpen, setLoginOpen] = useState(false);
 
 const openLoginPopup = () => {
@@ -171,11 +172,25 @@ useEffect(() => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
   // Handler for the first category dropdown
-  const handleCategorySelection = (mainCategory, subCategory, item) => {
-    setSelectedCategory(item);
-    setValue("category", item);
-    setCategoryDropdownOpen(false);
-  };
+  const handleCategorySelection = (main, sub, child) => {
+  const newCategory = { main, sub, child };
+  
+  setSelectedCategories(prev => {
+    // Check for duplicates
+    const exists = prev.some(cat => 
+      cat.main === main && cat.sub === sub && cat.child === child
+    );
+    
+    if (!exists) {
+      const updatedCategories = [...prev, newCategory];
+      setValue("category", updatedCategories); // Update form value
+      return updatedCategories;
+    }
+    return prev;
+  });
+  
+  setCategoryDropdownOpen(false);
+};
 
   // const openOtpModal = (type) => {
   //   setOtpModal({
@@ -366,8 +381,11 @@ useEffect(() => {
     country: data.country || "",
     state: data.state || "",
     city: data.city || "",
-    category: data.category || "",
-    investmentRange: data.investmentRange || "",
+category: data.categories.map(c => ({
+      main: c.main,
+      sub: c.sub,
+      child: c.child
+    })),    investmentRange: data.investmentRange || "",
     investmentAmount: data.investmentAmount || "",
     occupation: data.occupation || "",
     ...(data.occupation === "Other" && { specifyOccupation: data.otherOccupation || "" }),
@@ -824,21 +842,23 @@ useEffect(() => {
         >{/* Category Field */}
 <Grid sx={{ position: "relative" }}>
   <Stack direction="row" alignItems="center" spacing={1}>
+    <TextField
+  fullWidth
+  label="Select Preferred Categories"
+  value={selectedCategories
+    .map(c => `${c.main} > ${c.sub} > ${c.child}`)
+    .join(", ") || ""}
+  onClick={() => setCategoryDropdownOpen(!isCategoryDropdownOpen)}
+  InputProps={{
+    readOnly: true,
+  }}
+  error={!!errors.category}
+  helperText={errors.category?.message}
+ {...register("category", {
+   validate: value => value?.length > 0 || "At least one category is required"
+ })}
+/>
 
-  <TextField
-    fullWidth
-    label="Select Preferred Category"
-    value={selectedCategory}
-    onClick={() => setCategoryDropdownOpen(!isCategoryDropdownOpen)}
-    InputProps={{
-      readOnly: true,
-    }}
-    error={!!errors.category}
-    helperText={errors.category?.message}
-    {...register("category", {
-      required: "Category is required",
-    })}
-  />
 
   {isCategoryDropdownOpen && (
     <Paper
@@ -978,7 +998,7 @@ useEffect(() => {
         </Typography>
         {activeSubCategory?.children && (
           <List>
-            {activeSubCategory.children.map((item, index) => (
+            {activeSubCategory.children.map((child, index) => (
               <ListItem
                 key={index}
                 button="true"
@@ -986,11 +1006,11 @@ useEffect(() => {
                   handleCategorySelection(
                     categories[activeCategory]?.name,
                     activeSubCategory?.name,
-                    item
+                    child
                   )
                 }
               >
-                <ListItemText primary={item} />
+                <ListItemText primary={child} />
               </ListItem>
             ))}
           </List>

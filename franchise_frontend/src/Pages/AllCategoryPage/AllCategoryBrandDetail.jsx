@@ -109,7 +109,7 @@ function BrandList() {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
         {
           headers: {
             "Content-Type": "application/json",
@@ -672,12 +672,16 @@ function BrandList() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+        console.log("Brand Email:", brand?.personalDetails?.email);            
+
         try {
             const payload = {
                 ...formData,
                 brandId: brand?._id,
                 brandName: brand?.personalDetails?.brandName || "",
+                brandEmail: brand.personalDetails?.email || "",
             };
+// console.log(payload);
 
             const response = await axios.post(
                 "http://localhost:5000/api/v1/brandlisting/createInstaApply",
@@ -699,6 +703,7 @@ function BrandList() {
                     investmentRange: "",
                     planToInvest: "",
                     readyToInvest: "",
+
                 });
                 setIsModalOpen(false);
             }
@@ -1166,7 +1171,7 @@ function BrandList() {
                                                         {isSubmitting ? (
                                                             <CircularProgress size={24} color="inherit" />
                                                         ) : (
-                                                            "Submit Application"
+                                                            "Submit"
                                                         )}
                                                     </Button>
                                                 </motion.div>
@@ -1467,38 +1472,38 @@ function BrandList() {
     };
 
     // Enhanced franchise type options based on selected model
-    const getFranchiseTypeOptions = () => {
-      if (!formData.franchiseModel) return [];
-      const selectedModel = franchiseModelsData.find(
-        (model) => model.franchiseModel === formData.franchiseModel
-      );
-      return selectedModel
-        ? [
-            {
-              label: selectedModel.franchiseType,
-              value: selectedModel.franchiseType,
-              fullData: selectedModel,
-            },
-          ]
-        : [];
-    };
+  const getFranchiseTypeOptions = () => {
+  if (!formData.franchiseModel) return [];
+  const selectedModel = franchiseModelsData.find(
+    (model) => model.franchiseModel === formData.franchiseModel
+  );
+  return selectedModel
+    ? [
+        {
+          label: selectedModel.franchiseType,
+          value: selectedModel.franchiseType,
+          fullData: selectedModel,
+        },
+      ]
+    : [];
+};
 
     // Enhanced investment range options based on selected model
-    const getInvestmentRangeOptions = () => {
-      if (!formData.franchiseModel) return [];
-      const selectedModel = franchiseModelsData.find(
-        (model) => model.franchiseModel === formData.franchiseModel
-      );
-      return selectedModel
-        ? [
-            {
-              label: selectedModel.investmentRange,
-              value: selectedModel.investmentRange,
-              fullData: selectedModel,
-            },
-          ]
-        : [];
-    };
+   const getInvestmentRangeOptions = () => {
+  if (!formData.franchiseModel) return [];
+  const selectedModel = franchiseModelsData.find(
+    (model) => model.franchiseModel === formData.franchiseModel
+  );
+  return selectedModel
+    ? [
+        {
+          label: selectedModel.investmentRange,
+          value: selectedModel.investmentRange,
+          fullData: selectedModel,
+        },
+      ]
+    : [];
+};
     // Other options (unchanged)
     const investmentTimings = [
       "Immediately",
@@ -1610,6 +1615,7 @@ function BrandList() {
           ...formData,
           brandId: selectedBrand?._id,
           brandName: selectedBrand?.personalDetails?.brandName || "",
+          brandEmail: selectedBrand?.personalDetails?.email || "",
         };
         console.log(payload);
 
