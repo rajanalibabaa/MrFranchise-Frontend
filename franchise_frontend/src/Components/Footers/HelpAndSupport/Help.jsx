@@ -7,11 +7,14 @@ import {
   Link,
   Stack,
 } from "@mui/material";
-import CallIcon from "@mui/icons-material/Call";
-import EmailIcon from "@mui/icons-material/Email";
-import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
+import {
+  Email,
+  Phone,
+ 
+} from '@mui/icons-material';
 import Navbar from "../../Navbar/NavBar";
+import { Link as RouterLink } from "react-router-dom";
+
 import Footer from "../Footer";
 
 const paperStyle = {
@@ -32,8 +35,9 @@ const titleStyle = {
   display: "flex",
   alignItems: "center",
   gap: 1,
+  marginTop: 3,
   fontWeight: "bold",
-  color: "primary.main",
+  color: "#ffba00",
   userSelect: "none",
   "& span": {
     fontSize: "1.3rem",
@@ -73,7 +77,7 @@ const Help = () => {
       <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 10 }}>
         <Navbar />
       </Box>
-      <Box sx={{ maxWidth: 900, mx: "auto", p: 3, mt: 15 }}>
+      <Box sx={{ maxWidth: 1200, mx: "auto", p: 3, mt: 15 }}>
         {/* Header */}
         <Typography align="center" variant="h4" fontWeight="bold" color="orange">
           Help Center
@@ -88,91 +92,111 @@ const Help = () => {
           support, guidance, and answers to frequently asked questions.
         </Typography>
 
-        {/* Popular Help Topics */}
-        <Paper variant="outlined" sx={paperStyle}>
-  <Typography variant="h6" gutterBottom sx={titleStyle}>
+       {/* Popular Help Topics */}
+{/* Popular Help Topics */}
+{/* <Paper variant="outlined" sx={paperStyle}> */}
+  <Typography variant="h6" sx={titleStyle}>
     <span>🔹</span> Popular Help Topics
   </Typography>
 
-  <Paper
-    elevation={4}
+  {/* Flex container for cards */}
+  <Box
     sx={{
-      p: 2,
-      mb: 2,
-      borderRadius: 3,
-      cursor: "pointer",
-      transition: "transform 0.3s ease, box-shadow 0.3s ease",
-      "&:hover": {
-        transform: "translateY(-5px)",
-        boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
-        backgroundColor: "rgba(25, 118, 210, 0.05)",
-      },
+      display: "flex",
+      flexWrap: "nowrap",  // NO wrapping
+      // gap: 1,
+      mt: 2,
+      overflowX: "hidden",   // optional horizontal scroll on small screens
     }}
   >
-    <Typography variant="subtitle1" sx={subtitleStyle}>
-      <span style={{ marginRight: 8 }}>🧩</span> 1. How does MrFranchise.in work?
-    </Typography>
-    <Typography sx={contentStyle}>
-      MrFranchise.in is a franchise consulting and marketing platform that connects brands with potential investors.
-      <br />
-      We help businesses franchise their model, promote their brand, and attract qualified leads through strategic campaigns and investor outreach.
-    </Typography>
-  </Paper>
+    {/* Card 1 */}
+    <Paper
+      elevation={4}
+      sx={{
+        flex: "0 0 30%",  // fixed width: 1/3rd of container
+        height: 205,
+       margin:1,
+        p: 1.5,
+        borderRadius: 5,
+        cursor: "pointer",
+        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+        "&:hover": {
+          transform: "translateY(-5px)",
+          // boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
+          // backgroundColor: "rgba(25, 118, 210, 0.05)",
+        },
+      }}
+    >
+      <Typography variant="subtitle1" sx={subtitleStyle}>
+        <span style={{ marginRight: 8 }}>🧩</span> 1. How does MrFranchise.in work?
+      </Typography>
+      <Typography sx={contentStyle}>
+        MrFranchise.in is a franchise consulting and marketing platform that connects brands with potential investors.
+  
+        We help businesses franchise their model, promote their brand, and attract qualified leads through strategic campaigns and investor outreach.
+      </Typography>
+    </Paper>
 
-  <Paper
-    elevation={4}
-    sx={{
-      p: 2,
-      mb: 2,
-      borderRadius: 3,
-      cursor: "pointer",
-      transition: "transform 0.3s ease, box-shadow 0.3s ease",
-      "&:hover": {
-        transform: "translateY(-5px)",
-        boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
-        backgroundColor: "rgba(25, 118, 210, 0.05)",
-      },
-    }}
-  >
-    <Typography variant="subtitle1" sx={subtitleStyle}>
-      <span style={{ marginRight: 8 }}>🏷️</span> 2. I’m a business owner. How do I list my brand?
-    </Typography>
-    <Typography sx={contentStyle}>
-      You can click the “Add Listing” button on the top menu to submit your brand for evaluation. Once reviewed by our team, we’ll guide you through the onboarding and promotion process.
-    </Typography>
-  </Paper>
+    {/* Card 2 */}
+    <Paper
+      elevation={4}
+      sx={{
+        flex: "0 0 30%",
+        height: 205,
+        margin:1,
+        p: 1.5,
+        borderRadius: 3,
+        cursor: "pointer",
+        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+        "&:hover": {
+          transform: "translateY(-5px)",
+          // boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
+          // backgroundColor: "rgba(25, 118, 210, 0.05)",
+        },
+      }}
+    >
+      <Typography variant="subtitle1" sx={subtitleStyle}>
+        <span style={{ marginRight: 8 }}>🏷️</span> 2. I’m a business owner. How do I list my brand?
+      </Typography>
+      <Typography sx={contentStyle}>
+        You can click the “Add Listing” button on the top menu to submit your brand for evaluation. Once reviewed by our team, we’ll guide you through the onboarding and promotion process.
+      </Typography>
+    </Paper>
 
-  <Paper
-    elevation={4}
-    sx={{
-      p: 2,
-      borderRadius: 3,
-      cursor: "pointer",
-      transition: "transform 0.3s ease, box-shadow 0.3s ease",
-      "&:hover": {
-        transform: "translateY(-5px)",
-        boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
-        backgroundColor: "rgba(25, 118, 210, 0.05)",
-      },
-    }}
-  >
-    <Typography variant="subtitle1" sx={subtitleStyle}>
-      <span style={{ marginRight: 8 }}>💼</span> 3. I’m an investor. How do I explore franchise opportunities?
-    </Typography>
-    <Typography sx={contentStyle}>
-      Browse through Franchise Categories based on your preferred industry, investment range, or location. You can apply directly or request a call-back for consultation.
-    </Typography>
-  </Paper>
-</Paper>
-
+    {/* Card 3 */}
+    <Paper
+      elevation={4}
+      sx={{
+        flex: "0 0 30%",
+        height: 200,
+        margin:1,
+        p: 1.5,
+        borderRadius: 3,
+        cursor: "pointer",
+        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+        "&:hover": {
+          transform: "translateY(-5px)",
+          // boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
+          // backgroundColor: "rgba(25, 118, 210, 0.05)",
+        },
+      }}
+    >
+      <Typography variant="subtitle1" sx={subtitleStyle}>
+        <span style={{ marginRight: 8 }}>💼</span> 3. I’m an investor. How do I explore franchise opportunities?
+      </Typography>
+      <Typography sx={contentStyle}>
+        Browse through Franchise Categories based on your preferred industry, investment range, or location. You can apply directly or request a call-back for consultation.
+      </Typography>
+    </Paper>
+  </Box>
 
         {/* Account & Listings */}
-        <Paper variant="outlined" sx={paperStyle}>
+       
           <Typography variant="h6" gutterBottom sx={titleStyle}>
             <span>🔹</span> Account & Listings
           </Typography>
 
-          <Box mb={2}>
+          <Box mb={2} ml={10}>
             <Typography variant="subtitle1" sx={subtitleStyle}>
               👤 How do I create an account?
             </Typography>
@@ -182,7 +206,7 @@ const Help = () => {
             </Typography>
           </Box>
 
-          <Box>
+          <Box ml={10}>
             <Typography variant="subtitle1" sx={subtitleStyle}>
               ✏️ Can I edit or update my brand listing?
             </Typography>
@@ -192,10 +216,9 @@ const Help = () => {
               requirements, or upload new media.
             </Typography>
           </Box>
-        </Paper>
-
+      
         {/* Consulting & Paid Services */}
-        <Paper variant="outlined" sx={paperStyle}>
+       
           <Typography variant="h6" gutterBottom sx={titleStyle}>
             <span>🔹</span> Consulting & Paid Services
           </Typography>
@@ -224,10 +247,10 @@ const Help = () => {
               invoice. We support secure UPI, bank transfer, and card payments.
             </Typography>
           </Box>
-        </Paper>
+       
 
         {/* Technical Help */}
-        <Paper variant="outlined" sx={paperStyle}>
+        
           <Typography variant="h6" gutterBottom sx={titleStyle}>
             <span>🔹</span> Technical Help
           </Typography>
@@ -251,78 +274,67 @@ const Help = () => {
               You can also call or WhatsApp us for faster support.
             </Typography>
           </Box>
-        </Paper>
+       
 
-        {/* Immediate Assistance */}
-        <Paper
-          variant="outlined"
-          sx={{ p: 3, mb: 4, backgroundColor: "#e8f5e9", borderColor: "green" }}
-        >
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            color="green"
-            gutterBottom
-            sx={{ display: "flex", alignItems: "center", gap: 1 }}
-          >
-            🟢 Need Immediate Assistance?
-          </Typography>
-
-          <Stack spacing={1}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <CallIcon color="success" />
-              <Typography>Call Us: +91 98413 23388</Typography>
-            </Box>
-
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <EmailIcon color="success" />
-              <Typography>Email: ceo@MrFranchise.in</Typography>
-            </Box>
-
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <WhatsAppIcon sx={{ color: "#25D366" }} />
-              <Button
-                variant="outlined"
-                color="success"
-                href="https://wa.me/919841323388"
-                target="_blank"
-                size="small"
-                sx={{ textTransform: "none" }}
-              >
-                WhatsApp Support
-              </Button>
-            </Box>
-
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <LocationOnIcon color="success" />
-              <Typography>Office: Chennai, Tamil Nadu</Typography>
-            </Box>
-          </Stack>
-        </Paper>
+       
+       
 
         {/* Additional Resources */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-around",
-            flexWrap: "wrap",
-            gap: 2,
-            mb: 5,
-          }}
-        >
-          <Link href="#" underline="hover">
-            Terms & Conditions
-          </Link>
-          <Link href="#" underline="hover">
-            Privacy Policy
-          </Link>
-          <Link href="#" underline="hover">
-            Sitemap
-          </Link>
-          <Link href="#" underline="hover">
-            Contact Us
-          </Link>
-        </Box>
+      <Box
+    sx={{
+      mt: 6,
+      p: 4,
+      borderRadius: 4,
+      background: 'rgba(255, 255, 255, 0.75)',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(255, 186, 0, 0.4)',
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+      transition: 'all 0.3s ease',
+      '&:hover': {
+        boxShadow: '0 10px 28px rgba(0, 0, 0, 0.15)',
+      },
+    }}
+  >
+    <Typography
+      variant="h5"
+      fontWeight={700}
+      color="text.primary"
+      gutterBottom
+      sx={{ textAlign: 'center', color: '#FF6F00' }}
+    >
+      📞 Need Immediate Assistance?
+    </Typography>
+
+    
+
+    <Typography variant="body1" textAlign="center" sx={{ color: 'black' }}>
+       <Email sx={{ verticalAlign: 'middle', mr: 1 }} />
+                  <Link href="mailto:ceo@MrFranchise.in" color="#FF6F00" underline="hover">
+                    Email: ceo@MrFranchise.in
+                  </Link>
+      <br />
+     <Phone sx={{ verticalAlign: 'middle', mr: 1 }} />
+        <Link href="tel:+919841323388" color="black" underline="hover">
+           Call
+Us: +91 98413 23388
+        </Link><br />
+        💬{' '}
+                <Link href="https://wa.me/919841323388" target="_blank" rel="noopener" color="black" underline="hover"fontWeight="bold">
+                  WhatsApp Chat
+                </Link>
+      <br />
+      📍 Head Office:{' '}
+<Link
+  href="https://www.google.com/maps/place/Chennai,+Tamil+Nadu"
+  target="_blank"
+  rel="noopener noreferrer"
+  color="#FF6F00"
+  underline="hover"
+>
+  Chennai, Tamil Nadu
+</Link>
+    </Typography>
+  </Box>
       </Box>
 
       <Footer />

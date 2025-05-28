@@ -142,7 +142,7 @@ function Navbar() {
 </Button>
   <Button
   component={Link}
-  to="/expand-franchise"
+  to="/investfranchise"
   size="small"
   sx={{ textTransform: 'none' }}
 >
