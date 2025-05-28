@@ -39,7 +39,7 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
       if (!investorUUID || !AccessToken) return;
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/v1/investor/investor_favbrands/favbrands/${investorUUID}`,
+          `http://localhost:5000/api/v1/like/get-favbrands/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -96,7 +96,7 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     // Call delete API
     const response = await axios.delete(
-      `http://localhost:5000/api/v1/investor/investor_favbrands/delete/${investorUUID}`,
+      `http://localhost:5000/api/v1/like/delete-favbrand/${investorUUID}`,
       {
         headers: {
           "Content-Type": "application/json",
