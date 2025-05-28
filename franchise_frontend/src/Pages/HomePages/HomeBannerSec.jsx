@@ -236,10 +236,10 @@ const HomeBannerSec = () => {
       <TopInvestVdoSec/> 
       <TopInvestVdo2/> 
       <TopInvestVdo3/> 
-     <TopInvestVdoSec/>
+     {/* <TopInvestVdoSec/> */}
 
-     <TopInvestVdo2/>
-     <TopInvestVdo3/>
+     {/* <TopInvestVdo2/> */}
+     {/* <TopInvestVdo3/> */}
 {/* footer sections */}
       <Footer/> 
      </>
