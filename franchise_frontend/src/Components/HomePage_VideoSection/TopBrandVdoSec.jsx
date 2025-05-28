@@ -90,7 +90,7 @@ function TopBrandVdoSec() {
     const fetchBrandData = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopOne"
+          "https://franchise-backend-wgp6.onrender.com/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopOne"
         );
         const fetchedData = response.data?.data;
 

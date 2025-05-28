@@ -85,7 +85,7 @@ const BestBrandSlider = () => {
   useEffect (() => {
     const fetchBrandData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopThree");
+        const response = await axios.get("https://franchise-backend-wgp6.onrender.com/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopThree");
         const fetchedData = response.data?.data;
         // Ensure it's always an array for consistent behavior
         if (fetchedData) {
