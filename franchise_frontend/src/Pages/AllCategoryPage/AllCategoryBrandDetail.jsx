@@ -672,12 +672,16 @@ function BrandList() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+        console.log("Brand Email:", brand?.personalDetails?.email);            
+
         try {
             const payload = {
                 ...formData,
                 brandId: brand?._id,
                 brandName: brand?.personalDetails?.brandName || "",
+                brandEmail: brand.personalDetails?.email || "",
             };
+// console.log(payload);
 
             const response = await axios.post(
                 "http://localhost:5000/api/v1/brandlisting/createInstaApply",
@@ -699,6 +703,7 @@ function BrandList() {
                     investmentRange: "",
                     planToInvest: "",
                     readyToInvest: "",
+
                 });
                 setIsModalOpen(false);
             }
@@ -1610,6 +1615,7 @@ function BrandList() {
           ...formData,
           brandId: selectedBrand?._id,
           brandName: selectedBrand?.personalDetails?.brandName || "",
+          brandEmail: selectedBrand?.personalDetails?.email || "",
         };
         console.log(payload);
 

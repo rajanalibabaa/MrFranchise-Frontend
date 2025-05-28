@@ -23,6 +23,7 @@ import PopupModal from "../../Components/PopUpModal/PopUpModal";
 import TopBrandVdoCards from "../../Components/HomePage_VideoSection/TopBrandVdoCards";
 import TopInvestVdo2 from "../../Components/HomePage_VideoSection/TopInvestVdo2";
 import TopInvestVdo3 from "../../Components/HomePage_VideoSection/TopInvestVdo3";
+import FranchiseReels from "../../Components/HomePageVideoSecton2/FranchiseVideosecnew2";
 
 
 const HomeBannerSec = () => {
@@ -227,7 +228,10 @@ const HomeBannerSec = () => {
       <TopBrandVdoSec/> 
       <TopBrandVdoCards/> 
      {/* top double video section */}
-      <TopIndusVdoSec/> 
+<FranchiseReels/>
+
+     <TopIndusVdoSec/>
+
      {/* top triple video section */}
       <TopInvestVdoSec/> 
       <TopInvestVdo2/> 
