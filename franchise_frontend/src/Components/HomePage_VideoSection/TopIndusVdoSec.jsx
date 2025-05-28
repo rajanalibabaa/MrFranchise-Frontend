@@ -85,7 +85,7 @@ const BestBrandSlider = () => {
   useEffect (() => {
     const fetchBrandData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopThree");
+        const response = await axios.get("https://franchise-backend-wgp6.onrender.com/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopThree");
         const fetchedData = response.data?.data;
         // Ensure it's always an array for consistent behavior
         if (fetchedData) {
@@ -110,6 +110,7 @@ const BestBrandSlider = () => {
   }, [currentSlide, startAutoSlide]);
 
   
+console.log("brandList:", brandList);
 
   return (
     <Box 
@@ -118,8 +119,8 @@ const BestBrandSlider = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" fontWeight="bold">
-          Best Brand
+        <Typography variant="h5" fontWeight="bold" sx={{ color: '#ffba00' }}>
+          Today Marketing Leading Brands
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <IconButton onClick={handlePrev} sx={{ bgcolor: '#f0f0f0' }}>
@@ -192,15 +193,16 @@ const BestBrandSlider = () => {
               </Box>
             </Box>
 
-            <CardContent sx={{ bgcolor: '#ffff', px: 2, pb: 2 }}>
+            <CardContent sx={{ bgcolor: '#ffff', px: 2, pb: 2 }} >
               <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 0.5 }}>
-                {brand.title}
+                Brand Name :  {brand.title}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {brand.title}
+              <Typography variant="body2" fontWeight={"bold"} >
+                Investment : {brand.title}
               </Typography>
-              <Typography variant="body2" fontWeight="medium" sx={{ my: 1 }}>
-                {brand.title}
+              <Typography  variant="body2"  sx={{ my: 1 }} display={'flex'} justifyContent={'space-around'}>
+                <Typography fontWeight={'bold'}> Area Required :{brand.title}</Typography>
+                <Typography fontWeight={'bold'}>Roi : {brand.title}</Typography>
               </Typography>
               <Button
                 fullWidth

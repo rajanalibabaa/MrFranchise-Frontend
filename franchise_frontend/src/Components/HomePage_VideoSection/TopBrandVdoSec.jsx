@@ -134,7 +134,7 @@ function TopBrandVdoSec() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Typography
+      {/* <Typography
         variant="h5"
         fontWeight="bold"
         mb={2}
@@ -144,7 +144,7 @@ function TopBrandVdoSec() {
         transition={{ duration: 0.6 }}
       >
         Top Brand
-      </Typography>
+      </Typography> */}
 
       <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
         {/* Left Video Section */}
