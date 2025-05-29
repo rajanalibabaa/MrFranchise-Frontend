@@ -310,7 +310,7 @@ function Navbar() {
         <Toolbar
           sx={{
             display: "flex",
-            justifyContent: isMobile ? "space-between" : "space-around",
+            justifyContent: isMobile ? "space-evenly" : "space-evenly",
             alignItems: "center",
             px: { xs: 1, sm: 2 },
             minHeight: "64px !important",
