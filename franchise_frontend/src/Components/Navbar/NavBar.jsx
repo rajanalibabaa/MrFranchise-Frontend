@@ -15,7 +15,8 @@ import {
   useMediaQuery,
   useTheme,
   Menu,
-  Badge
+  Badge,
+  Container
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { User, MessageSquare, Globe, LogOut, LogIn, UserPlus, Home } from "lucide-react";
@@ -32,6 +33,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import logo from "../../assets/Images/logo.png"
 import FilterDropdowns from "./FilterDropdownsData";
+
 function Navbar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -141,7 +143,7 @@ function Navbar() {
       {/* Top Bar - Secondary Navigation */}
       <Box
         sx={{
-          background: "",
+          background: "linear-gradient(135deg,rgb(249, 172, 18) 0%,rgb(144, 220, 72) 100%)",
           backdropFilter: "blur(8px)",
           p: 1,
           display: "flex",
@@ -157,9 +159,9 @@ function Navbar() {
             size="small"
             sx={{ 
               textTransform: 'none',
-              color: 'rgba(255, 255, 255, 0.9)',
+              color: 'rgba(2, 2, 2, 0.9)',
               '&:hover': {
-                color: '#ff9800',
+                color: 'white',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)'
               }
             }}
@@ -172,9 +174,9 @@ function Navbar() {
             size="small"
             sx={{ 
               textTransform: 'none',
-              color: 'rgba(255, 255, 255, 0.9)',
+              color: 'rgba(0, 0, 0, 0.9)',
               '&:hover': {
-                color: '#ff9800',
+                color: 'white',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)'
               }
             }}
@@ -187,10 +189,10 @@ function Navbar() {
             size="small"
             sx={{ 
               textTransform: 'none',
-              color: 'rgba(255, 255, 255, 0.9)',
+              color: 'rgba(0, 0, 0, 0.9)',
               '&:hover': {
-                color: '#ff9800',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                color: 'white',
+                backgroundColor: 'rgba(83, 210, 33, 0.1)'
               }
             }}
           >
@@ -202,9 +204,9 @@ function Navbar() {
             size="small"
             sx={{ 
               textTransform: 'none',
-              color: 'rgba(255, 255, 255, 0.9)',
+              color: 'rgba(0, 0, 0, 0.9)',
               '&:hover': {
-                color: '#ff9800',
+                color: 'white',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)'
               }
             }}
@@ -224,7 +226,7 @@ function Navbar() {
               value="en"
               disableUnderline
               sx={{
-                color: 'rgba(0, 0, 0, 0.9)',
+                color: 'rgba(255, 255, 255, 0.9)',
                 '& .MuiSelect-icon': {
                   right: 8,
                   top: 'calc(50% - 8px)'
@@ -237,8 +239,12 @@ function Navbar() {
                 }
               }}
             >
-
-              <MenuItem value="en" sx={{ color: 'rgba(54, 47, 47, 0.9)' }}><Globe size={14} color="rgba(2, 2, 2, 0.9)" /> EN - English</MenuItem>
+              <MenuItem value="en" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Globe size={14} color="rgba(255, 255, 255, 0.9)" /> 
+                  <span>EN - English</span>
+                </Box>
+              </MenuItem>
             </Select>
           </FormControl>
         </Box>
@@ -251,7 +257,31 @@ function Navbar() {
         elevation={0}
         sx={{
           backdropFilter: "blur(8px)",
-          backgroundColor: "white",
+          background: "linear-gradient(to right, #ffffff, #f5f5f5)",
+          borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: 'linear-gradient(90deg, #ff9800, #ff5722, #ff9800)',
+            backgroundSize: '200% 100%',
+            animation: 'gradient 3s ease infinite',
+          },
+          '@keyframes gradient': {
+            '0%': {
+              backgroundPosition: '0% 50%',
+            },
+            '50%': {
+              backgroundPosition: '100% 50%',
+            },
+            '100%': {
+              backgroundPosition: '0% 50%',
+            },
+          }
         }}
       >
         <Toolbar
@@ -268,141 +298,222 @@ function Navbar() {
           >
             <MenuIcon />
           </IconButton>
-          <img src={logo} alt="brand logo" style={{ width: 170, height: 100 }} />
-
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          
+          <Box 
+            component={Link} 
+            to="/" 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              textDecoration: 'none',
+              ml: 2 
+            }}
           >
-          </motion.div>
-
-          <Box sx={{ display: "flex", gap: 8 }}>
-
-            <Box ref={avatarRef} sx={{ position: "relative" }}>
-
-
-              <IconButton 
-                onClick={handleMenuOpen}
-                sx={{ 
-                  p: 0,
-                  '&:hover': {
-                    transform: 'scale(1.1)',
-                    transition: 'transform 0.3s ease'
-                  }
-                }}
-              >
-                <Avatar
-                  sx={{
-                    bgcolor: "rgba(255, 152, 0, 0.8)",
-                    width: 36,
-                    height: 36,
-                    '&:hover': { 
-                      bgcolor: "rgba(255, 152, 0, 1)",
-                      boxShadow: '0 0 10px rgba(255, 152, 0, 0.5)'
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  <User size={20} color="white" />
-                </Avatar>
-              </IconButton>
-
-
-              <Menu
-                anchorEl={anchorEl}
-                open={menuOpen}
-                onClose={handleMenuClose}
-                PaperProps={{
-                  elevation: 3,
-                  sx: {
-                    mt: 1,
-                    minWidth: 200,
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
-                  }
-                }}
-                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-              >
-                {!isLogin ? (
-                  [
-                    <MenuItem 
-                      key="signin" 
-                      onClick={() => {
-                        setLoginModalOpen(true);
-                        handleMenuClose();
-                      }}
-                      sx={{
-                        '&:hover': {
-                          backgroundColor: 'rgba(255, 152, 0, 0.1)'
-                        }
-                      }}
-                    >
-                      <LogIn size={18} style={{ marginRight: 12 }} />
-                      Sign In
-                    </MenuItem>,
-                    <MenuItem 
-                      key="register" 
-                      onClick={() => handleNavigate("/registerhandleuser")}
-                      sx={{
-                        '&:hover': {
-                          backgroundColor: 'rgba(255, 152, 0, 0.1)'
-                        }
-                      }}
-                    >
-                      <UserPlus size={18} style={{ marginRight: 12 }} />
-                      Register
-                    </MenuItem>
-                  ]
-                ) : (
-                  [
-                    <MenuItem 
-                      key="profile" 
-                      onClick={handleMyProfileNavigate}
-                      sx={{
-                        '&:hover': {
-                          backgroundColor: 'rgba(255, 152, 0, 0.1)'
-                        }
-                      }}
-                    >
-                      <User size={18} style={{ marginRight: 12 }} />
-                      My Profile
-                    </MenuItem>,
-                    <MenuItem 
-                      key="home" 
-                      onClick={() => handleNavigate("/")}
-                      sx={{
-                        '&:hover': {
-                          backgroundColor: 'rgba(255, 152, 0, 0.1)'
-                        }
-                      }}
-                    >
-                      <Home size={18} style={{ marginRight: 12 }} />
-                      Home
-                    </MenuItem>,
-                    <MenuItem 
-                      key="logout" 
-                      onClick={handleSignOut}
-                      sx={{
-                        '&:hover': {
-                          backgroundColor: 'rgba(255, 152, 0, 0.1)'
-                        }
-                      }}
-                    >
-                      <LogOut size={18} style={{ marginRight: 12 }} />
-                      Sign Out
-                    </MenuItem>
-                  ]
-                )}
-              </Menu>
-            </Box>
+            <img 
+              src={logo} 
+              alt="brand logo" 
+              style={{ 
+                width: 190, 
+                marginLeft: 10,
+                height: 90,
+                objectFit: 'contain',
+                transition: 'transform 0.3s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)'
+                }
+              }} 
+            />
           </Box>
-        </Toolbar>
+<Box sx={{ flexGrow: 1 , mt: 2 }}>
+  <Typography 
+              variant="h3" 
+              component="div" 
+              sx={{
+                fontWeight: 700,
+                textAlign: 'center',
+                color: 'text.primary',
+                position: 'relative',
+                zIndex: 1,
+                textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}
+            >
+              Welcome to <Box component="span" sx={{ color: "#ff9800", fontWeight: "bold" }}>Our Franchise</Box> Website
+            </Typography>
+            <Typography 
+              variant="h6" 
+              sx={{
+                textAlign: 'center',
+                color: 'text.secondary',
+                mt: 1,
+                position: 'relative',
+                zIndex: 1,
+                fontWeight: 500
+              }}
+            >
+              World's highest visited franchise website network
+            </Typography>
+</Box>
 
-<FilterDropdowns />
-        </AppBar>
-      
+          {/* <Box sx={{ flexGrow: 1 }} /> */}
+
+          <Box ref={avatarRef} sx={{ position: "relative" }}>
+            <IconButton 
+              onClick={handleMenuOpen}
+              sx={{ 
+                p: 0,
+                '&:hover': {
+                  transform: 'scale(1.1)',
+                  transition: 'transform 0.3s ease'
+                }
+              }}
+            >
+              <Avatar
+                sx={{
+                  bgcolor: "rgba(255, 152, 0, 0.8)",
+                  width: 36,
+                  height: 36,
+                  '&:hover': { 
+                    bgcolor: "rgba(255, 152, 0, 1)",
+                    boxShadow: '0 0 10px rgba(255, 152, 0, 0.5)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <User size={20} color="white" />
+              </Avatar>
+            </IconButton>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={menuOpen}
+              onClose={handleMenuClose}
+              PaperProps={{
+                elevation: 3,
+                sx: {
+                  mt: 1,
+                  minWidth: 200,
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                  '& .MuiMenuItem-root': {
+                    px: 2,
+                    py: 1.5,
+                  }
+                }
+              }}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            >
+              {!isLogin ? (
+                [
+                  <MenuItem 
+                    key="signin" 
+                    onClick={() => {
+                      setLoginModalOpen(true);
+                      handleMenuClose();
+                    }}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                      }
+                    }}
+                  >
+                    <LogIn size={18} style={{ marginRight: 12 }} />
+                    Sign In
+                  </MenuItem>,
+                  <MenuItem 
+                    key="register" 
+                    onClick={() => handleNavigate("/registerhandleuser")}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                      }
+                    }}
+                  >
+                    <UserPlus size={18} style={{ marginRight: 12 }} />
+                    Register
+                  </MenuItem>
+                ]
+              ) : (
+                [
+                  <MenuItem 
+                    key="profile" 
+                    onClick={handleMyProfileNavigate}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                      }
+                    }}
+                  >
+                    <User size={18} style={{ marginRight: 12 }} />
+                    My Profile
+                  </MenuItem>,
+                  <MenuItem 
+                    key="home" 
+                    onClick={() => handleNavigate("/")}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                      }
+                    }}
+                  >
+                    <Home size={18} style={{ marginRight: 12 }} />
+                    Home
+                  </MenuItem>,
+                  <MenuItem 
+                    key="logout" 
+                    onClick={handleSignOut}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                      }
+                    }}
+                  >
+                    <LogOut size={18} style={{ marginRight: 12 }} />
+                    Sign Out
+                  </MenuItem>
+                ]
+              )}
+            </Menu>
+          </Box>
+          
+        </Toolbar>
+ {/* Welcome Banner */}
+        <Box
+          sx={{
+            background: 'linear-gradient(135deg, rgba(255,152,0,0.1) 0%, rgba(255,152,0,0.05) 100%)',
+            // py: 3,
+            // px: 2,
+            borderTop: '1px solid rgba(255,152,0,0.1)',
+            borderBottom: '1px solid rgba(255,152,0,0.1)',
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundImage: 'radial-gradient(circle at 10% 20%, rgba(255,152,0,0.05) 0%, transparent 20%)',
+              zIndex: 0
+            }
+          }}
+        >
+          <Container maxWidth="lg">
+            
+            <Container maxWidth="lg">
+            <FilterDropdowns />
+          </Container>
+          </Container>
+        </Box>
+
+       
+        {/* Filter Dropdowns */}
+        <Box sx={{ background: 'rgba(255, 255, 255, 0.8)' }}>
+          
+        </Box>
+      </AppBar>
 
       {/* Sidebar */}
       <Drawer
@@ -413,7 +524,8 @@ function Navbar() {
           sx: {
             backgroundColor: 'rgba(25, 25, 25, 0.9)',
             backdropFilter: 'blur(10px)',
-            color: 'white'
+            color: 'white',
+            width: isMobile ? '80%' : '300px'
           }
         }}
       >
@@ -503,4 +615,4 @@ function Navbar() {
   );
 }
 
-export default Navbar; 
+export default Navbar;
