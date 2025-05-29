@@ -6,7 +6,7 @@ import BrandList from './AllCategoryBrandDetail'
 function BrandCategroyViewPage() {
   return (
     <>
-    <Navbar />
+    {/* <Navbar /> */}
 
     <BrandList />
     <Footer />

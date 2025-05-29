@@ -123,7 +123,7 @@ const FilterDropdowns = () => {
   if (loading.filters) return <CircularProgress />;
 
   return (
-    <Box sx={{ pt: 4, px: 2 }}>
+    <Box>
       <Box sx={{ 
         display: "flex", 
         flexDirection: { xs: "column", md: "row" }, 

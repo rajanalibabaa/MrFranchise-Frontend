@@ -16,10 +16,11 @@ import {
   useTheme,
   Menu,
   Badge,
-  Container
+  Container,
+  Divider
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { User, MessageSquare, Globe, LogOut, LogIn, UserPlus, Home } from "lucide-react";
+import { User, MessageSquare, Globe, LogOut, LogIn, UserPlus, Home, Plus, Search } from "lucide-react";
 import SideViewContent from "../SideViewContentMenu/SideHoverMenu";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { useSelector, useDispatch } from "react-redux";
@@ -30,8 +31,9 @@ import {
 } from "../../Redux/Slices/navbarSlice";
 import { logout } from "../../Redux/Slices/AuthSlice/authSlice";
 import axios from "axios";
-import { motion } from "framer-motion";
-import logo from "../../assets/Images/logo.png"
+import { motion, AnimatePresence } from "framer-motion";
+import logo from "../../assets/Images/logo.png";
+// import backgroundPattern from "../../assets/Images/network-pattern.png";
 import FilterDropdowns from "./FilterDropdownsData";
 
 function Navbar() {
@@ -49,13 +51,21 @@ function Navbar() {
   const [anchorEl, setAnchorEl] = useState(null);
   const menuRef = useRef(null);
   const avatarRef = useRef(null);
-
+  const [scrolled, setScrolled] = useState(false);
   const [logoutLoading, setlogoutLoading] = useState(false);
 
   // Fallback for ID if Redux state is empty (e.g., after refresh)
   const ID =
     localStorage.getItem("brandUUID") ||
     localStorage.getItem("investorUUID");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -138,96 +148,108 @@ function Navbar() {
     dispatch(toggleMenu(false));
   };
 
+  // Animation variants
+  const fadeIn = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  };
+
+  const pulse = {
+    scale: [1, 1.05, 1],
+    transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+  };
+
   return (
     <>
       {/* Top Bar - Secondary Navigation */}
       <Box
         sx={{
-          background: "linear-gradient(135deg, #2c3e50 0%, #1a1a2e 100%)",
+          background: "linear-gradient(135deg, rgba(242, 168, 50, 0.9) 0%, rgba(185, 230, 21, 0.9) 100%)",
           backdropFilter: "blur(8px)",
           p: 1,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            // backgroundImage: `url(${backgroundPattern})`,
+            // backgroundSize: '300px',
+            // opacity: 0.1,
+            // zIndex: 0
+          }
         }}
+        component={motion.div}
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
       >
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: isMobile ? 0.5 : 1 }}>
-          <Button
-            component={Link}
-            to="/expandyourbrand"
-            size="small"
-            sx={{ 
-              textTransform: 'none',
-              color: 'rgba(255, 255, 255, 0.9)',
-              '&:hover': {
-                color: '#ff9800',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-              }
-            }}
-          >
-            Expand Your Franchise
-          </Button>
-          <Button
-            component={Link}
-            to="/expand-franchise"
-            size="small"
-            sx={{ 
-              textTransform: 'none',
-              color: 'rgba(255, 255, 255, 0.9)',
-              '&:hover': {
-                color: '#ff9800',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-              }
-            }}
-          >
-            Investor
-          </Button>
-          <Button
-            component={Link}
-            to="/advertisewithus"
-            size="small"
-            sx={{ 
-              textTransform: 'none',
-              color: 'rgba(255, 255, 255, 0.9)',
-              '&:hover': {
-                color: '#ff9800',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-              }
-            }}
-          >
-            Advertise
-          </Button>
-          <Button
-            component={Link}
-            to="/expand-franchise"
-            size="small"
-            sx={{ 
-              textTransform: 'none',
-              color: 'rgba(255, 255, 255, 0.9)',
-              '&:hover': {
-                color: '#ff9800',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-              }
-            }}
-          >
-            Sell Your Business
-          </Button>
+        <Box sx={{ 
+          display: "flex", 
+          flexWrap: "wrap", 
+          gap: isMobile ? 0.5 : 1,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          {['Expand Your Franchise', 'Investor', 'Advertise'].map((text, index) => (
+            <motion.div
+              key={text}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                component={Link}
+                to={
+                  text === 'Expand Your Franchise' ? '/expandyourbrand' :
+                  text === 'Investor' ? '/investfranchise' :
+                  '/advertisewithus'
+                }
+                size="small"
+                sx={{ 
+                  textTransform: 'none',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  '&:hover': {
+                    color: 'black',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                  }
+                }}
+              >
+                {text}
+              </Button>
+            </motion.div>
+          ))}
         </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <IconButton size="small"  sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-            <Badge badgeContent={3} color="error">
-              <MessageSquare size={18} />
-            </Badge>
-          </IconButton>
-          <FormControl variant="standard" size="small" sx={{ minWidth: 100 }}>
+        <Box sx={{ 
+          display: "flex", 
+          alignItems: "center", 
+          gap: isMobile ? 2 : 4,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          <motion.div whileHover={{ scale: 1.1 }}>
+            <IconButton size="small" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+              <Badge badgeContent={3} color="error">
+                <MessageSquare size={18} />
+              </Badge>
+            </IconButton>
+          </motion.div>
+          
+          <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 100 }}>
             <Select
               value="en"
               disableUnderline
               sx={{
                 color: 'rgba(255, 255, 255, 0.9)',
                 '& .MuiSelect-icon': {
+                  color: 'rgba(255, 255, 255, 0.9)',
                   right: 8,
                   top: 'calc(50% - 8px)'
                 },
@@ -239,10 +261,10 @@ function Navbar() {
                 }
               }}
             >
-              <MenuItem value="en" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+              <MenuItem value="en" sx={{ color: 'rgba(0, 0, 0, 0.9)' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Globe size={14} color="rgba(255, 255, 255, 0.9)" /> 
-                  <span>EN - English</span>
+                  <Globe size={14} color="rgba(0, 0, 0, 0.9)" /> 
+                  <span>EN</span>
                 </Box>
               </MenuItem>
             </Select>
@@ -256,10 +278,11 @@ function Navbar() {
         color="transparent" 
         elevation={0}
         sx={{
-          backdropFilter: "blur(8px)",
-          background: "linear-gradient(to right, #ffffff, #f5f5f5)",
+          backdropFilter: scrolled ? "blur(12px)" : "blur(8px)",
+          background: scrolled ? "rgba(255, 255, 255, 0.95)" : "rgba(255, 255, 255, 0.9)",
           borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
           position: 'relative',
+          transition: 'all 0.3s ease',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -287,71 +310,129 @@ function Navbar() {
         <Toolbar
           sx={{
             display: "flex",
+            justifyContent: isMobile ? "space-between" : "space-around",
+            alignItems: "center",
             px: { xs: 1, sm: 2 },
             minHeight: "64px !important",
+            gap: isMobile ? 1 : 2
           }}
         >
-          <IconButton 
-            edge="start" 
-            onClick={() => dispatch(toggleSidebar(true))}
-            sx={{ color: '#ff9800' }}
-          >
-            <MenuIcon />
-          </IconButton>
-          
-          <Box 
-            component={Link} 
-            to="/" 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              textDecoration: 'none',
-              mr: 2
-            }}
-          >
-            <img 
-              src={logo} 
-              alt="brand logo" 
-              style={{ 
-                width: 170, 
-                height: 50,
-                objectFit: 'contain',
-                transition: 'transform 0.3s ease',
-                '&:hover': {
-                  transform: 'scale(1.05)'
-                }
-              }} 
-            />
-          </Box>
-
-          <Box sx={{ flexGrow: 1 }} />
-
-          <Box ref={avatarRef} sx={{ position: "relative" }}>
-            <IconButton 
-              onClick={handleMenuOpen}
-              sx={{ 
-                p: 0,
-                '&:hover': {
-                  transform: 'scale(1.1)',
-                  transition: 'transform 0.3s ease'
-                }
-              }}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <motion.div whileHover={{ scale: 1.1 }}>
+              <IconButton 
+                edge="start" 
+                onClick={() => dispatch(toggleSidebar(true))}
+                sx={{ color: '#ff9800' }}
+              >
+                <MenuIcon />
+              </IconButton>
+            </motion.div>
+            
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <Avatar
-                sx={{
-                  bgcolor: "rgba(255, 152, 0, 0.8)",
-                  width: 36,
-                  height: 36,
-                  '&:hover': { 
-                    bgcolor: "rgba(255, 152, 0, 1)",
-                    boxShadow: '0 0 10px rgba(255, 152, 0, 0.5)'
-                  },
-                  transition: 'all 0.3s ease'
+              <Box 
+                component={Link} 
+                to="/" 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  textDecoration: 'none',
                 }}
               >
-                <User size={20} color="white" />
-              </Avatar>
-            </IconButton>
+                <img 
+                  src={logo} 
+                  alt="brand logo" 
+                  style={{ 
+                    width: isMobile ? 120 : 170, 
+                    height: isMobile ? 50 : 70,
+                    objectFit: 'contain',
+                    transition: 'transform 0.3s ease',
+                  }} 
+                />
+              </Box>
+            </motion.div>
+          </Box>
+
+          {!isMobile && (
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 2,
+              flex: isTablet ? 1 : 'none',
+              justifyContent: isTablet ? 'center' : 'flex-start'
+            }}>
+              <motion.div whileHover={{ y: -2 }}>
+                <Button 
+                  startIcon={<Plus size={18} />}
+                  sx={{ 
+                    color: '#ff9800',  
+                    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                    borderRadius: '8px',
+                    px: 3,
+                    py: 1,
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 152, 0, 0.2)'
+                    }
+                  }}
+                >
+                  Add Business
+                </Button>
+              </motion.div>
+              
+              <motion.div whileHover={{ y: -2 }}>
+                <Button 
+                  startIcon={<Search size={18} />}
+                  sx={{ 
+                    color: '#ff9800',  
+                    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                    borderRadius: '8px',
+                    px: 3,
+                    py: 1,
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 152, 0, 0.2)'
+                    }
+                  }}
+                >
+                  Find Brand
+                </Button>
+              </motion.div>
+            </Box>
+          )}
+
+          <Box sx={{ flexGrow: isMobile ? 1 : 0 }} />
+
+          <Box ref={avatarRef} sx={{ position: "relative" }}>
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <IconButton 
+                onClick={handleMenuOpen}
+                sx={{ 
+                  p: 0,
+                }}
+              >
+                <Avatar
+                  sx={{
+                    bgcolor: "rgba(255, 152, 0, 0.8)",
+                    width: 36,
+                    height: 36,
+                    '&:hover': { 
+                      bgcolor: "rgba(255, 152, 0, 1)",
+                      boxShadow: '0 0 10px rgba(255, 152, 0, 0.5)'
+                    },
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  <User size={20} color="white" />
+                </Avatar>
+              </IconButton>
+            </motion.div>
 
             <Menu
               anchorEl={anchorEl}
@@ -368,6 +449,7 @@ function Navbar() {
                   '& .MuiMenuItem-root': {
                     px: 2,
                     py: 1.5,
+                    transition: 'all 0.2s ease',
                   }
                 }
               }}
@@ -384,24 +466,35 @@ function Navbar() {
                     }}
                     sx={{
                       '&:hover': {
-                        backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                        transform: 'translateX(5px)'
                       }
                     }}
+                    component={motion.div}
+                    whileHover={{ x: 5 }}
                   >
-                    <LogIn size={18} style={{ marginRight: 12 }} />
-                    Sign In
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <LogIn size={18} style={{ marginRight: 12 }} />
+                      <Typography variant="body1">Sign In</Typography>
+                    </Box>
                   </MenuItem>,
+                  <Divider key="divider" />,
                   <MenuItem 
                     key="register" 
                     onClick={() => handleNavigate("/registerhandleuser")}
                     sx={{
                       '&:hover': {
-                        backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                        transform: 'translateX(5px)'
                       }
                     }}
+                    component={motion.div}
+                    whileHover={{ x: 5 }}
                   >
-                    <UserPlus size={18} style={{ marginRight: 12 }} />
-                    Register
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <UserPlus size={18} style={{ marginRight: 12 }} />
+                      <Typography variant="body1">Register</Typography>
+                    </Box>
                   </MenuItem>
                 ]
               ) : (
@@ -411,36 +504,54 @@ function Navbar() {
                     onClick={handleMyProfileNavigate}
                     sx={{
                       '&:hover': {
-                        backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                        transform: 'translateX(5px)'
                       }
                     }}
+                    component={motion.div}
+                    whileHover={{ x: 5 }}
                   >
-                    <User size={18} style={{ marginRight: 12 }} />
-                    My Profile
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <User size={18} style={{ marginRight: 12 }} />
+                      <Typography variant="body1">My Profile</Typography>
+                    </Box>
                   </MenuItem>,
+                  <Divider key="divider" />,
                   <MenuItem 
                     key="home" 
                     onClick={() => handleNavigate("/")}
                     sx={{
                       '&:hover': {
-                        backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                        transform: 'translateX(5px)'
                       }
                     }}
+                    component={motion.div}
+                    whileHover={{ x: 5 }}
                   >
-                    <Home size={18} style={{ marginRight: 12 }} />
-                    Home
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Home size={18} style={{ marginRight: 12 }} />
+                      <Typography variant="body1">Home</Typography>
+                    </Box>
                   </MenuItem>,
+                  <Divider key="divider2" />,
                   <MenuItem 
                     key="logout" 
                     onClick={handleSignOut}
                     sx={{
                       '&:hover': {
-                        backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                        transform: 'translateX(5px)',
+                        color: 'error.main'
                       }
                     }}
+                    component={motion.div}
+                    whileHover={{ x: 5 }}
                   >
-                    <LogOut size={18} style={{ marginRight: 12 }} />
-                    Sign Out
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <LogOut size={18} style={{ marginRight: 12 }} />
+                      <Typography variant="body1">Sign Out</Typography>
+                    </Box>
                   </MenuItem>
                 ]
               )}
@@ -448,65 +559,7 @@ function Navbar() {
           </Box>
         </Toolbar>
 
-        {/* Welcome Banner */}
-        <Box
-          sx={{
-            background: 'linear-gradient(135deg, rgba(255,152,0,0.1) 0%, rgba(255,152,0,0.05) 100%)',
-            py: 3,
-            px: 2,
-            borderTop: '1px solid rgba(255,152,0,0.1)',
-            borderBottom: '1px solid rgba(255,152,0,0.1)',
-            position: 'relative',
-            overflow: 'hidden',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundImage: 'radial-gradient(circle at 10% 20%, rgba(255,152,0,0.05) 0%, transparent 20%)',
-              zIndex: 0
-            }
-          }}
-        >
-          <Container maxWidth="lg">
-            <Typography 
-              variant="h5" 
-              component="div" 
-              sx={{
-                fontWeight: 700,
-                textAlign: 'center',
-                color: 'text.primary',
-                position: 'relative',
-                zIndex: 1,
-                textShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}
-            >
-              Welcome to <Box component="span" sx={{ color: "#ff9800", fontWeight: "bold" }}>Our Franchise</Box> Website
-            </Typography>
-            <Typography 
-              variant="subtitle1" 
-              sx={{
-                textAlign: 'center',
-                color: 'text.secondary',
-                mt: 1,
-                position: 'relative',
-                zIndex: 1,
-                fontWeight: 500
-              }}
-            >
-              World's highest visited franchise website network
-            </Typography>
-          </Container>
-        </Box>
-
-        {/* Filter Dropdowns */}
-        <Box sx={{ background: 'rgba(255, 255, 255, 0.8)' }}>
-          <Container maxWidth="lg">
-            <FilterDropdowns />
-          </Container>
-        </Box>
+       
       </AppBar>
 
       {/* Sidebar */}
@@ -516,10 +569,11 @@ function Navbar() {
         onClose={() => dispatch(toggleSidebar(false))}
         PaperProps={{
           sx: {
-            backgroundColor: 'rgba(25, 25, 25, 0.9)',
+            backgroundColor: 'rgba(25, 25, 25, 0.97)',
             backdropFilter: 'blur(10px)',
             color: 'white',
-            width: isMobile ? '80%' : '300px'
+            width: isMobile ? '85%' : '300px',
+            borderRight: '1px solid rgba(255, 152, 0, 0.2)'
           }
         }}
       >
@@ -537,74 +591,81 @@ function Navbar() {
       />
 
       {/* Logout Confirmation Modal */}
-      {popupLogout && (
-        <Box
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            bgcolor: "rgba(0, 0, 0, 0.7)",
-            zIndex: 1300,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backdropFilter: 'blur(5px)'
-          }}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 300 }}
+      <AnimatePresence>
+        {popupLogout && (
+          <Box
+            sx={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              bgcolor: "rgba(0, 0, 0, 0.7)",
+              zIndex: 1300,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: 'blur(5px)'
+            }}
           >
-            <Box
-              sx={{
-                bgcolor: "background.paper",
-                boxShadow: 3,
-                p: 3,
-                borderRadius: 2,
-                width: 300,
-                textAlign: 'center'
-              }}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300 }}
             >
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Confirm Logout
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-                Are you sure you want to sign out?
-              </Typography>
-              <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
-                <Button 
-                  variant="outlined" 
-                  onClick={() => setPopupLogout(false)}
-                  sx={{
-                    textTransform: 'none',
-                    borderRadius: 50,
-                    px: 3
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  variant="contained" 
-                  color="primary" 
-                  onClick={handleVerifySignOut}
-                  sx={{
-                    textTransform: 'none',
-                    borderRadius: 50,
-                    px: 3,
-                    background: 'linear-gradient(45deg, #FF9800 30%, #FFC107 90%)',
-                    boxShadow: '0 3px 5px 2px rgba(255, 152, 0, .3)'
-                  }}
-                >
-                  {logoutLoading ? "Signing out..." : "Sign Out"}
-                </Button>
+              <Box
+                sx={{
+                  bgcolor: "background.paper",
+                  boxShadow: 3,
+                  p: 3,
+                  borderRadius: 2,
+                  width: 300,
+                  textAlign: 'center'
+                }}
+              >
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                  Confirm Logout
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+                  Are you sure you want to sign out?
+                </Typography>
+                <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
+                  <motion.div whileHover={{ scale: 1.05 }}>
+                    <Button 
+                      variant="outlined" 
+                      onClick={() => setPopupLogout(false)}
+                      sx={{
+                        textTransform: 'none',
+                        borderRadius: 50,
+                        px: 3
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }}>
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      onClick={handleVerifySignOut}
+                      sx={{
+                        textTransform: 'none',
+                        borderRadius: 50,
+                        px: 3,
+                        background: 'linear-gradient(45deg, #FF9800 30%, #FFC107 90%)',
+                        boxShadow: '0 3px 5px 2px rgba(255, 152, 0, .3)'
+                      }}
+                    >
+                      {logoutLoading ? "Signing out..." : "Sign Out"}
+                    </Button>
+                  </motion.div>
+                </Box>
               </Box>
-            </Box>
-          </motion.div>
-        </Box>
-      )}
+            </motion.div>
+          </Box>
+        )}
+      </AnimatePresence>
     </>
   );
 }
