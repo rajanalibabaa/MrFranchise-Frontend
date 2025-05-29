@@ -65,6 +65,7 @@ import {
 import { CheckCircleOutline } from "@mui/icons-material";
 import {motion} from "framer-motion"
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 function BrandList() {
   const [brands, setBrands] = useState([]);
@@ -103,13 +104,17 @@ function BrandList() {
   ];
 
   // Application form states
-  
+  const Id = useSelector((state) => state.auth?.investorUUID) || useSelector((state) => state.auth?.brandUUID);
+  const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
   const fetchBrands = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(
+      let response;
+
+    if (!AccessToken) {
+      response = await axios.get(
         "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
         {
           headers: {
@@ -117,9 +122,20 @@ function BrandList() {
           },
         }
       );
+    } else {
+      response = await axios.get(
+        `http://localhost:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+        }
+      );
+    }
 
       const brandsData = response.data.data;
-      console.log("Brands data:", brandsData);
+      // console.log("Brands data:", brandsData);
 
       setBrands(brandsData);
       setFilteredBrands(brandsData);
@@ -169,7 +185,7 @@ function BrandList() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [Id, AccessToken]);
 
   useEffect(() => {
     fetchBrands();
@@ -449,22 +465,83 @@ function BrandList() {
     </Box>
   );
 
-  const [likedStatus, setlikedStatus] = useState({});
-  const toggleLike = (brandId) => {
-    setlikedStatus((prev) => ({
-      ...prev,
-      [brandId]: !prev[brandId],
-    }));
-    console.log("Brand ID liked:", brandId);
+  const [login, setLogin] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [message, setMessage] = useState("");
+
+const toggleLike = async (brandId) => {
+  try {
+
+    if (!AccessToken) {
+      setMessage("You need to log in to continue.");
+      alert("You need to log in to continue.")
+      setLogin(true);
+      setShowPopup(true);
+      return 
+    }
+
+    const brandToUpdate = brands.find((brand) => brand.uuid === brandId);
+    if (!brandToUpdate) return;
+
+    const updatedLikedStatus = !brandToUpdate.isLiked;
+
+    if (updatedLikedStatus) {
+      // Add to favorites
+      await axios.post(
+        "http://localhost:5000/api/v1/like/post-favbrands",
+        { branduuid: brandId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+        }
+      );
+      // console.log("Added to favorites");
+    } else {
+      // Remove from favorites
+      const unlike = await axios.delete(
+        `http://localhost:5000/api/v1/like/delete-favbrand/${Id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+          data: { brandID: brandId },
+        }
+      );
+      // console.log("Removed from favorites :",unlike);
+    }
+
+    // Update the local state
+    setBrands((prev) =>
+      prev.map((brand) =>
+        brand.uuid === brandId
+          ? { ...brand, isLiked: updatedLikedStatus }
+          : brand
+      )
+    );
+
+    // console.log("Brand ID liked:", brandId);
+  } catch (error) {
+    console.error("Error toggling like status:", error);
+  }
+};
+
+const closePopup = () => {
+    setShowPopup(false);
   };
 
+
+
   const BrandCard = ({ brand }) => (
-    <Card
+    <div>
+      <Card
       sx={{
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        transition: "transform 0.3s, box-shadow 0.3s",
+        // transition: "transform 0.3s, box-shadow 0.3s",
         "&:hover": {
           transform: "translateY(-5px)",
           boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
@@ -500,7 +577,7 @@ function BrandList() {
                         // top: 8,
                         // right: 8,
                         cursor: "pointer",
-                        color: likedStatus[brand.uuid] ? "red" : "gray",
+                        color: brand.isLiked ? "red" : "gray",
                         }}
             />
           </Typography>
@@ -583,6 +660,8 @@ function BrandList() {
         </Button>
       </CardActions>
     </Card>
+    
+    </div>
   );
 
   
@@ -2416,6 +2495,7 @@ function BrandList() {
       </Drawer>
 
       <BrandDetailsDialog />
+      
     </Container>
   );
 }
