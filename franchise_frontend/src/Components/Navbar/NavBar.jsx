@@ -143,7 +143,7 @@ function Navbar() {
       {/* Top Bar - Secondary Navigation */}
       <Box
         sx={{
-          background: "linear-gradient(135deg,rgb(249, 172, 18) 0%,rgb(144, 220, 72) 100%)",
+          background: "linear-gradient(135deg, #2c3e50 0%, #1a1a2e 100%)",
           backdropFilter: "blur(8px)",
           p: 1,
           display: "flex",
@@ -159,9 +159,9 @@ function Navbar() {
             size="small"
             sx={{ 
               textTransform: 'none',
-              color: 'rgba(2, 2, 2, 0.9)',
+              color: 'rgba(255, 255, 255, 0.9)',
               '&:hover': {
-                color: 'white',
+                color: '#ff9800',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)'
               }
             }}
@@ -174,9 +174,9 @@ function Navbar() {
             size="small"
             sx={{ 
               textTransform: 'none',
-              color: 'rgba(0, 0, 0, 0.9)',
+              color: 'rgba(255, 255, 255, 0.9)',
               '&:hover': {
-                color: 'white',
+                color: '#ff9800',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)'
               }
             }}
@@ -189,10 +189,10 @@ function Navbar() {
             size="small"
             sx={{ 
               textTransform: 'none',
-              color: 'rgba(0, 0, 0, 0.9)',
+              color: 'rgba(255, 255, 255, 0.9)',
               '&:hover': {
-                color: 'white',
-                backgroundColor: 'rgba(83, 210, 33, 0.1)'
+                color: '#ff9800',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
               }
             }}
           >
@@ -204,9 +204,9 @@ function Navbar() {
             size="small"
             sx={{ 
               textTransform: 'none',
-              color: 'rgba(0, 0, 0, 0.9)',
+              color: 'rgba(255, 255, 255, 0.9)',
               '&:hover': {
-                color: 'white',
+                color: '#ff9800',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)'
               }
             }}
@@ -306,16 +306,15 @@ function Navbar() {
               display: 'flex', 
               alignItems: 'center', 
               textDecoration: 'none',
-              ml: 2 
+              mr: 2
             }}
           >
             <img 
               src={logo} 
               alt="brand logo" 
               style={{ 
-                width: 190, 
-                marginLeft: 10,
-                height: 90,
+                width: 170, 
+                height: 50,
                 objectFit: 'contain',
                 transition: 'transform 0.3s ease',
                 '&:hover': {
@@ -324,37 +323,8 @@ function Navbar() {
               }} 
             />
           </Box>
-<Box sx={{ flexGrow: 1 , mt: 2 }}>
-  <Typography 
-              variant="h3" 
-              component="div" 
-              sx={{
-                fontWeight: 700,
-                textAlign: 'center',
-                color: 'text.primary',
-                position: 'relative',
-                zIndex: 1,
-                textShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}
-            >
-              Welcome to <Box component="span" sx={{ color: "#ff9800", fontWeight: "bold" }}>Our Franchise</Box> Website
-            </Typography>
-            <Typography 
-              variant="h6" 
-              sx={{
-                textAlign: 'center',
-                color: 'text.secondary',
-                mt: 1,
-                position: 'relative',
-                zIndex: 1,
-                fontWeight: 500
-              }}
-            >
-              World's highest visited franchise website network
-            </Typography>
-</Box>
 
-          {/* <Box sx={{ flexGrow: 1 }} /> */}
+          <Box sx={{ flexGrow: 1 }} />
 
           <Box ref={avatarRef} sx={{ position: "relative" }}>
             <IconButton 
@@ -476,14 +446,14 @@ function Navbar() {
               )}
             </Menu>
           </Box>
-          
         </Toolbar>
- {/* Welcome Banner */}
+
+        {/* Welcome Banner */}
         <Box
           sx={{
             background: 'linear-gradient(135deg, rgba(255,152,0,0.1) 0%, rgba(255,152,0,0.05) 100%)',
-            // py: 3,
-            // px: 2,
+            py: 3,
+            px: 2,
             borderTop: '1px solid rgba(255,152,0,0.1)',
             borderBottom: '1px solid rgba(255,152,0,0.1)',
             position: 'relative',
@@ -501,17 +471,41 @@ function Navbar() {
           }}
         >
           <Container maxWidth="lg">
-            
-            <Container maxWidth="lg">
-            <FilterDropdowns />
-          </Container>
+            <Typography 
+              variant="h5" 
+              component="div" 
+              sx={{
+                fontWeight: 700,
+                textAlign: 'center',
+                color: 'text.primary',
+                position: 'relative',
+                zIndex: 1,
+                textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}
+            >
+              Welcome to <Box component="span" sx={{ color: "#ff9800", fontWeight: "bold" }}>Our Franchise</Box> Website
+            </Typography>
+            <Typography 
+              variant="subtitle1" 
+              sx={{
+                textAlign: 'center',
+                color: 'text.secondary',
+                mt: 1,
+                position: 'relative',
+                zIndex: 1,
+                fontWeight: 500
+              }}
+            >
+              World's highest visited franchise website network
+            </Typography>
           </Container>
         </Box>
 
-       
         {/* Filter Dropdowns */}
         <Box sx={{ background: 'rgba(255, 255, 255, 0.8)' }}>
-          
+          <Container maxWidth="lg">
+            <FilterDropdowns />
+          </Container>
         </Box>
       </AppBar>
 
