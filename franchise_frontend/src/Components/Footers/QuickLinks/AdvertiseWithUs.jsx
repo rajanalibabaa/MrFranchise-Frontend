@@ -32,7 +32,7 @@ import {
  
 } from '@mui/icons-material';
 import { Link as RouterLink } from "react-router-dom";
-
+import { motion } from 'framer-motion'; 
 import Navbar from "../../Navbar/NavBar";
 import Footer from "../Footer";
 
@@ -59,51 +59,67 @@ const SectionDivider = ({ icon, label }) => (
     <Divider sx={{ flexGrow: 1, borderColor: '#7ad03a' }} />
   </Box>
 );
-
+const fadeInVariant = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0 }
+};
 
 const AdvertiseWithUs = () => {
   return (
     <Box>
       <Box><Navbar /></Box>
-      <Container  >
-      {/* Hero Section */}
-      {/* <Fade in timeout={800}>
-        <Paper
-          elevation={4}
-          sx={{
-            p: 5,
-            mb: 6,
-            borderRadius: 4,
-            // background: 'linear-gradient(135deg, #ffba00, #7ad03a)',
-            color: 'black',
-            textAlign: 'center',
-          }}
-        > */}
-          <Typography variant="h3" mt={5} align="center" fontWeight="bold" >
+      <Container>
+        {/* Hero Section */}
+        <Box
+          component={motion.div}
+          variants={fadeInVariant}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+        >
+          <Typography variant="h3" mt={5} align="center" fontWeight="bold" color='#ffba00'>
             Advertise with MrFranchise.in
           </Typography>
-          <Typography variant="h6"align="center"  mb={3} fontWeight={300}>
+          <Typography variant="h6" align="center" color='#8e8e8e' mb={3} fontWeight={300}>
             Reach Business Owners · Engage Serious Investors · Grow Your Brand
           </Typography>
-        {/* </Paper>
-      </Fade> */}
+        </Box>
 
       {/* Introduction */}
-      <Typography
-        variant="body1"
-        paragraph
-        sx={{ mb: 4, fontSize: '1.15rem', lineHeight: 1.9, textAlign: 'center',color:"#0009" }}
-      >
-           <Link component={RouterLink} to="/" underline="hover" color="black">
-  MrFranchise.in</Link> is South India's fastest-growing franchise consulting and investment platform – a trusted destination where entrepreneurs, brand owners, and investors discover scalable business opportunities.By advertising
-with us, you position your brand directly in front of decision-makers —
-from aspiring franchisees to seasoned investors, working professionals, and
-NRIs looking to invest in profitable brands.
-      </Typography>
+       <Box
+          component={motion.div}
+          variants={fadeInVariant}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+        >
+          <Typography
+            variant="body1"
+            paragraph
+            sx={{ mb: 4, fontSize: '1.15rem', lineHeight: 1.9, textAlign: 'center', color: "black" }}
+          >
+            <Link component={RouterLink} to="/" underline="hover" color="black" fontWeight="bold">
+              MrFranchise.in
+            </Link> is South India's fastest-growing franchise consulting and investment platform – a trusted destination where entrepreneurs, brand owners, and investors discover scalable business opportunities. By advertising
+            with us, you position your brand directly in front of decision-makers —
+            from aspiring franchisees to seasoned investors, working professionals, and
+            NRIs looking to invest in profitable brands.
+          </Typography>
+        </Box>
 
       {/* Why Advertise */}
-      <SectionDivider  icon={<CheckCircleOutline />} label="Why Advertise on MrFranchise.in?"  />
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Box
+          component={motion.div}
+          variants={fadeInVariant}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+        >
+          <SectionDivider icon={<CheckCircleOutline />} label="Why Advertise on MrFranchise.in?" />
+          <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} md={6} mx="auto">
           <List>
             <ListItem disableGutters>
@@ -136,8 +152,16 @@ not just clicks." />
           </List>
         </Grid>
       </Grid>
-
+</Box>
       {/* Advertising Opportunities */}
+      <Box
+          component={motion.div}
+          variants={fadeInVariant}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.6 }}
+        >
       <SectionDivider icon={<Campaign />} label="Advertising Opportunities" />
        <Typography sx={{ mb: 4, fontSize: '1.15rem', lineHeight: 1.9, textAlign: 'center', fontWeight:'bold'}}>We offer a wide
 range of ad placements and packages to suit your goals:</Typography>
@@ -196,8 +220,16 @@ positioning.</Typography>
           </Card>
         </Grid>
       </Grid>
-
+</Box>
       {/* Audience & Advertisers */}
+      <Box
+          component={motion.div}
+          variants={fadeInVariant}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.8 }}
+        >
       <SectionDivider icon={<Groups />} label="Advertisers & Audience" />
       <Grid container spacing={4} sx={{ display: 'flex', justifyContent: 'center' }}>
         <Grid item xs={12} md={6}>
@@ -252,19 +284,39 @@ positioning.</Typography>
           </Paper>
         </Grid>
       </Grid>
-
+</Box>
       {/* Contact Section */}
-      <SectionDivider icon={<Phone />} label="Get In Touch" />
-      <Paper
-        elevation={3}
-        sx={{
-          p: 5,
-          textAlign: 'center',
-          background: 'linear-gradient(135deg, #fafafa, #f5f5f5)',
-          borderRadius: 4,
-          mt: 6,
-        }}
-      >
+      <motion.div
+                        variants={{
+                          hidden: { opacity: 0, y: 30 },
+                          visible: {
+                            opacity: 1,
+                            y: 0,
+                            transition: {
+                              duration: 0.8,
+                              ease: 'easeOut',
+                            },
+                          },
+                        }}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, amount: 0.2 }}
+                      >
+                        <Box
+                          sx={{
+                            mt: 6,
+                            p: { xs: 2, md: 4 },
+                            borderRadius: 4,
+                            background: 'linear-gradient(120deg, #fffbe7 60%, #fff 100%)',
+                            border: '2px solid #FF6F00',
+                            boxShadow: '0 12px 32px rgba(255, 186, 0, 0.10)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              boxShadow: '0 16px 40px rgba(255, 186, 0, 0.18)',
+                            },
+                            textAlign: 'center',
+                          }}
+                        >
         <Typography variant="h4" color="#ffba00" fontWeight={700} gutterBottom>
           Partner With Us
         </Typography>
@@ -282,19 +334,9 @@ MrFranchise.in</Link> positions you directly in front of the right audience.    
             startIcon={<Download />}
             component={Link}
             href="/media-kit.pdf"
-            sx={{ borderRadius: 2 }}
+            sx={{ borderRadius: 2, color:"white" ,bgcolor: '#ffba00', '&:hover': { bgcolor: '#ffba00' } }}
           >
             Download Media Kit
-          </Button>
-          <Button
-            variant="outlined"
-            size="large"
-            startIcon={<Email />}
-            component={Link}
-            href="mailto:ceo@MrFranchise.in"
-            sx={{ borderRadius: 2 }}
-          >
-            Contact Ad Team
           </Button>
         </Box>
 
@@ -307,9 +349,11 @@ MrFranchise.in</Link> positions you directly in front of the right audience.    
         </Link></Typography>
           <Typography><Language sx={{ verticalAlign: 'middle', mr: 1 }} />www.MrFranchise.in/advertise</Typography>
         </Box>
-      </Paper>
+      
+      </Box>
+      </motion.div>
     </Container>
-      <Box><Footer /></Box>
+      <Box sx={{ mt: 6, backgroundColor: "background.default", py: 4 }}><Footer /></Box>
     </Box>
     
   );

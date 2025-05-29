@@ -5,20 +5,18 @@ import { motion } from "framer-motion";
 import Navbar from "../../Navbar/NavBar";
 import Footer from "../Footer";
 import {
-  CheckCircleOutline,
-  Image,
-  VideoCameraBack,
-  Search,
   Email,
-  Campaign,
-  Groups,
-  Business,
-  Download,
   Phone,
-  Language,
- 
 } from '@mui/icons-material';
 
+
+const FONT_FAMILY = "'Poppins', 'Roboto', 'Arial', sans-serif";
+
+// Animation variants for sections
+const sectionVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+};
 const Section = ({ title, children }) => (
   <Box mt={2}>
     <Typography variant="h5" gutterBottom fontWeight={600} color="#ffba00">

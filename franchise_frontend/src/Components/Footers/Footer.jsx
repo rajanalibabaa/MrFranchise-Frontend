@@ -186,7 +186,7 @@ function Footer() {
               >
                 About Us
               </Link>
-              <Link
+              {/* <Link
                 href="/contactus"
                 color="inherit"
                 underline="hover"
@@ -197,7 +197,7 @@ function Footer() {
                 }}
               >
                 Contact
-              </Link>
+              </Link> */}
               <Link
                 href="/faq"
                 color="inherit"
@@ -234,7 +234,7 @@ function Footer() {
               >
                 Terms & Conditions
               </Link>
-              <Link
+              {/* <Link
                 href="/privacypolicy"
                 color="inherit"
                 underline="hover"
@@ -245,7 +245,7 @@ function Footer() {
                 }}
               >
                 Privacy Policy
-              </Link>
+              </Link> */}
             </Box>
           </Grid>
         </Grid>
