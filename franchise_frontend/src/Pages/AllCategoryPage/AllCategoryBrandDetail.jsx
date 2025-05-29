@@ -114,7 +114,7 @@ function BrandList() {
 
       // console.log("AccessToken :",AccessToken)
       const response = await axios.get(
-        `http://localhost:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -464,7 +464,7 @@ const toggleLike = async (brandId) => {
     if (updatedLikedStatus) {
       // Add to favorites
       await axios.post(
-        "http://localhost:5000/api/v1/like/post-favbrands",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
         { branduuid: brandId },
         {
           headers: {
@@ -477,7 +477,7 @@ const toggleLike = async (brandId) => {
     } else {
       // Remove from favorites
       const unlike = await axios.delete(
-        `http://localhost:5000/api/v1/like/delete-favbrand/${Id}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${Id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -749,7 +749,7 @@ const toggleLike = async (brandId) => {
             };
 
             const response = await axios.post(
-                "http://localhost:5000/api/v1/brandlisting/createInstaApply",
+                "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createInstaApply",
                 payload,
                 {
                     headers: {
@@ -1683,7 +1683,7 @@ const toggleLike = async (brandId) => {
         console.log(payload);
 
         const response = await axios.post(
-          "http://localhost:5000/api/v1/brandlisting/createInstaApply",
+          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createInstaApply",
           payload,
           {
             headers: {

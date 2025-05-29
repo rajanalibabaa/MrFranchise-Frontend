@@ -9,8 +9,11 @@ import PersonIcon from '@mui/icons-material/Person';
 const ManageProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [investorData, setInvestorData] = useState({});
-    const id = "680606dacf204b491b61d764";
-
+const id = useSelector((state) => state.user.investorUUID);
+    const AccessToken = useSelector((state) => state.auth.AccessToken);
+    console.log(id);
+    console.log(AccessToken);
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -40,6 +43,16 @@ const ManageProfile = () => {
         }));
     };
     
+    // Helper function to safely render object values
+    const renderValue = (value) => {
+        if (value === null || value === undefined) {
+            return '';
+        }
+        if (typeof value === 'object') {
+            return JSON.stringify(value); // or handle nested objects differently
+        }
+        return value;
+    };
 
     const fieldLabels = [
         { key: "firstName", label: "First Name" },
@@ -69,9 +82,7 @@ const ManageProfile = () => {
             const field2 = fieldLabels[i + 1];
 
             rows.push(
-                
-                <Box key={i} sx={{ display: "flex", gap: 1, mb: 1,height: "100%" }}>
-                    
+                <Box key={i} sx={{ display: "flex", gap: 1, mb: 1, height: "100%" }}>
                     <TextField
                         fullWidth
                         label={field1.label}
@@ -99,7 +110,6 @@ const ManageProfile = () => {
         return rows;
     };
   
-   
     return (
         <div style={{ display: "flex", marginTop: -30 }}>
             <Box
@@ -125,11 +135,11 @@ const ManageProfile = () => {
                 {isEditing ? (
                     <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                         {renderTwoColumnForm()}
-                        <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 2,marginTop: -1 }}>
+                        <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 2, marginTop: -1 }}>
                             <Button variant="contained" color="primary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00" }}>
                                 Update
                             </Button>
-                            <Button  color="secondary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00", color: "#fff" }}>
+                            <Button color="secondary" onClick={() => setIsEditing(false)} sx={{ backgroundColor: "#ffab00", color: "#fff" }}>
                                 Cancel
                             </Button>
                         </Box>
@@ -156,27 +166,22 @@ const ManageProfile = () => {
                             </Avatar>
                         </Box>
 
-                        <Paper sx={{ p: 2, backgroundColor: "#fff", borderRadius: 2, border: "1px solid #ddd", marginTop: 2, marginLeft: -5 }}>
-                            <Typography><strong>Name:</strong> {investorData.firstName} {investorData.lastName}</Typography>
-                            <Typography><strong>Email:</strong> {investorData.email}</Typography>
-                            <Typography><strong>Phone:</strong> {investorData.mobileNumber}</Typography>
-                            <Typography><strong>WhatsApp:</strong> {investorData.whatsappNumber}</Typography>
-                            <Typography><strong>Address:</strong> {investorData.address}</Typography>
-                            <Typography><strong>City:</strong> {investorData.city}</Typography>
-                            <Typography><strong>District:</strong> {investorData.district}</Typography>
-                            <Typography><strong>State:</strong> {investorData.state}</Typography>
-                            <Typography><strong>Country:</strong> {investorData.country}</Typography>
-                            <Typography><strong>Pincode:</strong> {investorData.pincode}</Typography>
-                            <Typography><strong>Occupation:</strong> {investorData.occupation}</Typography>
-                            <Typography><strong>Category:</strong> {investorData.category}</Typography>
-                            <Typography><strong>Investment Range:</strong> {investorData.investmentRange}</Typography>
-                            <Typography><strong>Capital:</strong> {investorData.capital}</Typography>
-                            <Typography><strong>Looking For:</strong> {investorData.lookingFor}</Typography>
-                            <Typography><strong>Own Property:</strong> {investorData.ownProperty}</Typography>
-                            {/* <Typography><strong>Property Type:</strong> {investorData.propertyType}</Typography>
-                            <Typography><strong>Min Area:</strong> {investorData.minArea}</Typography>
-                            <Typography><strong>Max Area:</strong> {investorData.maxArea}</Typography>
-                            <Typography><strong>Sqft:</strong> {investorData.sqft}</Typography> */}
+                        <Paper sx={{ 
+                            p: 2, 
+                            backgroundColor: "#fff", 
+                            borderRadius: 2, 
+                            border: "1px solid #ddd", 
+                            marginTop: 2, 
+                            marginLeft: -5,
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                            gap: 2
+                        }}>
+                            {fieldLabels.map((field) => (
+                                <Typography key={field.key}>
+                                    <strong>{field.label}:</strong> {renderValue(investorData[field.key])}
+                                </Typography>
+                            ))}
                         </Paper>
                     </>
                 )}

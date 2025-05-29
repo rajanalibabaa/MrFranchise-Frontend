@@ -96,7 +96,7 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     // Call delete API
     const response = await axios.delete(
-      `http://localhost:5000/api/v1/like/delete-favbrand/${investorUUID}`,
+      `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${investorUUID}`,
       {
         headers: {
           "Content-Type": "application/json",

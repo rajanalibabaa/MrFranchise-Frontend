@@ -48,12 +48,10 @@ function TopBrandVdoSec() {
   const [open, setOpen] = useState(false);
   
   const timeoutRef = useRef(null);
-  const videoRef = useRef(null);
+  const videoRefs = useRef([]);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  
-
 
   const handleNext = useCallback(() => {
     if (!isHovered && !isVideoPlaying && brandData.length > 0) {
@@ -76,8 +74,12 @@ function TopBrandVdoSec() {
     }
   }, [isHovered, isVideoPlaying, handleNext, brandData]);
 
-  const handleVideoPlay = () => {
+  const handleVideoPlay = (index) => {
     setIsVideoPlaying(true);
+    // Pause other videos
+    videoRefs.current.forEach((ref, i) => {
+      if (i !== index && ref) ref.pause();
+    });
     clearTimeout(timeoutRef.current);
   };
 
@@ -98,8 +100,6 @@ function TopBrandVdoSec() {
         if (fetchedData) {
           setBrandData(Array.isArray(fetchedData) ? fetchedData : [fetchedData]);
         }
-
-        // console.log("Fetched brand data:", brandData);
       } catch (error) {
         console.error("Error fetching brand data:", error);
       }
@@ -117,7 +117,10 @@ function TopBrandVdoSec() {
     return <div>Loading...</div>;
   }
 
-  const brand = brandData[index];
+  // Get current and next two brands for display
+  const currentBrand = brandData[index];
+  const nextBrand1 = brandData[(index + 1) % brandData.length];
+  const nextBrand2 = brandData[(index + 2) % brandData.length];
 
   const handleLike = () => {
     setLiked((prev) => !prev);
@@ -146,70 +149,42 @@ function TopBrandVdoSec() {
         Top Brand
       </Typography> */}
 
-      <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-        {/* Left Video Section */}
-        <Box
+      <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap", justifyContent: "center"}}>
+        {/* Navigation buttons */}
+        <IconButton
           sx={{
-            flex: 1,
-            minWidth: 0,
-            position: "relative",
-            borderRadius: 2,
-            overflow: "hidden",
-            boxShadow: 3,
-            height: 450,
+            position: "absolute",
+            left: 40,
+            top: "50%",
+            transform: "translateY(-50%)",
+            bgcolor: "white",
+            zIndex: 10,
+            boxShadow: 1,
           }}
+          onClick={handlePrev}
         >
-          <motion.video
-            ref={videoRef}
-            key={brand.videoUrl}
-            src={brand.videoUrl}
-            controls
-            onPlay={handleVideoPlay}
-            onPause={handleVideoPause}
-            initial={{ opacity: 0.5, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              borderRadius: 8,
-            }}
-          />
-          <IconButton
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: 8,
-              transform: "translateY(-50%)",
-              bgcolor: "white",
-              zIndex: 10,
-              boxShadow: 1,
-            }}
-            onClick={handlePrev}
-          >
-            <ChevronLeft />
-          </IconButton>
-          <IconButton
-            sx={{
-              position: "absolute",
-              top: "50%",
-              right: 8,
-              transform: "translateY(-50%)",
-              bgcolor: "white",
-              zIndex: 10,
-              boxShadow: 1,
-            }}
-            onClick={handleNext}
-          >
-            <ChevronRight />
-          </IconButton>
-        </Box>
+          <ChevronLeft />
+        </IconButton>
+        
+        <IconButton
+          sx={{
+            position: "absolute",
+            right: 40,
+            top: "50%",
+            transform: "translateY(-50%)",
+            bgcolor: "white",
+            zIndex: 10,
+            boxShadow: 1,
+          }}
+          onClick={handleNext}
+        >
+          <ChevronRight />
+        </IconButton>
 
-        {/* Right Card Section */}
-        <AnimatePresence mode="wait" custom={direction}>
+        {/* First Card */}
+        <AnimatePresence mode="wait">
           <Card
-            key={brand.title}
+            key={currentBrand.title}
             component={motion.div}
             custom={direction}
             initial="enter"
@@ -217,10 +192,10 @@ function TopBrandVdoSec() {
             exit="exit"
             variants={variants}
             sx={{
-              flex: 1,
-              minWidth: 360,
+              width: 500,
               height: 450,
               display: "flex",
+              flexDirection: "ro",
               borderRadius: 3,
               boxShadow: 4,
               overflow: "hidden",
@@ -229,21 +204,29 @@ function TopBrandVdoSec() {
               },
             }}
           >
-            <Box
-              component="img"
-              src={brand.thumbnailUrl}
-              alt={brand.title}
-              sx={{
-                width: "45%",
-                height: "100%",
-                objectFit: "fill",
-              }}
-            />
-
+            <Box sx={{ height: "100%", position: "relative",width:500 }}>
+              <motion.video
+                ref={el => videoRefs.current[0] = el}
+                src={currentBrand.videoUrl}
+                controls
+                onPlay={() => handleVideoPlay(0)}
+                onPause={handleVideoPause}
+                initial={{ opacity: 0.5, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6 }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </Box>
+            
             <Box
               sx={{
                 p: 2,
-                width: "55%",
+                height: "60%",
+                width:600,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
@@ -259,9 +242,9 @@ function TopBrandVdoSec() {
                   }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Avatar src={brand.logo} sx={{ width: 28, height: 28 }} />
+                    <Avatar src={currentBrand.logo} sx={{ width: 28, height: 28 }} />
                     <Typography variant="h6" fontWeight="bold">
-                      {brand.title}
+                      {currentBrand.title}
                     </Typography>
                   </Box>
                   <IconButton
@@ -278,18 +261,7 @@ function TopBrandVdoSec() {
                 </Box>
 
                 <Typography variant="body2" color="text.secondary" mb={1}>
-                  {brand.description}
-                </Typography>
-
-                <Typography variant="body2" sx={{ mb: 0.5 }}>
-                  💰 {brand.description}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  📐 {brand.description}
-                </Typography>
-
-                <Typography variant="body2" color="text.secondary">
-                  {brand.description}
+                  {currentBrand.description}
                 </Typography>
               </Box>
 
@@ -298,11 +270,9 @@ function TopBrandVdoSec() {
                 sx={{
                   backgroundColor: "#f29724",
                   textTransform: "none",
-                  width: "fit-content",
-                  px: 3,
+                  width: "100%",
                   borderRadius: 1,
                   mt: 1,
-                  ml: 42,
                   "&:hover": {
                     backgroundColor: "#e2faa7",
                     color: "#000",
@@ -311,43 +281,133 @@ function TopBrandVdoSec() {
               >
                 Apply
               </Button>
-              <Modal
-                      open={open}
-                      onClose={handleClose}
-                      aria-labelledby="modal-modal-title"
-                      aria-describedby="modal-modal-description"
-                    >
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: "50%",
-                          left: "50%",
-                          transform: "translate(-50%, -50%)",
-                          width: 400,
-                          bgcolor: "background.paper",
-                          border: "2px solid #000",
-                          boxShadow: 24,
-                          p: 4,
-                        }}
-                      >
-                        <Typography id="modal-modal-title" variant="h6" component="h2">
-                          Why Should We Ask?
-                        </Typography>
-                        <Typography sx={{ mt: 2 }}>
-                          Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic,
-                          quibusdam. Inventore quam, commodi quo perspiciatis ut voluptatem
-                          corporis, laudantium ullam eaque voluptates aliquid totam temporibus
-                          iste molestiae deserunt quod ipsam.
-                        </Typography>
-                        <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                          Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                        </Typography>
-                      </Box>
-                    </Modal>
             </Box>
           </Card>
         </AnimatePresence>
+
+        {/* Second Card */}
+        <Card
+          sx={{
+            width: 500,
+            height: 450,
+            display: "flex",
+            flexDirection: "row",
+            borderRadius: 3,
+            boxShadow: 4,
+            overflow: "hidden",
+            ":hover": {
+              boxShadow: 9,
+            },
+          }}
+        >
+          <Box sx={{ height: "100%", position: "relative" }}>
+            <motion.video
+              ref={el => videoRefs.current[1] = el}
+              src={nextBrand1.videoUrl}
+              controls
+              onPlay={() => handleVideoPlay(1)}
+              onPause={handleVideoPause}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          </Box>
+          
+          <Box
+            sx={{
+              p: 2,
+              height: "60%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  mb: 1,
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Avatar src={nextBrand1.logo} sx={{ width: 28, height: 28 }} />
+                  <Typography variant="h6" fontWeight="bold">
+                    {nextBrand1.title}
+                  </Typography>
+                </Box>
+                <IconButton
+                  onClick={handleLike}
+                  size="small"
+                  sx={{ p: 0.5 }}
+                >
+                  <FavoriteBorder sx={{ color: "gray", fontSize: 25 }} />
+                </IconButton>
+              </Box>
+
+              <Typography variant="body2" color="text.secondary" mb={1}>
+                {nextBrand1.description}
+              </Typography>
+            </Box>
+
+            <Button
+              variant="contained" onClick={handleOpen}
+              sx={{
+                backgroundColor: "#f29724",
+                textTransform: "none",
+                width: "100%",
+                borderRadius: 1,
+                mt: 1,
+                "&:hover": {
+                  backgroundColor: "#e2faa7",
+                  color: "#000",
+                },
+              }}
+            >
+              Apply
+            </Button>
+          </Box>
+        </Card>
+      
+     
       </Box>
+
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Why Should We Ask?
+          </Typography>
+          <Typography sx={{ mt: 2 }}>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic,
+            quibusdam. Inventore quam, commodi quo perspiciatis ut voluptatem
+            corporis, laudantium ullam eaque voluptates aliquid totam temporibus
+            iste molestiae deserunt quod ipsam.
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+          </Typography>
+        </Box>
+      </Modal>
     </Box>
   );
 }
