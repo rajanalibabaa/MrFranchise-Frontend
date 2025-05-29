@@ -23,6 +23,7 @@ import PopupModal from "../../Components/PopUpModal/PopUpModal";
 import TopBrandVdoCards from "../../Components/HomePage_VideoSection/TopBrandVdoCards";
 import TopInvestVdo2 from "../../Components/HomePage_VideoSection/TopInvestVdo2";
 import TopInvestVdo3 from "../../Components/HomePage_VideoSection/TopInvestVdo3";
+import FranchiseReels from "../../Components/HomePageVideoSecton2/FranchiseVideosecnew2";
 
 
 const HomeBannerSec = () => {
@@ -49,22 +50,18 @@ const HomeBannerSec = () => {
       }
     }, []);
 
-{/* <PopupModal open={isPopupOpen} onClose={handlePopupClose} /> */}
+ <PopupModal open={isPopupOpen} onClose={handlePopupClose} /> 
 
   return (
     <>
- <PopupModal open={isPopupOpen} onClose={handlePopupClose} />
-
-    {/* login and register pop up */}
-    <LoginRegisterPopUp/>
-    {/* navbarcontent */}
+    {/* <LoginRegisterPopUp/> */}
     <Navbar />
     
     <Box
       sx={{
       
         minHeight: 150,
-        maxWidth:1200,
+        maxWidth:1800,
         justifyContent:"center",
         backgroundImage: `url(${"bgimg"})`,
         backgroundSize: "cover",
@@ -97,34 +94,6 @@ const HomeBannerSec = () => {
         <Typography variant="body1" sx={{ mb: 3, color: "black" }}>
           World's highest visited franchise website network
         </Typography>
-   
-
-        {/* <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            gap: 3,
-            mb: 4,
-          }}
-        >
-          <Button variant="contained" sx={{ bgcolor: "#b00", '&:hover': { bgcolor: "darkred" } }}>Franchise</Button>
-          <Button
-            variant="contained"
-            sx={{ bgcolor: "#b00", '&:hover': { bgcolor: "darkred" } }}
-            onClick={() => navigate("/dealer")}
-          >
-            Dealer Distributer
-          </Button>
-          <Button
-            variant="contained"
-            sx={{ bgcolor: "#b00", '&:hover': { bgcolor: "darkred" } }}
-            onClick={() => navigate("/partner")}
-          >
-           Channel Partner
-          </Button>
-        </Box> */}
-
         <Box
           sx={{
             display: "flex",
@@ -256,17 +225,20 @@ const HomeBannerSec = () => {
      
     </Box>
     {/* top single vido section */}
-     <TopBrandVdoSec/>
-     <TopBrandVdoCards/>
+      <TopBrandVdoSec/> 
+      <TopBrandVdoCards/> 
      {/* top double video section */}
+<FranchiseReels/>
+
      <TopIndusVdoSec/>
+
      {/* top triple video section */}
-     <TopInvestVdoSec/>
-     
-     <TopInvestVdo2/>
-     <TopInvestVdo3/>
+      <TopInvestVdoSec/> 
+      <TopInvestVdo2/> 
+      <TopInvestVdo3/> 
+
 {/* footer sections */}
-     <Footer/>
+      <Footer/> 
      </>
     
   )

@@ -85,7 +85,7 @@ function LoginPage({ open, onClose }) {
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
-
+      
       if (response.data.success) {
         setSnackbar({
           open: true,
@@ -94,6 +94,7 @@ function LoginPage({ open, onClose }) {
         });
         setIsOtpSent(true);
         setResendDisabled(true);
+
       } else {
         throw new Error(response.data.message || "Failed to send OTP");
       }
