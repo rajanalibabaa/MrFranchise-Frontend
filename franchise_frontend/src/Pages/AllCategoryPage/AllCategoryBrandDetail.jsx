@@ -111,9 +111,19 @@ function BrandList() {
     try {
       setLoading(true);
       setError(null);
+      let response;
 
-      // console.log("AccessToken :",AccessToken)
-      const response = await axios.get(
+    if (!AccessToken) {
+      response = await axios.get(
+        "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } else {
+      response = await axios.get(
         `http://localhost:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
         {
           headers: {
@@ -122,6 +132,7 @@ function BrandList() {
           },
         }
       );
+    }
 
       const brandsData = response.data.data;
       // console.log("Brands data:", brandsData);
@@ -454,8 +465,21 @@ function BrandList() {
     </Box>
   );
 
+  const [login, setLogin] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [message, setMessage] = useState("");
+
 const toggleLike = async (brandId) => {
   try {
+
+    if (!AccessToken) {
+      setMessage("You need to log in to continue.");
+      alert("You need to log in to continue.")
+      setLogin(true);
+      setShowPopup(true);
+      return 
+    }
+
     const brandToUpdate = brands.find((brand) => brand.uuid === brandId);
     if (!brandToUpdate) return;
 
@@ -504,12 +528,15 @@ const toggleLike = async (brandId) => {
   }
 };
 
-
+const closePopup = () => {
+    setShowPopup(false);
+  };
 
 
 
   const BrandCard = ({ brand }) => (
-    <Card
+    <div>
+      <Card
       sx={{
         height: "100%",
         display: "flex",
@@ -633,6 +660,8 @@ const toggleLike = async (brandId) => {
         </Button>
       </CardActions>
     </Card>
+    
+    </div>
   );
 
   
@@ -2466,6 +2495,7 @@ const toggleLike = async (brandId) => {
       </Drawer>
 
       <BrandDetailsDialog />
+      
     </Container>
   );
 }
