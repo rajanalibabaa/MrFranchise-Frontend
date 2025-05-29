@@ -17,21 +17,23 @@ function Footer() {
           <Grid item xs={12} sm={6} md={4}>
             <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
               <Box
-                component="img"
-                src={brandlogo}
-                alt="MR FRANCHISE Logo"
-                sx={{
-                  display: "inline-block",
-                  width: "auto",
-                  height: { xs: 50, sm: 60, md: 70 },
-                  px: 2,
-                  py: 1,
-                  mb: 1,
-                  marginLeft: { xs: 0, md: 4 },
-                  objectFit: "contain",
-                  mx: { xs: "auto", md: 0 },
-                }}
-              ></Box>
+  component="img"
+  src={brandlogo}
+  alt="MR FRANCHISE Logo"
+  sx={{
+    display: "inline-block",
+    width: "auto",
+    height: { xs: 50, sm: 60, md: 70 },
+    px: 2,
+    py: 1,
+    mb: 1,
+    marginLeft: { xs: 0, md: 4 },
+    objectFit: "contain",
+    mx: { xs: "auto", md: 0 },
+    cursor: "pointer", // Add pointer cursor for clarity
+  }}
+  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+/>
               <Typography
                 variant="subtitle2"
                 sx={{
