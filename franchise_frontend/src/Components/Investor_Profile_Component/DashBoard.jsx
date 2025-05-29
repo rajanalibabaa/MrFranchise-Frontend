@@ -39,7 +39,7 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
       if (!investorUUID || !AccessToken) return;
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/v1/like/get-favbrands/${investorUUID}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/like/get-favbrands/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",

@@ -364,6 +364,7 @@ function Navbar() {
             }}>
               <motion.div whileHover={{ y: -2 }}>
                 <Button 
+                onClick={() => navigate('/brandlistingform')}
                   startIcon={<Plus size={18} />}
                   sx={{ 
                     color: '#ff9800',  
@@ -378,13 +379,14 @@ function Navbar() {
                     }
                   }}
                 >
-                  Add Business
+                  Add Your Business To Franchise
                 </Button>
               </motion.div>
               
               <motion.div whileHover={{ y: -2 }}>
                 <Button 
                   startIcon={<Search size={18} />}
+                  onClick={() => navigate('/brandviewpage')}
                   sx={{ 
                     color: '#ff9800',  
                     backgroundColor: 'rgba(255, 152, 0, 0.1)',
@@ -398,7 +400,7 @@ function Navbar() {
                     }
                   }}
                 >
-                  Find Brand
+                  Find Your Brand To Franchise
                 </Button>
               </motion.div>
             </Box>

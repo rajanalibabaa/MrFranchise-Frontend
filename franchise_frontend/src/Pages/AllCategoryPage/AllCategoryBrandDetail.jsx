@@ -66,6 +66,8 @@ import { CheckCircleOutline } from "@mui/icons-material";
 import {motion} from "framer-motion"
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { set } from "react-hook-form";
+import LoginPage from "../LoginPage/LoginPage.jsx";
 
 function BrandList() {
   const [brands, setBrands] = useState([]);
@@ -89,6 +91,9 @@ function BrandList() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
+
+  const [showLogin, setShowLogin] = useState(false);
+
   const investmentRangeOptions = [
     { label: "All Ranges", value: "" },
     { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
@@ -111,9 +116,19 @@ function BrandList() {
     try {
       setLoading(true);
       setError(null);
+      let response;
 
-      // console.log("AccessToken :",AccessToken)
-      const response = await axios.get(
+    if (!AccessToken) {
+      response = await axios.get(
+        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } else {
+      response = await axios.get(
         `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
         {
           headers: {
@@ -122,6 +137,7 @@ function BrandList() {
           },
         }
       );
+    }
 
       const brandsData = response.data.data;
       // console.log("Brands data:", brandsData);
@@ -454,8 +470,22 @@ function BrandList() {
     </Box>
   );
 
+  const [login, setLogin] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [message, setMessage] = useState("");
+
 const toggleLike = async (brandId) => {
   try {
+
+    if (!AccessToken) {
+      setMessage("You need to log in to continue.");
+      alert("You need to log in to continue.")
+      // setLogin(true);
+      // setShowPopup(true);
+      setShowLogin(true)
+      return 
+    }
+
     const brandToUpdate = brands.find((brand) => brand.uuid === brandId);
     if (!brandToUpdate) return;
 
@@ -504,12 +534,15 @@ const toggleLike = async (brandId) => {
   }
 };
 
-
+const closePopup = () => {
+    setShowPopup(false);
+  };
 
 
 
   const BrandCard = ({ brand }) => (
-    <Card
+    <div>
+      <Card
       sx={{
         height: "100%",
         display: "flex",
@@ -543,16 +576,20 @@ const toggleLike = async (brandId) => {
             {brand.personalDetails?.brandName}
           </Typography>
           <Typography>
-            <Favorite 
-                       onClick={() => toggleLike(brand.uuid)}
-                        sx={{
-                        // position: "absolute",
-                        // top: 8,
-                        // right: 8,
-                        cursor: "pointer",
-                        color: brand.isLiked ? "red" : "gray",
-                        }}
-            />
+           <>
+  <Favorite 
+    onClick={() => toggleLike(brand.uuid)}
+    sx={{
+      cursor: "pointer",
+      color: brand.isLiked ? "red" : "gray",
+    }}
+  />
+
+  {showLogin && (
+    <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+  )}
+</>
+
           </Typography>
         </Box>
 
@@ -633,6 +670,8 @@ const toggleLike = async (brandId) => {
         </Button>
       </CardActions>
     </Card>
+    
+    </div>
   );
 
   
@@ -749,7 +788,7 @@ const toggleLike = async (brandId) => {
             };
 
             const response = await axios.post(
-                "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createInstaApply",
+                "http://localhost:5000/api/v1/brandlisting/createInstaApply",
                 payload,
                 {
                     headers: {
@@ -1683,7 +1722,7 @@ const toggleLike = async (brandId) => {
         console.log(payload);
 
         const response = await axios.post(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createInstaApply",
+          "http://localhost:5000/api/v1/brandlisting/createInstaApply",
           payload,
           {
             headers: {
@@ -2466,6 +2505,7 @@ const toggleLike = async (brandId) => {
       </Drawer>
 
       <BrandDetailsDialog />
+      
     </Container>
   );
 }
