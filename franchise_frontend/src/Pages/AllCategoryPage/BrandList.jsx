@@ -74,16 +74,18 @@ const investmentRangeOptions = [
 function BrandList() {
   const dispatch = useDispatch();
   const {
-    data: brands,
-    filteredData: filteredBrands,
-    loading,
-    error,
-    categories: availableCategories,
-    modelTypes: availableModelTypes,
-    states: availableStates,
-    cities: availableCities,
-    filters,
+    data: brands =[],
+    filteredData: filteredBrands=[],
+    loading =false,
+    error =null,
+    categories: availableCategories=[],
+    modelTypes: availableModelTypes=[],
+    states: availableStates=[],
+    cities: availableCities=[],
+    filters ={},
   } = useSelector((state) => state.brands);
+
+  console.log(" =========== : ",brands)
 
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -113,7 +115,7 @@ function BrandList() {
     dispatch(clearFilters());
   };
 
-  const activeFilterCount = Object.values(filters).filter(Boolean).length;
+  const activeFilterCount = Object.values(filters || {}).filter(Boolean).length;
 
   const FilterPanel = () => (
     <Box sx={{ width: 280, p: 2 }}>

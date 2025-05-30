@@ -1,7 +1,7 @@
 import React from 'react'
 import Navbar from '../../Components/Navbar/NavBar'
 import Footer from '../../Components/Footers/Footer'
-import BrandList from './BrandList.jsx'
+import BrandList from './BrandList'
 
 function BrandCategroyViewPage() {
   return (
