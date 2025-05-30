@@ -61,6 +61,7 @@ import {
   Support,
   Favorite,
   AreaChart,
+  Email,
 } from "@mui/icons-material";
 import { CheckCircleOutline } from "@mui/icons-material";
 import {motion} from "framer-motion"
