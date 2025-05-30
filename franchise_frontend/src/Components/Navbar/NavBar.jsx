@@ -103,12 +103,9 @@ function Navbar() {
     setlogoutLoading(true)
     try {
       const response = await axios.post(
-<<<<<<< HEAD
         // `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
         `http://localhost:5000/api/v1/logout/${ID}`,
-=======
         `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
->>>>>>> 00399705284de786cd8fdcabddcea30e68185be5
         {},
         {
           headers: {
