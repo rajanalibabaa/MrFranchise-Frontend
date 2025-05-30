@@ -118,7 +118,7 @@ const OverviewTab = ({ brand }) => {
       };
 
       const response = await axios.post(
-        "http://localhost:5000/api/v1/brandlisting/createInstaApply",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createInstaApply",
         payload,
         {
           headers: {

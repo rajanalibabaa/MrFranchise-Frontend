@@ -108,13 +108,13 @@ const FoodAndBeverageSection = () => {
     );
 
   return (
-    <Box sx={{ p: 4, background: "#fff", maxWidth: 1800, mx: "auto" }}>
+    <Box sx={{ p: 1, maxWidth: 1900,  }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Typography variant="h5" fontWeight={600}>
           Invest Your Franchise
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Near You!
+        <Typography variant="body2" >
+          All Brands
         </Typography>
       </Box>
 

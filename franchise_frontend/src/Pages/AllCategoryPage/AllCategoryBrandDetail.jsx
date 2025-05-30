@@ -67,6 +67,8 @@ import { CheckCircleOutline } from "@mui/icons-material";
 import {motion} from "framer-motion"
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { set } from "react-hook-form";
+import LoginPage from "../LoginPage/LoginPage.jsx";
 
 function BrandList() {
   const [brands, setBrands] = useState([]);
@@ -90,6 +92,9 @@ function BrandList() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
+
+  const [showLogin, setShowLogin] = useState(false);
+
   const investmentRangeOptions = [
     { label: "All Ranges", value: "" },
     { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
@@ -112,10 +117,20 @@ function BrandList() {
     try {
       setLoading(true);
       setError(null);
+      let response;
 
-      // console.log("AccessToken :",AccessToken)
-      const response = await axios.get(
-        `http://localhost:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
+    if (!AccessToken) {
+      response = await axios.get(
+        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } else {
+      response = await axios.get(
+        `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -123,6 +138,7 @@ function BrandList() {
           },
         }
       );
+    }
 
       const brandsData = response.data.data;
       // console.log("Brands data:", brandsData);
@@ -265,7 +281,6 @@ function BrandList() {
   }, [applyFilters]);
 
   const handleOpenBrand = (brand) => {
-    // console.log(brand)
     setSelectedBrand(brand);
     setOpenDialog(true);
     setTabValue(0);
@@ -456,8 +471,22 @@ function BrandList() {
     </Box>
   );
 
+  const [login, setLogin] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [message, setMessage] = useState("");
+
 const toggleLike = async (brandId) => {
   try {
+
+    if (!AccessToken) {
+      setMessage("You need to log in to continue.");
+      alert("You need to log in to continue.")
+      // setLogin(true);
+      // setShowPopup(true);
+      setShowLogin(true)
+      return 
+    }
+
     const brandToUpdate = brands.find((brand) => brand.uuid === brandId);
     if (!brandToUpdate) return;
 
@@ -466,7 +495,7 @@ const toggleLike = async (brandId) => {
     if (updatedLikedStatus) {
       // Add to favorites
       await axios.post(
-        "http://localhost:5000/api/v1/like/post-favbrands",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
         { branduuid: brandId },
         {
           headers: {
@@ -479,7 +508,7 @@ const toggleLike = async (brandId) => {
     } else {
       // Remove from favorites
       const unlike = await axios.delete(
-        `http://localhost:5000/api/v1/like/delete-favbrand/${Id}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${Id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -506,12 +535,15 @@ const toggleLike = async (brandId) => {
   }
 };
 
-
+const closePopup = () => {
+    setShowPopup(false);
+  };
 
 
 
   const BrandCard = ({ brand }) => (
-    <Card
+    <div>
+      <Card
       sx={{
         height: "100%",
         display: "flex",
@@ -545,16 +577,20 @@ const toggleLike = async (brandId) => {
             {brand.personalDetails?.brandName}
           </Typography>
           <Typography>
-            <Favorite 
-                       onClick={() => toggleLike(brand.uuid)}
-                        sx={{
-                        // position: "absolute",
-                        // top: 8,
-                        // right: 8,
-                        cursor: "pointer",
-                        color: brand.isLiked ? "red" : "gray",
-                        }}
-            />
+           <>
+  <Favorite 
+    onClick={() => toggleLike(brand.uuid)}
+    sx={{
+      cursor: "pointer",
+      color: brand.isLiked ? "red" : "gray",
+    }}
+  />
+
+  {showLogin && (
+    <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+  )}
+</>
+
           </Typography>
         </Box>
 
@@ -635,6 +671,8 @@ const toggleLike = async (brandId) => {
         </Button>
       </CardActions>
     </Card>
+    
+    </div>
   );
 
   
@@ -646,8 +684,6 @@ const toggleLike = async (brandId) => {
     const [selectedModel, setSelectedModel] = useState(null);
     const [formData, setFormData] = useState({
         fullName: "",
-        investorEmail:"",
-        mobileNumber:"",
         franchiseModel: "",
         franchiseType: "",
         investmentRange: "",
@@ -655,7 +691,6 @@ const toggleLike = async (brandId) => {
         planToInvest: "",
         readyToInvest: "",
     });
-    console.log("formdata.",formData)
 
     // Animation variants
     const containerVariants = {
@@ -1074,36 +1109,6 @@ const toggleLike = async (brandId) => {
                                                         label="Full Name"
                                                         name="fullName"
                                                         value={formData.fullName}
-                                                        onChange={handleChange}
-                                                        required
-                                                        variant="outlined"
-                                                        size="small"
-                                                        sx={{ mb: 2 }}
-                                                    />
-                                                </motion.div>
-                                            </Grid>
-                                            <Grid item xs={12} md={6}>
-                                                <motion.div variants={itemVariants}>
-                                                    <TextField
-                                                        fullWidth
-                                                        label="Email"
-                                                        name="email"
-                                                        value={formData.investorEmail}
-                                                        onChange={handleChange}
-                                                        required
-                                                        variant="outlined"
-                                                        size="small"
-                                                        sx={{ mb: 2 }}
-                                                    />
-                                                </motion.div>
-                                            </Grid>
-                                            <Grid item xs={12} md={6}>
-                                                <motion.div variants={itemVariants}>
-                                                    <TextField
-                                                        fullWidth
-                                                        label="MobileNumber"
-                                                        name="mobileNumber"
-                                                        value={formData.mobileNumber}
                                                         onChange={handleChange}
                                                         required
                                                         variant="outlined"
@@ -1532,8 +1537,6 @@ const toggleLike = async (brandId) => {
 
     const [formData, setFormData] = useState({
       fullName: "",
-      investorEmail:"",
-      mobileNumber:"",
       franchiseModel: "",
       franchiseType: "",
       investmentRange: "",
@@ -1541,7 +1544,6 @@ const toggleLike = async (brandId) => {
       planToInvest: "",
       readyToInvest: "",
     });
-    console.log("formdata.....",formData)
 
     const handleMediaClick = (media, index) => {
       // If it's a video and we're clicking the controls, don't open full screen
@@ -1639,18 +1641,6 @@ const toggleLike = async (brandId) => {
         name: "fullName",
         label: "Full Name",
         type: "text",
-        required: true,
-      },
-       {
-        name: "investorEmail",
-        label: "Email",
-        type: "email",
-        required: true,
-      },
-       {
-        name: "mobileNumber",
-        label: "Mobile number",
-        type: "number",
         required: true,
       },
       {
@@ -2516,9 +2506,9 @@ const toggleLike = async (brandId) => {
       </Drawer>
 
       <BrandDetailsDialog />
+      
     </Container>
   );
 }
 
 export default BrandList;
-
