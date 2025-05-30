@@ -49,6 +49,8 @@ import {
 import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress from "@mui/material/CircularProgress";
+import Navbar from "../../../Components/Navbar/NavBar";
+import Footer from "../../../Components/Footers/Footer";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
 const FORM_STEP_KEY = "brandRegistrationActiveStep";
@@ -1049,6 +1051,8 @@ const BrandRegisterForm = () => {
     );
   };
   return (
+    <>
+    <Navbar/>
     <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Box
         sx={{
@@ -1212,6 +1216,8 @@ const BrandRegisterForm = () => {
         </Alert>
       </Snackbar>
     </Box>
+    <Footer/>
+    </>
   );
 };
 
