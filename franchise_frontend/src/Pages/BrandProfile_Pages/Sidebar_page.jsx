@@ -6,7 +6,7 @@ import img from "../../assets/Images/brandLogo.jpg";
 const Sidebar = () => {
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      {/* Sidebar (Fixed width and non-scrollable) */}
+     
       <Box
         sx={{
           width: 240,
@@ -21,7 +21,6 @@ const Sidebar = () => {
           flexShrink: 0,
         }}
       >
-        {/* Clickable Logo */}
         <Box sx={{ textAlign: "center", mb: 2 }}>
           <RouterLink to="/" style={{ textDecoration: "none" }}>
             <Box
@@ -61,9 +60,7 @@ const Sidebar = () => {
           <RouterLink to="/brandDashboard/brandDashboard" style={navLinkStyle}>
             Dashboard
           </RouterLink>
-          <RouterLink to="/brandDashboard/brandmanageprofile" style={navLinkStyle}>
-            Manage Profile
-          </RouterLink>
+          
           <RouterLink to="/brandDashboard/brandaddvedios" style={navLinkStyle}>
             Add Videos
           </RouterLink>
