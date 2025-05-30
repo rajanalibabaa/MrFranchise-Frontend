@@ -29,6 +29,7 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
   const [likedStates, setLikedStates] = useState({});
   const [showMore, setShowMore] = useState({});
   const [removeMsg, setremoveMsg] = useState("");
+  const [viewStatus, setviewStatus] = useState({});
   
 const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
@@ -52,6 +53,43 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
         setInvestorInfo(data);
 
         setLikedBrands(data);
+
+        // console.log(" ==== :",data.length)
+
+        // Initialize likedStates
+        const initialLiked = {};
+        data.forEach((item, idx) => {
+          const id = item.brandDetails?.brandId || item._id || item.id || idx;
+          initialLiked[id] = true;
+        });
+        setLikedStates(initialLiked);
+      } catch (error) {
+        console.error("API Error:", error);
+      }
+    };
+
+    fetchInvestor();
+  }, [investorUUID, AccessToken]);
+  useEffect(() => {
+    const fetchInvestor = async () => {
+      if (!investorUUID || !AccessToken) return;
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/v1/view/getAllViewBrands/${investorUUID}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${AccessToken}`,
+            },
+          }
+        );
+
+        const data = response?.data?.data || [];
+        setviewStatus(data);
+
+        setviewStatus(data);
+
+        // console.log(" ==== :",data.length)
 
         // Initialize likedStates
         const initialLiked = {};
@@ -130,16 +168,118 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const renderTabContent = () => {
     switch (tabValue) {
-      case 0:
-        return viewedBrands.length > 0 ? (
-          <ul>
-            {viewedBrands.map((item, idx) => (
-              <li key={idx}>{item.name || JSON.stringify(item)}</li>
-            ))}
-          </ul>
-        ) : (
-          <Typography>No viewed brands available.</Typography>
+     case 0:
+  return viewStatus.length > 0 ? (
+    <Grid container spacing={3}>
+      {viewStatus.map((item, idx) => {
+        const brandId = item.uuid;
+
+        return (
+          <Grid item sm={6} md={4} lg={3} key={brandId} sx={{ display: "flex", justifyContent: "center" }}>
+            <Card
+              sx={{
+                width: "345px",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+                boxShadow: 3,
+                "&:hover": { boxShadow: 6 },
+              }}
+            >
+              {/* Brand Image */}
+              <CardMedia
+                component="img"
+                height="160"
+                image={
+                  item.brandDetails?.brandLogo?.[0] ||
+                  "https://via.placeholder.com/300x160?text=No+Image"
+                }
+                alt={item.personalDetails?.brandName || "Brand Image"}
+              />
+
+              {/* Brand Info */}
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  component="div"
+                  noWrap
+                  title={item.personalDetails?.brandName || "Unnamed Brand"}
+                >
+                  {item.personalDetails?.brandName || "Unnamed Brand"}
+                </Typography>
+
+                {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    <strong>Franchise Models: </strong>
+                    {item.franchiseDetails.modelsOfFranchise.map((value, index) => (
+                      <span key={index} style={{ marginRight: "6px" }}>
+                        {value.franchiseModel}
+                        {index !== item.franchiseDetails.modelsOfFranchise.length - 1 ? "," : ""}
+                      </span>
+                    ))}
+                  </Typography>
+                )}
+              </CardContent>
+
+              {/* Brand Description */}
+              <CardContent sx={{ pt: 0, mt: "auto", wordWrap: "break-word", whiteSpace: "normal" }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  Description:
+                </Typography>
+
+                {item.personalDetails?.brandDescription ? (
+                  showMore[brandId] ? (
+                    <Typography variant="body2" color="text.secondary">
+                      {item.personalDetails.brandDescription}
+                      <Typography
+                        component="span"
+                        onClick={() => toggleShowMore(brandId)}
+                        sx={{
+                          cursor: "pointer",
+                          color: "primary.main",
+                          ml: 0.5,
+                          userSelect: "none",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        ...Less
+                      </Typography>
+                    </Typography>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      {item.personalDetails.brandDescription.slice(0, 100)}
+                      {item.personalDetails.brandDescription.length > 100 && (
+                        <Typography
+                          component="span"
+                          onClick={() => toggleShowMore(brandId)}
+                          sx={{
+                            cursor: "pointer",
+                            color: "primary.main",
+                            ml: 0.5,
+                            userSelect: "none",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          ...More
+                        </Typography>
+                      )}
+                    </Typography>
+                  )
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    No description provided.
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
         );
+      })}
+    </Grid>
+  ) : (
+    <Typography>No viewed brands available.</Typography>
+  );
 
       case 1:
         return likedBrands.length > 0 ? (
@@ -542,26 +682,60 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
           >
             <Tab
               label={
+                
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <VisibilityIcon fontSize="small" />
-                  Viewed Brands
-                </Box>
+                <FavoriteIcon fontSize="small" />
+                <Typography variant="body2" fontWeight={500}>
+                  Viewed Brands 
+                </Typography>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  color="primary"
+                  sx={{ ml: 0.5 }}
+                >
+                  ({viewStatus?.length || 0})
+                </Typography>
+              </Box>
+
               }
             />
             <Tab
               label={
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <FavoriteIcon fontSize="small" />
+                <FavoriteIcon fontSize="small" />
+                <Typography variant="body2" fontWeight={500}>
                   Interested Brands
-                </Box>
+                </Typography>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  color="primary"
+                  sx={{ ml: 0.5 }}
+                >
+                  ({likedBrands?.length || 0})
+                </Typography>
+              </Box>
+
               }
             />
             <Tab
               label={
+                
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <AssignmentTurnedInIcon fontSize="small" />
-                  Applied List
-                </Box>
+                <FavoriteIcon fontSize="small" />
+                <Typography variant="body2" fontWeight={500}>
+                  Applied List 
+                </Typography>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  color="primary"
+                  sx={{ ml: 0.5 }}
+                >
+                  ({likedBrands?.length || 0})
+                </Typography>
+              </Box>               
               }
             />
           </Tabs>
