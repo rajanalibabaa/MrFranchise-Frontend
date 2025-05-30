@@ -17,13 +17,15 @@
     "@mui/styled-engine-sc": "^7.0.2",
     "@reduxjs/toolkit": "^2.7.0",
     "axios": "^1.9.0",
-    "framer-motion": "^12.12.1",
+    "framer-motion": "^12.15.0",
     "lucide-react": "^0.503.0",
     "react": "^19.0.0",
+    "react-confetti": "^6.4.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.3",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.5.3",
+    "react-use": "^17.6.0",
     "styled-components": "^6.1.17"
   },
   "devDependencies": {
