@@ -310,7 +310,7 @@ function Navbar() {
         <Toolbar
           sx={{
             display: "flex",
-            justifyContent: isMobile ? "space-evenly" : "space-evenly",
+            justifyContent: isMobile ? "space-evenly" : "space-between",
             alignItems: "center",
             px: { xs: 1, sm: 2 },
             minHeight: "64px !important",
@@ -353,12 +353,15 @@ function Navbar() {
                 />
               </Box>
             </motion.div>
+            
           </Box>
 
-          {!isMobile && (
-            <Box sx={{ 
+            
+          {/* <Box sx={{ flexGrow: isMobile ? 1 : 0 }} /> */}
+
+<Box  sx={{ 
               display: 'flex', 
-              gap: 2,
+              gap: 5,
               flex: isTablet ? 1 : 'none',
               justifyContent: isTablet ? 'center' : 'flex-start'
             }}>
@@ -404,11 +407,9 @@ function Navbar() {
                 </Button>
               </motion.div>
             </Box>
-          )}
-
-          <Box sx={{ flexGrow: isMobile ? 1 : 0 }} />
 
           <Box ref={avatarRef} sx={{ position: "relative" }}>
+            
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
