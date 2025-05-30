@@ -11,7 +11,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { Favorite, FavoriteBorder } from "@mui/icons-material";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, color } from "framer-motion";
 import axios from "axios";
 
 function TopBrandVdoCards() {
@@ -126,7 +126,7 @@ function TopBrandVdoCards() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Typography variant="h4" fontWeight="bold" mb={3} textAlign="center">
+      <Typography variant="h4" fontWeight="bold" sx={{ color: "#ff9800" }} mb={3} textAlign="left" backgroundColor="#689f38">
         Featured Franchise Brands
       </Typography>
       
@@ -134,7 +134,7 @@ function TopBrandVdoCards() {
         sx={{
           display: "grid",
           gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr",
-          gap: 3,
+          gap: 2,
         }}
       >
         {/* Main Video Card (Left) */}
@@ -154,11 +154,11 @@ function TopBrandVdoCards() {
                 overflow: "hidden",
                 boxShadow: 6,
                 width:isMobile ? '100%' : 800,
-                height: isMobile ? 'auto' : 500,
+                height: isMobile ? 'auto' : 520,
               }}
             >
               <Box sx={{ 
-                height: isMobile ? 250 : 370, 
+                height: isMobile ? 250 : 400, 
                 overflow: "hidden",
                 position: 'relative'
               }}>

@@ -58,12 +58,13 @@ const BrandVideoCard = ({
         transform: 'translateY(-5px)'
       }
     }}>
-      {/* Video Section */}
+      {/* Video Section - Fixed height container */}
       <Box sx={{
         position: 'relative',
         width: '100%',
-        aspectRatio: '16/9',
-        backgroundColor: '#000'
+        height: isMobile ? '200px' : '350px', // Fixed height for all cards
+        backgroundColor: '#000',
+        overflow: 'hidden'
       }}>
         {videoUrl ? (
           <>
@@ -76,7 +77,7 @@ const BrandVideoCard = ({
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
+                objectFit: 'cover', // Cover maintains aspect ratio while filling container
                 cursor: 'pointer'
               }}
               muted
@@ -118,7 +119,7 @@ const BrandVideoCard = ({
       </Box>
       
       {/* Content Section */}
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 1 }}>
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center', 
@@ -129,8 +130,8 @@ const BrandVideoCard = ({
             <Avatar 
               src={brand?.brandDetails?.brandLogo?.[0]} 
               sx={{ 
-                width: 42, 
-                height: 42,
+                width: 50, 
+                height: 50,
                 border: '1px solid #eee'
               }} 
             />
@@ -216,17 +217,16 @@ const BrandVideoCard = ({
           mb: 2
         }}>
          {brand?.personalDetails?.brandCategories?.map((category, i) => (
-  <Chip
-    key={i}
-    label={`${category.main} > ${category.sub} > ${category.child}`}
-    size="small"
-    sx={{
-      backgroundColor: theme.palette.grey[200],
-      color: theme.palette.text.primary
-    }}
-  />
-))}
-
+            <Chip
+              key={i}
+              label={`${category.main} > ${category.sub} > ${category.child}`}
+              size="small"
+              sx={{
+                backgroundColor: theme.palette.grey[200],
+                color: theme.palette.text.primary
+              }}
+            />
+          ))}
         </Box>
         
         <Button
@@ -338,7 +338,7 @@ function TopBrandVdoSec() {
     // Set up auto-rotation every 3 minutes (180000 ms)
     autoPlayTimer.current = setInterval(() => {
       rotateBrands();
-    }, 180000);
+    }, 10000);
 
     return () => {
       if (autoPlayTimer.current) {
@@ -453,7 +453,9 @@ function TopBrandVdoSec() {
         fontWeight="bold" 
         gutterBottom
         sx={{ 
-          textAlign: 'center',
+          textAlign: 'left',
+          backgroundColor: '#689f38',
+          color: '#ff9800',
           mb: 4
         }}
       >

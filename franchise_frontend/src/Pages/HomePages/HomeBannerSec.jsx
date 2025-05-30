@@ -16,14 +16,14 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import TopBrandVdoSec from "../../Components/HomePage_VideoSection/TopBrandVdoSec";
-import TopIndusVdoSec from "../../Components/HomePage_VideoSection/TopIndusVdoSec";
+import TopBrandVdoSec from "../../Components/HomePage_VideoSection/TopBrandTwoVdoSec";
+import TopIndusVdoSec from "../../Components/HomePage_VideoSection/TopIndusVdoSecRandomAll";
 import TopInvestVdoSec from "../../Components/HomePage_VideoSection/TopInvestVdoSec";
 import Navbar from "../../Components/Navbar/NavBar";
 import Footer from "../../Components/Footers/Footer";
 import LoginRegisterPopUp from "../../Components/PopUpModal/LoginRegisterPopUp";
 import PopupModal from "../../Components/PopUpModal/PopUpModal";
-import TopBrandVdoCards from "../../Components/HomePage_VideoSection/TopBrandVdoCards";
+import TopBrandVdoCards from "../../Components/HomePage_VideoSection/TopBrandThreeVdoCards";
 import TopInvestVdo2 from "../../Components/HomePage_VideoSection/TopInvestVdo2";
 import TopInvestVdo3 from "../../Components/HomePage_VideoSection/TopInvestVdo3";
 import FranchiseReels from "../../Components/HomePageVideoSecton2/FranchiseVideosecnew2";
