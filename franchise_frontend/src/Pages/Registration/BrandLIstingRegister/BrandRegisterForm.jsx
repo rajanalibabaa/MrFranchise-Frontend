@@ -33,7 +33,6 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-
 } from "@mui/material";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -43,8 +42,15 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import BrandDetails from "./BrandDetails";
 import FranchiseDetails from "./FranchiseDetails";
 import Uploads from "../BrandLIstingRegister/BrandRegisterUploads";
-import{ validateBrandDetails,validateFranchiseDetails } from "./BrandRegisterValidation";
+import {
+  validateBrandDetails,
+  validateFranchiseDetails,
+} from "./BrandRegisterValidation";
 import axios from "axios";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CircularProgress from "@mui/material/CircularProgress";
+import Navbar from "../../../Components/Navbar/NavBar";
+import Footer from "../../../Components/Footers/Footer";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
 const FORM_STEP_KEY = "brandRegistrationActiveStep";
@@ -172,8 +178,7 @@ const BrandRegisterForm = () => {
     return savedData ? JSON.parse(savedData) : initialFormData;
   });
 
-
-  // console.log("Form Data:", formData);  
+  // console.log("Form Data:", formData);
 
   const [validationErrors, setValidationErrors] = useState({
     brandDetails: {},
@@ -193,13 +198,14 @@ const BrandRegisterForm = () => {
     severity: "error",
   });
 
+  // Add loading state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
   useEffect(() => {
     localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formData));
     localStorage.setItem(FORM_STEP_KEY, activeStep.toString());
   }, [formData, activeStep]);
-
-
-
 
   const validateUploadsDetails = (data) => {
     const errors = {};
@@ -265,118 +271,127 @@ const BrandRegisterForm = () => {
 
   const handleSubmit = async () => {
     const isValid = validateStep(activeStep);
-    
+
     if (isValid) {
       try {
+        setIsSubmitting(true);
+        setSubmitSuccess(false);
+
         // Your submit logic here
-        //form data to submit 
+        //form data to submit
         const formDataSend = new FormData();
 
-        formDataSend.append('personalDetails', JSON.stringify({
-          fullName: formData.brandDetails.fullName,
-          email: formData.brandDetails.email,
-          mobileNumber: formData.brandDetails.mobileNumber,
-          brandName: formData.brandDetails.brandName,
-          companyName: formData.brandDetails.companyName,
-          country: countries.find(c => c.code === formData.brandDetails.country)?.name || formData.brandDetails.country,
-          pincode: formData.brandDetails.pincode,
-          headOfficeAddress: formData.brandDetails.headOfficeAddress,
-          state: formData.brandDetails.state,
-          city: formData.brandDetails.city,
-          establishedYear: formData.brandDetails.establishedYear,
-          franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
-          brandCategories: formData.brandDetails.brandCategories,
-          brandDescription: formData.brandDetails.brandDescription,
-          expansionLocation: formData.brandDetails.expansionLocation,
-          pancardNumber: formData.brandDetails.pancardNumber,
-          gstNumber: formData.brandDetails.gstNumber,
-          website: formData.brandDetails.website,
-          facebook: formData.brandDetails.facebook,
-          instagram: formData.brandDetails.instagram,
-          linkedin: formData.brandDetails.linkedin,   
-             }));
-             formDataSend.append('franchiseDetails', JSON.stringify({
-               modelsOfFranchise: formData.franchiseDetails.fico,
-          companyOwnedOutlets: formData.franchiseDetails.companyOwnedOutlets,
-          franchiseOutlets: formData.franchiseDetails.franchiseOutlets,
-          totalOutlets: formData.franchiseDetails.totalOutlets,
-          requirementSupport: formData.franchiseDetails.requirementSupport,
-          trainingProvidedBy: formData.franchiseDetails.trainingProvidedBy,
-          agreementPeriod: formData.franchiseDetails.agreementPeriod,
+        formDataSend.append(
+          "personalDetails",
+          JSON.stringify({
+            fullName: formData.brandDetails.fullName,
+            email: formData.brandDetails.email,
+            mobileNumber: formData.brandDetails.mobileNumber,
+            brandName: formData.brandDetails.brandName,
+            companyName: formData.brandDetails.companyName,
+            country:
+              countries.find((c) => c.code === formData.brandDetails.country)
+                ?.name || formData.brandDetails.country,
+            pincode: formData.brandDetails.pincode,
+            headOfficeAddress: formData.brandDetails.headOfficeAddress,
+            state: formData.brandDetails.state,
+            city: formData.brandDetails.city,
+            establishedYear: formData.brandDetails.establishedYear,
+            franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
+            brandCategories: formData.brandDetails.brandCategories,
+            brandDescription: formData.brandDetails.brandDescription,
+            expansionLocation: formData.brandDetails.expansionLocation,
+            pancardNumber: formData.brandDetails.pancardNumber,
+            gstNumber: formData.brandDetails.gstNumber,
+            website: formData.brandDetails.website,
+            facebook: formData.brandDetails.facebook,
+            instagram: formData.brandDetails.instagram,
+            linkedin: formData.brandDetails.linkedin,
+          })
+        );
+        formDataSend.append(
+          "franchiseDetails",
+          JSON.stringify({
+            modelsOfFranchise: formData.franchiseDetails.fico,
+            companyOwnedOutlets: formData.franchiseDetails.companyOwnedOutlets,
+            franchiseOutlets: formData.franchiseDetails.franchiseOutlets,
+            totalOutlets: formData.franchiseDetails.totalOutlets,
+            requirementSupport: formData.franchiseDetails.requirementSupport,
+            trainingProvidedBy: formData.franchiseDetails.trainingProvidedBy,
+            agreementPeriod: formData.franchiseDetails.agreementPeriod,
+          })
+        );
+        formDataSend.append("brandDetails", JSON.stringify({}));
+        // Add files to formData
+        const fileFields = {
+          brandLogo: formData.uploads.brandLogo,
+          gstCertificate: formData.uploads.gstCertificate,
+          pancard: formData.uploads.pancard,
+          exteriorOutlet: formData.uploads.exteriorOutlet,
+          interiorOutlet: formData.uploads.interiorOutlet,
+          franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
+          brandPromotionVideo: formData.uploads.brandPromotionVideo,
+        };
+        Object.entries(fileFields).forEach(([fieldName, files]) => {
+          if (files && files.length > 0) {
+            files.forEach((file) => {
+              formDataSend.append(fieldName, file);
+            });
+          }
+        });
+        //   const apiData = {
+        //   personalDetails: {
+        //     fullName: formData.brandDetails.fullName,
+        //     email: formData.brandDetails.email,
+        //     mobileNumber: formData.brandDetails.mobileNumber,
+        //     brandName: formData.brandDetails.brandName,
+        //     companyName: formData.brandDetails.companyName,
+        //     country: countries.find(c => c.code === formData.brandDetails.country)?.name || formData.brandDetails.country,
+        //     pincode: formData.brandDetails.pincode,
+        //     headOfficeAddress: formData.brandDetails.headOfficeAddress,
+        //     state: formData.brandDetails.state,
+        //     city: formData.brandDetails.city,
+        //     establishedYear: formData.brandDetails.establishedYear,
+        //     franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
+        //     brandCategories: formData.brandDetails.brandCategories,
+        //     brandDescription: formData.brandDetails.brandDescription,
+        //     expansionLocation: formData.brandDetails.expansionLocation,
+        //     pancardNumber: formData.brandDetails.pancardNumber,
+        //     gstNumber: formData.brandDetails.gstNumber,
+        //     website: formData.brandDetails.website,
+        //     facebook: formData.brandDetails.facebook,
+        //     instagram: formData.brandDetails.instagram,
+        //     linkedin: formData.brandDetails.linkedin,
+        //   },
+        //   franchiseDetails: {
+        //             },
+        //   brandDetails: {
+        //     pancard: formData.uploads.pancard,
+        //     gstCertificate: formData.uploads.gstCertificate,
+        //     brandLogo: formData.uploads.brandLogo,
+        //     exterioroutlet: formData.uploads.exteriorOutlet,
+        //     interiorOutlet: formData.uploads.interiorOutlet,
+        //     franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
+        //     brandPromotionVideo: formData.uploads.brandPromotionVideo,
+        //   }
+        // };
 
-             }))
-             formDataSend.append('brandDetails', JSON.stringify({
-               
-             }))
-              // Add files to formData
-      const fileFields = {
-        brandLogo: formData.uploads.brandLogo,
-        gstCertificate: formData.uploads.gstCertificate,
-        pancard: formData.uploads.pancard,
-        exteriorOutlet: formData.uploads.exteriorOutlet,
-        interiorOutlet: formData.uploads.interiorOutlet,
-        franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
-        brandPromotionVideo: formData.uploads.brandPromotionVideo
-      };
-      Object.entries(fileFields).forEach(([fieldName, files]) => {
-        if (files && files.length > 0) {
-          files.forEach(file => {
-            formDataSend.append(fieldName, file);
-          });
-        }
-      });
-      //   const apiData = {
-      //   personalDetails: {
-      //     fullName: formData.brandDetails.fullName,
-      //     email: formData.brandDetails.email,
-      //     mobileNumber: formData.brandDetails.mobileNumber,
-      //     brandName: formData.brandDetails.brandName,
-      //     companyName: formData.brandDetails.companyName,
-      //     country: countries.find(c => c.code === formData.brandDetails.country)?.name || formData.brandDetails.country,
-      //     pincode: formData.brandDetails.pincode,
-      //     headOfficeAddress: formData.brandDetails.headOfficeAddress,
-      //     state: formData.brandDetails.state,
-      //     city: formData.brandDetails.city,
-      //     establishedYear: formData.brandDetails.establishedYear,
-      //     franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
-      //     brandCategories: formData.brandDetails.brandCategories,
-      //     brandDescription: formData.brandDetails.brandDescription,
-      //     expansionLocation: formData.brandDetails.expansionLocation,
-      //     pancardNumber: formData.brandDetails.pancardNumber,
-      //     gstNumber: formData.brandDetails.gstNumber,
-      //     website: formData.brandDetails.website,
-      //     facebook: formData.brandDetails.facebook,
-      //     instagram: formData.brandDetails.instagram,
-      //     linkedin: formData.brandDetails.linkedin,
-      //   },
-      //   franchiseDetails: {
-      //             },
-      //   brandDetails: {
-      //     pancard: formData.uploads.pancard,
-      //     gstCertificate: formData.uploads.gstCertificate,
-      //     brandLogo: formData.uploads.brandLogo,
-      //     exterioroutlet: formData.uploads.exteriorOutlet,
-      //     interiorOutlet: formData.uploads.interiorOutlet,
-      //     franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
-      //     brandPromotionVideo: formData.uploads.brandPromotionVideo,
-      //   }
-      // };
-
-
-
-        const response = await axios.post('http://localhost:5000/api/v1/brandlisting/createBrandListing', formDataSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        const response = await axios.post(
+          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
+          formDataSend,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
         );
 
         console.log(response.data);
 
-      // if (response.status !== 200 && response.status !== 201) {
-      //   throw new Error(response.data.message || "Submission failed");
-      // }
+        // if (response.status !== 200 && response.status !== 201) {
+        //   throw new Error(response.data.message || "Submission failed");
+        // }
+        setSubmitSuccess(true);
         setSnackbar({
           open: true,
           message: "Form submitted successfully!",
@@ -388,14 +403,19 @@ const BrandRegisterForm = () => {
         localStorage.removeItem(FORM_STEP_KEY);
         setFormData(initialFormData);
         setActiveStep(0);
-      } catch (error) {     
-        console.log('submission error',error);
-           
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+
+      } catch (error) {
+        console.log("submission error", error);
         setSnackbar({
           open: true,
           message: "Submission failed. Please try again.",
           severity: "error",
         });
+      }finally {
+        setIsSubmitting(false); // Stop loading regardless of success/failure
       }
     }
   };
@@ -644,70 +664,70 @@ const BrandRegisterForm = () => {
   };
 
   const renderFicoModels = () => {
-  if (!formData.franchiseDetails.fico?.length) return null;
+    if (!formData.franchiseDetails.fico?.length) return null;
 
-  // Define the order of fields you want to display
-  const fieldOrder = [
-    'franchiseModel',
-    'franchiseType',
-    'investmentRange',
-    'areaRequired',
-    'franchiseFee',
-    'royaltyFee',
-    'interiorCost',
-    'exteriorCost',
-    'otherCost',
-    'roi',
-    'roiPeriod',
-    'breakEven',
-    'requireInvestmentCapital',
-    'propertyType'
-  ];
+    // Define the order of fields you want to display
+    const fieldOrder = [
+      "franchiseModel",
+      "franchiseType",
+      "investmentRange",
+      "areaRequired",
+      "franchiseFee",
+      "royaltyFee",
+      "interiorCost",
+      "exteriorCost",
+      "otherCost",
+      "roi",
+      "roiPeriod",
+      "breakEven",
+      "requireInvestmentCapital",
+      "propertyType",
+    ];
 
-  return (
-    <Box sx={{ mt: 2 }}>
-      <Accordion elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-            FICO Models ({formData.franchiseDetails.fico.length})
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Grid container spacing={2}>
-            {formData.franchiseDetails.fico.map((model, index) => (
-              <Grid item xs={12} key={index}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    position: "relative",
-                    border: "1px solid #e0e0e0",
-                  }}
-                >
-                  <IconButton
-                    sx={{ position: "absolute", top: 8, right: 8 }}
-                    onClick={() => handleRemoveFicoModel(index)}
+    return (
+      <Box sx={{ mt: 2 }}>
+        <Accordion elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+              FICO Models ({formData.franchiseDetails.fico.length})
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Grid container spacing={2}>
+              {formData.franchiseDetails.fico.map((model, index) => (
+                <Grid item xs={12} key={index}>
+                  <Paper
+                    sx={{
+                      p: 2,
+                      position: "relative",
+                      border: "1px solid #e0e0e0",
+                    }}
                   >
-                    <CloseIcon />
-                  </IconButton>
-                  <Grid container spacing={1}>
-                    {fieldOrder.map((field) => (
-                      <Grid item xs={12} sm={6} key={field}>
-                        <Typography variant="body2">
-                          <strong>{formatFieldName(field)}:</strong>{" "}
-                          {model[field] || "Not specified"}
-                        </Typography>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </AccordionDetails>
-      </Accordion>
-    </Box>
-  );
-};
+                    <IconButton
+                      sx={{ position: "absolute", top: 8, right: 8 }}
+                      onClick={() => handleRemoveFicoModel(index)}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                    <Grid container spacing={1}>
+                      {fieldOrder.map((field) => (
+                        <Grid item xs={12} sm={6} key={field}>
+                          <Typography variant="body2">
+                            <strong>{formatFieldName(field)}:</strong>{" "}
+                            {model[field] || "Not specified"}
+                          </Typography>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
+    );
+  };
 
   const formatFieldName = (name) => {
     return name
@@ -723,310 +743,316 @@ const BrandRegisterForm = () => {
     }
     return value || "Not provided";
   };
- const renderPreviewContent = () => {
-  // Add null checks for all form data sections
-  const brandDetails = formData.brandDetails || {};
-  const franchiseDetails = formData.franchiseDetails || {};
-  const uploads = formData.uploads || {};
+  const renderPreviewContent = () => {
+    // Add null checks for all form data sections
+    const brandDetails = formData.brandDetails || {};
+    const franchiseDetails = formData.franchiseDetails || {};
+    const uploads = formData.uploads || {};
 
-  // Helper function to render file previews
-  const renderFilePreviews = (files) => {
-if (!files || !Array.isArray(files) || files.length === 0) return "No files uploaded";
+    // Helper function to render file previews
+    const renderFilePreviews = (files) => {
+      if (!files || !Array.isArray(files) || files.length === 0)
+        return "No files uploaded";
 
-    return (
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
-        {files.map((file, index) => {
-          // Handle both string URLs and File objects
-          let url =
-            typeof file === "string"
-              ? file
-              : file instanceof File
-              ? URL.createObjectURL(file)
-              : "";
+      return (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
+          {files.map((file, index) => {
+            // Handle both string URLs and File objects
+            let url =
+              typeof file === "string"
+                ? file
+                : file instanceof File
+                ? URL.createObjectURL(file)
+                : "";
 
-          // Determine file type
-          const isImage =
-            typeof file === "string"
-              ? file.match(/\.(jpeg|jpg|gif|png)$/i)
-              : file.type?.includes("image");
-          const isVideo =
-            typeof file === "string"
-              ? file.match(/\.(mp4|mov|avi)$/i)
-              : file.type?.includes("video");
-          const fileName =
-            typeof file === "string" ? file.split("/").pop() : file.name;
+            // Determine file type
+            const isImage =
+              typeof file === "string"
+                ? file.match(/\.(jpeg|jpg|gif|png)$/i)
+                : file.type?.includes("image");
+            const isVideo =
+              typeof file === "string"
+                ? file.match(/\.(mp4|mov|avi)$/i)
+                : file.type?.includes("video");
+            const fileName =
+              typeof file === "string" ? file.split("/").pop() : file.name;
 
-          return (
-            <Box key={index} sx={{ width: 150 }}>
-              {isImage ? (
-                <img
-                  src={url}
-                  alt={`Preview ${index}`}
-                  style={{ width: "100%", height: "auto", borderRadius: 4 }}
-                />
-              ) : isVideo ? (
-                <video controls style={{ width: "100%", borderRadius: 4 }}>
-                  <source src={url} type={file.type || "video/mp4"} />
-                  Your browser does not support the video tag.
-                </video>
-              ) : (
-                <Paper sx={{ p: 1, textAlign: "center" }}>
-                  <Typography variant="caption">{fileName}</Typography>
-                </Paper>
-              )}
-              <Typography
-                variant="caption"
-                noWrap
-                sx={{ display: "block", mt: 0.5 }}
-              >
-                {fileName}
-              </Typography>
-            </Box>
-          );
-        })}
-      </Box>
-    );
-  };
+            return (
+              <Box key={index} sx={{ width: 150 }}>
+                {isImage ? (
+                  <img
+                    src={url}
+                    alt={`Preview ${index}`}
+                    style={{ width: "100%", height: "auto", borderRadius: 4 }}
+                  />
+                ) : isVideo ? (
+                  <video controls style={{ width: "100%", borderRadius: 4 }}>
+                    <source src={url} type={file.type || "video/mp4"} />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <Paper sx={{ p: 1, textAlign: "center" }}>
+                    <Typography variant="caption">{fileName}</Typography>
+                  </Paper>
+                )}
+                <Typography
+                  variant="caption"
+                  noWrap
+                  sx={{ display: "block", mt: 0.5 }}
+                >
+                  {fileName}
+                </Typography>
+              </Box>
+            );
+          })}
+        </Box>
+      );
+    };
 
-  // Helper function to render brand categories
-  const renderBrandCategories = (categories) => {
-    if (!categories || categories.length === 0) return "No categories selected";
+    // Helper function to render brand categories
+    const renderBrandCategories = (categories) => {
+      if (!categories || categories.length === 0)
+        return "No categories selected";
 
-    return (
-      <Box>
-        {categories.map((category, index) => (
-          <Box
-            key={index}
-            sx={{
-              mb: 1,
-              p: 1,
-              border: "1px solid #e0e0e0",
-              borderRadius: 1,
-            }}
-          >
-            <Typography variant="body2">
-              <strong>Main Category:</strong> {category.main || "Not specified"}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Sub Category:</strong> {category.sub || "Not specified"}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Child Category:</strong> {category.child || "Not specified"}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-    );
-  };
-
-  // Helper function to render expansion locations
-  const renderExpansionLocations = (locations) => {
-    if (!locations || locations.length === 0) return "No locations added";
-
-    return (
-      <Box>
-        {locations.map((location, index) => (
-          <Box
-            key={index}
-            sx={{
-              mb: 1,
-              p: 1,
-              border: "1px solid #e0e0e0",
-              borderRadius: 1,
-            }}
-          >
-            <Typography variant="body2">
-              <strong>Country:</strong> {location.country || "Not specified"}
-            </Typography>
-            <Typography variant="body2">
-              <strong>State:</strong> {location.state || "Not specified"}
-            </Typography>
-            <Typography variant="body2">
-              <strong>District:</strong> {location.district || "Not specified"}
-            </Typography>
-            <Typography variant="body2">
-              <strong>City:</strong> {location.city || "Not specified"}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-    );
-  };
-
-  // Helper function to render FICO models with all details
- const renderFicoModels = (ficoModels) => {
-  if (!ficoModels || ficoModels.length === 0) return "No FICO models added";
-
-  return (
-    <Box>
-      {ficoModels.map((model, index) => {
-        // Filter out empty/null/undefined fields
-        const modelFields = Object.entries(model).filter(
-          ([, value]) => value !== "" && value !== null && value !== undefined
-        );
-
-        if (modelFields.length === 0) {
-          return (
+      return (
+        <Box>
+          {categories.map((category, index) => (
             <Box
               key={index}
               sx={{
-                mb: 2,
-                p: 2,
+                mb: 1,
+                p: 1,
                 border: "1px solid #e0e0e0",
                 borderRadius: 1,
               }}
             >
-              <Typography variant="body2">Model {index + 1} (No details provided)</Typography>
+              <Typography variant="body2">
+                <strong>Main Category:</strong>{" "}
+                {category.main || "Not specified"}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Sub Category:</strong> {category.sub || "Not specified"}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Child Category:</strong>{" "}
+                {category.child || "Not specified"}
+              </Typography>
             </Box>
-          );
-        }
+          ))}
+        </Box>
+      );
+    };
 
-        return (
-          <Box
-            key={index}
-            sx={{
-              mb: 2,
-              p: 2,
-              border: "1px solid #e0e0e0",
-              borderRadius: 1,
-            }}
-          >
-            
-            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-              Model {index + 1}
-            </Typography>
-            
-            <Grid container spacing={1}>
-              {modelFields.map(([key, value]) => (
-                <Grid item xs={12} sm={6} key={key}>
-                  <Typography variant="body2">
-                    <strong>{formatFieldName(key)}:</strong> {value}
-                  
-                  </Typography>
-                </Grid>
-              ))}
-            </Grid>
+    // Helper function to render expansion locations
+    const renderExpansionLocations = (locations) => {
+      if (!locations || locations.length === 0) return "No locations added";
 
-       
+      return (
+        <Box>
+          {locations.map((location, index) => (
+            <Box
+              key={index}
+              sx={{
+                mb: 1,
+                p: 1,
+                border: "1px solid #e0e0e0",
+                borderRadius: 1,
+              }}
+            >
+              <Typography variant="body2">
+                <strong>Country:</strong> {location.country || "Not specified"}
+              </Typography>
+              <Typography variant="body2">
+                <strong>State:</strong> {location.state || "Not specified"}
+              </Typography>
+              <Typography variant="body2">
+                <strong>District:</strong>{" "}
+                {location.district || "Not specified"}
+              </Typography>
+              <Typography variant="body2">
+                <strong>City:</strong> {location.city || "Not specified"}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      );
+    };
 
-          </Box>
-        );
-      })}
-    </Box>
-  );
-};
+    // Helper function to render FICO models with all details
+    const renderFicoModels = (ficoModels) => {
+      if (!ficoModels || ficoModels.length === 0) return "No FICO models added";
 
-  return (
-    <Box sx={{ mt: 2 }}>
-      <TableContainer component={Paper} sx={{ mb: 4 }}>
-        <Typography
-          variant="subtitle1"
-          sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5" }}
-        >
-          Brand Details
-        </Typography>
-        <Table size="small">
-          <TableBody>
-            {Object.entries(brandDetails).map(([key, value]) => {
-              // Skip brandCategories and expansionLocation as we'll render them separately
-              if (key === "brandCategories" || key === "expansionLocation") {
-                return null;
-              }
+      return (
+        <Box>
+          {ficoModels.map((model, index) => {
+            // Filter out empty/null/undefined fields
+            const modelFields = Object.entries(model).filter(
+              ([, value]) =>
+                value !== "" && value !== null && value !== undefined
+            );
+
+            if (modelFields.length === 0) {
               return (
+                <Box
+                  key={index}
+                  sx={{
+                    mb: 2,
+                    p: 2,
+                    border: "1px solid #e0e0e0",
+                    borderRadius: 1,
+                  }}
+                >
+                  <Typography variant="body2">
+                    Model {index + 1} (No details provided)
+                  </Typography>
+                </Box>
+              );
+            }
+
+            return (
+              <Box
+                key={index}
+                sx={{
+                  mb: 2,
+                  p: 2,
+                  border: "1px solid #e0e0e0",
+                  borderRadius: 1,
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{ mb: 1, fontWeight: "bold" }}
+                >
+                  Model {index + 1}
+                </Typography>
+
+                <Grid container spacing={1}>
+                  {modelFields.map(([key, value]) => (
+                    <Grid item xs={12} sm={6} key={key}>
+                      <Typography variant="body2">
+                        <strong>{formatFieldName(key)}:</strong> {value}
+                      </Typography>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            );
+          })}
+        </Box>
+      );
+    };
+
+    return (
+      <Box sx={{ mt: 2 }}>
+        <TableContainer component={Paper} sx={{ mb: 4 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+          >
+            Brand Details
+          </Typography>
+          <Table size="small">
+            <TableBody>
+              {Object.entries(brandDetails).map(([key, value]) => {
+                // Skip brandCategories and expansionLocation as we'll render them separately
+                if (key === "brandCategories" || key === "expansionLocation") {
+                  return null;
+                }
+                return (
+                  <TableRow key={key}>
+                    <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                      {formatFieldName(key)}
+                    </TableCell>
+                    <TableCell>{formatFieldValue(value)}</TableCell>
+                  </TableRow>
+                );
+              })}
+
+              {/* Brand Categories row */}
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                  Brand Categories
+                </TableCell>
+                <TableCell>
+                  {renderBrandCategories(brandDetails.brandCategories)}
+                </TableCell>
+              </TableRow>
+
+              {/* Expansion Locations row */}
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                  Expansion Locations
+                </TableCell>
+                <TableCell>
+                  {renderExpansionLocations(brandDetails.expansionLocation)}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <TableContainer component={Paper} sx={{ mb: 4 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+          >
+            Franchise Details
+          </Typography>
+          <Table size="small">
+            <TableBody>
+              {Object.entries(franchiseDetails).map(([key, value]) => (
                 <TableRow key={key}>
                   <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
                     {formatFieldName(key)}
                   </TableCell>
-                  <TableCell>{formatFieldValue(value)}</TableCell>
+                  <TableCell>
+                    {key === "fico"
+                      ? renderFicoModels(value)
+                      : formatFieldValue(value)}
+                  </TableCell>
                 </TableRow>
-              );
-            })}
-            
-            {/* Brand Categories row */}
-            <TableRow>
-              <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
-                Brand Categories
-              </TableCell>
-              <TableCell>
-                {renderBrandCategories(brandDetails.brandCategories)}
-              </TableCell>
-            </TableRow>
-            
-            {/* Expansion Locations row */}
-            <TableRow>
-              <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
-                Expansion Locations
-              </TableCell>
-              <TableCell>
-                {renderExpansionLocations(brandDetails.expansionLocation)}
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-      <TableContainer component={Paper} sx={{ mb: 4 }}>
-        <Typography
-          variant="subtitle1"
-          sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5" }}
-        >
-          Franchise Details
-        </Typography>
-        <Table size="small">
-          <TableBody>
-            {Object.entries(franchiseDetails).map(([key, value]) => (
-              <TableRow key={key}>
-                <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
-                  {formatFieldName(key)}
-                </TableCell>
-                <TableCell>
-                  {key === "fico" ?   (
-                    renderFicoModels(value)
-                  ) : (
-                    formatFieldValue(value)
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <TableContainer component={Paper}>
-        <Typography
-          variant="subtitle1"
-          sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5" }}
-        >
-          Uploads
-        </Typography>
-        <Table size="small">
-          <TableBody>
-            {Object.entries(uploads).map(([key, value]) => (
-              <TableRow key={key}>
-                <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
-                  {formatFieldName(key)}
-                </TableCell>
-                <TableCell>
-                  {value.length > 0 ? (
-                    <>
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        {value.length} file(s) uploaded
-                      </Typography>
-                      {renderFilePreviews(value)}
-                    </>
-                  ) : (
-                    "No files uploaded"
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
-  );
-};
+        <TableContainer component={Paper}>
+          <Typography
+            variant="subtitle1"
+            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+          >
+            Uploads
+          </Typography>
+          <Table size="small">
+            <TableBody>
+              {Object.entries(uploads).map(([key, value]) => (
+                <TableRow key={key}>
+                  <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                    {formatFieldName(key)}
+                  </TableCell>
+                  <TableCell>
+                    {value.length > 0 ? (
+                      <>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          {value.length} file(s) uploaded
+                        </Typography>
+                        {renderFilePreviews(value)}
+                      </>
+                    ) : (
+                      "No files uploaded"
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+    );
+  };
   return (
+    <>
+    <Navbar/>
     <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Box
         sx={{
@@ -1037,7 +1063,7 @@ if (!files || !Array.isArray(files) || files.length === 0) return "No files uplo
           p: 2,
         }}
       >
-        <Box >
+        <Box>
           <Stepper
             activeStep={activeStep}
             alternativeLabel
@@ -1068,8 +1094,14 @@ if (!files || !Array.isArray(files) || files.length === 0) return "No files uplo
             </Toolbar>
           </Stepper>
           <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
-            <Box width="30%"> {activeStep >= 0 && renderSelectedCategories()}</Box>
-            <Box width="25%"> {activeStep >= 0 && renderExpansionLocations()}</Box>
+            <Box width="30%">
+              {" "}
+              {activeStep >= 0 && renderSelectedCategories()}
+            </Box>
+            <Box width="25%">
+              {" "}
+              {activeStep >= 0 && renderExpansionLocations()}
+            </Box>
             <Box width="45%"> {activeStep >= 1 && renderFicoModels()}</Box>
           </Box>
         </Box>
@@ -1084,9 +1116,7 @@ if (!files || !Array.isArray(files) || files.length === 0) return "No files uplo
             overflow: "auto",
           }}
         >
-          <Box sx={{ p: 2}}>
-          {getStepContent(activeStep)}
-          </Box>
+          <Box sx={{ p: 2 }}>{getStepContent(activeStep)}</Box>
         </Box>
 
         <Box
@@ -1097,36 +1127,57 @@ if (!files || !Array.isArray(files) || files.length === 0) return "No files uplo
             borderTop: "1px solid #e0e0e0",
           }}
         >
-          <Button
-            disabled={activeStep === 0}
-            onClick={handleBack}
-            sx={{ mr: 2 }}
-          >
-            Back
-          </Button>
+           <Button
+          disabled={activeStep === 0 || isSubmitting}
+          onClick={handleBack}
+          sx={{ mr: 2 }}
+        >
+          Back
+        </Button>
 
-          <Button variant="outlined" onClick={handlePreviewOpen} sx={{ mr: 2 }}>
-            Preview
-          </Button>
+          <Button 
+          variant="outlined" 
+          onClick={handlePreviewOpen} 
+          sx={{ mr: 2 }}
+          disabled={isSubmitting}
+        >
+          Preview
+        </Button>
 
           <Button
             variant="outlined"
             color="error"
             onClick={handleCancel}
             sx={{ mr: 2 }}
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
 
-          {activeStep === steps.length - 1 ? (
-            <Button variant="contained" onClick={handleSubmit}>
-              Submit
-            </Button>
-          ) : (
-            <Button variant="contained" onClick={handleNext}>
-              Next
-            </Button>
-          )}
+              {activeStep === steps.length - 1 ? (
+          <Button 
+            variant="contained" 
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            startIcon={
+              isSubmitting ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : submitSuccess ? (
+                <CheckCircleIcon />
+              ) : null
+            }
+          >
+            {isSubmitting ? "Submitting..." : submitSuccess ? "Submitted!" : "Submit"}
+          </Button>
+        ) : (
+          <Button 
+            variant="contained" 
+            onClick={handleNext}
+            disabled={isSubmitting}
+          >
+            Next
+          </Button>
+        )}
         </Box>
       </Box>
 
@@ -1165,8 +1216,9 @@ if (!files || !Array.isArray(files) || files.length === 0) return "No files uplo
         </Alert>
       </Snackbar>
     </Box>
+    <Footer/>
+    </>
   );
 };
 
 export default BrandRegisterForm;
-

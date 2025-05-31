@@ -19,10 +19,14 @@ import PersonIcon from "@mui/icons-material/Person";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useSelector,useDispatch } from "react-redux";
 import img from "../../assets/images/brandLogo.jpg";
+import { openBrandDialog } from  "../../Redux/Slices/brandSlice.jsx"
+import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog.jsx";
 
 const DashBoard = ({ selectedSection, sectionContent }) => {
+
+  const dispatch = useDispatch()
      const theme = useTheme();
   const [tabValue, setTabValue] = useState(0);
   const [investorInfo, setInvestorInfo] = useState(null);
@@ -43,7 +47,7 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
       if (!investorUUID || !AccessToken) return;
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/v1/like/get-favbrands/${investorUUID}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/like/get-favbrands/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -70,11 +74,7 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
         console.error("API Error:", error);
       }
     };
-
-    fetchInvestor();
-  }, [investorUUID, AccessToken]);
-  useEffect(() => {
-    const fetchInvestor = async () => {
+     const fetchViewed = async () => {
       if (!investorUUID || !AccessToken) return;
       try {
         const response = await axios.get(
@@ -105,6 +105,8 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
         console.error("API Error:", error);
       }
     };
+
+    fetchViewed();
 
     fetchInvestor();
   }, [investorUUID, AccessToken]);
@@ -137,7 +139,7 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     // Call delete API
     const response = await axios.delete(
-      `http://localhost:5000/api/v1/like/delete-favbrand/${investorUUID}`,
+      `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${investorUUID}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -177,10 +179,18 @@ const handleViewBTN = (brandId) => {
     if (value.uuid === brandId) {
       console.log(value.uuid);
       console.log(value);
+      dispatch(openBrandDialog(value))
     }
   });
-  
+
 };
+const toggleViewClose = (brandId) => {
+  console.log("Clicked brandId:", brandId);
+
+  const updatedStatus = viewStatus.filter(item => item.uuid !== brandId);
+  setviewStatus(updatedStatus);
+};
+
 
   const renderTabContent = () => {
     switch (tabValue) {
@@ -217,9 +227,11 @@ const handleViewBTN = (brandId) => {
           backgroundColor: "#f5f5f5",
         },
       }}
-      onClick={() => handleRemoveCard(brandId)} // your custom handler
+      // onClick={() => handleRemoveCard(brandId)} // your custom handler
     >
-      <CloseIcon fontSize="small" />
+      <CloseIcon
+        onClick={() => toggleViewClose(brandId)}
+      fontSize="small" />
     </IconButton>
 
     {/* Brand Image */}
@@ -403,6 +415,10 @@ const handleViewBTN = (brandId) => {
                         </Typography>
                         )}
                     </CardContent>
+                    <Button
+    sx={{backgroundColor:"green",color:"white"}}
+    onClick={() => handleViewBTN(brandId)}
+    >VIEW DETAILS</Button>
                 </Card>
 
 
@@ -734,6 +750,8 @@ const handleViewBTN = (brandId) => {
       ) : (
         sectionContent[selectedSection]
       )}
+
+      <BrandDetailsDialog/>
     </Box>
   );
 };

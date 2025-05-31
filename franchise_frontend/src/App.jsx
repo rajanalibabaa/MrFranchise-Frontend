@@ -19,7 +19,6 @@ import FeedBack from '../src/Components/Investor_Profile_Component/FeedBack.jsx'
 import Complaint from '../src/Components/Investor_Profile_Component/Complaint.jsx';
 import BrandDashBoard from './Components/BrandProfile_Component/BrandDashBoard';
 import Sidebar from './Pages/BrandProfile_Pages/Sidebar_page';
-import BrandManageProfile from './Components/BrandProfile_Component/BrandManageProfile';
 import BrandFeedBack from './Components/BrandProfile_Component/BrandFeedback';
 import BrandComplaint from './Components/BrandProfile_Component/BrandComplaint';
 import BrandAddVedios from './Components/BrandProfile_Component/BrandAddVedios';
@@ -43,6 +42,7 @@ import AllBusinessCategories from './Components/Footers/QuickLinks/AllBusinessCa
 import ExpandYourBrand from './Components/Footers/QuickLinks/ExpandYourBrand.jsx';
 import FranchiseConsulting from './Components/Footers/QuickLinks/FranchiseConsulting.jsx';
 import InvestFranchise from './Components/Footers/QuickLinks/InvestFranchise.jsx';
+import FranchisePromotion from './Components/Footers/QuickLinks/FranchisePromotion.jsx';
 
 
 function App() {
@@ -79,7 +79,6 @@ function App() {
     <Route path="brandaddvedios" element={<BrandAddVedios />} />
     <Route path="brandfeedback" element={<BrandFeedBack />} />
     <Route path="brandcomplaint" element={<BrandComplaint />} />
-    <Route path="brandmanageprofile" element={<BrandManageProfile />} />
     <Route path="brandsearchus" element={<BrandSearchus />} />
     <Route path='/brandDashboard/brandlistingcontrol' element={<BrandListingController />} />
   </Route>
@@ -102,6 +101,7 @@ function App() {
   <Route path='/expandyourbrand' element={<ExpandYourBrand/>}/>
   <Route path='/franchiseconsulting' element={<FranchiseConsulting/>}/>
   <Route path='/investfranchise' element={<InvestFranchise/>}/>
+  <Route path='/franchisepromotion' element={<FranchisePromotion/>}/>
 
   
 </Routes>

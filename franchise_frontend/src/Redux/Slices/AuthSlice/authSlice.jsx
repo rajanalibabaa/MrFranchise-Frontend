@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-// Get token and UUIDs from localStorage
 const tokenFromStorage = localStorage.getItem("accessToken");
 const investorFromStorage = localStorage.getItem("investorUUID");
 const brandFromStorage = localStorage.getItem("brandUUID");

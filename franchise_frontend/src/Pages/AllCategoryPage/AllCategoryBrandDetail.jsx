@@ -61,11 +61,14 @@ import {
   Support,
   Favorite,
   AreaChart,
+  Email,
 } from "@mui/icons-material";
 import { CheckCircleOutline } from "@mui/icons-material";
 import {motion} from "framer-motion"
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { set } from "react-hook-form";
+import LoginPage from "../LoginPage/LoginPage.jsx";
 
 function BrandList() {
   const [brands, setBrands] = useState([]);
@@ -89,6 +92,9 @@ function BrandList() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
+
+  const [showLogin, setShowLogin] = useState(false);
+
   const investmentRangeOptions = [
     { label: "All Ranges", value: "" },
     { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
@@ -115,7 +121,7 @@ function BrandList() {
 
     if (!AccessToken) {
       response = await axios.get(
-        "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
         {
           headers: {
             "Content-Type": "application/json",
@@ -124,7 +130,7 @@ function BrandList() {
       );
     } else {
       response = await axios.get(
-        `http://localhost:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -489,8 +495,9 @@ const toggleLike = async (brandId) => {
     if (!AccessToken) {
       setMessage("You need to log in to continue.");
       alert("You need to log in to continue.")
-      setLogin(true);
-      setShowPopup(true);
+      // setLogin(true);
+      // setShowPopup(true);
+      setShowLogin(true)
       return 
     }
 
@@ -502,7 +509,7 @@ const toggleLike = async (brandId) => {
     if (updatedLikedStatus) {
       // Add to favorites
       await axios.post(
-        "http://localhost:5000/api/v1/like/post-favbrands",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
         { branduuid: brandId },
         {
           headers: {
@@ -515,7 +522,7 @@ const toggleLike = async (brandId) => {
     } else {
       // Remove from favorites
       const unlike = await axios.delete(
-        `http://localhost:5000/api/v1/like/delete-favbrand/${Id}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${Id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -584,16 +591,20 @@ const closePopup = () => {
             {brand.personalDetails?.brandName}
           </Typography>
           <Typography>
-            <Favorite 
-                       onClick={() => toggleLike(brand.uuid)}
-                        sx={{
-                        // position: "absolute",
-                        // top: 8,
-                        // right: 8,
-                        cursor: "pointer",
-                        color: brand.isLiked ? "red" : "gray",
-                        }}
-            />
+           <>
+  <Favorite 
+    onClick={() => toggleLike(brand.uuid)}
+    sx={{
+      cursor: "pointer",
+      color: brand.isLiked ? "red" : "gray",
+    }}
+  />
+
+  {showLogin && (
+    <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+  )}
+</>
+
           </Typography>
         </Box>
 

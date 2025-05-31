@@ -124,7 +124,7 @@ function RegisterHandleUser() {
 
         <Button
           variant="contained"
-          onClick={() => handleNavigation("/brand-register")}
+          onClick={() => handleNavigation("/brandlistingform")}
           sx={{
             mb: 2,
             bgcolor: "#e99830",

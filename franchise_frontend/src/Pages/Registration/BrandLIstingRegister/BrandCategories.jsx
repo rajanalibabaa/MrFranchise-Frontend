@@ -1,339 +1,339 @@
 import React from 'react';
 
   export  const categories = [
-        {
-          name: "Automotive",
-          children: [
-            {
-              name: "Automobile Related",
-              subChild: [
-                "Automobile Accessories",
-                "Automobile Garage Related",
-                "Automobile Maintanance Related",
-                "Automobile Spares / Tyre",
-                "Road Safety Equipments",
-                "Security & Helpline Services",
-                "Web Based/Online Platform",
-              ],
-            },
-            {
-              name: "Commercial Vehicles",
-              subChild: [
-                "Commercial Vehicles Bus/Trucks",
-                "Commercial Electric Vehicles (EV)",
-                "Off Road / All Terrain Vehicles",
-                "Three Wheeler (Auto) Showroom",
-                "Tractors",
-              ],
-            },
-            {
-              name: "Four Wheeler",
-              subChild: [
-                "Car Exterior Parts",
-                "Car Interior Accessories",
-                "Car Interior Spare Parts",
-                "Car Maintanance & Repair Services",
-                "Car Rental",
-                "Car Reselling",
-                "Car Showroom",
-                "Car Wash / Ceramic Coating / Detailing",
-                "Electric Vehicles Four Wheelers (EV)",
-              ],
-            },
-            {
-              name: "Two Wheeler",
-              subChild: [
-                "Bicycle",
-                "Bike Maintanance & Repair Services",
-                "Bike Rental",
-                "Bike Showroom",
-                "Bike Wash",
-                "Biker's Accessories",
-                "Electric Vehicles Two Wheelers (EV)",
-              ],
-            },
-          ],
-        },
-        {
-          name: "Beauty & Health",
-          children: [
-            {
-              name: "Beauty Aesthetics & Supplies",
-              subChild: [
-                "Bath Products",
-                "Beauty Equipments",
-                "Beauty Salons/ Unisex Salons/ Spa",
-                "Cosmetic Accessories",
-                "Cosmetics & Beauty Product Stores",
-                "Pet Grooming",
-                "Tattoo, Piercing & Nail Art",
-              ],
-            },
-            {
-              name: "Health Care",
-              subChild: [
-                "Ayurvedic & Herbal Products",
-                "Fitness & Gym Equipments",
-                "Fitness Centres",
-                "Health & Wellness Centres",
-                "Health Care Services",
-                "Medical Equipment & Supplies",
-                "Nutrition & Supplements",
-                "Pharmacy",
-              ],
-            },
-            {
-              name: "Wellness",
-              subChild: [
-                "Fitness & Gym Equipments",
-                "Health & Wellness Centres",
-                "Health Care Services",
-                "Medical Equipment & Supplies",
-                "Nutrition & Supplements",
-                "Pharmacy",
-              ],
-            },
-          ],
-        },
-        {
-          name: "Business Services",
-          children: [
-            {
-              name: "Advertising & Marketing",
-              subChild: [
-                "Advertising & Marketing Agencies",
-                "Digital Marketing",
-                "Event Management",
-                "Public Relations",
-                "Social Media Marketing",
-              ],
-            },
-            {
-              name: "Business Consulting",
-              subChild: [
-                "BPO",
-                "Business",
-                "Career Counseling",
-                "Financial",
-                "HR & Recruitment",
-                "Immigration",
-                "Legal",
-                "Matrimonial",
-                "Others Consultancy",
-                "Real Estate",
-                "Service For SMEs",
-                "Technology",
-              ],
-            },
-            {
-              name: "Financial Services",
-              subChild: [
-                "Accounting & Auditing Services",
-                "Equity & Debt Providers",
-                "Finance Advisors & Brokers",
-                "Financial Investment & Trading",
-                "Foreign Exchange (FOREX)",
-                "Insurance",
-                "Microfinance",
-                "Non Banking Financial Company (NBFC)",
-                "Others Financial",
-                "Payment Solution Services",
-                "Post Office Services",
-                "Tax Consulting Services",
-                "Wealth Management",
-              ],
-            },
-            {
-              name: "Household Services",
-              subChild: [
-                "Electrical & Plumbing Services",
-                "Facility Management",
-                "Gardening Services",
-                "Home Appliances Repair Services",
-                "Home Renovation Services",
-                "Home Safety & Security",
-                "Housekeeping",
-                "Institutional/Facility Cleaning",
-                "Laundry & Dry Cleaning",
-                "Pest Control",
-                "Repair Services",
-              ],
-            },
-            {
-              name: "IT Services",
-              subChild: [
-                "Application Development",
-                "Cloud Services",
-                "Computer Hardware & Software",
-                "Data Science & Analytics",
-                "Domain & Hosting Services",
-                "ERP Solutions",
-                "IT Consulting",
-                "IT Infrastructure Management",
-                "Mobile App Development",
-                "Networking & Security Services",
-                "Software Development",
-                "Web Development",
-              ],
-            },
-            {
-              name: "Logistics & Transportation",
-              subChild: [
-                "Cargo & Freight Services",
-                "Courier Services",
-                "Freight Forwarding",
-                "International Logistics",
-                "Logistics Aggregators",
-                "Packers & Movers",
-                "Transportation",
-              ],
-            },
-            {
-              name: "Real Estate",
-              subChild: ["Commercial Real Estate", "Residential Real Estate"],
-            },
-            {
-              name: "Travel & Tourism",
-              subChild: [
-                "Adventure Tourism",
-                "Air Ticketing Services",
-                "Car Rentals",
-                "Cruise Services",
-                "Domestic Tour Operators",
-                "Foreign Tour Operators",
-                "Hotel & Resort Booking Services",
-                "Railway Ticketing Services",
-                "Travel Insurance",
-              ],
-            },
-            {
-              name: "waste Management & Recycling",
-              subChild: [
-                "E-Waste Recycling",
-                "Hazardous Waste Management",
-                "Plastic Waste Management",
-                "Waste Collection & Disposal",
-                "Waste Recycling",
-              ],
-            },
-          ],
-        },
-        {
-          name: "Education & Training",
-          children: [
-            {
-              name: "Coaching & Tutoring",
-              subChild: [
-                "CAD/CAM/CAE & Multimedia",
-                "Competitive Exam Coaching Institute",
-                "Online Coaching",
-                "Robotics & Technical Training/ AI",
-                "School Tutoring",
-              ],
-            },
-            {
-              name: "Early Education",
-              subChild: ["Day Care", "Montessori Schools", "Preschools/Play Schools"],
-            },
-            {
-              name: "Education Consultants",
-              subChild: ["Education Consultants", "Overseas Education Consultants"],
-            },
-            {
-              name: "Education Services",
-              subChild: [
-                "Education Services",
-                "Educational Institutions",
-                "Educational Software & Apps",
-                "Online Learning Platforms",
-              ],
-            },
-            {
-              name: "Higher Education",
-              subChild: [
-                "Degree/Diploma Colleges",
-                "Distance Learning Centres",
-                "Professional Education Colleges",
-                "Universities (including Overseas Franchises)",
-              ],
-            },
-            {
-              name: "online Learning",
-              subChild: [
-                "Certification Course Coaching",
-                "Corporate Training",
-                "Entrance Examination Coaching",
-                "Foreign Language Coaching",
-                "Online Learning/E-learning",
-                "Other Online Education",
-                "Professional Education Coaching",
-              ],
-            },
-            {
-              name: "Vocational Training",
-              subChild: [
-                "Aviation & Hospitality Training Institute",
-                "BPO/KPO Training Institutes",
-                "Banking & Insurance Training Institute",
-                "Beauty & Wellness Training Institute",
-                "Financial Advisory",
-                "HR Certification Institute",
-                "IT Education",
-                "Language Schools",
-                "Other Vocational Training",
-                "Paramedical/Medical Training",
-                "Retail Training Institutes",
-                "Skills / Personality Development",
-              ],
-            },
-          ],
-        },
-        {
-          name: "Fashion & Lifestyle",
-          children: [
-            {
-              name: "Accessories",
-              subChild: [
-                "Bags & Luggage",
-                "Belt & Wallets",
-                "Eyewear",
-                "Fashion Accessories",
-                "Footwear",
-                "Jewellery",
-                "Watches",
-              ],
-            },
-            {
-              name: "Clothing",
-              subChild: [
-                "Apparel & Garments",
-                "Clothing Accessories",
-                "Fabric & Textile",
-                "Footwear",
-                "Garment Manufacturing",
-                "Jewellery",
-                "Leather Garments",
-                "Textile Machinery & Equipment",
-              ],
-            },
-            {
-              name: "Cosmetics & Beauty Products",
-              subChild: [
-                "Beauty & Personal Care",
-                "Cosmetics & Beauty Products",
-                "Cosmetics & Beauty Product Stores",
-                "Health & Wellness Centres",
-                "Medical Equipment & Supplies",
-              ],
-            },
-          ],
-        },
+        // {
+        //   name: "Automotive",
+        //   children: [
+        //     {
+        //       name: "Automobile Related",
+        //       subChild: [
+        //         "Automobile Accessories",
+        //         "Automobile Garage Related",
+        //         "Automobile Maintanance Related",
+        //         "Automobile Spares / Tyre",
+        //         "Road Safety Equipments",
+        //         "Security & Helpline Services",
+        //         "Web Based/Online Platform",
+        //       ],
+        //     },
+        //     {
+        //       name: "Commercial Vehicles",
+        //       subChild: [
+        //         "Commercial Vehicles Bus/Trucks",
+        //         "Commercial Electric Vehicles (EV)",
+        //         "Off Road / All Terrain Vehicles",
+        //         "Three Wheeler (Auto) Showroom",
+        //         "Tractors",
+        //       ],
+        //     },
+        //     {
+        //       name: "Four Wheeler",
+        //       subChild: [
+        //         "Car Exterior Parts",
+        //         "Car Interior Accessories",
+        //         "Car Interior Spare Parts",
+        //         "Car Maintanance & Repair Services",
+        //         "Car Rental",
+        //         "Car Reselling",
+        //         "Car Showroom",
+        //         "Car Wash / Ceramic Coating / Detailing",
+        //         "Electric Vehicles Four Wheelers (EV)",
+        //       ],
+        //     },
+        //     {
+        //       name: "Two Wheeler",
+        //       subChild: [
+        //         "Bicycle",
+        //         "Bike Maintanance & Repair Services",
+        //         "Bike Rental",
+        //         "Bike Showroom",
+        //         "Bike Wash",
+        //         "Biker's Accessories",
+        //         "Electric Vehicles Two Wheelers (EV)",
+        //       ],
+        //     },
+        //   ],
+        // },
+        // {
+        //   name: "Beauty & Health",
+        //   children: [
+        //     {
+        //       name: "Beauty Aesthetics & Supplies",
+        //       subChild: [
+        //         "Bath Products",
+        //         "Beauty Equipments",
+        //         "Beauty Salons/ Unisex Salons/ Spa",
+        //         "Cosmetic Accessories",
+        //         "Cosmetics & Beauty Product Stores",
+        //         "Pet Grooming",
+        //         "Tattoo, Piercing & Nail Art",
+        //       ],
+        //     },
+        //     {
+        //       name: "Health Care",
+        //       subChild: [
+        //         "Ayurvedic & Herbal Products",
+        //         "Fitness & Gym Equipments",
+        //         "Fitness Centres",
+        //         "Health & Wellness Centres",
+        //         "Health Care Services",
+        //         "Medical Equipment & Supplies",
+        //         "Nutrition & Supplements",
+        //         "Pharmacy",
+        //       ],
+        //     },
+        //     {
+        //       name: "Wellness",
+        //       subChild: [
+        //         "Fitness & Gym Equipments",
+        //         "Health & Wellness Centres",
+        //         "Health Care Services",
+        //         "Medical Equipment & Supplies",
+        //         "Nutrition & Supplements",
+        //         "Pharmacy",
+        //       ],
+        //     },
+        //   ],
+        // },
+        // {
+        //   name: "Business Services",
+        //   children: [
+        //     {
+        //       name: "Advertising & Marketing",
+        //       subChild: [
+        //         "Advertising & Marketing Agencies",
+        //         "Digital Marketing",
+        //         "Event Management",
+        //         "Public Relations",
+        //         "Social Media Marketing",
+        //       ],
+        //     },
+        //     {
+        //       name: "Business Consulting",
+        //       subChild: [
+        //         "BPO",
+        //         "Business",
+        //         "Career Counseling",
+        //         "Financial",
+        //         "HR & Recruitment",
+        //         "Immigration",
+        //         "Legal",
+        //         "Matrimonial",
+        //         "Others Consultancy",
+        //         "Real Estate",
+        //         "Service For SMEs",
+        //         "Technology",
+        //       ],
+        //     },
+        //     {
+        //       name: "Financial Services",
+        //       subChild: [
+        //         "Accounting & Auditing Services",
+        //         "Equity & Debt Providers",
+        //         "Finance Advisors & Brokers",
+        //         "Financial Investment & Trading",
+        //         "Foreign Exchange (FOREX)",
+        //         "Insurance",
+        //         "Microfinance",
+        //         "Non Banking Financial Company (NBFC)",
+        //         "Others Financial",
+        //         "Payment Solution Services",
+        //         "Post Office Services",
+        //         "Tax Consulting Services",
+        //         "Wealth Management",
+        //       ],
+        //     },
+        //     {
+        //       name: "Household Services",
+        //       subChild: [
+        //         "Electrical & Plumbing Services",
+        //         "Facility Management",
+        //         "Gardening Services",
+        //         "Home Appliances Repair Services",
+        //         "Home Renovation Services",
+        //         "Home Safety & Security",
+        //         "Housekeeping",
+        //         "Institutional/Facility Cleaning",
+        //         "Laundry & Dry Cleaning",
+        //         "Pest Control",
+        //         "Repair Services",
+        //       ],
+        //     },
+        //     {
+        //       name: "IT Services",
+        //       subChild: [
+        //         "Application Development",
+        //         "Cloud Services",
+        //         "Computer Hardware & Software",
+        //         "Data Science & Analytics",
+        //         "Domain & Hosting Services",
+        //         "ERP Solutions",
+        //         "IT Consulting",
+        //         "IT Infrastructure Management",
+        //         "Mobile App Development",
+        //         "Networking & Security Services",
+        //         "Software Development",
+        //         "Web Development",
+        //       ],
+        //     },
+        //     {
+        //       name: "Logistics & Transportation",
+        //       subChild: [
+        //         "Cargo & Freight Services",
+        //         "Courier Services",
+        //         "Freight Forwarding",
+        //         "International Logistics",
+        //         "Logistics Aggregators",
+        //         "Packers & Movers",
+        //         "Transportation",
+        //       ],
+        //     },
+        //     {
+        //       name: "Real Estate",
+        //       subChild: ["Commercial Real Estate", "Residential Real Estate"],
+        //     },
+        //     {
+        //       name: "Travel & Tourism",
+        //       subChild: [
+        //         "Adventure Tourism",
+        //         "Air Ticketing Services",
+        //         "Car Rentals",
+        //         "Cruise Services",
+        //         "Domestic Tour Operators",
+        //         "Foreign Tour Operators",
+        //         "Hotel & Resort Booking Services",
+        //         "Railway Ticketing Services",
+        //         "Travel Insurance",
+        //       ],
+        //     },
+        //     {
+        //       name: "waste Management & Recycling",
+        //       subChild: [
+        //         "E-Waste Recycling",
+        //         "Hazardous Waste Management",
+        //         "Plastic Waste Management",
+        //         "Waste Collection & Disposal",
+        //         "Waste Recycling",
+        //       ],
+        //     },
+        //   ],
+        // },
+        // {
+        //   name: "Education & Training",
+        //   children: [
+        //     {
+        //       name: "Coaching & Tutoring",
+        //       subChild: [
+        //         "CAD/CAM/CAE & Multimedia",
+        //         "Competitive Exam Coaching Institute",
+        //         "Online Coaching",
+        //         "Robotics & Technical Training/ AI",
+        //         "School Tutoring",
+        //       ],
+        //     },
+        //     {
+        //       name: "Early Education",
+        //       subChild: ["Day Care", "Montessori Schools", "Preschools/Play Schools"],
+        //     },
+        //     {
+        //       name: "Education Consultants",
+        //       subChild: ["Education Consultants", "Overseas Education Consultants"],
+        //     },
+        //     {
+        //       name: "Education Services",
+        //       subChild: [
+        //         "Education Services",
+        //         "Educational Institutions",
+        //         "Educational Software & Apps",
+        //         "Online Learning Platforms",
+        //       ],
+        //     },
+        //     {
+        //       name: "Higher Education",
+        //       subChild: [
+        //         "Degree/Diploma Colleges",
+        //         "Distance Learning Centres",
+        //         "Professional Education Colleges",
+        //         "Universities (including Overseas Franchises)",
+        //       ],
+        //     },
+        //     {
+        //       name: "online Learning",
+        //       subChild: [
+        //         "Certification Course Coaching",
+        //         "Corporate Training",
+        //         "Entrance Examination Coaching",
+        //         "Foreign Language Coaching",
+        //         "Online Learning/E-learning",
+        //         "Other Online Education",
+        //         "Professional Education Coaching",
+        //       ],
+        //     },
+        //     {
+        //       name: "Vocational Training",
+        //       subChild: [
+        //         "Aviation & Hospitality Training Institute",
+        //         "BPO/KPO Training Institutes",
+        //         "Banking & Insurance Training Institute",
+        //         "Beauty & Wellness Training Institute",
+        //         "Financial Advisory",
+        //         "HR Certification Institute",
+        //         "IT Education",
+        //         "Language Schools",
+        //         "Other Vocational Training",
+        //         "Paramedical/Medical Training",
+        //         "Retail Training Institutes",
+        //         "Skills / Personality Development",
+        //       ],
+        //     },
+        //   ],
+        // },
+        // {
+        //   name: "Fashion & Lifestyle",
+        //   children: [
+        //     {
+        //       name: "Accessories",
+        //       subChild: [
+        //         "Bags & Luggage",
+        //         "Belt & Wallets",
+        //         "Eyewear",
+        //         "Fashion Accessories",
+        //         "Footwear",
+        //         "Jewellery",
+        //         "Watches",
+        //       ],
+        //     },
+        //     {
+        //       name: "Clothing",
+        //       subChild: [
+        //         "Apparel & Garments",
+        //         "Clothing Accessories",
+        //         "Fabric & Textile",
+        //         "Footwear",
+        //         "Garment Manufacturing",
+        //         "Jewellery",
+        //         "Leather Garments",
+        //         "Textile Machinery & Equipment",
+        //       ],
+        //     },
+        //     {
+        //       name: "Cosmetics & Beauty Products",
+        //       subChild: [
+        //         "Beauty & Personal Care",
+        //         "Cosmetics & Beauty Products",
+        //         "Cosmetics & Beauty Product Stores",
+        //         "Health & Wellness Centres",
+        //         "Medical Equipment & Supplies",
+        //       ],
+        //     },
+        //   ],
+        // },
         {
           name: "Food & Beverages",
           children: [
             {
               name: "Bakery, Sweets & Ice Cream",
-              subChild: [
+              children: [
                 "Bakery",
                 "Bakery Equipment & Supplies",
                 "Bakery Ingredients",
@@ -347,7 +347,7 @@ import React from 'react';
             },
             {
               name: "Catering & Food Services",
-              subChild: [
+              children: [
                 "Catering Services",
                 "Catering Equipment & Supplies",
                 "Catering Ingredients",
@@ -357,7 +357,7 @@ import React from 'react';
             },
             {
               name: "Cafe & Parlors",
-              subChild: [
+              children: [
                 "Cafe",
                 "Cafe Equipment & Supplies",
                 "Cafe Ingredients",
@@ -367,7 +367,7 @@ import React from 'react';
             },
             {
               name: "Food & Beverage",
-              subChild: [
+              children: [
                 "Beverages",
                 "Beverages Equipment & Supplies",
                 "Beverages Ingredients",
@@ -377,7 +377,7 @@ import React from 'react';
             },
             {
               name: "Restaurant & Night Clubs",
-              subChild: [
+              children: [
                 "Restaurant",
                 "Restaurant Equipment & Supplies",
                 "Restaurant Ingredients",
@@ -387,196 +387,196 @@ import React from 'react';
             },
           ],
         },
-        {
-          name: "HomeBased Business Services",
-          children: [
-            {
-              name: "Beauty & Personal Care",
-              subChild: [
-                "Beauty & Personal Care",
-                "Cosmetics & Beauty Products",
-                "Cosmetics & Beauty Product Stores",
-                "Health & Wellness Centres",
-                "Medical Equipment & Supplies",
-              ],
-            },
-            {
-              name: "Business Services",
-              subChild: [
-                "Accounting & Auditing Services",
-                "Equity & Debt Providers",
-                "Finance Advisors & Brokers",
-                "Financial Investment & Trading",
-                "Foreign Exchange (FOREX)",
-                "Insurance",
-                "Microfinance",
-                "Non Banking Financial Company (NBFC)",
-                "Others Financial",
-                "Payment Solution Services",
-                "Post Office Services",
-                "Tax Consulting Services",
-                "Wealth Management",
-              ],
-            },
-            {
-              name: "repair & Maintenance",
-              subChild: [
-                "Electrical & Plumbing Services",
-                "Facility Management",
-                "Gardening Services",
-                "Home Appliances Repair Services",
-                "Home Renovation Services",
-                "Home Safety & Security",
-                "Housekeeping",
-                "Institutional/Facility Cleaning",
-                "Laundry & Dry Cleaning",
-                "Pest Control",
-                "Repair Services",
-              ],
-            },
-            {
-              name: "technology & Releated",
-              subChild: [
-                "Application Development",
-                "Cloud Services",
-                "Computer Hardware & Software",
-                "Data Science & Analytics",
-                "Domain & Hosting Services",
-                "ERP Solutions",
-                "IT Consulting",
-                "IT Infrastructure Management",
-                "Mobile App Development",
-                "Networking & Security Services",
-                "Software Development",
-                "Web Development",
-              ],
-            },
-          ],
-        },
-        {
-          name: "Hotels & Resorts",
-          children: [
-            {
-              name: "Hotels",
-              subChild: ["Hotel Booking Services", "Hotels & Resorts"],
-            },
-            {
-              name: "Resorts",
-              subChild: ["Hotel Booking Services", "Hotels & Resorts"],
-            },
-            {
-              name: "Travel & Tourism",
-              subChild: [
-                "Adventure Tourism",
-                "Air Ticketing Services",
-                "Car Rentals",
-                "Cruise Services",
-                "Domestic Tour Operators",
-                "Foreign Tour Operators",
-                "Hotel & Resort Booking Services",
-                "Railway Ticketing Services",
-                "Travel Insurance",
-              ],
-            },
-            {
-              name: "Travel Agents",
-              subChild: ["Travel Agents", "Travel Booking Services"],
-            },
-          ],
-        },
-        {
-          name: "Reatils",
-          children: [
-            {
-              name: "Books & Stationery",
-              subChild: ["Books & Stationery", "Books & Stationery Stores"],
-            },
-            {
-              name: "consumer Durables",
-              subChild: [
-                "Consumer Electronics",
-                "Consumer Electronics Stores",
-                "Consumer Goods",
-                "Consumer Goods Stores",
-              ],
-            },
-            {
-              name: "E-Reatail",
-              subChild: ["E-Commerce", "E-Commerce Stores"],
-            },
-            {
-              name: "Fashion",
-              subChild: [
-                "Apparel & Garments",
-                "Clothing Accessories",
-                "Fabric & Textile",
-                "Footwear",
-                "Garment Manufacturing",
-                "Jewellery",
-                "Leather Garments",
-                "Textile Machinery & Equipment",
-              ],
-            },
-            {
-              name: "Home & Office",
-              subChild: [
-                "Home & Office Appliances",
-                "Home & Office Appliances Stores",
-              ],
-            },
-            {
-              name: "supermarket & Grocery",
-              subChild: [
-                "Dairy/F&V Stores",
-                "Department & Convenience Stores",
-                "Food Marts",
-                "Gourmet Stores",
-                "Grocery Stores",
-                "Kiosks",
-                "Meat & Chicken Shops",
-                "Organic Products",
-                "Pet Stores",
-                "Superstores",
-                "Wine Shops",
-              ],
-            },
-          ],
-        },
-        {
-          name: "Sports & Fitness & entertainment",
-          children: [
-            {
-              name: "Fitness & Gym",
-              subChild: [
-                "Fitness & Gym Equipments",
-                "Fitness Centres",
-                "Health & Wellness Centres",
-                "Health Care Services",
-                "Medical Equipment & Supplies",
-                "Nutrition & Supplements",
-                "Pharmacy",
-              ],
-            },
-            {
-              name: "Sports & Games",
-              subChild: [
-                "Sports & Games Accessories",
-                "Sports & Games Equipments",
-                "Sports & Games Stores",
-              ],
-            },
-            {
-              name: "entertainment",
-              subChild: [
-                "Event Management",
-                "Event Organizers",
-                "Event Planning",
-                "Event Production",
-                "Event Rentals",
-              ],
-            },
-          ],
-        },
+        // {
+        //   name: "HomeBased Business Services",
+        //   children: [
+        //     {
+        //       name: "Beauty & Personal Care",
+        //       children: [
+        //         "Beauty & Personal Care",
+        //         "Cosmetics & Beauty Products",
+        //         "Cosmetics & Beauty Product Stores",
+        //         "Health & Wellness Centres",
+        //         "Medical Equipment & Supplies",
+        //       ],
+        //     },
+        //     {
+        //       name: "Business Services",
+        //       children: [
+        //         "Accounting & Auditing Services",
+        //         "Equity & Debt Providers",
+        //         "Finance Advisors & Brokers",
+        //         "Financial Investment & Trading",
+        //         "Foreign Exchange (FOREX)",
+        //         "Insurance",
+        //         "Microfinance",
+        //         "Non Banking Financial Company (NBFC)",
+        //         "Others Financial",
+        //         "Payment Solution Services",
+        //         "Post Office Services",
+        //         "Tax Consulting Services",
+        //         "Wealth Management",
+        //       ],
+        //     },
+        //     {
+        //       name: "repair & Maintenance",
+        //       children: [
+        //         "Electrical & Plumbing Services",
+        //         "Facility Management",
+        //         "Gardening Services",
+        //         "Home Appliances Repair Services",
+        //         "Home Renovation Services",
+        //         "Home Safety & Security",
+        //         "Housekeeping",
+        //         "Institutional/Facility Cleaning",
+        //         "Laundry & Dry Cleaning",
+        //         "Pest Control",
+        //         "Repair Services",
+        //       ],
+        //     },
+        //     {
+        //       name: "technology & Releated",
+        //       children: [
+        //         "Application Development",
+        //         "Cloud Services",
+        //         "Computer Hardware & Software",
+        //         "Data Science & Analytics",
+        //         "Domain & Hosting Services",
+        //         "ERP Solutions",
+        //         "IT Consulting",
+        //         "IT Infrastructure Management",
+        //         "Mobile App Development",
+        //         "Networking & Security Services",
+        //         "Software Development",
+        //         "Web Development",
+        //       ],
+        //     },
+        //   ],
+        // },
+        // {
+        //   name: "Hotels & Resorts",
+        //   children: [
+        //     {
+        //       name: "Hotels",
+        //       subChild: ["Hotel Booking Services", "Hotels & Resorts"],
+        //     },
+        //     {
+        //       name: "Resorts",
+        //       subChild: ["Hotel Booking Services", "Hotels & Resorts"],
+        //     },
+        //     {
+        //       name: "Travel & Tourism",
+        //       subChild: [
+        //         "Adventure Tourism",
+        //         "Air Ticketing Services",
+        //         "Car Rentals",
+        //         "Cruise Services",
+        //         "Domestic Tour Operators",
+        //         "Foreign Tour Operators",
+        //         "Hotel & Resort Booking Services",
+        //         "Railway Ticketing Services",
+        //         "Travel Insurance",
+        //       ],
+        //     },
+        //     {
+        //       name: "Travel Agents",
+        //       subChild: ["Travel Agents", "Travel Booking Services"],
+        //     },
+        //   ],
+        // },
+        // {
+        //   name: "Reatils",
+        //   children: [
+        //     {
+        //       name: "Books & Stationery",
+        //       subChild: ["Books & Stationery", "Books & Stationery Stores"],
+        //     },
+        //     {
+        //       name: "consumer Durables",
+        //       subChild: [
+        //         "Consumer Electronics",
+        //         "Consumer Electronics Stores",
+        //         "Consumer Goods",
+        //         "Consumer Goods Stores",
+        //       ],
+        //     },
+        //     {
+        //       name: "E-Reatail",
+        //       subChild: ["E-Commerce", "E-Commerce Stores"],
+        //     },
+        //     {
+        //       name: "Fashion",
+        //       subChild: [
+        //         "Apparel & Garments",
+        //         "Clothing Accessories",
+        //         "Fabric & Textile",
+        //         "Footwear",
+        //         "Garment Manufacturing",
+        //         "Jewellery",
+        //         "Leather Garments",
+        //         "Textile Machinery & Equipment",
+        //       ],
+        //     },
+        //     {
+        //       name: "Home & Office",
+        //       subChild: [
+        //         "Home & Office Appliances",
+        //         "Home & Office Appliances Stores",
+        //       ],
+        //     },
+        //     {
+        //       name: "supermarket & Grocery",
+        //       subChild: [
+        //         "Dairy/F&V Stores",
+        //         "Department & Convenience Stores",
+        //         "Food Marts",
+        //         "Gourmet Stores",
+        //         "Grocery Stores",
+        //         "Kiosks",
+        //         "Meat & Chicken Shops",
+        //         "Organic Products",
+        //         "Pet Stores",
+        //         "Superstores",
+        //         "Wine Shops",
+        //       ],
+        //     },
+        //   ],
+        // },
+        // {
+        //   name: "Sports & Fitness & entertainment",
+        //   children: [
+        //     {
+        //       name: "Fitness & Gym",
+        //       subChild: [
+        //         "Fitness & Gym Equipments",
+        //         "Fitness Centres",
+        //         "Health & Wellness Centres",
+        //         "Health Care Services",
+        //         "Medical Equipment & Supplies",
+        //         "Nutrition & Supplements",
+        //         "Pharmacy",
+        //       ],
+        //     },
+        //     {
+        //       name: "Sports & Games",
+        //       subChild: [
+        //         "Sports & Games Accessories",
+        //         "Sports & Games Equipments",
+        //         "Sports & Games Stores",
+        //       ],
+        //     },
+        //     {
+        //       name: "entertainment",
+        //       subChild: [
+        //         "Event Management",
+        //         "Event Organizers",
+        //         "Event Planning",
+        //         "Event Production",
+        //         "Event Rentals",
+        //       ],
+        //     },
+        //   ],
+        // },
       ];
 
 export default categories;

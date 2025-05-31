@@ -104,7 +104,7 @@ function TopInvestVdo2() {
         );
 
   return (
-    <Box sx={{ p: 4, background: "#fff", maxWidth: 1800, mx: "auto" }}>
+    <Box sx={{ p: 4, maxWidth: 1800, mx: "auto" }}>
       <Box sx={{ display: "flex", mb: 2 }}>
         <Typography variant="h5" fontWeight={600}>
           Invest Your Franchise
