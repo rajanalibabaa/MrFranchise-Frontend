@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef ,} from "react";
+import { useDispatch } from "react-redux";
 import {
   Box,
   Typography,
@@ -14,6 +15,8 @@ import {
 } from "@mui/material";
 import { Favorite, FavoriteBorder, PlayCircleOutline } from "@mui/icons-material";
 import axios from "axios";
+import { openBrandDialog } from "../../Redux/Slices/brandSlice";
+import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 
 const BrandVideoCard = ({ 
   brand, 
@@ -280,9 +283,11 @@ function TopBrandVdoSec() {
   const [autoPlayIndex, setAutoPlayIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+   const [selectedBrand, setSelectedBrand] = useState(null);
   
   const videoRefs = useRef([]);
   const autoPlayTimer = useRef(null);
+const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchBrandData = async () => {
@@ -397,9 +402,12 @@ function TopBrandVdoSec() {
   };
 
   const handleApply = (brand) => {
-    // Handle apply logic
-    console.log("Applying for:", brand.personalDetails?.brandName);
-    // You might want to open a modal or navigate to application page
+
+    setSelectedBrand(brand);
+    dispatch(openBrandDialog(selectedBrand));
+
+    console.log("selcted brand",brand);
+    
   };
 
   if (loading) {
@@ -515,6 +523,8 @@ function TopBrandVdoSec() {
           ))}
         </Box>
       )}
+  <BrandDetailsDialog/>
+
     </Box>
   );
 }
