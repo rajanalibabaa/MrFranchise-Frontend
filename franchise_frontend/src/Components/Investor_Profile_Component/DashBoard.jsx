@@ -9,7 +9,10 @@ import {
   CardContent,
   CardMedia,
   Grid,
+  Button,
 } from "@mui/material";
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 import { useTheme, useMediaQuery } from '@mui/material';
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import PersonIcon from "@mui/icons-material/Person";
@@ -166,6 +169,19 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     setShowMore((prev) => ({ ...prev, [brandId]: !prev[brandId] }));
   };
 
+const handleViewBTN = (brandId) => {
+  console.log("Clicked brandId:", brandId);
+
+  viewStatus.map((value, index) => {
+    // console.log(value);
+    if (value.uuid === brandId) {
+      console.log(value.uuid);
+      console.log(value);
+    }
+  });
+  
+};
+
   const renderTabContent = () => {
     switch (tabValue) {
      case 0:
@@ -175,105 +191,77 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
         const brandId = item.uuid;
 
         return (
-          <Grid item sm={6} md={4} lg={3} key={brandId} sx={{ display: "flex", justifyContent: "center" }}>
-            <Card
-              sx={{
-                width: "345px",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                position: "relative",
-                boxShadow: 3,
-                "&:hover": { boxShadow: 6 },
-              }}
-            >
-              {/* Brand Image */}
-              <CardMedia
-                component="img"
-                height="160"
-                image={
-                  item.brandDetails?.brandLogo?.[0] ||
-                  "https://via.placeholder.com/300x160?text=No+Image"
-                }
-                alt={item.personalDetails?.brandName || "Brand Image"}
-              />
+         <Grid item sm={6} md={4} lg={3} key={brandId} sx={{ display: "flex", justifyContent: "center" }}>
+  <Card
+    sx={{
+      width: "345px",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      position: "relative",
+      boxShadow: 3,
+      "&:hover": { boxShadow: 6 },
+    }}
+  >
+    {/* Exit Button */}
+    <IconButton
+      size="small"
+      sx={{
+        position: "absolute",
+        top: 8,
+        right: 8,
+        zIndex: 2,
+        backgroundColor: "#fff",
+        boxShadow: 1,
+        "&:hover": {
+          backgroundColor: "#f5f5f5",
+        },
+      }}
+      onClick={() => handleRemoveCard(brandId)} // your custom handler
+    >
+      <CloseIcon fontSize="small" />
+    </IconButton>
 
-              {/* Brand Info */}
-              <CardContent>
-                <Typography
-                  variant="h6"
-                  component="div"
-                  noWrap
-                  title={item.personalDetails?.brandName || "Unnamed Brand"}
-                >
-                  {item.personalDetails?.brandName || "Unnamed Brand"}
-                </Typography>
+    {/* Brand Image */}
+    <CardMedia
+      component="img"
+      height="160"
+      image={
+        item.brandDetails?.brandLogo?.[0] ||
+        "https://via.placeholder.com/300x160?text=No+Image"
+      }
+      alt={item.personalDetails?.brandName || "Brand Image"}
+    />
 
-                {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    <strong>Franchise Models: </strong>
-                    {item.franchiseDetails.modelsOfFranchise.map((value, index) => (
-                      <span key={index} style={{ marginRight: "6px" }}>
-                        {value.franchiseModel}
-                        {index !== item.franchiseDetails.modelsOfFranchise.length - 1 ? "," : ""}
-                      </span>
-                    ))}
-                  </Typography>
-                )}
-              </CardContent>
+    {/* Brand Info */}
+    <CardContent>
+      <Typography
+        variant="h6"
+        component="div"
+        noWrap
+        title={item.personalDetails?.brandName || "Unnamed Brand"}
+      >
+        {item.personalDetails?.brandName || "Unnamed Brand"}
+      </Typography>
 
-              {/* Brand Description */}
-              <CardContent sx={{ pt: 0, mt: "auto", wordWrap: "break-word", whiteSpace: "normal" }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                  Description:
-                </Typography>
-
-                {item.personalDetails?.brandDescription ? (
-                  showMore[brandId] ? (
-                    <Typography variant="body2" color="text.secondary">
-                      {item.personalDetails.brandDescription}
-                      <Typography
-                        component="span"
-                        onClick={() => toggleShowMore(brandId)}
-                        sx={{
-                          cursor: "pointer",
-                          color: "primary.main",
-                          ml: 0.5,
-                          userSelect: "none",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        ...Less
-                      </Typography>
-                    </Typography>
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      {item.personalDetails.brandDescription.slice(0, 100)}
-                      {item.personalDetails.brandDescription.length > 100 && (
-                        <Typography
-                          component="span"
-                          onClick={() => toggleShowMore(brandId)}
-                          sx={{
-                            cursor: "pointer",
-                            color: "primary.main",
-                            ml: 0.5,
-                            userSelect: "none",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          ...More
-                        </Typography>
-                      )}
-                    </Typography>
-                  )
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    No description provided.
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
+      {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          <strong>Franchise Models: </strong>
+          {item.franchiseDetails.modelsOfFranchise.map((value, index) => (
+            <span key={index} style={{ marginRight: "6px" }}>
+              {value.franchiseModel}
+              {index !== item.franchiseDetails.modelsOfFranchise.length - 1 ? "," : ""}
+            </span>
+          ))}
+        </Typography>
+      )}
+    </CardContent>
+    <Button
+    sx={{backgroundColor:"green",color:"white"}}
+    onClick={() => handleViewBTN(brandId)}
+    >VIEW DETAILS</Button>
+  </Card>
+</Grid>
         );
       })}
     </Grid>
