@@ -189,7 +189,7 @@ const ComplaintContent = () => {
               value={selectedTopic}
               label="Topic"
               onChange={(e) => setSelectedTopic(e.target.value)}
-            >
+            > 
               <MenuItem value="Service Issue">Service Issue</MenuItem>
               <MenuItem value="Technical Bug">Technical Bug</MenuItem>
               <MenuItem value="Payment Problem">Payment Problem</MenuItem>
@@ -230,12 +230,12 @@ const ContactUs = () => {
   You can reach us by email at{' '}
  
   <a
-    href="https://mail.google.com/mail/?view=cm&fs=1&to=arul03sekar@gmail.com"
+    href="https://mail.google.com/mail/?view=cm&fs=1&to=mrfranchisc22@gmail.com"
     target="_blank"
     rel="noopener noreferrer"
     style={{ color: "#1976d2", textDecoration: "underline" }}
   >
-    arul03sekar@gmail.com
+   mrfranchisc22@gmail.com
   </a>
 </Typography>
 

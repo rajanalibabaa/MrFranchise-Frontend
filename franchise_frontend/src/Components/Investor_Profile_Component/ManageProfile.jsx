@@ -77,7 +77,7 @@ const ManageProfile = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/otp/existingEmailOTP",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/otp/existingEmailOTP",
         { email: investorData.email },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -96,18 +96,18 @@ const ManageProfile = () => {
   };
 
   const handleOtpVerify = async () => {
-    console.log("======= : ",otp.length)
-     if (!otp || otp.length === 0) {
-    setOtpError("Please enter the OTP");
-    return; 
-  }
+    if (!otp || otp.length === 0) {
+      setOtpError("Please enter the OTP");
+      return;
+    }
+
     setOtpError('');
     setErrorMSG('');
     setreguestOTP(true);
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/otp/verifyExistingEmailOTP",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/otp/verifyExistingEmailOTP",
         {
           email: investorData.email,
           verifyOTP: otp
@@ -118,8 +118,6 @@ const ManageProfile = () => {
           },
         }
       );
-
-      console.log("response.data.success :",response.data.success)
 
       if (response.data.success) {
         setEditMode(true);
@@ -163,8 +161,27 @@ const ManageProfile = () => {
   };
 
   const renderField = (label, key) => {
+    const value = investorData[key];
     const isPhoneField = key === 'mobileNumber' || key === 'whatsappNumber';
     const isReadOnly = key === 'country';
+
+    let displayValue = '';
+    if (Array.isArray(value)) {
+      if (key === 'category') {
+        displayValue = value
+          .map(item => {
+            const parts = [item.main, item.sub, item.child].filter(Boolean);
+            return parts.join(' > ');
+          })
+          .join(', ');
+      } else {
+        displayValue = value.join(', ');
+      }
+    } else if (typeof value === 'object' && value !== null) {
+      displayValue = JSON.stringify(value);
+    } else {
+      displayValue = value || '';
+    }
 
     return (
       <Box mb={2}>
@@ -178,13 +195,13 @@ const ManageProfile = () => {
               fullWidth
               variant="outlined"
               size="small"
-              value={investorData[key] || ''}
+              value={value || ''}
               onChange={(e) => setInvestorData({ ...investorData, [key]: e.target.value })}
             />
           </Box>
         ) : (
           <Typography variant="body1" sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}>
-            {isPhoneField ? `+91 ${investorData[key] || ''}` : investorData[key] || ''}
+            {isPhoneField ? `+91 ${displayValue}` : displayValue}
           </Typography>
         )}
       </Box>
@@ -267,7 +284,7 @@ const ManageProfile = () => {
           {renderField("Looking For", "lookingFor")}
           {renderField("Occupation", "occupation")}
           {renderField("Pincode", "pincode")}
-          {renderField("Property Type", "propertytype")}
+          {renderField("Property Type", "propertyType")}
         </Paper>
       </Box>
 

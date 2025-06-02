@@ -3,13 +3,17 @@ import Drawer from "@mui/material/Drawer";
 import { Box, Typography, Avatar, Dialog, DialogTitle, DialogContent, IconButton   } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
+import { useDispatch, useSelector } from "react-redux";
+import { openBrandDialog, closeBrandDialog } from "../../Redux/Slices/brandSlice";
+
 import axios from "axios";
+
 const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
   const [filteredBrands, setFilteredBrands] = useState([]);
   const [brandsData, setBrandsData] = useState([]);
-  const [selectedBrand, setSelectedBrand] = useState(null); 
+  // const [selectedBrand, setSelectedBrand] = useState(null); 
  
   const fetchBrandDetails = async (hover) => {
   try {
@@ -27,6 +31,9 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
   }
 };
 
+const dispatch = useDispatch();
+const { openDialog, selectedBrand } = useSelector((state) => state.brands);
+
   // Fetch brands on mount (or when Drawer opens)
   React.useEffect(() => {
     if (hoverCategory !== null && brandsData.length === 0) {
@@ -35,8 +42,8 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
   }, [hoverCategory]);
 
   // Filter brands when hovering subChild
-const handleSubChildHover = async (subChild) => {
-  const childName = typeof subChild === "string" ? subChild : subChild.name;
+const handleSubChildHover = async (children) => {
+  const childName = typeof children === "string" ? children : children.name;
   console.log("Hovering subChild:", childName);
   const filtered = brandsData.filter((brand) => {
     const categories = brand.personalDetails?.brandCategories || [];
@@ -85,14 +92,14 @@ const handleSubChildHover = async (subChild) => {
            <Typography  variant="subtitle1"  fontWeight="bold"  mb={1}  display="flex"  alignItems="center">
              {activeSubCategory.name}
            </Typography>
-           {activeSubCategory.subChild?.map((subChild, idx) => {
-             const name = typeof subChild === "string" ? subChild : subChild.name;
-             const Icon = typeof subChild === "object" ? subChild.icon : null;
+           {activeSubCategory.children?.map((children, idx) => {
+             const name = typeof children === "string" ? children : children.name;
+             const Icon = typeof children === "object" ? children.icon : null;
        
              return (
                <Box
                  key={idx}
-                 onMouseEnter={() => handleSubChildHover(subChild)}
+                 onMouseEnter={() => handleSubChildHover(children)}
                  sx={{ cursor: "pointer", display: "flex", alignItems: "center", py: 1, gap: 1,   }} >
                  {Icon && (
                    <Box component={Icon} sx={{ fontSize: 20 }} />
@@ -123,7 +130,7 @@ const handleSubChildHover = async (subChild) => {
       {filteredBrands.slice(0, 16).map((brand, idx) => (
         <Box
           key={brand._id || idx}
-          onClick={() => setSelectedBrand(brand)} 
+          onClick={() => dispatch(openBrandDialog(brand))}
           sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 2, border: "1px solid #e0e0e0", borderRadius: 3, background: "#fff", minHeight: 160, boxShadow: "0 2px 8px 0 rgba(60,72,88,0.06)", transition: "box-shadow 0.2s , transform 0.2s",cursor: "pointer",
             "&:hover": {
               boxShadow: "0 4px 16px 0 rgba(60,72,88,0.12)",
@@ -156,41 +163,19 @@ const handleSubChildHover = async (subChild) => {
 )}  
 
       {/* Brand Details Dialog */}
-        <Dialog open={!!selectedBrand} onClose={() => setSelectedBrand(null)} maxWidth="sm" fullWidth>
+        <Dialog open={openDialog} onClose={() => dispatch(closeBrandDialog())} maxWidth="sm" fullWidth>
           <DialogTitle>
             {selectedBrand?.personalDetails?.brandName || "Brand Details"}
             <IconButton
               aria-label="close"
-              onClick={() => setSelectedBrand(null)}
+               onClick={() => dispatch(closeBrandDialog())}
               sx={{ position: "absolute", right: 8, top: 8 }}
             >
               <CloseIcon />
             </IconButton>
           </DialogTitle>
           <DialogContent dividers>
-            {selectedBrand && (
-              <Box sx={{ textAlign: "center" }}>
-                <Avatar
-                  src={selectedBrand.brandDetails?.brandLogo || ""}
-                  alt={selectedBrand.personalDetails?.brandName || "B"}
-                  sx={{ width: 80, height: 80, mb: 2, mx: "auto", bgcolor: "#e0e0e0", fontSize: 40 }}
-                >
-                  {selectedBrand.personalDetails?.brandName
-                    ? selectedBrand.personalDetails.brandName[0]
-                    : "B"}
-                </Avatar>
-                <Typography variant="h6" fontWeight="bold">
-                  {selectedBrand.personalDetails?.brandName}
-                </Typography>
-                <Typography variant="subtitle1" color="text.secondary">
-                  {selectedBrand.personalDetails?.companyName}
-                </Typography>
-                <Typography variant="body2" sx={{ mt: 2 }}>
-                  {selectedBrand.personalDetails?.brandDescription}
-                </Typography>
-                {/* Add more brand details here as needed */}
-              </Box>
-            )}
+          
           </DialogContent>
         </Dialog>
 

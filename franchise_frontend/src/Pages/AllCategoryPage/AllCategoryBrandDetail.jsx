@@ -61,10 +61,14 @@ import {
   Support,
   Favorite,
   AreaChart,
+  Email,
 } from "@mui/icons-material";
 import { CheckCircleOutline } from "@mui/icons-material";
 import {motion} from "framer-motion"
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { set } from "react-hook-form";
+import LoginPage from "../LoginPage/LoginPage.jsx";
 
 function BrandList() {
   const [brands, setBrands] = useState([]);
@@ -88,6 +92,9 @@ function BrandList() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [selectedInvestmentRange, setSelectedInvestmentRange] = useState("");
+
+  const [showLogin, setShowLogin] = useState(false);
+
   const investmentRangeOptions = [
     { label: "All Ranges", value: "" },
     { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
@@ -103,12 +110,17 @@ function BrandList() {
   ];
 
   // Application form states
+  const Id = useSelector((state) => state.auth?.investorUUID) || useSelector((state) => state.auth?.brandUUID);
+  const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
   const fetchBrands = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(
+      let response;
+
+    if (!AccessToken) {
+      response = await axios.get(
         "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
         {
           headers: {
@@ -116,9 +128,20 @@ function BrandList() {
           },
         }
       );
+    } else {
+      response = await axios.get(
+        `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+        }
+      );
+    }
 
       const brandsData = response.data.data;
-      console.log("Brands data:", brandsData);
+      // console.log("Brands data:", brandsData);
 
       setBrands(brandsData);
       setFilteredBrands(brandsData);
@@ -168,7 +191,7 @@ function BrandList() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [Id, AccessToken]);
 
   useEffect(() => {
     fetchBrands();
@@ -257,7 +280,21 @@ function BrandList() {
     applyFilters();
   }, [applyFilters]);
 
-  const handleOpenBrand = (brand) => {
+  const handleOpenBrand = async(brand) => {
+
+    console.log(brand.uuid)
+
+    const viewResponse = await axios.post(`http://localhost:5000/api/v1/view/postViewBrands/${Id}`,
+      {viewedID:brand.uuid},
+      {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+        }
+    )
+
+    console.log(viewResponse.data)
     setSelectedBrand(brand);
     setOpenDialog(true);
     setTabValue(0);
@@ -448,13 +485,84 @@ function BrandList() {
     </Box>
   );
 
+  const [login, setLogin] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [message, setMessage] = useState("");
+
+const toggleLike = async (brandId) => {
+  try {
+
+    if (!AccessToken) {
+      setMessage("You need to log in to continue.");
+      alert("You need to log in to continue.")
+      // setLogin(true);
+      // setShowPopup(true);
+      setShowLogin(true)
+      return 
+    }
+
+    const brandToUpdate = brands.find((brand) => brand.uuid === brandId);
+    if (!brandToUpdate) return;
+
+    const updatedLikedStatus = !brandToUpdate.isLiked;
+
+    if (updatedLikedStatus) {
+      // Add to favorites
+      await axios.post(
+        "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
+        { branduuid: brandId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+        }
+      );
+      // console.log("Added to favorites");
+    } else {
+      // Remove from favorites
+      const unlike = await axios.delete(
+        `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${Id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+          data: { brandID: brandId },
+        }
+      );
+      // console.log("Removed from favorites :",unlike);
+    }
+
+    // Update the local state
+    setBrands((prev) =>
+      prev.map((brand) =>
+        brand.uuid === brandId
+          ? { ...brand, isLiked: updatedLikedStatus }
+          : brand
+      )
+    );
+
+    // console.log("Brand ID liked:", brandId);
+  } catch (error) {
+    console.error("Error toggling like status:", error);
+  }
+};
+
+const closePopup = () => {
+    setShowPopup(false);
+  };
+
+
+
   const BrandCard = ({ brand }) => (
-    <Card
+    <div>
+      <Card
       sx={{
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        transition: "transform 0.3s, box-shadow 0.3s",
+        // transition: "transform 0.3s, box-shadow 0.3s",
         "&:hover": {
           transform: "translateY(-5px)",
           boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
@@ -483,7 +591,20 @@ function BrandList() {
             {brand.personalDetails?.brandName}
           </Typography>
           <Typography>
-            <Favorite />
+           <>
+  <Favorite 
+    onClick={() => toggleLike(brand.uuid)}
+    sx={{
+      cursor: "pointer",
+      color: brand.isLiked ? "red" : "gray",
+    }}
+  />
+
+  {showLogin && (
+    <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+  )}
+</>
+
           </Typography>
         </Box>
 
@@ -564,6 +685,8 @@ function BrandList() {
         </Button>
       </CardActions>
     </Card>
+    
+    </div>
   );
 
   
@@ -672,16 +795,12 @@ function BrandList() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        console.log("Brand Email:", brand?.personalDetails?.email);            
-
         try {
             const payload = {
                 ...formData,
                 brandId: brand?._id,
                 brandName: brand?.personalDetails?.brandName || "",
-                brandEmail: brand.personalDetails?.email || "",
             };
-// console.log(payload);
 
             const response = await axios.post(
                 "http://localhost:5000/api/v1/brandlisting/createInstaApply",
@@ -703,7 +822,6 @@ function BrandList() {
                     investmentRange: "",
                     planToInvest: "",
                     readyToInvest: "",
-
                 });
                 setIsModalOpen(false);
             }
@@ -1472,38 +1590,38 @@ function BrandList() {
     };
 
     // Enhanced franchise type options based on selected model
-  const getFranchiseTypeOptions = () => {
-  if (!formData.franchiseModel) return [];
-  const selectedModel = franchiseModelsData.find(
-    (model) => model.franchiseModel === formData.franchiseModel
-  );
-  return selectedModel
-    ? [
-        {
-          label: selectedModel.franchiseType,
-          value: selectedModel.franchiseType,
-          fullData: selectedModel,
-        },
-      ]
-    : [];
-};
+    const getFranchiseTypeOptions = () => {
+      if (!formData.franchiseModel) return [];
+      const selectedModel = franchiseModelsData.find(
+        (model) => model.franchiseModel === formData.franchiseModel
+      );
+      return selectedModel
+        ? [
+            {
+              label: selectedModel.franchiseType,
+              value: selectedModel.franchiseType,
+              fullData: selectedModel,
+            },
+          ]
+        : [];
+    };
 
     // Enhanced investment range options based on selected model
-   const getInvestmentRangeOptions = () => {
-  if (!formData.franchiseModel) return [];
-  const selectedModel = franchiseModelsData.find(
-    (model) => model.franchiseModel === formData.franchiseModel
-  );
-  return selectedModel
-    ? [
-        {
-          label: selectedModel.investmentRange,
-          value: selectedModel.investmentRange,
-          fullData: selectedModel,
-        },
-      ]
-    : [];
-};
+    const getInvestmentRangeOptions = () => {
+      if (!formData.franchiseModel) return [];
+      const selectedModel = franchiseModelsData.find(
+        (model) => model.franchiseModel === formData.franchiseModel
+      );
+      return selectedModel
+        ? [
+            {
+              label: selectedModel.investmentRange,
+              value: selectedModel.investmentRange,
+              fullData: selectedModel,
+            },
+          ]
+        : [];
+    };
     // Other options (unchanged)
     const investmentTimings = [
       "Immediately",
@@ -1615,7 +1733,6 @@ function BrandList() {
           ...formData,
           brandId: selectedBrand?._id,
           brandName: selectedBrand?.personalDetails?.brandName || "",
-          brandEmail: selectedBrand?.personalDetails?.email || "",
         };
         console.log(payload);
 
@@ -2403,6 +2520,7 @@ function BrandList() {
       </Drawer>
 
       <BrandDetailsDialog />
+      
     </Container>
   );
 }

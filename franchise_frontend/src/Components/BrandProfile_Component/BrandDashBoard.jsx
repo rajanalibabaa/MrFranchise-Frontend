@@ -9,15 +9,13 @@ import axios from 'axios';
 const BrandDashBoard = ({ selectedSection, sectionContent }) => {
     const [tabValue, setTabValue] = useState(0);
 
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
-    };
+
     const [brandData, setBrandData] = useState({});
 
     const brandUUID = useSelector((state) => state.auth.brandUUID);
     const token = useSelector((state) => state.auth.AccessToken);
-     console.log('Brand UUID:', brandUUID);
-     console.log('Token:', token);
+    //  console.log('Brand UUID:', brandUUID);
+    //  console.log('Token:', token);
     useEffect(() => {
 
         const fetchBrandDetails = async () => {
@@ -48,6 +46,13 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
         }
 
     }, [brandUUID, token]);
+
+    const handleTabChange = (event, index) => {
+
+        console.log(" ============ :",index)
+        
+        setTabValue(index);
+    };
     
 
     return (
@@ -67,8 +72,8 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                         <Box sx={{ display: "flex", gap: 4 }}>
                             {/* Profile Avatar */}
                             <Box sx={{
-                                width: 240, height: 200, textAlign: "center",
-                                bgcolor: "#fff", p: 2, borderRadius: 2, boxShadow: 2
+                                // width: 240, height: 200, textAlign: "center",
+                                // bgcolor: "#fff", p: 2, borderRadius: 2, boxShadow: 2
                             }}>
                                  <Avatar sx={{
                                     width: 230, height: 210, mx: "auto", mb: 2,
@@ -89,10 +94,10 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
 
                             {/* Profile Info */}
                             <Box sx={{ flex: 1 }}>
-                                <Box sx={{
-                                    mb: 3, bgcolor: "#fff", p: 2, borderRadius: 2,
-                                    boxShadow: 2, width: "90%", textAlign: "center",
-                                    height: "40%", paddingTop: "65px", paddingBottom: "65px"
+                                <Box sx={{mt: 8,
+                                    // mb: 3, bgcolor: "#fff", p: 2, borderRadius: 2,
+                                    // boxShadow: 2, width: "90%", textAlign: "center",
+                                    // height: "40%", paddingTop: "65px", paddingBottom: "65px"
                                 }}>
                                     <Typography variant="h4" fontWeight={600}>
                                         Welcome {brandData.firstName}
@@ -125,7 +130,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                                         <Tab label="Your Enqueries" />
                                         <Tab label="Total View" />
                                         <Tab label="Total Like" />
-                                        <Tab label="Enqueries" />
+                                        <Tab label="Brand Enqueries" />
                                     </Tabs>
                                 </Box>
                             </Box>

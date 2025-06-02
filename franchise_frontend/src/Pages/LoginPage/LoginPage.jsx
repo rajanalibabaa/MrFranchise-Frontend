@@ -80,12 +80,11 @@ function LoginPage({ open, onClose }) {
 
     try {
       const response = await axios.post(
-        // "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
-        "http://localhost:5000/api/v1/login/generateOTPforLogin",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
-
+      
       if (response.data.success) {
         setSnackbar({
           open: true,
@@ -94,6 +93,7 @@ function LoginPage({ open, onClose }) {
         });
         setIsOtpSent(true);
         setResendDisabled(true);
+
       } else {
         throw new Error(response.data.message || "Failed to send OTP");
       }
@@ -121,8 +121,7 @@ function LoginPage({ open, onClose }) {
 
     try {
       const response = await axios.post(
-        // "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
-        "http://localhost:5000/api/v1/login/",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
