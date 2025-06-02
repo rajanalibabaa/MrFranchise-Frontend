@@ -153,7 +153,7 @@ const BrandVideoCard = ({
         height: isMobile ? 300 : '100%',
         backgroundColor: '#000',
         overflow: 'hidden',
-        flexShrink: 0
+        flexShrink: 0,
       }}>
         {videoUrl ? (
           <>
@@ -167,7 +167,7 @@ const BrandVideoCard = ({
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
               muted
               autoPlay
