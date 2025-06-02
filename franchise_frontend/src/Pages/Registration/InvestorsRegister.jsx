@@ -383,7 +383,7 @@ useEffect(() => {
     country: data.country || "",
     state: data.state || "",
     city: data.city || "",
-category: data.categories .map(c => ({
+category: (data.categories || []) .map(c => ({
       main: c.main,
       sub: c.sub,
       child: c.child
