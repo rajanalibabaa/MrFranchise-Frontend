@@ -180,7 +180,7 @@ function BrandList() {
       const cities = [
         ...new Set(
           brandsData.map((brand) => brand.personalDetails?.city).filter(Boolean)
-        ),
+        ),     
       ];
       setAvailableCategories(categories);
       setAvailableModelTypes(modelTypes);
