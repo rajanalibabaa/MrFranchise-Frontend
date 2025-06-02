@@ -1,68 +1,257 @@
-import React from 'react'
-import { Box, Container, Grid, Typography, Link, IconButton } from "@mui/material";
-import { Facebook, Instagram, LinkedIn, Twitter } from "@mui/icons-material";
-import logo from "../../assets/images/brandLogo.jpg";
+import React from "react";
+import { Box, Container, Grid, Typography, Link } from "@mui/material";
+import brandlogo from "../../assets/Images/brandLogo.jpg";
+
 function Footer() {
   return (
-    <Box component="footer" sx={{ backgroundColor: '#1e1e1e', color: '#fff', mt: 8, py: 6 }}>
-    <Container maxWidth="lg">
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={4}>
-          <Box display="flex" flexDirection="column" alignItems="flex-start">
-            <Link href="/" underline="none">
-              <Box component="img" src={logo} alt="Company Logo" sx={{ height: 60, mb: 2 }} />
-            </Link>
-            <Typography variant="body2" sx={{ maxWidth: 250 }}>
-              Your trusted franchise business expert, helping you grow and expand efficiently.
-            </Typography>
-            <Box sx={{ mt: 2 }}>
-              <IconButton color="inherit" component="a" href="https://twitter.com" target="_blank">
-                <Twitter />
-              </IconButton>
-              <IconButton color="inherit" component="a" href="https://facebook.com" target="_blank">
-                <Facebook />
-              </IconButton>
-              <IconButton color="inherit" component="a" href="https://linkedin.com" target="_blank">
-                <LinkedIn />
-              </IconButton>
-              <IconButton color="inherit" component="a" href="https://instagram.com" target="_blank">
-                <Instagram />
-              </IconButton>
+    <Box
+      component="footer"
+      sx={{
+        backgroundColor: "#000",
+        color: "#fff",
+        py: { xs: 4, sm: 5, md: 6 },
+      }}
+    >
+      <Container maxWidth="lg">
+        <Grid container spacing={4} justifyContent={"space-between"}>
+          <Grid item xs={12} sm={6} md={4}>
+            <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
+              <Box
+  component="img"
+  src={brandlogo}
+  alt="MR FRANCHISE Logo"
+  sx={{
+    display: "inline-block",
+    width: "auto",
+    height: { xs: 50, sm: 60, md: 70 },
+    px: 2,
+    py: 1,
+    mb: 1,
+    marginLeft: { xs: 0, md: 4 },
+    objectFit: "contain",
+    mx: { xs: "auto", md: 0 },
+    cursor: "pointer", // Add pointer cursor for clarity
+  }}
+  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+/>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  color: "#ffba00",
+                  fontWeight: "bold",
+                  mt: 1,
+                  fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
+                }}
+              >
+                BUSINESS INVESTORS: BEST CHOICE
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  mt: 1,
+                  maxWidth: 280,
+                  mx: { xs: "auto", md: 0 },
+                  fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+                  lineHeight: 1.4,
+                }}
+              >
+                Empowering franchise growth across India by connecting brands
+                with serious investors.
+              </Typography>
             </Box>
-          </Box>
+          </Grid>
+
+          {/* Center Section: Quick Links */}
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            sx={{ textAlign: { xs: "center", sm: "center", md: "left" } }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                color: "#ffba00",
+                fontWeight: "bold",
+                mb: 2,
+                fontSize: { xs: "1.1rem", sm: "1.2rem", md: "1.3rem" },
+              }}
+            >
+              QUICK LINKS
+            </Typography>
+            <Box sx={{marginLeft:1}}>
+              <Link
+                href="/addlisting"
+                color="inherit"
+                underline="hover"
+                display="block"
+                sx={{
+                  mb: 0.5,
+                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
+                }}
+              >
+                Add Listing
+              </Link>
+              <Link
+                href="/expandyourbrand"
+                color="inherit"
+                underline="hover"
+                display="block"
+                sx={{
+                  mb: 0.5,
+                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
+                }}
+              >
+                Expand Your Brand
+              </Link>
+              <Link
+                href="/investfranchise"
+                color="inherit"
+                underline="hover"
+                display="block"
+                sx={{
+                  mb: 0.5,
+                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
+                }}
+              >
+                Invest in a Franchise
+              </Link>
+              <Link
+                href="/advertisewithus"
+                color="inherit"
+                underline="hover"
+                display="block"
+                sx={{
+                  mb: 0.5,
+                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
+                }}
+              >
+                Advertise With Us
+              </Link>
+              <Link
+                href="/allbusinesscategory"
+                color="inherit"
+                underline="hover"
+                display="block"
+                sx={{
+                  mb: 0.5,
+                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
+                }}
+              >
+                All Business Categories
+              </Link>
+              <Link
+                href="/franchiseconsulting"
+                color="inherit"
+                underline="hover"
+                display="block"
+                sx={{
+                  mb: 0.5,
+                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
+                }}
+              >
+                Franchise Consulting
+              </Link>
+            </Box>
+          </Grid>
+
+          {/* Right Section: Help & Support */}
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            sx={{ textAlign: { xs: "center", sm: "center", md: "left" } }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                color: "#ffba00",
+                fontWeight: "bold",
+                mb: 2,
+                fontSize: { xs: "1.1rem", sm: "1.2rem", md: "1.3rem" },
+              }}
+            >
+              HELP & SUPPORT
+            </Typography>
+            <Box sx={{marginLeft:2}}>
+              <Link
+                href="/aboutus"
+                color="inherit"
+                underline="hover"
+                display="block"
+                sx={{
+                  mb: 0.5,
+                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
+                }}
+              >
+                About Us
+              </Link>
+              {/* <Link
+                href="/contactus"
+                color="inherit"
+                underline="hover"
+                display="block"
+                sx={{
+                  mb: 0.5,
+                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
+                }}
+              >
+                Contact
+              </Link> */}
+              <Link
+                href="/faq"
+                color="inherit"
+                underline="hover"
+                display="block"
+                sx={{
+                  mb: 0.5,
+                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
+                }}
+              >
+                FAQs
+              </Link>
+              <Link
+                href="/help"
+                color="inherit"
+                underline="hover"
+                display="block"
+                sx={{
+                  mb: 0.5,
+                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
+                }}
+              >
+                Help
+              </Link>
+              <Link
+                href="/termsandconditions"
+                color="inherit"
+                underline="hover"
+                display="block"
+                sx={{
+                  mb: 0.5,
+                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
+                }}
+              >
+                Terms & Conditions
+              </Link>
+            </Box>
+          </Grid>
         </Grid>
 
-        <Grid item xs={12} sm={4} md={2}>
-          <Typography variant="h6" gutterBottom>Beauty & Health</Typography>
-          <Box>
-            <Link href="/beauty%20asthetics%20&%20supplies" color="inherit" display="block" underline="hover">Beauty Asthetics & Supplies</Link>
-            <Link href="/healthcare" color="inherit" display="block" underline="hover">Health Care</Link>
-            <Link href="/wellnes" color="inherit" display="block" underline="hover">Wellness</Link>
-          </Box>
-        </Grid>
-
-        <Grid item xs={12} sm={4} md={3}>
-          <Typography variant="h6" gutterBottom>Business Services</Typography>
-          <Box>
-            <Link href="/advertisement%20&%20media%20services" color="inherit" display="block" underline="hover">Advertisement & Media Services</Link>
-            <Link href="/consultancy" color="inherit" display="block" underline="hover">Consultancy</Link>
-            <Link href="/it%20services" color="inherit" display="block" underline="hover">IT Services</Link>
-          </Box>
-        </Grid>
-
-        <Grid item xs={12} sm={4} md={3}>
-          <Typography variant="h6" gutterBottom>Contact</Typography>
-          <Typography variant="body2">Email: contact@mywebsite.com</Typography>
-          <Typography variant="body2">Phone: +123 456 7890</Typography>
-        </Grid>
-      </Grid>
-
-      <Box textAlign="center" pt={5}>
-        <Typography variant="body2">© 2025 MyWebsite. All rights reserved by Mr.Franchise</Typography>
-      </Box>
-    </Container>
-  </Box>
-  )
+        {/* Bottom Text */}
+        <Box textAlign="center" mt={6}>
+          <Typography
+            variant="body2"
+            sx={{ color: "#aaa", fontSize: { xs: "0.75rem", sm: "0.85rem", md: "0.9rem" } }}
+          >
+            © 2025 MrFranchise.in. All Rights Reserved.
+          </Typography>
+        </Box>
+      </Container>
+    </Box>
+  );
 }
 
-export default Footer
+export default Footer;

@@ -1,17 +1,5 @@
 import React, { useRef, useState } from "react";
-import { 
-  Box, 
-  Button, 
-  Card, 
-  Container, 
-  Grid, 
-  IconButton, 
-  Modal, 
-  TextField, 
-  Typography,
-  styled,
-  keyframes
-} from "@mui/material";
+import {  Box,  Button,  Card,  Container,  IconButton, Modal, TextField,  Typography,styled, keyframes} from "@mui/material";
 import { motion } from "framer-motion";
 // import Footer from "../../Components/Footer";
 
@@ -28,10 +16,10 @@ const fadeInDown = keyframes`
   to { opacity: 1; transform: translateY(0); }
 `;
 
-const fadeIn = keyframes`
-  from { opacity: 0; }
-  to { opacity: 1; }
-`;
+// const fadeIn = keyframes`
+//   from { opacity: 0; }
+//   to { opacity: 1; }
+// `;
 
 const scaleUp = keyframes`
   from { transform: scale(0.95); opacity: 0; }
@@ -75,6 +63,7 @@ const BrandLogo = styled('img')({
   '&:hover': {
     transform: 'scale(1.05)',
   },
+
 });
 
 const TabButton = styled(Button)(({ active }) => ({
@@ -343,7 +332,7 @@ function BrandViewPage() {
           <strong>Name:</strong> Fiery Pot Foods Team
         </Typography>
         <Typography>
-          <strong>Phone:</strong> +91 98765 43210
+          <strong>Phone:</strong> +91 98765 43210 
         </Typography>
         <Typography>
           <strong>Email:</strong> contact@fierypotfoods.com
@@ -411,7 +400,23 @@ function BrandViewPage() {
           {/* Sections */}
           <ContentSection ref={sectionRefs.business}>
             <Typography variant="h5" sx={{ mb: 2, color: '#1e3a8a' }}>
-              About Brand – Fiery Pot Foods
+              Brand Details 
+            </Typography>
+            <Typography>
+              Fiery Pot Foods is a fast-growing QSR chain serving fusion foods
+              like momos, kebabs, and rolls. Known for high ROI and strong
+              branding.
+            </Typography>
+            <Typography variant="h5" sx={{ mb: 2, color: '#1e3a8a', mt: 2 }}>
+              Company Name
+            </Typography>
+            <Typography>
+              Fiery Pot Foods is a fast-growing QSR chain serving fusion foods
+              like momos, kebabs, and rolls. Known for high ROI and strong
+              branding.
+            </Typography>
+            <Typography variant="h5" sx={{ mb: 2, color: '#1e3a8a', mt: 2  }}>
+              Description 
             </Typography>
             <Typography>
               Fiery Pot Foods is a fast-growing QSR chain serving fusion foods
@@ -421,12 +426,30 @@ function BrandViewPage() {
           </ContentSection>
 
           <ContentSection ref={sectionRefs.investment}>
-            <Typography variant="h5" sx={{ mb: 2, color: '#1e3a8a' }}>
+          <Typography variant="h5" sx={{ mb: 2, color: '#1e3a8a' }}>
+              Investment Details 
+            </Typography>
+            <Typography>
+              Fiery Pot Foods is a fast-growing QSR chain serving fusion foods
+              like momos, kebabs, and rolls. Known for high ROI and strong
+              branding.
+            </Typography>
+            <Typography variant="h5" sx={{ mb: 2, color: '#1e3a8a', mt: 2 }}>
               Franchise Investment
             </Typography>
             <InfoGrid>
               <Typography>Operations Started: <span>2021</span></Typography>
               <Typography>Franchise Since: <span>2022</span></Typography>
+              <Typography>Franchise Fee: <span>₹2.5 Lakhs</span></Typography>
+              <Typography>Franchise Fee: <span>₹2.5 Lakhs</span></Typography>
+            </InfoGrid>
+            <Typography variant="h5" sx={{ mb: 2, color: '#1e3a8a', mt: 2 }}>
+              Outlet Distribution
+            </Typography>
+            <InfoGrid>
+              <Typography>Operations Started: <span>2021</span></Typography>
+              <Typography>Franchise Since: <span>2022</span></Typography>
+              <Typography>Franchise Fee: <span>₹2.5 Lakhs</span></Typography>
               <Typography>Franchise Fee: <span>₹2.5 Lakhs</span></Typography>
             </InfoGrid>
           </ContentSection>
@@ -438,6 +461,13 @@ function BrandViewPage() {
             <InfoGrid>
               <Typography>Area Required: <span>200 - 600 Sq.ft</span></Typography>
               <Typography>Location: <span>High footfall areas</span></Typography>
+            </InfoGrid>
+            <Typography variant="h5" sx={{ mb: 2, color: '#1e3a8a', mt: 2 }}>
+              Select Location
+            </Typography>
+            <InfoGrid>
+            <Typography>Location: <span>High footfall areas</span></Typography>
+            <Typography>Location: <span>High footfall areas</span></Typography>
             </InfoGrid>
           </ContentSection>
 
@@ -459,6 +489,12 @@ function BrandViewPage() {
               <Typography>Tenure: <span>5 Years</span></Typography>
               <Typography>Renewable: <span>Yes</span></Typography>
             </InfoGrid>
+            <Typography variant="h5" sx={{ mb: 2, color: '#1e3a8a', mt: 2 }}>
+            Agreement Clause
+            </Typography>
+            <Typography>
+            Both parties hereby agree to the terms and conditions outlined in this agreement. This document represents the entire understanding between the parties and supersedes all prior discussions or communications, whether written or verbal. Any amendments or modifications must be made in writing and signed by both parties to be considered valid. Each party acknowledges that they have read, understood, and voluntarily entered into this agreement.
+            </Typography>
           </ContentSection>
 
           <ContentSection>
