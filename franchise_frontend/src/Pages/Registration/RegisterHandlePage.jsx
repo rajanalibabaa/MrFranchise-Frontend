@@ -17,6 +17,8 @@ import FacebookIcon from "../../Assets/Images/FacebookIcon.png";
 // import TwitterIcon from "../../Assets/Images/TwitterIcon.png";
 import GoogleIcon from "../../Assets/Images/GoogleIcon.png";
 import LoginPage from "../../Pages/LoginPage/LoginPage"
+import Footer from "../../Components/Footers/Footer";
+import Navbar from "../../Components/Navbar/NavBar";
 
 function RegisterHandleUser() {
   const navigate = useNavigate();
@@ -41,6 +43,8 @@ function RegisterHandleUser() {
   };
 
   return (
+    <>
+    <Navbar/>
     <Box
       sx={{
         height: "100vh",
@@ -209,6 +213,9 @@ function RegisterHandleUser() {
 </Box>
       </Grid>
     </Box>
+    <Footer/>
+    </>
+    
   );
 }
 

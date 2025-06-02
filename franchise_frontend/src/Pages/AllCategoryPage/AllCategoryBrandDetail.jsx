@@ -280,7 +280,21 @@ function BrandList() {
     applyFilters();
   }, [applyFilters]);
 
-  const handleOpenBrand = (brand) => {
+  const handleOpenBrand = async(brand) => {
+
+    console.log(brand.uuid)
+
+    const viewResponse = await axios.post(`http://localhost:5000/api/v1/view/postViewBrands/${Id}`,
+      {viewedID:brand.uuid},
+      {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+        }
+    )
+
+    console.log(viewResponse.data)
     setSelectedBrand(brand);
     setOpenDialog(true);
     setTabValue(0);

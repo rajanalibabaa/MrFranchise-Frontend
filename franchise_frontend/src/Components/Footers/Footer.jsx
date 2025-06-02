@@ -236,18 +236,6 @@ function Footer() {
               >
                 Terms & Conditions
               </Link>
-              {/* <Link
-                href="/privacypolicy"
-                color="inherit"
-                underline="hover"
-                display="block"
-                sx={{
-                  mb: 0.5,
-                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
-                }}
-              >
-                Privacy Policy
-              </Link> */}
             </Box>
           </Grid>
         </Grid>

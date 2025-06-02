@@ -9,17 +9,24 @@ import {
   CardContent,
   CardMedia,
   Grid,
+  Button,
 } from "@mui/material";
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 import { useTheme, useMediaQuery } from '@mui/material';
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import PersonIcon from "@mui/icons-material/Person";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useSelector,useDispatch } from "react-redux";
 import img from "../../assets/images/brandLogo.jpg";
+import { openBrandDialog } from  "../../Redux/Slices/brandSlice.jsx"
+import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog.jsx";
 
 const DashBoard = ({ selectedSection, sectionContent }) => {
+
+  const dispatch = useDispatch()
      const theme = useTheme();
   const [tabValue, setTabValue] = useState(0);
   const [investorInfo, setInvestorInfo] = useState(null);
@@ -29,6 +36,7 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
   const [likedStates, setLikedStates] = useState({});
   const [showMore, setShowMore] = useState({});
   const [removeMsg, setremoveMsg] = useState("");
+  const [viewStatus, setviewStatus] = useState({});
   
 const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
@@ -53,6 +61,8 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
         setLikedBrands(data);
 
+        // console.log(" ==== :",data.length)
+
         // Initialize likedStates
         const initialLiked = {};
         data.forEach((item, idx) => {
@@ -64,6 +74,39 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
         console.error("API Error:", error);
       }
     };
+     const fetchViewed = async () => {
+      if (!investorUUID || !AccessToken) return;
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/v1/view/getAllViewBrands/${investorUUID}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${AccessToken}`,
+            },
+          }
+        );
+
+        const data = response?.data?.data || [];
+        setviewStatus(data);
+
+        setviewStatus(data);
+
+        // console.log(" ==== :",data.length)
+
+        // Initialize likedStates
+        const initialLiked = {};
+        data.forEach((item, idx) => {
+          const id = item.brandDetails?.brandId || item._id || item.id || idx;
+          initialLiked[id] = true;
+        });
+        setLikedStates(initialLiked);
+      } catch (error) {
+        console.error("API Error:", error);
+      }
+    };
+
+    fetchViewed();
 
     fetchInvestor();
   }, [investorUUID, AccessToken]);
@@ -128,18 +171,115 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     setShowMore((prev) => ({ ...prev, [brandId]: !prev[brandId] }));
   };
 
+const handleViewBTN = (brandId) => {
+  console.log("Clicked brandId:", brandId);
+
+  viewStatus.map((value, index) => {
+    // console.log(value);
+    if (value.uuid === brandId) {
+      console.log(value.uuid);
+      console.log(value);
+      dispatch(openBrandDialog(value))
+    }
+  });
+
+};
+const toggleViewClose = (brandId) => {
+  console.log("Clicked brandId:", brandId);
+
+  const updatedStatus = viewStatus.filter(item => item.uuid !== brandId);
+  setviewStatus(updatedStatus);
+};
+
+
   const renderTabContent = () => {
     switch (tabValue) {
-      case 0:
-        return viewedBrands.length > 0 ? (
-          <ul>
-            {viewedBrands.map((item, idx) => (
-              <li key={idx}>{item.name || JSON.stringify(item)}</li>
-            ))}
-          </ul>
-        ) : (
-          <Typography>No viewed brands available.</Typography>
+     case 0:
+  return viewStatus.length > 0 ? (
+    <Grid container spacing={3}>
+      {viewStatus.map((item, idx) => {
+        const brandId = item.uuid;
+
+        return (
+         <Grid item sm={6} md={4} lg={3} key={brandId} sx={{ display: "flex", justifyContent: "center" }}>
+  <Card
+    sx={{
+      width: "345px",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      position: "relative",
+      boxShadow: 3,
+      "&:hover": { boxShadow: 6 },
+    }}
+  >
+    {/* Exit Button */}
+    <IconButton
+      size="small"
+      sx={{
+        position: "absolute",
+        top: 8,
+        right: 8,
+        zIndex: 2,
+        backgroundColor: "#fff",
+        boxShadow: 1,
+        "&:hover": {
+          backgroundColor: "#f5f5f5",
+        },
+      }}
+      // onClick={() => handleRemoveCard(brandId)} // your custom handler
+    >
+      <CloseIcon
+        onClick={() => toggleViewClose(brandId)}
+      fontSize="small" />
+    </IconButton>
+
+    {/* Brand Image */}
+    <CardMedia
+      component="img"
+      height="160"
+      image={
+        item.brandDetails?.brandLogo?.[0] ||
+        "https://via.placeholder.com/300x160?text=No+Image"
+      }
+      alt={item.personalDetails?.brandName || "Brand Image"}
+    />
+
+    {/* Brand Info */}
+    <CardContent>
+      <Typography
+        variant="h6"
+        component="div"
+        noWrap
+        title={item.personalDetails?.brandName || "Unnamed Brand"}
+      >
+        {item.personalDetails?.brandName || "Unnamed Brand"}
+      </Typography>
+
+      {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          <strong>Franchise Models: </strong>
+          {item.franchiseDetails.modelsOfFranchise.map((value, index) => (
+            <span key={index} style={{ marginRight: "6px" }}>
+              {value.franchiseModel}
+              {index !== item.franchiseDetails.modelsOfFranchise.length - 1 ? "," : ""}
+            </span>
+          ))}
+        </Typography>
+      )}
+    </CardContent>
+    <Button
+    sx={{backgroundColor:"green",color:"white"}}
+    onClick={() => handleViewBTN(brandId)}
+    >VIEW DETAILS</Button>
+  </Card>
+</Grid>
         );
+      })}
+    </Grid>
+  ) : (
+    <Typography>No viewed brands available.</Typography>
+  );
 
       case 1:
         return likedBrands.length > 0 ? (
@@ -275,6 +415,10 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
                         </Typography>
                         )}
                     </CardContent>
+                    <Button
+    sx={{backgroundColor:"green",color:"white"}}
+    onClick={() => handleViewBTN(brandId)}
+    >VIEW DETAILS</Button>
                 </Card>
 
 
@@ -542,26 +686,60 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
           >
             <Tab
               label={
+                
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <VisibilityIcon fontSize="small" />
-                  Viewed Brands
-                </Box>
+                <FavoriteIcon fontSize="small" />
+                <Typography variant="body2" fontWeight={500}>
+                  Viewed Brands 
+                </Typography>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  color="primary"
+                  sx={{ ml: 0.5 }}
+                >
+                  ({viewStatus?.length || 0})
+                </Typography>
+              </Box>
+
               }
             />
             <Tab
               label={
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <FavoriteIcon fontSize="small" />
+                <FavoriteIcon fontSize="small" />
+                <Typography variant="body2" fontWeight={500}>
                   Interested Brands
-                </Box>
+                </Typography>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  color="primary"
+                  sx={{ ml: 0.5 }}
+                >
+                  ({likedBrands?.length || 0})
+                </Typography>
+              </Box>
+
               }
             />
             <Tab
               label={
+                
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <AssignmentTurnedInIcon fontSize="small" />
-                  Applied List
-                </Box>
+                <FavoriteIcon fontSize="small" />
+                <Typography variant="body2" fontWeight={500}>
+                  Applied List 
+                </Typography>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  color="primary"
+                  sx={{ ml: 0.5 }}
+                >
+                  ({likedBrands?.length || 0})
+                </Typography>
+              </Box>               
               }
             />
           </Tabs>
@@ -572,6 +750,8 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
       ) : (
         sectionContent[selectedSection]
       )}
+
+      <BrandDetailsDialog/>
     </Box>
   );
 };

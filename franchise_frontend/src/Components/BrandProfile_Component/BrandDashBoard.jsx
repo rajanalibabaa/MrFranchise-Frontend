@@ -9,15 +9,13 @@ import axios from 'axios';
 const BrandDashBoard = ({ selectedSection, sectionContent }) => {
     const [tabValue, setTabValue] = useState(0);
 
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
-    };
+
     const [brandData, setBrandData] = useState({});
 
     const brandUUID = useSelector((state) => state.auth.brandUUID);
     const token = useSelector((state) => state.auth.AccessToken);
-     console.log('Brand UUID:', brandUUID);
-     console.log('Token:', token);
+    //  console.log('Brand UUID:', brandUUID);
+    //  console.log('Token:', token);
     useEffect(() => {
 
         const fetchBrandDetails = async () => {
@@ -48,6 +46,13 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
         }
 
     }, [brandUUID, token]);
+
+    const handleTabChange = (event, index) => {
+
+        console.log(" ============ :",index)
+        
+        setTabValue(index);
+    };
     
 
     return (

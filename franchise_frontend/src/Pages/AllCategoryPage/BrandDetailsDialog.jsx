@@ -32,6 +32,7 @@ const BrandDetailsDialog = () => {
   const [selectedMedia, setSelectedMedia] = useState(null);
   const { openDialog, selectedBrand , } = useSelector((state) => state.brands);
 
+  console.log("=============== :",openDialog,selectedBrand)
   const dispatch = useDispatch();
 
   const handleClose = () => {

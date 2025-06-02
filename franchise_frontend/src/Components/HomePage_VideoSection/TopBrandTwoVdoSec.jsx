@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef ,} from "react";
-import { useDispatch } from "react-redux";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Typography,
@@ -11,12 +10,104 @@ import {
   useTheme,
   Chip,
   Divider,
-  CircularProgress
+  CircularProgress,
+  Grid,
+  Modal
 } from "@mui/material";
-import { Favorite, FavoriteBorder, PlayCircleOutline } from "@mui/icons-material";
+import { Favorite, FavoriteBorder, PlayCircleOutline, NavigateBefore, NavigateNext } from "@mui/icons-material";
+import { useDispatch } from "react-redux";
 import axios from "axios";
 import { openBrandDialog } from "../../Redux/Slices/brandSlice";
 import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
+
+const ImageGallery = ({ brand }) => {
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const handleImageClick = (imgUrl) => {
+    setSelectedImage(imgUrl);
+  };
+
+  const handleClose = () => {
+    setSelectedImage(null);
+  };
+
+  const renderImageRow = (images, title) => (
+    images?.length > 0 && (
+      <>
+        <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>{title}</Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            overflowX: 'auto',
+            gap: 2,
+            pb: 1,
+            mb: 3,
+            '&::-webkit-scrollbar': {
+              display: 'none' // Hide scrollbar
+            },
+            scrollbarWidth: 'none' // Firefox
+          }}
+        >
+          {images.map((img, index) => (
+            <Box
+              key={index}
+              component="img"
+              src={img}
+              alt={`${title} ${index + 1}`}
+              onClick={() => handleImageClick(img)}
+              sx={{
+                width: 160,
+                height: 100,
+                borderRadius: 2,
+                objectFit: 'cover',
+                cursor: 'pointer',
+                boxShadow: 2,
+                transition: 'transform 0.3s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                },
+              }}
+            />
+          ))}
+        </Box>
+      </>
+    )
+  );
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', mt: 3,  color: 'orange'}}>
+      {renderImageRow(brand?.brandDetails?.interiorOutlet, 'Brand Gallery')}
+      {renderImageRow(brand?.brandDetails?.exteriorOutlet, 'Brand Gallery')}
+
+      <Modal open={!!selectedImage} onClose={handleClose}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            outline: 'none',
+            maxWidth: '90%',
+            maxHeight: '90%',
+          }}
+        >
+          <Box
+            component="img"
+            src={selectedImage}
+            alt="Full View"
+            sx={{
+              width: '100%',
+              height: 'auto',
+              maxHeight: '90vh',
+              borderRadius: 2,
+              boxShadow: 5,
+            }}
+          />
+        </Box>
+      </Modal>
+    </Box>
+  );
+};
 
 const BrandVideoCard = ({ 
   brand, 
@@ -27,21 +118,14 @@ const BrandVideoCard = ({
   liked,
   onLike,
   onApply,
-  autoPlay
+  onNext,
+  onPrev,
+  currentIndex,
+  totalBrands
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  useEffect(() => {
-    if (autoPlay && videoRef.current) {
-      const playPromise = videoRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.error("Auto-play prevented:", error);
-        });
-      }
-    }
-  }, [autoPlay, videoRef]);
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
 
   // Get the first available video URL
   const videoUrl = brand?.brandDetails?.brandPromotionVideo?.[0] || 
@@ -50,24 +134,26 @@ const BrandVideoCard = ({
   return (
     <Card sx={{ 
       width: '100%',
+      height: isMobile ? 'auto' : '500px',
       borderRadius: 2,
       boxShadow: 3,
       overflow: 'hidden',
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: isMobile ? 'column' : 'row',
       transition: 'all 0.3s ease',
+      position: 'relative',
       '&:hover': {
-        boxShadow: 6,
-        transform: 'translateY(-5px)'
+        boxShadow: 6
       }
     }}>
-      {/* Video Section - Fixed height container */}
+      {/* Video Section - Left Side */}
       <Box sx={{
         position: 'relative',
-        width: '100%',
-        height: isMobile ? '200px' : '350px', // Fixed height for all cards
+        width: isMobile ? '100%' : '55%',
+        height: isMobile ? 300 : '100%',
         backgroundColor: '#000',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        flexShrink: 0,
       }}>
         {videoUrl ? (
           <>
@@ -80,10 +166,11 @@ const BrandVideoCard = ({
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover', // Cover maintains aspect ratio while filling container
-                cursor: 'pointer'
+                objectFit: 'cover',
+                cursor: 'pointer',
               }}
               muted
+              autoPlay
               playsInline
             />
             
@@ -119,17 +206,65 @@ const BrandVideoCard = ({
             <Typography>Video not available</Typography>
           </Box>
         )}
+
+        {/* Video Navigation Controls */}
+        {!isMobile && (
+          <Box sx={{
+            position: 'absolute',
+            bottom: 16,
+            right: 16,
+            display: 'flex',
+            
+            gap: 1,
+            zIndex: 1
+          }}>
+            <IconButton
+              onClick={onPrev}
+              size="small"
+              sx={{
+                backgroundColor: 'rgba(0,0,0,0.6)',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(0,0,0,0.8)'
+                }
+              }}
+              disabled={currentIndex === 0}
+            >
+              <NavigateBefore />
+            </IconButton>
+            <IconButton
+              onClick={onNext}
+              size="small"
+              sx={{
+                backgroundColor: 'rgba(0,0,0,0.6)',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(0,0,0,0.8)'
+                }
+              }}
+              disabled={currentIndex === totalBrands - 1}
+            >
+              <NavigateNext />
+            </IconButton>
+          </Box>
+        )}
       </Box>
       
-      {/* Content Section */}
-      <Box sx={{ p: 1 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          mb: 1
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      {/* Content Section - Right Side */}
+      <Box sx={{ 
+        p: 3,
+        width: isMobile ? '100%' : '40%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between'
+      }}>
+        <Box>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2,
+            mb: 2
+          }}>
             <Avatar 
               src={brand?.brandDetails?.brandLogo?.[0]} 
               sx={{ 
@@ -138,16 +273,111 @@ const BrandVideoCard = ({
                 border: '1px solid #eee'
               }} 
             />
-            <Typography variant="h6" fontWeight="bold" noWrap>
-              {brand?.personalDetails?.brandName || "Unknown Brand"}
+            <Box>
+              <Typography variant="h5" fontWeight="bold" >
+                {brand?.personalDetails?.brandName || "Unknown Brand"}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {brand?.personalDetails?.brandCategories?.[0]?.child  || "No category"}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" paragraph>
+              {brand?.personalDetails?.brandDescription?.substring(0, 150) || "No description available"}...
             </Typography>
           </Box>
-          
+<hr style={{ border: "1px solid green" }} />
+<Typography variant="subtitle2" fontWeight="bold" gutterBottom sx={{ mt: 2 , mb: 1 , color: "orange"}}>
+  Investment Details 
+</Typography>
+
+<Box sx={{ mb: 2 }}>
+  <Grid container spacing={1} justifyContent={"space-evenly"}>
+    {brand?.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange && (
+      <Grid item xs={6}>
+        <Typography variant="body2">
+          <strong>Investment:</strong><br />
+          {formatInvestmentRange(brand.franchiseDetails.modelsOfFranchise[0].investmentRange)}
+        </Typography>
+      </Grid>
+    )}
+
+    {brand?.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired && (
+      <Grid item xs={6}>
+        <Typography variant="body2">
+          <strong>Area:</strong><br />
+          {brand.franchiseDetails.modelsOfFranchise[0].areaRequired} sq.ft
+        </Typography>
+      </Grid>
+    )}
+
+    {brand?.personalDetails?.franchiseSinceYear && (
+      <Grid item xs={6}>
+        <Typography variant="body2">
+          <strong>Franchising:</strong><br />
+          {brand.personalDetails.franchiseSinceYear} Years
+        </Typography>
+      </Grid>
+    )}
+
+    {brand?.personalDetails?.establishedYear && (
+      <Grid item xs={6}>
+        <Typography variant="body2">
+          <strong>Established :</strong><br />
+          {brand.personalDetails.establishedYear} Years
+        </Typography>
+      </Grid>
+    )}
+
+    {brand?.franchiseDetails?.franchiseOutlets && (
+      <Grid item xs={6}>
+        <Typography variant="body2">
+          <strong>Total:</strong><br />
+          {brand.franchiseDetails.franchiseOutlets} Outlets
+         </Typography>
+      </Grid>
+    )}
+  </Grid>
+</Box>
+
+<hr style={{ border: "1px solid green" }} />
+
+          <ImageGallery brand={brand} />
+        </Box>
+
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mt: 'auto',
+          // pt: 2
+        }}>
+          <Button
+            variant="contained" 
+            onClick={() => onApply(brand)}
+            size="medium"
+            sx={{
+              flex: 1,
+              backgroundColor: "#f29724",
+              textTransform: "none",
+              borderRadius: 1,
+              py: 1,
+              "&:hover": {
+                backgroundColor: "#e68a1e",
+                boxShadow: 2,
+              },
+            }}
+          >
+            Apply Now
+          </Button>
+
           <IconButton
             onClick={onLike}
             size="small"
             sx={{ 
-              p: 0.5,
+              ml: 2,
               '&:hover': {
                 transform: 'scale(1.1)'
               }
@@ -156,99 +386,54 @@ const BrandVideoCard = ({
             {liked ? (
               <Favorite sx={{ 
                 color: "red", 
-                fontSize: 25,
-                animation: 'pulse 0.5s ease',
-                '@keyframes pulse': {
-                  '0%': { transform: 'scale(1)' },
-                  '50%': { transform: 'scale(1.3)' },
-                  '100%': { transform: 'scale(1)' }
-                }
+                fontSize: 24,
+                animation: 'pulse 0.5s ease'
               }} />
             ) : (
               <FavoriteBorder sx={{ 
                 color: "gray", 
-                fontSize: 25 
+                fontSize: 24 
               }} />
             )}
           </IconButton>
         </Box>
-        
-        <Box sx={{ 
-          display: 'flex', 
-          gap: 1, 
-          flexWrap: 'wrap',
-          mb: 1.5
-        }}>
-          {brand?.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange && (
-            <Chip 
-              label={`Investment: ${formatInvestmentRange(brand.franchiseDetails.modelsOfFranchise[0].investmentRange)}`} 
-              size="small" 
-              color="success"
-            />
-          )}
-          {brand?.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired && (
-            <Chip 
-              label={`Area: ${brand.franchiseDetails.modelsOfFranchise[0].areaRequired} sq.ft`} 
-              size="small"
-              color="success" 
-            />
-          )}
-        </Box>
-        
-        <Typography 
-          variant="body2" 
-          color="text.secondary" 
-          sx={{
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            mb: 2,
-            minHeight: 40
-          }}
-        >
-          {brand?.personalDetails?.brandDescription || "No description available"}
-        </Typography>
-        
-        <Divider sx={{ my: 1 }} />
-        
-        <Box sx={{ 
-          display: 'flex', 
-          gap: 1, 
-          flexWrap: 'wrap',
-          mb: 2
-        }}>
-         {brand?.personalDetails?.brandCategories?.map((category, i) => (
-            <Chip
-              key={i}
-              label={`${category.main} > ${category.sub} > ${category.child}`}
+
+        {/* Mobile Navigation */}
+        {isMobile && (
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: 2,
+            mt: 2
+          }}>
+            <IconButton
+              onClick={onPrev}
               size="small"
               sx={{
                 backgroundColor: theme.palette.grey[200],
-                color: theme.palette.text.primary
+                '&:hover': {
+                  backgroundColor: theme.palette.grey[300]
+                }
               }}
-            />
-          ))}
-        </Box>
-        
-        <Button
-          fullWidth
-          variant="contained" 
-          onClick={() => onApply(brand)}
-          sx={{
-            backgroundColor: "#f29724",
-            textTransform: "none",
-            borderRadius: 1,
-            py: 1,
-            "&:hover": {
-              backgroundColor: "#e68a1e",
-              boxShadow: 2,
-            },
-          }}
-        >
-          Apply Now
-        </Button>
+              disabled={currentIndex === 0}
+            >
+              <NavigateBefore />
+            </IconButton>
+            <IconButton
+              onClick={onNext}
+              size="small"
+              sx={{
+                backgroundColor: theme.palette.grey[200],
+                '&:hover': {
+                  backgroundColor: theme.palette.grey[300]
+                }
+              }}
+              disabled={currentIndex === totalBrands - 1}
+            >
+              <NavigateNext />
+            </IconButton>
+          </Box>
+        )}
       </Box>
     </Card>
   );
@@ -276,18 +461,16 @@ function TopBrandVdoSec() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   
   const [brandData, setBrandData] = useState([]);
-  const [displayBrands, setDisplayBrands] = useState([]);
+  const [currentBrand, setCurrentBrand] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [playingIndex, setPlayingIndex] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [likedBrands, setLikedBrands] = useState({});
-  const [autoPlayIndex, setAutoPlayIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-   const [selectedBrand, setSelectedBrand] = useState(null);
   
-  const videoRefs = useRef([]);
+  const videoRef = useRef(null);
   const autoPlayTimer = useRef(null);
-const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchBrandData = async () => {
@@ -297,15 +480,15 @@ const dispatch = useDispatch();
           "https://franchise-backend-wgp6.onrender.com/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopOne"
         );
         
-        // Handle both array and single object responses
         let fetchedData = response.data?.data;
         if (!Array.isArray(fetchedData)) {
           fetchedData = fetchedData ? [fetchedData] : [];
         }
         
         setBrandData(fetchedData);
-        console.log('fetchedData',fetchedData);
-        
+        if (fetchedData.length > 0) {
+          setCurrentBrand(fetchedData[0]);
+        }
         
         // Initialize liked status
         const initialLikedState = {};
@@ -316,9 +499,6 @@ const dispatch = useDispatch();
           }
         });
         setLikedBrands(initialLikedState);
-        
-        // Set first two brands to display initially (or all if less than 2)
-        setDisplayBrands(fetchedData.slice(0, 2));
         
         setLoading(false);
       } catch (err) {
@@ -338,59 +518,61 @@ const dispatch = useDispatch();
   }, []);
 
   useEffect(() => {
-    if (brandData.length <= 2) return;
+    if (brandData.length <= 1) return;
     
-    // Set up auto-rotation every 3 minutes (180000 ms)
+    // Set up auto-rotation every 30 seconds (30000 ms)
     autoPlayTimer.current = setInterval(() => {
-      rotateBrands();
-    }, 10000);
+      handleNext();
+    }, 30000);
 
     return () => {
       if (autoPlayTimer.current) {
         clearInterval(autoPlayTimer.current);
       }
     };
-  }, [brandData]);
+  }, [brandData, currentIndex]);
 
-  const rotateBrands = () => {
-    if (brandData.length <= 2) return;
-    
-    setCurrentIndex(prev => {
-      const nextIndex = (prev + 2) % brandData.length;
-      // Get next two brands (or wrap around to start)
-      let nextBrands;
-      if (nextIndex + 1 >= brandData.length) {
-        nextBrands = [
-          brandData[nextIndex],
-          brandData[0] // Wrap around
-        ];
-      } else {
-        nextBrands = brandData.slice(nextIndex, nextIndex + 2);
-      }
-      
-      setDisplayBrands(nextBrands);
-      
-      // Auto-play the first video in the new set
-      setAutoPlayIndex(0);
-      setPlayingIndex(0);
-      
-      return nextIndex;
-    });
-  };
-
-  const handlePlay = (index) => {
-    setPlayingIndex(index);
-    // Pause other videos
-    videoRefs.current.forEach((ref, i) => {
-      if (i !== index && ref) {
-        ref.pause();
-        ref.currentTime = 0;
-      }
-    });
+  const handlePlay = () => {
+    setIsPlaying(true);
+    // Reset auto-play timer when user manually plays
+    if (autoPlayTimer.current) {
+      clearInterval(autoPlayTimer.current);
+      autoPlayTimer.current = setInterval(() => {
+        handleNext();
+      }, 30000);
+    }
   };
 
   const handlePause = () => {
-    setPlayingIndex(null);
+    setIsPlaying(false);
+  };
+
+  const handleNext = () => {
+    if (brandData.length === 0) return;
+    
+    const nextIndex = (currentIndex + 1) % brandData.length;
+    setCurrentIndex(nextIndex);
+    setCurrentBrand(brandData[nextIndex]);
+    setIsPlaying(false); // Auto-pause when changing videos
+    
+    // Reset video to start
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+    }
+  };
+
+  const handlePrev = () => {
+    if (brandData.length === 0) return;
+    
+    const prevIndex = (currentIndex - 1 + brandData.length) % brandData.length;
+    setCurrentIndex(prevIndex);
+    setCurrentBrand(brandData[prevIndex]);
+    setIsPlaying(false); // Auto-pause when changing videos
+    
+    // Reset video to start
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+    }
   };
 
   const handleLike = (brandId) => {
@@ -398,16 +580,10 @@ const dispatch = useDispatch();
       ...prev,
       [brandId]: !prev[brandId]
     }));
-    // API call to update like status would go here
   };
 
   const handleApply = (brand) => {
-
-    setSelectedBrand(brand);
-    dispatch(openBrandDialog(selectedBrand));
-
-    console.log("selcted brand",brand);
-    
+    dispatch(openBrandDialog(brand));
   };
 
   if (loading) {
@@ -462,69 +638,38 @@ const dispatch = useDispatch();
         gutterBottom
         sx={{ 
           textAlign: 'left',
-          backgroundColor: '#689f38',
-          color: '#ff9800',
-          mb: 4
+          mb: 4,
+          color: theme.palette.primary.main
         }}
       >
         Featured Franchise Opportunities
       </Typography>
       
-      <Box sx={{
-        display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-        gap: isMobile ? 3 : 4,
-        alignItems: 'stretch'
-      }}>
-        {displayBrands.map((brand, index) => {
-          const brandId = brand.uuid || brand.personalDetails?.brandName;
-          return (
-            <BrandVideoCard
-              key={brandId || index}
-              brand={brand}
-              isPlaying={playingIndex === index}
-              onPlay={() => handlePlay(index)}
-              onPause={handlePause}
-              videoRef={el => videoRefs.current[index] = el}
-              liked={brandId ? likedBrands[brandId] : false}
-              onLike={() => brandId && handleLike(brandId)}
-              onApply={handleApply}
-              autoPlay={autoPlayIndex === index}
-            />
-          );
-        })}
-      </Box>
-
-      {/* Navigation dots for mobile */}
-      {isMobile && brandData.length > 2 && (
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          gap: 1, 
-          mt: 3 
-        }}>
-          {Array.from({ length: Math.ceil(brandData.length / 2) }).map((_, i) => (
-            <Box
-              key={i}
-              onClick={() => {
-                const startIndex = i * 2;
-                setDisplayBrands(brandData.slice(startIndex, startIndex + 2));
-                setCurrentIndex(startIndex);
-              }}
-              sx={{
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                bgcolor: currentIndex === i * 2 ? 'primary.main' : 'grey.400',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-            />
-          ))}
-        </Box>
+      {currentBrand && (
+        <BrandVideoCard
+          brand={currentBrand}
+          isPlaying={isPlaying}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          videoRef={videoRef}
+          liked={currentBrand.uuid ? likedBrands[currentBrand.uuid] : false}
+          onLike={() => currentBrand.uuid && handleLike(currentBrand.uuid)}
+          onApply={handleApply}
+          onNext={handleNext}
+          onPrev={handlePrev}
+          currentIndex={currentIndex}
+          totalBrands={brandData.length}
+        />
       )}
-  <BrandDetailsDialog/>
 
+      {/* Brand counter */}
+      {brandData.length > 1 && (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+          {currentIndex + 1} of {brandData.length}
+        </Typography>
+      )}
+
+      <BrandDetailsDialog />
     </Box>
   );
 }

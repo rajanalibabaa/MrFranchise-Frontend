@@ -15,12 +15,14 @@ import {
   useTheme,
   Chip,
   Divider,
-  Avatar
+  Avatar,
+  Grid
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { motion } from "framer-motion";
 import axios from "axios";
+import { Favorite } from "@mui/icons-material";
 
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
@@ -46,6 +48,19 @@ const NewlyRegisteredBrandsSection = () => {
     "Hot Investment Opportunities",
     "Recently Added Ventures"
   ];
+
+  // Strict fixed dimensions for all cards
+  const CARD_DIMENSIONS = {
+    mobile: { width: 280, height: 520 },
+    tablet: { width: 320, height: 560 },
+    desktop: { width: 370, height: 500 }
+  };
+
+  const getCardDimensions = () => {
+    if (isMobile) return CARD_DIMENSIONS.mobile;
+    if (isTablet) return CARD_DIMENSIONS.tablet;
+    return CARD_DIMENSIONS.desktop;
+  };
 
   // Format investment range
   const formatInvestmentRange = (range) => {
@@ -152,6 +167,9 @@ const NewlyRegisteredBrandsSection = () => {
       </Box>
     );
 
+  const { width: cardWidth, height: cardHeight } = getCardDimensions();
+  const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
+
   return (
     <Box sx={{ 
       p: isMobile ? 2 : 4, 
@@ -212,7 +230,8 @@ const NewlyRegisteredBrandsSection = () => {
               variants={cardVariants}
               whileHover={{ scale: 1.03 }}
               style={{ 
-                minWidth: isMobile ? 280 : isTablet ? 320 : 370,
+                width: cardWidth,
+                height: cardHeight,
                 flexShrink: 0
               }}
             >
@@ -222,7 +241,8 @@ const NewlyRegisteredBrandsSection = () => {
                   flexDirection: "column",
                   borderRadius: 3,
                   overflow: "hidden",
-                  height: "100%",
+                  width: '100%',
+                  height: '100%',
                   border: "1px solid #eee",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                   transition: 'all 0.3s ease',
@@ -231,132 +251,169 @@ const NewlyRegisteredBrandsSection = () => {
                   }
                 }}
               >
-                {videoUrl ? (
-                  <CardMedia
-                    component="video"
-                    src={videoUrl}
-                    alt={brand.personalDetails?.brandName || "Brand"}
-                    sx={{ 
-                      height: isMobile ? 200 : 250,
-                      width: '100%',
-                      objectFit: 'cover'
-                    }}
-                    controls
-                    muted
-                    loop
-                  />
-                ) : (
-                  <Box sx={{ 
-                    height: isMobile ? 200 : 250,
-                    width: '100%',
-                    bgcolor: theme.palette.grey[200],
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Typography>Video not available</Typography>
-                  </Box>
-                )}
-
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    gap: 2,
-                    mb: 1.5
-                  }}>
-                    <Avatar 
-                      src={brand?.brandDetails?.brandLogo?.[0]} 
+                {/* Media Container with Strict Dimensions */}
+                <Box sx={{
+                  height: mediaHeight,
+                  width: '100%',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  backgroundColor: theme.palette.grey[200]
+                }}>
+                  {videoUrl ? (
+                    <CardMedia
+                      component="video"
+                      src={videoUrl}
+                      alt={brand.personalDetails?.brandName || "Brand"}
                       sx={{ 
-                        width: 50, 
-                        height: 50,
-                        border: '1px solid #eee'
-                      }} 
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                      controls
+                      muted
+                      loop
                     />
-                    <Typography variant="h6" fontWeight={600} noWrap>
-                      {brand.personalDetails?.brandName}
-                    </Typography>
-                  </Box>
+                  ) : (
+                    <Box sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Video not available
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
 
-                  <Box sx={{ 
-                    display: 'flex', 
-                    gap: 1, 
-                    flexWrap: 'wrap',
-                    mb: 2
-                  }}>
-                    {firstModel.investmentRange && (
-                      <Chip 
-                        label={`Investment: ${formatInvestmentRange(firstModel.investmentRange)}`} 
-                        size="small" 
-                        color="primary"
+                {/* Card Content with Fixed Height */}
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: `calc(${cardHeight}px - ${mediaHeight}px)`,
+                  justifyContent: 'space-between'
+                }}>
+                  <CardContent sx={{ flex: 1, overflow: 'hidden' }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      gap: 2,
+                      mb: 1.5
+                    }}>
+                      <Avatar 
+                        src={brand?.brandDetails?.brandLogo?.[0]} 
+                        sx={{ 
+                          width: 50, 
+                          height: 50,
+                          border: '1px solid #eee',
+                          flexShrink: 0
+                        }} 
                       />
-                    )}
-                    {firstModel.areaRequired && (
-                      <Chip 
-                        label={`Area: ${firstModel.areaRequired} sq.ft`} 
-                        size="small"
-                      />
-                    )}
-                  </Box>
+                      <Typography 
+                        variant="h6" 
+                        fontWeight={600} 
+                        sx={{
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      >
+                        {brand.personalDetails?.brandName}
+                      </Typography>
+                    </Box>
 
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary"
-                    sx={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
+                    <Box sx={{ 
+                      display: 'flex', 
+                      gap: 1, 
+                      flexWrap: 'wrap',
                       mb: 2,
-                      minHeight: 40
-                    }}
-                  >
-                    {brand.personalDetails?.brandDescription || "No description available"}
-                  </Typography>
+                      minHeight: 32
+                    }}>
+                      {firstModel.investmentRange && (
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary"
+                        >
+                          Investment: {firstModel.investmentRange}
+                        </Typography>
+                      )}
+                      {firstModel.areaRequired && (
+                        <Typography 
+                          variant="body2" 
+                          color="text.secondary"
+                        >
+                          Area: {firstModel.areaRequired}
+                        </Typography>
+                      )}
+                    </Box>
 
-                  <Divider sx={{ my: 1 }} />
-
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    mt: 1
-                  }}>
-                    <Typography variant="body2" fontWeight={600}>
-                      Models: {franchiseModels.length}
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary"
+                      sx={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        mb: 2,
+                        minHeight: 40
+                      }}
+                    >
+                      {brand.personalDetails?.brandDescription || "No description available"}
                     </Typography>
 
+                    <Divider sx={{ my: 1 }} />
+
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      mt: 1
+                    }}>
+                      <Typography variant="body2" fontWeight={600}>
+                        Models: {franchiseModels.length}
+                      </Typography>
+
+                      <Button
+                        variant="text"
+                        size="small"
+                        startIcon={<VisibilityIcon />}
+                        onClick={() => (isOpen ? handleCloseDialog() : handleOpenDialog(brand))}
+                        sx={{ textTransform: 'none' }}
+                      >
+                        {isOpen ? "Hide" : "View Details"}
+                      </Button>
+                    </Box>
+                  </CardContent>
+
+                  <Box sx={{ px: 2, pb: 2 }}>
                     <Button
-                      variant="text"
-                      size="small"
-                      startIcon={<VisibilityIcon />}
-                      onClick={() => (isOpen ? handleCloseDialog() : handleOpenDialog(brand))}
-                      sx={{ textTransform: 'none' }}
+                      variant="contained"
+                      fullWidth
+                      onClick={() => handleApply(brand)}
+                      sx={{
+                        backgroundColor: "#f29724",
+                        "&:hover": { 
+                          backgroundColor: "#e68a1e",
+                          boxShadow: 2
+                        },
+                        py: 1,
+                        borderRadius: 1,
+                        textTransform: 'none'
+                      }}
                     >
-                      {isOpen ? "Hide" : "View Details"}
+                      Apply Now
                     </Button>
                   </Box>
-                </CardContent>
-
-                <Box sx={{ px: 2, pb: 2 }}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={() => handleApply(brand)}
-                    sx={{
-                      backgroundColor: "#f29724",
-                      "&:hover": { 
-                        backgroundColor: "#e68a1e",
-                        boxShadow: 2
-                      },
-                      py: 1,
-                      borderRadius: 1,
-                      textTransform: 'none'
-                    }}
-                  >
-                    Apply Now
-                  </Button>
                 </Box>
               </Card>
             </motion.div>
