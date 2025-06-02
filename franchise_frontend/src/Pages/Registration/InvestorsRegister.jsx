@@ -42,6 +42,8 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
 import backgroundImage from "../../assets/Images/investor image.jpg";
 import LoginPage from "../../Pages/LoginPage/LoginPage"
+import Footer from "../../Components/Footers/Footer";
+import Navbar from "../../Components/Navbar/NavBar";
 
 
 const phoneCodes = {
@@ -381,7 +383,7 @@ useEffect(() => {
     country: data.country || "",
     state: data.state || "",
     city: data.city || "",
-category: data.categories.map(c => ({
+category: data.categories .map(c => ({
       main: c.main,
       sub: c.sub,
       child: c.child
@@ -509,6 +511,7 @@ category: data.categories.map(c => ({
 
   return (
    <Box sx={{backgroundImage: `url(${backgroundImage})`, backgroundSize: "cover", height: "100vh"}}>
+    <Navbar />
     <Container
       sx={{
         // maxWidth: "lg",
@@ -1326,7 +1329,9 @@ label={
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Container></Box>
+    </Container>
+    <Footer/>
+    </Box>
   );
 };
 
