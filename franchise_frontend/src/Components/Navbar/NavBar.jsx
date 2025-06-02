@@ -105,7 +105,7 @@ function Navbar() {
       const response = await axios.post(
         // `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
         `http://localhost:5000/api/v1/logout/${ID}`,
-        `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
+        // `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
         {},
         {
           headers: {
