@@ -91,6 +91,8 @@ const brandSlice = createSlice({
     loading: false,
     error: null,
     categories: [],
+    subCategories: [],
+    childCategories: [],
     investmentRanges: [],
     modelTypes: [],
     states: [],
@@ -98,6 +100,8 @@ const brandSlice = createSlice({
     filters: {
       searchTerm: "",
       selectedCategory: "",
+      selectedSubCategory: "",
+      selectedChildCategory: [],
       selectedModelType: "",
       selectedState: "",
       selectedCity: "",
@@ -110,12 +114,13 @@ const brandSlice = createSlice({
     setFilters: (state, action) => {
       state.filters = { ...state.filters, ...action.payload };
       state.filteredData = applyFiltersToBrands(state.data, state.filters);
-    
     },
     clearFilters: (state) => {
       state.filters = {
         searchTerm: "",
         selectedCategory: "",
+        selectedSubCategory: "",
+        selectedChildCategory: [],
         selectedModelType: "",
         selectedState: "",
         selectedCity: "",
@@ -137,34 +142,14 @@ const brandSlice = createSlice({
       .addCase(toggleLikeBrand.fulfilled, (state, action) => {
         const { brandId, isLiked } = action.payload;
         // Update both data and filteredData
-        state.data = state.data.map((brand) =>
+       state.data = state.data.map((brand) =>
           brand.uuid === brandId ? { ...brand, isLiked } : brand
         );
-
-        // // Update likedBrands array
-        // if (isLiked) {
-        //   state.likedBrands.push(brandId);
-        // } else {
-        //   state.likedBrands = state.likedBrands.filter((id) => id !== brandId);
-        // }
+        state.filteredData = state.filteredData.map((brand) =>
+          brand.uuid === brandId ? { ...brand, isLiked } : brand
+        );
       })
 
-      // .addCase(fetchLikedBrands.fulfilled, (state, action) => {
-      //   state.likedBrands = action.payload;
-      //   console.log("v1", action.payload)
-
-      //   // Update isLiked status in all brands
-      //   state.data = state.data.map((brand) => ({
-      //     ...brand,
-
-      //     isLiked: action.payload.includes(brand.uuid),
-      //   }));
-
-      //   state.filteredData = state.filteredData.map((brand) => ({
-      //     ...brand,
-      //     isLiked: action.payload.includes(brand.uuid),
-      //   }));
-      // })
       .addCase(fetchBrands.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -172,20 +157,48 @@ const brandSlice = createSlice({
       .addCase(fetchBrands.fulfilled, (state, action) => {
         state.loading = false;
         state.data = action.payload;
-        console.log("fetched", action.payload);
-        state.filteredData = action.payload;
+            state.filteredData = applyFiltersToBrands(action.payload, state.filters);
 
         // Extract unique values for filters
-        state.categories = [
-          ...new Set(
-            action.payload.flatMap(
-              (brand) =>
-                brand.personalDetails?.brandCategories?.map(
-                  (category) => category.main
-                ) || []
-            )
-          ),
-        ];
+   // Extract unique categories with their hierarchy
+        const categoryMap = {};
+        const subCategoryMap = {};
+        const childCategoryMap = {};
+
+       action.payload.forEach((brand) => {
+          brand.personalDetails?.brandCategories?.forEach((category) => {
+            // Main categories
+            if (category.main && !categoryMap[category.main]) {
+              categoryMap[category.main] = {
+                id: category.main,
+                name: category.main
+              };
+            }
+
+            // Sub categories
+            if (category.sub && !subCategoryMap[category.sub]) {
+              subCategoryMap[category.sub] = {
+                id: category.sub,
+                name: category.sub,
+                parentCategory: category.main
+              };
+            }
+
+            // Child categories
+            if (category.child && !childCategoryMap[category.child]) {
+              childCategoryMap[category.child] = {
+                id: category.child,
+                name: category.child,
+                parentSubCategory: category.sub
+              };
+            }
+          });
+        });
+
+        state.categories = Object.values(categoryMap);
+        state.subCategories = Object.values(subCategoryMap);
+        state.childCategories = Object.values(childCategoryMap);
+
 
         state.modelTypes = [
           ...new Set(
@@ -246,6 +259,23 @@ const applyFiltersToBrands = (brands, filters) => {
       )
     );
   }
+  // Sub category filter
+  if (filters.selectedSubCategory) {
+    result = result.filter((brand) =>
+      brand.personalDetails?.brandCategories?.some(
+        (cat) => cat.sub === filters.selectedSubCategory
+      )
+    );
+  }
+     // Child categories filter
+  if (filters.selectedChildCategories?.length > 0) {
+    result = result.filter((brand) =>
+      brand.personalDetails?.brandCategories?.some((cat) =>
+        filters.selectedChildCategories.includes(cat.child)
+      )
+    );
+  }
+
 
   if (filters.selectedModelType) {
     result = result.filter((brand) =>
@@ -275,12 +305,11 @@ const applyFiltersToBrands = (brands, filters) => {
     );
   }
 
+ // Investment range filter
   if (filters.selectedInvestmentRange) {
-    const [min, max] = filters.selectedInvestmentRange.split("-").map(Number);
     result = result.filter((brand) => {
-      const franchiseFee =
-        parseFloat(brand.franchiseDetails?.franchiseFee) || 0;
-      return franchiseFee >= min && franchiseFee <= max;
+      const investmentRange = brand.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange || "";
+      return investmentRange === filters.selectedInvestmentRange;
     });
   }
 

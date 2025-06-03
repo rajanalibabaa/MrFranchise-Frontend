@@ -12,7 +12,8 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchBrands, setFilters } from "../../Redux/Slices/brandSlice";
+import { setFilters } from "../../Redux/Slices/brandSlice";
+
 const investmentRangeOptions = [
   { label: "All Ranges", value: "" },
   { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
@@ -30,23 +31,21 @@ const investmentRangeOptions = [
 const FilterDropdowns = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { categories, states, filters, loading } = useSelector(
-    (state) => state.brands
-  );
-  useEffect(() => {
-    dispatch(fetchBrands());
-  }, [dispatch]);
+  const {
+    categories = [],
+    states = [],
+    filters,
+    loading,
+  } = useSelector((state) => state.brands);
 
   const handleFilterChange = (name, value) => {
     dispatch(setFilters({ [name]: value }));
-
   };
 
   const handleFindBrands = () => {
-    // Apply filters before navigating
-
-    navigate("/brandviewpage");
-    dispatch(fetchBrands());
+    navigate("/brandviewpage", {
+      state: { filters }, // Pass current filters to the next page
+    });
   };
 
   return (
@@ -60,7 +59,7 @@ const FilterDropdowns = () => {
           alignItems: "center",
         }}
       >
-        {/* Category Filter */}
+        {/* Category Filter - Updated to match your data structure */}
         <FormControl fullWidth sx={{ minWidth: 180 }}>
           <InputLabel>Category</InputLabel>
           <Select
@@ -71,9 +70,9 @@ const FilterDropdowns = () => {
             label="Category"
           >
             <MenuItem value="">All Categories</MenuItem>
-            {categories.map((category, idx) => (
-              <MenuItem key={idx} value={category}>
-                {category}
+            {categories.map((category) => (
+              <MenuItem key={category.id} value={category.id}>
+                {category.name}
               </MenuItem>
             ))}
           </Select>
