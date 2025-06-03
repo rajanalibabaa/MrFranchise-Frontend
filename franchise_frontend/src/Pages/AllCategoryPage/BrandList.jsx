@@ -46,6 +46,7 @@ import {
   Business as BusinessIcon,
   AreaChart,
   Favorite,
+  Repeat,
 } from "@mui/icons-material";
 import {
   fetchBrands,
@@ -58,6 +59,8 @@ import {
 import BrandDetailsDialog from "./BrandDetailsDialog";
 import LoginPage from "../LoginPage/LoginPage";
 import { useLocation } from "react-router-dom";
+import { Compare } from "@mui/icons-material";
+import BrandComparison from "./BrandComparison";
 
 const investmentRangeOptions = [
   { label: "All Ranges", value: "" },
@@ -393,11 +396,13 @@ const FilterPanel = ({
 };
 
 const BrandCard = ({
-  brand,
+   brand,
   handleOpenBrand,
   toggleLike,
   showLogin,
   setShowLogin,
+  isSelectedForComparison,
+  toggleBrandComparison,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -433,8 +438,27 @@ const BrandCard = ({
           transform: "translateY(-5px)",
           boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
         },
+        
       }}
     >
+        {/* Add comparison toggle button */}
+      <IconButton
+        sx={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          zIndex: 1,
+          backgroundColor: isSelectedForComparison ? "#4caf50" : "rgba(0,0,0,0.5)",
+          color: "white",
+          "&:hover": {
+            backgroundColor: isSelectedForComparison ? "#388e3c" : "rgba(0,0,0,0.7)",
+          },
+        }}
+        onClick={() => toggleBrandComparison(brand)}
+      >
+        <Compare fontSize="small" />
+      </IconButton>
+
       <Box
         component="img"
         src={brand.brandDetails?.brandLogo}
@@ -445,9 +469,10 @@ const BrandCard = ({
           p: 2,
           height: 270,
           width: "100%",
+           display:"grid", gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" }
         }}
       />
-      <CardContent sx={{ flexGrow: 1 }}>
+      <Grid sx={{ flexGrow: 1 , } }>
         <Box
           display="flex"
           justifyContent="space-between"
@@ -535,7 +560,7 @@ const BrandCard = ({
           {brand.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired ||
             "Not specified"}
         </Typography>
-      </CardContent>
+      </Grid>
       <CardActions sx={{ p: 2 }}>
         <Button
           size="medium"
@@ -581,6 +606,32 @@ function BrandList() {
   } = useSelector((state) => state.brands);
 
   console.log("filteredData :", filteredBrands);
+
+  // Add these state variables to the BrandList component
+  const [comparisonOpen, setComparisonOpen] = useState(false);
+  const [selectedForComparison, setSelectedForComparison] = useState([]);
+
+  // Add these functions to the BrandList component
+  const toggleBrandComparison = (brand) => {
+    setSelectedForComparison((prev) => {
+      const exists = prev.some((b) => b.uuid === brand.uuid);
+      if (exists) {
+        return prev.filter((b) => b.uuid !== brand.uuid);
+      } else if (prev.length < 3) {
+        return [...prev, brand];
+      }
+      return prev;
+    });
+  };
+  console.log("compare",selectedForComparison)
+
+  const removeFromComparison = (brandId) => {
+    setSelectedForComparison((prev) => prev.filter((b) => b.uuid !== brandId));
+  };
+
+  const clearComparison = () => {
+    setSelectedForComparison([]);
+  };
 
   useEffect(() => {
     try {
@@ -638,7 +689,30 @@ function BrandList() {
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
+    <Container maxWidth="xl" sx={{ mt: 2, mb: 6 }}>
+      <Box sx={{ position: "fixed", right: 20, zIndex: 1000 }}>
+        <Badge badgeContent={selectedForComparison.length} color="primary">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Compare />}
+            onClick={() => setComparisonOpen(true)}
+            sx={{
+              borderRadius: 4,
+              boxShadow: 3,
+              bgcolor: "#ff9800",
+              "&:hover": {
+                bgcolor: "#fb8c00",
+                boxShadow: 6,
+              },
+              
+            }}
+          >
+            Compare
+          </Button>
+        </Badge>
+      </Box>
+
       <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3 }}>
         <Link
           color="inherit"
@@ -658,6 +732,8 @@ function BrandList() {
         {/* Desktop Filters */}
         <Box
           sx={{
+            mt: 3,
+            mr: 5,
             width: { md: 280 },
             flexShrink: 0,
             display: { xs: "none", md: "block" },
@@ -787,10 +863,21 @@ function BrandList() {
                       toggleLike={toggleLike}
                       showLogin={showLogin}
                       setShowLogin={setShowLogin}
+                      isSelectedForComparison={selectedForComparison.some(
+                        (b) => b.uuid === brand.uuid
+                      )}
+                      toggleBrandComparison={toggleBrandComparison}
                     />
                   </Grid>
                 ))}
               </Grid>
+              {/* Comparison dialog */}
+              <BrandComparison
+                open={comparisonOpen}
+                onClose={() => setComparisonOpen(false)}
+                selectedBrands={selectedForComparison}
+                removeFromComparison={removeFromComparison}
+              />
             </>
           )}
         </Box>

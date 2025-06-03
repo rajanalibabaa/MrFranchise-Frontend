@@ -12,7 +12,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setFilters } from "../../Redux/Slices/brandSlice";
+import { fetchBrands, setFilters } from "../../Redux/Slices/brandSlice";
 
 const investmentRangeOptions = [
   { label: "All Ranges", value: "" },
@@ -37,6 +37,10 @@ const FilterDropdowns = () => {
     filters,
     loading,
   } = useSelector((state) => state.brands);
+
+  useEffect(()=>{
+      dispatch(fetchBrands());
+  },[])
 
   const handleFilterChange = (name, value) => {
     dispatch(setFilters({ [name]: value }));
