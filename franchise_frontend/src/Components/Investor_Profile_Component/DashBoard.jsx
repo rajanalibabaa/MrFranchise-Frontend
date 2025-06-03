@@ -47,7 +47,8 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
       if (!investorUUID || !AccessToken) return;
       try {
         const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/like/get-favbrands/${investorUUID}`,
+          // `https://franchise-backend-wgp6.onrender.com/api/v1/like/get-favbrands/${investorUUID}`,
+          `http://localhost:5000/api/v1/like/get-favbrands/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -139,7 +140,8 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     // Call delete API
     const response = await axios.delete(
-      `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${investorUUID}`,
+      // `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${investorUUID}`,
+      `http://localhost:5000/api/v1/like/delete-favbrand/${investorUUID}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -184,11 +186,19 @@ const handleViewBTN = (brandId) => {
   });
 
 };
-const toggleViewClose = (brandId) => {
-  console.log("Clicked brandId:", brandId);
+const toggleViewClose = async(brandId) => {
 
   const updatedStatus = viewStatus.filter(item => item.uuid !== brandId);
   setviewStatus(updatedStatus);
+
+  await axios.delete(`http://localhost:5000/api/v1/view/deleteViewBrandByID/${investorUUID}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AccessToken}`,
+        },
+        data: { brandID :brandId },
+      })
 };
 
 
