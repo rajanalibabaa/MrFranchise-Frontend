@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useCallback } from "react";
 import {
   Container,
   Box,
@@ -21,8 +22,13 @@ import {
   Badge,
   Drawer,
   IconButton,
+  FormControlLabel,
+  Checkbox,
+  ListItemText,
   Rating,
   Chip,
+  Radio,
+  RadioGroup,
 } from "@mui/material";
 import {
   LocationOn,
@@ -66,172 +72,325 @@ const investmentRangeOptions = [
   { label: "Rs.2Cr-5Cr", value: "Rs.2 Cr - 5 Cr" },
   { label: "Rs.5Cr-above", value: "Rs.5 Cr - Above" },
 ];
-
+// Updated FilterPanel component
 const FilterPanel = ({
   filters,
   handleFilterChange,
   handleClearFilters,
   activeFilterCount,
-  availableCategories,
-  availableModelTypes,
-  availableStates,
-  availableCities,
-  filteredBrands,
-  brands,
-}) => (
-  <Box sx={{ width: 280, p: 2 }}>
-    <Box
-      display="flex"
-      justifyContent="space-between"
-      alignItems="center"
-      mb={2}
-    >
-      <Typography variant="h6">Filters</Typography>
-      <Button
-        size="small"
-        onClick={handleClearFilters}
-        disabled={activeFilterCount === 0}
-        startIcon={<ClearIcon />}
-        sx={{ color: "#ff9800" }}
-      >
-        Clear
-      </Button>
-    </Box>
+  availableCategories = [],
+  availableSubCategories = [],
+  availableChildCategories = [],
+  availableModelTypes = [],
+  availableStates = [],
+  availableCities = [],
+  filteredBrands = [],
+  brands = [],
+}) => {
+  const [selectedMainCategory, setSelectedMainCategory] = useState(
+    filters.selectedCategory || ""
+  );
+  const [selectedSubCategory, setSelectedSubCategory] = useState(
+    filters.selectedSubCategory || ""
+  );
+  const [selectedChildCategories, setSelectedChildCategories] = useState(
+    filters.selectedChildCategories || []
+  );
 
-    <TextField
-      fullWidth
-      variant="outlined"
-      placeholder="Search brands..."
-      value={filters.searchTerm}
-      onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
-      InputProps={{
-        startAdornment: <SearchIcon sx={{ mr: 1, color: "#ff9800" }} />,
-      }}
-      sx={{ mb: 3 }}
-    />
+  // Sync local state with Redux filters
+  useEffect(() => {
+    setSelectedMainCategory(filters.selectedCategory || "");
+    setSelectedSubCategory(filters.selectedSubCategory || "");
+    setSelectedChildCategories(filters.selectedChildCategories || []);
+  }, [
+    filters.selectedCategory,
+    filters.selectedSubCategory,
+    filters.selectedChildCategories,
+  ]);
 
-    <FormControl fullWidth sx={{ mb: 3 }}>
-      <InputLabel>Category</InputLabel>
-      <Select
-        value={filters.selectedCategory}
-        onChange={(e) => handleFilterChange("selectedCategory", e.target.value)}
-        label="Category"
-        sx={{
-          "& .MuiSelect-icon": {
-            color: "#ff9800",
-          },
-        }}
-      >
-        <MenuItem value="">
-          <em>All Categories</em>
-        </MenuItem>
-        {availableCategories.map((category) => (
-          <MenuItem key={category} value={category}>
-            {category}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-
-    <FormControl fullWidth sx={{ mb: 3 }}>
-      <InputLabel>Model Type</InputLabel>
-      <Select
-        value={filters.selectedModelType}
-        onChange={(e) =>
-          handleFilterChange("selectedModelType", e.target.value)
-        }
-        label="Model Type"
-        sx={{
-          "& .MuiSelect-icon": {
-            color: "#ff9800",
-          },
-        }}
-      >
-        <MenuItem value="">
-          <em>All Model Types</em>
-        </MenuItem>
-        {availableModelTypes.map((type) => (
-          <MenuItem key={type} value={type}>
-            {type}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-
-    <FormControl fullWidth sx={{ mb: 3 }}>
-      <InputLabel>State</InputLabel>
-      <Select
-        value={filters.selectedState}
-        onChange={(e) => handleFilterChange("selectedState", e.target.value)}
-        label="State"
-        sx={{
-          "& .MuiSelect-icon": {
-            color: "#ff9800",
-          },
-        }}
-      >
-        <MenuItem value="">
-          <em>All States</em>
-        </MenuItem>
-        {availableStates.map((state) => (
-          <MenuItem key={state} value={state}>
-            {state}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-
-    <FormControl fullWidth sx={{ mb: 3 }}>
-      <InputLabel>City</InputLabel>
-      <Select
-        value={filters.selectedCity}
-        onChange={(e) => handleFilterChange("selectedCity", e.target.value)}
-        label="City"
-        sx={{
-          "& .MuiSelect-icon": {
-            color: "#ff9800",
-          },
-        }}
-      >
-        <MenuItem value="">
-          <em>All Cities</em>
-        </MenuItem>
-        {availableCities.map((city) => (
-          <MenuItem key={city} value={city}>
-            {city}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-
-    <Typography gutterBottom sx={{ color: "#4caf50" }}>
-      Investment Range
-    </Typography>
-    <Select
-      value={filters.selectedInvestmentRange}
-      onChange={(e) =>
-        handleFilterChange("selectedInvestmentRange", e.target.value)
+  // Reset sub and child categories when main category changes
+  useEffect(() => {
+    if (!selectedMainCategory) {
+      if (selectedSubCategory || selectedChildCategories.length > 0) {
+        setSelectedSubCategory("");
+        setSelectedChildCategories([]);
+        handleFilterChange("selectedSubCategory", "");
+        handleFilterChange("selectedChildCategories", []);
       }
-      label="Investment Range"
-      sx={{
-        "& .MuiSelect-icon": {
-          color: "#ff9800",
-        },
-        width: "100%",
-      }}
-    >
-      {investmentRangeOptions.map((option) => (
-        <MenuItem key={option.value} value={option.value}>
-          {option.label}
-        </MenuItem>
-      ))}
-    </Select>
+    }
+  }, [selectedMainCategory]);
 
-    <Typography variant="body2" sx={{ color: "#4caf50", mt: 2 }}>
-      Showing {filteredBrands.length} of {brands.length} brands
-    </Typography>
-  </Box>
-);
+  // Reset child categories when sub category changes
+  // Reset child categories when sub category changes
+  useEffect(() => {
+    if (!selectedSubCategory && selectedChildCategories.length > 0) {
+      setSelectedChildCategories([]);
+      handleFilterChange("selectedChildCategories", []);
+    }
+  }, [selectedSubCategory]);
+
+  const handleMainCategoryChange = (event) => {
+    const value = event.target.value;
+    setSelectedMainCategory(value);
+    handleFilterChange("selectedCategory", value);
+  };
+
+  const handleSubCategoryChange = (event) => {
+    const value = event.target.value;
+    setSelectedSubCategory(value);
+    handleFilterChange("selectedSubCategory", value);
+  };
+
+  const handleChildCategoryChange = (event) => {
+    const { value, checked } = event.target;
+    let newChildCategories = [...selectedChildCategories];
+
+    if (checked) {
+      if (!newChildCategories.includes(value)) {
+        newChildCategories.push(value);
+      }
+    } else {
+      newChildCategories = newChildCategories.filter((item) => item !== value);
+    }
+
+    setSelectedChildCategories(newChildCategories);
+    handleFilterChange("selectedChildCategories", newChildCategories);
+  };
+
+  // Get filtered subcategories based on selected main category
+  const getFilteredSubCategories = () => {
+    if (!selectedMainCategory || !availableSubCategories) return [];
+    return availableSubCategories.filter(
+      (sub) => sub?.parentCategory === selectedMainCategory
+    );
+  };
+
+  // Get filtered child categories based on selected sub category
+  const getFilteredChildCategories = () => {
+    if (!selectedSubCategory || !availableChildCategories) return [];
+    return availableChildCategories.filter(
+      (child) => child?.parentSubCategory === selectedSubCategory
+    );
+  };
+
+  return (
+    <Box sx={{ width: 280, p: 2 }}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h6">Filters</Typography>
+        <Button
+          size="small"
+          onClick={handleClearFilters}
+          disabled={activeFilterCount === 0}
+          startIcon={<ClearIcon />}
+          sx={{ color: "#ff9800" }}
+        >
+          Clear
+        </Button>
+      </Box>
+
+      <TextField
+        fullWidth
+        variant="outlined"
+        placeholder="Search brands..."
+        value={filters.searchTerm}
+        onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
+        InputProps={{
+          startAdornment: <SearchIcon sx={{ mr: 1, color: "#ff9800" }} />,
+        }}
+        sx={{ mb: 3 }}
+      />
+      {/* Main Category Radio Buttons */}
+      <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
+        Main Category
+      </Typography>
+      <FormControl component="fieldset" fullWidth sx={{ mb: 2 }}>
+        <RadioGroup
+          value={selectedMainCategory}
+          onChange={handleMainCategoryChange}
+        >
+          <FormControlLabel
+            value=""
+            control={<Radio color="primary" />}
+            label="All Categories"
+          />
+          {availableCategories.map((category) => (
+            <FormControlLabel
+              key={category.id}
+              value={category.id}
+              control={<Radio color="primary" />}
+              label={category.name}
+            />
+          ))}
+        </RadioGroup>
+      </FormControl>
+
+      {/* Sub Category Radio Buttons (only shown when main category is selected) */}
+      {selectedMainCategory && (
+        <>
+          <Divider sx={{ my: 2 }} />
+          <Typography
+            gutterBottom
+            sx={{ color: "#4caf50", fontWeight: "bold" }}
+          >
+            Sub Category
+          </Typography>
+          <FormControl component="fieldset" fullWidth sx={{ mb: 2 }}>
+            <RadioGroup
+              value={selectedSubCategory}
+              onChange={handleSubCategoryChange}
+            >
+              <FormControlLabel
+                value=""
+                control={<Radio color="primary" />}
+                label="All Sub Categories"
+              />
+              {getFilteredSubCategories().map((subCategory) => (
+                <FormControlLabel
+                  key={subCategory.id}
+                  value={subCategory.id}
+                  control={<Radio color="primary" />}
+                  label={subCategory.name}
+                />
+              ))}
+            </RadioGroup>
+          </FormControl>
+        </>
+      )}
+
+      {selectedSubCategory && (
+        <>
+          <Divider sx={{ my: 2 }} />
+          <Typography
+            gutterBottom
+            sx={{ color: "#4caf50", fontWeight: "bold" }}
+          >
+            Child Categories
+          </Typography>
+          <Box sx={{ maxHeight: 200, overflow: "auto" }}>
+            {getFilteredChildCategories().map((childCategory) => (
+              <FormControlLabel
+                key={childCategory.id}
+                control={
+                  <Checkbox
+                    checked={selectedChildCategories.includes(childCategory.id)}
+                    onChange={handleChildCategoryChange}
+                    value={childCategory.id}
+                    color="primary"
+                  />
+                }
+                label={childCategory.name}
+                sx={{ display: "block", ml: 1 }}
+              />
+            ))}
+          </Box>
+        </>
+      )}
+      {/* Rest of the filters remain unchanged */}
+      <FormControl fullWidth sx={{ mb: 3 }}>
+        <InputLabel>Model Type</InputLabel>
+        <Select
+          value={filters.selectedModelType}
+          onChange={(e) =>
+            handleFilterChange("selectedModelType", e.target.value)
+          }
+          label="Model Type"
+          sx={{
+            "& .MuiSelect-icon": {
+              color: "#ff9800",
+            },
+          }}
+        >
+          <MenuItem value="">
+            <em>All Model Types</em>
+          </MenuItem>
+          {availableModelTypes.map((type) => (
+            <MenuItem key={type} value={type}>
+              {type}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <FormControl fullWidth sx={{ mb: 3 }}>
+        <InputLabel>State</InputLabel>
+        <Select
+          value={filters.selectedState}
+          onChange={(e) => handleFilterChange("selectedState", e.target.value)}
+          label="State"
+          sx={{
+            "& .MuiSelect-icon": {
+              color: "#ff9800",
+            },
+          }}
+        >
+          <MenuItem value="">
+            <em>All States</em>
+          </MenuItem>
+          {availableStates.map((state) => (
+            <MenuItem key={state} value={state}>
+              {state}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <FormControl fullWidth sx={{ mb: 3 }}>
+        <InputLabel>City</InputLabel>
+        <Select
+          value={filters.selectedCity}
+          onChange={(e) => handleFilterChange("selectedCity", e.target.value)}
+          label="City"
+          sx={{
+            "& .MuiSelect-icon": {
+              color: "#ff9800",
+            },
+          }}
+        >
+          <MenuItem value="">
+            <em>All Cities</em>
+          </MenuItem>
+          {availableCities.map((city) => (
+            <MenuItem key={city} value={city}>
+              {city}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <Typography gutterBottom sx={{ color: "#4caf50" }}>
+        Investment Range
+      </Typography>
+      <Select
+        value={filters.selectedInvestmentRange}
+        onChange={(e) =>
+          handleFilterChange("selectedInvestmentRange", e.target.value)
+        }
+        label="Investment Range"
+        sx={{
+          "& .MuiSelect-icon": {
+            color: "#ff9800",
+          },
+          width: "100%",
+        }}
+      >
+        {investmentRangeOptions.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </Select>
+
+      <Typography variant="body2" sx={{ color: "#4caf50", mt: 2 }}>
+        Showing {filteredBrands.length} of {brands.length} brands
+      </Typography>
+    </Box>
+  );
+};
 
 const BrandCard = ({
   brand,
@@ -411,6 +570,8 @@ function BrandList() {
     loading = false,
     error = null,
     categories: availableCategories = [],
+    subCategories: availableSubCategories = [],
+    childCategories: availableChildCategories = [],
     modelTypes: availableModelTypes = [],
     states: availableStates = [],
     cities: availableCities = [],
@@ -419,11 +580,17 @@ function BrandList() {
     selectedBrand,
   } = useSelector((state) => state.brands);
 
-    // console.log(initialFilters)
+  console.log("filteredData :", filteredBrands);
 
   useEffect(() => {
-    dispatch(setFilters(initialFilters)); // Initialize filters from navigation state
-    dispatch(fetchBrands());
+    try {
+      if (filteredBrands.length === 0) {
+        dispatch(setFilters(initialFilters)); // Initialize filters from navigation state
+        dispatch(fetchBrands());
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }, [dispatch]);
 
   const handleOpenBrand = (brand) => {
@@ -434,9 +601,12 @@ function BrandList() {
     dispatch(closeBrandDialog());
   };
 
-  const handleFilterChange = (name, value) => {
-    dispatch(setFilters({ [name]: value }));
-  };
+  const handleFilterChange = useCallback(
+    (name, value) => {
+      dispatch(setFilters({ [name]: value }));
+    },
+    [dispatch]
+  );
 
   const handleClearFilters = () => {
     dispatch(clearFilters());
@@ -499,6 +669,8 @@ function BrandList() {
             handleClearFilters={handleClearFilters}
             activeFilterCount={activeFilterCount}
             availableCategories={availableCategories}
+            availableSubCategories={availableSubCategories}
+            availableChildCategories={availableChildCategories}
             availableModelTypes={availableModelTypes}
             availableStates={availableStates}
             availableCities={availableCities}
