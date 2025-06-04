@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -15,11 +15,10 @@ import {
   TableRow,
   Paper,
   Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
+  Avatar,
+  Chip,
 } from "@mui/material";
-import { Close, ExpandMore } from "@mui/icons-material";
+import { Close, ArrowBack, ArrowForward } from "@mui/icons-material";
 
 const BrandComparison = ({
   open,
@@ -27,9 +26,45 @@ const BrandComparison = ({
   selectedBrands,
   removeFromComparison,
 }) => {
-  // Helper function to get nested object values
+  const [currentModelIndexes, setCurrentModelIndexes] = useState({});
+  
   const getNestedValue = (obj, path) => {
     return path.split('.').reduce((o, p) => (o ? o[p] : null), obj);
+  };
+
+  // Initialize or update current model indexes when brands change
+  React.useEffect(() => {
+    const indexes = {};
+    selectedBrands.forEach(brand => {
+      if (brand.uuid && !(brand.uuid in currentModelIndexes)) {
+        indexes[brand.uuid] = 0;
+      }
+    });
+    if (Object.keys(indexes).length > 0) {
+      setCurrentModelIndexes(prev => ({ ...prev, ...indexes }));
+    }
+  }, [selectedBrands]);
+
+  const handleNextModel = (brandId) => {
+    setCurrentModelIndexes(prev => {
+      const brandModels = selectedBrands.find(b => b.uuid === brandId)?.franchiseDetails?.modelsOfFranchise || [];
+      const currentIndex = prev[brandId] || 0;
+      return {
+        ...prev,
+        [brandId]: (currentIndex + 1) % brandModels.length
+      };
+    });
+  };
+
+  const handlePrevModel = (brandId) => {
+    setCurrentModelIndexes(prev => {
+      const brandModels = selectedBrands.find(b => b.uuid === brandId)?.franchiseDetails?.modelsOfFranchise || [];
+      const currentIndex = prev[brandId] || 0;
+      return {
+        ...prev,
+        [brandId]: (currentIndex - 1 + brandModels.length) % brandModels.length
+      };
+    });
   };
 
   // Main comparison fields
@@ -41,6 +76,7 @@ const BrandComparison = ({
     { label: "Company Owned Outlets", field: "franchiseDetails.companyOwnedOutlets" },
     { label: "Franchise Outlets", field: "franchiseDetails.franchiseOutlets" },
     { label: "Agreement Period", field: "franchiseDetails.agreementPeriod" },
+    { label: "Requirement Support", field: "franchiseDetails.requirementSupport" },
   ];
 
   // Franchise model fields
@@ -61,130 +97,206 @@ const BrandComparison = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth scroll="paper">
-      <DialogTitle>
+      <DialogTitle sx={{ bgcolor: "", color: "Black" }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">Brand Comparison</Typography>
-          <IconButton onClick={onClose}>
+          <IconButton onClick={onClose} sx={{ color: "black" }}>
             <Close />
           </IconButton>
         </Box>
       </DialogTitle>
       <DialogContent dividers>
         {selectedBrands.length === 0 ? (
-          <Typography>No brands selected for comparison</Typography>
-        ) : (
-          <Box>
-            {/* Basic Information */}
-            <Accordion defaultExpanded>
-              <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography variant="subtitle1">Basic Information</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <TableContainer component={Paper}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Feature</TableCell>
-                        {selectedBrands.map((brand) => (
-                          <TableCell key={brand.uuid} align="center">
-                            <Box display="flex" flexDirection="column" alignItems="center">
-                              <Typography variant="subtitle2">
-                                {brand.personalDetails?.brandName}
-                              </Typography>
-                              <IconButton 
-                                size="small" 
-                                onClick={() => removeFromComparison(brand.uuid)}
-                              >
-                                <Close fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {basicInfoFields.map((field) => (
-                        <TableRow key={field.label}>
-                          <TableCell component="th" scope="row">
-                            <Typography variant="subtitle2">{field.label}</Typography>
-                          </TableCell>
-                          {selectedBrands.map((brand) => (
-                            <TableCell key={`${brand.uuid}-${field.field}`} align="center">
-                              {getNestedValue(brand, field.field) || "-"}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
-                         <TableRow>
-                        <TableCell component="th" scope="row">
-                          <Typography variant="subtitle2">Requirement Support</Typography>
-                        </TableCell>
-                        {selectedBrands.map((brand) => (
-                          <TableCell key={`${brand.uuid}-support`} align="center">
-                            {brand.franchiseDetails?.requirementSupport || "-"}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                       {/* <TableRow>
-                        <TableCell component="th" scope="row">
-                          <Typography variant="subtitle2">Brand Description</Typography>
-                        </TableCell>
-                        {selectedBrands.map((brand) => (
-                          <TableCell key={`${brand.uuid}-desc`} align="center">
-                            <Typography variant="body2" noWrap>
-                              {brand.personalDetails?.brandDescription || "-"}
-                            </Typography>
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                       */}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </AccordionDetails>
-            </Accordion>
-
-            {/* Franchise Models */}
-            {selectedBrands.map((brand, index) => (
-              brand.franchiseDetails?.modelsOfFranchise?.map((model, modelIndex) => (
-                <Accordion key={`${brand.uuid}-model-${modelIndex}`}>
-                  <AccordionSummary expandIcon={<ExpandMore />}>
-                    <Typography variant="subtitle1">
-                      {brand.personalDetails?.brandName} - {model.franchiseModel} ({model.franchiseType})
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <TableContainer component={Paper}>
-                      <Table size="small">
-                        <TableBody>
-                          {franchiseModelFields.map((field) => (
-                            <TableRow key={field.label}>
-                              <TableCell component="th" scope="row">
-                                <Typography variant="subtitle2">{field.label}</Typography>
-                              </TableCell>
-                              <TableCell align="left">
-                                {model[field.field] || "-"}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                          
-
-                          
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </AccordionDetails>
-                </Accordion>
-              ))
-            ))}
-
-          
+          <Box textAlign="center" py={4}>
+            <Typography variant="h6" color="textSecondary">
+              No brands selected for comparison
+            </Typography>
           </Box>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table size="small" sx={{ minWidth: 650 }}>
+              <TableHead>
+                <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+                  <TableCell sx={{ fontWeight: "bold", width: "200px" }}>Feature</TableCell>
+                  {selectedBrands.map((brand) => (
+                    <TableCell key={brand.uuid} align="center" sx={{ width: `${80/selectedBrands.length}%` }}>
+                      <Box display="flex" flexDirection="column" alignItems="center">
+                        <Avatar
+                          src={brand.brandDetails?.brandLogo}
+                          alt={brand.personalDetails?.brandName}
+                          sx={{ 
+                            width: 80, 
+                            height: 80, 
+                            borderRadius:"50%",
+                            mb: 1,
+                            border: "2px solid #ff9800",
+                            bgcolor: "white",
+                            p: 0.5
+                          }}
+                          variant="rounded"
+                        />
+                        <Typography variant="subtitle1" sx={{ fontWeight: "bold", color: "#4caf50" }}>
+                          {brand.personalDetails?.brandName}
+                        </Typography>
+                        <Chip
+                          label="Remove"
+                          size="small"
+                          onClick={() => removeFromComparison(brand.uuid)}
+                          sx={{ 
+                            mt: 1, 
+                            bgcolor: "#F2211D", 
+                            color: "white",
+                            "&:hover": {
+                              bgcolor: "#fb8c00"
+                            }
+                          }}
+                        />
+                      </Box>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {/* Basic Information Rows */}
+                {basicInfoFields.map((field) => (
+                  <TableRow key={field.label} hover>
+                    <TableCell component="th" scope="row" sx={{ bgcolor: "#f9f9f9", fontWeight: "bold" }}>
+                      <Typography variant="subtitle2">{field.label}</Typography>
+                    </TableCell>
+                    {selectedBrands.map((brand) => (
+                      <TableCell 
+                        key={`${brand.uuid}-${field.field}`} 
+                        align="center"
+                        sx={{ 
+                          borderLeft: "1px solid #e0e0e0",
+                          bgcolor: field.label === "Brand Name" ? "#f5f5f5" : "white"
+                        }}
+                      >
+                        {getNestedValue(brand, field.field) || "-"}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+
+
+
+                {/* Franchise Model Navigation */}
+                <TableRow hover>
+                  <TableCell component="th" scope="row" sx={{ bgcolor: "#f9f9f9", fontWeight: "bold" }}>
+                    <Typography variant="subtitle2">Franchise Model</Typography>
+                  </TableCell>
+                  {selectedBrands.map((brand) => {
+                    const models = brand.franchiseDetails?.modelsOfFranchise || [];
+                    const currentIndex = currentModelIndexes[brand.uuid] || 0;
+                    const currentModel = models[currentIndex];
+                    
+                    return (
+                      <TableCell 
+                        key={`${brand.uuid}-model-nav`} 
+                        align="center"
+                        sx={{ bgcolor: "#f5f5f5" }}
+                      >
+                        {models.length > 0 ? (
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            p: 1,
+                            borderRadius: 1,
+                            bgcolor: "#fff8e1"
+                          }}>
+                            <IconButton 
+                              size="small" 
+                              onClick={() => handlePrevModel(brand.uuid)}
+                              disabled={models.length <= 1}
+                              sx={{ color: "#ff9800" }}
+                            >
+                              <ArrowBack fontSize="small" />
+                            </IconButton>
+                            
+                            <Box sx={{ mx: 1, minWidth: 120 }}>
+                              <Typography variant="body2" fontWeight="bold" color="#4caf50">
+                                {currentModel?.franchiseModel || "-"}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {currentModel?.franchiseType || ""}
+                              </Typography>
+                              {models.length > 1 && (
+                                <Typography variant="caption" display="block" color="#ff9800">
+                                  ({currentIndex + 1} of {models.length})
+                                </Typography>
+                              )}
+                            </Box>
+                            
+                            <IconButton 
+                              size="small" 
+                              onClick={() => handleNextModel(brand.uuid)}
+                              disabled={models.length <= 1}
+                              sx={{ color: "#ff9800" }}
+                            >
+                              <ArrowForward fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        ) : (
+                          <Typography variant="body2">-</Typography>
+                        )}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+
+                {/* Franchise Model Details */}
+                {franchiseModelFields.slice(1).map((field) => (
+                  <TableRow key={field.label} hover>
+                    <TableCell component="th" scope="row" sx={{ bgcolor: "#f9f9f9", fontWeight: "bold" }}>
+                      <Typography variant="subtitle2">{field.label}</Typography>
+                    </TableCell>
+                    {selectedBrands.map((brand) => {
+                      const models = brand.franchiseDetails?.modelsOfFranchise || [];
+                      const currentIndex = currentModelIndexes[brand.uuid] || 0;
+                      const currentModel = models[currentIndex];
+                      
+                      return (
+                        <TableCell 
+                          key={`${brand.uuid}-${field.field}`} 
+                          align="center"
+                          sx={{ 
+                            borderLeft: "1px solid #e0e0e0",
+                            bgcolor: "white"
+                          }}
+                        >
+                          {currentModel ? (
+                            <Typography 
+                              sx={{ 
+                                color: field.label.includes("Fee") || field.label.includes("Cost") ? "#ff9800" : "inherit",
+                                fontWeight: field.label.includes("Investment") ? "bold" : "normal"
+                              }}
+                            >
+                              {currentModel[field.field] || "-"}
+                            </Typography>
+                          ) : "-"}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="primary">
-          Close
+      <DialogActions sx={{ bgcolor: "#f5f5f5" }}>
+        <Button 
+          onClick={onClose} 
+          sx={{ 
+            color: "white",
+            bgcolor: "#ff9800",
+            "&:hover": {
+              bgcolor: "#388e3c"
+            }
+          }}
+        >
+          Close Comparison
         </Button>
       </DialogActions>
     </Dialog>

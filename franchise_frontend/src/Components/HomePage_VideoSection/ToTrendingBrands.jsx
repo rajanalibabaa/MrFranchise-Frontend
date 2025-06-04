@@ -63,7 +63,7 @@ const TopInvestVdocardround = () => {
 
   return (
     <Box component="section"  sx={{ p: 2, maxWidth: 1400, mx: "auto" }}>
-      {/* <Typography variant="h4" sx={{ 
+      <Typography variant="h5" sx={{ 
         mb: 6, 
         fontWeight: 800,
         textAlign: 'center',
@@ -72,7 +72,7 @@ const TopInvestVdocardround = () => {
         WebkitTextFillColor: 'transparent'
       }}>
         Explore Franchise Opportunities
-      </Typography> */}
+      </Typography>
 
       {/* Circular Brand Logos Grid */}
       <Box sx={{

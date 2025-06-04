@@ -413,8 +413,8 @@ useEffect(() => {
     country: data.country || "",
     state: data.state || "",
     city: data.city || "",
-category: selectedCategories,  
-  investmentRange: data.investmentRange || "",
+category:selectedCategories,
+   investmentRange: data.investmentRange || "",
     investmentAmount: data.investmentAmount || "",
     occupation: data.occupation || "",
     ...(data.occupation === "Other" && { specifyOccupation: data.otherOccupation || "" }),
@@ -1293,7 +1293,7 @@ category: selectedCategories,
           color: "primary.main",
           "&:hover": {
             color: "primary.dark",
-            
+
           },
         }}
       >

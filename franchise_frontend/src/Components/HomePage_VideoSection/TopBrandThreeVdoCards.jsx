@@ -182,8 +182,8 @@ function TopBrandVdoCards() {
   return (
     <Box 
       sx={{ 
-        px: isMobile ? 2 : isTablet ? 3 : 4, 
-        py: isMobile ? 4 : 6,
+        // px: isMobile ? 2 : isTablet ? 3 : 4, 
+        py: isMobile ? 1 : 2,
         mx: "auto",
         position: 'relative',
         maxWidth: 1400,
@@ -205,12 +205,12 @@ function TopBrandVdoCards() {
             width: '80px',
             height: '4px',
             background: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
-            mt: 1,
+            mt: 0,
             borderRadius: 2
           }
         }}
       >
-        Featured Franchise Brands
+        Premium Franchise Brands
       </Typography>
       
       <Box
