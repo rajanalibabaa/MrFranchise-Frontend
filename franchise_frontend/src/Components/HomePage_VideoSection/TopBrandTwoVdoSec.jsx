@@ -12,7 +12,8 @@ import {
   Divider,
   CircularProgress,
   Grid,
-  Modal
+  Modal,
+  Link
 } from "@mui/material";
 import { Favorite, FavoriteBorder, PlayCircleOutline, NavigateBefore, NavigateNext } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
@@ -74,10 +75,13 @@ const ImageGallery = ({ brand }) => {
     )
   );
 
+
+
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', mt: 3,  color: 'orange'}}>
-      {renderImageRow(brand?.brandDetails?.interiorOutlet, 'Brand Gallery')}
-      {renderImageRow(brand?.brandDetails?.exteriorOutlet, 'Brand Gallery')}
+      {renderImageRow(brand?.brandDetails?.interiorOutlet, 'Brand Interior Gallery')}
+      {renderImageRow(brand?.brandDetails?.exteriorOutlet, 'Brand Exterior Gallery')}
 
       <Modal open={!!selectedImage} onClose={handleClose}>
         <Box
@@ -131,6 +135,12 @@ const BrandVideoCard = ({
   const videoUrl = brand?.brandDetails?.brandPromotionVideo?.[0] || 
                   brand?.brandDetails?.franchisePromotionVideo?.[0];
 
+const [expanded, setExpanded] = useState(false);
+const description = brand?.personalDetails?.brandDescription || "No description available";
+  const shortDescription = description.substring(0, 100);
+
+
+
   return (
     <Card sx={{ 
       width: '100%',
@@ -155,7 +165,9 @@ const BrandVideoCard = ({
         overflow: 'hidden',
         flexShrink: 0,
       }}>
+        
         {videoUrl ? (
+          
           <>
             <video
               ref={videoRef}
@@ -172,6 +184,7 @@ const BrandVideoCard = ({
               muted
               autoPlay
               playsInline
+              
             />
             
             {!isPlaying && (
@@ -212,20 +225,20 @@ const BrandVideoCard = ({
           <Box sx={{
             position: 'absolute',
             bottom: 16,
-            right: 16,
+            left: '30%',
+            // right: 16,
             display: 'flex',
-            
-            gap: 1,
+            gap: 20,
             zIndex: 1
           }}>
             <IconButton
               onClick={onPrev}
               size="small"
               sx={{
-                backgroundColor: 'rgba(0,0,0,0.6)',
+                backgroundColor: 'rgba(197, 154, 12, 0.89)',
                 color: 'white',
                 '&:hover': {
-                  backgroundColor: 'rgba(0,0,0,0.8)'
+                  backgroundColor: 'rgba(123, 255, 0, 0.8)'
                 }
               }}
               disabled={currentIndex === 0}
@@ -236,10 +249,10 @@ const BrandVideoCard = ({
               onClick={onNext}
               size="small"
               sx={{
-                backgroundColor: 'rgba(0,0,0,0.6)',
+                backgroundColor: 'rgba(102, 236, 0, 0.6)',
                 color: 'white',
                 '&:hover': {
-                  backgroundColor: 'rgba(0,0,0,0.8)'
+                  backgroundColor: 'rgba(239, 182, 13, 0.8)'
                 }
               }}
               disabled={currentIndex === totalBrands - 1}
@@ -253,10 +266,15 @@ const BrandVideoCard = ({
       {/* Content Section - Right Side */}
       <Box sx={{ 
         p: 3,
+        mr: isMobile ? 0 : 2,
         width: isMobile ? '100%' : '40%',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        overflow:'scroll',
+        scrollbarWidth:'none',
       }}>
         <Box>
           <Box sx={{ 
@@ -285,8 +303,20 @@ const BrandVideoCard = ({
 
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" paragraph>
-              {brand?.personalDetails?.brandDescription?.substring(0, 150) || "No description available"}...
-            </Typography>
+          {expanded ? description : `${shortDescription}...`},
+                {description.length > 100 && (
+        <Typography
+          size="small"
+          color="grey"
+          variant="text"
+          sx={{ cursor: 'pointer' }}
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? 'readless' : 'readmore'}
+        </Typography>
+      )}
+             </Typography>
+       
           </Box>
 <hr style={{ border: "1px solid green" }} />
 <Typography variant="subtitle2" fontWeight="bold" gutterBottom sx={{ mt: 2 , mb: 1 , color: "orange"}}>
@@ -358,6 +388,7 @@ const BrandVideoCard = ({
             variant="contained" 
             onClick={() => onApply(brand)}
             size="medium"
+            
             sx={{
               flex: 1,
               backgroundColor: "#f29724",
@@ -629,21 +660,31 @@ function TopBrandVdoSec() {
     <Box sx={{ 
       px: isMobile ? 2 : 4,
       py: 4,
-      maxWidth: '1800px',
-      mx: 'auto'
+      maxWidth: '1400px',
+      mx: 'auto',
     }}>
       <Typography 
-        variant="h4" 
-        fontWeight="bold" 
-        gutterBottom
-        sx={{ 
-          textAlign: 'left',
-          mb: 4,
-          color: theme.palette.primary.main
-        }}
-      >
+              variant={isMobile ? "h6" : "h5"} 
+              fontWeight="bold" 
+              sx={{ 
+                color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
+                mb: 3, 
+                textAlign: "left",
+                position: 'relative',
+                '&:after': {
+                  content: '""',
+                  display: 'block',
+                  width: '80px',
+                  height: '4px',
+                  background: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
+                  mt: 1,
+                  borderRadius: 2
+                }
+              }}
+            >
         Featured Franchise Opportunities
-      </Typography>
+            </Typography>
+      
       
       {currentBrand && (
         <BrandVideoCard

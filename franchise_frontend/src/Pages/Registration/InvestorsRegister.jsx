@@ -413,6 +413,7 @@ category: (data.categories || []) .map(c => ({
           "Registration successful! Redirecting to login...",
           "success"
         );
+        setLoginOpen(true);
         // setTimeout(() => navigate("/"), 2000);
       } else {
         showSnackbar(
@@ -1211,7 +1212,7 @@ label={
 
             {/* Submit Button */}
             <Grid component="span"
-      onClick={openLoginPopup}
+      // onClick={openLoginPopup}
       // sx={{
       //   textDecoration: "none",
       //   cursor: "pointer",

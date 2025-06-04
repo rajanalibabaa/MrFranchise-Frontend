@@ -146,14 +146,17 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   ];
 
   const investmentRanges = [
-    { label: "Under ₹5 Lakhs", value: "under_5_lakhs" },
-    { label: "₹5-10 Lakhs", value: "5_10_lakhs" },
-    { label: "₹10-25 Lakhs", value: "10_25_lakhs" },
-    { label: "₹25-50 Lakhs", value: "25_50_lakhs" },
-    { label: "₹50 Lakhs - ₹1 Crore", value: "50_lakhs_1_crore" },
-    { label: "₹1-2 Crores", value: "1_2_crores" },
-    { label: "₹2-5 Crores", value: "2_5_crores" },
-    { label: "Above ₹5 Crores", value: "above_5_crores" },
+    { label: "Below ₹50K", value:"Below-50,000" },
+  { label: "₹50K - ₹2 Lakhs", value:"Rs.50,000-2L" },
+  { label: "₹2 - ₹5 Lakhs", value:"Rs.2L-5L" },
+  { label: "₹5 - ₹10 Lakhs", value:"Rs.5L-10L" },
+  { label: "₹10 - ₹20 Lakhs", value:"Rs.10L-20L" },
+  { label: "₹20 - ₹30 Lakhs", value:"Rs.20L-30L"},
+  { label: "₹30 - ₹50 Lakhs", value:"Rs.30L-50L" },
+  { label: "₹50 Lakhs - ₹1 Crore", value:"Rs.50L-1Cr" },
+  { label: "₹1 - ₹2 Crores", value:"Rs.1Cr-2Cr" },
+  { label: "₹2 - ₹5 Crores", value:"Rs.2Cr-5Cr" },
+  { label: "Above ₹5 Crores", value:"Rs.5Cr-above" },
   ];
 
   const propertyTypes = ["Owned Property", "Rented Property"];
