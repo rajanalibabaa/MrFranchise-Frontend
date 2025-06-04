@@ -166,7 +166,7 @@ function Navbar() {
   return (
     <>
       {/* Top Bar - Secondary Navigation */}
-      <Box
+      {/* <Box
         sx={{
           background: "linear-gradient(135deg, rgba(242, 168, 50, 0.9) 0%, rgba(185, 230, 21, 0.9) 100%)",
           backdropFilter: "blur(8px)",
@@ -195,86 +195,8 @@ function Navbar() {
         animate="visible"
         variants={fadeIn}
       >
-        <Box sx={{ 
-          display: "flex", 
-          flexWrap: "wrap", 
-          gap: isMobile ? 0.5 : 1,
-          position: 'relative',
-          zIndex: 1
-        }}>
-          {['Expand Your Franchise', 'Investor', 'Advertise'].map((text, index) => (
-            <motion.div
-              key={text}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button
-                component={Link}
-                to={
-                  text === 'Expand Your Franchise' ? '/expandyourbrand' :
-                  text === 'Investor' ? '/investfranchise' :
-                  '/advertisewithus'
-                }
-                size="small"
-                sx={{ 
-                  textTransform: 'none',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  '&:hover': {
-                    color: 'black',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                  }
-                }}
-              >
-                {text}
-              </Button>
-            </motion.div>
-          ))}
-        </Box>
-
-        <Box sx={{ 
-          display: "flex", 
-          alignItems: "center", 
-          gap: isMobile ? 2 : 4,
-          position: 'relative',
-          zIndex: 1
-        }}>
-          <motion.div whileHover={{ scale: 1.1 }}>
-            <IconButton size="small" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-              <Badge badgeContent={3} color="error">
-                <MessageSquare size={18} />
-              </Badge>
-            </IconButton>
-          </motion.div>
-          
-          <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 100 }}>
-            <Select
-              value="en"
-              disableUnderline
-              sx={{
-                color: 'rgba(255, 255, 255, 0.9)',
-                '& .MuiSelect-icon': {
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  right: 8,
-                  top: 'calc(50% - 8px)'
-                },
-                '&:before': {
-                  borderBottom: 'none'
-                },
-                '&:hover:not(.Mui-disabled):before': {
-                  borderBottom: 'none'
-                }
-              }}
-            >
-              <MenuItem value="en" sx={{ color: 'rgba(0, 0, 0, 0.9)' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Globe size={14} color="rgba(0, 0, 0, 0.9)" /> 
-                  <span>EN</span>
-                </Box>
-              </MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </Box>
+        
+        
 
       {/* Main Navigation Bar */}
       <AppBar 
@@ -359,6 +281,41 @@ function Navbar() {
             </motion.div>
             
           </Box>
+<Box sx={{ 
+          display: "flex", 
+          flexWrap: "wrap", 
+          gap: isMobile ? 0.5 : 1,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          {['Expand Your Franchise', 'Investor', 'Advertise'].map((text, index) => (
+            <motion.div
+              key={text}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                component={Link}
+                to={
+                  text === 'Expand Your Franchise' ? '/expandyourbrand' :
+                  text === 'Investor' ? '/investfranchise' :
+                  '/advertisewithus'
+                }
+                size="small"
+                sx={{ 
+                  textTransform: 'none',
+                  color: '#ff9800',
+                  '&:hover': {
+                    color: 'black',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                  }
+                }}
+              >
+                {text}
+              </Button>
+            </motion.div>
+          ))}
+        </Box>
 
             
           <Box sx={{ flexGrow: isMobile ? 1 : 1 }} />
@@ -565,6 +522,50 @@ function Navbar() {
               )}
             </Menu>
           </Box>
+
+          <Box sx={{ 
+          display: "flex", 
+          alignItems: "center", 
+          gap: isMobile ? 2 : 1,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          <motion.div whileHover={{ scale: 1.1 }}>
+            <IconButton size="small" sx={{ color: 'rgba(253, 182, 16, 0.9)' }}>
+              <Badge badgeContent={3} color="error">
+                <MessageSquare size={18} />
+              </Badge>
+            </IconButton>
+          </motion.div>
+          
+          <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 10 }}>
+            <Select
+              value="en"
+              disableUnderline
+              sx={{
+                color: '#ff9800',
+                '& .MuiSelect-icon': {
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  right: 8,
+                  top: 'calc(50% - 8px)'
+                },
+                '&:before': {
+                  borderBottom: 'none'
+                },
+                '&:hover:not(.Mui-disabled):before': {
+                  borderBottom: 'none'
+                }
+              }}
+            >
+              <MenuItem value="en" sx={{ color: '#ff9800' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Globe size={18} color="rgba(5, 5, 5, 0.9)" /> 
+                  <span>EN</span>
+                </Box>
+              </MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
         </Toolbar>
 
        

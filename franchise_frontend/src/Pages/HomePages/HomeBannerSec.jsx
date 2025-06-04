@@ -390,38 +390,39 @@ const pageConfig = {
   // Section Configuration
   sections: [
     {
-      component: "TopBrandVdoSec",
-      title: "Trending Food Franchises",
-      background: "#fffaf7",
-      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-      animationDelay: 0
-    },
-    {
       component: "TopBrandVdoCards",
-      title: "Popular Cuisine Categories",
+      // title: "Popular Cuisine Categories",
       background: "white",
       // backgroundImage: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
       backgroundOpacity: 0.1,
-      dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
+      // dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
       animationDelay: 0.2
     },
+    // {
+    //   component: "TopBrandVdoSec",
+    //   // title: "Trending Food Franchises",
+    //   background: "#fffaf7",
+    //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    //   animationDelay: 0
+    // },
+    
     {
       component: "TopIndusVdoSec",
-      title: "Franchise Booming Industries",
+      // title: "Franchise Booming Industries",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
       animationDelay: 0.4
     },
     {
       component: "TopInvestVdoSec",
-      title: "Investment Opportunities",
+      // title: "Investment Opportunities",
       background: "white",
       dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
       animationDelay: 0.6
     },
     {
       component: "TopInvestVdo2",
-      title: "Emerging Concepts",
+      // title: "Emerging Concepts",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
       animationDelay: 0.8
@@ -429,8 +430,8 @@ const pageConfig = {
     {
       component: "TopInvestVdocardround",
       title: "Trending Brands",
-      background: "linear-gradient(rgba(255, 250, 247, 0.85), rgba(255, 250, 247, 0.7))",
-      // backgroundImage: "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80",
+      // background: "linear-gradient(rgba(255, 250, 247, 0.85), rgba(255, 250, 247, 0.7))",
+      backgroundImage: "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80",
       dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
       animationDelay: 1.0
     }
@@ -528,7 +529,7 @@ const HomeBannerSec = () => {
         )}
         
         <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
-          <Typography 
+          {/* <Typography 
             variant={isMobile ? "h4" : "h3"} 
             sx={{
               fontWeight: 700,
@@ -548,7 +549,7 @@ const HomeBannerSec = () => {
             }}
           >
             {sectionConfig.title}
-          </Typography>
+          </Typography> */}
           
           <React.Suspense fallback={<div>Loading...</div>}>
             <motion.div
@@ -578,12 +579,12 @@ const HomeBannerSec = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: isMobile ? 'scroll' : 'fixed',
-          py: 3,
+          py: 1,
           px: 2,
           position: 'relative',
           overflow: 'hidden',
           color: 'white',
-          minHeight: isMobile ? '80vh' : '10vh',
+          minHeight: isMobile ? '80vh' : '5vh',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

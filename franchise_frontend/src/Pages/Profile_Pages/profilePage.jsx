@@ -3,11 +3,15 @@ import { Link as RouterLink, Outlet } from "react-router-dom";
 import { Box, Button } from "@mui/material";
 import img from "../../assets/Images/brandLogo.jpg";
 import { useNavigate } from "react-router-dom";
+import Footer from "../../Components/Footers/Footer";
+import Navbar from "../../Components/Navbar/NavBar";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   return (
-    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+<>
+<Navbar/>
+<Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       {/* Sidebar */}
       <Box
         sx={{
@@ -113,6 +117,10 @@ const ProfilePage = () => {
         <Outlet />
       </Box>
     </Box>
+    <Footer/>
+</>
+
+    
   );
 };
 

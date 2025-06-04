@@ -136,6 +136,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     "Area Franchise",
     "District Franchise",
     "State Franchise",
+    'Area Delaership',
+    'State Delaership',
+    'City Delaership'
   ];
 
   const franchiseModels = [
@@ -143,6 +146,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     "FOCO (Franchise Owned Company Operated)",
     "FICO (Franchise Invested Company Operated)",
     "COCO (Company Owned Company Operated)",
+    "C&F (Clearing & Forwarding)",
+    "DEALERSHIP",
+    "DISTRIBUTORSHIP",
   ];
 
   const investmentRanges = [
