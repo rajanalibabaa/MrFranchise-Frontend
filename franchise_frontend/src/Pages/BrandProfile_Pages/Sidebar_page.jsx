@@ -2,9 +2,13 @@ import React from "react";
 import { Link as RouterLink, Outlet } from "react-router-dom";
 import { Box, Button } from "@mui/material";
 import img from "../../assets/Images/brandLogo.jpg";
+import Footer from "../../Components/Footers/Footer";
+import Navbar from "../../Components/Navbar/NavBar";
 
 const Sidebar = () => {
   return (
+    <>
+    <Navbar/>
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
      
       <Box
@@ -113,6 +117,9 @@ const Sidebar = () => {
         <Outlet />
       </Box>
     </Box>
+    <Footer/>
+    </>
+    
   );
 };
 

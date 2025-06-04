@@ -13,6 +13,7 @@ import {
   Select
 } from "@mui/material";
 import StarIcon from '@mui/icons-material/Star';
+import { useSelector } from 'react-redux';
 
 const labels = {
   0.5: 'Useless',
@@ -37,6 +38,10 @@ const FeedBack = () => {
   const [hover, setHover] = useState(-1);
   const [selectedTopic, setSelectedTopic] = useState('');
   const [feedbackText, setFeedbackText] = useState('');
+ const investorUUID = useSelector((state) => state.auth?.investorUUID);
+  const AccessToken = useSelector((state) => state.auth?.AccessToken);
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,10 +53,17 @@ const FeedBack = () => {
     };
 
     try {
+      
+  console.log(investorUUID)
+  console.log(AccessToken)   
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/feedback/createFeedback",
+        // "https://franchise-backend-wgp6.onrender.com/api/feedback/createFeedback",
+        `http://localhost:5000/api/v1/feedback/createFeedback/${investorUUID}`,
         formattedData,
-        { headers: { "Content-Type": "application/json" } }
+        { 
+          headers: { "Content-Type": "application/json" },
+          Authorization: `Bearer ${AccessToken}`,
+        }
       );
       console.log("Feedback submitted:", response.data);
       setFeedbackText('');

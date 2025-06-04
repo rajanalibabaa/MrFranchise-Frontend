@@ -383,11 +383,8 @@ useEffect(() => {
     country: data.country || "",
     state: data.state || "",
     city: data.city || "",
-category: (data.categories || []) .map(c => ({
-      main: c.main,
-      sub: c.sub,
-      child: c.child
-    })),    investmentRange: data.investmentRange || "",
+category:selectedCategories,
+   investmentRange: data.investmentRange || "",
     investmentAmount: data.investmentAmount || "",
     occupation: data.occupation || "",
     ...(data.occupation === "Other" && { specifyOccupation: data.otherOccupation || "" }),
@@ -413,6 +410,7 @@ category: (data.categories || []) .map(c => ({
           "Registration successful! Redirecting to login...",
           "success"
         );
+        setLoginOpen(true);
         // setTimeout(() => navigate("/"), 2000);
       } else {
         showSnackbar(
@@ -1211,7 +1209,7 @@ label={
 
             {/* Submit Button */}
             <Grid component="span"
-      onClick={openLoginPopup}
+      // onClick={openLoginPopup}
       // sx={{
       //   textDecoration: "none",
       //   cursor: "pointer",

@@ -116,6 +116,8 @@ function Navbar() {
         }
       );
 
+      console.log("===logout===")
+
       if (response.status === 200) {
         setTimeout(() => {
           dispatch(logout());
@@ -164,7 +166,7 @@ function Navbar() {
   return (
     <>
       {/* Top Bar - Secondary Navigation */}
-      <Box
+      {/* <Box
         sx={{
           background: "linear-gradient(135deg, rgba(242, 168, 50, 0.9) 0%, rgba(185, 230, 21, 0.9) 100%)",
           backdropFilter: "blur(8px)",
@@ -193,86 +195,8 @@ function Navbar() {
         animate="visible"
         variants={fadeIn}
       >
-        <Box sx={{ 
-          display: "flex", 
-          flexWrap: "wrap", 
-          gap: isMobile ? 0.5 : 1,
-          position: 'relative',
-          zIndex: 1
-        }}>
-          {['Expand Your Franchise', 'Investor', 'Advertise'].map((text, index) => (
-            <motion.div
-              key={text}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button
-                component={Link}
-                to={
-                  text === 'Expand Your Franchise' ? '/expandyourbrand' :
-                  text === 'Investor' ? '/investfranchise' :
-                  '/advertisewithus'
-                }
-                size="small"
-                sx={{ 
-                  textTransform: 'none',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  '&:hover': {
-                    color: 'black',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                  }
-                }}
-              >
-                {text}
-              </Button>
-            </motion.div>
-          ))}
-        </Box>
-
-        <Box sx={{ 
-          display: "flex", 
-          alignItems: "center", 
-          gap: isMobile ? 2 : 4,
-          position: 'relative',
-          zIndex: 1
-        }}>
-          <motion.div whileHover={{ scale: 1.1 }}>
-            <IconButton size="small" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-              <Badge badgeContent={3} color="error">
-                <MessageSquare size={18} />
-              </Badge>
-            </IconButton>
-          </motion.div>
-          
-          <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 100 }}>
-            <Select
-              value="en"
-              disableUnderline
-              sx={{
-                color: 'rgba(255, 255, 255, 0.9)',
-                '& .MuiSelect-icon': {
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  right: 8,
-                  top: 'calc(50% - 8px)'
-                },
-                '&:before': {
-                  borderBottom: 'none'
-                },
-                '&:hover:not(.Mui-disabled):before': {
-                  borderBottom: 'none'
-                }
-              }}
-            >
-              <MenuItem value="en" sx={{ color: 'rgba(0, 0, 0, 0.9)' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Globe size={14} color="rgba(0, 0, 0, 0.9)" /> 
-                  <span>EN</span>
-                </Box>
-              </MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </Box>
+        
+        
 
       {/* Main Navigation Bar */}
       <AppBar 
@@ -357,38 +281,74 @@ function Navbar() {
             </motion.div>
             
           </Box>
+<Box sx={{ 
+          display: "flex", 
+          flexWrap: "wrap", 
+          gap: isMobile ? 0.5 : 1,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          {['Expand Your Franchise', 'Investor', 'Advertise'].map((text, index) => (
+            <motion.div
+              key={text}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                component={Link}
+                to={
+                  text === 'Expand Your Franchise' ? '/expandyourbrand' :
+                  text === 'Investor' ? '/investfranchise' :
+                  '/advertisewithus'
+                }
+                size="small"
+                sx={{ 
+                  textTransform: 'none',
+                  color: '#ff9800',
+                  '&:hover': {
+                    color: 'black',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                  }
+                }}
+              >
+                {text}
+              </Button>
+            </motion.div>
+          ))}
+        </Box>
 
             
-          {/* <Box sx={{ flexGrow: isMobile ? 1 : 0 }} /> */}
+          <Box sx={{ flexGrow: isMobile ? 1 : 1 }} />
 
 <Box  sx={{ 
               display: 'flex', 
               gap: 5,
               flex: isTablet ? 1 : 'none',
-              justifyContent: isTablet ? 'center' : 'flex-start'
+              justifyContent: isTablet ? 'center' : 'flex-end'
             }}>
               <motion.div whileHover={{ y: -2 }}>
                 <Button 
                 onClick={() => navigate('/brandlistingform')}
-                  startIcon={<Plus size={18} />}
-                  sx={{ 
-                    color: '#ff9800',  
-                    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                  startIcon={<Plus size={20} />}
+                  
+                  sx={{
+                    color: 'black',  
+                    backgroundColor: '#7ad03a',
                     borderRadius: '8px',
-                    px: 3,
+                    px: 5,
                     py: 1,
                     textTransform: 'none',
                     fontWeight: 500,
                     '&:hover': {
-                      backgroundColor: 'rgba(255, 152, 0, 0.2)'
+                      backgroundColor: 'rgba(111, 255, 0, 0.98)'
                     }
                   }}
                 >
-                  Add Your Business To Franchise
+                  Add Your Brand
                 </Button>
               </motion.div>
               
-              <motion.div whileHover={{ y: -2 }}>
+              {/* <motion.div whileHover={{ y: -2 }}>
                 <Button 
                   startIcon={<Search size={18} />}
                   onClick={() => navigate('/brandviewpage')}
@@ -407,7 +367,7 @@ function Navbar() {
                 >
                   Find Your Brand To Franchise
                 </Button>
-              </motion.div>
+              </motion.div> */}
             </Box>
 
           <Box ref={avatarRef} sx={{ position: "relative" }}>
@@ -562,6 +522,50 @@ function Navbar() {
               )}
             </Menu>
           </Box>
+
+          <Box sx={{ 
+          display: "flex", 
+          alignItems: "center", 
+          gap: isMobile ? 2 : 1,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          <motion.div whileHover={{ scale: 1.1 }}>
+            <IconButton size="small" sx={{ color: 'rgba(253, 182, 16, 0.9)' }}>
+              <Badge badgeContent={3} color="error">
+                <MessageSquare size={18} />
+              </Badge>
+            </IconButton>
+          </motion.div>
+          
+          <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 10 }}>
+            <Select
+              value="en"
+              disableUnderline
+              sx={{
+                color: '#ff9800',
+                '& .MuiSelect-icon': {
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  right: 8,
+                  top: 'calc(50% - 8px)'
+                },
+                '&:before': {
+                  borderBottom: 'none'
+                },
+                '&:hover:not(.Mui-disabled):before': {
+                  borderBottom: 'none'
+                }
+              }}
+            >
+              <MenuItem value="en" sx={{ color: '#ff9800' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Globe size={18} color="rgba(5, 5, 5, 0.9)" /> 
+                  <span>EN</span>
+                </Box>
+              </MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
         </Toolbar>
 
        

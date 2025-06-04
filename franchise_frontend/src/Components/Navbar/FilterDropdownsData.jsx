@@ -12,7 +12,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchBrands, setFilters } from "../../Redux/Slices/brandSlice";
+import { setFilters,fetchBrands } from "../../Redux/Slices/brandSlice";
 
 const investmentRangeOptions = [
   { label: "All Ranges", value: "" },
@@ -39,7 +39,7 @@ const FilterDropdowns = () => {
   } = useSelector((state) => state.brands);
 
   useEffect(()=>{
-      dispatch(fetchBrands());
+dispatch(fetchBrands());
   },[])
 
   const handleFilterChange = (name, value) => {
@@ -60,11 +60,15 @@ const FilterDropdowns = () => {
           flexDirection: { xs: "column", md: "row" },
           gap: 2,
           mb: 4,
+          p: 2,
+          borderRadius: 2,
           alignItems: "center",
+                    backgroundColor: "#fff",
+
         }}
       >
         {/* Category Filter - Updated to match your data structure */}
-        <FormControl fullWidth sx={{ minWidth: 180 }}>
+        <FormControl fullWidth sx={{ minWidth: 180, }}>
           <InputLabel>Category</InputLabel>
           <Select
             value={filters.selectedCategory || ""}

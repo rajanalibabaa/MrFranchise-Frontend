@@ -142,9 +142,9 @@ const BestBrandSlider = () => {
       sx={{ 
         px: isMobile ? 2 : 4, 
         py: 6, 
-        maxWidth: '1800px', 
+        maxWidth: '1400px', 
         mx: 'auto',
-        overflow: 'hidden'
+        overflow: 'hidden',
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -154,11 +154,29 @@ const BestBrandSlider = () => {
         justifyContent: 'space-between', 
         alignItems: 'center', 
         mb: 3 
-        ,backgroundColor: '#689f38' 
       }}>
-        <Typography variant="h4" fontWeight="bold" sx={{ color: '#ffba00'}}>
+        <Typography 
+        variant={isMobile ? "h6" : "h5"} 
+        fontWeight="bold" 
+        sx={{ 
+          color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
+          mb: 3, 
+          textAlign: "left",
+          position: 'relative',
+          '&:after': {
+            content: '""',
+            display: 'block',
+            width: '80px',
+            height: '4px',
+            background: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
+            mt: 1,
+            borderRadius: 2
+          }
+        }}
+      >
           Today's Marketing Leading Brands
-        </Typography>
+      </Typography>
+        
         {!isMobile && (
           <Box sx={{ display: 'flex', gap: 2 }}>
             <IconButton 
@@ -212,7 +230,7 @@ const BestBrandSlider = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               sx={{
-                minWidth: isMobile ? 280 : isTablet ? 320 : 350,
+                minWidth: isMobile ? 280 : isTablet ? 320 : 320,
                 height: isMobile ? 420 : 370,
                 borderRadius: 4,
                 overflow: 'hidden',

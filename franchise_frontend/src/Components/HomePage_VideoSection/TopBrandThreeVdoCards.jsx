@@ -6,11 +6,12 @@ import {
   CardContent,
   Button,
   Slide,
-  Avatar,
+  Avatar, 
   IconButton,
   useMediaQuery,
   Chip,
   Tooltip,
+  LinearProgress,
 } from "@mui/material";
 import {
   Favorite,
@@ -27,30 +28,43 @@ import { useTheme } from "@mui/material/styles";
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [likedBrands, setLikedBrands] = useState({});
   const [activeVideo, setActiveVideo] = useState(null);
+  const [videoProgress, setVideoProgress] = useState({});
   const timeoutRef = useRef(null);
   const [brandData, setBrandData] = useState([]);
-  const mainVideoRef = useRef(null);
-  const sideVideoRefs = useRef([]);
+  const videoRefs = useRef([]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
+  // Fixed card sizes with better aspect ratios
+  const CARD_SIZES = {
+    main: {
+      width: isMobile ? '100%' : isTablet ? '100%' : '68%',
+      height: isMobile ? 420 : isTablet ? 480 : 550,
+      videoHeight: isMobile ? 250 : isTablet ? 300 : 420
+    },
+    side: {
+      width: isMobile ? '100%' : isTablet ? '100%' : '30%',
+      height: isMobile ? 200 : isTablet ? 220 : 260,
+      videoWidth: isMobile ? '40%' : isTablet ? '45%' : '48%'
+    }
+  };
+
   const handleNext = useCallback(() => {
-    if (!isHovered && !isVideoPlaying) {
+    if (!isHovered && brandData.length > 0) {
       setCurrentIndex((prev) => (prev + 1) % brandData.length);
     }
-  }, [isHovered, isVideoPlaying, brandData]);
+  }, [isHovered, brandData]);
 
   const startAutoSlide = useCallback(() => {
     clearTimeout(timeoutRef.current);
-    if (!isHovered && !isVideoPlaying && brandData.length > 0) {
-      timeoutRef.current = setTimeout(() => handleNext(), 5000);
+    if (!isHovered && brandData.length > 0) {
+      timeoutRef.current = setTimeout(() => handleNext(), 8000);
     }
-  }, [isHovered, isVideoPlaying, handleNext, brandData]);
+  }, [isHovered, handleNext, brandData]);
 
   useEffect(() => {
     const fetchBrandData = async () => {
@@ -65,10 +79,13 @@ function TopBrandVdoCards() {
           setBrandData(data);
           
           const initialLikedState = {};
-          data.forEach(brand => {
+          const initialProgressState = {};
+          data.forEach((brand, index) => {
             initialLikedState[brand.uuid || brand.title] = false;
+            initialProgressState[index] = 0;
           });
           setLikedBrands(initialLikedState);
+          setVideoProgress(initialProgressState);
         }
       } catch (error) {
         console.error("Error fetching brand data:", error);
@@ -83,32 +100,52 @@ function TopBrandVdoCards() {
     return () => clearTimeout(timeoutRef.current);
   }, [currentIndex, startAutoSlide]);
 
-  const handleVideoPlay = (videoRef, index) => {
-    setIsVideoPlaying(true);
+  useEffect(() => {
+    // Initialize all videos to autoplay and loop
+    videoRefs.current.forEach((video, index) => {
+      if (video) {
+        video.autoplay = true;
+        video.loop = true;
+        video.muted = true;
+        video.playsInline = true;
+
+        
+        
+        // Set up progress tracking
+        video.ontimeupdate = () => {
+          const progress = (video.currentTime / video.duration) * 100;
+          setVideoProgress(prev => ({...prev, [index]: progress}));
+        };
+      }
+    });
+  }, [brandData]);
+
+  const handleVideoPlay = (index) => {
     setActiveVideo(index);
-    clearTimeout(timeoutRef.current);
-    
-    if (videoRef !== mainVideoRef.current) {
-      mainVideoRef.current?.pause();
-    }
-    sideVideoRefs.current.forEach(ref => {
-      if (ref && ref !== videoRef) ref.pause();
+    // Pause other videos
+    videoRefs.current.forEach((video, i) => {
+      if (video && i !== index) {
+        video.pause();
+      }
     });
   };
 
-  const handleVideoPause = () => {
-    setIsVideoPlaying(false);
-    setActiveVideo(null);
-    startAutoSlide();
+  const handleVideoPause = (index) => {
+    if (activeVideo === index) {
+      setActiveVideo(null);
+    }
   };
 
-  const togglePlayPause = (videoRef, index) => {
-    if (videoRef.paused) {
-      videoRef.play();
-      handleVideoPlay(videoRef, index);
-    } else {
-      videoRef.pause();
-      handleVideoPause();
+  const togglePlayPause = (index) => {
+    const video = videoRefs.current[index];
+    if (video) {
+      if (video.paused) {
+        video.play();
+        handleVideoPlay(index);
+      } else {
+        video.pause();
+        handleVideoPause(index);
+      }
     }
   };
 
@@ -117,7 +154,6 @@ function TopBrandVdoCards() {
       ...prev,
       [brandId]: !prev[brandId]
     }));
-    // API call to update like status would go here
   };
 
   if (!brandData || brandData.length === 0) {
@@ -127,7 +163,6 @@ function TopBrandVdoCards() {
         justifyContent: 'center', 
         alignItems: 'center', 
         height: 300,
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
         borderRadius: 2,
         boxShadow: 1
       }}>
@@ -139,14 +174,10 @@ function TopBrandVdoCards() {
   }
 
   const mainBrand = brandData[currentIndex];
-  const nextBrand1 = brandData[(currentIndex + 1) % brandData.length];
-  const nextBrand2 = brandData[(currentIndex + 2) % brandData.length];
-
-  // Responsive layout values
-  const cardHeight = isMobile ? 400 : isTablet ? 450 : 500;
-  const sideCardHeight = isMobile ? 180 : isTablet ? 200 : 240;
-  const mainCardWidth = isMobile ? '100%' : isTablet ? '100%' : 800;
-  const sideCardsWidth = isMobile ? '100%' : isTablet ? '100%' : 500;
+  const nextBrands = [
+    brandData[(currentIndex + 1) % brandData.length],
+    brandData[(currentIndex + 2) % brandData.length]
+  ].filter(brand => brand); // Filter out undefined brands
 
   return (
     <Box 
@@ -155,13 +186,13 @@ function TopBrandVdoCards() {
         py: isMobile ? 4 : 6,
         mx: "auto",
         position: 'relative',
-        maxWidth: 1800,
+        maxWidth: 1400,
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Typography 
-        variant={isMobile ? "h5" : "h4"} 
+        variant={isMobile ? "h6" : "h5"} 
         fontWeight="bold" 
         sx={{ 
           color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
@@ -184,249 +215,203 @@ function TopBrandVdoCards() {
       
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr" : "2fr 1fr",
-          gap: isMobile ? 3 : isTablet ? 3 : 4,
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? 3 : isTablet ? 3 : 3,
+          alignItems: 'stretch'
         }}
       >
         {/* Main Video Card (Left) */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={mainBrand.uuid || mainBrand.title}
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Card
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                borderRadius: 3,
-                overflow: "hidden",
-                boxShadow: 6,
-                width: mainCardWidth,
-                height: cardHeight,
-                background: theme.palette.mode === 'dark' ? '#424242' : '#ffffff',
-                position: 'relative',
-                '&:hover': {
-                  boxShadow: theme.shadows[10],
-                  transform: 'translateY(-5px)',
-                  transition: 'all 0.3s ease'
-                }
-              }}
+        <Box sx={{ 
+          flex: isMobile ? '1 1 auto' : '0 0 68%', 
+          maxWidth: CARD_SIZES.main.width,
+          minWidth: isMobile ? '100%' : '68%'
+        }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={mainBrand.uuid || mainBrand.title}
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.5 }}
             >
-              <Box sx={{ 
-                height: isMobile ? 200 : isTablet ? 300 : 400, 
-                overflow: "hidden",
-                position: 'relative',
-                cursor: 'pointer'
-              }}
-              onClick={() => togglePlayPause(mainVideoRef.current, 'main')}
+              <Card
+                sx={{
+                  height: CARD_SIZES.main.height,
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  boxShadow: 6,
+                  background: theme.palette.mode === 'dark' ? '#424242' : '#ffffff',
+                  position: 'relative',
+                  transition: 'transform 0.3s, box-shadow 0.3s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: theme.shadows[12],
+                  }
+                }}
               >
-                <video
-                  ref={mainVideoRef}
-                  src={mainBrand.brandDetails?.brandPromotionVideo?.[0] || 
-                       mainBrand.brandDetails?.franchisePromotionVideo?.[0]}
-                  controls={false}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
+                <Box 
+                  sx={{ 
+                    height: CARD_SIZES.main.videoHeight,
+                    position: 'relative',
+                    cursor: 'pointer',
+                    backgroundColor: '#000',
+                    overflow: 'hidden'
                   }}
-                />
-                {activeVideo !== 'main' && (
+                  onClick={() => togglePlayPause(0)}
+                >
+                  <video
+                    ref={el => videoRefs.current[0] = el}
+                    src={mainBrand.brandDetails?.brandPromotionVideo?.[0] || 
+                         mainBrand.brandDetails?.franchisePromotionVideo?.[0]}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    autoPlay
+                    muted
+                    loop
+                    controls
+                    playsInline
+                    onPlay={() => handleVideoPlay(0)}
+                    onPause={() => handleVideoPause(0)}
+                  />
                   <Box
                     sx={{
                       position: 'absolute',
-                      top: 0,
+                      bottom: 16,
                       left: 0,
                       right: 0,
-                      bottom: 0,
                       display: 'flex',
-                      alignItems: 'center',
                       justifyContent: 'center',
-                      background: 'rgba(0,0,0,0.3)',
                     }}
                   >
-                    <PlayCircle sx={{ 
-                      fontSize: 60, 
-                      color: 'rgba(255,255,255,0.8)',
-                      '&:hover': {
-                        color: '#fff',
-                        transform: 'scale(1.1)'
-                      }
-                    }} />
-                  </Box>
-                )}
-                <Box sx={{
-                  position: 'absolute',
-                  bottom: 10,
-                  left: 10,
-                  background: 'rgba(0,0,0,0.7)',
-                  color: '#fff',
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 1,
-                  fontSize: '0.8rem'
-                }}>
-                  Featured Brand
-                </Box>
-              </Box>
-              
-              <CardContent
-                sx={{
-                  bgcolor: "background.paper",
-                  display: "flex",
-                  flexDirection: isMobile ? 'column' : 'row',
-                  alignItems: isMobile ? 'flex-start' : 'center',
-                  px: 3,
-                  py: 2,
-                  flex: 1,
-                }}
-              >
-                <Box sx={{ flex: 7 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar 
-                      src={mainBrand.brandDetails?.brandLogo?.[0]} 
-                      sx={{ 
-                        width: isMobile ? 28 : 36, 
-                        height: isMobile ? 28 : 36,
-                        border: `2px solid ${theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00'}`
-                      }} 
-                    />
-                    <Typography 
-                      variant={isMobile ? "subtitle1" : "h6"} 
-                      fontWeight="bold"
-                      sx={{
-                        background: theme.palette.mode === 'dark' 
-                          ? 'linear-gradient(45deg, #ffb74d, #ff9800)' 
-                          : 'linear-gradient(45deg, #f57c00, #ff9800)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        fontWeight: 700
-                      }}
-                    >
-                      {mainBrand.personalDetails?.brandName || mainBrand.title}
-                    </Typography>
-                  </Box>
-                  
-                  <Box sx={{ 
-                    display: 'flex', 
-                    gap: 1, 
-                    mt: 1,
-                    flexWrap: 'wrap'
-                  }}>
-                    {mainBrand.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange && (
-                      <Chip
-                        label={`💰 ${formatInvestmentRange(mainBrand.franchiseDetails.modelsOfFranchise[0].investmentRange)}`}
-                        size="small"
-                        sx={{
-                          background: theme.palette.mode === 'dark' ? 'rgba(255, 183, 77, 0.2)' : 'rgba(245, 124, 0, 0.1)',
-                          color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00'
+                    {/* over flow hidden */}
+                    {/* <Box sx={{
+                      background: 'rgba(0,0,0,0.7)',
+                      color: '#fff',
+                      px: 2,
+                      py: 1,
+                      borderRadius: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2,
+                      width: '90%',
+                      maxWidth: 400
+                    }}>
+                      <IconButton 
+                        size="small" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePlayPause(0);
+                        }}
+                        sx={{ color: '#fff' }}
+                      >
+                        {activeVideo === 0 ? <PauseCircle /> : <PlayCircle />}
+                      </IconButton>
+                      <LinearProgress 
+                        variant="determinate" 
+                        value={videoProgress[0] || 0}
+                        sx={{ 
+                          flexGrow: 1,
+                          height: 4,
+                          borderRadius: 2,
+                          backgroundColor: 'rgba(255,255,255,0.3)',
+                          '& .MuiLinearProgress-bar': {
+                            backgroundColor: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
+                            borderRadius: 2
+                          }
                         }}
                       />
-                    )}
-                    {mainBrand.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired && (
-                      <Chip
-                        label={`📏 ${mainBrand.franchiseDetails.modelsOfFranchise[0].areaRequired} sq.ft`}
-                        size="small"
-                        sx={{
-                          background: theme.palette.mode === 'dark' ? 'rgba(255, 183, 77, 0.2)' : 'rgba(245, 124, 0, 0.1)',
-                          color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00'
-                        }}
-                      />
-                    )}
+                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', minWidth: 50, textAlign: 'right' }}>
+                        {Math.floor((videoProgress[0] || 0) * 3.5 / 100)}:{(Math.floor((videoProgress[0] || 0) * 3.5 / 100) % 60).toString().padStart(2, '0')} / 3:30
+                      </Typography>
+                    </Box> */}
                   </Box>
                 </Box>
                 
-                {!isMobile && (
-                  <>
-                    <Box sx={{ 
-                      width: "1px", 
-                      height: "40px", 
-                      backgroundColor: "divider", 
-                      mx: 2,
-                      opacity: 0.6
-                    }} />
-                    <Box sx={{ 
-                      flex: 3, 
-                      display: 'flex', 
-                      justifyContent: 'center',
-                      flexDirection: 'column',
-                      gap: 1
-                    }}>
-                      <Button
-                        variant="contained"
+                <CardContent
+                  sx={{
+                    bgcolor: "background.paper",
+                    display: "flex",
+                    flexDirection: isMobile ? 'column' : 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    px: 3,
+                    py: 2,
+                    height: `calc(${CARD_SIZES.main.height}px - ${CARD_SIZES.main.videoHeight}px)`,
+                  }}
+                >
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 2,
+                    flex: 1,
+                    minWidth: 0
+                  }}>
+                    <Avatar 
+                      src={mainBrand.brandDetails?.brandLogo?.[0]} 
+                      sx={{ 
+                        width: 48, 
+                        height: 48,
+                        border: `2px solid ${theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00'}`,
+                        boxShadow: theme.shadows[2]
+                      }} 
+                    />
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography 
+                        variant="h6" 
+                        fontWeight="bold"
+                        noWrap
                         sx={{
                           background: theme.palette.mode === 'dark' 
                             ? 'linear-gradient(45deg, #ffb74d, #ff9800)' 
                             : 'linear-gradient(45deg, #f57c00, #ff9800)',
-                          textTransform: "none",
-                          px: 3,
-                          color: '#fff',
-                          fontWeight: 600,
-                          "&:hover": { 
-                            background: theme.palette.mode === 'dark' 
-                              ? 'linear-gradient(45deg, #ff9800, #ffb74d)' 
-                              : 'linear-gradient(45deg, #ff9800, #f57c00)',
-                            boxShadow: theme.shadows[4]
-                          },
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: 700
                         }}
                       >
-                        Apply Now
-                      </Button>
-                      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                        <Tooltip title="Add to favorites">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleLike(mainBrand.uuid || mainBrand.title)}
-                            sx={{
-                              color: likedBrands[mainBrand.uuid || mainBrand.title] 
-                                ? theme.palette.error.main 
-                                : 'text.secondary'
-                            }}
-                          >
-                            {likedBrands[mainBrand.uuid || mainBrand.title] ? (
-                              <Favorite fontSize="small" />
-                            ) : (
-                              <FavoriteBorder fontSize="small" />
-                            )}
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Share">
-                          <IconButton size="small">
-                            <Share fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="More info">
-                          <IconButton size="small">
-                            <Info fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        {mainBrand.personalDetails?.brandName || mainBrand.title}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary" noWrap>
+                          {mainBrand.personalDetails?.brandCategory || "Franchise Brand"}
+                        </Typography>
+                        <Chip 
+                          label={formatInvestmentRange(mainBrand.investmentDetails?.investmentRange)}
+                          size="small"
+                          sx={{
+                            ml: 1,
+                            height: 20,
+                            fontSize: '0.65rem',
+                            bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 184, 77, 0.2)' : 'rgba(245, 124, 0, 0.2)',
+                            color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00'
+                          }}
+                        />
                       </Box>
                     </Box>
-                  </>
-                )}
-                
-                {isMobile && (
+                  </Box>
+                  
                   <Box sx={{ 
-                    width: '100%', 
-                    mt: 2,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
+                    display: 'flex', 
+                    alignItems: 'center',
+                    gap: 2,
+                    ml: 2
                   }}>
                     <Button
                       variant="contained"
-                      fullWidth
                       sx={{
                         background: theme.palette.mode === 'dark' 
                           ? 'linear-gradient(45deg, #ffb74d, #ff9800)' 
                           : 'linear-gradient(45deg, #f57c00, #ff9800)',
                         textTransform: "none",
+                        px: 3,
                         color: '#fff',
                         fontWeight: 600,
+                        whiteSpace: 'nowrap',
+                        minWidth: 120,
                         "&:hover": { 
                           background: theme.palette.mode === 'dark' 
                             ? 'linear-gradient(45deg, #ff9800, #ffb74d)' 
@@ -437,38 +422,42 @@ function TopBrandVdoCards() {
                     >
                       Apply Now
                     </Button>
-                    <Box sx={{ ml: 2, display: 'flex', gap: 0.5 }}>
+                    <Tooltip title={likedBrands[mainBrand.uuid || mainBrand.title] ? "Remove from favorites" : "Add to favorites"}>
                       <IconButton
-                        size="small"
                         onClick={() => handleLike(mainBrand.uuid || mainBrand.title)}
                         sx={{
                           color: likedBrands[mainBrand.uuid || mainBrand.title] 
                             ? theme.palette.error.main 
-                            : 'text.secondary'
+                            : 'text.secondary',
+                          '&:hover': {
+                            color: theme.palette.error.main,
+                            backgroundColor: 'rgba(244, 67, 54, 0.08)'
+                          }
                         }}
                       >
                         {likedBrands[mainBrand.uuid || mainBrand.title] ? (
-                          <Favorite fontSize="small" />
+                          <Favorite />
                         ) : (
-                          <FavoriteBorder fontSize="small" />
+                          <FavoriteBorder />
                         )}
                       </IconButton>
-                    </Box>
+                    </Tooltip>
                   </Box>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        </AnimatePresence>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </AnimatePresence>
+        </Box>
 
         {/* Right Side Cards */}
         <Box sx={{ 
+          flex: isMobile ? '1 1 auto' : '0 0 30%',
           display: "flex", 
           flexDirection: "column", 
           gap: isMobile ? 3 : isTablet ? 3 : 4,
-          width: sideCardsWidth
+          minWidth: isMobile ? '100%' : '30%'
         }}>
-          {[nextBrand1, nextBrand2].map((brand, i) => (
+          {nextBrands.map((brand, i) => (
             <Slide
               direction="up"
               in
@@ -481,30 +470,32 @@ function TopBrandVdoCards() {
               >
                 <Card
                   sx={{
-                    display: "flex",
-                    height: sideCardHeight,
+                    height: CARD_SIZES.side.height,
                     borderRadius: 3,
                     overflow: "hidden",
                     boxShadow: 4,
-                    transition: "all 0.3s ease",
                     background: theme.palette.mode === 'dark' ? '#424242' : '#ffffff',
+                    display: 'flex',
+                    transition: 'transform 0.3s, box-shadow 0.3s',
                     '&:hover': { 
+                      transform: 'translateY(-5px)',
                       boxShadow: theme.shadows[8],
-                      transform: 'translateY(-5px)'
                     }
                   }}
                 >
-                  <Box sx={{ 
-                    width: isMobile ? 120 : isTablet ? 180 : 220, 
-                    height: "100%",
-                    position: 'relative',
-                    cursor: 'pointer'
-                  }}
-                  onClick={() => togglePlayPause(sideVideoRefs.current[i], i)}
+                  <Box 
+                    sx={{ 
+                      width: CARD_SIZES.side.videoWidth,
+                      height: "100%",
+                      position: 'relative',
+                      cursor: 'pointer',
+                      backgroundColor: '#000',
+                      flexShrink: 0
+                    }}
+                    onClick={() => togglePlayPause(i + 1)}
                   >
                     <video
-                      ref={el => sideVideoRefs.current[i] = el}
-                      controls={false}
+                      ref={el => videoRefs.current[i + 1] = el}
                       src={brand.brandDetails?.brandPromotionVideo?.[0] || 
                            brand.brandDetails?.franchisePromotionVideo?.[0]}
                       style={{
@@ -512,73 +503,81 @@ function TopBrandVdoCards() {
                         height: "100%",
                         objectFit: "cover",
                       }}
+                      autoPlay
+                      muted
+                      loop
+                      controls
+                      playsInline
+                      onPlay={() => handleVideoPlay(i + 1)}
+                      onPause={() => handleVideoPause(i + 1)}
                     />
-                    {activeVideo !== i && (
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          background: 'rgba(0,0,0,0.3)',
-                        }}
-                      >
-                        <PlayCircle sx={{ 
-                          fontSize: 40, 
-                          color: 'rgba(255,255,255,0.8)',
-                          '&:hover': {
-                            color: '#fff',
-                            transform: 'scale(1.1)'
-                          }
-                        }} />
-                      </Box>
-                    )}
-                    <Box sx={{
-                      position: 'absolute',
-                      bottom: 8,
-                      left: 8,
-                      background: 'rgba(0,0,0,0.7)',
-                      color: '#fff',
-                      px: 0.8,
-                      py: 0.3,
-                      borderRadius: 1,
-                      fontSize: '0.7rem'
-                    }}>
-                      {i === 0 ? "Trending" : "Popular"}
-                    </Box>
+                    <Chip
+                      label={i === 0 ? "Trending" : "Popular"}
+                      size="small"
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        left: 8,
+                        background: theme.palette.mode === 'dark' 
+                          ? 'linear-gradient(45deg, #ffb74d, #ff9800)' 
+                          : 'linear-gradient(45deg, #f57c00, #ff9800)',
+                        color: '#fff',
+                        fontWeight: 'bold',
+                        fontSize: '0.65rem'
+                      }}
+                    />
+                    <IconButton
+                      size="small"
+                      sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        color: '#fff',
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(0,0,0,0.7)',
+                        }
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        togglePlayPause(i + 1);
+                      }}
+                    >
+                      {activeVideo === i + 1 ? <PauseCircle /> : <PlayCircle />}
+                    </IconButton>
                   </Box>
                   <CardContent
                     sx={{
-                      bgcolor: "background.paper",
-                      flex: 2,
+                      flex: 1,
                       display: "flex",
                       flexDirection: "column",
                       justifyContent: "space-between",
-                      p: isMobile ? 1.5 : 2,
+                      p: 2,
+                      overflow: 'hidden'
                     }}
                   >
-                    <Box>
+                    <Box sx={{ overflow: 'hidden' }}>
                       <Box sx={{ 
                         display: 'flex', 
                         justifyContent: 'space-between',
-                        alignItems: 'flex-start'
+                        alignItems: 'flex-start',
+                        gap: 1
                       }}>
-                        <Typography 
-                          variant={isMobile ? "body1" : "subtitle1"} 
-                          fontWeight="bold" 
-                          noWrap
-                          sx={{
-                            maxWidth: 'calc(100% - 40px)',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }}
-                        >
-                          {brand.personalDetails?.brandName || brand.title}
-                        </Typography>
+                        <Tooltip title={brand.personalDetails?.brandName || brand.title}>
+                          <Typography 
+                            variant="subtitle1" 
+                            fontWeight="bold" 
+                            noWrap
+                            sx={{
+                              flex: 1,
+                              minWidth: 0,
+                              color: theme.palette.mode === 'dark' ? '#fff' : 'text.primary'
+                            }}
+                          >
+                            {brand.personalDetails?.brandName || brand.title}
+                          </Typography>
+                        </Tooltip>
                         <IconButton
                           size="small"
                           onClick={() => handleLike(brand.uuid || brand.title)}
@@ -587,14 +586,15 @@ function TopBrandVdoCards() {
                               ? theme.palette.error.main 
                               : 'text.secondary',
                             '&:hover': {
-                              transform: 'scale(1.2)'
+                              color: theme.palette.error.main,
+                              backgroundColor: 'rgba(244, 67, 54, 0.08)'
                             }
                           }}
                         >
                           {likedBrands[brand.uuid || brand.title] ? (
-                            <Favorite sx={{ fontSize: 20 }} />
+                            <Favorite fontSize="small" />
                           ) : (
-                            <FavoriteBorder sx={{ fontSize: 20 }} />
+                            <FavoriteBorder fontSize="small" />
                           )}
                         </IconButton>
                       </Box>
@@ -608,11 +608,12 @@ function TopBrandVdoCards() {
                           WebkitBoxOrient: 'vertical',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
-                          mt: 0.5,
-                          fontSize: isMobile ? '0.8rem' : '0.9rem'
+                          mt: 1,
+                          fontSize: '0.8rem',
+                          lineHeight: 1.4
                         }}
                       >
-                        {brand.personalDetails?.brandDescription || "Brand description"}
+                        {brand.personalDetails?.brandDescription || "Brand description not available"}
                       </Typography>
                     </Box>
                     
@@ -622,51 +623,28 @@ function TopBrandVdoCards() {
                       alignItems: 'flex-end',
                       mt: 1
                     }}>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        flexDirection: 'column',
-                        gap: 0.5
-                      }}>
-                        {brand.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange && (
-                          <Chip
-                            label={`${formatInvestmentRange(brand.franchiseDetails.modelsOfFranchise[0].investmentRange)}`}
-                            size="small"
-                            sx={{
-                              background: theme.palette.mode === 'dark' ? 'rgba(255, 183, 77, 0.2)' : 'rgba(245, 124, 0, 0.1)',
-                              color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
-                              fontSize: '0.7rem',
-                              height: '24px'
-                            }}
-                          />
-                        )}
-                        {brand.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired && (
-                          <Chip
-                            label={`${brand.franchiseDetails.modelsOfFranchise[0].areaRequired} sq.ft`}
-                            size="small"
-                            sx={{
-                              background: theme.palette.mode === 'dark' ? 'rgba(255, 183, 77, 0.2)' : 'rgba(245, 124, 0, 0.1)',
-                              color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
-                              fontSize: '0.7rem',
-                              height: '24px'
-                            }}
-                          />
-                        )}
-                      </Box>
-                      
+                      <Chip 
+                        label={formatInvestmentRange(brand.investmentDetails?.investmentRange)}
+                        size="small"
+                        sx={{
+                          fontSize: '0.65rem',
+                          bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 184, 77, 0.2)' : 'rgba(245, 124, 0, 0.2)',
+                          color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00'
+                        }}
+                      />
                       <Button
                         variant="contained"
-                        size={isMobile ? "small" : "medium"}
+                        size="small"
                         sx={{
                           background: theme.palette.mode === 'dark' 
                             ? 'linear-gradient(45deg, #ffb74d, #ff9800)' 
                             : 'linear-gradient(45deg, #f57c00, #ff9800)',
                           textTransform: "none",
-                          fontSize: isMobile ? "0.7rem" : "0.8rem",
-                          px: isMobile ? 1 : 1.5,
-                          py: 0.5,
+                          fontSize: "0.75rem",
+                          px: 2,
                           color: '#fff',
                           fontWeight: 600,
-                          minWidth: '80px',
+                          minWidth: 100,
                           "&:hover": { 
                             background: theme.palette.mode === 'dark' 
                               ? 'linear-gradient(45deg, #ff9800, #ffb74d)' 
@@ -675,7 +653,7 @@ function TopBrandVdoCards() {
                           },
                         }}
                       >
-                        Apply
+                        View Details
                       </Button>
                     </Box>
                   </CardContent>
