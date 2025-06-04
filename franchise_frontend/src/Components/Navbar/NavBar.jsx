@@ -116,6 +116,8 @@ function Navbar() {
         }
       );
 
+      console.log("===logout===")
+
       if (response.status === 200) {
         setTimeout(() => {
           dispatch(logout());
