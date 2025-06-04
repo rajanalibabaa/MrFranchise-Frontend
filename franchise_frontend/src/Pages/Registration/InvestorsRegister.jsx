@@ -383,11 +383,8 @@ useEffect(() => {
     country: data.country || "",
     state: data.state || "",
     city: data.city || "",
-category: (data.categories || []) .map(c => ({
-      main: c.main,
-      sub: c.sub,
-      child: c.child
-    })),    investmentRange: data.investmentRange || "",
+category:selectedCategories,
+   investmentRange: data.investmentRange || "",
     investmentAmount: data.investmentAmount || "",
     occupation: data.occupation || "",
     ...(data.occupation === "Other" && { specifyOccupation: data.otherOccupation || "" }),

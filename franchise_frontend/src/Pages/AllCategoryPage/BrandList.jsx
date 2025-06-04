@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useCallback } from "react";
+import { KeyboardArrowUp } from "@mui/icons-material";
 import {
   Container,
   Box,
@@ -449,13 +450,13 @@ const BrandCard = ({
           top: 8,
           right: 8,
           zIndex: 2,
-          backgroundColor: isSelectedForComparison 
-            ? "rgba(76, 175, 80, 0.9)" 
+          backgroundColor: isSelectedForComparison
+            ? "rgba(76, 175, 80, 0.9)"
             : "rgba(0,0,0,0.5)",
           color: "white",
           "&:hover": {
-            backgroundColor: isSelectedForComparison 
-              ? "rgba(56, 142, 60, 0.9)" 
+            backgroundColor: isSelectedForComparison
+              ? "rgba(56, 142, 60, 0.9)"
               : "rgba(0,0,0,0.7)",
           },
           width: 32,
@@ -482,12 +483,14 @@ const BrandCard = ({
       />
 
       {/* Content Container */}
-      <Box sx={{ 
-        p: 2,
-        flexGrow: 1,
-        display: "flex",
-        flexDirection: "column",
-      }}>
+      <Box
+        sx={{
+          p: 2,
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {/* Brand Name and Like Button */}
         <Box
           display="flex"
@@ -498,7 +501,7 @@ const BrandCard = ({
           <Typography
             variant="h6"
             component="div"
-            sx={{ 
+            sx={{
               fontWeight: 600,
               color: "text.primary",
               pr: 1,
@@ -511,14 +514,14 @@ const BrandCard = ({
           >
             {brand.personalDetails?.brandName}
           </Typography>
-          <IconButton 
-            onClick={handleLikeClick} 
+          <IconButton
+            onClick={handleLikeClick}
             disabled={isProcessing}
             sx={{
               ml: 1,
               "&:hover": {
-                backgroundColor: "rgba(244, 67, 54, 0.1)"
-              }
+                backgroundColor: "rgba(244, 67, 54, 0.1)",
+              },
             }}
           >
             {isProcessing ? (
@@ -534,7 +537,7 @@ const BrandCard = ({
           </IconButton>
         </Box>
 
-        {/* Rating */}
+        {/* Rating
         <Box display="flex" alignItems="center" mb={1.5}>
           <Rating
             value={4.5}
@@ -547,67 +550,100 @@ const BrandCard = ({
           <Typography variant="body2" sx={{ ml: 1, color: "text.secondary" }}>
             (24 reviews)
           </Typography>
-        </Box>
+        </Box> */}
 
         {/* Categories */}
         <Box sx={{ mb: 2, minHeight: 32 }}>
-          {brand.personalDetails?.brandCategories?.slice(0, 2).map((category, index) => (
-            <Chip
-              key={index}
-              label={category.main}
-              size="small"
-              sx={{
-                mr: 1,
-                mb: 1,
-                bgcolor: "rgba(255, 152, 0, 0.1)",
-                color: "orange.dark",
-                fontWeight: 500,
-              }}
-            />
-          ))}
+          {brand.personalDetails?.brandCategories
+            ?.slice(0, 2)
+            .map((category, index) => (
+              <Chip
+                key={index}
+                label={category.main}
+                size="small"
+                sx={{
+                  mr: 1,
+                  mb: 1,
+                  bgcolor: "rgba(255, 152, 0, 0.1)",
+                  color: "orange.dark",
+                  fontWeight: 500,
+                }}
+              />
+            ))}
         </Box>
 
         {/* Details List */}
-        <Box sx={{ 
-          mb: 2,
-          flexGrow: 1,
-          "& > *:not(:last-child)": {
-            mb: 1.5
-          }
-        }}>
+        <Box
+          sx={{
+            mb: 2,
+            flexGrow: 1,
+            "& > *:not(:last-child)": {
+              mb: 1.5,
+            },
+          }}
+        >
           <Box display="flex" alignItems="center">
-            <LocationOn sx={{ 
-              mr: 1.5, 
-              fontSize: "1rem", 
-              color: "text.secondary",
-              flexShrink: 0
-            }} />
+            <LocationOn
+              sx={{
+                mr: 1.5,
+                fontSize: "1rem",
+                color: "text.secondary",
+                flexShrink: 0,
+              }}
+            />
             <Typography variant="body2" noWrap>
-              {brand.personalDetails?.city?.split(",").pop() || "Multiple locations"}
+              <span style={{ fontWeight: 600 }}>Expansion Location:</span>
+              <br/>
+              {brand.personalDetails.expansionLocation?.length > 0 ? (
+                <>
+                  {brand.personalDetails.expansionLocation
+                    .slice(0, 2) // Always show first 2 states
+                    .map((loc) => loc.state)
+                    .join(", ")}
+
+                  {/* Always show "more" if there are locations (even if ≤2) */}
+                  <Button
+                    size="small"
+                    sx={{ ml: 0.5, minWidth: 0, padding: 0 }}
+                    // onClick={() => setShowAllLocations(true)}
+                  >
+                    ...more
+                  </Button>
+                </>
+              ) : (
+                "Multiple locations"
+              )}
             </Typography>
           </Box>
 
           <Box display="flex" alignItems="center">
-            <AttachMoney sx={{ 
-              mr: 1.5, 
-              fontSize: "1rem", 
-              color: "text.secondary",
-              flexShrink: 0
-            }} />
+            <AttachMoney
+              sx={{
+                mr: 1.5,
+                fontSize: "1rem",
+                color: "text.secondary",
+                flexShrink: 0,
+              }}
+            />
             <Typography variant="body2" noWrap>
-              {brand.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange || "Not specified"}
+              <span style={{ fontWeight: 600 }}>Investment Range:</span>{" "}
+              {brand.franchiseDetails?.modelsOfFranchise?.[0]
+                ?.investmentRange || "Not specified"}
             </Typography>
           </Box>
 
           <Box display="flex" alignItems="center">
-            <AreaChart sx={{ 
-              mr: 1.5, 
-              color: "text.secondary",
-              flexShrink: 0
-            }} />
+            <AreaChart
+              sx={{
+                mr: 1.5,
+                color: "text.secondary",
+                flexShrink: 0,
+              }}
+            />
             <Typography variant="body2" noWrap>
-              {brand.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired 
-                ? `${brand.franchiseDetails.modelsOfFranchise[0].areaRequired} sq.ft` 
+              <span style={{ fontWeight: 600 }}>Area Required:</span>{" "}
+              {brand.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired
+                ? `${brand.franchiseDetails.modelsOfFranchise[0].areaRequired} sq.ft`
                 : "Not specified"}
             </Typography>
           </Box>
@@ -621,13 +657,13 @@ const BrandCard = ({
           startIcon={<Description />}
           sx={{
             py: 1.25,
-            bgcolor: "primary.main",
+            bgcolor: "#4caf50",
             borderRadius: 1,
             fontWeight: 500,
             textTransform: "none",
             "&:hover": {
-              bgcolor: "primary.dark",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+              bgcolor: "#7BC718",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
             },
           }}
         >
@@ -667,6 +703,28 @@ function BrandList() {
 
   console.log("filteredData :", filteredBrands);
 
+  // Add these for back to top button
+  const [scrollPosition, setScrollPosition] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const position = window.pageYOffset;
+    setScrollPosition(position);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [handleScroll]);
+
   // Add these state variables to the BrandList component
   const [comparisonOpen, setComparisonOpen] = useState(false);
   const [selectedForComparison, setSelectedForComparison] = useState([]);
@@ -683,7 +741,7 @@ function BrandList() {
       return prev;
     });
   };
-  console.log("compare",selectedForComparison)
+  console.log("compare", selectedForComparison);
 
   const removeFromComparison = (brandId) => {
     setSelectedForComparison((prev) => prev.filter((b) => b.uuid !== brandId));
@@ -765,14 +823,12 @@ function BrandList() {
                 bgcolor: "#fb8c00",
                 boxShadow: 6,
               },
-              
             }}
           >
             Compare
           </Button>
         </Badge>
       </Box>
-
       <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3 }}>
         <Link
           color="inherit"
@@ -787,7 +843,74 @@ function BrandList() {
           <Store sx={{ mr: 0.5, color: "#ff9800" }} /> Franchise Brands
         </Typography>
       </Breadcrumbs>
-
+      {/* Back to Top Button */}
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: 24,
+          right: 24,
+          zIndex: 1000,
+          opacity: 0,
+          visibility: "hidden",
+          transition: "all 0.3s ease",
+          "&.visible": {
+            opacity: 1,
+            visibility: "visible",
+          },
+        }}
+        className={scrollPosition > 300 ? "visible" : ""}
+      >
+        <IconButton
+          onClick={scrollToTop}
+          sx={{
+            bgcolor: "#ff9800",
+            color: "white",
+            "&:hover": {
+              bgcolor: "#fb8c00",
+            },
+            boxShadow: 3,
+            width: 48,
+            height: 48,
+          }}
+          aria-label="back to top"
+        >
+          <KeyboardArrowUp fontSize="medium" />
+        </IconButton>
+      </Box>{" "}
+      {/* Back to Top Button */}
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: 24,
+          right: 24,
+          zIndex: 1000,
+          opacity: 0,
+          visibility: "hidden",
+          transition: "all 0.3s ease",
+          "&.visible": {
+            opacity: 1,
+            visibility: "visible",
+          },
+        }}
+        className={scrollPosition > 300 ? "visible" : ""}
+      >
+        <IconButton
+          onClick={scrollToTop}
+          sx={{
+            bgcolor: "#ff9800",
+            color: "white",
+            "&:hover": {
+              bgcolor: "#fb8c00",
+            },
+            boxShadow: 3,
+            width: 48,
+            height: 48,
+          }}
+          aria-label="back to top"
+        >
+          <KeyboardArrowUp fontSize="medium" />
+        </IconButton>
+      </Box>
       <Box display="flex" flexDirection={{ xs: "column", md: "row" }}>
         {/* Desktop Filters */}
         <Box
@@ -942,7 +1065,6 @@ function BrandList() {
           )}
         </Box>
       </Box>
-
       {/* Mobile Filters Drawer */}
       <Drawer
         anchor="left"
@@ -993,7 +1115,6 @@ function BrandList() {
           </Box>
         </Box>
       </Drawer>
-
       <BrandDetailsDialog
         open={openDialog}
         onClose={handleCloseDialog}
