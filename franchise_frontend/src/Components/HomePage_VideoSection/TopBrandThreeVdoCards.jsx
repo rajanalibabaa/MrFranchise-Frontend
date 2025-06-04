@@ -11,6 +11,9 @@ import {
   useMediaQuery,
   Chip,
   Tooltip,
+  Stack,
+  colors
+  
 } from "@mui/material";
 import {
   Favorite,
@@ -176,6 +179,11 @@ function TopBrandVdoCards() {
     brandData[(currentIndex + 2) % brandData.length]
   ].filter(brand => brand); // Filter out undefined brands
 
+  const Fact = ({ label, value }) => (
+  <Typography variant="body2" color="text.secondary" noWrap>
+    <strong>{label}:</strong>&nbsp;{value || "Not Specified"}
+  </Typography>
+);
   return (
     <Box 
       sx={{ 
@@ -287,119 +295,131 @@ function TopBrandVdoCards() {
                   </Box>
                 </Box>
                 
-                <CardContent
-                  sx={{
-                    bgcolor: "background.paper",
-                    display: "flex",
-                    flexDirection: isMobile ? 'column' : 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    px: 3,
-                    py: 1,
-                    height: `calc(${CARD_SIZES.main.height}px - ${CARD_SIZES.main.videoHeight}px)`,
-                  }}
-                >
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 1,
-                    flex: 1,
-                    minWidth: 0
-                  }}>
-                    <Avatar 
-                      src={mainBrand.brandDetails?.brandLogo?.[0]} 
-                      sx={{ 
-                        width: 50, 
-                        height:50,
-                        border: `2px solid ${theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00'}`,
-                        boxShadow: theme.shadows[2]
-                      }} 
-                    />
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography 
-                        variant="h6" 
-                        fontWeight="bold"
-                        noWrap
-                        sx={{
-                          background: theme.palette.mode === 'dark' 
-                            ? 'linear-gradient(45deg, #ffb74d, #ff9800)' 
-                            : 'linear-gradient(45deg, #f57c00, #ff9800)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          fontWeight: 700
-                        }}
-                      >
-                        {mainBrand.personalDetails?.brandName || mainBrand.title}
-                      </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                        <Typography variant="body2" color="text.secondary" noWrap>
-                          {(mainBrand.personalDetails?.brandCategories).map((cat) => cat.child).join(', ') || "Franchise Brand"}
-                        </Typography>
-                        <Chip 
-                          label={formatInvestmentRange(mainBrand.franchiseDetails?.modelsOfFranchise[0]?.investmentRange)}
-                          size="small"
-                          sx={{
-                            ml: 1,
-                            height: 20,
-                            fontSize: '0.65rem',
-                            bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 184, 77, 0.2)' : 'rgba(245, 124, 0, 0.2)',
-                            color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00'
-                          }}
-                        />
-                      </Box>
-                    </Box>
-                  </Box>
-                  
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    gap: 2,
-                    ml: 2
-                  }}>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        background: theme.palette.mode === 'dark' 
-                          ? 'linear-gradient(45deg, #ffb74d, #ff9800)' 
-                          : 'linear-gradient(45deg, #f57c00, #ff9800)',
-                        textTransform: "none",
-                        px: 3,
-                        color: '#fff',
-                        fontWeight: 600,
-                        whiteSpace: 'nowrap',
-                        minWidth: 120,
-                        "&:hover": { 
-                          background: theme.palette.mode === 'dark' 
-                            ? 'linear-gradient(45deg, #ff9800, #ffb74d)' 
-                            : 'linear-gradient(45deg, #ff9800, #f57c00)',
-                          boxShadow: theme.shadows[4]
-                        },
-                      }}
-                    >
-                      Apply Now
-                    </Button>
-                    <Tooltip title={likedBrands[mainBrand.uuid || mainBrand.title] ? "Remove from favorites" : "Add to favorites"}>
-                      <IconButton
-                        onClick={() => handleLike(mainBrand.uuid || mainBrand.title)}
-                        sx={{
-                          color: likedBrands[mainBrand.uuid || mainBrand.title] 
-                            ? theme.palette.error.main 
-                            : 'text.secondary',
-                          '&:hover': {
-                            color: theme.palette.error.main,
-                            backgroundColor: 'rgba(244, 67, 54, 0.08)'
-                          }
-                        }}
-                      >
-                        {likedBrands[mainBrand.uuid || mainBrand.title] ? (
-                          <Favorite />
-                        ) : (
-                          <FavoriteBorder />
-                        )}
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </CardContent>
+
+
+<CardContent
+  sx={{
+    bgcolor: "background.paper",
+    px: { xs: 0, sm: 3 },
+    py: 0,
+    height: `calc(${CARD_SIZES.main.height}px - ${CARD_SIZES.main.videoHeight}px)`,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  }}
+>
+  {/* TOP SECTION — Avatar + Brand name + Categories */}
+  <Stack
+    direction={{ xs: "column", sm: "row" }}
+    alignItems={{ xs: "flex-start", sm: "center" }}
+    spacing={2}
+    sx={{ flex: 1, minWidth: 0 }}
+  >
+    {/* Avatar + name */}
+    <Stack direction="row" spacing={2} alignItems="center" sx={{ minWidth: 0, flex: 1 }}>
+      <Avatar
+        src={mainBrand.brandDetails?.brandLogo?.[0]}
+        alt={mainBrand.personalDetails?.brandName}
+        sx={{
+          width: 50,
+          height: 50,
+          border: `2px solid ${theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00"}`,
+          boxShadow: theme.shadows[2],
+        }}
+      />
+
+      <Box sx={{ overflow: "hidden" }}>
+        <Typography
+          variant="h6"
+          fontWeight={700}
+          noWrap
+          sx={{
+         backgroundColor:'#7ad03a',
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          {mainBrand.personalDetails?.brandName || mainBrand.title}
+        </Typography>
+
+        {/* Category trail */}
+        <Typography variant="body2" noWrap>
+          { (mainBrand.personalDetails?.brandCategories ?? [])
+              .map((c) => c.child)
+              .filter(Boolean)
+              .join("  •  ") || "Franchise Brand" }
+        </Typography>
+      </Box>
+    </Stack>
+
+    {/* Middle facts (Investment / Area / Type) */}
+    <Stack
+      direction="row"
+      spacing={4}
+      flexWrap="wrap"
+      justifyContent={{ xs: "flex-start", sm: "center" }}
+    >
+      <Fact
+        label="Investment"
+        value={mainBrand.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange}
+      />
+      <Fact
+        label="Area"
+        value={mainBrand.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired}
+      />
+      <Fact
+        label=" Model Type"
+        value={mainBrand.franchiseDetails?.modelsOfFranchise?.[0]?.franchiseType}
+      />
+    </Stack>
+
+    {/* Right-hand actions */}
+    <Stack direction="row" spacing={1} alignItems="center">
+      <Button
+        variant="contained"
+        sx={{
+          px: 3,
+          fontWeight: 600,
+          textTransform: "none",
+          color: "#fff",
+          background: theme.palette.mode === "dark"
+            ? "linear-gradient(45deg, #ffb74d, #ff9800)"
+            : "linear-gradient(45deg, #f57c00, #ff9800)",
+          "&:hover": {
+            background: theme.palette.mode === "dark"
+              ? "linear-gradient(45deg, #ff9800, #ffb74d)"
+              : "linear-gradient(45deg, #ff9800, #f57c00)",
+            boxShadow: theme.shadows[4],
+          },
+        }}
+      >
+        Apply Now
+      </Button>
+
+      <Tooltip
+        title={likedBrands[mainBrand.uuid ?? mainBrand.title]
+          ? "Remove from favorites"
+          : "Add to favorites"}
+      >
+        <IconButton
+          onClick={() => handleLike(mainBrand.uuid ?? mainBrand.title)}
+          sx={{
+            color: likedBrands[mainBrand.uuid ?? mainBrand.title]
+              ? theme.palette.error.main
+              : "text.secondary",
+            "&:hover": {
+              color: theme.palette.error.main,
+              backgroundColor: "rgba(244, 67, 54, 0.08)",
+            },
+          }}
+        >
+          {likedBrands[mainBrand.uuid ?? mainBrand.title] ? <Favorite /> : <FavoriteBorder />}
+        </IconButton>
+      </Tooltip>
+    </Stack>
+  </Stack>
+</CardContent>
+
               </Card>
             </motion.div>
           </AnimatePresence>
@@ -505,11 +525,11 @@ function TopBrandVdoCards() {
                   </Box>
                   <CardContent
                     sx={{
-                      flex: 1,
+                     
                       display: "flex",
                       flexDirection: "column",
-                      justifyContent: "space-between",
-                      p: 2,
+                      justifyContent: "space-around",
+                      p: 1.5,
                       overflow: 'hidden'
                     }}
                   >
@@ -518,17 +538,19 @@ function TopBrandVdoCards() {
                         display: 'flex', 
                         justifyContent: 'space-between',
                         alignItems: 'flex-start',
-                        gap: 1
+                        gap: 0.5
                       }}>
                         <Tooltip title={brand.personalDetails?.brandName || brand.title}>
+                          
                           <Typography 
-                            variant="subtitle1" 
+                            variant="h6" 
+color="#7ad03a"
                             fontWeight="bold" 
                             noWrap
                             sx={{
                               flex: 1,
                               minWidth: 0,
-                              color: theme.palette.mode === 'dark' ? '#fff' : 'text.primary'
+                              // color: theme.palette.mode === 'dark' ? '#fff' : 'text.primary'
                             }}
                           >
                             {brand.personalDetails?.brandName || brand.title}
@@ -555,9 +577,8 @@ function TopBrandVdoCards() {
                         </IconButton>
                       </Box>
                       
-                      <Typography 
-                        variant="body2" 
-                        color="text.secondary" 
+                      <Typography variant="body2" 
+                        color="Black" 
                         sx={{
                           display: '-webkit-box',
                           WebkitLineClamp: 2,
@@ -566,28 +587,61 @@ function TopBrandVdoCards() {
                           textOverflow: 'ellipsis',
                           mt: 1,
                           fontSize: '0.8rem',
+                          lineHeight: 1
+                        }}>
+                         Categories: {(brand.personalDetails?.brandCategories).map((cat) => cat.child)}
+                        </Typography>
+                        <Typography variant="body2" 
+                        color="Black" 
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          mt: 1.2,
+                          fontSize: '0.8rem',
                           lineHeight: 1.4
-                        }}
-                      >
-                        {brand.personalDetails?.brandDescription || "Brand description not available"}
-                      </Typography>
+                        }} >
+ Investment: {brand.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange}
+                        </Typography>
+                        <Typography variant="body2" 
+                        color="Black" 
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          mt: 1.2,
+                          fontSize: '0.8rem',
+                          lineHeight: 1.4
+                        }} >
+ Area: {brand.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired}
+                        </Typography>
+                        <Typography variant="body2" 
+                        color="Black" 
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          mt: 1.2,
+                          fontSize: '0.8rem',
+                          lineHeight: 1.5
+                        }} >
+ Type: {brand.franchiseDetails?.modelsOfFranchise?.[0]?.franchiseType}
+                        </Typography>
                     </Box>
                     
                     <Box sx={{ 
                       display: 'flex', 
                       justifyContent: 'space-between',
                       alignItems: 'flex-end',
-                      mt: 1
+                      mt: 2
                     }}>
-                      <Chip 
-                        label={formatInvestmentRange(brand.investmentDetails?.investmentRange)}
-                        size="small"
-                        sx={{
-                          fontSize: '0.65rem',
-                          bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 184, 77, 0.2)' : 'rgba(245, 124, 0, 0.2)',
-                          color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00'
-                        }}
-                      />
+                      
                       <Button
                         variant="contained"
                         size="small"
@@ -597,7 +651,7 @@ function TopBrandVdoCards() {
                             : 'linear-gradient(45deg, #f57c00, #ff9800)',
                           textTransform: "none",
                           fontSize: "0.75rem",
-                          px: 2,
+                          px: 4,
                           color: '#fff',
                           fontWeight: 600,
                           minWidth: 100,
@@ -623,21 +677,21 @@ function TopBrandVdoCards() {
   );
 }
 
-function formatInvestmentRange(range) {
-  if (!range) return "N/A";
+// function formatInvestmentRange(range) {
+//   if (!range) return "N/A";
   
-  const ranges = {
-    '5_10_lakhs': '₹5-10 L',
-    '10_25_lakhs': '₹10-25 L',
-    '25_50_lakhs': '₹25-50 L',
-    '50_75_lakhs': '₹50-75 L',
-    '75_1_crore': '₹75L-1Cr',
-    '1_2_crore': '₹1-2 Cr',
-    '2_5_crore': '₹2-5 Cr',
-    '5_10_crore': '₹5-10 Cr'
-  };
+//   const ranges = {
+//     '5_10_lakhs': '₹5-10 L',
+//     '10_25_lakhs': '₹10-25 L',
+//     '25_50_lakhs': '₹25-50 L',
+//     '50_75_lakhs': '₹50-75 L',
+//     '75_1_crore': '₹75L-1Cr',
+//     '1_2_crore': '₹1-2 Cr',
+//     '2_5_crore': '₹2-5 Cr',
+//     '5_10_crore': '₹5-10 Cr'
+//   };
   
-  return ranges[range] || range.split('_').join('-') + ' L';
-}
+//   return ranges[range] || range.split('_').join('-') + ' L';
+// }
 
 export default TopBrandVdoCards;
