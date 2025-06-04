@@ -34,7 +34,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
-
+import { useTheme, useMediaQuery } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import IconButton from "@mui/material/IconButton";
@@ -172,6 +172,12 @@ const initialFormData = {
 
 const BrandRegisterForm = () => {
   const navigate = useNavigate();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // <600px
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md")); // 600px - 900px
+  const isLaptop = useMediaQuery(theme.breakpoints.up("md")); // >=900px
+
 
   const [formData, setFormData] = useState(() => {
     const savedData = localStorage.getItem(FORM_DATA_KEY);
@@ -943,11 +949,16 @@ const BrandRegisterForm = () => {
     };
 
     return (
-      <Box sx={{ mt: 2 }}>
-        <TableContainer component={Paper} sx={{ mb: 4 }}>
+      <Box sx={{ mt: 2 , px: { xs: 0.5, sm: 2, md: 4 },
+    width: "100%",
+    maxWidth: "100vw",}}>
+        <TableContainer component={Paper} sx={{ mb: 4,
+      boxShadow: { xs: 0, sm: 1 },
+      borderRadius: { xs: 0, sm: 2 },
+      overflowX: "auto", }}>
           <Typography
             variant="subtitle1"
-            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5", fontSize: { xs: 16, sm: 18 }, }}
           >
             Brand Details
           </Typography>
@@ -960,30 +971,38 @@ const BrandRegisterForm = () => {
                 }
                 return (
                   <TableRow key={key}>
-                    <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                    <TableCell  sx={{
+                  fontWeight: "bold",
+                  width: { xs: "45%", sm: "30%" },
+                  fontSize: { xs: 13, sm: 15 },
+                  wordBreak: "break-word" }}>
                       {formatFieldName(key)}
                     </TableCell>
-                    <TableCell>{formatFieldValue(value)}</TableCell>
+                    <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>{formatFieldValue(value)}</TableCell>
                   </TableRow>
                 );
               })}
 
               {/* Brand Categories row */}
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                <TableCell sx={{ fontWeight: "bold",
+              width: { xs: "45%", sm: "30%" },
+              fontSize: { xs: 13, sm: 15 }, }}>
                   Brand Categories
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
                   {renderBrandCategories(brandDetails.brandCategories)}
                 </TableCell>
               </TableRow>
 
               {/* Expansion Locations row */}
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                <TableCell sx={{ fontWeight: "bold",
+              width: { xs: "45%", sm: "30%" },
+              fontSize: { xs: 13, sm: 15 }, }}>
                   Expansion Locations
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
                   {renderExpansionLocations(brandDetails.expansionLocation)}
                 </TableCell>
               </TableRow>
@@ -991,10 +1010,13 @@ const BrandRegisterForm = () => {
           </Table>
         </TableContainer>
 
-        <TableContainer component={Paper} sx={{ mb: 4 }}>
+        <TableContainer component={Paper} sx={{ mb: 4,
+      boxShadow: { xs: 0, sm: 1 },
+      borderRadius: { xs: 0, sm: 2 },
+      overflowX: "auto",}}>
           <Typography
             variant="subtitle1"
-            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5",fontSize: { xs: 16, sm: 18 } }}
           >
             Franchise Details
           </Typography>
@@ -1220,5 +1242,4 @@ const BrandRegisterForm = () => {
     </>
   );
 };
-
 export default BrandRegisterForm;

@@ -38,7 +38,7 @@ import PrivacyPolicy from './Components/Footers/HelpAndSupport/PrivacyPolicy.jsx
 import TermsAndConditions from './Components/Footers/HelpAndSupport/TermsAndConditions.jsx';
 import AddListing from './Components/Footers/QuickLinks/AddListing.jsx';
 import AdvertiseWithUs from './Components/Footers/QuickLinks/AdvertiseWithUs.jsx';
-// import AllBusinessCategories from './Components/Footers/QuickLinks/AllBusinessCategories.jsx';
+
 import ExpandYourBrand from './Components/Footers/QuickLinks/ExpandYourBrand.jsx';
 import FranchiseConsulting from './Components/Footers/QuickLinks/FranchiseConsulting.jsx';
 import InvestFranchise from './Components/Footers/QuickLinks/InvestFranchise.jsx';
@@ -97,7 +97,6 @@ function App() {
 
   <Route path='/addlisting' element={<AddListing/>}/>
   <Route path='/advertisewithus' element={<AdvertiseWithUs/>}/>
-  {/* <Route path='/allbusinesscategory' element={<AllBusinessCategories/>}/> */}
   <Route path='/expandyourbrand' element={<ExpandYourBrand/>}/>
   <Route path='/franchiseconsulting' element={<FranchiseConsulting/>}/>
   <Route path='/investfranchise' element={<InvestFranchise/>}/>
