@@ -140,8 +140,8 @@ const BestBrandSlider = () => {
   return (
     <Box 
       sx={{ 
-        px: isMobile ? 2 : 4, 
-        py: 6, 
+        px: isMobile ? 2 : 2, 
+        py: 1, 
         maxWidth: '1400px', 
         mx: 'auto',
         overflow: 'hidden',
@@ -160,7 +160,7 @@ const BestBrandSlider = () => {
         fontWeight="bold" 
         sx={{ 
           color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
-          mb: 3, 
+          mb: 1, 
           textAlign: "left",
           position: 'relative',
           '&:after': {
@@ -174,7 +174,7 @@ const BestBrandSlider = () => {
           }
         }}
       >
-          Today's Marketing Leading Brands
+          Top Food & Beverage Brands
       </Typography>
         
         {!isMobile && (
