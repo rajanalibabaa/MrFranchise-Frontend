@@ -11,15 +11,12 @@ import {
   useMediaQuery,
   Chip,
   Tooltip,
-  LinearProgress,
 } from "@mui/material";
 import {
   Favorite,
   FavoriteBorder,
   PlayCircle,
   PauseCircle,
-  Share,
-  Info,
 } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -287,47 +284,6 @@ function TopBrandVdoCards() {
                       justifyContent: 'center',
                     }}
                   >
-                    {/* over flow hidden */}
-                    {/* <Box sx={{
-                      background: 'rgba(0,0,0,0.7)',
-                      color: '#fff',
-                      px: 2,
-                      py: 1,
-                      borderRadius: 2,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 2,
-                      width: '90%',
-                      maxWidth: 400
-                    }}>
-                      <IconButton 
-                        size="small" 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePlayPause(0);
-                        }}
-                        sx={{ color: '#fff' }}
-                      >
-                        {activeVideo === 0 ? <PauseCircle /> : <PlayCircle />}
-                      </IconButton>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={videoProgress[0] || 0}
-                        sx={{ 
-                          flexGrow: 1,
-                          height: 4,
-                          borderRadius: 2,
-                          backgroundColor: 'rgba(255,255,255,0.3)',
-                          '& .MuiLinearProgress-bar': {
-                            backgroundColor: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
-                            borderRadius: 2
-                          }
-                        }}
-                      />
-                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', minWidth: 50, textAlign: 'right' }}>
-                        {Math.floor((videoProgress[0] || 0) * 3.5 / 100)}:{(Math.floor((videoProgress[0] || 0) * 3.5 / 100) % 60).toString().padStart(2, '0')} / 3:30
-                      </Typography>
-                    </Box> */}
                   </Box>
                 </Box>
                 
@@ -339,7 +295,7 @@ function TopBrandVdoCards() {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     px: 3,
-                    py: 2,
+                    py: 1,
                     height: `calc(${CARD_SIZES.main.height}px - ${CARD_SIZES.main.videoHeight}px)`,
                   }}
                 >
