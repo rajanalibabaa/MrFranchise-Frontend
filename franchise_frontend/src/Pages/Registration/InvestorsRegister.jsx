@@ -91,6 +91,28 @@ const dropdownRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState("");
  const [selectedCategories, setSelectedCategories] = useState([]);
 const [loginOpen, setLoginOpen] = useState(false);
+const FORM_DATA_KEY = "investor_form_data";
+const initialFormData = {
+  firstName: "",
+  email: "",
+  mobileNumber: "",
+  whatsappNumber: "",
+  address: "",
+  pincode: "",
+  country: "India",
+  state: "",
+  city: "",
+  categories: [],
+  investmentRange: "",
+  investmentAmount: "",
+  occupation: "",
+  otherOccupation: "",
+  propertyType: "",
+  propertySize: "",
+  preferredState: "",
+  preferredCity: "",
+  terms: false,
+};
 
 const openLoginPopup = () => {
     setLoginOpen(true);
@@ -369,7 +391,15 @@ useEffect(() => {
       setOtpModal((prev) => ({ ...prev, loading: false }));
     }
   };
+ const [formData, setFormData] = useState(() => {
+    const savedData = localStorage.getItem(FORM_DATA_KEY);
+    return savedData ? JSON.parse(savedData) : initialFormData;
+  });
 
+  // Save to localStorage whenever formData changes
+  useEffect(() => {
+    localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formData));
+  }, [formData]);
   
 
   const onSubmit = async (data) => {
@@ -383,11 +413,12 @@ useEffect(() => {
     country: data.country || "",
     state: data.state || "",
     city: data.city || "",
-category: data.categories .map(c => ({
-      main: c.main,
-      sub: c.sub,
-      child: c.child
-    })),    investmentRange: data.investmentRange || "",
+category: (data.categories || []).map(c => ({
+  main: c.main,
+  sub: c.sub,
+  child: c.child
+})),
+    investmentRange: data.investmentRange || "",
     investmentAmount: data.investmentAmount || "",
     occupation: data.occupation || "",
     ...(data.occupation === "Other" && { specifyOccupation: data.otherOccupation || "" }),
@@ -413,6 +444,7 @@ category: data.categories .map(c => ({
           "Registration successful! Redirecting to login...",
           "success"
         );
+        setLoginOpen(true);
         // setTimeout(() => navigate("/"), 2000);
       } else {
         showSnackbar(
@@ -439,6 +471,7 @@ category: data.categories .map(c => ({
       }
     }
   };
+  
 
   useEffect(() => {
     if (selectedCountry && phoneCodes[selectedCountry]) {
@@ -510,7 +543,7 @@ category: data.categories .map(c => ({
   // );
 
   return (
-   <Box sx={{backgroundImage: `url(${backgroundImage})`, backgroundSize: "cover", height: "100vh"}}>
+   <Box sx={{backgroundImage: `url(${backgroundImage})`, backgroundSize: "cover", height: "100%"}}>
     <Navbar />
     <Container
       sx={{
@@ -524,12 +557,21 @@ category: data.categories .map(c => ({
        
       }}
     >
-      <Paper ref= {dropdownRef} elevation={3} sx={{ pt: 1, pl: 5, pr: 3,borderRadius: "10px",
-        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",bgcolor:"#e6f2de" }} >
-          <Toolbar sx={{ display: "flex", justifyContent: "flex-end",mb:-2, mt:-2 }}>
-    <FormControl size="small" sx={{ minWidth: 120 ,backgroundColor: "white" }}>
+      <Paper ref={dropdownRef}
+  elevation={3}
+  sx={{
+    p:2,
+    borderRadius: "10px",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+    bgcolor: "#e6f2de",
+    display: "flex",
+    flexDirection: "column",
+    position: "relative",
+  }} >
+          <Toolbar sx={{ display: "flex", justifyContent: "flex-end",mb:-2, mt:-2, }}>
+    <FormControl size="small"  sx={{ minWidth: 120 ,backgroundColor: "white" , borderRadius: "4px"}}>
       <Select
-        value={watch("country") || "India"} // Use watch to get the current country value
+        value={watch("country") || "India"} 
         onChange={(e) => {
           setValue("country", e.target.value);
           setSelectedCountry(e.target.value);
@@ -549,7 +591,7 @@ category: data.categories .map(c => ({
           variant="h4"
           gutterBottom
           fontWeight="bold"
-          sx={{ textAlign: "center", mb: 1, color:"orange" }}
+          sx={{ textAlign: "center", mb: 1, color:"orange", mt:3}}
         >
           Investor Registration
         </Typography>
@@ -635,10 +677,18 @@ category: data.categories .map(c => ({
                     message: "Invalid phone number (10 digits required)",
                   },
                 })}
-                error={!!errors.mobileNumber}
-                helperText={errors.mobileNumber?.message || " "}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">{phonePrefix}</InputAdornment>,
+               error={!!errors.mobileNumber}
+  helperText={errors.mobileNumber?.message || " "}
+  inputProps={{
+    maxLength: 10,
+    inputMode: "numeric",
+    pattern: "[0-9]*"
+  }}
+  onInput={e => {
+    e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+  }}
+  InputProps={{
+    startAdornment: <InputAdornment position="start">{phonePrefix}</InputAdornment>,
                 //   endAdornment: (
                 //     <InputAdornment position="end">
                 //       <Button
@@ -678,10 +728,18 @@ category: data.categories .map(c => ({
                     message: "Invalid WhatsApp number (10 digits required)",
                   },
                 })}
-                error={!!errors.whatsappNumber}
-                helperText={errors.whatsappNumber?.message || " "}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">{phonePrefix}</InputAdornment>,
+               error={!!errors.whatsappNumber}
+  helperText={errors.whatsappNumber?.message || " "}
+  inputProps={{
+    maxLength: 10,
+    inputMode: "numeric",
+    pattern: "[0-9]*"
+  }}
+  onInput={e => {
+    e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+  }}
+  InputProps={{
+    startAdornment: <InputAdornment position="start">{phonePrefix}</InputAdornment>,
                 //   endAdornment: (
                 //     <InputAdornment position="end">
                 //       <Button
@@ -1023,8 +1081,8 @@ category: data.categories .map(c => ({
   )}
   <Tooltip title="Select your preferred category to invest">
                     <InfoIcon
-                      color="primary"
-                      sx={{ cursor: "pointer", mt: 1 }}
+                    
+                      sx={{  color:"#ff9800", cursor: "pointer", mt: 1 }}
                     />
                   </Tooltip></Stack>
 </Grid>
@@ -1080,8 +1138,8 @@ category: data.categories .map(c => ({
                   </TextField>
                   <Tooltip title="Select your preferred investment range as per your budget.">
                     <InfoIcon
-                      color="primary"
-                      sx={{ cursor: "pointer", mt: 1 }}
+                   
+                      sx={{  color:"#ff9800", cursor: "pointer", mt: 1 }}
                     />
                   </Tooltip>
                 </Stack>
@@ -1115,7 +1173,7 @@ category: data.categories .map(c => ({
                   />
                 </Grid>
 {/* Property Type Field */}
-          <Grid xs={12} sm={6} md={4}>
+          <Grid item xs={12} sm={6} md={4}>
   <FormControl component="fieldset" fullWidth error={!!errors.propertyType}>
     <FormLabel component="legend">Property Type *</FormLabel>
     <Controller
@@ -1124,7 +1182,7 @@ category: data.categories .map(c => ({
       rules={{ required: "Property type is required" }}
       render={({ field }) => (
         <RadioGroup
-          row
+         row
           {...field}
           value={field.value || ""}
           onChange={(e) => {
@@ -1133,11 +1191,13 @@ category: data.categories .map(c => ({
               setValue("propertySize", "");
             }
           }}
+          sx={{flexWrap:'nowrap'}}
         >
           <FormControlLabel
             value="Own Property"
             control={<Radio />}
             label="Own Property"
+            
           />
           <FormControlLabel
             value="Rental Property"
@@ -1184,74 +1244,61 @@ category: data.categories .map(c => ({
   </Grid>
 )}
 
-            {/* Terms and Conditions */}
-            <Grid sx={{  xs: 12 }}>
-              <FormControlLabel
-                control={
-                  <Checkbox {...register("terms", { required: true })} />
-                }
-label={
-          <Typography variant="body2">
-            I agree to the{" "}
-            <Link
-              component={RouterLink}
-              to="/termscondition"
-             
-            >
-              terms and conditions
-            </Link>
-          </Typography>
-        }              />
-              {errors.terms && (
-                <Typography color="error" variant="body2">
-                  You must accept the terms
-                </Typography>
-              )}
-            </Grid>
+           
+<Grid container spacing={2} >
+  {/* Terms and Conditions Checkbox */}
+  <Grid item xs={12} sx={{alignItems: "center", justifyContent: "center", display: "flex"}}>
+    <FormControlLabel
+      control={<Checkbox {...register("terms", { required: true })} />}
+      label={
+        <Typography variant="body2">
+          I agree to the{" "}
+          <Link component={RouterLink} to="/termscondition">
+            terms and conditions
+          </Link>
+        </Typography>
+      }
+    />
+    {errors.terms && (
+      <Typography color="error" variant="body2">
+        You must accept the terms
+      </Typography>
+    )}
+  </Grid>
 
-            {/* Submit Button */}
-            <Grid component="span"
-      onClick={openLoginPopup}
-      // sx={{
-      //   textDecoration: "none",
-      //   cursor: "pointer",
-      //   color: "primary.main",
-      //   "&:hover": {
-      //     color: "primary.dark",
-      //   },
-      // }}
-              sx={{
-                width: "70%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                marginLeft: "15%",
-                xs: 12,
-              }}
-            >
-              <Button fullWidth type="submit" size="large" variant="contained">
-                REGISTER
-              </Button>
-            </Grid>
-
-            <Grid sx={{  xs: 12 }}>
-  <Typography textAlign="center">
-    Already have an account?{" "}
-    <Box
-      component="span"
-      onClick={openLoginPopup}
-      sx={{
-        textDecoration: "none",
-        cursor: "pointer",
-        color: "primary.main",
-        "&:hover": {
-          color: "primary.dark",
-        },
-      }}
+  {/* Submit Button */}
+  <Grid item xs={12} sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+    <Button 
+      fullWidth 
+      type="submit" 
+      size="large" 
+      variant="contained"
+      sx={{ width: "70%" }}
     >
-      Sign In
-    </Box>
-  </Typography>
+      REGISTER
+    </Button>
+  </Grid>
+
+  {/* Sign In Link */}
+  <Grid item xs={12} sx={{ mt: 2, textAlign: "center" }}>
+    <Typography>
+      Already have an account?{" "}
+      <Box
+        component="span"
+        onClick={openLoginPopup}
+        sx={{
+          textDecoration: "none",
+          cursor: "pointer",
+          color: "primary.main",
+          "&:hover": {
+            color: "primary.dark",
+          },
+        }}
+      >
+        Sign In
+      </Box>
+    </Typography>
+  </Grid>
 </Grid>
 
           </Grid>

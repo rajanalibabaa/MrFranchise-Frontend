@@ -213,6 +213,7 @@ function LoginPage({ open, onClose }) {
           <Grid container sx={{ minHeight: "65vh" }}>
             <Grid
               item
+              xs={12}
               md={6}
               sx={{
                 display: { xs: "none", md: "flex" },
@@ -220,13 +221,20 @@ function LoginPage({ open, onClose }) {
                 justifyContent: "center",
                 bgcolor: "white",
                 p: 0,
+                order: { xs: 1, md: 0 }, 
               }}
             >
               <Box
                 component="img"
                 src={illustration}
                 alt="Login Illustration"
-                sx={{ width: "100%", maxWidth: 400, borderRadius: 2 }}
+                sx={{
+          width: { xs: "100%", sm: "80%", md: "100%" },
+          maxWidth: 400,
+          borderRadius: 2,
+          mx: "auto",
+          display: "block",
+        }}
               />
             </Grid>
 
@@ -238,7 +246,8 @@ function LoginPage({ open, onClose }) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                p: 4,
+                p: { xs: 2, md: 4 },
+        order: { xs: 2, md: 1 },
               }}
             >
               <Box sx={{ width: "100%", maxWidth: 400 }}>
