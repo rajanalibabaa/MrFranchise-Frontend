@@ -84,7 +84,7 @@ const ProfilePage = () => {
 
           <RouterLink to="/investordashboard" style={navLinkStyle}>Dashboard</RouterLink>
           <RouterLink to="/investordashboard/manageProfile" style={navLinkStyle}>Manage Profile</RouterLink>
-          <RouterLink to="/investordashboard/respondemanager" style={navLinkStyle}>Searches</RouterLink>
+          <RouterLink to="/investordashboard/respondemanager" style={navLinkStyle}>Reach Us</RouterLink>
           {/* <RouterLink to="/investordashboard/upgradeaccount" style={navLinkStyle}> Upgrade Account</RouterLink> */}
         </Box>
         <Button
