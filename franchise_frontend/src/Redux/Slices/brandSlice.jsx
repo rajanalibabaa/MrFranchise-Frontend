@@ -1,18 +1,81 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+
+const token = localStorage.getItem("accessToken");
+
+export const toggleLikeBrand = createAsyncThunk(
+  "brands/toggleLike",
+  async ({ brandId, isLiked }, { rejectWithValue }) => {
+    console.log(brandId, isLiked);
+
+    try {
+      if (!token) {
+        return rejectWithValue("You need to log in to continue.");
+      }
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      if (!isLiked && token) {
+        await axios.post(
+          "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
+          { branduuid: brandId },
+          config
+        );
+      }
+      if (isLiked && token) {
+        await axios.delete(
+          `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${brandId}`,
+          config
+        );
+      }
+
+      return {
+        brandId,
+        isLiked: !isLiked,
+        responseData: response.data, // Include the response data if needed
+      };
+    } catch (err) {
+      console.error("API Error:", err.response?.data);
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to toggle like"
+      );
+    }
+  }
+);
 
 export const fetchBrands = createAsyncThunk(
-  'brands/fetchBrands',
+  "brands/fetchBrands",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      let response;
+
+      if (!token) {
+        response = await axios.get(
+          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      } else {
+        const userId = localStorage.getItem("brandUUID");
+
+        response = await axios.get(
+          `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${userId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
       return response.data.data;
     } catch (err) {
       return rejectWithValue(err.message || "Failed to fetch brands");
@@ -21,26 +84,31 @@ export const fetchBrands = createAsyncThunk(
 );
 
 const brandSlice = createSlice({
-  name: 'brands',
+  name: "brands",
   initialState: {
     data: [],
     filteredData: [],
     loading: false,
     error: null,
     categories: [],
+    subCategories: [],
+    childCategories: [],
+    investmentRanges: [],
     modelTypes: [],
     states: [],
     cities: [],
     filters: {
       searchTerm: "",
       selectedCategory: "",
+      selectedSubCategory: "",
+      selectedChildCategory: [],
       selectedModelType: "",
       selectedState: "",
       selectedCity: "",
       selectedInvestmentRange: "",
     },
-     openDialog: false,
-  selectedBrand: null
+    openDialog: false,
+    selectedBrand: null,
   },
   reducers: {
     setFilters: (state, action) => {
@@ -51,6 +119,8 @@ const brandSlice = createSlice({
       state.filters = {
         searchTerm: "",
         selectedCategory: "",
+        selectedSubCategory: "",
+        selectedChildCategory: [],
         selectedModelType: "",
         selectedState: "",
         selectedCity: "",
@@ -58,19 +128,28 @@ const brandSlice = createSlice({
       };
       state.filteredData = state.data;
     },
-      openBrandDialog: (state, action) => {
-    state.openDialog = true ;
-    state.selectedBrand = action.payload;  
-    console.log("vvvvvvvvvvvvv", state.openDialog)
-    console.log("vvvvvvvvvvvvv",action.payload)
-  },
-  closeBrandDialog: (state) => {
-    state.openDialog = false;
-    state.selectedBrand = null;
-  }
+    openBrandDialog: (state, action) => {
+      state.openDialog = true;
+      state.selectedBrand = action.payload;
+    },
+    closeBrandDialog: (state) => {
+      state.openDialog = false;
+      state.selectedBrand = null;
+    },
   },
   extraReducers: (builder) => {
     builder
+      .addCase(toggleLikeBrand.fulfilled, (state, action) => {
+        const { brandId, isLiked } = action.payload;
+        // Update both data and filteredData
+       state.data = state.data.map((brand) =>
+          brand.uuid === brandId ? { ...brand, isLiked } : brand
+        );
+        state.filteredData = state.filteredData.map((brand) =>
+          brand.uuid === brandId ? { ...brand, isLiked } : brand
+        );
+      })
+
       .addCase(fetchBrands.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -78,19 +157,48 @@ const brandSlice = createSlice({
       .addCase(fetchBrands.fulfilled, (state, action) => {
         state.loading = false;
         state.data = action.payload;
-        state.filteredData = action.payload;
-        
+            state.filteredData = applyFiltersToBrands(action.payload, state.filters);
+
         // Extract unique values for filters
-        state.categories = [
-          ...new Set(
-            action.payload.flatMap(
-              (brand) =>
-                brand.personalDetails?.brandCategories?.map(
-                  (category) => category.main
-                ) || []
-            )
-          ),
-        ];
+   // Extract unique categories with their hierarchy
+        const categoryMap = {};
+        const subCategoryMap = {};
+        const childCategoryMap = {};
+
+       action.payload.forEach((brand) => {
+          brand.personalDetails?.brandCategories?.forEach((category) => {
+            // Main categories
+            if (category.main && !categoryMap[category.main]) {
+              categoryMap[category.main] = {
+                id: category.main,
+                name: category.main
+              };
+            }
+
+            // Sub categories
+            if (category.sub && !subCategoryMap[category.sub]) {
+              subCategoryMap[category.sub] = {
+                id: category.sub,
+                name: category.sub,
+                parentCategory: category.main
+              };
+            }
+
+            // Child categories
+            if (category.child && !childCategoryMap[category.child]) {
+              childCategoryMap[category.child] = {
+                id: category.child,
+                name: category.child,
+                parentSubCategory: category.sub
+              };
+            }
+          });
+        });
+
+        state.categories = Object.values(categoryMap);
+        state.subCategories = Object.values(subCategoryMap);
+        state.childCategories = Object.values(childCategoryMap);
+
 
         state.modelTypes = [
           ...new Set(
@@ -113,7 +221,9 @@ const brandSlice = createSlice({
 
         state.cities = [
           ...new Set(
-            action.payload.map((brand) => brand.personalDetails?.city).filter(Boolean)
+            action.payload
+              .map((brand) => brand.personalDetails?.city)
+              .filter(Boolean)
           ),
         ];
       })
@@ -121,14 +231,13 @@ const brandSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
-  }
+  },
 });
 
 // Helper function to apply filters
 const applyFiltersToBrands = (brands, filters) => {
   let result = [...brands];
 
-  // Apply search filter
   if (filters.searchTerm) {
     const term = filters.searchTerm.toLowerCase();
     result = result.filter((brand) => {
@@ -143,7 +252,6 @@ const applyFiltersToBrands = (brands, filters) => {
     });
   }
 
-  // Apply category filter
   if (filters.selectedCategory) {
     result = result.filter((brand) =>
       brand.personalDetails?.brandCategories?.some(
@@ -151,8 +259,24 @@ const applyFiltersToBrands = (brands, filters) => {
       )
     );
   }
+  // Sub category filter
+  if (filters.selectedSubCategory) {
+    result = result.filter((brand) =>
+      brand.personalDetails?.brandCategories?.some(
+        (cat) => cat.sub === filters.selectedSubCategory
+      )
+    );
+  }
+     // Child categories filter
+  if (filters.selectedChildCategories?.length > 0) {
+    result = result.filter((brand) =>
+      brand.personalDetails?.brandCategories?.some((cat) =>
+        filters.selectedChildCategories.includes(cat.child)
+      )
+    );
+  }
 
-  // Apply model type filter
+
   if (filters.selectedModelType) {
     result = result.filter((brand) =>
       brand.franchiseDetails?.modelsOfFranchise?.some(
@@ -161,7 +285,6 @@ const applyFiltersToBrands = (brands, filters) => {
     );
   }
 
-  // Apply state filter
   if (filters.selectedState) {
     result = result.filter(
       (brand) =>
@@ -172,7 +295,6 @@ const applyFiltersToBrands = (brands, filters) => {
     );
   }
 
-  // Apply city filter
   if (filters.selectedCity) {
     result = result.filter(
       (brand) =>
@@ -183,18 +305,17 @@ const applyFiltersToBrands = (brands, filters) => {
     );
   }
 
-  // Apply investment range filter
+ // Investment range filter
   if (filters.selectedInvestmentRange) {
-    const [min, max] = filters.selectedInvestmentRange.split("-").map(Number);
     result = result.filter((brand) => {
-      const franchiseFee =
-        parseFloat(brand.franchiseDetails?.franchiseFee) || 0;
-      return franchiseFee >= min && franchiseFee <= max;
+      const investmentRange = brand.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange || "";
+      return investmentRange === filters.selectedInvestmentRange;
     });
   }
 
   return result;
 };
 
-export const { setFilters, clearFilters ,openBrandDialog,closeBrandDialog} = brandSlice.actions;
+export const { setFilters, clearFilters, openBrandDialog, closeBrandDialog } =
+  brandSlice.actions;
 export default brandSlice.reducer;

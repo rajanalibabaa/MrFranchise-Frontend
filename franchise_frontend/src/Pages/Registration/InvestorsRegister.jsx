@@ -413,12 +413,8 @@ useEffect(() => {
     country: data.country || "",
     state: data.state || "",
     city: data.city || "",
-category: (data.categories || []).map(c => ({
-  main: c.main,
-  sub: c.sub,
-  child: c.child
-})),
-    investmentRange: data.investmentRange || "",
+category: selectedCategories,  
+  investmentRange: data.investmentRange || "",
     investmentAmount: data.investmentAmount || "",
     occupation: data.occupation || "",
     ...(data.occupation === "Other" && { specifyOccupation: data.otherOccupation || "" }),
@@ -1244,10 +1240,13 @@ category: (data.categories || []).map(c => ({
   </Grid>
 )}
 
+
+
            
-<Grid container spacing={2} >
+<Grid container spacing={2} sx={{ display:"flex" }}>
   {/* Terms and Conditions Checkbox */}
-  <Grid item xs={12} sx={{alignItems: "center", justifyContent: "center", display: "flex"}}>
+  <Grid item xs={12} sx={{ justifyContent: "center", display: "flex" }}>
+    <Box>
     <FormControlLabel
       control={<Checkbox {...register("terms", { required: true })} />}
       label={
@@ -1264,6 +1263,7 @@ category: (data.categories || []).map(c => ({
         You must accept the terms
       </Typography>
     )}
+    </Box>
   </Grid>
 
   {/* Submit Button */}
@@ -1279,6 +1279,7 @@ category: (data.categories || []).map(c => ({
     </Button>
   </Grid>
 
+
   {/* Sign In Link */}
   <Grid item xs={12} sx={{ mt: 2, textAlign: "center" }}>
     <Typography>
@@ -1292,6 +1293,7 @@ category: (data.categories || []).map(c => ({
           color: "primary.main",
           "&:hover": {
             color: "primary.dark",
+            
           },
         }}
       >

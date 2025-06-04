@@ -16,11 +16,13 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setUUIDandTOKEN: (state, action) => {
-      const { investorUUID, brandUUID, token } = action.payload;
+      const { investorUUID, brandUUID, token, userData } = action.payload;
       state.investorUUID = investorUUID;
       state.brandUUID = brandUUID;
       state.AccessToken = token;
       state.isLogin = true;
+      // state.userData = userData;
+      console.log(userData)
 
       if (token) {
         localStorage.setItem("accessToken", token);
@@ -33,6 +35,8 @@ const authSlice = createSlice({
       state.brandUUID = null;
       state.AccessToken = null;
       state.isLogin = false;
+      // state.userData = null
+
 
       localStorage.removeItem("accessToken");
       localStorage.removeItem("investorUUID");

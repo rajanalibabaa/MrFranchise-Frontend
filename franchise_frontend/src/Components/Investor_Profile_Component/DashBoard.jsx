@@ -37,79 +37,216 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
   const [showMore, setShowMore] = useState({});
   const [removeMsg, setremoveMsg] = useState("");
   const [viewStatus, setviewStatus] = useState({});
+  const [userData, setuserData] = useState('');
   
 const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
+  
+
+  // useEffect(() => {
+  //   const fetchInvestor = async () => {
+  //     if (!investorUUID || !AccessToken) return;
+  //     try {
+  //       const response = await axios.get(
+  //         // `https://franchise-backend-wgp6.onrender.com/api/v1/like/get-favbrands/${investorUUID}`,
+  //         `http://localhost:5000/api/v1/like/get-favbrands/${investorUUID}`,
+  //         {
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${AccessToken}`,
+  //           },
+  //         }
+  //       );
+
+  //       const data = response?.data?.data || [];
+  //       setInvestorInfo(data);
+
+  //       setLikedBrands(data);
+
+  //       // console.log(" ==== :",data.length)
+
+  //       // Initialize likedStates
+  //       const initialLiked = {};
+  //       data.forEach((item, idx) => {
+  //         const id = item.brandDetails?.brandId || item._id || item.id || idx;
+  //         initialLiked[id] = true;
+  //       });
+  //       setLikedStates(initialLiked);
+  //     } catch (error) {
+  //       console.error("API Error:", error);
+  //     }
+  //   };
+  //    const fetchViewed = async () => {
+  //     if (!investorUUID || !AccessToken) return;
+  //     try {
+  //       const response = await axios.get(
+  //         `http://localhost:5000/api/v1/view/getAllViewBrands/${investorUUID}`,
+  //         {
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${AccessToken}`,
+  //           },
+  //         }
+  //       );
+
+  //       const data = response?.data?.data || [];
+  //       setviewStatus(data);
+
+  //       setviewStatus(data);
+  //       const initialLiked = {};
+  //       data.forEach((item, idx) => {
+  //         const id = item.brandDetails?.brandId || item._id || item.id || idx;
+  //         initialLiked[id] = true;
+  //       });
+  //       setLikedStates(initialLiked);
+  //     } catch (error) {
+  //       console.error("API Error:", error);
+  //     }
+  //   };
+
+  //   const fetchInstantApplyList = async () => {
+  //     const response = await axios.get(`http://localhost:5000/api/v1/instantapply/getInstaApplyById/${investorUUID}`,
+  //       {
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${AccessToken}`,
+  //           },
+  //         }
+  //     )
+      
+  //     if (response.status === 200) {
+  //       setAppliedBrands(response.data.data)
+  //     }
+  //   }
+
+  //   const fetchUserData = async () => {
+
+  //     console.log(investorUUID)
+  //     const response = await axios.get(`http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+  //       {
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${AccessToken}`,
+  //           },
+  //         }
+  //     )
+  //     console,log(" user :",response.data)
+  //     if (response.status === 200) {
+  //       setuserData(response.data.data)
+  //     }
+  //   }
+
+  //   fetchViewed();
+  //   fetchInvestor();
+  //   fetchInstantApplyList()
+  //   fetchUserData()
+  // }, [investorUUID, AccessToken]);
 
   useEffect(() => {
-    const fetchInvestor = async () => {
-      if (!investorUUID || !AccessToken) return;
-      try {
-        const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/like/get-favbrands/${investorUUID}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${AccessToken}`,
-            },
+  if (!investorUUID || !AccessToken) return;
+
+      const fetchInvestor = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:5000/api/v1/like/get-favbrands/${investorUUID}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AccessToken}`,
+              },
+            }
+          );
+
+          const data = response?.data?.data || [];
+          setInvestorInfo(data);
+          setLikedBrands(data);
+
+          const initialLiked = {};
+          data.forEach((item, idx) => {
+            const id = item.brandDetails?.brandId || item._id || item.id || idx;
+            initialLiked[id] = true;
+          });
+          setLikedStates((prev) => ({ ...prev, ...initialLiked }));
+        } catch (error) {
+          console.error("Error fetching investor favorites:", error);
+        }
+      };
+
+      const fetchViewed = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:5000/api/v1/view/getAllViewBrandByID/${investorUUID}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AccessToken}`,
+              },
+            }
+          );
+
+          const data = response?.data?.data || [];
+          setviewStatus(data);
+
+          const initialViewed = {};
+          data.forEach((item, idx) => {
+            const id = item.brandDetails?.brandId || item._id || item.id || idx;
+            initialViewed[id] = true;
+          });
+          setLikedStates((prev) => ({ ...prev, ...initialViewed }));
+        } catch (error) {
+          console.error("Error fetching viewed brands:", error);
+        }
+      };
+
+      const fetchInstantApplyList = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:5000/api/v1/instantapply/getInstaApplyById/${investorUUID}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AccessToken}`,
+              },
+            }
+          );
+
+          if (response.status === 200) {
+            setAppliedBrands(response.data.data);
           }
-        );
+        } catch (error) {
+          console.error("Error fetching applied brands:", error);
+        }
+      };
 
-        const data = response?.data?.data || [];
-        setInvestorInfo(data);
+      const fetchUserData = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AccessToken}`,
+              },
+            }
+          );
+          console.log("User Data:", response.data);
 
-        setLikedBrands(data);
-
-        // console.log(" ==== :",data.length)
-
-        // Initialize likedStates
-        const initialLiked = {};
-        data.forEach((item, idx) => {
-          const id = item.brandDetails?.brandId || item._id || item.id || idx;
-          initialLiked[id] = true;
-        });
-        setLikedStates(initialLiked);
-      } catch (error) {
-        console.error("API Error:", error);
-      }
-    };
-     const fetchViewed = async () => {
-      if (!investorUUID || !AccessToken) return;
-      try {
-        const response = await axios.get(
-          `http://localhost:5000/api/v1/view/getAllViewBrands/${investorUUID}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${AccessToken}`,
-            },
+          if (response.status === 200) {
+            setuserData(response.data.data);
           }
-        );
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
 
-        const data = response?.data?.data || [];
-        setviewStatus(data);
-
-        setviewStatus(data);
-
-        // console.log(" ==== :",data.length)
-
-        // Initialize likedStates
-        const initialLiked = {};
-        data.forEach((item, idx) => {
-          const id = item.brandDetails?.brandId || item._id || item.id || idx;
-          initialLiked[id] = true;
-        });
-        setLikedStates(initialLiked);
-      } catch (error) {
-        console.error("API Error:", error);
-      }
-    };
-
-    fetchViewed();
-
-    fetchInvestor();
+      // Optionally run all in parallel
+      fetchInvestor();
+      fetchViewed();
+      fetchInstantApplyList();
+      fetchUserData();
   }, [investorUUID, AccessToken]);
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -120,7 +257,6 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-//   console.log(" ========== :",isMobile)
   
 
   const handleTabChange = (event, newValue) => {
@@ -139,7 +275,8 @@ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     // Call delete API
     const response = await axios.delete(
-      `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${investorUUID}`,
+      // `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${investorUUID}`,
+      `http://localhost:5000/api/v1/like/delete-favbrand/${investorUUID}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -184,11 +321,19 @@ const handleViewBTN = (brandId) => {
   });
 
 };
-const toggleViewClose = (brandId) => {
-  console.log("Clicked brandId:", brandId);
+const toggleViewClose = async(brandId) => {
 
   const updatedStatus = viewStatus.filter(item => item.uuid !== brandId);
   setviewStatus(updatedStatus);
+
+  await axios.delete(`http://localhost:5000/api/v1/view/deleteViewBrandByID/${investorUUID}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AccessToken}`,
+        },
+        data: { brandID :brandId },
+      })
 };
 
 
@@ -202,78 +347,77 @@ const toggleViewClose = (brandId) => {
 
         return (
          <Grid item sm={6} md={4} lg={3} key={brandId} sx={{ display: "flex", justifyContent: "center" }}>
-  <Card
-    sx={{
-      width: "345px",
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      position: "relative",
-      boxShadow: 3,
-      "&:hover": { boxShadow: 6 },
-    }}
-  >
-    {/* Exit Button */}
-    <IconButton
-      size="small"
-      sx={{
-        position: "absolute",
-        top: 8,
-        right: 8,
-        zIndex: 2,
-        backgroundColor: "#fff",
-        boxShadow: 1,
-        "&:hover": {
-          backgroundColor: "#f5f5f5",
-        },
-      }}
-      // onClick={() => handleRemoveCard(brandId)} // your custom handler
-    >
-      <CloseIcon
-        onClick={() => toggleViewClose(brandId)}
-      fontSize="small" />
-    </IconButton>
+        <Card
+          sx={{
+            width: "345px",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+            boxShadow: 3,
+            "&:hover": { boxShadow: 6 },
+          }}
+        >
+          {/* Exit Button */}
+          <IconButton
+            size="small"
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              zIndex: 2,
+              backgroundColor: "#fff",
+              boxShadow: 1,
+              "&:hover": {
+                backgroundColor: "#f5f5f5",
+              },
+            }}
+            // onClick={() => handleRemoveCard(brandId)} // your custom handler
+          >
+            <CloseIcon
+              onClick={() => toggleViewClose(brandId)}
+            fontSize="small" />
+          </IconButton>
 
-    {/* Brand Image */}
-    <CardMedia
-      component="img"
-      height="160"
-      image={
-        item.brandDetails?.brandLogo?.[0] ||
-        "https://via.placeholder.com/300x160?text=No+Image"
-      }
-      alt={item.personalDetails?.brandName || "Brand Image"}
-    />
+          <CardMedia
+            component="img"
+            height="160"
+            image={
+              item.brandDetails?.brandLogo?.[0] ||
+              "https://via.placeholder.com/300x160?text=No+Image"
+            }
+            alt={item.personalDetails?.brandName || "Brand Image"}
+          />
 
-    {/* Brand Info */}
-    <CardContent>
-      <Typography
-        variant="h6"
-        component="div"
-        noWrap
-        title={item.personalDetails?.brandName || "Unnamed Brand"}
-      >
-        {item.personalDetails?.brandName || "Unnamed Brand"}
-      </Typography>
+          {/* Brand Info */}
+          <CardContent>
+            <Typography
+              variant="h6"
+              component="div"
+              noWrap
+              title={item.personalDetails?.brandName || "Unnamed Brand"}
+            >
+              {item.personalDetails?.brandName || "Unnamed Brand"}
+            </Typography>
 
-      {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (
-        <Typography variant="body2" sx={{ mt: 1 }}>
-          <strong>Franchise Models: </strong>
-          {item.franchiseDetails.modelsOfFranchise.map((value, index) => (
-            <span key={index} style={{ marginRight: "6px" }}>
-              {value.franchiseModel}
-              {index !== item.franchiseDetails.modelsOfFranchise.length - 1 ? "," : ""}
-            </span>
-          ))}
-        </Typography>
-      )}
-    </CardContent>
-    <Button
-    sx={{backgroundColor:"green",color:"white"}}
-    onClick={() => handleViewBTN(brandId)}
-    >VIEW DETAILS</Button>
-  </Card>
-</Grid>
+            {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                <strong>Franchise Models: </strong>
+                {item.franchiseDetails.modelsOfFranchise.map((value, index) => (
+                  <span key={index} style={{ marginRight: "6px" }}>
+                    {value.franchiseModel}
+                    {index !== item.franchiseDetails.modelsOfFranchise.length - 1 ? "," : ""}
+                  </span>
+                ))}
+              </Typography>
+            )}
+          </CardContent>
+          <Button
+          sx={{backgroundColor:"green",color:"white"}}
+          onClick={() => handleViewBTN(brandId)}
+          >VIEW DETAILS</Button>
+        </Card>
+      </Grid>
         );
       })}
     </Grid>
@@ -577,11 +721,48 @@ const toggleViewClose = (brandId) => {
 
       case 2:
         return appliedBrands.length > 0 ? (
-          <ul>
-            {appliedBrands.map((item, idx) => (
-              <li key={idx}>{item.name || JSON.stringify(item)}</li>
-            ))}
-          </ul>
+         <Box sx={{ flexGrow: 1 }}>
+        <Grid container spacing={2}>
+          {appliedBrands.map((item, idx) => (
+            <Grid item key={idx} xs={12} sm={6} md={4} lg={3}>
+              <Card
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  position: "relative",
+                  boxShadow: 3,
+                  "&:hover": { boxShadow: 6 },
+                  mb: 1,
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  height="160"
+                  image={item?.brandLogo || "https://via.placeholder.com/300x160?text=No+Image"}
+                  alt={item.brandName || "Brand Image"}
+                />
+
+                <CardContent>
+                  <Typography variant="h6" noWrap title={item.brandName || "Unnamed Brand"}>
+        <strong>Brand Name:</strong> {item.brandName || "Unnamed Brand"}
+                  </Typography>
+
+                  <Typography noWrap>
+                    <strong>Franchise Type:</strong> {item.franchiseType || "Franchise Type Not Provided"}
+                  </Typography>
+
+                  <Typography noWrap>
+                    <strong>Investment Range:</strong> {item.investmentRange || "Investment Range Not Provided"}
+                  </Typography>
+
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
         ) : (
           <Typography>No applied brands available.</Typography>
         );
@@ -638,7 +819,7 @@ const toggleViewClose = (brandId) => {
             }}
           >
             <img
-              src={img}
+              src={userData?.Avatar || img}
               alt="Profile"
               loading="lazy"
               style={{
@@ -661,12 +842,16 @@ const toggleViewClose = (brandId) => {
           </Avatar>
 
           <Box sx={{ flex: 1 }}>
-            <Typography variant="h4" fontWeight={600} sx={{ mb: 1 }}>
-              Welcome {investorInfo?.firstName || "Investor"}
-            </Typography>
-            <Typography color="text.secondary" variant="h5">
+            <Typography color="text.secondary" variant="h9">
               Investor
             </Typography>
+            <Typography variant="h4" fontWeight={600} sx={{ mb: 1 }}>
+              {userData?.isFirstTime ? "Welcome" : "Welcome Back"}{" "}
+              <Box component="span" sx={{ fontWeight: 100, color: "#6e6e6e" }}>
+                {userData?.firstName?.trim() || "Investor"}
+              </Box>
+            </Typography>
+            
           </Box>
         </Box>
       ) : (
@@ -737,7 +922,7 @@ const toggleViewClose = (brandId) => {
                   color="primary"
                   sx={{ ml: 0.5 }}
                 >
-                  ({likedBrands?.length || 0})
+                  ({appliedBrands?.length || 0})
                 </Typography>
               </Box>               
               }

@@ -22,7 +22,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { Favorite } from "@mui/icons-material";
+import {  Favorite,ArrowRight } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
@@ -42,6 +43,8 @@ const NewlyRegisteredBrandsSection = () => {
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [currentCategory, setCurrentCategory] = useState(0);
   
+  const navigate = useNavigate();
+  
   const categories = [
     "Newly Registered Brands",
     "Trending Franchises",
@@ -53,7 +56,7 @@ const NewlyRegisteredBrandsSection = () => {
   const CARD_DIMENSIONS = {
     mobile: { width: 280, height: 520 },
     tablet: { width: 320, height: 560 },
-    desktop: { width: 370, height: 500 }
+    desktop: { width: 320, height: 500 }
   };
 
   const getCardDimensions = () => {
@@ -172,10 +175,10 @@ const NewlyRegisteredBrandsSection = () => {
 
   return (
     <Box sx={{ 
-      p: isMobile ? 2 : 4, 
-      maxWidth: 1800, 
+      p: isMobile ? 0 : 4, 
+      maxWidth: isMobile ? '100%' : 1400, 
       mx: 'auto',
-      mb: 6
+      mb: isMobile ? 0 : 6,
     }}>
       <Box sx={{ 
         display: "flex", 
@@ -183,18 +186,41 @@ const NewlyRegisteredBrandsSection = () => {
         alignItems: "center",
         mb: 3
       }}>
-        <Typography variant={isMobile ? "h6" : "h5"} fontWeight={600}>
-          {categories[currentCategory]}
-        </Typography>
+        <Typography 
+        variant={isMobile ? "body1" : "h5"} 
+        fontWeight="bold" 
+        sx={{ 
+          color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
+          mb: 3, 
+          textAlign: "left",
+          position: 'relative',
+          '&:after': {
+            content: '""',
+            display: 'block',
+            width: '80px',
+            height: '4px',
+            background: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
+            mt: 1,
+            borderRadius: 2
+          }
+        }}
+      >
+      {categories[currentCategory]}
+      </Typography>
+        
         <Button 
-          variant="text" 
+          variant="link" 
+          size="small"
           sx={{ 
-            color: theme.palette.primary.main,
             textTransform: 'none',
-            fontSize: isMobile ? 14 : 16
+            fontSize: isMobile ? 14 : 16,
+            '&:hover': {
+              color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
+            }
           }}
+          onClick={() => navigate("/brandviewpage")}
         >
-          View All Brands
+          View More <ArrowRight/>
         </Button>
       </Box>
 
@@ -422,90 +448,149 @@ const NewlyRegisteredBrandsSection = () => {
       </Box>
 
       {/* Franchise Models Dialog */}
-      <Dialog 
-        open={dialogOpen} 
-        onClose={handleCloseDialog} 
-        maxWidth="sm" 
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3
+     <Dialog 
+  open={dialogOpen} 
+  onClose={handleCloseDialog} 
+  maxWidth="sm" 
+  fullWidth
+  PaperProps={{
+    sx: {
+      borderRadius: 3,
+      boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.15)',
+      overflow: 'hidden'
+    }
+  }}
+  BackdropProps={{
+    sx: {
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backdropFilter: 'blur(4px)'
+    }
+  }}
+>
+  <DialogTitle
+    sx={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      bgcolor: "#f29724",
+      background: 'linear-gradient(135deg, #f29724 0%, #e67e22 100%)',
+      color: 'white',
+      py: 2,
+      px: 3,
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    }}
+  >
+    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+      {selectedBrand?.personalDetails?.brandName} - Franchise Models
+    </Typography>
+    <IconButton 
+      onClick={handleCloseDialog}
+      sx={{ 
+        color: 'white',
+        '&:hover': {
+          bgcolor: 'rgba(255,255,255,0.2)'
+        }
+      }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+
+  <DialogContent dividers sx={{ 
+    p: 0,
+    bgcolor: '#f5f7fa',
+    '&::-webkit-scrollbar': {
+      width: '6px'
+    },
+    '&::-webkit-scrollbar-thumb': {
+      bgcolor: '#e0e0e0',
+      borderRadius: '3px'
+    }
+  }}>
+    {selectedBrand?.franchiseDetails?.modelsOfFranchise?.map((model, idx) => (
+      <Box
+        key={idx}
+        sx={{
+          p: 3,
+          bgcolor: idx % 2 === 0 ? '#fff' : '#f9f9f9',
+          borderBottom: '1px solid #eaeaea',
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+            bgcolor: '#fff'
+          },
+          '&:last-child': {
+            borderBottom: 'none'
           }
         }}
       >
-        <DialogTitle
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: theme.palette.primary.main,
-            color: 'white'
+        <Typography 
+          variant="subtitle1" 
+          sx={{ 
+            fontWeight: 600, 
+            mb: 2,
+            color: '#333',
+            display: 'flex',
+            alignItems: 'center',
+            '&:before': {
+              content: '""',
+              display: 'inline-block',
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              bgcolor: '#f29724',
+              mr: 1.5
+            }
           }}
         >
-          <Typography variant="h6">
-            {selectedBrand?.personalDetails?.brandName} - Franchise Models
-          </Typography>
-          <IconButton 
-            onClick={handleCloseDialog}
-            sx={{ color: 'white' }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-
-        <DialogContent dividers sx={{ p: 0 }}>
-          {selectedBrand?.franchiseDetails?.modelsOfFranchise?.map((model, idx) => (
-            <Box
-              key={idx}
-              sx={{
-                p: 3,
-                bgcolor: idx % 2 === 0 ? '#fff' : '#f9f9f9',
-                borderBottom: '1px solid #eee',
-                '&:last-child': {
-                  borderBottom: 'none'
-                }
-              }}
-            >
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                {model.franchiseModel || "Franchise Model"}
-              </Typography>
-              
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Typography variant="body2">
-                    <strong>Type:</strong> {model.franchiseType || "N/A"}
+          {model.franchiseModel || "Franchise Model"}
+        </Typography>
+        
+        <Grid container spacing={2}>
+          {[
+            { label: "Type", value: model.franchiseType || "N/A" },
+            { label: "Investment", value: formatInvestmentRange(model.investmentRange) },
+            { label: "Area Required", value: model.areaRequired ? `${model.areaRequired} sq.ft` : "N/A" },
+            { label: "ROI", value: model.roi || "N/A" },
+            { label: "Franchise Fee", value: model.franchiseFee ? `₹${model.franchiseFee}` : "N/A" },
+            { label: "Royalty Fee", value: model.royaltyFee || "N/A" }
+          ].map((item, i) => (
+            <Grid item xs={6} key={i}>
+              <Box sx={{ 
+                display: 'flex',
+                alignItems: 'center',
+                height: '100%'
+              }}>
+                <Box sx={{
+                  bgcolor: '#f5f5f5',
+                  borderRadius: '4px',
+                  p: 1,
+                  width: '100%'
+                }}>
+                  <Typography variant="body2" sx={{ 
+                    fontWeight: 500,
+                    color: '#666',
+                    mb: 0.5,
+                    fontSize: '0.75rem'
+                  }}>
+                    {item.label}
                   </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body2">
-                    <strong>Investment:</strong> {formatInvestmentRange(model.investmentRange)}
+                  <Typography variant="body2" sx={{ 
+                    fontWeight: 600,
+                    color: '#333'
+                  }}>
+                    {item.value}
                   </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body2">
-                    <strong>Area Required:</strong> {model.areaRequired ? `${model.areaRequired} sq.ft` : "N/A"}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body2">
-                    <strong>ROI:</strong> {model.roi || "N/A"}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body2">
-                    <strong>Franchise Fee:</strong> {model.franchiseFee ? `₹${model.franchiseFee}` : "N/A"}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body2">
-                    <strong>Royalty Fee:</strong> {model.royaltyFee || "N/A"}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </Box>
+                </Box>
+              </Box>
+            </Grid>
           ))}
-        </DialogContent>
-      </Dialog>
+        </Grid>
+      </Box>
+    ))}
+  </DialogContent>
+</Dialog>
     </Box>
   );
 };

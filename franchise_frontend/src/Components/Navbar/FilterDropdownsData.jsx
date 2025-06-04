@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   Typography,
@@ -6,182 +6,139 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  CircularProgress,
   Button,
-  Modal,
-  Card,
-  CardContent,
-  CardMedia,
-  IconButton,
-  Chip,
-  Divider
+  CircularProgress,
 } from "@mui/material";
-import axios from "axios";
-import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { setFilters,fetchBrands } from "../../Redux/Slices/brandSlice";
+
+const investmentRangeOptions = [
+  { label: "All Ranges", value: "" },
+  { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
+  { label: "Rs.2L-5L", value: "Rs.2L-5L" },
+  { label: "Rs.5L-10L", value: "Rs.5 L - 10 L" },
+  { label: "Rs.10L-20L", value: "Rs.10 L - 20 L" },
+  { label: "Rs.20L-30L", value: "Rs.20 L - 30 L" },
+  { label: "Rs.30L-50L", value: "Rs.30 L - 50 L" },
+  { label: "Rs.50L-1Cr", value: "Rs.50 L - 1 Cr" },
+  { label: "Rs.1Cr-2Cr", value: "Rs.1 Cr - 2 Cr" },
+  { label: "Rs.2Cr-5Cr", value: "Rs.2 Cr - 5 Cr" },
+  { label: "Rs.5Cr-above", value: "Rs.5 Cr - Above" },
+];
 
 const FilterDropdowns = () => {
-  const [categories, setCategories] = useState([]);
-  const [locations, setLocations] = useState({ states: [] });
-  const [investmentOptions, setInvestmentOptions] = useState([]);
-  const [brands, setBrands] = useState([]);
-  const [filteredBrands, setFilteredBrands] = useState([]);
-  const [selectedBrand, setSelectedBrand] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const {
+    categories = [],
+    states = [],
+    filters,
+    loading,
+  } = useSelector((state) => state.brands);
 
-  const [selected, setSelected] = useState({
-    category: "",
-    state: "",
-    investment: ""
-  });
+  useEffect(()=>{
+dispatch(fetchBrands());
+  },[])
 
-  const [loading, setLoading] = useState({
-    filters: true,
-    brands: false
-  });
-
- useEffect(() => {
-  async function fetchFilters() {
-    try {
-      const res = await axios.get(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-      const data = res.data?.data || [];
-      console.log("data", data);
-
-      // Extract unique brandCategories
-      const uniqueCategories = [
-        ...new Set(
-          data.flatMap(item =>
-            item.personalDetails?.brandCategories?.map(cat => cat.name) || []
-          )
-        )
-      ];
-
-      // Extract unique states
-      const states = [
-        ...new Set(data.map(item => item.personalDetails?.state).filter(Boolean))
-      ].map(name => ({ name }));
-
-      // Extract unique investmentRanges
-      const investments = [
-        ...new Set(data.map(item => item.investmentRange).filter(Boolean))
-      ];
-
-      setCategories(uniqueCategories);
-      setLocations({ states });
-      setInvestmentOptions(investments);
-      setBrands(data); // If you’re using this for filtering
-    } catch (error) {
-      console.error("Failed to fetch filters", error);
-    } finally {
-      setLoading(prev => ({ ...prev, filters: false }));
-    }
-  }
-
-  fetchFilters();
-}, []);
-
-
-  const handleSearch = async () => {
-    setLoading(prev => ({ ...prev, brands: true }));
-    try {
-      // Filter brands based on selected criteria
-      const filtered = brands.filter(brand => {
-        return (
-          (selected.category === "" || brand.category === selected.category) &&
-          (selected.state === "" || brand.state === selected.state) &&
-          (selected.investment === "" || brand.investmentRange === selected.investment)
-        );
-      });
-      
-      setFilteredBrands(filtered);
-      
-      // If only one result, show it directly in modal
-      if (filtered.length === 1) {
-        setSelectedBrand(filtered[0]);
-        setModalOpen(true);
-      }
-    } catch (error) {
-      console.error("Failed to filter brands", error);
-    } finally {
-      setLoading(prev => ({ ...prev, brands: false }));
-    }
+  const handleFilterChange = (name, value) => {
+    dispatch(setFilters({ [name]: value }));
   };
 
-  const handleOpenModal = (brand) => {
-    setSelectedBrand(brand);
-    setModalOpen(true);
+  const handleFindBrands = () => {
+    navigate("/brandviewpage", {
+      state: { filters }, // Pass current filters to the next page
+    });
   };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-  };
-
-  if (loading.filters) return <CircularProgress />;
 
   return (
     <Box>
-      <Box sx={{ 
-        display: "flex", 
-        flexDirection: { xs: "column", md: "row" }, 
-        gap: 6, 
-        mb: 4,
-        // alignItems: "flex-end"
-      }}>
-        <FormControl fullWidth>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          gap: 2,
+          mb: 4,
+          p: 2,
+          borderRadius: 2,
+          alignItems: "center",
+                    backgroundColor: "#fff",
+
+        }}
+      >
+        {/* Category Filter - Updated to match your data structure */}
+        <FormControl fullWidth sx={{ minWidth: 180, }}>
           <InputLabel>Category</InputLabel>
           <Select
-            value={selected.category}
-            onChange={(e) => setSelected({ ...selected, category: e.target.value })}
+            value={filters.selectedCategory || ""}
+            onChange={(e) =>
+              handleFilterChange("selectedCategory", e.target.value)
+            }
             label="Category"
           >
             <MenuItem value="">All Categories</MenuItem>
-            {categories.map((cat, idx) => (
-              <MenuItem key={idx} value={cat}>{cat}</MenuItem>
+            {categories.map((category) => (
+              <MenuItem key={category.id} value={category.id}>
+                {category.name}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
 
-        <FormControl fullWidth>
+        {/* State Filter */}
+        <FormControl fullWidth sx={{ minWidth: 180 }}>
           <InputLabel>Location</InputLabel>
           <Select
-            value={selected.state}
+            value={filters.selectedState || ""}
+            onChange={(e) =>
+              handleFilterChange("selectedState", e.target.value)
+            }
             label="Location"
-            onChange={(e) => setSelected({ ...selected, state: e.target.value })}
           >
             <MenuItem value="">All Locations</MenuItem>
-            {locations.states.map((s, idx) => (
-              <MenuItem key={idx} value={s.name}>{s.name}</MenuItem>
+            {states.map((state, idx) => (
+              <MenuItem key={idx} value={state}>
+                {state}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
 
-        <FormControl fullWidth>
+        {/* Investment Range Filter */}
+        <FormControl fullWidth sx={{ minWidth: 180 }}>
           <InputLabel>Investment Range</InputLabel>
           <Select
+            value={filters.selectedInvestmentRange || ""}
+            onChange={(e) =>
+              handleFilterChange("selectedInvestmentRange", e.target.value)
+            }
             label="Investment Range"
-            value={selected.investment}
-            onChange={(e) => setSelected({ ...selected, investment: e.target.value })}
           >
-            <MenuItem value="">All Ranges</MenuItem>
-            {investmentOptions.map((opt, idx) => (
-              <MenuItem key={idx} value={opt}>{opt}</MenuItem>
+            {investmentRangeOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
 
         <Button
-          // variant="contained"
-          // color="primary"
-          onClick={handleSearch}
-          disabled={loading.brands}
+          variant="contained"
+          disabled={loading}
+          onClick={handleFindBrands}
           startIcon={<SearchIcon />}
-          sx={{ height: '46px', minWidth: '220px' ,backgroundColor: "#689f38", color: "#fafafa"}}
+          sx={{
+            height: "56px",
+            minWidth: "180px",
+            backgroundColor: "#689f38",
+            color: "#fafafa",
+            "&:hover": {
+              backgroundColor: "#558b2f",
+            },
+          }}
         >
-          {loading.brands ? <CircularProgress size={24} /> : "Find Brands"}
+          {loading ? <CircularProgress size={24} /> : "Find Brands"}
         </Button>
       </Box>
     </Box>

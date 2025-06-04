@@ -20,6 +20,7 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setUUIDandTOKEN } from "../../Redux/Slices/AuthSlice/authSlice";
 import CloseIcon from "@mui/icons-material/Close";
+import { logout } from "../../Redux/Slices/AuthSlice/authSlice";
 
 function LoginPage({ open, onClose }) {
   const navigate = useNavigate();
@@ -36,6 +37,8 @@ function LoginPage({ open, onClose }) {
   });
   const [resendDisabled, setResendDisabled] = useState(false);
   const [timer, setTimer] = useState(30);
+
+  
 
   useEffect(() => {
     if (resendDisabled && timer > 0) {
@@ -80,7 +83,8 @@ function LoginPage({ open, onClose }) {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
+        // "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
+        "http://localhost:5000/api/v1/login/generateOTPforLogin",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -121,10 +125,13 @@ function LoginPage({ open, onClose }) {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        // "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        "http://localhost:5000/api/v1/login/",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
+
+      console.log("response :",response.data.data)
 
       if (response.status === 200) {
         dispatch(
@@ -132,20 +139,21 @@ function LoginPage({ open, onClose }) {
             investorUUID: response.data.data.investorUUID,
             brandUUID: response.data.data.brandUserUUID,
             token: response.data.data.AccessToken,
+            // userData: response.data.data.userData,
           })
+
         );
 
-        // console.log("======= :", response.data.data)
+        setTimeout(() => {
+          dispatch(logout());
+          
+        }, 24 * 60 * 60 * 1000);
 
-        // localStorage.setItem("token", response.data.data.AccessToken);
-        setSnackbar({
+      setSnackbar({
           open: true,
           message: "Login successful! Redirecting...",
           severity: "success",
         });
-
-        // sessionStorage.setItem("authToken", response.data.data.AccessToken);
-        
         setTimeout(() => {
           onClose(); // Close the modal
           setFormData({ username: "", otp: "" });

@@ -96,17 +96,17 @@ function BrandList() {
   const [showLogin, setShowLogin] = useState(false);
 
   const investmentRangeOptions = [
-    { label: "All Ranges", value: "" },
-    { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
-    { label: "Rs.2L-5L", value: "Rs.2L-5L" },
-    { label: "Rs.5L-10L", value: "Rs.5 L - 10 L" },
-    { label: "Rs.10L-20L", value: "Rs.10 L - 20 L" },
-    { label: "Rs.20L-30L", value: "Rs.20 L - 30 L" },
-    { label: "Rs.30L-50L", value: "Rs.30 L - 50 L" },
-    { label: "Rs.50L-1Cr", value: "Rs.50 L - 1 Cr" },
-    { label: "Rs.1Cr-2Cr", value: "Rs.1 Cr - 2 Cr" },
-    { label: "Rs.2Cr-5Cr", value: "Rs.2 Cr - 5 Cr" },
-    { label: "Rs.5Cr-above", value: "Rs.5 Cr - Above" },
+    { label: "Below ₹50K", value:"Below-50,000" },
+  { label: "₹50K - ₹2 Lakhs", value:"Rs.50,000-2L" },
+  { label: "₹2 - ₹5 Lakhs", value:"Rs.2L-5L" },
+  { label: "₹5 - ₹10 Lakhs", value:"Rs.5L-10L" },
+  { label: "₹10 - ₹20 Lakhs", value:"Rs.10L-20L" },
+  { label: "₹20 - ₹30 Lakhs", value:"Rs.20L-30L"},
+  { label: "₹30 - ₹50 Lakhs", value:"Rs.30L-50L" },
+  { label: "₹50 Lakhs - ₹1 Crore", value:"Rs.50L-1Cr" },
+  { label: "₹1 - ₹2 Crores", value:"Rs.1Cr-2Cr" },
+  { label: "₹2 - ₹5 Crores", value:"Rs.2Cr-5Cr" },
+  { label: "Above ₹5 Crores", value:"Rs.5Cr-above" },
   ];
 
   // Application form states
@@ -180,7 +180,7 @@ function BrandList() {
       const cities = [
         ...new Set(
           brandsData.map((brand) => brand.personalDetails?.city).filter(Boolean)
-        ),
+        ),     
       ];
       setAvailableCategories(categories);
       setAvailableModelTypes(modelTypes);

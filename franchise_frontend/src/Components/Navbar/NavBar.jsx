@@ -105,7 +105,7 @@ function Navbar() {
       const response = await axios.post(
         // `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
         `http://localhost:5000/api/v1/logout/${ID}`,
-        `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
+        // `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
         {},
         {
           headers: {
@@ -115,6 +115,8 @@ function Navbar() {
           withCredentials: true,
         }
       );
+
+      console.log("===logout===")
 
       if (response.status === 200) {
         setTimeout(() => {
@@ -359,36 +361,37 @@ function Navbar() {
           </Box>
 
             
-          {/* <Box sx={{ flexGrow: isMobile ? 1 : 0 }} /> */}
+          <Box sx={{ flexGrow: isMobile ? 1 : 1 }} />
 
 <Box  sx={{ 
               display: 'flex', 
               gap: 5,
               flex: isTablet ? 1 : 'none',
-              justifyContent: isTablet ? 'center' : 'flex-start'
+              justifyContent: isTablet ? 'center' : 'flex-end'
             }}>
               <motion.div whileHover={{ y: -2 }}>
                 <Button 
                 onClick={() => navigate('/brandlistingform')}
-                  startIcon={<Plus size={18} />}
-                  sx={{ 
-                    color: '#ff9800',  
-                    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                  startIcon={<Plus size={20} />}
+                  
+                  sx={{
+                    color: 'black',  
+                    backgroundColor: '#7ad03a',
                     borderRadius: '8px',
-                    px: 3,
+                    px: 5,
                     py: 1,
                     textTransform: 'none',
                     fontWeight: 500,
                     '&:hover': {
-                      backgroundColor: 'rgba(255, 152, 0, 0.2)'
+                      backgroundColor: 'rgba(111, 255, 0, 0.98)'
                     }
                   }}
                 >
-                  Add Your Business To Franchise
+                  Add Your Brand
                 </Button>
               </motion.div>
               
-              <motion.div whileHover={{ y: -2 }}>
+              {/* <motion.div whileHover={{ y: -2 }}>
                 <Button 
                   startIcon={<Search size={18} />}
                   onClick={() => navigate('/brandviewpage')}
@@ -407,7 +410,7 @@ function Navbar() {
                 >
                   Find Your Brand To Franchise
                 </Button>
-              </motion.div>
+              </motion.div> */}
             </Box>
 
           <Box ref={avatarRef} sx={{ position: "relative" }}>
