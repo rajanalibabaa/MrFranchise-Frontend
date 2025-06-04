@@ -47,6 +47,8 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
 
     }, [brandUUID, token]);
 
+    console.log("brandData :",brandData)
+
     const handleTabChange = (event, index) => {
 
         console.log(" ============ :",index)

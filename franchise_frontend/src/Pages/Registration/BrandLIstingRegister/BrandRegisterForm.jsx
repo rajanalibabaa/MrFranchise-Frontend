@@ -339,6 +339,9 @@ const BrandRegisterForm = () => {
             });
           }
         });
+     
+
+
         //   const apiData = {
         //   personalDetails: {
         //     fullName: formData.brandDetails.fullName,
@@ -377,7 +380,8 @@ const BrandRegisterForm = () => {
         // };
 
         const response = await axios.post(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
+          // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
+          "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {
@@ -386,17 +390,23 @@ const BrandRegisterForm = () => {
           }
         );
 
-        console.log(response.data);
+        console.log("response.data ====:",response);
+        console.log("response.data ====:",response.data.message);
 
         // if (response.status !== 200 && response.status !== 201) {
         //   throw new Error(response.data.message || "Submission failed");
         // }
-        setSubmitSuccess(true);
+
+        if (response.status === 200) {
+          setSubmitSuccess(true);
         setSnackbar({
           open: true,
           message: "Form submitted successfully!",
           severity: "success",
         });
+        }
+
+        
 
         // Reset form after successful submission
         localStorage.removeItem(FORM_DATA_KEY);
@@ -408,10 +418,10 @@ const BrandRegisterForm = () => {
         }, 1500);
 
       } catch (error) {
-        console.log("submission error", error);
+        // console.log("submission error", error);
         setSnackbar({
           open: true,
-          message: "Submission failed. Please try again.",
+          message: "Submission failed. Please try again. or email already exists",
           severity: "error",
         });
       }finally {
@@ -681,6 +691,8 @@ const BrandRegisterForm = () => {
       "roiPeriod",
       "breakEven",
       "requireInvestmentCapital",
+      "marginOnSales",
+      "fixedReturn",
       "propertyType",
     ];
 
