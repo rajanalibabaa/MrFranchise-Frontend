@@ -41,12 +41,12 @@ function TopBrandVdoCards() {
     main: {
       width: isMobile ? '100%' : isTablet ? '100%' : '68%',
       height: isMobile ? 420 : isTablet ? 480 : 550,
-      videoHeight: isMobile ? 250 : isTablet ? 300 : 420
+      videoHeight: isMobile ? 250 : isTablet ? 300 : 450
     },
     side: {
       width: isMobile ? '100%' : isTablet ? '100%' : '30%',
       height: isMobile ? 200 : isTablet ? 220 : 260,
-      videoWidth: isMobile ? '40%' : isTablet ? '45%' : '48%'
+      videoWidth: isMobile ? '40%' : isTablet ? '45%' : '58%'
     }
   };
 
@@ -302,15 +302,15 @@ function TopBrandVdoCards() {
                   <Box sx={{ 
                     display: 'flex', 
                     alignItems: 'center', 
-                    gap: 2,
+                    gap: 1,
                     flex: 1,
                     minWidth: 0
                   }}>
                     <Avatar 
                       src={mainBrand.brandDetails?.brandLogo?.[0]} 
                       sx={{ 
-                        width: 48, 
-                        height: 48,
+                        width: 50, 
+                        height:50,
                         border: `2px solid ${theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00'}`,
                         boxShadow: theme.shadows[2]
                       }} 
@@ -333,10 +333,10 @@ function TopBrandVdoCards() {
                       </Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                         <Typography variant="body2" color="text.secondary" noWrap>
-                          {mainBrand.personalDetails?.brandCategory || "Franchise Brand"}
+                          {(mainBrand.personalDetails?.brandCategories).map((cat) => cat.child).join(', ') || "Franchise Brand"}
                         </Typography>
                         <Chip 
-                          label={formatInvestmentRange(mainBrand.investmentDetails?.investmentRange)}
+                          label={formatInvestmentRange(mainBrand.franchiseDetails?.modelsOfFranchise[0]?.investmentRange)}
                           size="small"
                           sx={{
                             ml: 1,
