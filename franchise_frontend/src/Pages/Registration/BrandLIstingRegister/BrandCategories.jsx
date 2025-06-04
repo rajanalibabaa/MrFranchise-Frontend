@@ -489,61 +489,61 @@ export const categories = [
           "Dairy Chains (Milk, Curd, Paneer, Ice Cream)",
         ],
       },
-      {
-        name: "Restaurant & Night Clubs",
-        children: [
-          "Casual Dine Restaurants",
-          "Fine Dine Restaurants",
-          "Multi Cuisine Restaurant",
-          "Theme Restaurants",
-          "Bars, Pubs & Lounge",
+      // {
+      //   name: "Restaurant & Night Clubs",
+      //   children: [
+      //     "Casual Dine Restaurants",
+      //     "Fine Dine Restaurants",
+      //     "Multi Cuisine Restaurant",
+      //     "Theme Restaurants",
+      //     "Bars, Pubs & Lounge",
 
-        ],
-      },
-       {
-        name: "Cafe & Parlors",
-        children: [
-          "Cafe Shops",
-          "Juices", "Smoothies"," Dairy Parlors",
-          "Tea And Coffee Chain",
-        ],
-      },
-       {
-        name: "Services",
-        children: [
-          "Food Delivery ",
-          "catering ",
+      //   ],
+      // },
+      //  {
+      //   name: "Cafe & Parlors",
+      //   children: [
+      //     "Cafe Shops",
+      //     "Juices", "Smoothies"," Dairy Parlors",
+      //     "Tea And Coffee Chain",
+      //   ],
+      // },
+      //  {
+      //   name: "Services",
+      //   children: [
+      //     "Food Delivery ",
+      //     "catering ",
           
-        ],
-      },
-       {
-        name: "Food Equipment",
-        children: [
+      //   ],
+      // },
+      //  {
+      //   name: "Food Equipment",
+      //   children: [
           
-          " Kitchen Equipment ",
-          "food Preparation Equipment ",
-          "Bakery Equipment ",
+      //     " Kitchen Equipment ",
+      //     "food Preparation Equipment ",
+      //     "Bakery Equipment ",
         
-        ],
-      },
-       {
-        name: "Food Products",
-        children: [
-          "Provession Stores",
-          "Meat Shops",
-          "Fruits & Vegetables",
-        ],
-      },
-      {
-        name: "Bakery, Sweets & Ice Cream",
-        children: [
-          "Bakery & Confectionary",
-          " Chocolate Stores",
-          "Snacks / Namkeen Shops",
-          "Sweetshop",
-          "Ice Creams & Yogurt Parlors",
-        ],
-      },
+      //   ],
+      // },
+      //  {
+      //   name: "Food Products",
+      //   children: [
+      //     "Provession Stores",
+      //     "Meat Shops",
+      //     "Fruits & Vegetables",
+      //   ],
+      // },
+      // {
+      //   name: "Bakery, Sweets & Ice Cream",
+      //   children: [
+      //     "Bakery & Confectionary",
+      //     " Chocolate Stores",
+      //     "Snacks / Namkeen Shops",
+      //     "Sweetshop",
+      //     "Ice Creams & Yogurt Parlors",
+      //   ],
+      // },
       // {
       //   name: "Catering & Food Services",
       //   children: ["Catering Service", "Online Food Ordering Services"],
