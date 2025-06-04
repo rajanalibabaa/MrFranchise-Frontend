@@ -64,7 +64,10 @@ export const fetchBrands = createAsyncThunk(
           }
         );
       } else {
-        const userId = localStorage.getItem("brandUUID");
+
+           
+        const userId = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID")
+
 
         response = await axios.get(
           `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${userId}`,

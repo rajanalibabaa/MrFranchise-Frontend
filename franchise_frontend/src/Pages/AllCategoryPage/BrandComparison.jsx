@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -15,11 +15,8 @@ import {
   TableRow,
   Paper,
   Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
 } from "@mui/material";
-import { Close, ExpandMore } from "@mui/icons-material";
+import { Close, ArrowBack, ArrowForward } from "@mui/icons-material";
 
 const BrandComparison = ({
   open,
@@ -27,9 +24,45 @@ const BrandComparison = ({
   selectedBrands,
   removeFromComparison,
 }) => {
-  // Helper function to get nested object values
+  const [currentModelIndexes, setCurrentModelIndexes] = useState({});
+  
   const getNestedValue = (obj, path) => {
     return path.split('.').reduce((o, p) => (o ? o[p] : null), obj);
+  };
+
+  // Initialize or update current model indexes when brands change
+  React.useEffect(() => {
+    const indexes = {};
+    selectedBrands.forEach(brand => {
+      if (brand.uuid && !(brand.uuid in currentModelIndexes)) {
+        indexes[brand.uuid] = 0;
+      }
+    });
+    if (Object.keys(indexes).length > 0) {
+      setCurrentModelIndexes(prev => ({ ...prev, ...indexes }));
+    }
+  }, [selectedBrands]);
+
+  const handleNextModel = (brandId) => {
+    setCurrentModelIndexes(prev => {
+      const brandModels = selectedBrands.find(b => b.uuid === brandId)?.franchiseDetails?.modelsOfFranchise || [];
+      const currentIndex = prev[brandId] || 0;
+      return {
+        ...prev,
+        [brandId]: (currentIndex + 1) % brandModels.length
+      };
+    });
+  };
+
+  const handlePrevModel = (brandId) => {
+    setCurrentModelIndexes(prev => {
+      const brandModels = selectedBrands.find(b => b.uuid === brandId)?.franchiseDetails?.modelsOfFranchise || [];
+      const currentIndex = prev[brandId] || 0;
+      return {
+        ...prev,
+        [brandId]: (currentIndex - 1 + brandModels.length) % brandModels.length
+      };
+    });
   };
 
   // Main comparison fields
@@ -41,6 +74,7 @@ const BrandComparison = ({
     { label: "Company Owned Outlets", field: "franchiseDetails.companyOwnedOutlets" },
     { label: "Franchise Outlets", field: "franchiseDetails.franchiseOutlets" },
     { label: "Agreement Period", field: "franchiseDetails.agreementPeriod" },
+    { label: "Requirement Support", field: "franchiseDetails.requirementSupport" },
   ];
 
   // Franchise model fields
@@ -73,113 +107,117 @@ const BrandComparison = ({
         {selectedBrands.length === 0 ? (
           <Typography>No brands selected for comparison</Typography>
         ) : (
-          <Box>
-            {/* Basic Information */}
-            <Accordion defaultExpanded>
-              <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography variant="subtitle1">Basic Information</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <TableContainer component={Paper}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Feature</TableCell>
-                        {selectedBrands.map((brand) => (
-                          <TableCell key={brand.uuid} align="center">
-                            <Box display="flex" flexDirection="column" alignItems="center">
-                              <Typography variant="subtitle2">
-                                {brand.personalDetails?.brandName}
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Feature</TableCell>
+                  {selectedBrands.map((brand) => (
+                    <TableCell key={brand.uuid} align="center">
+                      <Box display="flex" flexDirection="column" alignItems="center">
+                        <Typography variant="subtitle2">
+                          {brand.personalDetails?.brandName}
+                        </Typography>
+                        <IconButton 
+                          size="small" 
+                          onClick={() => removeFromComparison(brand.uuid)}
+                        >
+                          <Close fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {/* Basic Information Rows */}
+                {basicInfoFields.map((field) => (
+                  <TableRow key={field.label}>
+                    <TableCell component="th" scope="row">
+                      <Typography variant="subtitle2">{field.label}</Typography>
+                    </TableCell>
+                    {selectedBrands.map((brand) => (
+                      <TableCell key={`${brand.uuid}-${field.field}`} align="center">
+                        {getNestedValue(brand, field.field) || "-"}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+
+                {/* Franchise Model Navigation */}
+                <TableRow>
+                  <TableCell component="th" scope="row">
+                    <Typography variant="subtitle2">Franchise Model</Typography>
+                  </TableCell>
+                  {selectedBrands.map((brand) => {
+                    const models = brand.franchiseDetails?.modelsOfFranchise || [];
+                    const currentIndex = currentModelIndexes[brand.uuid] || 0;
+                    const currentModel = models[currentIndex];
+                    
+                    return (
+                      <TableCell key={`${brand.uuid}-model-nav`} align="center">
+                        {models.length > 0 ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <IconButton 
+                              size="small" 
+                              onClick={() => handlePrevModel(brand.uuid)}
+                              disabled={models.length <= 1}
+                            >
+                              <ArrowBack fontSize="small" />
+                            </IconButton>
+                            
+                            <Box sx={{ mx: 1, minWidth: 120 }}>
+                              <Typography variant="body2">
+                                {currentModel?.franchiseModel || "-"}
                               </Typography>
-                              <IconButton 
-                                size="small" 
-                                onClick={() => removeFromComparison(brand.uuid)}
-                              >
-                                <Close fontSize="small" />
-                              </IconButton>
+                              <Typography variant="caption" color="text.secondary">
+                                {currentModel?.franchiseType || ""}
+                              </Typography>
+                              {models.length > 1 && (
+                                <Typography variant="caption" display="block">
+                                  ({currentIndex + 1} of {models.length})
+                                </Typography>
+                              )}
                             </Box>
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {basicInfoFields.map((field) => (
-                        <TableRow key={field.label}>
-                          <TableCell component="th" scope="row">
-                            <Typography variant="subtitle2">{field.label}</Typography>
-                          </TableCell>
-                          {selectedBrands.map((brand) => (
-                            <TableCell key={`${brand.uuid}-${field.field}`} align="center">
-                              {getNestedValue(brand, field.field) || "-"}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
-                         <TableRow>
-                        <TableCell component="th" scope="row">
-                          <Typography variant="subtitle2">Requirement Support</Typography>
+                            
+                            <IconButton 
+                              size="small" 
+                              onClick={() => handleNextModel(brand.uuid)}
+                              disabled={models.length <= 1}
+                            >
+                              <ArrowForward fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        ) : (
+                          <Typography variant="body2">-</Typography>
+                        )}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+
+                {/* Franchise Model Details */}
+                {franchiseModelFields.slice(1).map((field) => (
+                  <TableRow key={field.label}>
+                    <TableCell component="th" scope="row">
+                      <Typography variant="subtitle2">{field.label}</Typography>
+                    </TableCell>
+                    {selectedBrands.map((brand) => {
+                      const models = brand.franchiseDetails?.modelsOfFranchise || [];
+                      const currentIndex = currentModelIndexes[brand.uuid] || 0;
+                      const currentModel = models[currentIndex];
+                      
+                      return (
+                        <TableCell key={`${brand.uuid}-${field.field}`} align="center">
+                          {currentModel ? (currentModel[field.field] || "-") : "-"}
                         </TableCell>
-                        {selectedBrands.map((brand) => (
-                          <TableCell key={`${brand.uuid}-support`} align="center">
-                            {brand.franchiseDetails?.requirementSupport || "-"}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                       {/* <TableRow>
-                        <TableCell component="th" scope="row">
-                          <Typography variant="subtitle2">Brand Description</Typography>
-                        </TableCell>
-                        {selectedBrands.map((brand) => (
-                          <TableCell key={`${brand.uuid}-desc`} align="center">
-                            <Typography variant="body2" noWrap>
-                              {brand.personalDetails?.brandDescription || "-"}
-                            </Typography>
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                       */}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </AccordionDetails>
-            </Accordion>
-
-            {/* Franchise Models */}
-            {selectedBrands.map((brand, index) => (
-              brand.franchiseDetails?.modelsOfFranchise?.map((model, modelIndex) => (
-                <Accordion key={`${brand.uuid}-model-${modelIndex}`}>
-                  <AccordionSummary expandIcon={<ExpandMore />}>
-                    <Typography variant="subtitle1">
-                      {brand.personalDetails?.brandName} - {model.franchiseModel} ({model.franchiseType})
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <TableContainer component={Paper}>
-                      <Table size="small">
-                        <TableBody>
-                          {franchiseModelFields.map((field) => (
-                            <TableRow key={field.label}>
-                              <TableCell component="th" scope="row">
-                                <Typography variant="subtitle2">{field.label}</Typography>
-                              </TableCell>
-                              <TableCell align="left">
-                                {model[field.field] || "-"}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                          
-
-                          
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </AccordionDetails>
-                </Accordion>
-              ))
-            ))}
-
-          
-          </Box>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </DialogContent>
       <DialogActions>
