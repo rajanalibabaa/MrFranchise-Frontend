@@ -34,6 +34,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     roi: "",
     breakEven: "",
     requireInvestmentCapital: "",
+    marginOnSales: "",
+    fixedReturn: "",
     propertyType: "",
   });
 
@@ -104,6 +106,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     const updatedFico = [...(data.fico || []), formattedFicoModel];
     onChange({ fico: updatedFico });
 
+    // console.log(" updatedFico :",updatedFico)
+    // console.log(" fico :",fico)
+
     setFicoModel({
       investmentRange: "",
       areaRequired: "",
@@ -118,6 +123,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       roi: "",
       breakEven: "",
       requireInvestmentCapital: "",
+      marginOnSales: "",
+      fixedReturn: "",
       propertyType: "",
     });
   };
@@ -439,6 +446,30 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   onChange={handleFicoChange}
                   error={!!errors["fico[0].requireInvestmentCapital"]}
                   helperText={errors["fico[0].requireInvestmentCapital"]}
+                  required
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  fullWidth
+                  label="Margin On Sales*"
+                  name="marginOnSales"
+                  value={ficoModel.marginOnSales}
+                  onChange={handleFicoChange}
+                  error={!!errors["fico[0].marginOnSales"]}
+                  helperText={errors["fico[0].marginOnSales"]}
+                  required
+                />
+              </Grid>
+              <Grid item>
+                <TextField
+                  fullWidth
+                  label="Fixed Return*"
+                  name="fixedReturn"
+                  value={ficoModel.fixedReturn}
+                  onChange={handleFicoChange}
+                  error={!!errors["fico[0].fixedReturn"]}
+                  helperText={errors["fico[0].fixedReturn"]}
                   required
                 />
               </Grid>
