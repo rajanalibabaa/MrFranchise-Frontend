@@ -129,8 +129,8 @@ function Footer() {
               >
                 Advertise With Us
               </Link>
-              {/* <Link
-                href="/allbusinesscategory"
+              <Link
+                href="/franchisepromotion"
                 color="inherit"
                 underline="hover"
                 display="block"
@@ -139,8 +139,8 @@ function Footer() {
                   fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
                 }}
               >
-                All Business Categories
-              </Link> */}
+                Franchise Promotion & Lead Distribution Packages
+              </Link>
               {/* <Link
                 href="/franchiseconsulting"
                 color="inherit"
