@@ -407,24 +407,18 @@ const BrandCard = ({
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleLikeClick = async () => {
-    if (isProcessing) return;
+const handleLikeClick = async () => {
+  if (isProcessing) return;
 
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      setShowLogin(true);
-      return;
-    }
-    setIsProcessing(true);
-
-    try {
-      await toggleLike(brand.uuid, brand.isLiked);
-    } catch (error) {
-      console.error("Error toggling like:", error);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  setIsProcessing(true);
+  try {
+    await toggleLike(brand.uuid, brand.isLiked);
+  } catch (error) {
+    console.error("Error toggling like:", error);
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
   return (
     <Card
@@ -475,7 +469,7 @@ const BrandCard = ({
         sx={{
           objectFit: "contain",
           backgroundColor: "#f9f9f9",
-          p: 2,
+          py:2,
           height: 180,
           width: "100%",
           borderBottom: "1px solid #eee",
@@ -605,7 +599,7 @@ const BrandCard = ({
                   <Button
                     size="small"
                     sx={{ ml: 0.5, minWidth: 0, padding: 0 }}
-                    // onClick={() => setShowAllLocations(true)}
+                    onClick={() =>handleOpenBrand(brand)}
                   >
                     ...more
                   </Button>
@@ -782,28 +776,19 @@ function BrandList() {
   };
 
   const toggleLike = async (brandId, isLiked) => {
-    const token = localStorage.getItem("accessToken");
-    // if()
-    // console.log("redux",likedBrands)
-    // console.log("isLiked", brandId, isLiked);
-    if (!token) {
-      setShowLogin(true);
-      return;
-    }
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    setShowLogin(true);
+    return;
+  }
 
-    // console.log("k",uuid,brandId)
-
-    try {
-      const uuid = brands.map(async (value, id) => {
-        if (value.uuid === brandId) {
-          await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
-        }
-      });
-    } catch (error) {
-      console.error("Like operation failed:", error);
-    }
-  };
-
+  try {
+    await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
+  } catch (error) {
+    console.error("Like operation failed:", error);
+    // You might want to show an error message to the user here
+  }
+};
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   return (
@@ -1118,7 +1103,9 @@ function BrandList() {
       <BrandDetailsDialog
         open={openDialog}
         onClose={handleCloseDialog}
-        brand={selectedBrand}
+        // brand={selectedBrand}
+        brand={brands}
+        
       />
     </Container>
   );
