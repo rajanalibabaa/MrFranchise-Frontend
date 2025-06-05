@@ -340,90 +340,90 @@ const toggleViewClose = async(brandId) => {
   const renderTabContent = () => {
     switch (tabValue) {
      case 0:
-  return viewStatus.length > 0 ? (
-    <Grid container spacing={3}>
-      {viewStatus.map((item, idx) => {
-        const brandId = item.uuid;
+        return viewStatus.length > 0 ? (
+          <Grid container spacing={3}>
+            {viewStatus.map((item, idx) => {
+              const brandId = item.uuid;
 
-        return (
-         <Grid item sm={6} md={4} lg={3} key={brandId} sx={{ display: "flex", justifyContent: "center" }}>
-        <Card
-          sx={{
-            width: "345px",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-            boxShadow: 3,
-            "&:hover": { boxShadow: 6 },
-          }}
-        >
-          {/* Exit Button */}
-          <IconButton
-            size="small"
-            sx={{
-              position: "absolute",
-              top: 8,
-              right: 8,
-              zIndex: 2,
-              backgroundColor: "#fff",
-              boxShadow: 1,
-              "&:hover": {
-                backgroundColor: "#f5f5f5",
-              },
-            }}
-            // onClick={() => handleRemoveCard(brandId)} // your custom handler
-          >
-            <CloseIcon
-              onClick={() => toggleViewClose(brandId)}
-            fontSize="small" />
-          </IconButton>
+              return (
+              <Grid item sm={6} md={4} lg={3} key={brandId} sx={{ display: "flex", justifyContent: "center" }}>
+              <Card
+                sx={{
+                  width: "345px",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  position: "relative",
+                  boxShadow: 3,
+                  "&:hover": { boxShadow: 6 },
+                }}
+              >
+                {/* Exit Button */}
+                <IconButton
+                  size="small"
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    zIndex: 2,
+                    backgroundColor: "#fff",
+                    boxShadow: 1,
+                    "&:hover": {
+                      backgroundColor: "#f5f5f5",
+                    },
+                  }}
+                  // onClick={() => handleRemoveCard(brandId)} // your custom handler
+                >
+                  <CloseIcon
+                    onClick={() => toggleViewClose(brandId)}
+                  fontSize="small" />
+                </IconButton>
 
-          <CardMedia
-            component="img"
-            height="160"
-            image={
-              item.brandDetails?.brandLogo?.[0] ||
-              "https://via.placeholder.com/300x160?text=No+Image"
-            }
-            alt={item.personalDetails?.brandName || "Brand Image"}
-          />
+                <CardMedia
+                  component="img"
+                  height="160"
+                  image={
+                    item.brandDetails?.brandLogo?.[0] ||
+                    "https://via.placeholder.com/300x160?text=No+Image"
+                  }
+                  alt={item.personalDetails?.brandName || "Brand Image"}
+                />
 
-          {/* Brand Info */}
-          <CardContent>
-            <Typography
-              variant="h6"
-              component="div"
-              noWrap
-              title={item.personalDetails?.brandName || "Unnamed Brand"}
-            >
-              {item.personalDetails?.brandName || "Unnamed Brand"}
-            </Typography>
+                {/* Brand Info */}
+                <CardContent>
+                  <Typography
+                    variant="h6"
+                    component="div"
+                    noWrap
+                    title={item.personalDetails?.brandName || "Unnamed Brand"}
+                  >
+                    {item.personalDetails?.brandName || "Unnamed Brand"}
+                  </Typography>
 
-            {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                <strong>Franchise Models: </strong>
-                {item.franchiseDetails.modelsOfFranchise.map((value, index) => (
-                  <span key={index} style={{ marginRight: "6px" }}>
-                    {value.franchiseModel}
-                    {index !== item.franchiseDetails.modelsOfFranchise.length - 1 ? "," : ""}
-                  </span>
-                ))}
-              </Typography>
-            )}
-          </CardContent>
-          <Button
-          sx={{backgroundColor:"green",color:"white"}}
-          onClick={() => handleViewBTN(brandId)}
-          >VIEW DETAILS</Button>
-        </Card>
-      </Grid>
+                  {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      <strong>Franchise Models: </strong>
+                      {item.franchiseDetails.modelsOfFranchise.map((value, index) => (
+                        <span key={index} style={{ marginRight: "6px" }}>
+                          {value.franchiseModel}
+                          {index !== item.franchiseDetails.modelsOfFranchise.length - 1 ? "," : ""}
+                        </span>
+                      ))}
+                    </Typography>
+                  )}
+                </CardContent>
+                <Button
+                sx={{backgroundColor:"green",color:"white"}}
+                onClick={() => handleViewBTN(brandId)}
+                >VIEW DETAILS</Button>
+              </Card>
+            </Grid>
+              );
+            })}
+          </Grid>
+        ) : (
+          <Typography>No viewed brands available.</Typography>
         );
-      })}
-    </Grid>
-  ) : (
-    <Typography>No viewed brands available.</Typography>
-  );
 
       case 1:
         return likedBrands.length > 0 ? (
