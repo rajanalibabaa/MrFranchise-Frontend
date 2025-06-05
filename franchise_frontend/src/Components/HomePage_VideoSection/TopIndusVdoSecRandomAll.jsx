@@ -15,6 +15,10 @@ import {
 import { ArrowBackIos, ArrowForwardIos, PlayArrow, Pause, VolumeOff, VolumeUp } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { openBrandDialog } from '../../Redux/Slices/brandSlice';
+import BrandDetailsDialog from '../../Pages/AllCategoryPage/BrandDetailsDialog';
 
 const BestBrandSlider = () => {
   const theme = useTheme();
@@ -29,6 +33,9 @@ const BestBrandSlider = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const timeoutRef = useRef(null);
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Calculate how many slides we have (cards per slide based on screen size)
   const cardsPerSlide = isMobile ? 1 : isTablet ? 2 : 3;
@@ -68,7 +75,9 @@ const BestBrandSlider = () => {
   }, [isMobile, isTablet, cardsPerSlide]);
 
   const handleApply = (brand) => {
-    console.log("Applying for:", brand.personalDetails?.brandName);
+    dispatch(openBrandDialog(brand));
+
+    console.log("Applying for:", brand);
     // You can replace this with your actual apply logic
   };
 
@@ -137,6 +146,7 @@ const BestBrandSlider = () => {
     return () => clearTimeout(timeoutRef.current);
   }, [currentSlide, startAutoSlide]);
 
+
   return (
     <Box 
       sx={{ 
@@ -174,7 +184,7 @@ const BestBrandSlider = () => {
           }
         }}
       >
-          Top Food & Beverage Brands
+          Top Leading Franchise Brands
       </Typography>
         
         {!isMobile && (
@@ -380,6 +390,8 @@ const BestBrandSlider = () => {
           ))}
         </Box>
       )}
+      {/* Brand Details Dialog */}
+      <BrandDetailsDialog />
     </Box>
   );
 };

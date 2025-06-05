@@ -128,7 +128,7 @@ const BrandDetailsDialog = () => {
             </Box>
           </Box>
           <Typography
-            variant="h4"
+            variant="h5"
             component="div"
             sx={{
               fontWeight: 700,
@@ -139,28 +139,6 @@ const BrandDetailsDialog = () => {
             }}
           >
             {selectedBrand.personalDetails?.brandName}
-
-            <Box display="flex" alignItems="center" mb={1}>
-              <Rating
-                value={3.5}
-                precision={0.5}
-                readOnly
-                size="medium"
-                icon={<Star fontSize="inherit" sx={{ color: "#ff9800" }} />}
-                emptyIcon={
-                  <StarBorder fontSize="inherit" sx={{ color: "#e0e0e0" }} />
-                }
-              />
-              <Typography
-                variant="body2"
-                sx={{
-                  ml: 1,
-                  color: "black",
-                }}
-              >
-                (24 reviews)
-              </Typography>
-            </Box>
           </Typography>
         </Box>
         <Box>
@@ -178,7 +156,7 @@ const BrandDetailsDialog = () => {
         </Box>
       </DialogTitle>
 
-      <Typography variant="subtitle1" m={2}>
+      <Typography variant="body1" m={1}>
         {selectedBrand.personalDetails?.brandCategories &&
           selectedBrand.personalDetails.brandCategories.length > 0 && (
             <Box>
@@ -188,53 +166,55 @@ const BrandDetailsDialog = () => {
                     key={index}
                     sx={{ mb: 1 }}
                     display={"flex"}
-                    justifyContent={"flex-start"}
-                    gap={20}
+                    gap={2}
                   >
-                    <Typography sx={{ fontWeight: "bold" }}>
-                      Category:{" "}
-                      <label style={{ color: "#ff9800" }}>
+                    <Typography variant="body2" m={1}  >
+                    <label style={{ color: "", fontWeight: "bold" }}>   Category:{"  "}</label>
+                      <label >
                         {category.child}
                       </label>
                     </Typography>
-                    <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                      Investment Range :
-                      <label style={{ color: "#ff9800" }}>
+                    <Typography variant="body2" m={1}>
+                    <label style={{ color: "", fontWeight: "bold" }}>Investment:</label>  
+                      <label>
                         {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
                           (model) => model.investmentRange
                         )}
                       </label>
                     </Typography>
-                    <Typography sx={{ fontWeight: "bold" }}>
-                      Arearequired :
-                      <label style={{ color: "#ff9800" }}>
+                    <Typography variant="body2" m={1}>
+                      <label style={{ color: "", fontWeight: "bold" }}>Area:</label>
+                      <label>
                         {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
                           (model) => model.areaRequired
                         )}
                       </label>
                     </Typography>
-                  </Box>
-                )
-              )}
-            </Box>
-          )}
-        {selectedBrand.personalDetails?.expansionLocation?.length > 0 && (
-          <Typography sx={{ fontWeight: "bold" }}>
-            Expansion Locations :
-            <label style={{ color: "#ff9800" }}>
-              {selectedBrand.personalDetails.expansionLocation.map(
-                (location) => `${location.city}, ${location.state}`
+                    <Typography >
+                      {selectedBrand.personalDetails?.expansionLocation?.length > 0 && (
+          <Typography variant="body2" m={1}>
+           <label style={{ color: "", fontWeight: "bold" }}>Expansion Locations:</label>
+            <label>
+               {selectedBrand.personalDetails.expansionLocation.map(
+                (location) => `${location.city}`
               )}
             </label>
           </Typography>
         )}
+                      </Typography>
+                                        </Box>
+                )
+              )}
+            </Box>
+          )}
+        
       </Typography>
 
       <DialogContent
         dividers
         sx={{
           display: "flex",
-          p: 1,
+          p: 0,
           position: "relative",
           flexDirection: { xs: "column", md: "row" },
         }}
@@ -242,14 +222,14 @@ const BrandDetailsDialog = () => {
         <Box
           sx={{
             flex: 1,
-            p: 3,
-            overflowY: "auto",
+            p: 1,
+            // overflowY: "auto",
             maxHeight: "70vh",
           }}
         >
           <Grid
             display={"flex"}
-            flexDirection={"row"}
+            flexDirection={"column"}
             justifyContent={"space-between"}
           >
             <Grid display={"flex"} flexDirection={"column"}>
@@ -275,13 +255,13 @@ const BrandDetailsDialog = () => {
                   </Tabs>
 
                   {tabIndex === 0 ? (
-                    <Box display="flex" flexWrap="wrap" gap={2}>
+                    <Box display="flex" flexDirection={"row"} flexWrap="wrap" gap={2}>
                       {allVideos.map((videoUrl, index) => (
                         <Box
                           key={index}
                           sx={{
                             width: { xs: "100%", sm: "48%", md: "48%" },
-                            height: 300,
+                            maxHeight: 300,
                             borderRadius: 2,
                             overflow: "hidden",
                             backgroundColor: "#f5f5f5",

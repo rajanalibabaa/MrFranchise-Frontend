@@ -17,10 +17,11 @@ import FilterDropdowns from "../../Components/Navbar/FilterDropdownsData";
 const dynamicComponents = {
   TopBrandVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandTwoVdoSec")),
   TopBrandVdoCards: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")),
-  TopIndusVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopIndusVdoSecRandomAll")),
-  TopInvestVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopInvestVdoSec")),
+  TopIndusVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopIndusVdoSecRandomAll")), //second video section
+  TopInvestVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopInvestVdoSec.jsx")),
   TopInvestVdo2: React.lazy(() => import("../../Components/HomePage_VideoSection/TopInvestVdo2")),
-  TopInvestVdocardround: React.lazy(() => import("../../Components/HomePage_VideoSection/ToTrendingBrands"))
+  TopInvestVdocardround: React.lazy(() => import("../../Components/HomePage_VideoSection/ToTrendingBrands")),
+  TopCafeBrandsSection:React.lazy(()=>import('../../Components/HomePage_VideoSection/TopCafeBrands.jsx')) //3rd video section
 };
 
 // Configuration object for the entire page
@@ -69,6 +70,13 @@ const pageConfig = {
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
       animationDelay: 0.4
+    },
+    {
+      component: "TopCafeBrandsSection",
+      // title: "Top Cafe Brands",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+      animationDelay: 0.5
     },
     {
       component: "TopInvestVdoSec",

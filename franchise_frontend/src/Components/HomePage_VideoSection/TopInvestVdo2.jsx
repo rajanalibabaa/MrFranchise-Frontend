@@ -26,12 +26,15 @@ import {
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import CloseIcon from "@mui/icons-material/Close";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import BusinessIcon from "@mui/icons-material/Business";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import CategoryIcon from "@mui/icons-material/Category";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { openBrandDialog } from "../../Redux/Slices/brandSlice";
+import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
@@ -48,20 +51,19 @@ function TopInvestVdo2() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const isPaused = useRef(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState(null);
   const [selectedValue, setSelectedValue] = useState("");
-  // const [expandedCards, setExpandedCards] = useState({});
+  const [allLocations, setAllLocations] = useState([]);
+
+const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Fixed card dimensions based on screen size
   const CARD_DIMENSIONS = {
-  width: isMobile ? 300 : isTablet ? 320 : 320,
-  height: 470, // Fixed height for uniformity
-  videoHeight: 200, // Set a consistent video height
-  avatarSize: isMobile ? 40 : 50,
-  descriptionLength: isMobile ? 80 : 100,
-};
-
+    width: isMobile ? 300 : isTablet ? 320 : 320,
+    height: 470, // Fixed height for uniformity
+    videoHeight: 200, // Set a consistent video height
+    avatarSize: isMobile ? 40 : 50,
+  };
 
   const handleChange = (event) => {
     setSelectedValue(event.target.value);
@@ -75,62 +77,66 @@ function TopInvestVdo2() {
     isPaused.current = false;
   };
 
-  const toggleDescription = (brandId) => {
-    setExpandedCards(prev => ({
-      ...prev,
-      [brandId]: !prev[brandId]
-    }));
+ const handleApply = (brand) => {
+dispatch(openBrandDialog(brand));
+    console.log("Apply",brand);
+    // Replace with actual apply logic
   };
 
-  // Format investment range
-  const formatInvestmentRange = (range) => {
-    if (!range) return "N/A";
-    
-    const ranges = {
-      '5_10_lakhs': '₹5-10 L',
-      '10_25_lakhs': '₹10-25 L',
-      '25_50_lakhs': '₹25-50 L',
-      '50_75_lakhs': '₹50-75 L',
-      '75_1_crore': '₹75L-1Cr',
-      '1_2_crore': '₹1-2 Cr',
-      '2_5_crore': '₹2-5 Cr',
-      '5_10_crore': '₹5-10 Cr',
-      '2_5_crores': '₹2-5 Cr'
-    };
-    
-    return ranges[range] || range.split('_').join('-') + ' L';
-  };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/homepage/getAllnewRegisterBrands",
-          { headers: { "Content-Type": "application/json" } }
-        );
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(
+        "https://franchise-backend-wgp6.onrender.com/api/v1/homepage/getAllnewRegisterBrands",
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-        if(response.data?.data?.length){
-          const brandsWithLocation = response.data.data.map((brand, index) => ({
+      if (response.data?.data?.length) {
+        const locationsSet = new Set();
+        const processedBrands = response.data.data.map((brand) => {
+          // Extract expansion locations - handle different possible structures
+          let expansionLocations = [];
+          
+          // Check different possible locations for the expansion data
+          if (brand?.personalDetails?.expansionLocation?.length > 0) {
+            // If expansionLocation is an array of objects with city property
+            expansionLocations = brand.personalDetails.expansionLocation
+              .map(loc => loc.city)
+              .filter(city => city); // filter out any undefined/null cities
+          } else if (brand?.brandDetails?.expansionLocations?.length > 0) {
+            // If expansionLocations is directly an array of strings
+            expansionLocations = brand.brandDetails.expansionLocations;
+          }
+
+          // Add these locations to our set
+          expansionLocations.forEach(loc => locationsSet.add(loc));
+          
+          // Return brand with its locations (use first location for display if available)
+          return {
             ...brand,
-            location: index % 3 === 0 ? "Chennai" : index % 3 === 1 ? "Bangalore" : "Coimbatore"
-          }));
+            locations: expansionLocations.length ? expansionLocations : ['Multiple Locations'],
+            displayLocation: expansionLocations[0] || 'Multiple Locations'
+          };
+        });
 
-          setBrands(brandsWithLocation);
-          setError(null);
-        } else {
-          setBrands([]);
-          setError("No brands found.");
-        }
-      } catch(err) {
-        setError("Failed to fetch brands.");
+        setBrands(processedBrands);
+        setAllLocations(['All Locations', ...Array.from(locationsSet).sort()]);
+        setError(null);
+      } else {
         setBrands([]);
-        console.error("Error fetching brands:", err);
-      } finally {
-        setLoading(false);
+        setError("No brands found.");
       }
-    };
-    fetchData();
-  }, []);
+    } catch (err) {
+      setError("Failed to fetch brands.");
+      setBrands([]);
+      console.error("Error fetching brands:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
+}, []);
 
   useEffect(() => {
     if (brands.length <= 2) return;
@@ -144,18 +150,8 @@ function TopInvestVdo2() {
     return () => clearInterval(interval);
   }, [brands]);
 
-  const handleOpenDialog = (brand) => {
-    setSelectedBrand(brand);
-    setDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setSelectedBrand(null);
-    setDialogOpen(false);
-  };
-
-  const filteredBrands = selectedValue
-    ? brands.filter((brand) => brand.location === selectedValue)
+  const filteredBrands = selectedValue && selectedValue !== "All Locations"
+    ? brands.filter((brand) => brand.locations.includes(selectedValue))
     : brands;
 
   if (loading)
@@ -189,28 +185,27 @@ function TopInvestVdo2() {
         gap: 2
       }}>
         <Typography 
-        variant={isMobile ? "h6" : "h5"} 
-        fontWeight="bold" 
-        sx={{ 
-          color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
-          mb: 3, 
-          textAlign: "left",
-          position: 'relative',
-          '&:after': {
-            content: '""',
-            display: 'block',
-            width: '80px',
-            height: '4px',
-            background: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
-            mt: 1,
-            borderRadius: 2
-          }
-        }}
-      >
+          variant={isMobile ? "h6" : "h5"} 
+          fontWeight="bold" 
+          sx={{ 
+            color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
+            mb: 3, 
+            textAlign: "left",
+            position: 'relative',
+            '&:after': {
+              content: '""',
+              display: 'block',
+              width: '80px',
+              height: '4px',
+              background: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
+              mt: 1,
+              borderRadius: 2
+            }
+          }}
+        >
           Find Franchise At Your Locations
-      </Typography>
+        </Typography>
        
-        
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center', 
@@ -234,10 +229,11 @@ function TopInvestVdo2() {
                 }
               }}
             >
-              <MenuItem value="">All Locations</MenuItem>
-              <MenuItem value="Chennai">Chennai</MenuItem>
-              <MenuItem value="Bangalore">Bangalore</MenuItem>
-              <MenuItem value="Coimbatore">Coimbatore</MenuItem>
+              {allLocations.map((location) => (
+                <MenuItem key={location} value={location}>
+                  {location}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           
@@ -266,17 +262,13 @@ function TopInvestVdo2() {
       >
         {filteredBrands.map((brand, index) => {
           const brandId = brand.uuid;
-          const isOpen = dialogOpen && selectedBrand?.uuid === brandId;
           const franchiseModels = brand.franchiseDetails?.modelsOfFranchise || [];
           const firstModel = franchiseModels[0] || {};
           const videoUrl = brand?.brandDetails?.brandPromotionVideo?.[0] || 
                          brand?.brandDetails?.franchisePromotionVideo?.[0];
-
-
-
-          // const description = brand?.personalDetails?.brandDescription || "No description available";
-          // const shortDescription = description.substring(0, CARD_DIMENSIONS.descriptionLength);
-          // const isExpanded = expandedCards[brandId] || false;
+          const category = brand?.personalDetails?.brandCategories?.[0]?.child || "No category";
+          const franchiseType = firstModel.franchiseType || "N/A";
+          const primaryLocation = brand.locations[0] || "Multiple Locations";
 
           return (
             <motion.div
@@ -346,7 +338,7 @@ function TopInvestVdo2() {
                   
                   {/* Location Chip */}
                   <Chip
-                    label={brand.location}
+                    label={primaryLocation}
                     size="small"
                     sx={{ 
                       position: 'absolute',
@@ -405,41 +397,8 @@ function TopInvestVdo2() {
                       >
                         {brand.personalDetails?.brandName}
                       </Typography>
-                      <Typography 
-                        variant="caption" 
-                        color="text.secondary"
-                        sx={{ display: 'flex', alignItems: 'center' }}
-                      >
-                        <LocationOnIcon sx={{ fontSize: 14, mr: 0.5 }} />
-                        {brand.location}
-                      </Typography>
                     </Box>
                   </Stack>
-
-                  {/* <Typography variant="body2" paragraph sx={{ 
-                    flexGrow: 1,
-                    fontSize: '0.875rem',
-                    color: 'text.secondary',
-                    mb: 1
-                  }}>
-                    {isExpanded ? description : `${shortDescription}...`}
-                    {description.length > CARD_DIMENSIONS.descriptionLength && (
-                      <Button
-                        size="small"
-                        color="primary"
-                        sx={{ 
-                          textTransform: 'none',
-                          p: 0,
-                          ml: 0.5,
-                          minWidth: 'auto',
-                          fontSize: '0.75rem'
-                        }}
-                        onClick={() => toggleDescription(brandId)}
-                      >
-                        {isExpanded ? 'Read less' : 'Read more'}
-                      </Button>
-                    )}
-                  </Typography> */}
 
                   {/* Key Metrics */}
                   <Paper 
@@ -450,244 +409,85 @@ function TopInvestVdo2() {
                       p: isMobile ? 1 : 1.5,
                       mb: 2,
                       borderRadius: 2,
-                      // backgroundColor: theme.palette.primary.light,
-                      // backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.9), rgba(255,255,255,0.7))'
                     }}
                   >
-                    <Grid container spacing={1}>
+                    <Grid container spacing={2}>
                       <Grid item xs={6}>
                         <Stack direction="row" spacing={1} alignItems="center" justifyContent={'flex-start'}>
-                          <MonetizationOnIcon  sx={{ fontSize: isMobile ? 16 : 18 }} />
+                          <CategoryIcon sx={{ fontSize: isMobile ? 16 : 18, color: 'orange' }} />
                           <Box>
-                            <Typography variant="caption" color="text.secondary">Investment</Typography>
-                            <Typography variant={isMobile ? "caption" : "body2"} fontWeight={500}>
-                              {firstModel.investmentRange ? 
-                                formatInvestmentRange(firstModel.investmentRange) : 'N/A'}
+                            <Typography variant="body2" color="text.secondary">Category</Typography>
+                            <Typography variant={isMobile ? "caption" : "body2"} fontWeight={200}>
+                              {category}
                             </Typography>
                           </Box>
                         </Stack>
                       </Grid>
                       <Grid item xs={6}>
                         <Stack direction="row" spacing={1} alignItems="center" justifyContent={'flex-start'}>
-                          <BusinessIcon  sx={{ fontSize: isMobile ? 16 : 18 }} />
+                          <StorefrontIcon sx={{ fontSize: isMobile ? 16 : 18, color: 'orange' }} />
                           <Box>
-                            <Typography variant="caption" color="text.secondary">Area</Typography>
+                            <Typography variant="body2" color="text.secondary">Type</Typography>
+                            <Typography variant={isMobile ? "caption" : "body2"} fontWeight={500}>
+                              {franchiseType}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Stack direction="row" spacing={1} alignItems="center" justifyContent={'flex-start'}>
+                          <BusinessIcon sx={{ fontSize: isMobile ? 16 : 18, color: 'orange' }} />
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Area</Typography>
                             <Typography variant={isMobile ? "caption" : "body2"} fontWeight={500}>
                               {firstModel.areaRequired || 'N/A'}
                             </Typography>
                           </Box>
                         </Stack>
                       </Grid>
+                      <Grid item xs={6}>
+                        <Stack direction="row" spacing={1} alignItems="center" justifyContent={'flex-start'}>
+                          <MonetizationOnIcon sx={{ fontSize: isMobile ? 16 : 18, color: 'orange' }} />
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">Investment</Typography>
+                            <Typography variant={isMobile ? "caption" : "body2"} fontWeight={500}>
+                              {firstModel.investmentRange || 'N/A'}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Button
+                          variant="contained"
+                          onClick={() => handleApply(brand)}
+                          fullWidth
+                          size={isMobile ? "small" : "medium"}
+                          sx={{
+                            backgroundColor: "orange",
+                            "&:hover": { 
+                              backgroundColor: "#ff9800",
+                              boxShadow: 2
+                            },
+                            py: isMobile ? 1 : 1,
+                            px: isMobile ? 2 : 4,
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            fontSize: isMobile ? '0.875rem' : '1rem'
+                          }}
+                        >
+                          Apply Now
+                        </Button>
+                      </Grid>
                     </Grid>
                   </Paper>
-
-                  <Divider sx={{ my: 1 }} />
-
-                  {/* Footer Actions */}
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    // mt: 'auto'
-                  }}>
-                    <Button
-                      variant="text"
-                      size={isMobile ? "small" : "medium"}
-                      startIcon={<VisibilityIcon fontSize={isMobile ? "small" : "medium"} />}
-                      onClick={() => (isOpen ? handleCloseDialog() : handleOpenDialog(brand))}
-                      sx={{ 
-                        textTransform: 'none',
-                        color: 'primary.main',
-                        fontSize: isMobile ? '0.75rem' : '0.875rem'
-                      }}
-                    >
-                      View Details
-                    </Button>
-
-                    <Typography variant="caption" color="text.secondary">
-                      {franchiseModels.length} Models
-                    </Typography>
-                  </Box>
                 </CardContent>
-
-                {/* Apply Button */}
-                <Box sx={{ 
-                  px: isMobile ? 1.5 : 2, 
-                  pb: isMobile ? 1.5 : 2,
-                  pt: 0
-                }}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    
-                    size={isMobile ? "small" : "medium"}
-                    sx={{
-                      backgroundColor: "orange",
-                      "&:hover": { 
-                        backgroundColor: "#ff9800",
-                        boxShadow: 2
-                      },
-                      py: isMobile ? 1 : .5,
-                      borderRadius: 2,
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      fontSize: isMobile ? '0.875rem' : '1rem'
-                    }}
-                  >
-                    Apply Now
-                  </Button>
-                </Box>
               </Card>
             </motion.div>
           );
         })}
       </Box>
 
-      {/* Franchise Models Dialog */}
-      <Dialog 
-        open={dialogOpen} 
-        onClose={handleCloseDialog} 
-        maxWidth="md" 
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            overflow: 'hidden',
-            maxHeight: '90vh'
-          }
-        }}
-      >
-        <DialogTitle
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: "orange.main",
-            color: 'white',
-            py: 2,
- backgroundImage: 'linear-gradient(to right, #ff9800, #e65100)',          }}
-        >
-          <Typography variant={isMobile ? "subtitle1" : "h6"} fontWeight={700}>
-            {selectedBrand?.personalDetails?.brandName} - Franchise Models
-          </Typography>
-          <IconButton 
-            onClick={handleCloseDialog}
-            sx={{ color: 'white' }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-
-        <DialogContent dividers sx={{ p: 0, overflowY: 'auto' }}>
-          {selectedBrand?.franchiseDetails?.modelsOfFranchise?.map((model, idx) => (
-            <Box
-              key={idx}
-              sx={{
-                p: isMobile ? 2 : 3,
-                bgcolor: idx % 2 === 0 ? '#fff' : '#fdf5ee',
-                borderBottom: '1px solid #eee',
-                '&:last-child': {
-                  borderBottom: 'none'
-                }
-              }}
-            >
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mb: 2,
-                flexDirection: { xs: 'column', sm: 'row' },
-          gap: 1
-              }}>
-                <Typography variant={isMobile ? "body1" : "subtitle1"} fontWeight={600} color="orange">
-                  {model.franchiseModel || "Franchise Model"}
-                </Typography>
-                <Button 
-                  variant="contained" 
-                  size={isMobile ? "small" : "medium"}
-                  sx={{
-                    textTransform: 'none',
-                    borderRadius: 2,
-backgroundImage: 'linear-gradient(to right,rgb(53, 211, 0),rgb(95, 237, 30))',
-              color: 'white',
-              px: 3                  }}
-                >
-                  Request Info
-                </Button>
-              </Box>
-              
-              <Grid container spacing={isMobile ? 1 : 2}>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <MonetizationOnIcon color="warning" sx={{ fontSize: isMobile ? 18 : 20 }} />
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">Investment</Typography>
-                      <Typography variant={isMobile ? "body2" : "body1"}>
-                        {formatInvestmentRange(model.investmentRange)}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <BusinessIcon color="warning" sx={{ fontSize: isMobile ? 18 : 20 }} />
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">Area Required</Typography>
-                      <Typography variant={isMobile ? "body2" : "body1"}>
-                        {model.areaRequired ? `${model.areaRequired} sq.ft` : "N/A"}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <MonetizationOnIcon color="warning" sx={{ fontSize: isMobile ? 18 : 20 }} />
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">Franchise Fee</Typography>
-                      <Typography variant={isMobile ? "body2" : "body1"}>
-                        {model.franchiseFee ? `₹${model.franchiseFee}` : "N/A"}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <BusinessIcon color="warning" sx={{ fontSize: isMobile ? 18 : 20 }} />
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">Royalty Fee</Typography>
-                      <Typography variant={isMobile ? "body2" : "body1"}>
-                        {model.royaltyFee || "N/A"}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <LocationOnIcon color="warning" sx={{ fontSize: isMobile ? 18 : 20 }} />
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">Type</Typography>
-                      <Typography variant={isMobile ? "body2" : "body1"}>
-                        {model.franchiseType || "N/A"}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <MonetizationOnIcon color="warning" sx={{ fontSize: isMobile ? 18 : 20 }} />
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">ROI</Typography>
-                      <Typography variant={isMobile ? "body2" : "body1"}>
-                        {model.roi || "N/A"}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Grid>
-              </Grid>
-            </Box>
-          ))}
-        </DialogContent>
-      </Dialog>
     </Box>
   );
 }

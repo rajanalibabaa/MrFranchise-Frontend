@@ -30,7 +30,7 @@ const cardVariants = {
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
-const NewlyRegisteredBrandsSection = () => {
+const TopCafeBrandsSection = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
@@ -58,9 +58,8 @@ const NewlyRegisteredBrandsSection = () => {
   };
 
   const handleApply = (brand) => {
-dispatch(openBrandDialog(brand));
-    console.log("Apply",brand);
-    // Replace with actual apply logic
+    dispatch(openBrandDialog(brand));
+    console.log("Apply", brand);
   };
 
   const handleMouseEnter = () => {
@@ -82,65 +81,64 @@ dispatch(openBrandDialog(brand));
     }));
   };
 
-  // Function to format location states
-  // const formatLocations = (brand) => {
-  //   const states = brand.personalDetails?.states || [];
-  //   const brandId = brand.uuid;
-  //   const isExpanded = expandedLocations[brandId];
+  const formatLocations = (brand) => {
+    const states = brand.personalDetails?.states || [];
+    const brandId = brand.uuid;
+    const isExpanded = expandedLocations[brandId];
     
-  //   if (states.length === 0) return "Multiple locations";
+    if (states.length === 0) return "Multiple locations";
     
-  //   if (states.length <= 2) {
-  //     return states.join(", ");
-  //   }
+    if (states.length <= 2) {
+      return states.join(", ");
+    }
     
-  //   if (isExpanded) {
-  //     return (
-  //       <>
-  //         {states.join(", ")}
-  //         <Typography 
-  //           component="span" 
-  //           sx={{ 
-  //             color: 'primary.main', 
-  //             cursor: 'pointer',
-  //             fontWeight: 500,
-  //             ml: 1
-  //           }}
-  //           onClick={(e) => {
-  //             e.stopPropagation();
-  //             toggleExpandLocations(brandId);
-  //           }}
-  //         >
-  //           Less
-  //         </Typography>
-  //       </>
-  //     );
-  //   }
+    if (isExpanded) {
+      return (
+        <>
+          {states.join(", ")}
+          <Typography 
+            component="span" 
+            sx={{ 
+              color: 'primary.main', 
+              cursor: 'pointer',
+              fontWeight: 500,
+              ml: 1
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleExpandLocations(brandId);
+            }}
+          >
+            Less
+          </Typography>
+        </>
+      );
+    }
     
-  //   return (
-  //     <>
-  //       {states.slice(0, 2).join(", ")}
-  //       <Typography 
-  //         component="span" 
-  //         sx={{ 
-  //           color: 'primary.main', 
-  //           cursor: 'pointer',
-  //           fontWeight: 500,
-  //           ml: 1
-  //         }}
-  //         onClick={(e) => {
-  //           e.stopPropagation();
-  //           toggleExpandLocations(brandId);
-  //         }}
-  //       >
-  //         +{states.length - 2} more
-  //       </Typography>
-  //     </>
-  //   );
-  // };
+    return (
+      <>
+        {states.slice(0, 2).join(", ")}
+        <Typography 
+          component="span" 
+          sx={{ 
+            color: 'primary.main', 
+            cursor: 'pointer',
+            fontWeight: 500,
+            ml: 1
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleExpandLocations(brandId);
+          }}
+        >
+          +{states.length - 2} more
+        </Typography>
+      </>
+    );
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchTopCafeBrands = async () => {
       try {
         const response = await axios.get(
           "https://franchise-backend-wgp6.onrender.com/api/v1/homepage/getAllnewRegisterBrands",
@@ -161,18 +159,18 @@ dispatch(openBrandDialog(brand));
           setExpandedLocations(initialExpandedState);
         } else {
           setBrands([]);
-          setError("No brands found.");
+          setError("No cafe brands found.");
         }
       } catch (err) {
-        setError("Failed to fetch brands.");
+        setError("Failed to fetch cafe brands.");
         setBrands([]);
-        console.error("Error fetching brands:", err);
+        console.error("Error fetching cafe brands:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchTopCafeBrands();
   }, []);
 
   // Auto-rotate brands
@@ -238,7 +236,7 @@ dispatch(openBrandDialog(brand));
             }
           }}
         >
-          Top Restaurants Brands
+          Top Cafe Brands
         </Typography>
         
         <Button 
@@ -254,7 +252,7 @@ dispatch(openBrandDialog(brand));
               backgroundColor: 'transparent'
             }
           }}
-          onClick={() => navigate("/brandviewpage")}
+          onClick={() => navigate("/brandviewpage?category=cafe")}
         >
           View More
         </Button>
@@ -324,7 +322,7 @@ dispatch(openBrandDialog(brand));
                     <CardMedia
                       component="video"
                       src={videoUrl}
-                      alt={brand.personalDetails?.brandName || "Brand"}
+                      alt={brand.personalDetails?.brandName || "Cafe Brand"}
                       sx={{ 
                         position: 'absolute',
                         top: 0,
@@ -387,7 +385,6 @@ dispatch(openBrandDialog(brand));
                       >
                         {brand.personalDetails?.brandName}
                       </Typography>
-
                     </Box>
 
                     {/* Categories */}
@@ -413,18 +410,6 @@ dispatch(openBrandDialog(brand));
 
                     {/* Basic Info */}
                     <Stack spacing={1} sx={{ mb: 2 }}>
-                      {/* <Box display="flex" alignItems="center">
-                        <LocationOn sx={{ 
-                          mr: 1.5, 
-                          fontSize: "1rem", 
-                          color: "text.secondary",
-                          flexShrink: 0
-                        }} />
-                        <Typography variant="body2">
-                          {formatLocations(brand)}
-                        </Typography>
-                      </Box> */}
-
                       <Box display="flex" alignItems="center">
                         <Business sx={{ 
                           mr: 1.5, 
@@ -433,7 +418,7 @@ dispatch(openBrandDialog(brand));
                           flexShrink: 0
                         }} />
                         <Typography variant="body2">
-                        Franchise Type :  {firstModel.franchiseType || "N/A"}
+                          Franchise Type: {firstModel.franchiseType || "N/A"}
                         </Typography>
                       </Box>
 
@@ -445,16 +430,18 @@ dispatch(openBrandDialog(brand));
                           flexShrink: 0
                         }} />
                         <Typography variant="body2">
-                         Investment : {firstModel.investmentRange || "Not specified"}
+                          Investment: {firstModel.investmentRange || "Not specified"}
                         </Typography>
                       </Box>
                       <Box display="flex" alignItems="center">
-                        <AreaChart sx={{ mr: 1.5, 
+                        <AreaChart sx={{ 
+                          mr: 1.5, 
                           fontSize: "1rem", 
                           color: "text.secondary",
-                          flexShrink: 0}}/>
+                          flexShrink: 0
+                        }}/>
                         <Typography variant="body2">
-                         Area  : {firstModel.investmentRange || "Not specified"}
+                          Area: {firstModel.areaRequired || "Not specified"}
                         </Typography>
                       </Box>
                     </Stack>
@@ -491,8 +478,7 @@ dispatch(openBrandDialog(brand));
       </Box>
       <BrandDetailsDialog />
     </Box>
-
   );
 };
 
-export default NewlyRegisteredBrandsSection;
+export default TopCafeBrandsSection;
