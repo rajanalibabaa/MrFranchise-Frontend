@@ -12,8 +12,11 @@ import {
   Stack,
   Avatar
 } from '@mui/material';
-import { ArrowBackIos, ArrowForwardIos, PlayArrow, Pause, VolumeOff, VolumeUp } from '@mui/icons-material';
+import {toggleLikeBrand} from "../../Redux/Slices/brandSlice";
+import { ArrowBackIos, ArrowForwardIos, PlayArrow, Pause, VolumeOff, VolumeUp, Favorite} from '@mui/icons-material';
+import { CircularProgress } from '@mui/material';
 import { motion } from 'framer-motion';
+import LoginPage from '../../Pages/LoginPage/LoginPage';
 import axios from 'axios';
 
 const BestBrandSlider = () => {
@@ -26,6 +29,8 @@ const BestBrandSlider = () => {
   const [brandList, setBrandList] = useState([]);
   const [muteState, setMuteState] = useState([]);
   const [playState, setPlayState] = useState([]);
+  const [likeProcessing, setLikeProcessing] = useState({});
+  const [showLogin, setShowLogin] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const timeoutRef = useRef(null);
@@ -33,6 +38,24 @@ const BestBrandSlider = () => {
   // Calculate how many slides we have (cards per slide based on screen size)
   const cardsPerSlide = isMobile ? 1 : isTablet ? 2 : 3;
   const totalSlides = Math.ceil(brandList.length / cardsPerSlide);
+
+//Handle like button
+const handleLikeClick = async (brand) => {
+  if (likeProcessing[brand.uuid]) return;
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    setShowLogin(true);
+    return;
+  }
+  setLikeProcessing((prev) => ({ ...prev, [brand.uuid]: true }));
+  try {
+    await toggleLike(brand.uuid, brand.isLiked);
+  } catch (error) {
+    console.error("Error toggling like:", error);
+  } finally {
+    setLikeProcessing((prev) => ({ ...prev, [brand.uuid]: false }));
+  }
+};
 
   const toggleMute = (index) => {
     const newMuteState = [...muteState];
@@ -81,6 +104,31 @@ const BestBrandSlider = () => {
     const prevSlide = (currentSlide - 1 + totalSlides) % totalSlides;
     scrollToSlide(prevSlide);
   }, [currentSlide, totalSlides, scrollToSlide]);
+
+
+  //like toggle
+   const toggleLike = async (brandId, isLiked) => {
+      const token = localStorage.getItem("accessToken");
+      // if()
+      // console.log("redux",likedBrands)
+      // console.log("isLiked", brandId, isLiked);
+      if (!token) {
+        setShowLogin(true);
+        return;
+      }
+  
+      // console.log("k",uuid,brandId)
+  
+      try {
+        const uuid = brands.map(async (value, id) => {
+          if (value.uuid === brandId) {
+            await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
+          }
+        });
+      } catch (error) {
+        console.error("Like operation failed:", error);
+      }
+    };
 
   const startAutoSlide = useCallback(() => {
     clearTimeout(timeoutRef.current);
@@ -311,11 +359,27 @@ const BestBrandSlider = () => {
               </Box>
 
               <CardContent sx={{ bgcolor: '#ffff', px: 2, pb: 2 }}>
-                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5, justifyContent: 'space-between' }}>
   <Avatar src={logo} alt="brand" sx={{ width: 40, height: 40 }} />
-  <Typography variant="subtitle1" fontWeight="bold" noWrap>
+  <Typography variant="subtitle1" fontWeight="bold" noWrap sx={{flex:1}}>
     {brand.personalDetails?.brandName || "Unknown Brand"}
   </Typography>
+  <IconButton
+    onClick={() => handleLikeClick(brand)}
+    disabled={likeProcessing[brand.uuid]}
+    sx={{ ml: 1, p: 0.5 }}
+  >
+    {likeProcessing[brand.uuid] ? (
+      <CircularProgress size={20} />
+    ) : (
+      <Favorite
+        sx={{
+          color: brand.isLiked ? "#f44336" : "rgba(0,0,0,0.23)",
+          transition: "color 0.3s",
+        }}
+      />
+    )}
+  </IconButton>
 </Stack>
                 <Typography variant="body2" fontWeight="bold">
                   Investment: {formatInvestmentRange(investmentRange)}
@@ -380,7 +444,11 @@ const BestBrandSlider = () => {
           ))}
         </Box>
       )}
+      {showLogin && (
+  <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+)}
     </Box>
+    
   );
 };
 
