@@ -307,7 +307,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
                 required
               >
                 {Array.from(
-                  { length: 30 },
+                  { length: 100 },
                   (_, i) => new Date().getFullYear() - i
                 ).map((year) => (
                   <MenuItem key={year} value={year}>
@@ -337,7 +337,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
                 required
               >
                 {Array.from(
-                  { length: 30 },
+                  { length: 100 },
                   (_, i) => new Date().getFullYear() - i
                 ).map((year) => (
                   <MenuItem key={year} value={year}>
