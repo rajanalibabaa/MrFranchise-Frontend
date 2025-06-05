@@ -19,9 +19,14 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 import axios from "axios";
+<<<<<<< HEAD
 import { ArrowRight, MonetizationOn, Business, AreaChart, Favorite } from "@mui/icons-material";
+=======
+import { ArrowRight, MonetizationOn, Business, AreaChart,Favorite } from "@mui/icons-material";
+>>>>>>> a88fa5462993e35ca9a59eaa21f4df49314d0abc
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { openBrandDialog } from "../../Redux/Slices/brandSlice";
 import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 
@@ -42,6 +47,8 @@ const NewlyRegisteredBrandsSection = () => {
   const [expandedBrand, setExpandedBrand] = useState(null);
   const [expandedLocations, setExpandedLocations] = useState({});
   
+  const [likeProcessing, setLikeProcessing] = useState({});
+const [showLogin, setShowLogin] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
@@ -49,6 +56,23 @@ const NewlyRegisteredBrandsSection = () => {
     mobile: { width: 280, height: 520 },
     tablet: { width: 320, height: 560 },
     desktop: { width: 327, height: 500 }
+  };
+
+  const handleLikeClick = async (brand) => {
+    if (likeProcessing[brand.uuid]) return;
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setShowLogin(true);
+      return;
+    }
+    setLikeProcessing((prev) => ({ ...prev, [brand.uuid]: true }));
+    try {
+      await toggleLike(brand.uuid, brand.isLiked);
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    } finally {
+      setLikeProcessing((prev) => ({ ...prev, [brand.uuid]: false }));
+    }
   };
 
   const getCardDimensions = () => {
@@ -81,6 +105,29 @@ dispatch(openBrandDialog(brand));
       [brandId]: !prev[brandId]
     }));
   };
+  //like toggle
+     const toggleLike = async (brandId, isLiked) => {
+        const token = localStorage.getItem("accessToken");
+        // if()
+        // console.log("redux",likedBrands)
+        // console.log("isLiked", brandId, isLiked);
+        if (!token) {
+          setShowLogin(true);
+          return;
+        }
+    
+        // console.log("k",uuid,brandId)
+    
+        try {
+          const uuid = brands.map(async (value, id) => {
+            if (value.uuid === brandId) {
+              await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
+            }
+          });
+        } catch (error) {
+          console.error("Like operation failed:", error);
+        }
+      };
 
   // Function to format location states
   // const formatLocations = (brand) => {
@@ -365,7 +412,8 @@ dispatch(openBrandDialog(brand));
                       display: 'flex', 
                       alignItems: 'center',
                       gap: 2,
-                      mb: 1.5
+                      mb: 1.5,
+                      justifyContent: 'space-between'
                     }}>
                       <Avatar 
                         src={brand?.brandDetails?.brandLogo?.[0]} 
@@ -382,12 +430,32 @@ dispatch(openBrandDialog(brand));
                         sx={{
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
-                          textOverflow: 'ellipsis'
+                          textOverflow: 'ellipsis',
+                          flex:1
                         }}
                       >
                         {brand.personalDetails?.brandName}
                       </Typography>
+<<<<<<< HEAD
 
+=======
+                       <IconButton
+    onClick={() => handleLikeClick(brand)}
+    disabled={likeProcessing[brand.uuid]}
+    sx={{ ml: 1, p: 0.5 }}
+  >
+    {likeProcessing[brand.uuid] ? (
+      <CircularProgress size={20} />
+    ) : (
+      <Favorite
+        sx={{
+          color: brand.isLiked ? "#f44336" : "rgba(0,0,0,0.23)",
+          transition: "color 0.3s",
+        }}
+      />
+    )}
+  </IconButton>
+>>>>>>> a88fa5462993e35ca9a59eaa21f4df49314d0abc
                     </Box>
 
                     {/* Categories */}
@@ -490,6 +558,9 @@ dispatch(openBrandDialog(brand));
         })}
       </Box>
       <BrandDetailsDialog />
+      {showLogin && (
+  <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+)}
     </Box>
 
   );
