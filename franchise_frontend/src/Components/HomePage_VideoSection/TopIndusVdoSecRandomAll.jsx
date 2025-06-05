@@ -454,14 +454,11 @@ const handleLikeClick = async (brand) => {
           ))}
         </Box>
       )}
-<<<<<<< HEAD
       {/* Brand Details Dialog */}
       <BrandDetailsDialog />
-=======
       {showLogin && (
   <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
 )}
->>>>>>> a88fa5462993e35ca9a59eaa21f4df49314d0abc
     </Box>
     
   );
