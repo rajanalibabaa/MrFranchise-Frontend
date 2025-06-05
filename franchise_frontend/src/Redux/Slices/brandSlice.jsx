@@ -6,9 +6,8 @@ const token = localStorage.getItem("accessToken");
 export const toggleLikeBrand = createAsyncThunk(
   "brands/toggleLike",
   async ({ brandId, isLiked }, { rejectWithValue }) => {
-    console.log(brandId, isLiked);
-
     try {
+      const token = localStorage.getItem("accessToken");
       if (!token) {
         return rejectWithValue("You need to log in to continue.");
       }
@@ -20,25 +19,22 @@ export const toggleLikeBrand = createAsyncThunk(
         },
       };
 
-      if (!isLiked && token) {
+      if (!isLiked) {
+        // Like the brand
         await axios.post(
           "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
           { branduuid: brandId },
           config
         );
-      }
-      if (isLiked && token) {
+      } else {
+        // Unlike the brand
         await axios.delete(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${brandId}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${id}`,
           config
         );
       }
 
-      return {
-        brandId,
-        isLiked: !isLiked,
-        responseData: response.data, // Include the response data if needed
-      };
+      return { brandId, isLiked: !isLiked };
     } catch (err) {
       console.error("API Error:", err.response?.data);
       return rejectWithValue(

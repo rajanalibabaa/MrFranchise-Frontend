@@ -10,10 +10,11 @@ import {
   useMediaQuery,
   useTheme,
   Stack,
-  Avatar
+  Avatar,
+  Paper
 } from '@mui/material';
 import {toggleLikeBrand} from "../../Redux/Slices/brandSlice";
-import { ArrowBackIos, ArrowForwardIos, PlayArrow, Pause, VolumeOff, VolumeUp, Favorite} from '@mui/icons-material';
+import { ArrowBackIos, ArrowForwardIos, PlayArrow, Pause, VolumeOff, VolumeUp, Favorite, Category, Storefront, Business, MonetizationOn} from '@mui/icons-material';
 import { CircularProgress } from '@mui/material';
 import { motion } from 'framer-motion';
 import LoginPage from '../../Pages/LoginPage/LoginPage';
@@ -148,23 +149,7 @@ const handleLikeClick = async (brand) => {
     }
   }, [isHovered, handleNext, brandList.length]);
 
-  const formatInvestmentRange = (range) => {
-    if (!range) return "N/A";
-    
-    const ranges = {
-      '5_10_lakhs': '₹5-10 Lakhs',
-      '10_25_lakhs': '₹10-25 Lakhs',
-      '25_50_lakhs': '₹25-50 Lakhs',
-      '50_75_lakhs': '₹50-75 Lakhs',
-      '75_1_crore': '₹75 Lakhs - 1 Crore',
-      '1_2_crore': '₹1-2 Crore',
-      '2_5_crore': '₹2-5 Crore',
-      '5_10_crore': '₹5-10 Crore',
-      '2_5_crores': '₹2-5 Crore' // Added this based on your data
-    };
-    
-    return ranges[range] || range.split('_').join('-') + ' Lakhs';
-  };
+  
 
   useEffect(() => {
     const fetchBrandData = async () => {
@@ -278,29 +263,31 @@ const handleLikeClick = async (brand) => {
           // Get investment range from the first franchise model
           const investmentRange = brand?.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange;
           const areaRequired = brand?.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired;
-          const roi = brand?.franchiseDetails?.modelsOfFranchise?.[0]?.roi;
+          const FranchiseType = brand?.franchiseDetails?.modelsOfFranchise?.[0]?.franchiseType;
+          const Categories = (brand?.personalDetails?.brandCategories).map((cat) => cat.child) || [];
 
           return (
             <Card
-              key={brand.uuid || i}
-              component={motion.div}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              sx={{
-                minWidth: isMobile ? 280 : isTablet ? 320 : 320,
-                height: isMobile ? 420 : 370,
-                borderRadius: 4,
-                overflow: 'hidden',
-                boxShadow: 3,
-                transition: 'transform 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-5px)',
-                  boxShadow: 6,
-                },
-                flexShrink: 0,
-              }}
-            >
+  key={brand.uuid || i}
+  component={motion.div}
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5, delay: i * 0.1 }}
+  sx={{
+    width: isMobile ? 280 : isTablet ? 320 : 340, // Adjust width as needed
+    height: isMobile ? 420 : 450, // Adjust height as needed
+    borderRadius: 4,
+    overflow: 'hidden',
+    boxShadow: 3,
+    transition: 'transform 0.3s ease',
+    '&:hover': {
+      transform: 'translateY(-5px)',
+      boxShadow: 6,
+    },
+    flexShrink: 0,
+  }}
+>
+
               <Box sx={{ position: 'relative', height: isMobile ? 180 : 200 }}>
                 {videoUrl ? (
                   <video
@@ -368,63 +355,142 @@ const handleLikeClick = async (brand) => {
                 </Box>
               </Box>
 
-              <CardContent sx={{ bgcolor: '#ffff', px: 2, pb: 2 }}>
-                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5, justifyContent: 'space-between' }}>
-  <Avatar src={logo} alt="brand" sx={{ width: 40, height: 40 }} />
-  <Typography variant="subtitle1" fontWeight="bold" noWrap sx={{flex:1}}>
-    {brand.personalDetails?.brandName || "Unknown Brand"}
-  </Typography>
-  <IconButton
-    onClick={() => handleLikeClick(brand)}
-    disabled={likeProcessing[brand.uuid]}
-    sx={{ ml: 1, p: 0.5 }}
-  >
-    {likeProcessing[brand.uuid] ? (
-      <CircularProgress size={20} />
-    ) : (
-      <Favorite
-        sx={{
-          color: brand.isLiked ? "#f44336" : "rgba(0,0,0,0.23)",
-          transition: "color 0.3s",
-        }}
-      />
-    )}
-  </IconButton>
-</Stack>
-                <Typography variant="body2" fontWeight="bold">
-                  Investment: {formatInvestmentRange(investmentRange)}
-                </Typography>
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between',
-                  mt: 1,
-                  flexDirection: isMobile ? 'column' : 'row',
-                  gap: isMobile ? 0.5 : 0
-                }}>
-                  <Typography variant="body2" fontWeight="bold">
-                    Area: {areaRequired ? `${areaRequired} sq.ft` : "N/A"}
-                  </Typography>
-                  <Typography variant="body2" fontWeight="bold">
-                    ROI: {roi || "N/A"}
-                  </Typography>
-                </Box>
+              <CardContent sx={{ 
+                flex: 1,
+                p: isMobile ? 1.5 : 2,
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                {/* Brand Header */}
+                <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+                  <Avatar 
+                    src={logo} 
+                    sx={{ 
+                      width: 50, 
+                      height: 50,
+                      border: '2px solid white',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      flexShrink: 0
+                    }} 
+                  />
+                  <Box sx={{ overflow: 'hidden', flex: 1 }}>
+                    <Typography 
+                      variant={isMobile ? "subtitle1" : "h6"} 
+                      fontWeight={700}
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                    >
+                      {brand.personalDetails?.brandName || "Unknown Brand"}
+                    </Typography>
+                     <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography variant="body2">
+                        {Categories.join(", ") || "N/A"}
+                      </Typography>
+                    </Stack>
+                  </Box>
+                  <IconButton
+                    onClick={() => handleLikeClick(brand)}
+                    disabled={likeProcessing[brand.uuid]}
+                    sx={{ ml: 'auto', p: 0.5 }}
+                  >
+                    {likeProcessing[brand.uuid] ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      <Favorite
+                        sx={{
+                          color: brand.isLiked ? "#f44336" : "action.disabled",
+                          transition: "color 0.3s",
+                        }}
+                      />
+                    )}
+                  </IconButton>
+                </Stack>
+
+                {/* Categories */}
+                {/* {categories.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                      {categories.slice(0, 3).map((category, index) => (
+                        <Chip
+                          key={index}
+                          label={category}
+                          size="small"
+                          sx={{
+                            bgcolor: 'rgba(255, 152, 0, 0.1)',
+                            color: 'orange.dark',
+                            fontWeight: 500,
+                            mb: 1,
+                            fontSize: '0.7rem'
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                )} */}
+
+                {/* Key Metrics */}
+                <Paper 
+                  variant="outlined"
+                  sx={{ 
+                    p: isMobile ? 1 : 1,
+                    mb: 1,
+                    borderRadius: 2,
+                    flex: 1
+                  }}
+                >
+                  <Stack spacing={1.5}>
+                   
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Storefront sx={{ fontSize: 18, color: 'orange' }} />
+                      <Typography variant="body2">
+                        <Box component="span" fontWeight="bold">Type: </Box>
+                        {FranchiseType || "N/A"}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Business sx={{ fontSize: 18, color: 'orange' }} />
+                      <Typography variant="body2">
+                        <Box component="span" fontWeight="bold">Area: </Box>
+                        {areaRequired ? `${areaRequired} sq.ft` : "N/A"}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <MonetizationOn sx={{ fontSize: 18, color: 'orange' }} />
+                      <Typography variant="body2">
+                        <Box component="span" fontWeight="bold">Investment: </Box>
+                        {investmentRange || "N/A"}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </Paper>
+
+                {/* Apply Button */}
                 <Button
-                  fullWidth
-                  variant="contained" 
+                  variant="contained"
                   onClick={() => handleApply(brand)}
+                  fullWidth
+                  size={isMobile ? "small" : "medium"}
                   sx={{
-                    mt: 2,
-                    backgroundColor: '#f29724',
-                    borderRadius: 1,
-                    textTransform: 'none',
-                    '&:hover': {
-                      backgroundColor: '#e68a1e',
+                    backgroundColor: "#f29724",
+                    "&:hover": { 
+                      backgroundColor: "#e68a1e",
+                      boxShadow: 2
                     },
+                    py: 1,
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    fontSize: isMobile ? '0.875rem' : '1rem',
+                    mt: 'auto'
                   }}
                 >
                   Apply Now
                 </Button>
               </CardContent>
+
             </Card>
           );
         })}

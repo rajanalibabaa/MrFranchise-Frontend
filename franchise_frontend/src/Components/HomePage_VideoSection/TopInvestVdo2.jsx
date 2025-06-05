@@ -60,7 +60,7 @@ const navigate = useNavigate();
   // Fixed card dimensions based on screen size
   const CARD_DIMENSIONS = {
     width: isMobile ? 300 : isTablet ? 320 : 320,
-    height: 470, // Fixed height for uniformity
+    height: 420, // Fixed height for uniformity
     videoHeight: 200, // Set a consistent video height
     avatarSize: isMobile ? 40 : 50,
   };
@@ -397,6 +397,14 @@ useEffect(() => {
                       >
                         {brand.personalDetails?.brandName}
                       </Typography>
+                      <Chip label={category} size="small"
+                              sx={{
+                                bgcolor: 'rgba(255, 152, 0, 0.1)',
+                                color: 'orange.dark',
+                                fontWeight: 500,
+                                // mb: 1
+                              }} fontWeight={500}  >
+                            </Chip>
                     </Box>
                   </Stack>
 
@@ -406,29 +414,19 @@ useEffect(() => {
                     display="flex"
                     justifyContent="space-between" 
                     sx={{ 
-                      p: isMobile ? 1 : 1.5,
-                      mb: 2,
+                      p: isMobile ? 1 : 1,
+                      mb: 1,
                       borderRadius: 2,
                     }}
                   >
-                    <Grid container spacing={2}>
-                      <Grid item xs={6}>
-                        <Stack direction="row" spacing={1} alignItems="center" justifyContent={'flex-start'}>
-                          <CategoryIcon sx={{ fontSize: isMobile ? 16 : 18, color: 'orange' }} />
-                          <Box>
-                            <Typography variant="body2" color="text.secondary">Category</Typography>
-                            <Typography variant={isMobile ? "caption" : "body2"} fontWeight={200}>
-                              {category}
-                            </Typography>
-                          </Box>
-                        </Stack>
-                      </Grid>
+                    <Grid container spacing={2} display={'isMobile' ? 'block' : 'flex'} >
+                     
                       <Grid item xs={6}>
                         <Stack direction="row" spacing={1} alignItems="center" justifyContent={'flex-start'}>
                           <StorefrontIcon sx={{ fontSize: isMobile ? 16 : 18, color: 'orange' }} />
-                          <Box>
-                            <Typography variant="body2" color="text.secondary">Type</Typography>
-                            <Typography variant={isMobile ? "caption" : "body2"} fontWeight={500}>
+                          <Box display={'flex'}gap={6} >
+                            <Typography variant="subtitle2 " color="text.secondary" fontWeight={700}>Type:</Typography>
+                            <Typography variant={isMobile ? "caption" : "body2"} >
                               {franchiseType}
                             </Typography>
                           </Box>
@@ -437,26 +435,29 @@ useEffect(() => {
                       <Grid item xs={6}>
                         <Stack direction="row" spacing={1} alignItems="center" justifyContent={'flex-start'}>
                           <BusinessIcon sx={{ fontSize: isMobile ? 16 : 18, color: 'orange' }} />
-                          <Box>
-                            <Typography variant="body2" color="text.secondary">Area</Typography>
-                            <Typography variant={isMobile ? "caption" : "body2"} fontWeight={500}>
-                              {firstModel.areaRequired || 'N/A'}
+                          <Box display={'flex'}gap={7} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <Typography variant="subtitle2" color="text.secondary" fontWeight={700}>Area:</Typography>
+                            <Typography variant={isMobile ? "caption" : "body2"} >
+                              {firstModel.areaRequired || 'N/A'} sq.ft
                             </Typography>
                           </Box>
                         </Stack>
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid item xs={6} >
                         <Stack direction="row" spacing={1} alignItems="center" justifyContent={'flex-start'}>
                           <MonetizationOnIcon sx={{ fontSize: isMobile ? 16 : 18, color: 'orange' }} />
-                          <Box>
-                            <Typography variant="body2" color="text.secondary">Investment</Typography>
-                            <Typography variant={isMobile ? "caption" : "body2"} fontWeight={500}>
-                              {firstModel.investmentRange || 'N/A'}
+                          <Box display={'flex'}gap={2}  sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <Typography variant="subtitle2" color="text.secondary" fontWeight={700}>Investment:</Typography>
+                            <Typography variant={isMobile ? "caption" : "body2"} >
+                              {firstModel.investmentRange || 'N/A'} - INR
                             </Typography>
                           </Box>
                         </Stack>
                       </Grid>
-                      <Grid item xs={6}>
+                      
+                    </Grid>
+                  </Paper>
+                  <Grid item xs={6}>
                         <Button
                           variant="contained"
                           onClick={() => handleApply(brand)}
@@ -479,8 +480,6 @@ useEffect(() => {
                           Apply Now
                         </Button>
                       </Grid>
-                    </Grid>
-                  </Paper>
                 </CardContent>
               </Card>
             </motion.div>

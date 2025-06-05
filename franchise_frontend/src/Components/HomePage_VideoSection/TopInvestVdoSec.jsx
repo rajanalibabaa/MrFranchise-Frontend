@@ -19,11 +19,7 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 import axios from "axios";
-<<<<<<< HEAD
-import { ArrowRight, MonetizationOn, Business, AreaChart, Favorite } from "@mui/icons-material";
-=======
 import { ArrowRight, MonetizationOn, Business, AreaChart,Favorite } from "@mui/icons-material";
->>>>>>> a88fa5462993e35ca9a59eaa21f4df49314d0abc
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
@@ -436,9 +432,6 @@ dispatch(openBrandDialog(brand));
                       >
                         {brand.personalDetails?.brandName}
                       </Typography>
-<<<<<<< HEAD
-
-=======
                        <IconButton
     onClick={() => handleLikeClick(brand)}
     disabled={likeProcessing[brand.uuid]}
@@ -455,7 +448,6 @@ dispatch(openBrandDialog(brand));
       />
     )}
   </IconButton>
->>>>>>> a88fa5462993e35ca9a59eaa21f4df49314d0abc
                     </Box>
 
                     {/* Categories */}

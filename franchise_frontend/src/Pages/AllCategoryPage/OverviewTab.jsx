@@ -112,23 +112,33 @@ const OverviewTab = ({ brand }) => {
     try {
       const payload = {
         ...formData,
-        brandId: brand?._id,
+        brandId: brand?.uuid,
         brandName: brand?.personalDetails?.brandName || "",
         brandEmail: brand.personalDetails?.email || "",
       };
+ console.log("payload", payload);
+      const token = localStorage.getItem("accessToken");
+      const investorUUID = localStorage.getItem("investorUUID");
+      const brandUUID = localStorage.getItem("brandUUID");
+      
+
+      const id = investorUUID || brandUUID;
+      console.log(id, token);
 
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createInstaApply",
+        `http://localhost:5000/api/v1/instantapply/postApplication/${id}`,
         payload,
         {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
       
-      if (response.data.success) {
-        alert("✅ Your application has been submitted successfully!");
+      console.log("status code",response.data )
+
+      if (response.data) {
         setSubmitSuccess(true);
         setFormData({
           fullName: "",
@@ -139,7 +149,7 @@ const OverviewTab = ({ brand }) => {
           planToInvest: "",
           readyToInvest: "",
         });
-        setIsModalOpen(false);
+   
       }
     } catch (error) {
       console.error("Submission error:", error);
@@ -688,18 +698,18 @@ const OverviewTab = ({ brand }) => {
           label: "Requirement Support",
           value: brand.franchiseDetails?.requirementSupport,
         },
-        {
-          label: "Expansion Locations",
-          value: brand.personalDetails?.expansionLocation?.map(
-            (location, index) => (
-              <Box key={index} sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
-                <Typography>{location.city}</Typography> ,
-                <Typography>{location.state}</Typography> ,
-                <Typography>{location.country}</Typography>
-              </Box>
-            )
-          ),
-        },
+        // {
+        //   label: "Expansion Locations",
+        //   value: brand.personalDetails?.expansionLocation?.map(
+        //     (location, index) => (
+        //       <Box key={index} sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+        //         <Typography>{location.city}</Typography> ,
+        //         <Typography>{location.state}</Typography> ,
+        //         <Typography>{location.country}</Typography>
+        //       </Box>
+        //     )
+        //   ),
+        // },
       ],
     },
   ];

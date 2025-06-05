@@ -1,17 +1,25 @@
-import { Typography, Box, Button, Card, CardContent, Avatar, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Typography, Box, Button, Card, Avatar, IconButton, Stack, CircularProgress } from '@mui/material';
+import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import CloseIcon from "@mui/icons-material/Close";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { openBrandDialog } from "../../Redux/Slices/brandSlice";
+import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
+
 
 const TopInvestVdocardround = () => {
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedBrand, setSelectedBrand] = useState(null);
-  const [expandedBrand, setExpandedBrand] = useState(null);
-  const [visibleBrands, setVisibleBrands] = useState(21);
+  const [likedBrands, setLikedBrands] = useState({});
+  const [visibleBrands, setVisibleBrands] = useState(15);
+
+  
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,14 +48,22 @@ const TopInvestVdocardround = () => {
     fetchData();
   }, []);
 
-  const handleBrandClick = (brand) => {
-    setSelectedBrand(brand);
-    setExpandedBrand(brand.uuid === expandedBrand ? null : brand.uuid);
+  const handleLike = (brandId) => {
+    setLikedBrands(prev => ({
+      ...prev,
+      [brandId]: !prev[brandId]
+    }));
   };
 
   const handleShowMore = () => {
-    setVisibleBrands(prev => prev + 15);
+    setVisibleBrands(prev => prev + 10);
   };
+
+
+  const handleApply = (brand) => {
+      dispatch(openBrandDialog(brand));
+      console.log("Apply", brand);
+    };
 
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -62,272 +78,172 @@ const TopInvestVdocardround = () => {
   );
 
   return (
-    <Box component="section"  sx={{ p: 2, maxWidth: 1400, mx: "auto" }}>
+    <Box component="section" sx={{  maxWidth: 1400, mx: "auto" }}>
       <Typography variant="h5" sx={{ 
-        mb: 6, 
+        mb: 2, 
         fontWeight: 800,
         textAlign: 'center',
         background: 'linear-gradient(45deg, #f29724 30%, #ffcc80 90%)',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent'
       }}>
-        Explore Franchise Opportunities
+        Franchise Opportunities
       </Typography>
 
-      {/* Circular Brand Logos Grid */}
+      {/* Compact Cards Grid */}
       <Box sx={{
         display: 'grid',
-        justifyContent: 'center',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-        gap: 4,
-        mb: 1
+        gridTemplateColumns: { 
+          xs: 'repeat(2, 1fr)', 
+          sm: 'repeat(3, 1fr)', 
+          md: 'repeat(4, 1fr)',
+          lg: 'repeat(5, 1fr)'
+        },
+        gap: 5,
+        mb: 6
       }}>
         {brands.slice(0, visibleBrands).map((brand) => (
           <motion.div
             key={brand.uuid}
-            layout
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            whileHover={{ y: -5 }}
+            transition={{ duration: 0.2 }}
           >
-            <Card 
-              sx={{
-                p: 1,
-                borderRadius: '10%',
-                cursor: 'pointer',
-                background: 'transparent',
-                boxShadow: 'none',
-                position: 'relative',
-                height: expandedBrand === brand.uuid ? 'auto' : 170,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              onClick={() => handleBrandClick(brand)}
-            >
-              <motion.div
-                animate={{
-                  scale: expandedBrand === brand.uuid ? 1.2 : 1,
-                  y: expandedBrand === brand.uuid ? -20 : 0
+            <Card sx={{
+              p: 1.5,
+              borderRadius: 3,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              position: 'relative',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              '&:hover': {
+                boxShadow: '0 4px 12px rgba(242, 151, 36, 0.2)'
+              }
+            }}>
+              {/* Like Button */}
+              <IconButton
+                sx={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 4,
+                  zIndex: 2,
+                  color: likedBrands[brand.uuid] ? '#ff5252' : 'rgba(0,0,0,0.2)',
+                  '&:hover': {
+                    color: '#ff5252'
+                  }
                 }}
-                transition={{ type: "spring", stiffness: 300 }}
+                onClick={() => handleLike(brand.uuid)}
               >
-                <Avatar
-                  src={brand.brandDetails?.brandLogo}
-                  alt={brand.personalDetails?.brandName}
-                  sx={{
-                    width: expandedBrand === brand.uuid ? 120 : 100,
-                    height: expandedBrand === brand.uuid ? 120 : 100,
-                    border: '3px solid #f29724',
-                    transition: 'all 0.3s ease'
-                  }}
-                />
-              </motion.div>
+                {likedBrands[brand.uuid] ? (
+                  <FavoriteIcon fontSize="small" />
+                ) : (
+                  <FavoriteBorderIcon fontSize="small" />
+                )}
+              </IconButton>
 
-              <Typography variant="subtitle1" sx={{ 
-                mt: 2, 
-                fontWeight: 300,
-                textAlign: 'center',
-                color: expandedBrand === brand.uuid ? '#f29724' : 'inherit'
-              }}>
+              {/* Brand Logo */}
+              <Avatar
+                src={brand.brandDetails?.brandLogo}
+                alt={brand.personalDetails?.brandName}
+                sx={{
+                  width: 70,
+                  height: 70,
+                  border: '1px solid #f29724',
+                  mb: 1
+                }}
+              />
+
+              {/* Brand Name */}
+              <Typography 
+                variant="body1" 
+                fontWeight={700}
+                textAlign="center"
+                sx={{
+                  mb: 0.5,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '100%'
+                }}
+              >
                 {brand.personalDetails?.brandName}
               </Typography>
+ {/* Category Chips */}
+              <Box sx={{ 
+                display: 'flex',
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                gap: 0.5,
+                mt: 0.5,
+                mb: 1
+              }}>
+                {brand.personalDetails?.brandCategories?.slice(0, 2).map((category, idx) => (
+                  <Typography key={idx} variant="subtitle2" fontWeight={500}>{category.child}</Typography>
+                ))}
+              </Box>
+              {/* Investment */}
+              <Stack direction="column"  spacing={0.5} sx={{ mb: 0.5 }}>
+                {/* <MonetizationOnIcon sx={{ color: '#f29724', fontSize: 16 }} /> */}
+                <Typography variant="body2" fontWeight={500}>
+                 Investment: {brand.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange || 'N/A'}
+                </Typography>
+                <Typography variant="body2" fontWeight={500}>
+                Area:  {brand.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired || 'N/A'} sq.ft
+                </Typography>
+              </Stack>
 
-              <AnimatePresence>
-                {expandedBrand === brand.uuid && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ overflow: 'hidden' }}
-                  >
-                    <Box sx={{ mt: 2, textAlign: 'center' }}>
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        {brand.brandDetails?.category}
-                      </Typography>
-                      <Typography variant="body2" fontWeight={600}>
-                        Investment: {brand.franchiseDetails?.investmentRange}
-                      </Typography>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        sx={{
-                          mt: 2,
-                          borderRadius: 50,
-                          borderColor: '#f29724',
-                          color: '#f29724',
-                          '&:hover': {
-                            backgroundColor: '#f29724',
-                            color: 'white'
-                          }
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedBrand(brand);
-                        }}
-                      >
-                        View Details
-                      </Button>
-                    </Box>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+             
+
+              {/* View Button */}
+              <Button
+                variant="outlined"
+                size="small"
+                fullWidth
+                onClick={() => handleApply(brand)}
+                sx={{
+                  mt: 'auto',
+                  borderRadius: 2,
+                  fontSize: '0.9rem',
+                  py: 0.5,
+                  borderColor: '#f29724',
+                  color: 'green',
+                  '&:hover': {
+                    backgroundColor: 'rgba(250, 141, 8, 0.7)'
+                  }
+                }}
+              >
+                View Details
+              </Button>
             </Card>
           </motion.div>
         ))}
       </Box>
 
       {brands.length > visibleBrands && (
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Button
+            variant="contained"
+            sx={{
+              borderRadius: 2,
+              px: 4,
+              py: 1,
+              background: 'linear-gradient(45deg, #f29724 30%, #ffcc80 90%)',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 8px rgba(242, 151, 36, 0.3)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+            onClick={handleShowMore}
           >
-            <Button
-              variant="contained"
-              sx={{
-                borderRadius: 50,
-                px: 4,
-                py: 1.5,
-                background: 'linear-gradient(45deg, #f29724 30%, #ffcc80 90%)',
-                fontWeight: 600,
-                fontSize: '1rem'
-              }}
-              endIcon={
-                <motion.div
-                  animate={{ y: [0, 5, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                >
-                  <ExpandMoreIcon />
-                </motion.div>
-              }
-              onClick={handleShowMore}
-            >
-              Load More Brands
-            </Button>
-          </motion.div>
+            Show More Brands
+          </Button>
         </Box>
       )}
-
-      {/* Brand Details Dialog */}
-      <Dialog 
-        open={!!selectedBrand} 
-        onClose={() => setSelectedBrand(null)}
-        maxWidth="md"
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            background: 'radial-gradient(circle at top, #fff9e6, #ffffff)'
-          }
-        }}
-      >
-        {selectedBrand && (
-          <>
-            <DialogTitle sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              background: 'linear-gradient(to right, #f29724, #ffcc80)',
-              color: 'white',
-              py: 2
-            }}>
-              <Typography variant="h5" fontWeight={700}>
-                {selectedBrand.personalDetails?.brandName}
-              </Typography>
-              <IconButton onClick={() => setSelectedBrand(null)} sx={{ color: 'white' }}>
-                <CloseIcon />
-              </IconButton>
-            </DialogTitle>
-
-            <DialogContent sx={{ py: 4 }}>
-              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
-                <Box sx={{ flex: 1 }}>
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <Avatar
-                      src={selectedBrand.brandDetails?.brandLogo}
-                      alt={selectedBrand.personalDetails?.brandName}
-                      sx={{
-                        width: 200,
-                        height: 200,
-                        border: '4px solid #f29724',
-                        mx: 'auto',
-                        mb: 3
-                      }}
-                    />
-                  </motion.div>
-
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#f29724' }}>
-                    About the Brand
-                  </Typography>
-                  <Typography variant="body1" paragraph>
-                    {selectedBrand.brandDetails?.brandDescription || 'No description available.'}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#f29724' }}>
-                    Franchise Models
-                  </Typography>
-
-                  {selectedBrand.franchiseDetails?.modelsOfFranchise?.map((model, idx) => (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 + idx * 0.1 }}
-                    >
-                      <Card sx={{ mb: 2, p: 2, borderRadius: 3, borderLeft: '4px solid #f29724' }}>
-                        <Typography variant="subtitle1" fontWeight={600}>
-                          {model.franchiseModel}
-                        </Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                          <Typography variant="body2">
-                            <strong>Investment:</strong> {model.investmentRange}
-                          </Typography>
-                          <Typography variant="body2">
-                            <strong>Franchise Fee:</strong> ₹{model.franchiseFee}
-                          </Typography>
-                        </Box>
-                        {model.expectedROI && (
-                          <Typography variant="body2" mt={1}>
-                            <strong>Expected ROI:</strong> {model.expectedROI}
-                          </Typography>
-                        )}
-                      </Card>
-                    </motion.div>
-                  ))}
-
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                    style={{ marginTop: 24 }}
-                  >
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      size="large"
-                      sx={{
-                        borderRadius: 50,
-                        py: 1.5,
-                        background: 'linear-gradient(45deg, #f29724 30%, #ffcc80 90%)',
-                        fontWeight: 600,
-                        fontSize: '1rem'
-                      }}
-                    >
-                      Contact for Franchise Details
-                    </Button>
-                  </motion.div>
-                </Box>
-              </Box>
-            </DialogContent>
-          </>
-        )}
-      </Dialog>
+      <BrandDetailsDialog />
     </Box>
   );
 };

@@ -438,7 +438,7 @@ function TopBrandVdoCards() {
                           },
                         }}
                       >
-                        Apply Now
+                        View Details
                       </Button>
 
                       <Tooltip
