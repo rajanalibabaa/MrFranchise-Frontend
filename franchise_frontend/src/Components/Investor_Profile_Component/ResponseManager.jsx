@@ -30,7 +30,12 @@ const FeedBack = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!investorUUID || !AccessToken) return;
+    if (!investorUUID || !AccessToken){
+      setmsg("pleace login")
+      setSnackbarOpen(true);
+      return
+    } 
+    
 
     const data = { topic: selectedTopic, rating: value, feedback: feedbackText };
 
@@ -133,7 +138,11 @@ const ComplaintContent = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!investorUUID || !AccessToken) return;
+    if (!investorUUID || !AccessToken) {
+      setMsg("pleace login")
+      setSnackbarOpen(true);
+      return
+    } ;
 
     const data = { topic: selectedTopic, complaint: complaintText };
 
