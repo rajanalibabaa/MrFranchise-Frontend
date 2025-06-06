@@ -49,7 +49,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
     setError(null);
     try {
       const response = await axios.get(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+        "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
         {
           headers: {
             "Content-Type": "application/json",

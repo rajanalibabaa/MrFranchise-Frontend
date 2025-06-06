@@ -90,6 +90,12 @@ const dropdownRef = useRef(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
  const [selectedCategories, setSelectedCategories] = useState([]);
+
+ const [indiaData, setIndiaData] = useState([]);
+const [preferredStates, setPreferredStates] = useState([]);
+const [preferredCities, setPreferredCities] = useState([]);
+const preferredStateValue = watch("preferredState");
+
 const [loginOpen, setLoginOpen] = useState(false);
 const FORM_DATA_KEY = "investor_form_data";
 const initialFormData = {
@@ -121,6 +127,26 @@ const openLoginPopup = () => {
   const closeLoginPopup = () => {
     setLoginOpen(false);
   };
+
+  useEffect(() => {
+  axios.get("https://raw.githubusercontent.com/prasad-gowda/india-state-district-cities/master/India-state-district-city.json")
+    .then(res => {
+      setIndiaData(res.data);
+      setPreferredStates(res.data.map(state => state.state));
+    })
+    .catch(err => {
+      setIndiaData([]);
+      setPreferredStates([]);
+    });
+}, []);
+useEffect(() => {
+  if (preferredStateValue && indiaData.length > 0) {
+    const stateObj = indiaData.find(s => s.state === preferredStateValue);
+    setPreferredCities(stateObj ? stateObj.cities : []);
+  } else {
+    setPreferredCities([]);
+  }
+}, [preferredStateValue, indiaData]);
 // Add this useEffect hook to handle outside clicks
 useEffect(() => {
   const handleClickOutside = (event) => {
@@ -1146,28 +1172,48 @@ category:selectedCategories,
           
 {/* Preferred State Field (changed to text input) */}
                 <Grid item xs={12} sm={6} >
-                  <TextField
-                    fullWidth
-                    label="Preferred State "
-                    {...register("preferredState", {
-                      required: "Preferred state is required",
-                    })}
-                    error={!!errors.preferredState}
-                    helperText={errors.preferredState?.message}
-                  />
+                  <FormControl fullWidth error={!!errors.preferredState}>
+    <InputLabel>Preferred State</InputLabel>
+    <Select
+      label="Preferred State"
+      value={preferredStateValue || ""}
+      {...register("preferredState", { required: "Preferred state is required" })}
+      onChange={e => {
+        setValue("preferredState", e.target.value);
+        setValue("preferredCity", "");
+      }}
+    >
+      <MenuItem value="">Select State</MenuItem>
+      {preferredStates.map(state => (
+        <MenuItem key={state} value={state}>{state}</MenuItem>
+      ))}
+    </Select>
+    <Typography color="error" variant="caption">
+      {errors.preferredState?.message}
+    </Typography>
+  </FormControl>
                 </Grid>
 
                 {/* Preferred City Field (changed to text input) */}
                 <Grid item xs={12} sm={6} >
-                  <TextField
-                    fullWidth
-                    label="Preferred City "
-                    {...register("preferredCity", {
-                      required: "Preferred city is required",
-                    })}
-                    error={!!errors.preferredCity}
-                    helperText={errors.preferredCity?.message}
-                  />
+                  <FormControl fullWidth error={!!errors.preferredCity}>
+    <InputLabel>Preferred City</InputLabel>
+    <Select
+      label="Preferred City"
+      value={watch("preferredCity") || ""}
+      {...register("preferredCity", { required: "Preferred city is required" })}
+      onChange={e => setValue("preferredCity", e.target.value)}
+      disabled={!preferredStateValue}
+    >
+      <MenuItem value="">Select City</MenuItem>
+      {preferredCities.map(city => (
+        <MenuItem key={city} value={city}>{city}</MenuItem>
+      ))}
+    </Select>
+    <Typography color="error" variant="caption">
+      {errors.preferredCity?.message}
+    </Typography>
+  </FormControl>
                 </Grid>
 {/* Property Type Field */}
           <Grid item xs={12} sm={6} md={4}>

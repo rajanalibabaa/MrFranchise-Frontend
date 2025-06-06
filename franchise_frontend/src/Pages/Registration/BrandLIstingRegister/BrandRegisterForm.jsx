@@ -184,7 +184,7 @@ const BrandRegisterForm = () => {
     return savedData ? JSON.parse(savedData) : initialFormData;
   });
 
-  // console.log("Form Data:", formData);
+  console.log("Form Data:", formData);
 
   const [validationErrors, setValidationErrors] = useState({
     brandDetails: {},
@@ -338,6 +338,7 @@ const BrandRegisterForm = () => {
           franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
           brandPromotionVideo: formData.uploads.brandPromotionVideo,
         };
+     
         Object.entries(fileFields).forEach(([fieldName, files]) => {
           if (files && files.length > 0) {
             files.forEach((file) => {
@@ -384,7 +385,7 @@ const BrandRegisterForm = () => {
         //     brandPromotionVideo: formData.uploads.brandPromotionVideo,
         //   }
         // };
-
+  console.log("fileFields.....:", formDataSend);
         const response = await axios.post(
           // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
           "http://localhost:5000/api/v1/brandlisting/createBrandListing",
