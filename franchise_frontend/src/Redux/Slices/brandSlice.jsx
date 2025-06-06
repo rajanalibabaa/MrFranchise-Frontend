@@ -19,18 +19,25 @@ export const toggleLikeBrand = createAsyncThunk(
         },
       };
 
+        
+
       if (!isLiked) {
-        // Like the brand
+        // Like the brand - POST request
         await axios.post(
           "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
           { branduuid: brandId },
           config
         );
       } else {
-        // Unlike the brand
+        // Unlike the brand - DELETE request
         await axios.delete(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${id}`,
-          config
+          `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${brandId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            }
+          }
         );
       }
 
@@ -135,16 +142,16 @@ const brandSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(toggleLikeBrand.fulfilled, (state, action) => {
-        const { brandId, isLiked } = action.payload;
-        // Update both data and filteredData
-       state.data = state.data.map((brand) =>
-          brand.uuid === brandId ? { ...brand, isLiked } : brand
-        );
-        state.filteredData = state.filteredData.map((brand) =>
-          brand.uuid === brandId ? { ...brand, isLiked } : brand
-        );
-      })
+    .addCase(toggleLikeBrand.fulfilled, (state, action) => {
+      const { brandId, isLiked } = action.payload;
+  
+      state.data = state.data.map((brand) =>
+        brand.uuid === brandId ? { ...brand, isLiked } : brand
+      );
+      state.filteredData = state.filteredData.map((brand) =>
+        brand.uuid === brandId ? { ...brand, isLiked } : brand
+      );
+    })
 
       .addCase(fetchBrands.pending, (state) => {
         state.loading = true;
