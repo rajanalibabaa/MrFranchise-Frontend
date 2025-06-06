@@ -83,8 +83,8 @@ function LoginPage({ open, onClose }) {
 
     try {
       const response = await axios.post(
-        // "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
-        "http://localhost:5000/api/v1/login/generateOTPforLogin",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
+        // "http://localhost:5000/api/v1/login/generateOTPforLogin",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -125,8 +125,8 @@ function LoginPage({ open, onClose }) {
 
     try {
       const response = await axios.post(
-        // "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
-        "http://localhost:5000/api/v1/login/",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        // "http://localhost:5000/api/v1/login/",
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -146,8 +146,8 @@ function LoginPage({ open, onClose }) {
 
         setTimeout(() => {
           dispatch(logout());
-          
-        }, 24 * 60 * 60 * 1000);
+
+        },24*60 * 60 * 1000);
 
       setSnackbar({
           open: true,
@@ -221,6 +221,7 @@ function LoginPage({ open, onClose }) {
           <Grid container sx={{ minHeight: "65vh" }}>
             <Grid
               item
+              xs={12}
               md={6}
               sx={{
                 display: { xs: "none", md: "flex" },
@@ -228,13 +229,20 @@ function LoginPage({ open, onClose }) {
                 justifyContent: "center",
                 bgcolor: "white",
                 p: 0,
+                order: { xs: 1, md: 0 }, 
               }}
             >
               <Box
                 component="img"
                 src={illustration}
                 alt="Login Illustration"
-                sx={{ width: "100%", maxWidth: 400, borderRadius: 2 }}
+                sx={{
+          width: { xs: "100%", sm: "80%", md: "100%" },
+          maxWidth: 400,
+          borderRadius: 2,
+          mx: "auto",
+          display: "block",
+        }}
               />
             </Grid>
 
@@ -246,7 +254,8 @@ function LoginPage({ open, onClose }) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                p: 4,
+                p: { xs: 2, md: 4 },
+        order: { xs: 2, md: 1 },
               }}
             >
               <Box sx={{ width: "100%", maxWidth: 400 }}>

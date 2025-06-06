@@ -10,11 +10,19 @@ import {
   useMediaQuery,
   useTheme,
   Stack,
-  Avatar
+  Avatar,
+  Paper
 } from '@mui/material';
-import { ArrowBackIos, ArrowForwardIos, PlayArrow, Pause, VolumeOff, VolumeUp } from '@mui/icons-material';
+import {toggleLikeBrand} from "../../Redux/Slices/brandSlice";
+import { ArrowBackIos, ArrowForwardIos, PlayArrow, Pause, VolumeOff, VolumeUp, Favorite, Category, Storefront, Business, MonetizationOn} from '@mui/icons-material';
+import { CircularProgress } from '@mui/material';
 import { motion } from 'framer-motion';
+import LoginPage from '../../Pages/LoginPage/LoginPage';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { openBrandDialog } from '../../Redux/Slices/brandSlice';
+import BrandDetailsDialog from '../../Pages/AllCategoryPage/BrandDetailsDialog';
 
 const BestBrandSlider = () => {
   const theme = useTheme();
@@ -26,13 +34,36 @@ const BestBrandSlider = () => {
   const [brandList, setBrandList] = useState([]);
   const [muteState, setMuteState] = useState([]);
   const [playState, setPlayState] = useState([]);
+  const [likeProcessing, setLikeProcessing] = useState({});
+  const [showLogin, setShowLogin] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const timeoutRef = useRef(null);
 
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   // Calculate how many slides we have (cards per slide based on screen size)
   const cardsPerSlide = isMobile ? 1 : isTablet ? 2 : 3;
   const totalSlides = Math.ceil(brandList.length / cardsPerSlide);
+
+//Handle like button
+const handleLikeClick = async (brand) => {
+  if (likeProcessing[brand.uuid]) return;
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    setShowLogin(true);
+    return;
+  }
+  setLikeProcessing((prev) => ({ ...prev, [brand.uuid]: true }));
+  try {
+    await toggleLike(brand.uuid, brand.isLiked);
+  } catch (error) {
+    console.error("Error toggling like:", error);
+  } finally {
+    setLikeProcessing((prev) => ({ ...prev, [brand.uuid]: false }));
+  }
+};
 
   const toggleMute = (index) => {
     const newMuteState = [...muteState];
@@ -68,7 +99,9 @@ const BestBrandSlider = () => {
   }, [isMobile, isTablet, cardsPerSlide]);
 
   const handleApply = (brand) => {
-    console.log("Applying for:", brand.personalDetails?.brandName);
+    dispatch(openBrandDialog(brand));
+
+    console.log("Applying for:", brand);
     // You can replace this with your actual apply logic
   };
 
@@ -82,6 +115,31 @@ const BestBrandSlider = () => {
     scrollToSlide(prevSlide);
   }, [currentSlide, totalSlides, scrollToSlide]);
 
+
+  //like toggle
+   const toggleLike = async (brandId, isLiked) => {
+      const token = localStorage.getItem("accessToken");
+      // if()
+      // console.log("redux",likedBrands)
+      // console.log("isLiked", brandId, isLiked);
+      if (!token) {
+        setShowLogin(true);
+        return;
+      }
+  
+      // console.log("k",uuid,brandId)
+  
+      try {
+        const uuid = brands.map(async (value, id) => {
+          if (value.uuid === brandId) {
+            await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
+          }
+        });
+      } catch (error) {
+        console.error("Like operation failed:", error);
+      }
+    };
+
   const startAutoSlide = useCallback(() => {
     clearTimeout(timeoutRef.current);
     if (!isHovered && brandList.length > 0) {
@@ -91,23 +149,7 @@ const BestBrandSlider = () => {
     }
   }, [isHovered, handleNext, brandList.length]);
 
-  const formatInvestmentRange = (range) => {
-    if (!range) return "N/A";
-    
-    const ranges = {
-      '5_10_lakhs': '₹5-10 Lakhs',
-      '10_25_lakhs': '₹10-25 Lakhs',
-      '25_50_lakhs': '₹25-50 Lakhs',
-      '50_75_lakhs': '₹50-75 Lakhs',
-      '75_1_crore': '₹75 Lakhs - 1 Crore',
-      '1_2_crore': '₹1-2 Crore',
-      '2_5_crore': '₹2-5 Crore',
-      '5_10_crore': '₹5-10 Crore',
-      '2_5_crores': '₹2-5 Crore' // Added this based on your data
-    };
-    
-    return ranges[range] || range.split('_').join('-') + ' Lakhs';
-  };
+  
 
   useEffect(() => {
     const fetchBrandData = async () => {
@@ -137,11 +179,12 @@ const BestBrandSlider = () => {
     return () => clearTimeout(timeoutRef.current);
   }, [currentSlide, startAutoSlide]);
 
+
   return (
     <Box 
       sx={{ 
-        px: isMobile ? 2 : 4, 
-        py: 6, 
+        px: isMobile ? 2 : 2, 
+        py: 1, 
         maxWidth: '1400px', 
         mx: 'auto',
         overflow: 'hidden',
@@ -160,7 +203,7 @@ const BestBrandSlider = () => {
         fontWeight="bold" 
         sx={{ 
           color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
-          mb: 3, 
+          mb: 1, 
           textAlign: "left",
           position: 'relative',
           '&:after': {
@@ -174,7 +217,7 @@ const BestBrandSlider = () => {
           }
         }}
       >
-          Today's Marketing Leading Brands
+          Top Leading Franchise Brands
       </Typography>
         
         {!isMobile && (
@@ -220,29 +263,31 @@ const BestBrandSlider = () => {
           // Get investment range from the first franchise model
           const investmentRange = brand?.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange;
           const areaRequired = brand?.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired;
-          const roi = brand?.franchiseDetails?.modelsOfFranchise?.[0]?.roi;
+          const FranchiseType = brand?.franchiseDetails?.modelsOfFranchise?.[0]?.franchiseType;
+          const Categories = (brand?.personalDetails?.brandCategories).map((cat) => cat.child) || [];
 
           return (
             <Card
-              key={brand.uuid || i}
-              component={motion.div}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              sx={{
-                minWidth: isMobile ? 280 : isTablet ? 320 : 320,
-                height: isMobile ? 420 : 370,
-                borderRadius: 4,
-                overflow: 'hidden',
-                boxShadow: 3,
-                transition: 'transform 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-5px)',
-                  boxShadow: 6,
-                },
-                flexShrink: 0,
-              }}
-            >
+  key={brand.uuid || i}
+  component={motion.div}
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5, delay: i * 0.1 }}
+  sx={{
+    width: isMobile ? 280 : isTablet ? 320 : 340, // Adjust width as needed
+    height: isMobile ? 420 : 450, // Adjust height as needed
+    borderRadius: 4,
+    overflow: 'hidden',
+    boxShadow: 3,
+    transition: 'transform 0.3s ease',
+    '&:hover': {
+      transform: 'translateY(-5px)',
+      boxShadow: 6,
+    },
+    flexShrink: 0,
+  }}
+>
+
               <Box sx={{ position: 'relative', height: isMobile ? 180 : 200 }}>
                 {videoUrl ? (
                   <video
@@ -310,47 +355,142 @@ const BestBrandSlider = () => {
                 </Box>
               </Box>
 
-              <CardContent sx={{ bgcolor: '#ffff', px: 2, pb: 2 }}>
-                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
-  <Avatar src={logo} alt="brand" sx={{ width: 40, height: 40 }} />
-  <Typography variant="subtitle1" fontWeight="bold" noWrap>
-    {brand.personalDetails?.brandName || "Unknown Brand"}
-  </Typography>
-</Stack>
-                <Typography variant="body2" fontWeight="bold">
-                  Investment: {formatInvestmentRange(investmentRange)}
-                </Typography>
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between',
-                  mt: 1,
-                  flexDirection: isMobile ? 'column' : 'row',
-                  gap: isMobile ? 0.5 : 0
-                }}>
-                  <Typography variant="body2" fontWeight="bold">
-                    Area: {areaRequired ? `${areaRequired} sq.ft` : "N/A"}
-                  </Typography>
-                  <Typography variant="body2" fontWeight="bold">
-                    ROI: {roi || "N/A"}
-                  </Typography>
-                </Box>
+              <CardContent sx={{ 
+                flex: 1,
+                p: isMobile ? 1.5 : 2,
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                {/* Brand Header */}
+                <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+                  <Avatar 
+                    src={logo} 
+                    sx={{ 
+                      width: 50, 
+                      height: 50,
+                      border: '2px solid white',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      flexShrink: 0
+                    }} 
+                  />
+                  <Box sx={{ overflow: 'hidden', flex: 1 }}>
+                    <Typography 
+                      variant={isMobile ? "subtitle1" : "h6"} 
+                      fontWeight={700}
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                    >
+                      {brand.personalDetails?.brandName || "Unknown Brand"}
+                    </Typography>
+                     <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography variant="body2">
+                        {Categories.join(", ") || "N/A"}
+                      </Typography>
+                    </Stack>
+                  </Box>
+                  <IconButton
+                    onClick={() => handleLikeClick(brand)}
+                    disabled={likeProcessing[brand.uuid]}
+                    sx={{ ml: 'auto', p: 0.5 }}
+                  >
+                    {likeProcessing[brand.uuid] ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      <Favorite
+                        sx={{
+                          color: brand.isLiked ? "#f44336" : "action.disabled",
+                          transition: "color 0.3s",
+                        }}
+                      />
+                    )}
+                  </IconButton>
+                </Stack>
+
+                {/* Categories */}
+                {/* {categories.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                      {categories.slice(0, 3).map((category, index) => (
+                        <Chip
+                          key={index}
+                          label={category}
+                          size="small"
+                          sx={{
+                            bgcolor: 'rgba(255, 152, 0, 0.1)',
+                            color: 'orange.dark',
+                            fontWeight: 500,
+                            mb: 1,
+                            fontSize: '0.7rem'
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                )} */}
+
+                {/* Key Metrics */}
+                <Paper 
+                  variant="outlined"
+                  sx={{ 
+                    p: isMobile ? 1 : 1,
+                    mb: 1,
+                    borderRadius: 2,
+                    flex: 1
+                  }}
+                >
+                  <Stack spacing={1.5}>
+                   
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Storefront sx={{ fontSize: 18, color: 'orange' }} />
+                      <Typography variant="body2">
+                        <Box component="span" fontWeight="bold">Type: </Box>
+                        {FranchiseType || "N/A"}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Business sx={{ fontSize: 18, color: 'orange' }} />
+                      <Typography variant="body2">
+                        <Box component="span" fontWeight="bold">Area: </Box>
+                        {areaRequired ? `${areaRequired} sq.ft` : "N/A"}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <MonetizationOn sx={{ fontSize: 18, color: 'orange' }} />
+                      <Typography variant="body2">
+                        <Box component="span" fontWeight="bold">Investment: </Box>
+                        {investmentRange || "N/A"}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </Paper>
+
+                {/* Apply Button */}
                 <Button
-                  fullWidth
-                  variant="contained" 
+                  variant="contained"
                   onClick={() => handleApply(brand)}
+                  fullWidth
+                  size={isMobile ? "small" : "medium"}
                   sx={{
-                    mt: 2,
-                    backgroundColor: '#f29724',
-                    borderRadius: 1,
-                    textTransform: 'none',
-                    '&:hover': {
-                      backgroundColor: '#e68a1e',
+                    backgroundColor: "#f29724",
+                    "&:hover": { 
+                      backgroundColor: "#e68a1e",
+                      boxShadow: 2
                     },
+                    py: 1,
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    fontSize: isMobile ? '0.875rem' : '1rem',
+                    mt: 'auto'
                   }}
                 >
                   Apply Now
                 </Button>
               </CardContent>
+
             </Card>
           );
         })}
@@ -380,7 +520,13 @@ const BestBrandSlider = () => {
           ))}
         </Box>
       )}
+      {/* Brand Details Dialog */}
+      <BrandDetailsDialog />
+      {showLogin && (
+  <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+)}
     </Box>
+    
   );
 };
 

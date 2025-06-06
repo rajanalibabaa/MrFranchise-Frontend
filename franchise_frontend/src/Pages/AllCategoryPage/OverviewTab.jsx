@@ -698,18 +698,18 @@ const OverviewTab = ({ brand }) => {
           label: "Requirement Support",
           value: brand.franchiseDetails?.requirementSupport,
         },
-        {
-          label: "Expansion Locations",
-          value: brand.personalDetails?.expansionLocation?.map(
-            (location, index) => (
-              <Box key={index} sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
-                <Typography>{location.city}</Typography> ,
-                <Typography>{location.state}</Typography> ,
-                <Typography>{location.country}</Typography>
-              </Box>
-            )
-          ),
-        },
+        // {
+        //   label: "Expansion Locations",
+        //   value: brand.personalDetails?.expansionLocation?.map(
+        //     (location, index) => (
+        //       <Box key={index} sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+        //         <Typography>{location.city}</Typography> ,
+        //         <Typography>{location.state}</Typography> ,
+        //         <Typography>{location.country}</Typography>
+        //       </Box>
+        //     )
+        //   ),
+        // },
       ],
     },
   ];

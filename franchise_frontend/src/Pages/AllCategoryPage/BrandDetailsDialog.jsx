@@ -544,7 +544,7 @@ const BrandDetailsDialog = () => {
             </Box>
             <Typography
               variant="h4"
-              component="div"
+              component="span"
               sx={{
                 fontWeight: 700,
                 background:
@@ -554,28 +554,6 @@ const BrandDetailsDialog = () => {
               }}
             >
               {selectedBrand.personalDetails?.brandName}
-
-              <Box display="flex" alignItems="center" mb={1}>
-                <Rating
-                  value={3.5}
-                  precision={0.5}
-                  readOnly
-                  size="medium"
-                  icon={<Star fontSize="inherit" sx={{ color: "#ff9800" }} />}
-                  emptyIcon={
-                    <StarBorder fontSize="inherit" sx={{ color: "#e0e0e0" }} />
-                  }
-                />
-                <Typography
-                  variant="body2"
-                  sx={{
-                    ml: 1,
-                    color: "black",
-                  }}
-                >
-                  (24 reviews)
-                </Typography>
-              </Box>
             </Typography>
           </Box>
           <Box>
@@ -593,7 +571,7 @@ const BrandDetailsDialog = () => {
           </Box>
         </DialogTitle>
 
-        <Typography variant="subtitle1" m={2}>
+        <Typography variant="subtitle1" m={1}>
           {selectedBrand.personalDetails?.brandCategories &&
             selectedBrand.personalDetails.brandCategories.length > 0 && (
               <Box>
@@ -601,51 +579,49 @@ const BrandDetailsDialog = () => {
                   (category, index) => (
                     <Box
                       key={index}
-                      sx={{ mb: 1 }}
                       display={"flex"}
-                      justifyContent={"flex-start"}
-                      gap={20}
+                      justifyContent={"space-around"}
+                      gap={1}
                     >
-                      <Typography sx={{ fontWeight: "bold" }}>
-                        Category:{" "}
-                        <label style={{ color: "#ff9800" }}>
+                      <Typography variant="body2" m={1}>
+                       <label style={{ fontWeight: "bold" }}>Category:{" "}</label> 
+                        <label >
                           {category.child}
                         </label>
                       </Typography>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{ fontWeight: "bold" }}
+                      <Typography variant="body2" m={1}
                       >
-                        Investment Range :
-                        <label style={{ color: "#ff9800" }}>
+                      <label style={{ fontWeight: "bold" }}>Investment :</label>  
+                        <label >
                           {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
                             (model) => model.investmentRange
                           )}
                         </label>
                       </Typography>
-                      <Typography sx={{ fontWeight: "bold" }}>
-                        Area required :
-                        <label style={{ color: "#ff9800" }}>
+                      <Typography variant="body2" m={1} >
+                      <label style={{ fontWeight: "bold" }}>Area:</label>  
+                        <label >
                           {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
                             (model) => model.areaRequired
                           )}
                         </label>
                       </Typography>
+                      {selectedBrand.personalDetails?.expansionLocation?.length > 0 && (
+            <Typography  variant="body2" m={1}>
+                      <label style={{ fontWeight: "bold" }}>Expansions:</label>  
+              <label >
+                {selectedBrand.personalDetails.expansionLocation.map(
+                  (location) => `${location.city}`
+                )}
+              </label>
+            </Typography>
+          )}
                     </Box>
                   )
                 )}
               </Box>
             )}
-          {selectedBrand.personalDetails?.expansionLocation?.length > 0 && (
-            <Typography sx={{ fontWeight: "bold" }}>
-              Expansion Locations :
-              <label style={{ color: "#ff9800" }}>
-                {selectedBrand.personalDetails.expansionLocation.map(
-                  (location) => `${location.city}, ${location.state}`
-                )}
-              </label>
-            </Typography>
-          )}
+          
         </Typography>
 
         <DialogContent
@@ -660,7 +636,7 @@ const BrandDetailsDialog = () => {
           <Box
             sx={{
               flex: 1,
-              p: 3,
+              // p: 3,
               overflowY: "auto",
               maxHeight: "70vh",
             }}
@@ -686,7 +662,7 @@ const BrandDetailsDialog = () => {
                       value={tabIndex}
                       onChange={(e, newValue) => setTabIndex(newValue)}
                       centered
-                      sx={{ mb: 2 }}
+                      sx={{ mb: 1 }}
                     >
                       <Tab label="Video" />
                       <Tab label="Images" />
@@ -698,8 +674,8 @@ const BrandDetailsDialog = () => {
                           <Box
                             key={index}
                             sx={{
-                              width: { xs: "100%", sm: "48%", md: "48%" },
-                              height: 300,
+                              width: { xs: "100%", sm: "48%", md: "78%" },
+                              maxHeight: 400,
                               borderRadius: 2,
                               overflow: "hidden",
                               backgroundColor: "#f5f5f5",
@@ -728,7 +704,7 @@ const BrandDetailsDialog = () => {
                             key={index}
                             sx={{
                               width: { xs: "100%", sm: "30%", md: "23%" },
-                              height: 200,
+                              maxHeight: 200,
                               borderRadius: 2,
                               overflow: "hidden",
                               backgroundColor: "#f5f5f5",

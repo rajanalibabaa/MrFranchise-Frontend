@@ -16,11 +16,12 @@ import FilterDropdowns from "../../Components/Navbar/FilterDropdownsData";
 // Dynamic Components - Import all your video sections
 const dynamicComponents = {
   TopBrandVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandTwoVdoSec")),
-  TopBrandVdoCards: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")),
-  TopIndusVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopIndusVdoSecRandomAll")),
-  TopInvestVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopInvestVdoSec")),
-  TopInvestVdo2: React.lazy(() => import("../../Components/HomePage_VideoSection/TopInvestVdo2")),
-  TopInvestVdocardround: React.lazy(() => import("../../Components/HomePage_VideoSection/ToTrendingBrands"))
+  TopBrandVdoCards: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")),//first video section
+  TopIndusVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopIndusVdoSecRandomAll")), //second video section
+  TopInvestVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopInvestVdoSec.jsx")),
+  TopInvestVdo2: React.lazy(() => import("../../Components/HomePage_VideoSection/TopInvestVdo2")),//location cards
+  TopInvestVdocardround: React.lazy(() => import("../../Components/HomePage_VideoSection/ToTrendingBrands")),//last video section
+  TopCafeBrandsSection:React.lazy(()=>import('../../Components/HomePage_VideoSection/TopCafeBrands.jsx')) //3rd video section
 };
 
 // Configuration object for the entire page
@@ -69,6 +70,13 @@ const pageConfig = {
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
       animationDelay: 0.4
+    },
+    {
+      component: "TopCafeBrandsSection",
+      // title: "Top Cafe Brands",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+      animationDelay: 0.5
     },
     {
       component: "TopInvestVdoSec",
@@ -185,7 +193,7 @@ const HomeBannerSec = () => {
           />
         )}
         
-        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
+        <Container  maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
           {/* <Typography 
             variant={isMobile ? "h4" : "h3"} 
             sx={{
@@ -241,7 +249,7 @@ const HomeBannerSec = () => {
           position: 'relative',
           overflow: 'hidden',
           color: 'white',
-          minHeight: isMobile ? '80vh' : '5vh',
+          minHeight: isMobile ? '80vh' : '10vh',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -268,7 +276,7 @@ const HomeBannerSec = () => {
           }
         }}
       >
-        <Container maxWidth="xl" sx={{ 
+        <Container maxWidth="lg" sx={{ 
           position: 'relative', 
           zIndex: 2,
           textAlign: isMobile ? 'center' : 'left',
@@ -285,7 +293,7 @@ const HomeBannerSec = () => {
                   fontWeight: 200,
                   textAlign: 'center',
                   color: 'white',
-                  mb: 2,
+                  mb: 1,
                   lineHeight: 1.2,
                   fontSize: isMobile 
                     ? pageConfig.heroBanner.title.fontSize.mobile
@@ -328,8 +336,8 @@ const HomeBannerSec = () => {
                   mb: 1,
                   maxWidth: '800px',
                   mx: 'auto',
-                  lineHeight: 1.3,
-                  fontSize: isMobile ? '1.1rem' : '1.2rem',
+                  lineHeight: 1,
+                  fontSize: isMobile ? '1.1rem' : '1.1rem',
                   textShadow: '0 2px 4px rgba(0,0,0,0.5)'
                 }}
                 component={motion.div}
@@ -349,8 +357,8 @@ const HomeBannerSec = () => {
             <motion.div 
               variants={pageConfig.animations.item}
               style={{ 
-                marginTop: '3rem',
-                width: isMobile ? '100%' : '80%',
+                marginTop: '2rem',
+                width: isMobile ? '100%' : '85%',
                 marginLeft: 'auto',
                 marginRight: 'auto'
               }}
@@ -362,7 +370,7 @@ const HomeBannerSec = () => {
       </Box>
 
       {/* Render all sections from config */}
-      <Box sx={{ backgroundColor: '#fffaf7'}}>
+      <Box  sx={{ backgroundColor: '#fffaf7'}}>
         {pageConfig.sections.map((section, index) => renderSection(section, index))}
       </Box>
 

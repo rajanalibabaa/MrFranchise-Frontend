@@ -81,7 +81,7 @@ function Footer() {
               QUICK LINKS
             </Typography>
             <Box sx={{marginLeft:1}}>
-              <Link
+              {/* <Link
                 href="/addlisting"
                 color="inherit"
                 underline="hover"
@@ -92,7 +92,7 @@ function Footer() {
                 }}
               >
                 Add Listing
-              </Link>
+              </Link> */}
               <Link
                 href="/expandyourbrand"
                 color="inherit"
@@ -130,7 +130,7 @@ function Footer() {
                 Advertise With Us
               </Link>
               <Link
-                href="/allbusinesscategory"
+                href="/franchisepromotion"
                 color="inherit"
                 underline="hover"
                 display="block"
@@ -139,9 +139,9 @@ function Footer() {
                   fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
                 }}
               >
-                All Business Categories
+                Franchise Promotion & Lead Distribution Packages
               </Link>
-              <Link
+              {/* <Link
                 href="/franchiseconsulting"
                 color="inherit"
                 underline="hover"
@@ -152,7 +152,7 @@ function Footer() {
                 }}
               >
                 Franchise Consulting
-              </Link>
+              </Link> */}
             </Box>
           </Grid>
 
