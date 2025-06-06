@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Paper, Avatar, CircularProgress,
-  Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField
+  Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+  MenuItem,Select,FormControl,InputLabel,
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom';
+import {categories} from '../../Pages/Registration/BrandLIstingRegister/BrandCategories.jsx'
 
 const ManageProfile = () => {
   const [investorData, setInvestorData] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
+ // OTP dialog and verification state
   const [otpDialogOpen, setOtpDialogOpen] = useState(false);
   const [otpStep, setOtpStep] = useState(1);
   const [contactValue, setContactValue] = useState('');
@@ -22,10 +25,31 @@ const ManageProfile = () => {
   const [reguestOTP, setreguestOTP] = useState(false);
   const [ErrorMSG, setErrorMSG] = useState('');
 
+
+  // ✨ New: Error states for field validation
+  const [fieldErrors, setFieldErrors] = useState({
+    mobileNumber: '',
+    whatsappNumber: ''
+  });
+
   const navigate = useNavigate();
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
+    const [mainCategory, setMainCategory] = useState('');
+const [subCategory, setSubCategory] = useState('');
+const [childCategory, setChildCategory] = useState('');
+
+
+// Sync dropdowns when investorData.category changes (e.g. after save)
+useEffect(() => {
+  const value = investorData.category || {};
+  setMainCategory(value.main || '');
+  setSubCategory(value.sub || '');
+  setChildCategory(value.child || '');
+}, [investorData.category]);
+
+    // 🔄 Fetch investor data
   useEffect(() => {
     const fetchData = async () => {
       if (!investorUUID || !AccessToken) {
@@ -40,7 +64,7 @@ const ManageProfile = () => {
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${AccessToken}`,
+              Authorization:` Bearer ${AccessToken}`,
             },
           }
         );
@@ -69,6 +93,7 @@ const ManageProfile = () => {
     setContactValue(investorData.email || investorData.mobileNumber || '');
   };
 
+    // 📩 Request OTP to email
   const handleRequestOtp = async () => {
     if (!contactValue) return;
 
@@ -95,6 +120,7 @@ const ManageProfile = () => {
     }
   };
 
+    // ✅ OTP verification
   const handleOtpVerify = async () => {
     if (!otp || otp.length === 0) {
       setOtpError("Please enter the OTP");
@@ -134,18 +160,32 @@ const ManageProfile = () => {
     }
   };
 
+  // ✨ Updated: Validate numbers and show inline field error
   const handleSave = async () => {
     const dataToUpdate = { ...investorData };
-    if (dataToUpdate.mobileNumber && !dataToUpdate.mobileNumber.startsWith('+91')) {
-      dataToUpdate.mobileNumber = '+91' + dataToUpdate.mobileNumber.trim();
-    }
-    if (dataToUpdate.whatsappNumber && !dataToUpdate.whatsappNumber.startsWith('+91')) {
-      dataToUpdate.whatsappNumber = '+91' + dataToUpdate.whatsappNumber.trim();
-    }
+    const errors = { mobileNumber: '', whatsappNumber: '' };
+    let hasError = false;
+
+    const validatePhone = (field) => {
+      const number = dataToUpdate[field]?.replace('+91', '').trim();
+      if (!/^\d{10}$/.test(number)) {
+        errors[field] = 'Number must be exactly 10 digits.';
+        hasError = true;
+      } else {
+        dataToUpdate[field] = '+91' + number;
+      }
+    };
+
+    validatePhone('mobileNumber');
+    validatePhone('whatsappNumber');
+
+    setFieldErrors(errors);
+
+    if (hasError) return;
 
     try {
       await axios.patch(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/updateInvestor/${investorUUID}`,
+       ` https://franchise-backend-wgp6.onrender.com/api/v1/investor/updateInvestor/${investorUUID}`,
         dataToUpdate,
         {
           headers: {
@@ -160,19 +200,148 @@ const ManageProfile = () => {
     }
   };
 
+    const renderCategoryField = (label, key) => {
+  const value = investorData[key] || {};
+  let displayValue = [value.main, value.sub, value.child].filter(Boolean).join(' > ');
+
+  // Find options for dropdowns
+  const mainOptions = categories.map(c => c.name);
+  const subOptions = categories.find(c => c.name === mainCategory)?.children || [];
+  const childOptions = subOptions.find(s => s.name === subCategory)?.children || [];
+
+  const handleCategoryChange = (type, newValue) => {
+    if (type === 'main') {
+      setMainCategory(newValue);
+      setSubCategory('');
+      setChildCategory('');
+      setInvestorData({
+        ...investorData,
+        [key]: { main: newValue, sub: '', child: '' }
+      });
+    } else if (type === 'sub') {
+      setSubCategory(newValue);
+      setChildCategory('');
+      setInvestorData({
+        ...investorData,
+        [key]: { main: mainCategory, sub: newValue, child: '' }
+      });
+    } else if (type === 'child') {
+      setChildCategory(newValue);
+      setInvestorData({
+        ...investorData,
+        [key]: { main: mainCategory, sub: subCategory, child: newValue }
+      });
+    }
+  };
+
+
+//     return (
+//       <Box mb={2}>
+//         <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+//           {label}
+//         </Typography>
+//         {editMode ? (
+//           <FormControl fullWidth size="small">
+//             <Select
+//               value={displayValue || ''}
+//               onChange={(e) => {
+//                 // Split the selected value back into main/sub categories
+//                 const [main, sub] = e.target.value.split(' > ');
+//                 setInvestorData({ 
+//                   ...investorData, 
+//                   [key]: { main, sub } 
+//                 });
+//               }}
+//             >
+//               {categories.flatMap(mainCategory => 
+//   (mainCategory.children || []).map(subCategory => ({
+//     main: mainCategory.name,
+//     sub: subCategory.name,
+//     label: ${mainCategory.name} > ${subCategory.name}
+//   }))
+// ).map(category => (
+//                 <MenuItem key={category.label} value={category.label}>
+//                   {category.label}
+//                 </MenuItem>
+//               ))}
+//             </Select>
+//           </FormControl>
+//         ) : (
+//           <Typography variant="body1" sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}>
+//             {displayValue || '-----'}
+//           </Typography>
+//         )}
+//       </Box>
+//     );
+//   };
+
+  // ✨ Updated: Email field is read-only, and inline errors for phone fields
+  
+   return (
+    <Box mb={2}>
+      <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+        {label}
+      </Typography>
+      {editMode ? (
+        <>
+          <FormControl fullWidth size="small" sx={{ mb: 1 }}>
+            <InputLabel>Main Category</InputLabel>
+            <Select
+              value={mainCategory}
+              label="Main Category"
+              onChange={(e) => handleCategoryChange('main', e.target.value)}
+            >
+              {mainOptions.map(option => (
+                <MenuItem key={option} value={option}>{option}</MenuItem>
+              ))}
+            </Select>
+             </FormControl>
+          <FormControl fullWidth size="small" sx={{ mb: 1 }} disabled={!mainCategory}>
+            <InputLabel>Sub Category</InputLabel>
+            <Select
+              value={subCategory}
+              label="Sub Category"
+              onChange={(e) => handleCategoryChange('sub', e.target.value)}
+              disabled={!mainCategory}
+            >
+              {subOptions.map(option => (
+                <MenuItem key={option.name} value={option.name}>{option.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth size="small" disabled={!subCategory}>
+            <InputLabel>Subchild</InputLabel>
+            <Select
+              value={childCategory}
+              label="Subchild"
+              onChange={(e) => handleCategoryChange('child', e.target.value)}
+              disabled={!subCategory}
+            >
+              {(childOptions || []).map(option => (
+                <MenuItem key={option} value={option}>{option}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </>
+      ) : (
+        <Typography variant="body1" sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}>
+          {displayValue}
+        </Typography>
+      )}
+    </Box>
+  );
+};
+  
   const renderField = (label, key) => {
     const value = investorData[key];
     const isPhoneField = key === 'mobileNumber' || key === 'whatsappNumber';
-    const isReadOnly = key === 'country';
+    const isReadOnly = key === 'country' || key === 'email';
 
     let displayValue = '';
     if (Array.isArray(value)) {
       if (key === 'category') {
         displayValue = value
-          .map(item => {
-            const parts = [item.main, item.sub, item.child].filter(Boolean);
-            return parts.join(' > ');
-          })
+          .map(item => [item.main, item.sub, item.child].filter(Boolean).join(' > '))
           .join(', ');
       } else {
         displayValue = value.join(', ');
@@ -196,17 +365,72 @@ const ManageProfile = () => {
               variant="outlined"
               size="small"
               value={value || ''}
-              onChange={(e) => setInvestorData({ ...investorData, [key]: e.target.value })}
+              onChange={(e) => {
+                setInvestorData({ ...investorData, [key]: e.target.value });
+                setFieldErrors({ ...fieldErrors, [key]: '' }); // clear on change
+              }}
+              error={!!fieldErrors[key]}
+              helperText={fieldErrors[key]}
             />
           </Box>
         ) : (
           <Typography variant="body1" sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}>
-            {isPhoneField ? `+91 ${displayValue}` : displayValue}
+            {isPhoneField ? `+91 ${displayValue}` : displayValue || '-----'}
           </Typography>
         )}
       </Box>
     );
   };
+
+    // 📊 Dropdown values
+  const Investments =[
+    "having amount",
+    "take loan",
+    "need loan",
+  ];
+
+  const renderInvestmentField = (label, key) => {
+  const existingValue = investorData[key];
+  let displayValue = '';
+
+  if (Array.isArray(existingValue)) {
+    displayValue = existingValue[0] || '';
+  } else if (existingValue) {
+    displayValue = existingValue;
+  }
+
+    return (
+      <Box mb={2}>
+      <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+        {label}
+      </Typography>
+      {editMode ? (
+        <FormControl fullWidth size="small">
+          <Select
+            value={displayValue}
+            onChange={(e) => {
+              setInvestorData({ ...investorData, [key]: e.target.value })
+            }}
+          >
+            {Investments.map((option) => (
+              <MenuItem key={option} value={option}>
+                
+                {option}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      ) : (
+        <Typography
+          variant="body1"
+          sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}
+        >
+          {displayValue || '-----'}
+        </Typography>
+      )}
+    </Box>
+  );
+};
 
   if (loading) {
     return (
@@ -271,17 +495,19 @@ const ManageProfile = () => {
             <Typography variant="h6">{investorData.firstName}</Typography>
           </Box>
 
+          {/* Fields to render */}
           {renderField("First Name", "firstName")}
-          {renderField("Email", "email")}
+          {renderField("Email", "email")} {/* ✨ Email now read-only */}
           {renderField("Mobile Number", "mobileNumber")}
           {renderField("Whatsapp Number", "whatsappNumber")}
           {renderField("State", "state")}
           {renderField("Address", "address")}
-          {renderField("Category", "category")}
+          {renderCategoryField("Category", "categor")}
           {renderField("City", "city")}
           {renderField("Country", "country")}
-          {renderField("Investment Range", "investmentRange")}
-          {renderField("Looking For", "lookingFor")}
+          {/* {renderField("Preffered Investment ", "investmentRange")} */}
+          {renderInvestmentField("Preferred Investment ", "investmentRange")}
+          {/* {renderField("Looking For", "lookingFor")} */}
           {renderField("Occupation", "occupation")}
           {renderField("Pincode", "pincode")}
           {renderField("Property Type", "propertyType")}
