@@ -388,7 +388,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                 background: "linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%)",
               }}
             >
-              <Typography 
+              {/* <Typography 
                 variant="h6" 
                 fontWeight="bold" 
                 mb={2} 
@@ -400,8 +400,8 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                 }}
               >
                 Top Categories
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
+              </Typography> */}
+              {/* <Divider sx={{ mb: 2 }} /> */}
               {categories.map((category, index) => (
                 <motion.div
                   key={index}
@@ -667,7 +667,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
               </Box>
               <Grid container spacing={isMobile ? 1 : 2}>
                 {filteredBrands.slice(0, isMobile ? 8 : 12).map((brand, index) => (
-                  <Grid item xs={6} sm={4} md={3} key={brand._id || index}>
+                  <Grid item xs={12} sm={6} md={3} key={brand._id || index}>
                     <motion.div
                       whileHover={{ y: -5 }}
                       transition={{ duration: 0.2 }}
@@ -676,8 +676,10 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                         onClick={() => handleBrandClick(brand)}
                         elevation={1}
                         sx={{
-                          height: '100%',
+                          width:100,
+                          height: 150,
                           display: 'flex',
+                          justifyContent:'flex-start',
                           flexDirection: 'column',
                           alignItems: 'center',
                           p: isMobile ? 1 : 2,
@@ -694,15 +696,15 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                       >
                         <Box
                           sx={{
-                            width: isMobile ? 70 : 90,
-                            height: isMobile ? 70 : 90,
-                            mb: 1.5,
+                            width: isMobile ? 50 : 90,
+                            height: isMobile ? 50 : 90,
+                            // mb: 1.5,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            bgcolor: 'primary.light',
+                            // bgcolor: 'primary.light',
                             borderRadius: '50%',
-                            p: 1,
+                            // p: 1,
                           }}
                         >
                           <Avatar
@@ -711,8 +713,8 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                             sx={{
                               width: '100%',
                               height: '100%',
-                              fontSize: isMobile ? 28 : 36,
-                              bgcolor: 'primary.main',
+                              fontSize: isMobile ? 32 : 36,
+                              // bgcolor: 'primary.main',
                             }}
                           >
                             {brand.personalDetails?.brandName
@@ -727,7 +729,11 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                           sx={{ 
                             width: '100%', 
                             fontSize: isMobile ? '0.85rem' : '1rem',
-                            color: 'text.primary'
+                            color: 'text.primary',
+                            whiteSpace:'normal',
+                            wordBreak: 'break-word',
+                            lineHeight: 1.2,
+                            mb: 0.5,
                           }}
                         >
                           {brand.personalDetails?.brandName}
@@ -740,7 +746,9 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                           sx={{ 
                             width: '100%', 
                             fontSize: isMobile ? '0.75rem' : '0.875rem',
-                            mt: 0.5
+                            // mt: 0.5
+                            whiteSpace:'normal',
+                            wordBreak: 'break-word',
                           }}
                         >
                           {brand.personalDetails?.companyName}

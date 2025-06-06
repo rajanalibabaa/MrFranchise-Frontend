@@ -332,7 +332,7 @@ export const categories = [
     name: "Food & Beverages",
     children: [
       {
-        name: "Food Services",
+        name: "Food Franchises",
         children: [
           "QSR(Quick Service Restaurants)",
           " Casual Dining",
@@ -348,7 +348,7 @@ export const categories = [
         ],
       },
       {
-        name: "Beverage Services",
+        name: "Beverage Franchises",
         children: ["Coffee & Tea Cafes",
            "Juice & Smoothie Bars",
            "Functional Beverages",
@@ -390,7 +390,7 @@ export const categories = [
         ],
       },
       {
-        name: "Food Trucks & Kiosks",
+        name: "Food Trucks & Kiosks Franchises",
         children: [
           "Street Food Vans",
           "Mall Food Kiosks",
@@ -404,7 +404,7 @@ export const categories = [
         ],
       },
       {
-        name: "Food Equipment & Machinery",
+        name: "Food Equipment & Machinery Franchises",
         children: [
           "Commercial Kitchen Equipment",
           "Bakery Equipment",
@@ -420,7 +420,7 @@ export const categories = [
         ],
       },
       {
-        name: "Catering & Institutional Food",
+        name: "Catering & Institutional Food ",
         children: [
           "Corporate & Institutional Catering",
           "School & College Catering",
