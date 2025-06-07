@@ -182,6 +182,43 @@ const InvestorDashboard = () => {
                   primaryTypographyProps={{ color: colors.darkText }}
                 />
               </NavItem>
+              <NavItem 
+                button 
+                component={RouterLink} 
+                to="/investordashboard/settings"
+                className={location.pathname === '/investordashboard/settings' ? 'active' : ''}
+              >
+                <ListItemIcon sx={{ minWidth: 40, color: colors.darkText }}>
+                  <SettingsIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Settings" 
+                  primaryTypographyProps={{ color: colors.darkText }}
+                />
+              </NavItem>
+              <NavItem 
+                button 
+                onClick={() => { /* handle logout */ }}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: colors.lightOrange + '20',
+                    '& .MuiListItemIcon-root': {
+                      color: colors.lightOrange,
+                    },
+                    '& .MuiListItemText-primary': {
+                      color: colors.lightOrange,
+                    }
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40, color: colors.darkText }}>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Logout" 
+                  primaryTypographyProps={{ color: colors.darkText }}
+                />
+              </NavItem>
 
               {/* <NavItem 
                 button 
@@ -216,48 +253,7 @@ const InvestorDashboard = () => {
           </Box>
 
           {/* Bottom Section */}
-          <Box sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.08)' }}>
-            <List>
-              <NavItem 
-                button 
-                component={RouterLink} 
-                to="/investordashboard/settings"
-                className={location.pathname === '/investordashboard/settings' ? 'active' : ''}
-              >
-                <ListItemIcon sx={{ minWidth: 40, color: colors.darkText }}>
-                  <SettingsIcon />
-                </ListItemIcon>
-                <ListItemText 
-                  primary="Settings" 
-                  primaryTypographyProps={{ color: colors.darkText }}
-                />
-              </NavItem>
-              
-              <NavItem 
-                button 
-                onClick={() => { /* handle logout */ }}
-                sx={{
-                  '&:hover': {
-                    backgroundColor: colors.lightOrange + '20',
-                    '& .MuiListItemIcon-root': {
-                      color: colors.lightOrange,
-                    },
-                    '& .MuiListItemText-primary': {
-                      color: colors.lightOrange,
-                    }
-                  }
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 40, color: colors.darkText }}>
-                  <LogoutIcon />
-                </ListItemIcon>
-                <ListItemText 
-                  primary="Logout" 
-                  primaryTypographyProps={{ color: colors.darkText }}
-                />
-              </NavItem>
-            </List>
-          </Box>
+          
         </GlassSidebar>
 
         {/* Main Content */}

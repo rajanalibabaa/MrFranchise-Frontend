@@ -44,6 +44,7 @@ import FranchisePromotion from "./Components/Footers/QuickLinks/FranchisePromoti
 import Navbar from "./Components/Navbar/NavBar.jsx";
 import Footer from "./Components/Footers/Footer.jsx";
 import { Box } from "@mui/material";
+import Otherindustries from "./Components/Footers/QuickLinks/Otherindustries.jsx";
 
 function App() {
   return (
@@ -102,6 +103,7 @@ function App() {
           {/* <Route path='/franchiseconsulting' element={<FranchiseConsulting/>}/> */}
           <Route path="/investfranchise" element={<InvestFranchise />} />
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
+          <Route path="/otherindustries" element={<Otherindustries/>}/>
         </Routes>
       </Provider>
     </>
