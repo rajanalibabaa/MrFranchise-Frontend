@@ -125,9 +125,8 @@ const InvestorDashboard = () => {
 
   return (
     <>
-      <Navbar />
       <Box sx={{ 
-        mt: 2,
+        mt: 8,
         display: "flex", 
         minHeight: "calc(100vh - 64px)",
         backgroundColor: colors.creamWhite

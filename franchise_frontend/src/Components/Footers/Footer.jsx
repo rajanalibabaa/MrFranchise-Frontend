@@ -188,7 +188,7 @@ function Footer() {
               >
                 About Us
               </Link>
-              {/* <Link
+              <Link
                 href="/contactus"
                 color="inherit"
                 underline="hover"
@@ -198,8 +198,8 @@ function Footer() {
                   fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
                 }}
               >
-                Contact
-              </Link> */}
+                Contact Support
+              </Link>
               <Link
                 href="/faq"
                 color="inherit"

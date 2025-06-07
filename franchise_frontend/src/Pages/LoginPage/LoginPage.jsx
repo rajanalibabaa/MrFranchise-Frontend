@@ -273,13 +273,13 @@ function LoginPage({ open, onClose }) {
                   textAlign="center"
                   mb={3}
                 >
-                  Please log in to your account to continue.
+                  Login as Registered User
                 </Typography>
 
                 <form onSubmit={handleSubmit}>
                   <TextField
                     fullWidth
-                    label="Email or Phone Number"
+                    label="Enter your registered Email"
                     id="username"
                     value={formData.username}
                     onChange={handleChange}
@@ -340,7 +340,7 @@ function LoginPage({ open, onClose }) {
                 )}
 
                 <Typography variant="body2" textAlign="center" mt={2}>
-                  Don’t have an account?{" "}
+                  New Registration{" "}
                   <Link
                     component="button"
                     onClick={() => {
@@ -349,7 +349,7 @@ function LoginPage({ open, onClose }) {
                     }}
                     sx={{ fontWeight: 500 }}
                   >
-                    Register here
+                    Click here
                   </Link>
                 </Typography>
               </Box>
