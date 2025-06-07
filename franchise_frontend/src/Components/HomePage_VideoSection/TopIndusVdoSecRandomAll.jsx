@@ -487,7 +487,7 @@ const handleLikeClick = async (brand) => {
                     mt: 'auto'
                   }}
                 >
-                  Apply Now
+                  View Details
                 </Button>
               </CardContent>
 

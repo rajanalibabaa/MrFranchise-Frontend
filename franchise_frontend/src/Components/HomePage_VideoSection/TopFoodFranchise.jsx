@@ -125,6 +125,63 @@ dispatch(openBrandDialog(brand));
         }
       };
 
+  // Function to format location states
+  // const formatLocations = (brand) => {
+  //   const states = brand.personalDetails?.states || [];
+  //   const brandId = brand.uuid;
+  //   const isExpanded = expandedLocations[brandId];
+    
+  //   if (states.length === 0) return "Multiple locations";
+    
+  //   if (states.length <= 2) {
+  //     return states.join(", ");
+  //   }
+    
+  //   if (isExpanded) {
+  //     return (
+  //       <>
+  //         {states.join(", ")}
+  //         <Typography 
+  //           component="span" 
+  //           sx={{ 
+  //             color: 'primary.main', 
+  //             cursor: 'pointer',
+  //             fontWeight: 500,
+  //             ml: 1
+  //           }}
+  //           onClick={(e) => {
+  //             e.stopPropagation();
+  //             toggleExpandLocations(brandId);
+  //           }}
+  //         >
+  //           Less
+  //         </Typography>
+  //       </>
+  //     );
+  //   }
+    
+  //   return (
+  //     <>
+  //       {states.slice(0, 2).join(", ")}
+  //       <Typography 
+  //         component="span" 
+  //         sx={{ 
+  //           color: 'primary.main', 
+  //           cursor: 'pointer',
+  //           fontWeight: 500,
+  //           ml: 1
+  //         }}
+  //         onClick={(e) => {
+  //           e.stopPropagation();
+  //           toggleExpandLocations(brandId);
+  //         }}
+  //       >
+  //         +{states.length - 2} more
+  //       </Typography>
+  //     </>
+  //   );
+  // };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -224,7 +281,7 @@ dispatch(openBrandDialog(brand));
             }
           }}
         >
-          Top Cafe Brands
+          Top Food Franchise Brands
         </Typography>
         
         <Button 

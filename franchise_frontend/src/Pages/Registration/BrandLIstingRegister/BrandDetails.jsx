@@ -61,32 +61,112 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     district: "",
     city: "",
   });
+  const [statesData, setStatesData] = useState([]); // full data
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
-  const [cities, setCities] = useState([]);
-  const [loadingStates, setLoadingStates] = useState(false);
-  const [loadingDistricts, setLoadingDistricts] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
+const [stateCities, setStateCities] = useState([]);
   const [apiError, setApiError] = useState(null);
   const [pincodeError, setPincodeError] = useState(null);
   const [loadingPincode, setLoadingPincode] = useState(false);
 
-  // Initialize with basic Indian states
-  useEffect(() => {
-    const basicStates = [
-      { name: "Maharashtra", iso2: "MH" },
-      { name: "Delhi", iso2: "DL" },
-      { name: "Karnataka", iso2: "KA" },
-      { name: "Tamil Nadu", iso2: "TN" },
-      { name: "Uttar Pradesh", iso2: "UP" },
-      { name: "Gujarat", iso2: "GJ" },
-      { name: "West Bengal", iso2: "WB" },
-      { name: "Rajasthan", iso2: "RJ" },
-      { name: "Andhra Pradesh", iso2: "AP" },
-      { name: "Telangana", iso2: "TG" },
-    ];
-    setStates(basicStates);
-  }, []);
+ const [loading, setLoading] = useState({
+    states: false,
+    districts: false,
+    cities: false
+  });
+
+const [selectedState, setSelectedState] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  // Fetch all Indian states on component mount
+ useEffect(() => {
+  const fetchStates = async () => {
+    setLoading(prev => ({ ...prev, states: true }));
+    try {
+      const response = await axios.get(
+        "https://raw.githubusercontent.com/prasad-gowda/india-state-district-cities/master/India-state-district-city.json"
+      );
+      setStatesData(response.data);
+      console.log("States Data:", response.data);
+      
+      setStates(response.data.map(state => ({ id: state.iso2, name: state.name })).sort((a, b) => a.name.localeCompare(b.name)));
+      // Set the first state as selected by default
+
+    } catch (error) {
+      setApiError("Failed to load states. Please try again later.");
+      console.error("Error fetching states:", error);
+    } finally {
+      setLoading(prev => ({ ...prev, states: false }));
+    }
+  };
+
+  fetchStates();
+}, []);
+
+const handleStateChange = (e) => {
+  const stateName = e.target.value;
+  setSelectedState(stateName);
+  setSelectedDistrict("");
+  setSelectedCity("");
+
+  setNewLocation((prev) => ({
+    ...prev,
+    state: stateName,
+    district: "",
+    city: ""
+  }));
+
+  const stateObj = statesData.find(s => s.name === stateName);
+  if (stateObj) {
+    setDistricts(stateObj.districts.sort());
+    setStateCities(stateObj.cities);
+    setCities([]);
+  } else {
+    setDistricts([]);
+    setStateCities([]);
+    setCities([]);
+  }
+};
+
+
+
+
+const handleDistrictChange = (e) => {
+  const district = e.target.value;
+  setSelectedDistrict(district);
+  setSelectedCity("");
+
+  setNewLocation((prev) => ({
+    ...prev,
+    district,
+    city: ""
+  }));
+
+  const filteredCities = stateCities.filter(
+    (city) => city.district === district
+  );
+
+  const sortedCities = filteredCities.sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+
+  setCities(sortedCities);
+};
+
+
+
+
+  const handleCityChange = (e) => {
+  const city = e.target.value;
+  setSelectedCity(city);
+  setNewLocation((prev) => ({
+    ...prev,
+    city
+  }));
+};
+
+
+
 
   // Handle pincode change with debounce
   useEffect(() => {
@@ -129,77 +209,31 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     }
   };
 
-  // Fetch districts when state changes in the modal
-  useEffect(() => {
-    if (!newLocation.state) return;
 
-    const fetchDistricts = async () => {
-      setLoadingDistricts(true);
-      try {
-        // Mock districts based on state
-        const mockDistricts = {
-          Maharashtra: ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane"],
-          Delhi: ["New Delhi", "Central Delhi", "East Delhi"],
-          Karnataka: ["Bangalore", "Mysore", "Hubli", "Mangalore"],
-          "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai"],
-          "Uttar Pradesh": ["Lucknow", "Kanpur", "Varanasi", "Agra"],
-        };
+const handleAddLocation = () => {
+  console.log("Attempting to add location:", newLocation);
 
-        const districts = mockDistricts[newLocation.state] || ["Not available"];
-        setDistricts(districts.map((name) => ({ name })));
-      } catch (error) {
-        console.error("Error generating districts:", error);
-        setApiError("Failed to load districts. Please try again later.");
-      } finally {
-        setLoadingDistricts(false);
-      }
-    };
+  if (
+    newLocation.state?.trim() &&
+    newLocation.district?.trim() &&
+    newLocation.city?.trim()
+  ) {
+    const updatedLocations = Array.isArray(data.expansionLocation)
+      ? [...data.expansionLocation, { ...newLocation }]
+      : [{ ...newLocation }];
 
-    fetchDistricts();
-    setNewLocation((prev) => ({ ...prev, district: "", city: "" }));
-  }, [newLocation.state]);
+    console.log("Updated locations:", updatedLocations);
 
-  // Fetch cities when district changes in the modal
-  useEffect(() => {
-    if (!newLocation.district) return;
+    onChange({ expansionLocation: updatedLocations });
 
-    setLoadingCities(true);
-    setApiError(null);
+    setNewLocation({ country: "India", state: "", district: "", city: "" });
+    setOpenLocationModal(false);
+  } else {
+    console.warn("Missing state/district/city:", newLocation);
+  }
+};
 
-    setTimeout(() => {
-      try {
-        // Mock city data based on district
-        const mockCities = {
-          Mumbai: ["Mumbai", "Navi Mumbai", "Thane"],
-          Pune: ["Pune", "Pimpri-Chinchwad", "Hinjewadi"],
-          Nagpur: ["Nagpur", "Kamptee", "Katol"],
-          Bangalore: ["Bangalore", "Electronic City", "Whitefield"],
-          Delhi: ["New Delhi", "Noida", "Gurgaon"],
-          Chennai: ["Chennai", "Tambaram", "Anna Nagar"],
-          // Add more districts as needed
-        };
 
-        const cities = mockCities[newLocation.district] || ["Not available"];
-        setCities(cities.map((name) => ({ name })));
-      } catch (error) {
-        console.error("Error generating cities:", error);
-        setApiError("Failed to load cities. Please try again later.");
-      } finally {
-        setLoadingCities(false);
-      }
-    }, 500);
-  }, [newLocation.district]);
-
-  const handleAddLocation = () => {
-    if (newLocation.state && newLocation.district && newLocation.city) {
-      const updatedLocations = Array.isArray(data.expansionLocation)
-        ? [...data.expansionLocation, { ...newLocation }]
-        : [{ ...newLocation }];
-      onChange({ expansionLocation: updatedLocations });
-      setNewLocation({ country: "India", state: "", district: "", city: "" });
-      setOpenLocationModal(false);
-    }
-  };
 
   const handleRemoveLocation = (index) => {
     const updatedLocations = [...data.expansionLocation];
@@ -407,81 +441,53 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
                   <FormControl fullWidth sx={{ mb: 2 }}>
                     <InputLabel>State</InputLabel>
                     <Select
-                      value={newLocation.state}
-                      onChange={(e) =>
-                        setNewLocation({
-                          ...newLocation,
-                          state: e.target.value,
-                          district: "",
-                          city: "",
-                        })
-                      }
+                      value={selectedState}
+                      onChange={handleStateChange}
                       label="State"
-                      disabled={loadingStates}
+                      disabled={loading.states}
                     >
                       {states.map((state) => (
-                        <MenuItem key={state.iso2} value={state.name}>
+                        <MenuItem key={state.id} value={state.name}>
                           {state.name}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
-
-                  <FormControl fullWidth sx={{ mb: 2 }}>
+{selectedState && (  <FormControl fullWidth sx={{ mb: 2 }}>
                     <InputLabel>District</InputLabel>
                     <Select
-                      value={newLocation.district}
-                      onChange={(e) =>
-                        setNewLocation({
-                          ...newLocation,
-                          district: e.target.value,
-                          city: "",
-                        })
-                      }
+                      value={selectedDistrict}
+                      onChange={handleDistrictChange}
+                      
                       label="District"
-                      disabled={!newLocation.state || loadingDistricts}
+                      disabled={loading.districts}
                     >
-                      {loadingDistricts ? (
-                        <MenuItem disabled>Loading districts...</MenuItem>
-                      ) : districts.length > 0 ? (
-                        districts.map((district) => (
-                          <MenuItem key={district.name} value={district.name}>
-                            {district.name}
-                          </MenuItem>
-                        ))
-                      ) : (
-                        <MenuItem disabled>No districts available</MenuItem>
-                      )}
+                      {districts.map((district, index) => (
+                        <MenuItem key={index} value={district}>
+                          {district}
+                        </MenuItem>
+                      ))}
+                      
                     </Select>
-                  </FormControl>
-
+                  </FormControl>)}
+                 
+{selectedDistrict && ( 
                   <FormControl fullWidth sx={{ mb: 2 }}>
                     <InputLabel>City</InputLabel>
                     <Select
-                      value={newLocation.city}
-                      onChange={(e) =>
-                        setNewLocation({
-                          ...newLocation,
-                          city: e.target.value,
-                        })
-                      }
+                      value={selectedCity}
+                      onChange={handleCityChange}
                       label="City"
-                      disabled={!newLocation.district || loadingCities}
+                      disabled={loading.cities}
                     >
-                      {loadingCities ? (
-                        <MenuItem disabled>Loading cities...</MenuItem>
-                      ) : cities.length > 0 ? (
-                        cities.map((city) => (
-                          <MenuItem key={city.name} value={city.name}>
-                            {city.name}
-                          </MenuItem>
-                        ))
-                      ) : (
-                        <MenuItem disabled>No cities available</MenuItem>
-                      )}
+                      {stateCities.map((city, index) => (
+                        <MenuItem key={index} value={city.name}>
+                          {city.name} ({city.status})
+                        </MenuItem>
+                      ))}
                     </Select>
-                  </FormControl>
-                </Box>
+                  </FormControl>)}
+                </Box> 
               </DialogContent>
               <DialogActions>
                 <Button onClick={() => setOpenLocationModal(false)}>
