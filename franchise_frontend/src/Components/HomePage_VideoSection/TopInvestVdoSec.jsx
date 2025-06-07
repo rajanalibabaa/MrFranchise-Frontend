@@ -540,7 +540,7 @@ dispatch(openBrandDialog(brand));
                         fontWeight: 500
                       }}
                     >
-                      Apply Now
+                      View Details
                     </Button>
                   </Box>
                 </Box>

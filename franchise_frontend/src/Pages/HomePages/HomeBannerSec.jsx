@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
-  Button,
   Typography,
   Container,
   useMediaQuery,
@@ -17,11 +16,14 @@ import FilterDropdowns from "../../Components/Navbar/FilterDropdownsData";
 const dynamicComponents = {
   TopBrandVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandTwoVdoSec")),
   TopBrandVdoCards: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")),//first video section
-  TopIndusVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopIndusVdoSecRandomAll")), //second video section
-  TopInvestVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopInvestVdoSec.jsx")),
+  TopIndusVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopIndusVdoSecRandomAll")), //second video section top leading industries
+  TopInvestVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopInvestVdoSec.jsx")), //TOp restaurant investment section
   TopInvestVdo2: React.lazy(() => import("../../Components/HomePage_VideoSection/TopInvestVdo2")),//location cards
   TopInvestVdocardround: React.lazy(() => import("../../Components/HomePage_VideoSection/ToTrendingBrands")),//last video section
-  TopCafeBrandsSection:React.lazy(()=>import('../../Components/HomePage_VideoSection/TopCafeBrands.jsx')) //3rd video section
+  TopCafeBrandsSection:React.lazy(()=>import('../../Components/HomePage_VideoSection/TopCafeBrands.jsx')), //3rd video section
+  TopFoodFranchise:React.lazy(()=> import('../../Components/HomePage_VideoSection/TopFoodFranchise.jsx')), //top food franchise section
+  TopBeverageFranchise:React.lazy(()=> import ('../../Components/HomePage_VideoSection/TopBeverageFranchise.jsx')), //top beverage franchise section
+TopDesertBakeryFranchise:React.lazy(()=>import('../../Components/HomePage_VideoSection/TopDesertBakerys.jsx'))
 };
 
 // Configuration object for the entire page
@@ -49,45 +51,48 @@ const pageConfig = {
   sections: [
     {
       component: "TopBrandVdoCards",
-      // title: "Popular Cuisine Categories",
       background: "white",
-      // backgroundImage: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
       backgroundOpacity: 0.1,
-      // dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
       animationDelay: 0.2
     },
-    // {
-    //   component: "TopBrandVdoSec",
-    //   // title: "Trending Food Franchises",
-    //   background: "#fffaf7",
-    //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    //   animationDelay: 0
-    // },
-    
     {
       component: "TopIndusVdoSec",
-      // title: "Franchise Booming Industries",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
       animationDelay: 0.4
     },
     {
       component: "TopCafeBrandsSection",
-      // title: "Top Cafe Brands",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+      animationDelay: 0.5
+    },
+    {
+      component: "TopFoodFranchise",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+      animationDelay: 0.5
+    },
+    {
+      component: "TopBeverageFranchise",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+      animationDelay: 0.5
+    },
+    {
+      component: "TopDesertBakeryFranchise",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
       animationDelay: 0.5
     },
     {
       component: "TopInvestVdoSec",
-      // title: "Investment Opportunities",
       background: "white",
       dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
       animationDelay: 0.6
     },
     {
       component: "TopInvestVdo2",
-      // title: "Emerging Concepts",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
       animationDelay: 0.8
@@ -95,7 +100,6 @@ const pageConfig = {
     {
       component: "TopInvestVdocardround",
       title: "Trending Brands",
-      // background: "linear-gradient(rgba(255, 250, 247, 0.85), rgba(255, 250, 247, 0.7))",
       backgroundImage: "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80",
       dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
       animationDelay: 1.0
@@ -194,27 +198,6 @@ const HomeBannerSec = () => {
         )}
         
         <Container  maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
-          {/* <Typography 
-            variant={isMobile ? "h4" : "h3"} 
-            sx={{
-              fontWeight: 700,
-              textAlign: 'center',
-              // mb: 6,
-              color: '#333',
-              position: 'relative',
-              '&:after': {
-                content: '""',
-                display: 'block',
-                width: '280px',
-                height: '4px',
-                background: sectionConfig.dividerColor,
-                margin: '20px auto 0',
-                borderRadius: '2px'
-              }
-            }}
-          >
-            {sectionConfig.title}
-          </Typography> */}
           
           <React.Suspense fallback={<div>Loading...</div>}>
             <motion.div

@@ -646,15 +646,7 @@ const BrandDetailsDialog = () => {
               flexDirection={"row"}
               justifyContent={"space-between"}
             >
-              <Grid display={"flex"} flexDirection={"column"}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    flexDirection: { xs: "column", sm: "row" },
-                  }}
-                ></Box>
-              </Grid>
+
               <Grid container spacing={2}>
                 <Grid item xs={12} md={12}>
                   <Paper elevation={1} sx={{ p: 1.5, borderRadius: 2 }}>
@@ -675,7 +667,7 @@ const BrandDetailsDialog = () => {
                             key={index}
                             sx={{
                               width: { xs: "100%", sm: "48%", md: "78%" },
-                              maxHeight: 400,
+                              maxHeight:350,
                               borderRadius: 2,
                               overflow: "hidden",
                               backgroundColor: "#f5f5f5",
@@ -688,7 +680,7 @@ const BrandDetailsDialog = () => {
                               style={{
                                 width: "100%",
                                 height: "100%",
-                                objectFit: "cover",
+                                objectFit: "contain",
                               }}
                             >
                               <source src={videoUrl} type="video/mp4" />
