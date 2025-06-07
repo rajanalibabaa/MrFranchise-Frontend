@@ -7,8 +7,6 @@ import {
   useTheme,
 } from "@mui/material";
 import { motion, useAnimation } from "framer-motion";
-import Navbar from "../../Components/Navbar/NavBar";
-import Footer from "../../Components/Footers/Footer";
 import PopupModal from "../../Components/PopUpModal/PopUpModal";
 import FilterDropdowns from "../../Components/Navbar/FilterDropdownsData";
 
@@ -164,13 +162,15 @@ const HomeBannerSec = () => {
   const handlePopupClose = () => setIsPopupOpen(false);
 
   // Render a dynamic section component
-  const renderSection = (sectionConfig, index) => {
+  const renderSection   = (sectionConfig, index) => {
     const DynamicComponent = dynamicComponents[sectionConfig.component];
     
     return (
       <Box
+      
         key={index}
         sx={{
+          
           py: 1,
           px: 2,
           backgroundColor: sectionConfig.background,
@@ -217,10 +217,10 @@ const HomeBannerSec = () => {
   return (
     <>
       <PopupModal open={isPopupOpen} onClose={handlePopupClose} />
-      <Navbar />
       
       {/* Hero Banner */}
       <Box
+       mt={10} 
       maxWidth={'xl'}
         sx={{
           background: `linear-gradient(${pageConfig.heroBanner.overlayColor}), url(${pageConfig.heroBanner.backgroundImage})`,
@@ -357,7 +357,6 @@ const HomeBannerSec = () => {
         {pageConfig.sections.map((section, index) => renderSection(section, index))}
       </Box>
 
-      <Footer />
     </>
   );
 };

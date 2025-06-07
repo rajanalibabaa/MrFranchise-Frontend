@@ -6,9 +6,6 @@ import {
   CardContent,
   CardMedia, 
   CircularProgress, 
-  Dialog, 
-  DialogContent, 
-  DialogTitle, 
   IconButton,
   FormControl, 
   InputLabel, 
@@ -16,7 +13,6 @@ import {
   MenuItem,
   Avatar,
   Chip,
-  Divider,
   Grid,
   Stack,
   Paper,
@@ -29,7 +25,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import BusinessIcon from "@mui/icons-material/Business";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import CategoryIcon from "@mui/icons-material/Category";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -289,7 +284,6 @@ useEffect(() => {
                   flexDirection: "column",
                   borderRadius: 3,
                   overflow: "hidden",
-                  height: CARD_DIMENSIONS.height,
                   border: "1px solid #e0e0e0",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                   transition: 'all 0.3s ease',
@@ -412,8 +406,9 @@ useEffect(() => {
                   <Paper 
                     variant="outlined"
                     display="flex"
-                    justifyContent="space-between" 
+                     
                     sx={{ 
+                      justifyContent:"space-between",
                       p: isMobile ? 1 : 1,
                       mb: 1,
                       borderRadius: 2,
@@ -486,7 +481,7 @@ useEffect(() => {
           );
         })}
       </Box>
-
+<BrandDetailsDialog />
     </Box>
   );
 }

@@ -462,6 +462,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%)',
       p: { xs: 2, md: 4 }
+      
     }}>
 
       {/* Profile Section */}
@@ -469,9 +470,10 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
         mb: 1,
         borderRadius: 3,
         boxShadow: 3,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        
       }}>
-        {/* <Box sx={{
+        <Box sx={{
           display: 'flex',
           flexDirection: { xs: 'column', md: 'row' },
           alignItems: 'center',
@@ -502,7 +504,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
               {renderStatCard(<AssignmentTurnedIn />, 'Applied', stats.totalApplications, '33, 150, 243')}
             </Box>
           </Box>
-        </Box> */}
+        </Box>
       </Card>
 
       {/* Main Content */}
