@@ -76,6 +76,7 @@ const InvestorRegister = () => {
       country: "India",
       preferredState:"",
       preferredCity: "",
+      preferredDistrict:"",
     },
   });
 
@@ -92,9 +93,12 @@ const dropdownRef = useRef(null);
  const [selectedCategories, setSelectedCategories] = useState([]);
 
  const [indiaData, setIndiaData] = useState([]);
-const [preferredStates, setPreferredStates] = useState([]);
-const [preferredCities, setPreferredCities] = useState([]);
-const preferredStateValue = watch("preferredState");
+  const [preferredStates, setPreferredStates] = useState([]);
+  const [preferredCities, setPreferredCities] = useState([]);
+  const [preferredDistricts, setPreferredDistricts] = useState([]);
+
+  const preferredStateValue = watch("preferredState");
+  const preferredDistrictValue = watch("preferredDistrict");
 
 const [loginOpen, setLoginOpen] = useState(false);
 const FORM_DATA_KEY = "investor_form_data";
@@ -116,6 +120,7 @@ const initialFormData = {
   propertyType: "",
   propertySize: "",
   preferredState: "",
+  preferredDistrict: "",
   preferredCity: "",
   terms: false,
 };
@@ -129,24 +134,61 @@ const openLoginPopup = () => {
   };
 
   useEffect(() => {
-  axios.get("https://raw.githubusercontent.com/prasad-gowda/india-state-district-cities/master/India-state-district-city.json")
-    .then(res => {
-      setIndiaData(res.data);
-      setPreferredStates(res.data.map(state => state.state));
-    })
-    .catch(err => {
-      setIndiaData([]);
-      setPreferredStates([]);
-    });
-}, []);
+    axios
+      .get(
+        "https://raw.githubusercontent.com/prasad-gowda/india-state-district-cities/master/India-state-district-city.json"
+      )
+      .then((res) => {
+        // console.log
+        setIndiaData(res.data);
+        // Extract state names
+        const stateNames = res.data.map((state) => state.state);
+        setPreferredStates(stateNames);
+      })
+      .catch((err) => {
+        console.error("Error fetching location data:", err);
+        setIndiaData([]);
+        setPreferredStates([]);
+      });
+  }, []);
+
+
 useEffect(() => {
-  if (preferredStateValue && indiaData.length > 0) {
-    const stateObj = indiaData.find(s => s.state === preferredStateValue);
-    setPreferredCities(stateObj ? stateObj.cities : []);
-  } else {
-    setPreferredCities([]);
-  }
-}, [preferredStateValue, indiaData]);
+    if (preferredStateValue && indiaData.length > 0) {
+      const stateObj = indiaData.find((s) => s.state === preferredStateValue);
+      if (stateObj) {
+        // Extract district names
+        const districtNames = stateObj.districts.map((d) => d.name);
+        setPreferredDistricts(districtNames);
+      } else {
+        setPreferredDistricts([]);
+      }
+      // Clear city when state changes
+      setValue("preferredCity", "");
+    } else {
+      setPreferredDistricts([]);
+      setPreferredCities([]);
+    }
+  }, [preferredStateValue, indiaData, setValue]);
+
+  useEffect(() => {
+    if (preferredStateValue && preferredDistrictValue && indiaData.length > 0) {
+      const stateObj = indiaData.find((s) => s.state === preferredStateValue);
+      if (stateObj) {
+        const districtObj = stateObj.districts.find(
+          (d) => d.name === preferredDistrictValue
+        );
+        if (districtObj && districtObj.cities) {
+          setPreferredCities(districtObj.cities);
+        } else {
+          setPreferredCities([]);
+        }
+      }
+    } else {
+      setPreferredCities([]);
+    }
+  }, [preferredStateValue, preferredDistrictValue, indiaData]);
+
 // Add this useEffect hook to handle outside clicks
 useEffect(() => {
   const handleClickOutside = (event) => {
@@ -188,9 +230,7 @@ useEffect(() => {
     name: "occupation",
     defaultValue: "",
   });
-  // const propertyType = useWatch({ control, name: "propertyType" });
   const selectedRange = useWatch({ control, name: "investmentRange" });
-  // const selectedState = watch("preferredState");
 
   const [otpStates, setOtpStates] = useState({
     email: {
@@ -450,6 +490,7 @@ category:selectedCategories,
   }),
     preferredState: data.preferredState || "", 
     preferredCity: data.preferredCity || "",
+    preferredDistrict: data.preferredDistrict || "",
     };
     console.log("Submitting data:", formattedData); 
 
@@ -1171,49 +1212,86 @@ category:selectedCategories,
 
           
 {/* Preferred State Field (changed to text input) */}
-                <Grid item xs={12} sm={6} >
-                  <FormControl fullWidth error={!!errors.preferredState}>
-    <InputLabel>Preferred State</InputLabel>
-    <Select
-      label="Preferred State"
-      value={preferredStateValue || ""}
-      {...register("preferredState", { required: "Preferred state is required" })}
-      onChange={e => {
-        setValue("preferredState", e.target.value);
-        setValue("preferredCity", "");
-      }}
-    >
-      <MenuItem value="">Select State</MenuItem>
-      {preferredStates.map(state => (
-        <MenuItem key={state} value={state}>{state}</MenuItem>
-      ))}
-    </Select>
-    <Typography color="error" variant="caption">
-      {errors.preferredState?.message}
-    </Typography>
-  </FormControl>
-                </Grid>
+                <Grid item xs={12} sm={6}>
+                <FormControl fullWidth error={!!errors.preferredState}>
+                  <InputLabel>Preferred State *</InputLabel>
+                  <Select
+                    label="Preferred State"
+                    value={watch("preferredState") || ""}
+                    {...register("preferredState", {
+                      required: "Preferred state is required",
+                    })}
+                    onChange={(e) => {
+                      setValue("preferredState", e.target.value);
+                      setValue("preferredDistrict", "");
+                      setValue("preferredCity", "");
+                    }}
+                  >
+                    <MenuItem value="">Select State</MenuItem>
+                    {preferredStates.map((state) => (
+                      <MenuItem key={state} value={state}>
+                        {state}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <Typography color="error" variant="caption">
+                    {errors.preferredState?.message}
+                  </Typography>
+                </FormControl>
+              </Grid>
+
+                {/* Preferred District Field  */}
+                <Grid item xs={12} sm={6}>
+  <FormControl fullWidth error={!!errors.preferredDistrict}>
+                  <InputLabel>Preferred District *</InputLabel>
+                  <Select
+                    label="Preferred District"
+                    value={watch("preferredDistrict") || ""}
+                    {...register("preferredDistrict", {
+                      required: "Preferred district is required",
+                    })}
+                    onChange={(e) => {
+                      setValue("preferredDistrict", e.target.value);
+                      setValue("preferredCity", "");
+                    }}
+                    disabled={!watch("preferredState")}
+                  >
+                    <MenuItem value="">Select District</MenuItem>
+                    {preferredDistricts.map((district) => (
+                      <MenuItem key={district} value={district}>
+                        {district}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <Typography color="error" variant="caption">
+                    {errors.preferredDistrict?.message}
+                  </Typography>
+                </FormControl>
+</Grid>
 
                 {/* Preferred City Field (changed to text input) */}
                 <Grid item xs={12} sm={6} >
-                  <FormControl fullWidth error={!!errors.preferredCity}>
-    <InputLabel>Preferred City</InputLabel>
-    <Select
-      label="Preferred City"
-      value={watch("preferredCity") || ""}
-      {...register("preferredCity", { required: "Preferred city is required" })}
-      onChange={e => setValue("preferredCity", e.target.value)}
-      disabled={!preferredStateValue}
-    >
-      <MenuItem value="">Select City</MenuItem>
-      {preferredCities.map(city => (
-        <MenuItem key={city} value={city}>{city}</MenuItem>
-      ))}
-    </Select>
-    <Typography color="error" variant="caption">
-      {errors.preferredCity?.message}
-    </Typography>
-  </FormControl>
+        <FormControl fullWidth error={!!errors.preferredCity}>
+                  <InputLabel>Preferred City *</InputLabel>
+                  <Select
+                    label="Preferred City"
+                    value={watch("preferredCity") || ""}
+                    {...register("preferredCity", {
+                      required: "Preferred city is required",
+                    })}
+                    disabled={!watch("preferredDistrict")}
+                  >
+                    <MenuItem value="">Select City</MenuItem>
+                    {preferredCities.map((city) => (
+                      <MenuItem key={city} value={city}>
+                        {city}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <Typography color="error" variant="caption">
+                    {errors.preferredCity?.message}
+                  </Typography>
+                </FormControl>
                 </Grid>
 {/* Property Type Field */}
           <Grid item xs={12} sm={6} md={4}>
