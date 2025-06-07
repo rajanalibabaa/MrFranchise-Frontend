@@ -1087,7 +1087,6 @@ const BrandRegisterForm = () => {
   };
   return (
     <>
-    <Navbar/>
     <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Box
         sx={{
@@ -1251,7 +1250,6 @@ const BrandRegisterForm = () => {
         </Alert>
       </Snackbar>
     </Box>
-    <Footer/>
     </>
   );
 };

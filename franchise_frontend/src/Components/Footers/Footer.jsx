@@ -141,8 +141,8 @@ function Footer() {
               >
                 Franchise Promotion & Lead Distribution Packages
               </Link>
-              {/* <Link
-                href="/franchiseconsulting"
+              <Link
+                href="/otherindustries"
                 color="inherit"
                 underline="hover"
                 display="block"
@@ -151,8 +151,8 @@ function Footer() {
                   fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
                 }}
               >
-                Franchise Consulting
-              </Link> */}
+                Other Industries
+              </Link>
             </Box>
           </Grid>
 

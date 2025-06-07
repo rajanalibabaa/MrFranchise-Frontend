@@ -44,8 +44,8 @@ function RegisterHandleUser() {
 
   return (
     <>
-    <Navbar/>
     <Box
+    mt={isMobile ? 0 : 7}
       sx={{
         height: "100vh",
         overflow: "hidden",

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Paper, Avatar, CircularProgress,
@@ -7,6 +8,8 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import axios from "axios";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import { useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom';
 import { categories } from '../../Pages/Registration/BrandLIstingRegister/BrandCategories.jsx';
@@ -15,6 +18,8 @@ const ManageProfile = () => {
   const [investorData, setInvestorData] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
   // OTP dialog and verification state
   const [otpDialogOpen, setOtpDialogOpen] = useState(false);
@@ -209,8 +214,10 @@ const ManageProfile = () => {
         }
       );
       setEditMode(false);
+      setSnackbar({ open: true, message: "Profile successfully updated!", severity: "success" });
     } catch (error) {
       console.error("Error saving investor data:", error);
+      setSnackbar({ open: true, message: "Failed to update profile.", severity: "error" });
     }
   };
 
@@ -539,8 +546,25 @@ const ManageProfile = () => {
           <Button onClick={() => setOtpDialogOpen(false)}>Cancel</Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
+        >
+          {snackbar.message}
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 };
 
-export default ManageProfile;
+export default ManageProfile;
+
