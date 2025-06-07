@@ -40,13 +40,19 @@ import { Compare } from "@mui/icons-material";
 import BrandComparison from "./BrandComparison";
 import FilterPanel from "./FillterPannel.jsx";
 import BrandCard from "./BrandCard.jsx";
+import axios from "axios";
 
 function BrandList() {
   const dispatch = useDispatch();
   const location = useLocation();
   const [showLogin, setShowLogin] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
   const initialFilters = location.state?.filters || {};
+
+   const id = localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID")
+   const token = localStorage.getItem("accessToken")
+
   const {
     data: brands = [],
     filteredData: filteredBrands = [],
@@ -124,7 +130,20 @@ function BrandList() {
     }
   }, [dispatch]);
 
-  const handleOpenBrand = (brand) => {
+  const handleOpenBrand = async(brand) => {
+    console.log(brand.uuid)
+    const brandID = brand.uuid
+    const res = await axios.post(`https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
+      
+      {
+       headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          data:{brandID}
+        },
+      }
+    )
+    console.log("=res= :",res)
     dispatch(openBrandDialog(brand));
   };
 
@@ -150,6 +169,8 @@ function BrandList() {
       return;
     }
 
+    console.log("isliked === :",isLiked)
+    console.log("brandId :",brandId)
     try {
       await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
       // Optionally show success message
@@ -162,7 +183,7 @@ function BrandList() {
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 2, mb: 6 }}>
+    <Container maxWidth="xl" sx={{ mt: 2, mb: 6 ,}}>
       <Box sx={{ position: "fixed", right: 20, zIndex: 1000 }}>
         <Badge badgeContent={selectedForComparison.length} color="primary">
           <Button
@@ -184,7 +205,7 @@ function BrandList() {
           </Button>
         </Badge>
       </Box>
-      <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3 }}>
+      {/* <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3 }}>
         <Link
           color="inherit"
           href="/"
@@ -197,7 +218,7 @@ function BrandList() {
         >
           <Store sx={{ mr: 0.5, color: "#ff9800" }} /> Franchise Brands
         </Typography>
-      </Breadcrumbs>
+      </Breadcrumbs> */}
       {/* Back to Top Button */}
       <Box
         sx={{
@@ -270,11 +291,11 @@ function BrandList() {
         {/* Desktop Filters */}
         <Box
           sx={{
-            mt: 3,
             mr: 5,
             width: { md: 280 },
             flexShrink: 0,
             display: { xs: "none", md: "block" },
+            
           }}
         >
           <FilterPanel
@@ -325,13 +346,14 @@ function BrandList() {
         </Box>
 
         {/* Main Content */}
-        <Box sx={{ flexGrow: 1, ml: { md: 3 } }}>
+        <Box display="flex" flexDirection={{ xs: "column", md: "column" }} gap={3}>
           {loading ? (
             <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              minHeight="60vh"
+              sx={{
+        width: { md: 300 },
+        flexShrink: 0,
+        display: { xs: "none", md: "block" },
+      }}
             >
               <CircularProgress
                 size={60}

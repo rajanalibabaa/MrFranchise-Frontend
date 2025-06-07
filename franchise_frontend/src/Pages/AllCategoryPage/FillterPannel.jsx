@@ -31,8 +31,6 @@ const investmentRangeOptions = [
   { label: "Rs.5Cr-above", value: "Rs.5 Cr - Above" },
 ];
 
-
-// Updated FilterPanel component
 const FilterPanel = ({
   filters,
   handleFilterChange,
@@ -80,7 +78,6 @@ const FilterPanel = ({
     }
   }, [selectedMainCategory]);
 
-  // Reset child categories when sub category changes
   // Reset child categories when sub category changes
   useEffect(() => {
     if (!selectedSubCategory && selectedChildCategories.length > 0) {
@@ -134,7 +131,28 @@ const FilterPanel = ({
   };
 
   return (
-    <Box sx={{ width: 280, p: 2  }}>
+    <Box
+      sx={{
+        width: 280,
+        pr: 2,
+        position: { md: "fixed" },
+        height: { md: "calc(90vh - 32px)" },
+        overflowY: "auto",
+        "&::-webkit-scrollbar": {
+          width: "6px",
+        },
+        "&::-webkit-scrollbar-track": {
+          background: "#f1f1f1",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          background: "#ff9800",
+          borderRadius: "3px",
+        },
+        "&::-webkit-scrollbar-thumb:hover": {
+          background: "#fb8c00",
+        },
+      }}
+    >
       <Box
         display="flex"
         justifyContent="space-between"
@@ -164,6 +182,7 @@ const FilterPanel = ({
         }}
         sx={{ mb: 3 }}
       />
+      
       {/* Main Category Radio Buttons */}
       <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
         Main Category
@@ -193,10 +212,7 @@ const FilterPanel = ({
       {selectedMainCategory && (
         <>
           <Divider sx={{ my: 2 }} />
-          <Typography
-            gutterBottom
-            sx={{ color: "#4caf50", fontWeight: "bold" }}
-          >
+          <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
             Sub Category
           </Typography>
           <FormControl component="fieldset" fullWidth sx={{ mb: 2 }}>
@@ -225,10 +241,7 @@ const FilterPanel = ({
       {selectedSubCategory && (
         <>
           <Divider sx={{ my: 2 }} />
-          <Typography
-            gutterBottom
-            sx={{ color: "#4caf50", fontWeight: "bold" }}
-          >
+          <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
             Child Categories
           </Typography>
           <Box sx={{ maxHeight: 200, overflow: "auto" }}>
@@ -250,14 +263,13 @@ const FilterPanel = ({
           </Box>
         </>
       )}
-      {/* Rest of the filters remain unchanged */}
+
+      {/* Model Type Select */}
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>Model Type</InputLabel>
         <Select
           value={filters.selectedModelType}
-          onChange={(e) =>
-            handleFilterChange("selectedModelType", e.target.value)
-          }
+          onChange={(e) => handleFilterChange("selectedModelType", e.target.value)}
           label="Model Type"
           sx={{
             "& .MuiSelect-icon": {
@@ -276,6 +288,7 @@ const FilterPanel = ({
         </Select>
       </FormControl>
 
+      {/* State Select */}
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>State</InputLabel>
         <Select
@@ -299,6 +312,7 @@ const FilterPanel = ({
         </Select>
       </FormControl>
 
+      {/* City Select */}
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>City</InputLabel>
         <Select
@@ -322,20 +336,20 @@ const FilterPanel = ({
         </Select>
       </FormControl>
 
-      <Typography gutterBottom sx={{ color: "#4caf50" }}>
+      {/* Investment Range */}
+      <Typography gutterBottom sx={{ color: "#4caf50"  }}>
         Investment Range
       </Typography>
       <Select
         value={filters.selectedInvestmentRange}
-        onChange={(e) =>
-          handleFilterChange("selectedInvestmentRange", e.target.value)
-        }
+        onChange={(e) => handleFilterChange("selectedInvestmentRange", e.target.value)}
         label="Investment Range"
         sx={{
           "& .MuiSelect-icon": {
             color: "#ff9800",
           },
           width: "100%",
+          mb: 3
         }}
       >
         {investmentRangeOptions.map((option) => (
@@ -345,11 +359,11 @@ const FilterPanel = ({
         ))}
       </Select>
 
-      <Typography variant="body2" sx={{ color: "#4caf50", mt: 2 }}>
+      <Typography variant="body2" sx={{ color: "#4caf50" }}>
         Showing {filteredBrands.length} of {brands.length} brands
       </Typography>
     </Box>
   );
 };
 
-export default FilterPanel
+export default FilterPanel;

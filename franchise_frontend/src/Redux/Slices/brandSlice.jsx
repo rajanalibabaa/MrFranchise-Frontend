@@ -2,12 +2,14 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const token = localStorage.getItem("accessToken");
-
+ const id = localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID")
 export const toggleLikeBrand = createAsyncThunk(
   "brands/toggleLike",
   async ({ brandId, isLiked }, { rejectWithValue }) => {
+
+    console.log("=========== :",isLiked,brandId)
     try {
-      const token = localStorage.getItem("accessToken");
+     
       if (!token) {
         return rejectWithValue("You need to log in to continue.");
       }
@@ -20,25 +22,35 @@ export const toggleLikeBrand = createAsyncThunk(
       };
 
         
-
+      const brandID = brandId 
       if (!isLiked) {
         // Like the brand - POST request
         await axios.post(
           "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
+          // "http://localhost:5000/api/api/v1/like/post-favbrands",
           { branduuid: brandId },
           config
         );
-      } else {
+      } else 
+      if (isLiked) {
+
+        console.log("delete")
         // Unlike the brand - DELETE request
-        await axios.delete(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${brandId}`,
+        const res = await axios.delete(
+          `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${id}`,
+          // `http://localhost:5000/api/api/v1/like/delete-favbrand/${id}`,
+          
           {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
-            }
-          }
+            },
+            data:{ brandID},
+          },
+          
         );
+
+        console.log("res :",res)
       }
 
       return { brandId, isLiked: !isLiked };
@@ -50,6 +62,8 @@ export const toggleLikeBrand = createAsyncThunk(
     }
   }
 );
+
+
 
 export const fetchBrands = createAsyncThunk(
   "brands/fetchBrands",

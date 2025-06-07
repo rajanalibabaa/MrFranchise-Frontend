@@ -41,11 +41,17 @@ const handleLikeClick = async (brandId, isLiked) => {
   } finally {
     setIsProcessingLike(prev => ({ ...prev, [brandId]: false }));
   }
+
+  console.log("isLiked :", isLiked)
+  console.log("brandId :", brandId)
+
+  
 };
 
   return (
     <Card
       sx={{
+        overflow:"scroll",
         width: 320, // Fixed width
         height: 520, // Fixed height
         display: "flex",
@@ -115,22 +121,25 @@ const handleLikeClick = async (brandId, isLiked) => {
           alignItems="flex-start"
           mb={1}
         >
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{
-              fontWeight: 600,
-              color: "text.primary",
-              pr: 1,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-            }}
-          >
-            {brand.personalDetails?.brandName}
-          </Typography>
+         <Typography
+  variant="h6"
+  component="div"
+  sx={{
+    fontWeight: 600,
+    color: "text.primary",
+    pr: 1,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
+    lineHeight: "1em", 
+    maxHeight: "2.8em",  
+    wordBreak: "break-word", 
+  }}
+>
+  {brand.personalDetails?.brandName}
+</Typography>
           <IconButton
             onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
             disabled={isProcessingLike[brand.uuid]}
@@ -169,7 +178,7 @@ const handleLikeClick = async (brandId, isLiked) => {
             .map((category, index) => (
               <Chip
                 key={index}
-                label={category.main}
+                label={category.child}
                 size="small"
                 sx={{
                   mr: 1,
