@@ -199,7 +199,7 @@ const ManageProfile = () => {
 
     try {
       await axios.patch(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/updateInvestor/${investorUUID}`,
+       ` https://franchise-backend-wgp6.onrender.com/api/v1/investor/updateInvestor/${investorUUID}`,
         dataToUpdate,
         {
           headers: {
@@ -332,7 +332,7 @@ const ManageProfile = () => {
           </Box>
         ) : (
           <Typography variant="body1" sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}>
-            {isPhoneField ? `+91 ${displayValue}` : displayValue}
+            {isPhoneField ? `+91 ${displayValue}` : displayValue || '-----'}
           </Typography>
         )}
       </Box>
@@ -453,7 +453,7 @@ const ManageProfile = () => {
 
           {/* Fields to render */}
           {renderField("First Name", "firstName")}
-          {renderField("Email", "email")}
+          {renderField("Email", "email")} {/* ✨ Email now read-only */}
           {renderField("Mobile Number", "mobileNumber")}
           {renderField("Whatsapp Number", "whatsappNumber")}
           {renderField("State", "state")}
