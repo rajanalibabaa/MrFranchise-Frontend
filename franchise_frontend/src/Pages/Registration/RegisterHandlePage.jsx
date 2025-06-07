@@ -20,7 +20,11 @@ import LoginPage from "../../Pages/LoginPage/LoginPage"
 import Footer from "../../Components/Footers/Footer";
 import Navbar from "../../Components/Navbar/NavBar";
 
-function RegisterHandleUser() {
+function RegisterHandleUser({boolean = true}) {
+
+  console.log("boolean",boolean)
+  
+  
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -44,6 +48,8 @@ function RegisterHandleUser() {
 
   return (
     <>
+    {/* <Navbar/> */}
+    {boolean && <Navbar/>}
     <Box
     mt={isMobile ? 0 : 7}
       sx={{
@@ -213,7 +219,8 @@ function RegisterHandleUser() {
 </Box>
       </Grid>
     </Box>
-    <Footer/>
+    {/* <Footer/> */}
+    {boolean && <Footer/>}
     </>
     
   );
