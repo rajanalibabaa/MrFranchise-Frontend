@@ -19,11 +19,22 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { ArrowRight, MonetizationOn, Business, AreaChart,Favorite } from "@mui/icons-material";
+import {
+  ArrowRight,
+  MonetizationOn,
+  Business,
+  AreaChart,
+  Favorite,
+} from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-import { openBrandDialog } from "../../Redux/Slices/brandSlice";
+import {
+  openBrandDialog,
+  toggleLikeBrand,
+  fetchBrands,
+  viewApi,
+} from "../../Redux/Slices/brandSlice";
 import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 
 const cardVariants = {
@@ -33,43 +44,58 @@ const cardVariants = {
 
 const NewlyRegisteredBrandsSection = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-  
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const isPaused = useRef(false);
   const [expandedBrand, setExpandedBrand] = useState(null);
   const [expandedLocations, setExpandedLocations] = useState({});
-  
+
   const [likeProcessing, setLikeProcessing] = useState({});
-const [showLogin, setShowLogin] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
+  const { data: brand = [] } = useSelector((state) => state.brands);
+
   const CARD_DIMENSIONS = {
     mobile: { width: 280, height: 520 },
     tablet: { width: 320, height: 560 },
-    desktop: { width: 327, height: 500 }
+    desktop: { width: 327, height: 500 },
   };
 
-  const handleLikeClick = async (brand) => {
-    if (likeProcessing[brand.uuid]) return;
+ const handleLikeClick = async (brandId, isLiked) => {
+    if (likeProcessing[brandId]) return;
+
+    setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
+    try {
+      await toggleLike(brandId,isLiked);
+    } finally {
+      setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
+    }
+
+    console.log("isLiked :", isLiked);
+    console.log("brandId :", brandId);
+  };
+  const toggleLike = async (brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");
-    if (!token) {
+    if (!!token) {
       setShowLogin(true);
       return;
     }
-    setLikeProcessing((prev) => ({ ...prev, [brand.uuid]: true }));
+    console.log("isliked === :", isLiked);
+    console.log("brandId :", brandId);
     try {
-      await toggleLike(brand.uuid, brand.isLiked);
+      await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
+      // Optionally show success message
     } catch (error) {
-      console.error("Error toggling like:", error);
-    } finally {
-      setLikeProcessing((prev) => ({ ...prev, [brand.uuid]: false }));
+      console.error("Like operation failed:", error);
     }
   };
+
 
   const getCardDimensions = () => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -78,8 +104,9 @@ const [showLogin, setShowLogin] = useState(false);
   };
 
   const handleApply = (brand) => {
-dispatch(openBrandDialog(brand));
-    console.log("Apply",brand);
+    dispatch(openBrandDialog(brand));
+    dispatch(viewApi(brand.uuid));
+    console.log("Apply", brand);
     // Replace with actual apply logic
   };
 
@@ -96,55 +123,32 @@ dispatch(openBrandDialog(brand));
   };
 
   const toggleExpandLocations = (brandId) => {
-    setExpandedLocations(prev => ({
+    setExpandedLocations((prev) => ({
       ...prev,
-      [brandId]: !prev[brandId]
+      [brandId]: !prev[brandId],
     }));
   };
-  //like toggle
-     const toggleLike = async (brandId, isLiked) => {
-        const token = localStorage.getItem("accessToken");
-        // if()
-        // console.log("redux",likedBrands)
-        // console.log("isLiked", brandId, isLiked);
-        if (!token) {
-          setShowLogin(true);
-          return;
-        }
-    
-        // console.log("k",uuid,brandId)
-    
-        try {
-          const uuid = brands.map(async (value, id) => {
-            if (value.uuid === brandId) {
-              await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
-            }
-          });
-        } catch (error) {
-          console.error("Like operation failed:", error);
-        }
-      };
 
   // Function to format location states
   // const formatLocations = (brand) => {
   //   const states = brand.personalDetails?.states || [];
   //   const brandId = brand.uuid;
   //   const isExpanded = expandedLocations[brandId];
-    
+
   //   if (states.length === 0) return "Multiple locations";
-    
+
   //   if (states.length <= 2) {
   //     return states.join(", ");
   //   }
-    
+
   //   if (isExpanded) {
   //     return (
   //       <>
   //         {states.join(", ")}
-  //         <Typography 
-  //           component="span" 
-  //           sx={{ 
-  //             color: 'primary.main', 
+  //         <Typography
+  //           component="span"
+  //           sx={{
+  //             color: 'primary.main',
   //             cursor: 'pointer',
   //             fontWeight: 500,
   //             ml: 1
@@ -159,14 +163,14 @@ dispatch(openBrandDialog(brand));
   //       </>
   //     );
   //   }
-    
+
   //   return (
   //     <>
   //       {states.slice(0, 2).join(", ")}
-  //       <Typography 
-  //         component="span" 
-  //         sx={{ 
-  //           color: 'primary.main', 
+  //       <Typography
+  //         component="span"
+  //         sx={{
+  //           color: 'primary.main',
   //           cursor: 'pointer',
   //           fontWeight: 500,
   //           ml: 1
@@ -185,18 +189,15 @@ dispatch(openBrandDialog(brand));
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/homepage/getAllnewRegisterBrands",
-          { headers: { "Content-Type": "application/json" } }
-        );
+        const response = dispatch(fetchBrands());
 
-        if (response.data?.data?.length) {
-          setBrands(response.data.data);
+        if (response) {
+          setBrands(brand);
           setError(null);
-          
+
           // Initialize expanded locations state
           const initialExpandedState = {};
-          response.data.data.forEach(brand => {
+          brand.forEach((brand) => {
             if (brand.uuid) {
               initialExpandedState[brand.uuid] = false;
             }
@@ -249,53 +250,57 @@ dispatch(openBrandDialog(brand));
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
 
   return (
-    <Box sx={{ 
-      py: isMobile ? 1 : 2,
-      px: isMobile ? 0 : 2,
-      maxWidth: isMobile ? '100%' : 1400, 
-      mx: 'auto',
-      mb: isMobile ? 0 : 2,
-    }}>
-      <Box sx={{ 
-        display: "flex", 
-        justifyContent: "space-between", 
-        alignItems: "center",
-        mb: 1
-      }}>
-        <Typography 
-          variant={isMobile ? "body1" : "h5"} 
-          fontWeight="bold" 
-          sx={{ 
-            color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
-            mb: 1, 
+    <Box
+      sx={{
+        py: isMobile ? 1 : 2,
+        px: isMobile ? 0 : 2,
+        maxWidth: isMobile ? "100%" : 1400,
+        mx: "auto",
+        mb: isMobile ? 0 : 2,
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 1,
+        }}
+      >
+        <Typography
+          variant={isMobile ? "body1" : "h5"}
+          fontWeight="bold"
+          sx={{
+            color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+            mb: 1,
             textAlign: "left",
-            position: 'relative',
-            '&:after': {
+            position: "relative",
+            "&:after": {
               content: '""',
-              display: 'block',
-              width: '80px',
-              height: '4px',
-              background: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
+              display: "block",
+              width: "80px",
+              height: "4px",
+              background: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
               mt: 1,
-              borderRadius: 2
-            }
+              borderRadius: 2,
+            },
           }}
         >
           Top Desert & Bakery Brands
         </Typography>
-        
-        <Button 
-          variant="text" 
+
+        <Button
+          variant="text"
           size="small"
           endIcon={<ArrowRight />}
-          sx={{ 
-            textTransform: 'none',
+          sx={{
+            textTransform: "none",
             fontSize: isMobile ? 14 : 16,
             color: theme.palette.text.secondary,
-            '&:hover': {
-              color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
-              backgroundColor: 'transparent'
-            }
+            "&:hover": {
+              color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+              backgroundColor: "transparent",
+            },
           }}
           onClick={() => navigate("/brandviewpage")}
         >
@@ -314,30 +319,32 @@ dispatch(openBrandDialog(brand));
           p: 1,
           overflowX: "auto",
           scrollbarWidth: "none",
-          "&::-webkit-scrollbar": { display: "none" }
+          "&::-webkit-scrollbar": { display: "none" },
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {brands.map((brand) => {
+        {brand.map((brand) => {
           const brandId = brand.uuid;
           const isExpanded = expandedBrand === brandId;
-          const franchiseModels = brand.franchiseDetails?.modelsOfFranchise || [];
+          const franchiseModels =
+            brand.franchiseDetails?.modelsOfFranchise || [];
           const firstModel = franchiseModels[0] || {};
           const categories = brand.personalDetails?.brandCategories || [];
-          
+
           // Get the first available video URL
-          const videoUrl = brand?.brandDetails?.brandPromotionVideo?.[0] || 
-                         brand?.brandDetails?.franchisePromotionVideo?.[0];
+          const videoUrl =
+            brand?.brandDetails?.brandPromotionVideo?.[0] ||
+            brand?.brandDetails?.franchisePromotionVideo?.[0];
 
           return (
             <motion.div
               key={brandId}
               variants={cardVariants}
               whileHover={{ scale: 1.03 }}
-              style={{ 
+              style={{
                 width: cardWidth,
-                flexShrink: 0
+                flexShrink: 0,
               }}
             >
               <Card
@@ -346,51 +353,55 @@ dispatch(openBrandDialog(brand));
                   flexDirection: "column",
                   borderRadius: 3,
                   overflow: "hidden",
-                  width: '100%',
+                  width: "100%",
                   border: "1px solid #eee",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    boxShadow: '0 8px 16px rgba(0,0,0,0.12)'
-                  }
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
+                  },
                 }}
               >
                 {/* Media Container with Strict Dimensions */}
-                <Box sx={{
-                  height: mediaHeight,
-                  width: '100%',
-                  overflow: 'hidden',
-                  position: 'relative',
-                  backgroundColor: theme.palette.grey[200]
-                }}>
+                <Box
+                  sx={{
+                    height: mediaHeight,
+                    width: "100%",
+                    overflow: "hidden",
+                    position: "relative",
+                    backgroundColor: theme.palette.grey[200],
+                  }}
+                >
                   {videoUrl ? (
                     <CardMedia
                       component="video"
                       src={videoUrl}
                       alt={brand.personalDetails?.brandName || "Brand"}
-                      sx={{ 
-                        position: 'absolute',
+                      sx={{
+                        position: "absolute",
                         top: 0,
                         left: 0,
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
                       }}
                       controls
                       muted
                       loop
                     />
                   ) : (
-                    <Box sx={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
                       <Typography variant="body2" color="text.secondary">
                         No video available
                       </Typography>
@@ -399,71 +410,81 @@ dispatch(openBrandDialog(brand));
                 </Box>
 
                 {/* Card Content */}
-                <Box sx={{
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
                   <CardContent sx={{ pb: 1 }}>
-                    <Box sx={{ 
-                      display: 'flex', 
-                      alignItems: 'center',
-                      gap: 2,
-                      mb: 1.5,
-                      justifyContent: 'space-between'
-                    }}>
-                      <Avatar 
-                        src={brand?.brandDetails?.brandLogo?.[0]} 
-                        sx={{ 
-                          width: 50, 
-                          height: 50,
-                          border: '1px solid #eee',
-                          flexShrink: 0
-                        }} 
-                      />
-                      <Typography 
-                        variant="h6" 
-                        fontWeight={600} 
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 2,
+                        mb: 1.5,
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Avatar
+                        src={brand?.brandDetails?.brandLogo?.[0]}
                         sx={{
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          flex:1
+                          width: 50,
+                          height: 50,
+                          border: "1px solid #eee",
+                          flexShrink: 0,
+                        }}
+                      />
+                      <Typography
+                        variant="h6"
+                        fontWeight={600}
+                        sx={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          flex: 1,
                         }}
                       >
                         {brand.personalDetails?.brandName}
                       </Typography>
-                       <IconButton
-    onClick={() => handleLikeClick(brand)}
-    disabled={likeProcessing[brand.uuid]}
-    sx={{ ml: 1, p: 0.5 }}
-  >
-    {likeProcessing[brand.uuid] ? (
-      <CircularProgress size={20} />
-    ) : (
-      <Favorite
-        sx={{
-          color: brand.isLiked ? "#f44336" : "rgba(0,0,0,0.23)",
-          transition: "color 0.3s",
-        }}
-      />
-    )}
-  </IconButton>
+                      <IconButton
+                        onClick={() =>
+                          handleLikeClick(brand.uuid, brand.isLiked)
+                        }
+                        disabled={likeProcessing[brand.uuid]}
+                      >
+                        {likeProcessing[brand.uuid] ? (
+                          <CircularProgress size={24} />
+                        ) : (
+                          <Favorite
+                            sx={{
+                              color: brand.isLiked
+                                ? "#f44336"
+                                : "rgba(0, 0, 0, 0.23)",
+                            }}
+                          />
+                        )}
+                      </IconButton>
                     </Box>
 
                     {/* Categories */}
                     {categories.length > 0 && (
                       <Box sx={{ mb: 2 }}>
-                        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          sx={{ flexWrap: "wrap" }}
+                        >
                           {categories.slice(0, 3).map((category, index) => (
                             <Chip
                               key={index}
                               label={category.child}
                               size="small"
                               sx={{
-                                bgcolor: 'rgba(255, 152, 0, 0.1)',
-                                color: 'orange.dark',
+                                bgcolor: "rgba(255, 152, 0, 0.1)",
+                                color: "orange.dark",
                                 fontWeight: 500,
-                                mb: 1
+                                mb: 1,
                               }}
                             />
                           ))}
@@ -486,35 +507,44 @@ dispatch(openBrandDialog(brand));
                       </Box> */}
 
                       <Box display="flex" alignItems="center">
-                        <Business sx={{ 
-                          mr: 1.5, 
-                          fontSize: "1rem", 
-                          color: "text.secondary",
-                          flexShrink: 0
-                        }} />
+                        <Business
+                          sx={{
+                            mr: 1.5,
+                            fontSize: "1rem",
+                            color: "text.secondary",
+                            flexShrink: 0,
+                          }}
+                        />
                         <Typography variant="body2">
-                        Franchise Type :  {firstModel.franchiseType || "N/A"}
+                          Franchise Type : {firstModel.franchiseType || "N/A"}
                         </Typography>
                       </Box>
 
                       <Box display="flex" alignItems="center">
-                        <MonetizationOn sx={{ 
-                          mr: 1.5, 
-                          fontSize: "1rem", 
-                          color: "text.secondary",
-                          flexShrink: 0
-                        }} />
+                        <MonetizationOn
+                          sx={{
+                            mr: 1.5,
+                            fontSize: "1rem",
+                            color: "text.secondary",
+                            flexShrink: 0,
+                          }}
+                        />
                         <Typography variant="body2">
-                         Investment : {firstModel.investmentRange || "Not specified"}
+                          Investment :{" "}
+                          {firstModel.investmentRange || "Not specified"}
                         </Typography>
                       </Box>
                       <Box display="flex" alignItems="center">
-                        <AreaChart sx={{ mr: 1.5, 
-                          fontSize: "1rem", 
-                          color: "text.secondary",
-                          flexShrink: 0}}/>
+                        <AreaChart
+                          sx={{
+                            mr: 1.5,
+                            fontSize: "1rem",
+                            color: "text.secondary",
+                            flexShrink: 0,
+                          }}
+                        />
                         <Typography variant="body2">
-                         Area  : {firstModel.investmentRange || "Not specified"}
+                          Area : {firstModel.investmentRange || "Not specified"}
                         </Typography>
                       </Box>
                     </Stack>
@@ -530,14 +560,14 @@ dispatch(openBrandDialog(brand));
                       onClick={() => handleApply(brand)}
                       sx={{
                         backgroundColor: "#f29724",
-                        "&:hover": { 
+                        "&:hover": {
                           backgroundColor: "#e68a1e",
-                          boxShadow: 2
+                          boxShadow: 2,
                         },
                         py: 1,
                         borderRadius: 1,
-                        textTransform: 'none',
-                        fontWeight: 500
+                        textTransform: "none",
+                        fontWeight: 500,
                       }}
                     >
                       Apply Now
@@ -551,10 +581,9 @@ dispatch(openBrandDialog(brand));
       </Box>
       <BrandDetailsDialog />
       {showLogin && (
-  <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
-)}
+        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+      )}
     </Box>
-
   );
 };
 
