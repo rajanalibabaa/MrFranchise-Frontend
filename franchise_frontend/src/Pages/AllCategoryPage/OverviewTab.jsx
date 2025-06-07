@@ -42,29 +42,30 @@ const OverviewTab = ({ brand }) => {
     fullName: "",
     investorEmail: "",
     mobileNumber: "",
-    franchiseModel: "",
-    franchiseType: "",
+    // franchiseModel: "",
+    // franchiseType: "",
     investmentRange: "",
     location: "",
     planToInvest: "",
     readyToInvest: "",
   });
 
-  const franchiseModels = [
-    ...new Set(
-      brand?.franchiseDetails?.modelsOfFranchise?.map(
-        (m) => m.franchiseModel
-      ) || []
-    ),
-  ];
+
+  // const franchiseModels = [
+  //   ...new Set(
+  //     brand?.franchiseDetails?.modelsOfFranchise?.map(
+  //       (m) => m.franchiseModel
+  //     ) || []
+  //   ),
+  // ];
   
-  const franchiseTypes = [
-    ...new Set(
-      brand?.franchiseDetails?.modelsOfFranchise?.map(
-        (m) => m.franchiseType
-      ) || []
-    ),
-  ];
+  // const franchiseTypes = [
+  //   ...new Set(
+  //     brand?.franchiseDetails?.modelsOfFranchise?.map(
+  //       (m) => m.franchiseType
+  //     ) || []
+  //   ),
+  // ];
   
   const investmentRanges = [
     ...new Set(
@@ -87,6 +88,14 @@ const OverviewTab = ({ brand }) => {
     "Need Loan Assistance",
   ];
 
+const locationOptions = [
+  ...new Set(
+    (brand.personalDetails?.expansionLocation || []).map((loc) => {
+      const parts = [loc.city, loc.state, loc.country].filter(Boolean);
+      return parts.join(", ");
+    })
+  ),
+];
   const handleModelSelect = (model) => {
     setSelectedModel(model);
     setFormData((prev) => ({
@@ -116,7 +125,7 @@ const OverviewTab = ({ brand }) => {
         brandName: brand?.personalDetails?.brandName || "",
         brandEmail: brand.personalDetails?.email || "",
       };
- console.log("payload", payload);
+      console.log("payload", payload);
       const token = localStorage.getItem("accessToken");
       const investorUUID = localStorage.getItem("investorUUID");
       const brandUUID = localStorage.getItem("brandUUID");
@@ -143,8 +152,8 @@ const OverviewTab = ({ brand }) => {
         setFormData({
           fullName: "",
           location: "",
-          franchiseModel: "",
-          franchiseType: "",
+          // franchiseModel: "",
+          // franchiseType: "",
           investmentRange: "",
           planToInvest: "",
           readyToInvest: "",
@@ -164,14 +173,25 @@ const OverviewTab = ({ brand }) => {
     setFormData({
       fullName: "",
       location: "",
-      franchiseModel: "",
-      franchiseType: "",
+      // franchiseModel: "",
+      // franchiseType: "",
       investmentRange: "",
       planToInvest: "",
       readyToInvest: "",
     });
     setSubmitSuccess(false);
   };
+
+  const handleOpenModal = () => {
+  const investorInfo = JSON.parse(localStorage.getItem("investorInfo") || "{}");
+  setFormData((prev) => ({
+    ...prev,
+    fullName: investorInfo.fullName || "",
+    investorEmail: investorInfo.investorEmail || "",
+    mobileNumber: investorInfo.mobileNumber || "",
+  }));
+  setIsModalOpen(true);
+};
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat("en-IN", {
@@ -245,7 +265,9 @@ const OverviewTab = ({ brand }) => {
                     <TableCell sx={{ width: "8%" }}>Exterior</TableCell>
                     <TableCell sx={{ width: "8%" }}>ROI</TableCell>
                     <TableCell sx={{ width: "8%" }}>BreakEven</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Select</TableCell>
+                    <TableCell sx={{ width: "8%" }}>Margin on Sale</TableCell> 
+                    <TableCell sx={{ width: "8%" }}>Fixed Return</TableCell> 
+                    {/* <TableCell sx={{ width: "8%" }}>Select</TableCell> */}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -292,7 +314,9 @@ const OverviewTab = ({ brand }) => {
                         <TableCell>
                           {model.breakEven || "Not specified"}
                         </TableCell>
-                        <TableCell>
+                         <TableCell>{model.marginOnSale || "Not specified"}</TableCell> 
+                         <TableCell>{model.fixedReturn || "Not specified"}</TableCell> 
+                        {/* <TableCell>
                           <motion.div whileHover={{ scale: 1.05 }}>
                             <Button
                               variant="outlined"
@@ -314,7 +338,7 @@ const OverviewTab = ({ brand }) => {
                                 : "Select"}
                             </Button>
                           </motion.div>
-                        </TableCell>
+                        </TableCell> */}
                       </motion.tr>
                     )
                   )}
@@ -339,7 +363,9 @@ const OverviewTab = ({ brand }) => {
                 textTransform: "none",
                 fontSize: "1rem"
               }} 
-              onClick={() => setIsModalOpen(true)}
+              // onClick={() => setIsModalOpen(true) }
+              onClick={handleOpenModal}
+              
             >
               Apply for Franchise
             </Button>
@@ -472,6 +498,7 @@ const OverviewTab = ({ brand }) => {
 
                       <Grid item xs={12} md={6}>
                         <TextField
+                          select
                           fullWidth
                           label="Location"
                           name="location"
@@ -481,10 +508,16 @@ const OverviewTab = ({ brand }) => {
                           variant="outlined"
                           size="small"
                           sx={{ mb: 2 }}
-                        />
+                        >
+                          {locationOptions.map((location, i) => (
+                            <MenuItem key={i} value={location}>
+                              {location}
+                            </MenuItem>
+                          ))}
+                        </TextField>
                       </Grid>
 
-                      <Grid item xs={12} md={4}>
+                      {/* <Grid item xs={12} md={4}>
                         <TextField
                           select
                           fullWidth
@@ -503,9 +536,9 @@ const OverviewTab = ({ brand }) => {
                             </MenuItem>
                           ))}
                         </TextField>
-                      </Grid>
+                      </Grid> */}
 
-                      <Grid item xs={12} md={4}>
+                      {/* <Grid item xs={12} md={4}>
                         <TextField
                           select
                           fullWidth
@@ -524,7 +557,7 @@ const OverviewTab = ({ brand }) => {
                             </MenuItem>
                           ))}
                         </TextField>
-                      </Grid>
+                      </Grid> */}
 
                       <Grid item xs={12} md={4}>
                         <TextField
@@ -615,7 +648,7 @@ const OverviewTab = ({ brand }) => {
                             {isSubmitting ? (
                               <CircularProgress size={24} color="inherit" />
                             ) : (
-                              "Submit"
+                              "Apply"
                             )}
                           </Button>
                         </motion.div>

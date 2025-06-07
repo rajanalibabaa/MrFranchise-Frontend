@@ -429,19 +429,26 @@ category:selectedCategories,
 
     try {
       const response = await axios.post(
-        // "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
-        "http://localhost:5000/api/v1/investor/createInvestor",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
+        // "http://localhost:5000/api/v1/investor/createInvestor",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
 
       console.log("Registration response:", response.data);
+
       if (response.status === 201) {
         showSnackbar(
           "Registration successful! Redirecting to login...",
           "success"
         );
         setLoginOpen(true);
+        // After successful registration
+         localStorage.setItem("investorInfo", JSON.stringify({
+           fullName: investor.fullName,
+           investorEmail: investor.email,
+           mobileNumber: investor.mobileNumber,
+         }));
         // setTimeout(() => navigate("/"), 2000);
       } else {
         showSnackbar(
@@ -468,7 +475,7 @@ category:selectedCategories,
       }
     }
   };
-  
+
 
   useEffect(() => {
     if (selectedCountry && phoneCodes[selectedCountry]) {
