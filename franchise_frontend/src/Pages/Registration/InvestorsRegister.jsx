@@ -35,11 +35,12 @@ import {
   DialogActions,
   AppBar,
   Toolbar,
+  Divider,
 } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
-import backgroundImage from "../../assets/Images/investor image.jpg";
+import backgroundImage from "../../assets/Images/investorimage.jpg";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import Footer from "../../Components/Footers/Footer";
 import Navbar from "../../Components/Navbar/NavBar";
@@ -674,44 +675,50 @@ const InvestorRegister = () => {
 
   return (
     <Box
+    mt={5}
       sx={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: "cover",
-        height: "100%",
+        // backgroundImage: `url(${backgroundImage})` ,
+        backgroundColor: "#f0f0f0",
+        backgroundSize: "contain",
+        backgroundPosition: "center",
+        // backgroundRepeat: "no-repeat",
+        height: "100vh",
       }}
     >
-      <Navbar />
-      <Container
-        sx={{
-          // maxWidth: "lg",
-          // overflow: "auto",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          py: 2,
-          //  height: "100vh"
-        }}
-      >
-        <Paper
+ 
+    
+        <Box
           ref={dropdownRef}
-          elevation={3}
+          // elevation={3}
+          
           sx={{
             p: 2,
+            maxWidth:'500vh',
             borderRadius: "10px",
             boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-            bgcolor: "#e6f2de",
+            // bgcolor: "#e6f2de",
             display: "flex",
             flexDirection: "column",
             position: "relative",
           }}
         >
-          <Toolbar
+          
+          
+          <Typography
+            variant="h4"
+            gutterBottom
+            fontWeight="bold"
+            sx={{ textAlign: "center", mb: 1, color: "black", mt: 3 }}
+          >
+            Investor Registration
+          </Typography>
+<Toolbar
             sx={{ display: "flex", justifyContent: "flex-end", mb: -2, mt: -2 }}
           >
             <FormControl
               size="small"
               sx={{
-                minWidth: 120,
+                minWidth: 130,
                 backgroundColor: "white",
                 borderRadius: "4px",
               }}
@@ -733,23 +740,14 @@ const InvestorRegister = () => {
               </Select>
             </FormControl>
           </Toolbar>
-          <Typography
-            variant="h4"
-            gutterBottom
-            fontWeight="bold"
-            sx={{ textAlign: "center", mb: 1, color: "orange", mt: 3 }}
-          >
-            Investor Registration
-          </Typography>
-
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form   onSubmit={handleSubmit(onSubmit)}  >
             <Typography
               variant="h5"
               sx={{
-                marginBottom: "5px",
+                marginBottom: "25px",
                 marginTop: "5px",
                 fontWeight: "bold",
-                color: "orange",
+                color: "black",
               }}
             >
               Personal Details
@@ -759,8 +757,9 @@ const InvestorRegister = () => {
               spacing={2}
               sx={{
                 display: "grid",
-                gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+                gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
                 gap: 2,
+                
               }}
             >
               {" "}
@@ -1055,14 +1054,15 @@ const InvestorRegister = () => {
                 </Grid>
               )}
             </Grid>
+            {/* <Divider sx={{ borderColor: "#7ad03a", mt: 5 }} /> */}
 
             <Typography
               variant="h5"
               sx={{
-                marginBottom: "5px",
+                marginBottom: "25px",
                 marginTop: "20px",
                 fontWeight: "bold",
-                color: "orange",
+                color: "black",
               }}
             >
               Preferences
@@ -1073,7 +1073,7 @@ const InvestorRegister = () => {
               spacing={2}
               sx={{
                 display: "grid",
-                gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+                gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
                 gap: 2,
               }}
             >
@@ -1523,43 +1523,52 @@ const InvestorRegister = () => {
                   </TextField>
                 </Grid>
               )}
-              <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-            <Button variant="outlined" color="primary" onClick={handleAddPreference}>
+              {/* Add Preference Button */}
+              <Grid item xs={12} sm={6} md={4} mt={1} >
+            <Button size="medium"  fullWidth  variant="contained" sx={{ bgcolor: '#7ad03a', '&:hover': { bgcolor: '#6fbf2a' } }}  onClick={handleAddPreference}>
               Add Preference
             </Button>
-            <Button
+            
+          </ Grid>
+              <Grid item xs={12} sm={6} md={4} mt={1} >
+                <Button
+            
               variant="contained"
-              color="info"
+              color='warning'
+              size="medium"
+              fullWidth
+              sx={{ bgcolor: '#ff9800', '&:hover': { bgcolor: '#f57c00' } }}
               onClick={() => setPreferenceDialogOpen(true)}
               disabled={preferences.length === 0}
             >
               Show Added Preferences
             </Button>
-          </Stack>
+                </Grid>
 
           {/* Preferences Dialog */}
           <Dialog open={preferenceDialogOpen} onClose={() => setPreferenceDialogOpen(false)} maxWidth="md" fullWidth>
-            <DialogTitle>Added Preferences</DialogTitle>
+            <DialogTitle color="orange" fontWeight="bold">Added Preferences</DialogTitle>
             <DialogContent>
               {preferences.length === 0 ? (
-                <Typography>No preferences added yet.</Typography>
+                <Typography variant="body1" color="text.secondary">No preferences added yet.</Typography>
               ) : (
                 <List>
                   {preferences.map((pref, idx) => (
                     <ListItem key={idx} divider
                       secondaryAction={
-                        <Button color="error" onClick={() => handleRemovePreference(idx)}>
+                        <Button size="small" variant="outlined" color="error" onClick={() => handleRemovePreference(idx)}>
                           Remove
                         </Button>
                       }
                     >
                       <ListItemText
-                        primary={`State: ${pref.preferredState}, District: ${pref.preferredDistrict}, City: ${pref.preferredCity}`}
+                       
                         secondary={
                           <>
-                            <div>Category: {Array.isArray(pref.category) ? pref.category.map(c => `${c.main} > ${c.sub} > ${c.child}`).join(", ") : ""}</div>
-                            <div>Investment: {pref.investmentRange} - {pref.investmentAmount}</div>
-                            <div>Property: {pref.propertyType}{pref.propertyType === "Own Property" ? ` (${pref.propertySize})` : ""}</div>
+                            <Box sx={{ fontWeight: "bold" }}>State: {pref.preferredState} - {pref.preferredDistrict} - {pref.preferredCity}</Box>
+                            <Box sx={{ fontWeight: "bold" }}>Category: {Array.isArray(pref.category) ? pref.category.map(c => `${c.main} > ${c.sub} > ${c.child}`).join(", ") : ""}</Box>
+                            <Box sx={{ fontWeight: "bold" }}>Investment: {pref.investmentRange} - {pref.investmentAmount}</Box>
+                            <Box sx={{ fontWeight: "bold" }}>Property: {pref.propertyType}{pref.propertyType === "Own Property" ? ` (${pref.propertySize})` : ""}</Box>
                           </>
                         }
                       />
@@ -1569,12 +1578,15 @@ const InvestorRegister = () => {
               )}
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setPreferenceDialogOpen(false)}>Close</Button>
+              <Button color="error"  variant ="contained" onClick={() => setPreferenceDialogOpen(false)}>Close</Button>
             </DialogActions>
           </Dialog>
 
 
-              <Grid container spacing={2} sx={{ display: "flex" }}>
+              
+            </Grid>
+            {/* <Divider sx={{ borderColor: "#7ad03a", mt: 5 }} /> */}
+            <Grid container spacing={2} sx={{ display: "flex", justifyContent: "center", flexDirection  : "column" }} mt={3}>
                 {/* Terms and Conditions Checkbox */}
                 <Grid
                   item
@@ -1607,18 +1619,18 @@ const InvestorRegister = () => {
                 <Grid
                   item
                   xs={12}
-                  sx={{ mt: 2, display: "flex", justifyContent: "center" }}
+                  sx={{  display: "flex", justifyContent: "center" }}
                 >
                   <Button
-                    fullWidth
+                    // fullWidth
                     type="submit"
-                    size="large"
+                    size="small"
                     variant="contained"
                     sx={{
-                      width: "70%",
-                      bgcolor: "#ff9800",
+                      width: "30%",
+                      bgcolor: "#7ad03a",
                       color: "white",
-                      "&:hover": { bgcolor: "#e68900" },
+                      "&:hover": { bgcolor: "#7ad033" },
                     }}
                   >
                     REGISTER
@@ -1626,7 +1638,7 @@ const InvestorRegister = () => {
                 </Grid>
 
                 {/* Sign In Link */}
-                <Grid item xs={12} sx={{ mt: 2, textAlign: "center" }}>
+                <Grid item xs={12} sx={{ mt: 0, textAlign: "center" }}>
                   <Typography>
                     Already have an account?{" "}
                     <Box
@@ -1646,9 +1658,8 @@ const InvestorRegister = () => {
                   </Typography>
                 </Grid>
               </Grid>
-            </Grid>
           </form>
-        </Paper>
+        </Box>
         {/* Login Popup Dialog */}
         <Dialog
           open={loginOpen}
@@ -1756,7 +1767,7 @@ const InvestorRegister = () => {
     </>
   }
 />
-      </Container>
+     
       <Footer />
     </Box>
   );
