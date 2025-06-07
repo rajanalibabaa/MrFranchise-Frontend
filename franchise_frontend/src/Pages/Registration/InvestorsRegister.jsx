@@ -67,6 +67,7 @@ const InvestorRegister = () => {
     watch,
     control,
     formState: { errors },
+    clearErrors,
     // trigger,
   } = useForm({
     defaultValues: {
@@ -256,6 +257,16 @@ const InvestorRegister = () => {
     setValue("investmentAmount", "");
     setSelectedCategories([]);
     setValue("category", []);
+    clearErrors([
+      "preferredState",
+      "preferredDistrict",
+      "preferredCity",
+      "propertyType",
+      "propertySize",
+      "investmentRange",  
+      "investmentAmount",   
+      "category",
+    ])
     showSnackbar("Preference added!", "success");
   };
 
@@ -1085,11 +1096,13 @@ const InvestorRegister = () => {
                     }}
                     error={!!errors.category}
                     helperText={errors.category?.message}
-                    {...register("category", {
-                      validate: (value) =>
-                        value?.length > 0 ||
-                        "At least one category is required",
-                    })}
+                    {...register("category"
+                    //   , {
+                    //   validate: (value) =>
+                    //     value?.length > 0 ||
+                    //     "At least one category is required",
+                    // }
+                  )}
                   />
 
                   {isCategoryDropdownOpen && (
@@ -1270,9 +1283,11 @@ const InvestorRegister = () => {
                   fullWidth
                   defaultValue=""
                   SelectProps={{ native: true }}
-                  {...register("investmentRange", {
-                    required: "Preferred investment range is required",
-                  })}
+                  {...register("investmentRange"
+                  //   , {
+                  //   required: "Preferred investment range is required",
+                  // }
+                )}
                   error={!!errors.investmentRange}
                   helperText={errors.investmentRange?.message}
                 >
@@ -1292,9 +1307,11 @@ const InvestorRegister = () => {
                       fullWidth
                       defaultValue=""
                       SelectProps={{ native: true }}
-                      {...register("investmentAmount", {
-                        required: "Please select an amount range",
-                      })}
+                      {...register("investmentAmount"
+                      //   , {
+                      //   required: "Please select an amount range",
+                      // }
+                    )}
                       error={!!errors.investmentAmount}
                       helperText={errors.investmentAmount?.message}
                     >
@@ -1329,9 +1346,11 @@ const InvestorRegister = () => {
                   <Select
                     label="Preferred State"
                     value={watch("preferredState") || ""}
-                    {...register("preferredState", {
-                      required: "Preferred state is required",
-                    })}
+                    {...register("preferredState"
+                    //   , {
+                    //   required: "Preferred state is required",
+                    // }
+                  )}
                     onChange={(e) => {
                       setValue("preferredState", e.target.value);
                       setValue("preferredDistrict", "");
@@ -1358,9 +1377,11 @@ const InvestorRegister = () => {
                   <Select
                     label="Preferred District"
                     value={watch("preferredDistrict") || ""}
-                    {...register("preferredDistrict", {
-                      required: "Preferred district is required",
-                    })}
+                    {...register("preferredDistrict"
+                    //   , {
+                    //   required: "Preferred district is required",
+                    // }
+                  )}
                     onChange={(e) => {
                       setValue("preferredDistrict", e.target.value);
                       setValue("preferredCity", "");
@@ -1387,9 +1408,11 @@ const InvestorRegister = () => {
                   <Select
                     label="Preferred City"
                     value={watch("preferredCity") || ""}
-                    {...register("preferredCity", {
-                      required: "Preferred city is required",
-                    })}
+                    {...register("preferredCity"
+                    //   , {
+                    //   required: "Preferred city is required",
+                    // }
+                  )}
                     disabled={!watch("preferredDistrict")}
                   >
                     <MenuItem value="">Select City</MenuItem>
@@ -1409,13 +1432,13 @@ const InvestorRegister = () => {
                 <FormControl
                   component="fieldset"
                   fullWidth
-                  error={!!errors.propertyType}
+                  // error={!!errors.propertyType}
                 >
                   <FormLabel component="legend">Property Type *</FormLabel>
                   <Controller
                     name="propertyType"
                     control={control}
-                    rules={{ required: "Property type is required" }}
+                    // rules={{ required: "Property type is required" }}
                     render={({ field }) => (
                       <RadioGroup
                         row
