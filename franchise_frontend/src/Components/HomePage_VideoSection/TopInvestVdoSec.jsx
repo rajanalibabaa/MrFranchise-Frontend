@@ -80,7 +80,7 @@ const handleLikeClick = async (brandId, isLiked) => {
   };
   const toggleLike = async (brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");
-    if (!!token) {
+    if (!token) {
       setShowLogin(true);
       return;
     }

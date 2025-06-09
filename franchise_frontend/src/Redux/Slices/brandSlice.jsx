@@ -85,7 +85,7 @@ export const fetchBrands = createAsyncThunk(
     try {
       let response;
 
-      if (!!token ) {
+      if (!token ) {
         response = await axios.get(
           "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
           {
@@ -94,10 +94,12 @@ export const fetchBrands = createAsyncThunk(
             },
           }
         );
-      } else {
+      } 
+      if(token) {
          response = await Likeshow();
-         console.log(" ===== ",response)
+        
       }
+       console.log(" ===== ",response)
       return response.data.data;
     } catch (err) {
       return rejectWithValue(err.message || "Failed to fetch brands");

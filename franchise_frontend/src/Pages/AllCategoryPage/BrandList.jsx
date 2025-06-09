@@ -154,7 +154,8 @@ function BrandList() {
 
   const toggleLike = async (brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");
-    if (!!token ) {
+    console.log("TOKEN:",token)
+    if (!token ) {
       setShowLogin(true);
       return;
     }
