@@ -2,16 +2,14 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const token = localStorage.getItem("accessToken");
-const id =
-  localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID");
+const id =localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID");
 
 export const toggleLikeBrand = createAsyncThunk(
   "brands/toggleLike",
   async ({ brandId, isLiked }, { rejectWithValue }) => {
-    
     console.log("================ A:", isLiked, brandId);
     try {
-      if (!!token) {
+      if (!token) {
         return rejectWithValue("You need to log in to continue.");
       }
 
@@ -62,7 +60,6 @@ export const toggleLikeBrand = createAsyncThunk(
 
 export const Likeshow = async () => {
   try {
-
     const response = await axios.get(
       `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
       {
@@ -72,10 +69,10 @@ export const Likeshow = async () => {
         },
       }
     );
-    console.log( response.data.data)
+    console.log(response.data.data);
     return response;
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 };
 
@@ -85,7 +82,7 @@ export const fetchBrands = createAsyncThunk(
     try {
       let response;
 
-      if (!token ) {
+      if (!token) {
         response = await axios.get(
           "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
           {
@@ -94,12 +91,11 @@ export const fetchBrands = createAsyncThunk(
             },
           }
         );
-      } 
-      if(token) {
-         response = await Likeshow();
-        
       }
-       console.log(" ===== ",response)
+      if (token) {
+        response = await Likeshow();
+      }
+      console.log(" ===== ", response);
       return response.data.data;
     } catch (err) {
       return rejectWithValue(err.message || "Failed to fetch brands");
@@ -108,30 +104,29 @@ export const fetchBrands = createAsyncThunk(
 );
 
 export const viewApi = createAsyncThunk(
-    "brands/viewApi",
-      async ( brandID, { rejectWithValue }) => {
-        console.log("123458",brandID)
+  "brands/viewApi",
+  async (brandID, { rejectWithValue }) => {
+    console.log("123458", brandID);
 
-  try {
-    const res = await axios.post(`https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
-      
-      {
-       headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          data:{brandID}
-        },
-      }
-    )
-    console.log("viewres",res)
-    return res
+    try {
+      const res = await axios.post(
+        `https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
 
-  } catch (error) {
-    console.log(error)
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            data: { brandID },
+          },
+        }
+      );
+      console.log("viewres", res);
+      return res;
+    } catch (error) {
+      console.log(error);
+    }
   }
-}
- 
-  )
+);
 
 const brandSlice = createSlice({
   name: "brands",
@@ -159,7 +154,7 @@ const brandSlice = createSlice({
     },
     openDialog: false,
     selectedBrand: null,
-    brandID :""
+    brandID: "",
   },
   reducers: {
     setFilters: (state, action) => {
@@ -182,7 +177,6 @@ const brandSlice = createSlice({
     openBrandDialog: (state, action) => {
       state.openDialog = true;
       state.selectedBrand = action.payload;
-      
     },
     closeBrandDialog: (state) => {
       state.openDialog = false;
@@ -201,9 +195,9 @@ const brandSlice = createSlice({
           brand.uuid === brandId ? { ...brand, isLiked } : brand
         );
       })
-      .addCase(viewApi.fulfilled,(state,action)=>{
-        const {brandID} =action.payload;
-        state.brandID = brandID
+      .addCase(viewApi.fulfilled, (state, action) => {
+        const { brandID } = action.payload;
+        state.brandID = brandID;
       })
 
       .addCase(fetchBrands.pending, (state) => {
