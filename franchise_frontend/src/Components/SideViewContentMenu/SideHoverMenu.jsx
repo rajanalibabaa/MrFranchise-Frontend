@@ -295,13 +295,13 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
       onClose={onHoverLeave}
       PaperProps={{
         sx: {
-          height: isMobile ? "85vh" : isTablet ? "65vh" : 500,
-          background: "linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)",
-          boxShadow: theme.shadows[10],
-          borderBottomLeftRadius: 16,
-          borderBottomRightRadius: 16,
-          overflow: "hidden",
-          border: `1px solid ${theme.palette.divider}`,
+           height: isMobile ? "85vh" : isTablet ? "65vh" : 500,
+    background: "rgba(255,255,255,0.7)",
+    backdropFilter: "blur(12px)",
+    boxShadow: "0 8px 32px 0 rgba(60,72,88,0.18)",
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    border: "1.5px solid rgba(255,255,255,0.25)",
         },
       }}
       SlideProps={{

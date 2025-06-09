@@ -228,7 +228,7 @@ const handleLikeClick = async (brandId, isLiked) => {
             },
           }}
         >
-        Top Restaurants Brands JK/ , 
+        Top Restaurants Brands
         </Typography>
 
         <Button

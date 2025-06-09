@@ -25,13 +25,6 @@ import BusinessIcon from '@mui/icons-material/Business';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import React, { useEffect, useRef, useState } from "react";
-<<<<<<< HEAD
-import BusinessIcon from "@mui/icons-material/Business";
-import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import StorefrontIcon from "@mui/icons-material/Storefront";
-=======
->>>>>>> bd54b3a6970b98e08e48decab0761ee63c0af627
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -51,7 +44,7 @@ const cardVariants = {
 // Constants for card dimensions
 const getCardDimensions = (isMobile, isTablet) => ({
   width: isMobile ? 300 : isTablet ? 320 : 320,
-  height: 420,
+  height: 460,
   videoHeight: 200,
   avatarSize: isMobile ? 40 : 50,
 });
