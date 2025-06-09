@@ -11,7 +11,8 @@ import Navbar from "../../Components/Navbar/NavBar";
 import Footer from "../../Components/Footers/Footer";
 import PopupModal from "../../Components/PopUpModal/PopUpModal";
 import FilterDropdowns from "../../Components/Navbar/FilterDropdownsData";
-
+import { fetchBrands } from "../../Redux/Slices/brandSlice.jsx";
+import { useDispatch } from "react-redux";
 // Dynamic Components - Import all your video sections
 const dynamicComponents = {
   TopBrandVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandTwoVdoSec")),
@@ -25,6 +26,9 @@ const dynamicComponents = {
   TopBeverageFranchise:React.lazy(()=> import ('../../Components/HomePage_VideoSection/TopBeverageFranchise.jsx')), //top beverage franchise section
 TopDesertBakeryFranchise:React.lazy(()=>import('../../Components/HomePage_VideoSection/TopDesertBakerys.jsx'))
 };
+
+
+
 
 // Configuration object for the entire page
 const pageConfig = {
@@ -147,11 +151,13 @@ const HomeBannerSec = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const controls = useAnimation();
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const navEntries = performance.getEntriesByType("navigation");
     const isReload = navEntries[0]?.type === "reload";
     const popupShown = sessionStorage.getItem("popup-shown");
+     dispatch(fetchBrands())
 
     if (!popupShown || isReload) {
       setIsPopupOpen(true);
