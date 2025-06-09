@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Paper, Avatar, CircularProgress,
   Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
-  MenuItem, Select, FormControl, InputLabel,
+  MenuItem, Select, FormControl, InputLabel,ListItem, ListItemIcon, ListItemText,List,Stack
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
@@ -41,11 +41,11 @@ const ManageProfile = () => {
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
   // Initialize category state with empty values
-  const [categoryState, setCategoryState] = useState({
-    main: '',
-    sub: '',
-    child: ''
-  });
+  // const [categoryState, setCategoryState] = useState({
+  //   main: '',
+  //   sub: '',
+  //   child: ''
+  // });
 
   // Fetch investor data
   useEffect(() => {
@@ -70,20 +70,7 @@ const ManageProfile = () => {
           const data = response.data.data;
           data.mobileNumber = data.mobileNumber?.replace('+91', '') || '';
           data.whatsappNumber = data.whatsappNumber?.replace('+91', '') || '';
-          
-          // Set investor data
           setInvestorData(data);
-          
-          // Update category state from fetched data
-          if (data.category) {
-            let cat = data.category;
-            if (Array.isArray(cat)) cat = cat[0] || {};
-            setCategoryState({
-              main: cat.main || '',
-              sub: cat.sub || '',
-              child: cat.child || ''
-            });
-          }
         }
       } catch (error) {
         console.error("Error fetching investor data:", error);
@@ -94,6 +81,26 @@ const ManageProfile = () => {
 
     fetchData();
   }, [investorUUID, AccessToken]);
+          // Update category state from fetched data
+  //         if (data.category) {
+  //           let cat = data.category;
+  //           if (Array.isArray(cat)) cat = cat[0] || {};
+  //           setCategoryState({
+  //             main: cat.main || '',
+  //             sub: cat.sub || '',
+  //             child: cat.child || ''
+  //           });
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching investor data:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [investorUUID, AccessToken]);
 
   const handleEditToggle = () => {
     setOtpDialogOpen(true);
@@ -175,11 +182,8 @@ const ManageProfile = () => {
   const handleSave = async () => {
     const dataToUpdate = { 
       ...investorData,
-      category: {
-        main: categoryState.main,
-        sub: categoryState.sub,
-        child: categoryState.child
-      }
+      mobileNumber: '+91' + (investorData.mobileNumber || ''),
+      whatsappNumber: '+91' + (investorData.whatsappNumber || ''),
     };
     
     const errors = { mobileNumber: '', whatsappNumber: '' };
@@ -222,84 +226,84 @@ const ManageProfile = () => {
   };
 
   // Render category field
-  const renderCategoryField = (label) => {
-    const displayValue = [categoryState.main, categoryState.sub, categoryState.child].filter(Boolean).join(' > ');
+  // const renderCategoryField = (label) => {
+  //   const displayValue = [categoryState.main, categoryState.sub, categoryState.child].filter(Boolean).join(' > ');
 
-    // Find options for dropdowns
-    const mainOptions = categories.map(c => c.name);
-    const subOptions = categories.find(c => c.name === categoryState.main)?.children || [];
-    const childOptions = subOptions.find(s => s.name === categoryState.sub)?.children || [];
+  //   // Find options for dropdowns
+  //   const mainOptions = categories.map(c => c.name);
+  //   const subOptions = categories.find(c => c.name === categoryState.main)?.children || [];
+  //   const childOptions = subOptions.find(s => s.name === categoryState.sub)?.children || [];
 
-    const handleCategoryChange = (type, newValue) => {
-      const updatedCategory = { 
-        main: type === 'main' ? newValue : categoryState.main,
-        sub: type === 'sub' ? newValue : (type === 'main' ? '' : categoryState.sub),
-        child: type === 'child' ? newValue : (type !== 'child' ? '' : categoryState.child)
-      };
+  //   const handleCategoryChange = (type, newValue) => {
+  //     const updatedCategory = { 
+  //       main: type === 'main' ? newValue : categoryState.main,
+  //       sub: type === 'sub' ? newValue : (type === 'main' ? '' : categoryState.sub),
+  //       child: type === 'child' ? newValue : (type !== 'child' ? '' : categoryState.child)
+  //     };
 
-      setCategoryState(updatedCategory);
+  //     setCategoryState(updatedCategory);
 
-      // Also update the investorData with the new category
-      setInvestorData(prev => ({
-        ...prev,
-        category: updatedCategory
-      }));
-    };
+  //     // Also update the investorData with the new category
+  //     setInvestorData(prev => ({
+  //       ...prev,
+  //       category: updatedCategory
+  //     }));
+  //   };
 
-    return (
-      <Box mb={2}>
-        <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-          {label}
-        </Typography>
-        {editMode ? (
-          <>
-            <FormControl fullWidth size="small" sx={{ mb: 1 }}>
-              <InputLabel>Main Category</InputLabel>
-              <Select
-                value={categoryState.main}
-                label="Main Category"
-                onChange={(e) => handleCategoryChange('main', e.target.value)}
-              >
-                {mainOptions.map(option => (
-                  <MenuItem key={option} value={option}>{option}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth size="small" sx={{ mb: 1 }} disabled={!categoryState.main}>
-              <InputLabel>Sub Category</InputLabel>
-              <Select
-                value={categoryState.sub}
-                label="Sub Category"
-                onChange={(e) => handleCategoryChange('sub', e.target.value)}
-                disabled={!categoryState.main}
-              >
-                {subOptions.map(option => (
-                  <MenuItem key={option.name} value={option.name}>{option.name}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth size="small" disabled={!categoryState.sub}>
-              <InputLabel>Child Category</InputLabel>
-              <Select
-                value={categoryState.child}
-                label="Child Category"
-                onChange={(e) => handleCategoryChange('child', e.target.value)}
-                disabled={!categoryState.sub}
-              >
-                {(childOptions || []).map(option => (
-                  <MenuItem key={option} value={option}>{option}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </>
-        ) : (
-          <Typography variant="body1" sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}>
-            {displayValue || 'Not selected'}
-          </Typography>
-        )}
-      </Box>
-    );
-  };
+  //   return (
+  //     <Box mb={2}>
+  //       <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+  //         {label}
+  //       </Typography>
+  //       {editMode ? (
+  //         <>
+  //           <FormControl fullWidth size="small" sx={{ mb: 1 }}>
+  //             <InputLabel>Main Category</InputLabel>
+  //             <Select
+  //               value={categoryState.main}
+  //               label="Main Category"
+  //               onChange={(e) => handleCategoryChange('main', e.target.value)}
+  //             >
+  //               {mainOptions.map(option => (
+  //                 <MenuItem key={option} value={option}>{option}</MenuItem>
+  //               ))}
+  //             </Select>
+  //           </FormControl>
+  //           <FormControl fullWidth size="small" sx={{ mb: 1 }} disabled={!categoryState.main}>
+  //             <InputLabel>Sub Category</InputLabel>
+  //             <Select
+  //               value={categoryState.sub}
+  //               label="Sub Category"
+  //               onChange={(e) => handleCategoryChange('sub', e.target.value)}
+  //               disabled={!categoryState.main}
+  //             >
+  //               {subOptions.map(option => (
+  //                 <MenuItem key={option.name} value={option.name}>{option.name}</MenuItem>
+  //               ))}
+  //             </Select>
+  //           </FormControl>
+  //           <FormControl fullWidth size="small" disabled={!categoryState.sub}>
+  //             <InputLabel>Child Category</InputLabel>
+  //             <Select
+  //               value={categoryState.child}
+  //               label="Child Category"
+  //               onChange={(e) => handleCategoryChange('child', e.target.value)}
+  //               disabled={!categoryState.sub}
+  //             >
+  //               {(childOptions || []).map(option => (
+  //                 <MenuItem key={option} value={option}>{option}</MenuItem>
+  //               ))}
+  //             </Select>
+  //           </FormControl>
+  //         </>
+  //       ) : (
+  //         <Typography variant="body1" sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}>
+  //           {displayValue || 'Not selected'}
+  //         </Typography>
+  //       )}
+  //     </Box>
+  //   );
+  // };
 
   // Render regular field
   const renderField = (label, key) => {
@@ -346,54 +350,79 @@ const ManageProfile = () => {
     );
   };
 
-  // Investment options
-  const Investments = [
-    "having amount",
-    "take loan",
-    "need loan",
-  ];
+  // Render regular field
+  // const renderField = (label, key) => {
+  //   const value = investorData[key];
+  //   const isPhoneField = key === 'mobileNumber' || key === 'whatsappNumber';
+  //   const isReadOnly = key === 'country' || key === 'email';
 
-  const renderInvestmentField = (label, key) => {
-    const existingValue = investorData[key];
-    let displayValue = '';
+  //   let displayValue = '';
+  //   if (Array.isArray(value)) {
+  //     displayValue = value.join(', ');
+  //   } else if (typeof value === 'object' && value !== null && key !== 'category') {
+  //     displayValue = JSON.stringify(value);
+  //   } else {
+  //     displayValue = value || '';
+  //   }
 
-    if (Array.isArray(existingValue)) {
-      displayValue = existingValue[0] || '';
-    } else if (existingValue) {
-      displayValue = existingValue;
-    }
+  //   return (
+  //     <Box mb={2}>
+  //       <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+  //         {label}
+  //       </Typography>
+  //       {editMode && !isReadOnly ? (
+  //         <Box display="flex" alignItems="center">
+  //           {isPhoneField && <Typography sx={{ mr: 1 }}>+91</Typography>}
+  //           <TextField
+  //             fullWidth
+  //             variant="outlined"
+  //             size="small"
+  //             value={value || ''}
+  //             onChange={(e) => {
+  //               setInvestorData({ ...investorData, [key]: e.target.value });
+  //               setFieldErrors({ ...fieldErrors, [key]: '' });
+  //             }}
+  //             error={!!fieldErrors[key]}
+  //             helperText={fieldErrors[key]}
+  //           />
+  //         </Box>
+  //       ) : (
+  //         <Typography variant="body1" sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}>
+  //           {isPhoneField ? `+91 ${displayValue}` : displayValue || '-----'}
+  //         </Typography>
+  //       )}
+  //     </Box>
+  //   );
+  // };
 
-    return (
-      <Box mb={2}>
-        <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-          {label}
-        </Typography>
-        {editMode ? (
-          <FormControl fullWidth size="small">
-            <Select
-              value={displayValue}
-              onChange={(e) => {
-                setInvestorData({ ...investorData, [key]: e.target.value });
-              }}
-            >
-              {Investments.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        ) : (
-          <Typography
-            variant="body1"
-            sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}
-          >
-            {displayValue || '-----'}
-          </Typography>
-        )}
-      </Box>
-    );
-  };
+  // Render preferences
+  const renderPreferences = () => (
+    <Box mb={2}>
+      <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+        Preferences
+      </Typography>
+      {Array.isArray(investorData.preferences) && investorData.preferences.length > 0 ? (
+        <List>
+          {investorData.preferences.map((pref, idx) => (
+            <ListItem key={idx} divider>
+              <ListItemText
+                primary={
+                  <Stack spacing={0.5}>
+                    <Typography variant="body2"><b>Category:</b> {pref.category}</Typography>
+                    <Typography variant="body2"><b>Investment:</b> {pref.investmentRange} - {pref.investmentAmount}</Typography>
+                    <Typography variant="body2"><b>Location:</b> {pref.preferredState} / {pref.preferredDistrict} / {pref.preferredCity}</Typography>
+                    <Typography variant="body2"><b>Property:</b> {pref.propertyType}{pref.propertyType === "Own Property" ? ` (${pref.propertySize})` : ""}</Typography>
+                  </Stack>
+                }
+              />
+            </ListItem>
+          ))}
+        </List>
+      ) : (
+        <Typography variant="body2" color="text.secondary">No preferences added yet.</Typography>
+      )}
+    </Box>
+  );
 
   if (loading) {
     return (
@@ -411,6 +440,71 @@ const ManageProfile = () => {
       </Typography>
     );
   }
+  // Investment options
+  // const Investments = [
+  //   "having amount",
+  //   "take loan",
+  //   "need loan",
+  // ];
+
+  // const renderInvestmentField = (label, key) => {
+  //   const existingValue = investorData[key];
+  //   let displayValue = '';
+
+  //   if (Array.isArray(existingValue)) {
+  //     displayValue = existingValue[0] || '';
+  //   } else if (existingValue) {
+  //     displayValue = existingValue;
+  //   }
+
+  //   return (
+  //     <Box mb={2}>
+  //       <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+  //         {label}
+  //       </Typography>
+  //       {editMode ? (
+  //         <FormControl fullWidth size="small">
+  //           <Select
+  //             value={displayValue}
+  //             onChange={(e) => {
+  //               setInvestorData({ ...investorData, [key]: e.target.value });
+  //             }}
+  //           >
+  //             {Investments.map((option) => (
+  //               <MenuItem key={option} value={option}>
+  //                 {option}
+  //               </MenuItem>
+  //             ))}
+  //           </Select>
+  //         </FormControl>
+  //       ) : (
+  //         <Typography
+  //           variant="body1"
+  //           sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}
+  //         >
+  //           {displayValue || '-----'}
+  //         </Typography>
+  //       )}
+  //     </Box>
+  //   );
+  // };
+
+  // if (loading) {
+  //   return (
+  //     <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+  //       <CircularProgress />
+  //     </Box>
+  //   );
+  // }
+
+  // if (!investorData || Object.keys(investorData).length === 0) {
+  //   return (
+  //     <Typography variant="h6" align="center" mt={4}>
+  //       Unable to load profile. Please login again{' '}
+  //       <button onClick={() => navigate("/loginpage")}>Login</button>
+  //     </Typography>
+  //   );
+  // }
 
   return (
     <Box px={2}>
@@ -460,18 +554,17 @@ const ManageProfile = () => {
 
           {/* Fields to render */}
           {renderField("First Name", "firstName")}
-          {renderField("Email", "email")} {/* ✨ Email now read-only */}
+          {renderField("Email", "email", true)}
           {renderField("Mobile Number", "mobileNumber")}
           {renderField("Whatsapp Number", "whatsappNumber")}
           {renderField("State", "state")}
-          {renderField("Address", "address")}
-          {renderCategoryField("Category", "category")}
           {renderField("City", "city")}
           {renderField("Country", "country")}
-          {renderInvestmentField("Preferred Investment ", "investmentRange")}
+          {renderField("Address", "address")}
           {renderField("Occupation", "occupation")}
           {renderField("Pincode", "pincode")}
-          {renderField("Property Type", "propertyType")}
+{investorData.occupation === "Other" && renderField("Specify Occupation", "specifyOccupation")}  
+        {renderPreferences()}
         </Paper>
       </Box>
 
