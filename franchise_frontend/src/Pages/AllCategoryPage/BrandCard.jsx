@@ -15,8 +15,6 @@ import {
   AttachMoney,
   AreaChart,
   Description,
-  Star,
-  StarBorder,
 } from '@mui/icons-material';
 import LoginPage from '../LoginPage/LoginPage';
 
@@ -155,21 +153,6 @@ const handleLikeClick = async (brandId, isLiked) => {
             )}
           </IconButton>
         </Box>
-
-        {/* Rating
-        <Box display="flex" alignItems="center" mb={1.5}>
-          <Rating
-            value={4.5}
-            precision={0.5}
-            readOnly
-            size="small"
-            icon={<Star fontSize="inherit" sx={{ color: "#ff9800" }} />}
-            emptyIcon={<StarBorder fontSize="inherit" />}
-          />
-          <Typography variant="body2" sx={{ ml: 1, color: "text.secondary" }}>
-            (24 reviews)
-          </Typography>
-        </Box> */}
 
         {/* Categories */}
         <Box sx={{ mb: 2, minHeight: 32 }}>

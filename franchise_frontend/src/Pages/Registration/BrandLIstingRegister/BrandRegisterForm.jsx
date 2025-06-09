@@ -184,7 +184,7 @@ const BrandRegisterForm = () => {
     return savedData ? JSON.parse(savedData) : initialFormData;
   });
 
-  // console.log("Form Data:", formData);
+  console.log("Form Data:", formData);
 
   const [validationErrors, setValidationErrors] = useState({
     brandDetails: {},
@@ -338,6 +338,7 @@ const BrandRegisterForm = () => {
           franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
           brandPromotionVideo: formData.uploads.brandPromotionVideo,
         };
+     
         Object.entries(fileFields).forEach(([fieldName, files]) => {
           if (files && files.length > 0) {
             files.forEach((file) => {
@@ -384,7 +385,7 @@ const BrandRegisterForm = () => {
         //     brandPromotionVideo: formData.uploads.brandPromotionVideo,
         //   }
         // };
-
+  console.log("fileFields.....:", formDataSend);
         const response = await axios.post(
           "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
           // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
@@ -617,7 +618,7 @@ const BrandRegisterForm = () => {
     if (!formData.brandDetails.brandCategories?.length) return null;
 
     return (
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         <Accordion elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
@@ -649,7 +650,7 @@ const BrandRegisterForm = () => {
     if (!formData.brandDetails.expansionLocation?.length) return null;
 
     return (
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         <Accordion elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
@@ -1022,13 +1023,13 @@ const BrandRegisterForm = () => {
           </Table>
         </TableContainer>
 
-        <TableContainer component={Paper} sx={{ mb: 4,
+        <TableContainer component={Paper} sx={{ mb: 2,
       boxShadow: { xs: 0, sm: 1 },
       borderRadius: { xs: 0, sm: 2 },
       overflowX: "auto",}}>
           <Typography
             variant="subtitle1"
-            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5",fontSize: { xs: 16, sm: 18 } }}
+            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#ff9800",fontSize: { xs: 16, sm: 18 } }}
           >
             Franchise Details
           </Typography>
@@ -1086,8 +1087,7 @@ const BrandRegisterForm = () => {
   };
   return (
     <>
-    <Navbar/>
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" ,mt: 8 }}>
       <Box
         sx={{
           flexGrow: 1,
@@ -1250,7 +1250,6 @@ const BrandRegisterForm = () => {
         </Alert>
       </Snackbar>
     </Box>
-    <Footer/>
     </>
   );
 };

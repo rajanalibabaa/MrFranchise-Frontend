@@ -278,11 +278,8 @@ const handleAddLocation = () => {
   return (
     <Box sx={{ overflowY: "auto", pr: 1, mt: 0 }}>
       {/* Brand Details Section - Now in 5 columns for desktop */}
-      <Paper
-        elevation={0}
-        sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 1 }}
-      >
-        <Typography variant="h6" sx={{ mb: 1, color: "primary.main" }}>
+      
+        <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
           Brand Details
         </Typography>
 
@@ -290,9 +287,11 @@ const handleAddLocation = () => {
           container
           spacing={2}
           sx={{
+            mt:2,
             display: "grid",
             gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
             gap: 2,
+            
           }}
         >
           {/* Company Name */}
@@ -694,14 +693,10 @@ const handleAddLocation = () => {
             </Box>
           </Grid>
         </Grid>
-      </Paper>
 
       {/* Communication Information Section - 5 columns */}
-      <Paper
-        elevation={0}
-        sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 1, mt: 1 }}
-      >
-        <Typography variant="h6" sx={{ mb: 1, color: "primary.main" }}>
+     
+        <Typography variant="h6" sx={{ mb: 3, color: "#ff9800" }}>
           Communication Information
         </Typography>
         <Grid
@@ -872,14 +867,11 @@ const handleAddLocation = () => {
             />
           </Grid>
         </Grid>
-      </Paper>
+      
 
       {/* Social Media Section - 5 columns */}
-      <Paper
-        elevation={0}
-        sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 1, mt: 1 }}
-      >
-        <Typography variant="h6" sx={{ mb: 1, color: "primary.main" }}>
+
+        <Typography variant="h6" sx={{ mb: 2, mt:4, color: "#ff9800" }}>
           Social Media & Web Presence
         </Typography>
 
@@ -987,7 +979,7 @@ const handleAddLocation = () => {
             />
           </Grid>
         </Grid>
-      </Paper>
+     
     </Box>
   );
 };

@@ -1,22 +1,27 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Paper, Avatar, CircularProgress,
   Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
-  MenuItem,Select,FormControl,InputLabel,
+  MenuItem, Select, FormControl, InputLabel,
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import axios from "axios";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import { useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom';
-import {categories} from '../../Pages/Registration/BrandLIstingRegister/BrandCategories.jsx'
+import { categories } from '../../Pages/Registration/BrandLIstingRegister/BrandCategories.jsx';
 
 const ManageProfile = () => {
   const [investorData, setInvestorData] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
- // OTP dialog and verification state
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+
+  // OTP dialog and verification state
   const [otpDialogOpen, setOtpDialogOpen] = useState(false);
   const [otpStep, setOtpStep] = useState(1);
   const [contactValue, setContactValue] = useState('');
@@ -25,8 +30,7 @@ const ManageProfile = () => {
   const [reguestOTP, setreguestOTP] = useState(false);
   const [ErrorMSG, setErrorMSG] = useState('');
 
-
-  // ✨ New: Error states for field validation
+  // Error states for field validation
   const [fieldErrors, setFieldErrors] = useState({
     mobileNumber: '',
     whatsappNumber: ''
@@ -36,20 +40,14 @@ const ManageProfile = () => {
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
-    const [mainCategory, setMainCategory] = useState('');
-const [subCategory, setSubCategory] = useState('');
-const [childCategory, setChildCategory] = useState('');
+  // Initialize category state with empty values
+  const [categoryState, setCategoryState] = useState({
+    main: '',
+    sub: '',
+    child: ''
+  });
 
-
-// Sync dropdowns when investorData.category changes (e.g. after save)
-useEffect(() => {
-  const value = investorData.category || {};
-  setMainCategory(value.main || '');
-  setSubCategory(value.sub || '');
-  setChildCategory(value.child || '');
-}, [investorData.category]);
-
-    // 🔄 Fetch investor data
+  // Fetch investor data
   useEffect(() => {
     const fetchData = async () => {
       if (!investorUUID || !AccessToken) {
@@ -60,7 +58,7 @@ useEffect(() => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+         ` https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -72,7 +70,20 @@ useEffect(() => {
           const data = response.data.data;
           data.mobileNumber = data.mobileNumber?.replace('+91', '') || '';
           data.whatsappNumber = data.whatsappNumber?.replace('+91', '') || '';
+          
+          // Set investor data
           setInvestorData(data);
+          
+          // Update category state from fetched data
+          if (data.category) {
+            let cat = data.category;
+            if (Array.isArray(cat)) cat = cat[0] || {};
+            setCategoryState({
+              main: cat.main || '',
+              sub: cat.sub || '',
+              child: cat.child || ''
+            });
+          }
         }
       } catch (error) {
         console.error("Error fetching investor data:", error);
@@ -93,7 +104,7 @@ useEffect(() => {
     setContactValue(investorData.email || investorData.mobileNumber || '');
   };
 
-    // 📩 Request OTP to email
+  // Request OTP to email
   const handleRequestOtp = async () => {
     if (!contactValue) return;
 
@@ -120,7 +131,7 @@ useEffect(() => {
     }
   };
 
-    // ✅ OTP verification
+  // OTP verification
   const handleOtpVerify = async () => {
     if (!otp || otp.length === 0) {
       setOtpError("Please enter the OTP");
@@ -160,9 +171,17 @@ useEffect(() => {
     }
   };
 
-  // ✨ Updated: Validate numbers and show inline field error
+  // Save investor data
   const handleSave = async () => {
-    const dataToUpdate = { ...investorData };
+    const dataToUpdate = { 
+      ...investorData,
+      category: {
+        main: categoryState.main,
+        sub: categoryState.sub,
+        child: categoryState.child
+      }
+    };
+    
     const errors = { mobileNumber: '', whatsappNumber: '' };
     let hasError = false;
 
@@ -195,143 +214,94 @@ useEffect(() => {
         }
       );
       setEditMode(false);
+      setSnackbar({ open: true, message: "Profile successfully updated!", severity: "success" });
     } catch (error) {
       console.error("Error saving investor data:", error);
+      setSnackbar({ open: true, message: "Failed to update profile.", severity: "error" });
     }
   };
 
-    const renderCategoryField = (label, key) => {
-  const value = investorData[key] || {};
-  let displayValue = [value.main, value.sub, value.child].filter(Boolean).join(' > ');
+  // Render category field
+  const renderCategoryField = (label) => {
+    const displayValue = [categoryState.main, categoryState.sub, categoryState.child].filter(Boolean).join(' > ');
 
-  // Find options for dropdowns
-  const mainOptions = categories.map(c => c.name);
-  const subOptions = categories.find(c => c.name === mainCategory)?.children || [];
-  const childOptions = subOptions.find(s => s.name === subCategory)?.children || [];
+    // Find options for dropdowns
+    const mainOptions = categories.map(c => c.name);
+    const subOptions = categories.find(c => c.name === categoryState.main)?.children || [];
+    const childOptions = subOptions.find(s => s.name === categoryState.sub)?.children || [];
 
-  const handleCategoryChange = (type, newValue) => {
-    if (type === 'main') {
-      setMainCategory(newValue);
-      setSubCategory('');
-      setChildCategory('');
-      setInvestorData({
-        ...investorData,
-        [key]: { main: newValue, sub: '', child: '' }
-      });
-    } else if (type === 'sub') {
-      setSubCategory(newValue);
-      setChildCategory('');
-      setInvestorData({
-        ...investorData,
-        [key]: { main: mainCategory, sub: newValue, child: '' }
-      });
-    } else if (type === 'child') {
-      setChildCategory(newValue);
-      setInvestorData({
-        ...investorData,
-        [key]: { main: mainCategory, sub: subCategory, child: newValue }
-      });
-    }
-  };
+    const handleCategoryChange = (type, newValue) => {
+      const updatedCategory = { 
+        main: type === 'main' ? newValue : categoryState.main,
+        sub: type === 'sub' ? newValue : (type === 'main' ? '' : categoryState.sub),
+        child: type === 'child' ? newValue : (type !== 'child' ? '' : categoryState.child)
+      };
 
+      setCategoryState(updatedCategory);
 
-//     return (
-//       <Box mb={2}>
-//         <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-//           {label}
-//         </Typography>
-//         {editMode ? (
-//           <FormControl fullWidth size="small">
-//             <Select
-//               value={displayValue || ''}
-//               onChange={(e) => {
-//                 // Split the selected value back into main/sub categories
-//                 const [main, sub] = e.target.value.split(' > ');
-//                 setInvestorData({ 
-//                   ...investorData, 
-//                   [key]: { main, sub } 
-//                 });
-//               }}
-//             >
-//               {categories.flatMap(mainCategory => 
-//   (mainCategory.children || []).map(subCategory => ({
-//     main: mainCategory.name,
-//     sub: subCategory.name,
-//     label: ${mainCategory.name} > ${subCategory.name}
-//   }))
-// ).map(category => (
-//                 <MenuItem key={category.label} value={category.label}>
-//                   {category.label}
-//                 </MenuItem>
-//               ))}
-//             </Select>
-//           </FormControl>
-//         ) : (
-//           <Typography variant="body1" sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}>
-//             {displayValue || '-----'}
-//           </Typography>
-//         )}
-//       </Box>
-//     );
-//   };
+      // Also update the investorData with the new category
+      setInvestorData(prev => ({
+        ...prev,
+        category: updatedCategory
+      }));
+    };
 
-  // ✨ Updated: Email field is read-only, and inline errors for phone fields
-  
-   return (
-    <Box mb={2}>
-      <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-        {label}
-      </Typography>
-      {editMode ? (
-        <>
-          <FormControl fullWidth size="small" sx={{ mb: 1 }}>
-            <InputLabel>Main Category</InputLabel>
-            <Select
-              value={mainCategory}
-              label="Main Category"
-              onChange={(e) => handleCategoryChange('main', e.target.value)}
-            >
-              {mainOptions.map(option => (
-                <MenuItem key={option} value={option}>{option}</MenuItem>
-              ))}
-            </Select>
-             </FormControl>
-          <FormControl fullWidth size="small" sx={{ mb: 1 }} disabled={!mainCategory}>
-            <InputLabel>Sub Category</InputLabel>
-            <Select
-              value={subCategory}
-              label="Sub Category"
-              onChange={(e) => handleCategoryChange('sub', e.target.value)}
-              disabled={!mainCategory}
-            >
-              {subOptions.map(option => (
-                <MenuItem key={option.name} value={option.name}>{option.name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth size="small" disabled={!subCategory}>
-            <InputLabel>Subchild</InputLabel>
-            <Select
-              value={childCategory}
-              label="Subchild"
-              onChange={(e) => handleCategoryChange('child', e.target.value)}
-              disabled={!subCategory}
-            >
-              {(childOptions || []).map(option => (
-                <MenuItem key={option} value={option}>{option}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </>
-      ) : (
-        <Typography variant="body1" sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}>
-          {displayValue}
+    return (
+      <Box mb={2}>
+        <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+          {label}
         </Typography>
-      )}
-    </Box>
-  );
-};
-  
+        {editMode ? (
+          <>
+            <FormControl fullWidth size="small" sx={{ mb: 1 }}>
+              <InputLabel>Main Category</InputLabel>
+              <Select
+                value={categoryState.main}
+                label="Main Category"
+                onChange={(e) => handleCategoryChange('main', e.target.value)}
+              >
+                {mainOptions.map(option => (
+                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth size="small" sx={{ mb: 1 }} disabled={!categoryState.main}>
+              <InputLabel>Sub Category</InputLabel>
+              <Select
+                value={categoryState.sub}
+                label="Sub Category"
+                onChange={(e) => handleCategoryChange('sub', e.target.value)}
+                disabled={!categoryState.main}
+              >
+                {subOptions.map(option => (
+                  <MenuItem key={option.name} value={option.name}>{option.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth size="small" disabled={!categoryState.sub}>
+              <InputLabel>Child Category</InputLabel>
+              <Select
+                value={categoryState.child}
+                label="Child Category"
+                onChange={(e) => handleCategoryChange('child', e.target.value)}
+                disabled={!categoryState.sub}
+              >
+                {(childOptions || []).map(option => (
+                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </>
+        ) : (
+          <Typography variant="body1" sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}>
+            {displayValue || 'Not selected'}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  // Render regular field
   const renderField = (label, key) => {
     const value = investorData[key];
     const isPhoneField = key === 'mobileNumber' || key === 'whatsappNumber';
@@ -339,14 +309,8 @@ useEffect(() => {
 
     let displayValue = '';
     if (Array.isArray(value)) {
-      if (key === 'category') {
-        displayValue = value
-          .map(item => [item.main, item.sub, item.child].filter(Boolean).join(' > '))
-          .join(', ');
-      } else {
-        displayValue = value.join(', ');
-      }
-    } else if (typeof value === 'object' && value !== null) {
+      displayValue = value.join(', ');
+    } else if (typeof value === 'object' && value !== null && key !== 'category') {
       displayValue = JSON.stringify(value);
     } else {
       displayValue = value || '';
@@ -367,7 +331,7 @@ useEffect(() => {
               value={value || ''}
               onChange={(e) => {
                 setInvestorData({ ...investorData, [key]: e.target.value });
-                setFieldErrors({ ...fieldErrors, [key]: '' }); // clear on change
+                setFieldErrors({ ...fieldErrors, [key]: '' });
               }}
               error={!!fieldErrors[key]}
               helperText={fieldErrors[key]}
@@ -382,55 +346,54 @@ useEffect(() => {
     );
   };
 
-    // 📊 Dropdown values
-  const Investments =[
+  // Investment options
+  const Investments = [
     "having amount",
     "take loan",
     "need loan",
   ];
 
   const renderInvestmentField = (label, key) => {
-  const existingValue = investorData[key];
-  let displayValue = '';
+    const existingValue = investorData[key];
+    let displayValue = '';
 
-  if (Array.isArray(existingValue)) {
-    displayValue = existingValue[0] || '';
-  } else if (existingValue) {
-    displayValue = existingValue;
-  }
+    if (Array.isArray(existingValue)) {
+      displayValue = existingValue[0] || '';
+    } else if (existingValue) {
+      displayValue = existingValue;
+    }
 
     return (
       <Box mb={2}>
-      <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-        {label}
-      </Typography>
-      {editMode ? (
-        <FormControl fullWidth size="small">
-          <Select
-            value={displayValue}
-            onChange={(e) => {
-              setInvestorData({ ...investorData, [key]: e.target.value })
-            }}
-          >
-            {Investments.map((option) => (
-              <MenuItem key={option} value={option}>
-                
-                {option}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      ) : (
-        <Typography
-          variant="body1"
-          sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}
-        >
-          {displayValue || '-----'}
+        <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+          {label}
         </Typography>
-      )}
-    </Box>
-  );
-};
+        {editMode ? (
+          <FormControl fullWidth size="small">
+            <Select
+              value={displayValue}
+              onChange={(e) => {
+                setInvestorData({ ...investorData, [key]: e.target.value });
+              }}
+            >
+              {Investments.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        ) : (
+          <Typography
+            variant="body1"
+            sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}
+          >
+            {displayValue || '-----'}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
 
   if (loading) {
     return (
@@ -502,12 +465,10 @@ useEffect(() => {
           {renderField("Whatsapp Number", "whatsappNumber")}
           {renderField("State", "state")}
           {renderField("Address", "address")}
-          {renderCategoryField("Category", "categor")}
+          {renderCategoryField("Category", "category")}
           {renderField("City", "city")}
           {renderField("Country", "country")}
-          {/* {renderField("Preffered Investment ", "investmentRange")} */}
           {renderInvestmentField("Preferred Investment ", "investmentRange")}
-          {/* {renderField("Looking For", "lookingFor")} */}
           {renderField("Occupation", "occupation")}
           {renderField("Pincode", "pincode")}
           {renderField("Property Type", "propertyType")}
@@ -585,8 +546,25 @@ useEffect(() => {
           <Button onClick={() => setOtpDialogOpen(false)}>Cancel</Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
+        >
+          {snackbar.message}
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 };
 
 export default ManageProfile;
+
