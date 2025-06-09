@@ -96,7 +96,7 @@ const PopupModal = ({ open, onClose }) => {
           gutterBottom
           sx={{
             fontWeight: 'bold',
-            color: '#FFBA00',
+            color: 'black',
             fontSize: { 
                 xs: '1.2rem',
                 sm: '1.5rem',
@@ -105,7 +105,22 @@ const PopupModal = ({ open, onClose }) => {
              },
           }}
         >
-          Discover Franchise Opportunities with Us
+Discover 
+<Box component="span"
+  sx={{
+    color: '#ff9800',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    '&:hover': {
+      textDecoration: 'underline',
+      color: '#7AD03A',
+    }
+  }}
+  onClick={() => handleNavigation("/brandviewpage")}
+>
+  Food & Beverage
+</Box>
+Franchise Opportunities
         </Typography>
 
         <img src={pop1} alt="popup visual" style={imageStyle} loading="lazy" />

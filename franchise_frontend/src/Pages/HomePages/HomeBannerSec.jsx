@@ -9,6 +9,7 @@ import {
 import { motion, useAnimation } from "framer-motion";
 import PopupModal from "../../Components/PopUpModal/PopUpModal";
 import FilterDropdowns from "../../Components/Navbar/FilterDropdownsData";
+import Footer from "../../Components/Footers/Footer.jsx";
 
 // Dynamic Components - Import all your video sections
 const dynamicComponents = {
@@ -356,7 +357,7 @@ const HomeBannerSec = () => {
       <Box  sx={{ backgroundColor: '#fffaf7'}}>
         {pageConfig.sections.map((section, index) => renderSection(section, index))}
       </Box>
-
+<Footer />
     </>
   );
 };

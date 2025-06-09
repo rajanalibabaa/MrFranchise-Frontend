@@ -288,7 +288,7 @@ function Navbar() {
           position: 'relative',
           zIndex: 1
         }}>
-          {['Expand Your Franchise', 'Investor', 'Advertise','Franchise promotion & Lead Distribution Packages'].map((text, index) => (
+          {['Expand Your Franchise', 'Investor', 'Advertise','Lead Distribution Packages','Other Industries'].map((text, index) => (
             <motion.div
               key={text}
               whileHover={{ scale: 1.05 }}
@@ -300,7 +300,8 @@ function Navbar() {
                   text === 'Expand Your Franchise' ? '/expandyourbrand' :
                   text === 'Investor' ? '/investfranchise' :
                   text === 'Advertise' ? '/advertisewithus' :
-                  text === 'Franchise promotion & Lead Distribution Packages' ? '/franchisepromotion' :''
+                  text === 'Lead Distribution Packages' ? '/franchisepromotion' : 
+                  text === 'Other Industries' ? '/otherindustries' : '/'
                 }
                 size="small"
                 sx={{ 

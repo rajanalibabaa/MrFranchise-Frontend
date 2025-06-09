@@ -43,7 +43,6 @@ import { categories } from "./BrandLIstingRegister/BrandCategories";
 import backgroundImage from "../../assets/Images/investorimage.jpg";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import Footer from "../../Components/Footers/Footer";
-import Navbar from "../../Components/Navbar/NavBar";
 
 const phoneCodes = {
   India: "+91",

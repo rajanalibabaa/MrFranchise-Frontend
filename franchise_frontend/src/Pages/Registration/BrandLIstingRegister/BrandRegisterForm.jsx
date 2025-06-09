@@ -49,7 +49,6 @@ import {
 import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress from "@mui/material/CircularProgress";
-import Navbar from "../../../Components/Navbar/NavBar";
 import Footer from "../../../Components/Footers/Footer";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
@@ -1250,6 +1249,7 @@ const BrandRegisterForm = () => {
         </Alert>
       </Snackbar>
     </Box>
+    <Footer />
     </>
   );
 };
