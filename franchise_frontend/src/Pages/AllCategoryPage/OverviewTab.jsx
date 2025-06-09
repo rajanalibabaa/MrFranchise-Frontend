@@ -388,7 +388,7 @@ const OverviewTab = ({ brand }) => {
               }} 
               onClick={() => {
                  // Debug: See what you get
-                 console.log("Auto-fill values:",  userData.firstName, userData.email, userData.mobileNumber );
+                 console.log("Auto-fill values:",  userData?.firstName, userData?.email, userData?.mobileNumber );
                 setIsModalOpen(true);
               }}
             >
