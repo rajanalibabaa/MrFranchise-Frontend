@@ -386,8 +386,8 @@ const BrandRegisterForm = () => {
         // };
   console.log("fileFields.....:", formDataSend);
         const response = await axios.post(
-          // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
-          "http://localhost:5000/api/v1/brandlisting/createBrandListing",
+          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
+          // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {

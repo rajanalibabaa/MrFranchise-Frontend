@@ -571,6 +571,16 @@ const InvestorRegister = () => {
 
       console.log("Registration response:", response.data);
       if (response.status === 201) {
+        if (formattedData.firstName) {
+    localStorage.setItem("investorName", formattedData.firstName);
+  }
+  if (formattedData.email) {
+    localStorage.setItem("investorEmail", formattedData.email);
+  }
+  if (data.mobileNumber) {
+    localStorage.setItem("investorMobile", data.mobileNumber);
+  }
+
         showSnackbar(
           "Registration successful! Redirecting to login...",
           "success"

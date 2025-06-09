@@ -366,7 +366,7 @@ const handleAddLocation = () => {
                 label="Franchise Since Year"
                 onChange={handleChange}
                 variant="outlined"
-                size="small"
+                size="small"  
                 required
               >
                 {Array.from(

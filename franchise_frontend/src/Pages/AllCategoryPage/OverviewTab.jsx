@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -42,13 +42,50 @@ const OverviewTab = ({ brand }) => {
     fullName: "",
     investorEmail: "",
     mobileNumber: "",
-    franchiseModel: "",
-    franchiseType: "",
+    // franchiseModel: "",
+    // franchiseType: "",
     investmentRange: "",
     location: "",
     planToInvest: "",
     readyToInvest: "",
   });
+  const [userData, setUserData] = useState(null);
+ 
+   const investorUUID = localStorage.getItem("investorUUID");
+  const AccessToken = localStorage.getItem("accessToken");
+
+  useEffect(() => {
+    const fetchInvestorDetails = async () => {
+      if (!investorUUID || !AccessToken) return;
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${AccessToken}`,
+            },
+          }
+        );
+
+        console.log("Investor details response:", response.data.data);
+        setUserData(response.data.data);
+        // const investor = response.data?.data;
+        // if (investor) {
+        //   setFormData((prev) => ({
+        //     ...prev,
+        //     fullName: investor.firstName || "",
+        //     investorEmail: investor.email || "",
+        //     mobileNumber: investor.mobileNumber || "",
+        //   }));
+        // }
+      } catch (error) {
+        console.error("Failed to fetch investor details:", error);
+      }
+    };
+
+    fetchInvestorDetails();
+  }, [investorUUID, AccessToken]);
 
   const franchiseModels = [
     ...new Set(
@@ -73,7 +110,12 @@ const OverviewTab = ({ brand }) => {
       ) || []
     ),
   ];
-  
+
+  const expansionLocations = (brand.personalDetails?.expansionLocation || []).map(
+  (loc) =>
+    [loc.city, loc.state, loc.country].filter(Boolean).join(", ")
+);
+
   const investmentTimings = [
     "Immediately",
     "1-3 months",
@@ -116,7 +158,7 @@ const OverviewTab = ({ brand }) => {
         brandName: brand?.personalDetails?.brandName || "",
         brandEmail: brand.personalDetails?.email || "",
       };
- console.log("payload", payload);
+   console.log("payload", payload);
       const token = localStorage.getItem("accessToken");
       const investorUUID = localStorage.getItem("investorUUID");
       const brandUUID = localStorage.getItem("brandUUID");
@@ -143,8 +185,8 @@ const OverviewTab = ({ brand }) => {
         setFormData({
           fullName: "",
           location: "",
-          franchiseModel: "",
-          franchiseType: "",
+          // franchiseModel: "",
+          // franchiseType: "",
           investmentRange: "",
           planToInvest: "",
           readyToInvest: "",
@@ -164,8 +206,8 @@ const OverviewTab = ({ brand }) => {
     setFormData({
       fullName: "",
       location: "",
-      franchiseModel: "",
-      franchiseType: "",
+      // franchiseModel: "",
+      // franchiseType: "",
       investmentRange: "",
       planToInvest: "",
       readyToInvest: "",
@@ -245,7 +287,9 @@ const OverviewTab = ({ brand }) => {
                     <TableCell sx={{ width: "8%" }}>Exterior</TableCell>
                     <TableCell sx={{ width: "8%" }}>ROI</TableCell>
                     <TableCell sx={{ width: "8%" }}>BreakEven</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Select</TableCell>
+                    <TableCell sx={{ width: "8%" }}>Margin on Sale</TableCell> 
+                    <TableCell sx={{ width: "8%" }}>Fixed Return</TableCell> 
+                    {/* <TableCell sx={{ width: "8%" }}>Select</TableCell> */}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -292,7 +336,9 @@ const OverviewTab = ({ brand }) => {
                         <TableCell>
                           {model.breakEven || "Not specified"}
                         </TableCell>
-                        <TableCell>
+                         <TableCell>{model.marginOnSale || "Not specified"}</TableCell> 
+                         <TableCell>{model.fixedReturn || "Not specified"}</TableCell> 
+                        {/* <TableCell>
                           <motion.div whileHover={{ scale: 1.05 }}>
                             <Button
                               variant="outlined"
@@ -314,7 +360,7 @@ const OverviewTab = ({ brand }) => {
                                 : "Select"}
                             </Button>
                           </motion.div>
-                        </TableCell>
+                        </TableCell> */}
                       </motion.tr>
                     )
                   )}
@@ -327,6 +373,7 @@ const OverviewTab = ({ brand }) => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
+            
             <Button 
               variant="outlined" 
               sx={{ 
@@ -339,10 +386,15 @@ const OverviewTab = ({ brand }) => {
                 textTransform: "none",
                 fontSize: "1rem"
               }} 
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => {
+                 // Debug: See what you get
+                 console.log("Auto-fill values:",  userData.firstName, userData.email, userData.mobileNumber );
+                setIsModalOpen(true);
+              }}
             >
               Apply for Franchise
-            </Button>
+             </Button>
+
           </motion.div>
 
           <Dialog
@@ -435,12 +487,13 @@ const OverviewTab = ({ brand }) => {
                           fullWidth
                           label="Full Name"
                           name="fullName"
-                          value={formData.fullName}
+                          value={formData.fullName || userData?.firstName || ""}  
                           onChange={handleChange}
                           required
                           variant="outlined"
                           size="small"
                           sx={{ mb: 2 }}
+                          InputProps={{ readOnly: true }}
                         />
                       </Grid>
                       <Grid item xs={12} md={6}>
@@ -448,12 +501,13 @@ const OverviewTab = ({ brand }) => {
                           fullWidth
                           label="Email"
                           name="investorEmail"
-                          value={formData.investorEmail}
+                          value={formData.investorEmail || userData?.email || ""}
                           onChange={handleChange}
                           required
                           variant="outlined"
                           size="small"
                           sx={{ mb: 2 }}
+                          InputProps={{ readOnly: true }}
                         />
                       </Grid>
                       <Grid item xs={12} md={6}>
@@ -461,30 +515,43 @@ const OverviewTab = ({ brand }) => {
                           fullWidth
                           label="Mobile Number"
                           name="mobileNumber"
-                          value={formData.mobileNumber}
+                          value={formData.mobileNumber || userData?.mobileNumber || ""}
                           onChange={handleChange}
                           required
                           variant="outlined"
                           size="small"
                           sx={{ mb: 2 }}
+                          InputProps={{ readOnly: true }}
                         />
-                      </Grid>
+                      </Grid>                   
+                        <Grid item xs={12} md={6}>
+                          <
+                            TextField
+                            select
+                            fullWidth
+                            label="Location"
+                            name="location"
+                            value={formData.location}
+                            onChange={handleChange}
+                            required
+                            variant="outlined"
+                            size="small"
+                            sx={{ mb: 2 }}
+                          >
+                            {expansionLocations.length > 0 ? (
+                              expansionLocations.map((loc, i) => (
+                                <MenuItem key={i} value={loc}>
+                                  {loc}
+                                </MenuItem>
+                              ))
+                            ) : (
+                              <MenuItem value="">Not specified</MenuItem>
+                            )}
+                          </TextField>
+                        </Grid>
 
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Location"
-                          name="location"
-                          value={formData.location}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        />
-                      </Grid>
 
-                      <Grid item xs={12} md={4}>
+                      {/* <Grid item xs={12} md={4}>
                         <TextField
                           select
                           fullWidth
@@ -503,9 +570,9 @@ const OverviewTab = ({ brand }) => {
                             </MenuItem>
                           ))}
                         </TextField>
-                      </Grid>
+                      </Grid> */}
 
-                      <Grid item xs={12} md={4}>
+                      {/* <Grid item xs={12} md={4}>
                         <TextField
                           select
                           fullWidth
@@ -524,7 +591,7 @@ const OverviewTab = ({ brand }) => {
                             </MenuItem>
                           ))}
                         </TextField>
-                      </Grid>
+                      </Grid> */}
 
                       <Grid item xs={12} md={4}>
                         <TextField
@@ -615,7 +682,7 @@ const OverviewTab = ({ brand }) => {
                             {isSubmitting ? (
                               <CircularProgress size={24} color="inherit" />
                             ) : (
-                              "Submit"
+                              "Apply"
                             )}
                           </Button>
                         </motion.div>
