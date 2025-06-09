@@ -5,6 +5,7 @@ import pop1 from '../../assets/Images/logoforReg.jpg';
 import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import { keyframes } from '@mui/system';
+import LoginPage from '../../Pages/LoginPage/LoginPage';
 
 const zoomInOut = keyframes`
   0% { transform: scale(1); }
@@ -31,9 +32,6 @@ const style = {
   textAlign: 'center',
   animation: `${fadeIn} 0.6s ease-out`,
   backgroundColor: '#fff',
-  
-  
-  
 };
 
 const imageStyle = {
@@ -46,7 +44,7 @@ const imageStyle = {
 
 const PopupModal = ({ open, onClose }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false); // ✅ Fixed: moved inside the component
+  const [loginOpen, setLoginOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,107 +65,119 @@ const PopupModal = ({ open, onClose }) => {
   };
 
   const openLoginPopup = () => {
-    setLoginOpen(true); // ✅ This now works correctly
+    setLoginOpen(true);
   };
 
   return (
-    <Modal open={open} onClose={onClose} aria-labelledby="popup-title" aria-describedby="popup-description">
-      <Box sx={style}>
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            color: '#999',
-            '&:hover': {
-              color: '#000',
-            },
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
+    <>
+      <Modal open={open} onClose={onClose} aria-labelledby="popup-title" aria-describedby="popup-description">
+        <Box sx={style}>
+          <IconButton
+            aria-label="close"
+            onClick={onClose}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              color: '#999',
+              '&:hover': {
+                color: 'red',
+              },
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
 
-        <Typography
-          id="popup-title"
-          variant="h5"
-          component="h3"
-          gutterBottom
-          sx={{
-            fontWeight: 'bold',
-            color: '#FFBA00',
-            fontSize: { 
+          <Typography
+            id="popup-title"
+            variant="h5"
+            component="h3"
+            gutterBottom
+            sx={{
+              fontWeight: 'bold',
+              color: '#FFBA00',
+              fontSize: {
                 xs: '1.2rem',
                 sm: '1.5rem',
                 md: '1.8rem',
                 lg: '2rem',
-             },
-          }}
-        >
-          Discover Franchise Opportunities with Us
-        </Typography>
-
-        <img src={pop1} alt="popup visual" style={imageStyle} loading="lazy" />
-
-        <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-          <Button
-            variant="contained"
-            onClick={() => handleNavigation("/investor-register")}
-            sx={{
-              bgcolor: "#7ad03a",
-              "&:hover": {
-                bgcolor: "#5cbf24",
               },
-              width: "100%",
-              maxWidth: 250,
-              animation: `${zoomInOut} 1.5s ease-in-out infinite`,
-              fontWeight: 'bold',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-              transition: 'all 0.3s ease',
             }}
           >
-            Investor Register
-          </Button>
+            Discover Franchise Opportunities with Us
+          </Typography>
 
-          <Button
-            variant="contained"
-            onClick={() => handleNavigation("/brandlistingform")}
-            sx={{
-              bgcolor: "#e99830",
-              "&:hover": {
-                bgcolor: "#cc7a18",
-              },
-              width: "100%",
-              maxWidth: 250,
-              fontWeight: 'bold',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-              transition: 'all 0.3s ease',
-            }}
-          >
-            Brand Register
-          </Button>
+          <img src={pop1} alt="popup visual" style={imageStyle} loading="lazy" />
 
-          <Typography variant="body2" sx={{ mt: 2 }}>
-            Already have an account?{' '}
-            <Box
-              component="span"
-              onClick={openLoginPopup}
+          <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <Button
+              variant="contained"
+              onClick={() => handleNavigation("/investor-register")}
               sx={{
-                textDecoration: 'underline',
-                cursor: 'pointer',
-                color: '#007bff',
+                bgcolor: "#7ad03a",
                 "&:hover": {
-                  color: "#0056b3",
+                  bgcolor: "#5cbf24",
                 },
+                width: "100%",
+                maxWidth: 250,
+                animation: `${zoomInOut} 1.5s ease-in-out infinite`,
+                fontWeight: 'bold',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                transition: 'all 0.3s ease',
               }}
             >
-              Sign In
-            </Box>
-          </Typography>
+              Investor Register
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={() => handleNavigation("/brandlistingform")}
+              sx={{
+                bgcolor: "#e99830",
+                "&:hover": {
+                  bgcolor: "#cc7a18",
+                },
+                width: "100%",
+                maxWidth: 250,
+                fontWeight: 'bold',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              Brand Register
+            </Button>
+
+            <Typography variant="body2" sx={{ mt: 2 }}>
+              Already have an account?{' '}
+              <Box
+                component="span"
+                onClick={openLoginPopup}
+                sx={{
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  color: '#007bff',
+                  "&:hover": {
+                    color: "#0056b3",
+                  },
+                }}
+              >
+                Sign In
+              </Box>
+            </Typography>
+          </Box>
         </Box>
-      </Box>
-    </Modal>
+      </Modal>
+
+      {/* ✅ Properly render the LoginPage modal */}
+      <LoginPage
+        open={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onLoginSuccess={() => {
+          setLoginOpen(false);
+          handleClose();
+        }}
+      />
+    </>
   );
 };
 
