@@ -39,7 +39,7 @@ import img from "../../assets/images/brandLogo.jpg";
 const Dashboard = ({ selectedSection, sectionContent }) => {
   const dispatch = useDispatch();
   const [tabValue, setTabValue] = useState(0);
-  const [investorInfo, setInvestorInfo] = useState(null);
+  // const [investorInfo, setInvestorInfo] = useState(null);
   const [viewedBrands, setViewedBrands] = useState([]);
   const [likedBrands, setLikedBrands] = useState([]);
   const [appliedBrands, setAppliedBrands] = useState([]);

@@ -216,7 +216,9 @@ const HomeBannerSec = () => {
 
   return (
     <>
-      <PopupModal open={isPopupOpen} onClose={handlePopupClose} />
+     {!localStorage.getItem("accessToken") && (
+       <PopupModal open={isPopupOpen} onClose={handlePopupClose} />
+     )}
       <Navbar />
       
       {/* Hero Banner */}

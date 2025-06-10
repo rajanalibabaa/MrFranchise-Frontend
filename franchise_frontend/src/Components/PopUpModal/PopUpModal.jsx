@@ -13,10 +13,17 @@ const zoomInOut = keyframes`
   100% { transform: scale(1); }
 `;
 
-const fadeIn = keyframes`
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+const zoomIn = keyframes`
+  from {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
 `;
+
 
 const style = {
   position: 'absolute',
@@ -30,9 +37,10 @@ const style = {
   boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
   p: { xs: 2, sm: 3 },
   textAlign: 'center',
-  animation: `${fadeIn} 0.6s ease-out`,
   backgroundColor: '#fff',
+  animation: `${zoomIn} 0.4s ease-out forwards`,
 };
+
 
 const imageStyle = {
   width: '100%',
@@ -70,7 +78,9 @@ const PopupModal = ({ open, onClose }) => {
 
   return (
     <>
-      <Modal open={open} onClose={onClose} aria-labelledby="popup-title" aria-describedby="popup-description">
+      <Modal open={open} onClose={onClose} aria-labelledby="popup-title" aria-describedby="popup-description"
+        
+      >
         <Box sx={style}>
           <IconButton
             aria-label="close"
