@@ -194,7 +194,8 @@ const NewlyRegisteredBrandsSection = () => {
         if (response) {
           setBrands(brand);
           setError(null);
-          // Initialize expanded locations state 
+
+          // Initialize expanded locations state
           const initialExpandedState = {};
           brand.forEach((brand) => {
             if (brand.uuid) {

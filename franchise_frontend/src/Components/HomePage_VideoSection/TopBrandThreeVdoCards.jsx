@@ -12,7 +12,7 @@ import {
   Chip,
   Tooltip,
   Stack,
-  colors,
+  CircularProgress,
 } from "@mui/material";
 import {
   Favorite,
@@ -23,15 +23,13 @@ import {
   ChevronLeft,
 } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
-import { useDispatch,useSelector   } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBrands,
   openBrandDialog,
   toggleLikeBrand,
-  
 } from "../../Redux/Slices/brandSlice";
 import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
@@ -39,50 +37,22 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [likedBrands, setLikedBrands] = useState({});
   const [activeVideo, setActiveVideo] = useState(null);
-  const [videoProgress, setVideoProgress] = useState({});
   const timeoutRef = useRef(null);
-  const [brandData, setBrandData] = useState([]);
   const videoRefs = useRef([]);
+  const [showLogin, setShowLogin] = useState(false);
+  
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
-  const [showLogin, setShowLogin] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { data: brand = [] } = useSelector((state) => state.brands);
-
-  const handleLikeClick = async (brandId, isLiked) => {
-    if (likeProcessing[brandId]) return;
-
-    setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-    try {
-      await toggleLike(brandId, isLiked);
-    } finally {
-      setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
-    }
-
-    console.log("isLiked :", isLiked);
-    console.log("brandId :", brandId);
-  };
-  const toggleLike = async (brandId, isLiked) => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      setShowLogin(true);
-      return;
-    }
-    console.log("isliked === :", isLiked);
-    console.log("brandId :", brandId);
-    try {
-      await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
-      // Optionally show success message
-    } catch (error) {
-      console.error("Like operation failed:", error);
-    }
-  };
+  // Get brands and loading state from Redux
+  const { data: brands = [], loading: brandsLoading } = useSelector(
+    (state) => state.brands
+  );
 
   // Fixed card sizes with better aspect ratios
   const CARD_SIZES = {
@@ -98,79 +68,62 @@ function TopBrandVdoCards() {
     },
   };
 
-  const handleNext = useCallback(() => {
-    if (brandData.length > 0) {
-      setCurrentIndex((prev) => (prev + 1) % brandData.length);
+  const handleLikeClick = async (brandId, isLiked) => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setShowLogin(true);
+      return;
     }
-  }, [brandData]);
+
+    try {
+      await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
+    } catch (error) {
+      console.error("Like operation failed:", error);
+    }
+  };
+
+  const handleNext = useCallback(() => {
+    if (brands.length > 0) {
+      setCurrentIndex((prev) => (prev + 1) % brands.length);
+    }
+  }, [brands]);
 
   const handlePrev = useCallback(() => {
-    if (brandData.length > 0) {
-      setCurrentIndex(
-        (prev) => (prev - 1 + brandData.length) % brandData.length
-      );
+    if (brands.length > 0) {
+      setCurrentIndex((prev) => (prev - 1 + brands.length) % brands.length);
     }
-  }, [brandData]);
+  }, [brands]);
 
   const startAutoSlide = useCallback(() => {
     clearTimeout(timeoutRef.current);
-    if (!isHovered && brandData.length > 0) {
+    if (!isHovered && brands.length > 0) {
       timeoutRef.current = setTimeout(() => handleNext(), 8000);
     }
-  }, [isHovered, handleNext, brandData]);
-
-  useEffect(() => {
-    const fetchBrandData = async () => {
-      try {
-        // const response = await axios.get(
-        //   "http://51.20.81.150:5000/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopTwo"
-        // );
-        const response = await dispatch(fetchBrands());
-        const fetchedData = response.payload;
-
-        if (fetchedData) {
-          const data = Array.isArray(fetchedData) ? fetchedData : [fetchedData];
-          setBrandData(data);
-
-          const initialLikedState = {};
-          const initialProgressState = {};
-          data.forEach((brand, index) => {
-            initialLikedState[brand.uuid || brand.title] = false;
-            initialProgressState[index] = 0;
-          });
-          setLikedBrands(initialLikedState);
-          setVideoProgress(initialProgressState);
-        }
-      } catch (error) {
-        console.error("Error fetching brand data:", error);
-      }
-    };
-
-    fetchBrandData();
-  }, []);
-
-  useEffect(() => {
-    startAutoSlide();
-    return () => clearTimeout(timeoutRef.current);
-  }, [currentIndex, startAutoSlide]);
+  }, [isHovered, handleNext, brands]);
 
   useEffect(() => {
     // Initialize all videos to autoplay and loop
-    videoRefs.current.forEach((video, index) => {
+    videoRefs.current.forEach((video) => {
       if (video) {
         video.autoplay = true;
         video.loop = true;
         video.muted = true;
         video.playsInline = true;
-
-        // Set up progress tracking
-        video.ontimeupdate = () => {
-          const progress = (video.currentTime / video.duration) * 100;
-          setVideoProgress((prev) => ({ ...prev, [index]: progress }));
-        };
       }
     });
-  }, [brandData]);
+  }, [brands]);
+
+  useEffect(() => {
+    // Fetch brands if not already loaded
+    if (brands.length === 0 && !brandsLoading) {
+      dispatch(fetchBrands());
+    }
+  }, [dispatch, brands.length, brandsLoading]);
+
+  useEffect(() => {
+    startAutoSlide();
+    return () => clearTimeout(timeoutRef.current);
+  }, [currentIndex, startAutoSlide]);
 
   const handleVideoPlay = (index) => {
     setActiveVideo(index);
@@ -201,18 +154,19 @@ function TopBrandVdoCards() {
     }
   };
 
-  // const handleLike = (brandId) => {
-  //   setLikedBrands((prev) => ({
-  //     ...prev,
-  //     [brandId]: !prev[brandId],
-  //   }));
-  // };
-
   const handleApply = (brand) => {
     dispatch(openBrandDialog(brand));
   };
 
-  if (!brandData || brandData.length === 0) {
+  if (brandsLoading && brands.length === 0) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!brands || brands.length === 0) {
     return (
       <Box
         sx={{
@@ -225,16 +179,16 @@ function TopBrandVdoCards() {
         }}
       >
         <Typography variant="h6" color="text.secondary">
-          Loading featured brands...
+          No featured brands available
         </Typography>
       </Box>
     );
   }
 
-  const mainBrand = brandData[currentIndex];
+  const mainBrand = brands[currentIndex];
   const nextBrands = [
-    brandData[(currentIndex + 1) % brandData.length],
-    brandData[(currentIndex + 2) % brandData.length],
+    brands[(currentIndex + 1) % brands.length],
+    brands[(currentIndex + 2) % brands.length],
   ].filter((brand) => brand); // Filter out undefined brands
 
   const Fact = ({ label, value }) => (
@@ -254,6 +208,7 @@ function TopBrandVdoCards() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Header and navigation buttons */}
       <Box
         sx={{
           display: "flex",
@@ -330,6 +285,7 @@ function TopBrandVdoCards() {
         )}
       </Box>
 
+      {/* Brands slider */}
       <Box
         sx={{
           display: "flex",
@@ -371,6 +327,7 @@ function TopBrandVdoCards() {
                   },
                 }}
               >
+                {/* Video section */}
                 <Box
                   sx={{
                     height: CARD_SIZES.main.videoHeight,
@@ -384,7 +341,7 @@ function TopBrandVdoCards() {
                   <video
                     ref={(el) => (videoRefs.current[0] = el)}
                     src={
-                      mainBrand.brandDetails?.brandPromotionVideo?.[0] &&
+                      mainBrand.brandDetails?.brandPromotionVideo?.[0] ||
                       mainBrand.brandDetails?.franchisePromotionVideo?.[0]
                     }
                     style={{
@@ -413,14 +370,14 @@ function TopBrandVdoCards() {
                     justifyContent: "space-between",
                   }}
                 >
-                  {/* TOP SECTION — Avatar + Brand name + Categories */}
+                  {/* Brand header with like button */}
                   <Stack
                     direction={{ xs: "column", sm: "row" }}
                     alignItems={{ xs: "flex-start", sm: "center" }}
                     spacing={2}
                     sx={{ flex: 1, minWidth: 0 }}
                   >
-                    {/* Avatar + name */}
+                    {/* Avatar and brand name */}
                     <Stack
                       direction="row"
                       spacing={2}
@@ -457,7 +414,7 @@ function TopBrandVdoCards() {
                             mainBrand.title}
                         </Typography>
 
-                        {/* Category trail */}
+                        {/* Categories */}
                         <Typography
                           variant="body2"
                           noWrap
@@ -472,7 +429,7 @@ function TopBrandVdoCards() {
                       </Box>
                     </Stack>
 
-                    {/* Middle facts (Investment / Area / Type) */}
+                    {/* Key facts */}
                     <Stack
                       marginTop={0}
                       direction="row"
@@ -495,7 +452,7 @@ function TopBrandVdoCards() {
                         }
                       />
                       <Fact
-                        label=" Model Type"
+                        label="Model Type"
                         value={
                           mainBrand.franchiseDetails?.modelsOfFranchise?.[0]
                             ?.franchiseType
@@ -503,7 +460,7 @@ function TopBrandVdoCards() {
                       />
                     </Stack>
 
-                    {/* Right-hand actions */}
+                    {/* Action buttons */}
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Button
                         variant="contained"
@@ -531,29 +488,19 @@ function TopBrandVdoCards() {
 
                       <Tooltip
                         title={
-                          likedBrands[mainBrand.uuid ?? mainBrand.title]
+                          mainBrand.isLiked
                             ? "Remove from favorites"
                             : "Add to favorites"
                         }
                       >
                         <IconButton
                           onClick={() =>
-                            handleLike(mainBrand.uuid ?? mainBrand.title)
+                            handleLikeClick(mainBrand.uuid, mainBrand.isLiked)
                           }
-                          sx={{
-                            color: likedBrands[
-                              mainBrand.uuid ?? mainBrand.title
-                            ]
-                              ? theme.palette.error.main
-                              : "text.secondary",
-                            "&:hover": {
-                              color: theme.palette.error.main,
-                              backgroundColor: "rgba(244, 67, 54, 0.08)",
-                            },
-                          }}
+                          disabled={brandsLoading}
                         >
-                          {likedBrands[mainBrand.uuid ?? mainBrand.title] ? (
-                            <Favorite />
+                          {mainBrand.isLiked ? (
+                            <Favorite color="error" />
                           ) : (
                             <FavoriteBorder />
                           )}
@@ -748,9 +695,12 @@ function TopBrandVdoCards() {
                         </Tooltip>
                         <IconButton
                           size="small"
-                          onClick={() => handleLike(brand.uuid || brand.title)}
+                          onClick={() =>
+                            handleLikeClick(brand.uuid, brand.isLiked)
+                          }
+                          disabled={brandsLoading}
                           sx={{
-                            color: likedBrands[brand.uuid || brand.title]
+                            color: brand.isLiked
                               ? theme.palette.error.main
                               : "text.secondary",
                             "&:hover": {
@@ -759,7 +709,7 @@ function TopBrandVdoCards() {
                             },
                           }}
                         >
-                          {likedBrands[brand.uuid || brand.title] ? (
+                          {brand.isLiked ? (
                             <Favorite fontSize="small" />
                           ) : (
                             <FavoriteBorder fontSize="small" />
@@ -782,7 +732,7 @@ function TopBrandVdoCards() {
                         }}
                       >
                         Categories:{" "}
-                        {(brand.personalDetails?.brandCategories).map(
+                        {(brand.personalDetails?.brandCategories || []).map(
                           (cat) => cat.child
                         )}
                       </Typography>
@@ -891,7 +841,14 @@ function TopBrandVdoCards() {
           ))}
         </Box>
       </Box>
+      
+      {/* Brand Details Dialog */}
       <BrandDetailsDialog />
+      
+      {/* Login Dialog */}
+      {showLogin && (
+        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+      )}
     </Box>
   );
 }
