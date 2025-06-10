@@ -90,6 +90,8 @@ function Navbar() {
   };
 
   const handleLoginSuccess = (userData) => {
+
+    console.log("User Data:", userData);
     dispatch(loginSuccess(userData));
     setLoginModalOpen(false);
   };

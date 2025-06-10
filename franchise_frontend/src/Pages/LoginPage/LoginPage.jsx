@@ -23,6 +23,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import { logout } from "../../Redux/Slices/AuthSlice/authSlice";
 
 function LoginPage({ open, onClose }) {
+
+  console.log(" ======data====== ",open, onClose )
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -213,7 +215,9 @@ function LoginPage({ open, onClose }) {
           {/* Corrected Heading Structure */}
           <Typography variant="h5">Login</Typography>
           <IconButton onClick={onClose} sx={{ color: "white" }}>
-            <CloseIcon />
+            <CloseIcon 
+            
+            />
           </IconButton>
         </DialogTitle>
 
