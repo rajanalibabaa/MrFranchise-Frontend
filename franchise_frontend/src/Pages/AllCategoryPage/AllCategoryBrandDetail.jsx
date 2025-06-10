@@ -121,7 +121,7 @@ function BrandList() {
 
     if (!AccessToken) {
       response = await axios.get(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+        "http://51.20.81.150:5000/api/v1/brandlisting/getAllBrandListing",
         {
           headers: {
             "Content-Type": "application/json",
@@ -130,7 +130,7 @@ function BrandList() {
       );
     } else {
       response = await axios.get(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
+        `http://51.20.81.150:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -509,7 +509,7 @@ const toggleLike = async (brandId) => {
     if (updatedLikedStatus) {
       // Add to favorites
       await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
+        "http://51.20.81.150:5000/api/v1/like/post-favbrands",
         { branduuid: brandId },
         {
           headers: {
@@ -522,7 +522,7 @@ const toggleLike = async (brandId) => {
     } else {
       // Remove from favorites
       const unlike = await axios.delete(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${Id}`,
+        `http://51.20.81.150:5000/api/v1/like/delete-favbrand/${Id}`,
         {
           headers: {
             "Content-Type": "application/json",

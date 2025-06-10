@@ -508,7 +508,7 @@
 //       try {
 //         setLoading(true);
 //         const response = await axios.get(
-//           "https://franchise-backend-wgp6.onrender.com/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopOne"
+//           "http://51.20.81.150:5000/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopOne"
 //         );
         
 //         let fetchedData = response.data?.data;

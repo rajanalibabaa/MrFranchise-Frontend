@@ -123,7 +123,7 @@ function TopBrandVdoCards() {
     const fetchBrandData = async () => {
       try {
         // const response = await axios.get(
-        //   "https://franchise-backend-wgp6.onrender.com/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopTwo"
+        //   "http://51.20.81.150:5000/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopTwo"
         // );
         const response = await dispatch(fetchBrands());
         const fetchedData = response.payload;

@@ -54,7 +54,7 @@ const PostRequirement = () => {
       console.log("Sending cleaned data:", cleanData);
 
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/post/createPostRequirement",
+        "http://51.20.81.150:5000/api/post/createPostRequirement",
         cleanData,
         { headers: { "Content-Type": "application/json" } }
       );

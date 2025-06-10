@@ -58,7 +58,7 @@ const ManageProfile = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-         ` https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+         ` http://51.20.81.150:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -113,7 +113,7 @@ const ManageProfile = () => {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otp/existingEmailOTP",
+        "http://51.20.81.150:5000/api/v1/otp/existingEmailOTP",
         { email: investorData.email },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -144,7 +144,7 @@ const ManageProfile = () => {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otp/verifyExistingEmailOTP",
+        "http://51.20.81.150:5000/api/v1/otp/verifyExistingEmailOTP",
         {
           email: investorData.email,
           verifyOTP: otp
@@ -204,7 +204,7 @@ const ManageProfile = () => {
 
     try {
       await axios.patch(
-       ` https://franchise-backend-wgp6.onrender.com/api/v1/investor/updateInvestor/${investorUUID}`,
+       ` http://51.20.81.150:5000/api/v1/investor/updateInvestor/${investorUUID}`,
         dataToUpdate,
         {
           headers: {

@@ -58,7 +58,7 @@ const TopInvestVdo3 = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/homepage/getAllnewRegisterBrands",
+          "http://51.20.81.150:5000/api/v1/homepage/getAllnewRegisterBrands",
           { headers: { "Content-Type": "application/json" } }
         );
 

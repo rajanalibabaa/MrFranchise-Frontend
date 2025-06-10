@@ -155,7 +155,7 @@ const handleLikeClick = async (brand) => {
     const fetchBrandData = async () => {
       try {
         const response = await axios.get(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopThree"
+          "http://51.20.81.150:5000/api/v1/admin/videoAdvertise/getAdminVideoAdvertiseTopThree"
         );
         let fetchedData = response.data?.data;
         
