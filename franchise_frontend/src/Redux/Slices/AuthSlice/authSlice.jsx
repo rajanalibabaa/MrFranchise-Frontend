@@ -41,6 +41,7 @@ const authSlice = createSlice({
       localStorage.removeItem("accessToken");
       localStorage.removeItem("investorUUID");
       localStorage.removeItem("brandUUID");
+      localStorage.removeItem("logoutTimestamp");
     },
   },
 });
