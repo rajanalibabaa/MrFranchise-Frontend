@@ -4,11 +4,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '/', // root path (for AWS this is usually correct)
   plugins: [react()],
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: './src/setupTests.js', // setup file for testing
-  },
   build: {
     target: 'es2015', // ensures broader browser compatibility
     minify: 'terser',

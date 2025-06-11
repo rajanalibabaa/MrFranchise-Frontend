@@ -13,19 +13,14 @@ import {
   Chip,
   Divider,
   Avatar,
-  Grid,
-  Collapse,
   Stack,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import axios from "axios";
-import {
-  ArrowRight,
-  MonetizationOn,
-  Business,
-  AreaChart,
-  Favorite,
-} from "@mui/icons-material";
+import Favorite from "@mui/icons-material/Favorite";
+import ArrowRight from "@mui/icons-material/ArrowRight";
+import  MonetizationOn  from "@mui/icons-material/MonetizationOn";
+import Business from "@mui/icons-material/Business";
+import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
 import { useDispatch,useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
@@ -123,78 +118,7 @@ const handleLikeClick = async (brandId, isLiked) => {
       [brandId]: !prev[brandId],
     }));
   };
-  //like toggle
-
-
-
-  //   try {
-  //     const uuid = brand.map(async (value, id) => {
-  //       if (value.uuid === brandId) {
-  //         await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
-  //       }
-  //     });
-  //   } catch (error) {
-  //     console.error("Like operation failed:", error);
-  //   }
-  // };
-
-  // Function to format location states
-  // const formatLocations = (brand) => {
-  //   const states = brand.personalDetails?.states || [];
-  //   const brandId = brand.uuid;
-  //   const isExpanded = expandedLocations[brandId];
-
-  //   if (states.length === 0) return "Multiple locations";
-
-  //   if (states.length <= 2) {
-  //     return states.join(", ");
-  //   }
-
-  //   if (isExpanded) {
-  //     return (
-  //       <>
-  //         {states.join(", ")}
-  //         <Typography
-  //           component="span"
-  //           sx={{
-  //             color: 'primary.main',
-  //             cursor: 'pointer',
-  //             fontWeight: 500,
-  //             ml: 1
-  //           }}
-  //           onClick={(e) => {
-  //             e.stopPropagation();
-  //             toggleExpandLocations(brandId);
-  //           }}
-  //         >
-  //           Less
-  //         </Typography>
-  //       </>
-  //     );
-  //   }
-
-  //   return (
-  //     <>
-  //       {states.slice(0, 2).join(", ")}
-  //       <Typography
-  //         component="span"
-  //         sx={{
-  //           color: 'primary.main',
-  //           cursor: 'pointer',
-  //           fontWeight: 500,
-  //           ml: 1
-  //         }}
-  //         onClick={(e) => {
-  //           e.stopPropagation();
-  //           toggleExpandLocations(brandId);
-  //         }}
-  //       >
-  //         +{states.length - 2} more
-  //       </Typography>
-  //     </>
-  //   );
-  // };
-
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
