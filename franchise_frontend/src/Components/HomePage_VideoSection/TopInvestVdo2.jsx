@@ -1,3 +1,4 @@
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import {
   Typography,
   Box,
@@ -24,7 +25,6 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import BusinessIcon from '@mui/icons-material/Business';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import StorefrontIcon from '@mui/icons-material/Storefront';
-import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -34,22 +34,13 @@ import {
 } from "../../Redux/Slices/brandSlice";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
-
 // Animation variants for cards
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
-// Constants for card dimensions
-const getCardDimensions = (isMobile, isTablet) => ({
-  width: isMobile ? 300 : isTablet ? 320 : 320,
-  height: 460,
-  videoHeight: 200,
-  avatarSize: isMobile ? 40 : 50,
-});
-
-function TopInvestVdo2() {
+const TopInvestVdo2 = React.memo(() => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -62,14 +53,20 @@ function TopInvestVdo2() {
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
   const isPaused = useRef(false);
-  const [brand,setBrand]=useState([])
 
   // Redux state
   const { data: brands = [], loading, error } = useSelector((state) => state.brands);
-  const CARD_DIMENSIONS = getCardDimensions(isMobile, isTablet);
+
+  // Memoized values
+  const CARD_DIMENSIONS = useMemo(() => ({
+    width: isMobile ? 300 : isTablet ? 320 : 320,
+    height: 460,
+    videoHeight: 200,
+    avatarSize: isMobile ? 40 : 50,
+  }), [isMobile, isTablet]);
 
   // Handle like/unlike action
-  const handleLikeClick = async (brandId, isLiked) => {
+  const handleLikeClick = useCallback(async (brandId, isLiked) => {
     if (likeProcessing[brandId]) return;
 
     setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
@@ -83,31 +80,25 @@ function TopInvestVdo2() {
     } finally {
       setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
     }
-  };
+  }, [dispatch, likeProcessing]);
 
   // Filter brands by location
-  const filteredBrands = selectedLocation && selectedLocation !== "All Locations"
-    ? brands.filter((brand) => brand.locations?.includes(selectedLocation))
-    : brands;
+  const filteredBrands = useMemo(() => {
+    return selectedLocation && selectedLocation !== "All Locations"
+      ? brands.filter((brand) => brand.locations?.includes(selectedLocation))
+      : brands;
+  }, [brands, selectedLocation]);
 
   // Initialize data on mount
   useEffect(() => {
     const initializeData = async () => {
       try {
-        const response = await dispatch(fetchBrands());
-        if (response.payload) {
+        if (brands) {
           const locationsSet = new Set();
-          const processedBrands = response.payload.map((brand) => {
+          brands.forEach((brand) => {
             const expansionLocations = brand?.personalDetails?.expansionLocation?.map(loc => loc.city) || 
-                                       brand?.brandDetails?.expansionLocations || [];
-            
+                                     brand?.brandDetails?.expansionLocations || [];
             expansionLocations.forEach(loc => locationsSet.add(loc));
-            
-            return {
-              ...brand,
-              locations: expansionLocations.length ? expansionLocations : ["Multiple Locations"],
-              displayLocation: expansionLocations[0] || "Multiple Locations",
-            };
           });
 
           setAllLocations(["All Locations", ...Array.from(locationsSet).sort()]);
@@ -118,48 +109,19 @@ function TopInvestVdo2() {
     };
 
     initializeData();
-  }, [dispatch]);
-
-  // Auto-rotate brands effect
-  useEffect(() => {
-    if (brands.length <= 2) return;
-
-    const interval = setInterval(() => {
-      if (!isPaused.current) {
-        setBrand((prev) => [...prev.slice(1), prev[0]]);
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
   }, [brands]);
 
-  // Render loading state
-  if (loading) {
-    return (
-      <Box sx={{ p: 4, textAlign: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  // Render error state
-  if (error) {
-    return (
-      <Box sx={{ p: 4, textAlign: "center", color: "error.main" }}>
-        <Typography variant="body1">{error}</Typography>
-      </Box>
-    );
-  }
+  // Auto-rotate brands effect (removed as it was causing unnecessary re-renders)
+  // Consider implementing this differently if needed
 
   // Brand card component
-  const BrandCard = ({ brand }) => {
+  const BrandCard = React.memo(({ brand }) => {
     const {
       uuid: brandId,
       isLiked,
       personalDetails,
       brandDetails,
       franchiseDetails,
-      locations = [],
       displayLocation,
     } = brand;
 
@@ -272,7 +234,7 @@ function TopInvestVdo2() {
             "&:last-child": { pb: isMobile ? 1.5 : 1 },
             display: "flex",
             flexDirection: "column",
-            mb:2
+            mb: 2
           }}>
             <Stack direction="row" spacing={2} alignItems="center" mb={2}>
               <Avatar
@@ -382,7 +344,25 @@ function TopInvestVdo2() {
         </Card>
       </motion.div>
     );
-  };
+  });
+
+  // Render loading state
+  if (loading) {
+    return (
+      <Box sx={{ p: 4, textAlign: "center" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Render error state
+  if (error) {
+    return (
+      <Box sx={{ p: 4, textAlign: "center", color: "error.main" }}>
+        <Typography variant="body1">{error}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{
@@ -482,6 +462,6 @@ function TopInvestVdo2() {
       <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
     </Box>
   );
-}
+});
 
-export default TopInvestVdo2;
+export default TopInvestVdo2; 

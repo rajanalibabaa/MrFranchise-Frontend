@@ -14,7 +14,7 @@ import { useDispatch } from "react-redux";
 import Footer from "../../Components/Footers/Footer.jsx";
 // Dynamic Components - Import all your video sections
 const dynamicComponents = {
-  TopBrandVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandTwoVdoSec")),
+
   TopBrandVdoCards: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")),//first video section
   TopIndusVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopIndusVdoSecRandomAll")), //second video section top leading industries
   TopInvestVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopInvestVdoSec.jsx")), //TOp restaurant investment section
@@ -31,7 +31,7 @@ TopDesertBakeryFranchise:React.lazy(()=>import('../../Components/HomePage_VideoS
 
 // Configuration object for the entire page
 const pageConfig = {
-  // Hero Banner Configuration
+  // Hero Banner ConfigurationF
   heroBanner: {
     backgroundImage: "https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
     overlayColor: "rgba(0, 0, 0, 0.3)",
@@ -150,13 +150,15 @@ const HomeBannerSec = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const controls = useAnimation();
-  const dispatch = useDispatch()
+  const dispatch =useDispatch()
+
 
   useEffect(() => {
     const navEntries = performance.getEntriesByType("navigation");
     const isReload = navEntries[0]?.type === "reload";
     const popupShown = sessionStorage.getItem("popup-shown");
-     dispatch(fetchBrands())
+       
+    // dispatch(fetchBrands)
 
     if (!popupShown || isReload) {
       setIsPopupOpen(true);

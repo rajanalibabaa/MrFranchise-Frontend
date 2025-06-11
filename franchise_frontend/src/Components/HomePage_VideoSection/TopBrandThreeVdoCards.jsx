@@ -113,12 +113,6 @@ function TopBrandVdoCards() {
     });
   }, [brands]);
 
-  useEffect(() => {
-    // Fetch brands if not already loaded
-    if (brands.length === 0 && !brandsLoading) {
-      dispatch(fetchBrands());
-    }
-  }, [dispatch, brands.length, brandsLoading]);
 
   useEffect(() => {
     startAutoSlide();

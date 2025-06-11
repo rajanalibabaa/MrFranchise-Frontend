@@ -13,12 +13,9 @@ import {
   Chip,
   Divider,
   Avatar,
-  Grid,
-  Collapse,
   Stack,
 } from "@mui/material";
 import { motion } from "framer-motion";
-
 import {
   ArrowRight,
   MonetizationOn,
@@ -35,6 +32,7 @@ import {
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
 import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
+
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -45,19 +43,16 @@ const NewlyRegisteredBrandsSection = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
 
-  const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const isPaused = useRef(false);
-  const [expandedBrand, setExpandedBrand] = useState(null);
-  const [expandedLocations, setExpandedLocations] = useState({});
-
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
+  
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { data: brand = [] } = useSelector((state) => state.brands);
+  const { data: brands = [] } = useSelector((state) => state.brands);
 
   const CARD_DIMENSIONS = {
     mobile: { width: 280, height: 520 },
@@ -65,35 +60,48 @@ const NewlyRegisteredBrandsSection = () => {
     desktop: { width: 327, height: 500 },
   };
 
-const handleLikeClick = async (brandId, isLiked) => {
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        if (!brands || brands.length === 0) {
+          setError("No brands found.");
+        } else {
+          setError(null);
+        }
+      } catch (err) {
+        setError("Failed to process brands data.");
+        console.error("Error processing brands:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeData();
+  }, [brands]);
+
+  const handleLikeClick = async (brandId, isLiked) => {
     if (likeProcessing[brandId]) return;
 
     setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
     try {
-      await toggleLike(brandId,isLiked);
+      await toggleLike(brandId, isLiked);
     } finally {
       setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
     }
-
-    console.log("isLiked :", isLiked);
-    console.log("brandId :", brandId);
   };
+
   const toggleLike = async (brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       setShowLogin(true);
       return;
     }
-    console.log("isliked === :", isLiked);
-    console.log("brandId :", brandId);
     try {
       await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
-      // Optionally show success message
     } catch (error) {
       console.error("Like operation failed:", error);
     }
   };
-
 
   const getCardDimensions = () => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -103,8 +111,6 @@ const handleLikeClick = async (brandId, isLiked) => {
 
   const handleApply = (brand) => {
     dispatch(openBrandDialog(brand));
-    console.log("Apply", brand);
-    // Replace with actual apply logic
   };
 
   const handleMouseEnter = () => {
@@ -115,78 +121,36 @@ const handleLikeClick = async (brandId, isLiked) => {
     isPaused.current = false;
   };
 
-  const toggleExpandBrand = (brandId) => {
-    setExpandedBrand(expandedBrand === brandId ? null : brandId);
-  };
-
-  const toggleExpandLocations = (brandId) => {
-    setExpandedLocations((prev) => ({
-      ...prev,
-      [brandId]: !prev[brandId],
-    }));
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = dispatch(fetchBrands());
-        console.log("dispatch", response);
-
-        if (response) {
-          setBrands(brand);
-          console.log("trycatch", brand);
-          setError(null);
-
-          // Initialize expanded locations state
-          const initialExpandedState = {};
-          brand.forEach((brand) => {
-            if (brand.uuid) {
-              initialExpandedState[brand.uuid] = false;
-            }
-          });
-          setExpandedLocations(initialExpandedState);
-        } else {
-          setBrands([]);
-          setError("No brands found.");
-        }
-      } catch (err) {
-        setError("Failed to fetch brands.");
-        setBrands([]);
-        console.error("Error fetching brands:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   // Auto-rotate brands
   useEffect(() => {
     if (brands.length <= 2) return;
 
     const interval = setInterval(() => {
       if (!isPaused.current) {
-        setBrands((prev) => [...prev.slice(1), prev[0]]);
+        // This was causing unnecessary re-renders
+        // Consider alternative approaches if you need carousel functionality
+        // setBrands((prev) => [...prev.slice(1), prev[0]]);
       }
     }, 5000);
 
     return () => clearInterval(interval);
   }, [brands]);
 
-  if (loading)
+  if (loading) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <CircularProgress />
       </Box>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <Typography color="error">{error}</Typography>
       </Box>
     );
+  }
 
   const { width: cardWidth, height: cardHeight } = getCardDimensions();
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
@@ -228,7 +192,7 @@ const handleLikeClick = async (brandId, isLiked) => {
             },
           }}
         >
-        Top Restaurants Brands
+          Top Restaurants Brands
         </Typography>
 
         <Button
@@ -266,15 +230,12 @@ const handleLikeClick = async (brandId, isLiked) => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {brand.map((brand) => {
+        {brands.map((brand) => {
           const brandId = brand.uuid;
-          const isExpanded = expandedBrand === brandId;
           const franchiseModels =
             brand.franchiseDetails?.modelsOfFranchise || [];
           const firstModel = franchiseModels[0] || {};
           const categories = brand.personalDetails?.brandCategories || [];
-
-          // Get the first available video URL
           const videoUrl =
             brand?.brandDetails?.brandPromotionVideo?.[0] ||
             brand?.brandDetails?.franchisePromotionVideo?.[0];
@@ -304,7 +265,6 @@ const handleLikeClick = async (brandId, isLiked) => {
                   },
                 }}
               >
-                {/* Media Container with Strict Dimensions */}
                 <Box
                   sx={{
                     height: mediaHeight,
@@ -351,7 +311,6 @@ const handleLikeClick = async (brandId, isLiked) => {
                   )}
                 </Box>
 
-                {/* Card Content */}
                 <Box
                   sx={{
                     display: "flex",
@@ -409,7 +368,6 @@ const handleLikeClick = async (brandId, isLiked) => {
                       </IconButton>
                     </Box>
 
-                    {/* Categories */}
                     {categories.length > 0 && (
                       <Box sx={{ mb: 2 }}>
                         <Stack
@@ -434,20 +392,7 @@ const handleLikeClick = async (brandId, isLiked) => {
                       </Box>
                     )}
 
-                    {/* Basic Info */}
                     <Stack spacing={1} sx={{ mb: 2 }}>
-                      {/* <Box display="flex" alignItems="center">
-                        <LocationOn sx={{ 
-                          mr: 1.5, 
-                          fontSize: "1rem", 
-                          color: "text.secondary",
-                          flexShrink: 0
-                        }} />
-                        <Typography variant="body2">
-                          {formatLocations(brand)}
-                        </Typography>
-                      </Box> */}
-
                       <Box display="flex" alignItems="center">
                         <Business
                           sx={{
@@ -494,7 +439,6 @@ const handleLikeClick = async (brandId, isLiked) => {
                     <Divider sx={{ my: 1 }} />
                   </CardContent>
 
-                  {/* Apply Button */}
                   <Box sx={{ px: 2, pb: 2 }}>
                     <Button
                       variant="contained"

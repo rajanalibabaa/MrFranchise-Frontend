@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -30,25 +30,25 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchBrands,
   openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice.jsx";
 import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 
-const BestBrandSlider = () => {
+const BestBrandSlider = React.memo(() => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
 
   const videoRefs = useRef([]);
   const scrollRef = useRef(null);
-  const [muteState, setMuteState] = useState([]);
-  const [playState, setPlayState] = useState([]);
+  const timeoutRef = useRef(null);
+  
+  const [muteState, setMuteState] = useState({});
+  const [playState, setPlayState] = useState({});
   const [showLogin, setShowLogin] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const timeoutRef = useRef(null);
   const [likeProcessing, setLikeProcessing] = useState({});
 
   const navigate = useNavigate();
@@ -59,63 +59,52 @@ const BestBrandSlider = () => {
     (state) => state.brands
   );
 
-  // Calculate how many slides we have (cards per slide based on screen size)
-  const cardsPerSlide = isMobile ? 1 : isTablet ? 2 : 3;
-  const totalSlides = Math.ceil(brands.length / cardsPerSlide);
+  // Memoized calculations
+  const cardsPerSlide = useMemo(() => isMobile ? 1 : isTablet ? 2 : 3, [isMobile, isTablet]);
+  const totalSlides = useMemo(() => Math.ceil(brands.length / cardsPerSlide), [brands.length, cardsPerSlide]);
+  const cardWidth = useMemo(() => isMobile ? 280 : isTablet ? 320 : 340, [isMobile, isTablet]);
 
-const handleLikeClick = async (brandId, isLiked) => {
+  const handleLikeClick = useCallback(async (brandId, isLiked) => {
     if (likeProcessing[brandId]) return;
 
     setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
     try {
-      await toggleLike(brandId,isLiked);
+      await toggleLike(brandId, isLiked);
     } finally {
       setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
     }
+  }, [likeProcessing]);
 
-    console.log("isLiked :", isLiked);
-    console.log("brandId :", brandId);
-  };
-  const toggleLike = async (brandId, isLiked) => {
+  const toggleLike = useCallback(async (brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       setShowLogin(true);
       return;
     }
-    console.log("isliked === :", isLiked);
-    console.log("brandId :", brandId);
     try {
       await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
-      // Optionally show success message
     } catch (error) {
       console.error("Like operation failed:", error);
     }
-  };
-  const toggleMute = (index) => {
-    const newMuteState = [...muteState];
-    newMuteState[index] = !newMuteState[index];
-    setMuteState(newMuteState);
-    if (videoRefs.current[index])
-      videoRefs.current[index].muted = newMuteState[index];
-  };
+  }, [dispatch]);
 
-  const togglePlay = (index) => {
-    const newPlayState = [...playState];
-    newPlayState[index] = !newPlayState[index];
-    setPlayState(newPlayState);
-    if (videoRefs.current[index]) {
-      if (newPlayState[index]) {
-        videoRefs.current[index].play();
-      } else {
-        videoRefs.current[index].pause();
-      }
-    }
-  };
+  const toggleMute = useCallback((index) => {
+    setMuteState(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  }, []);
+
+  const togglePlay = useCallback((index) => {
+    setPlayState(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  }, []);
 
   const scrollToSlide = useCallback(
     (slideIndex) => {
       if (scrollRef.current) {
-        const cardWidth = isMobile ? 300 : isTablet ? 320 : 350;
         const gap = 16;
         const scrollPosition = slideIndex * cardsPerSlide * (cardWidth + gap);
         scrollRef.current.scrollTo({
@@ -125,12 +114,12 @@ const handleLikeClick = async (brandId, isLiked) => {
         setCurrentSlide(slideIndex);
       }
     },
-    [isMobile, isTablet, cardsPerSlide]
+    [cardWidth, cardsPerSlide]
   );
 
-  const handleApply = (brand) => {
+  const handleApply = useCallback((brand) => {
     dispatch(openBrandDialog(brand));
-  };
+  }, [dispatch]);
 
   const handleNext = useCallback(() => {
     const nextSlide = (currentSlide + 1) % totalSlides;
@@ -151,21 +140,34 @@ const handleLikeClick = async (brandId, isLiked) => {
     }
   }, [isHovered, handleNext, brands.length]);
 
+  // Initialize video states when brands change
   useEffect(() => {
-    // Initialize mute and play states when brands data changes
     if (brands.length > 0) {
-      setMuteState(Array(brands.length).fill(true));
-      setPlayState(Array(brands.length).fill(false));
+      const initialMuteState = {};
+      const initialPlayState = {};
+      brands.forEach((_, index) => {
+        initialMuteState[index] = true;
+        initialPlayState[index] = false;
+      });
+      setMuteState(initialMuteState);
+      setPlayState(initialPlayState);
     }
   }, [brands]);
 
+  // Sync video play/pause with state
   useEffect(() => {
-    // Fetch brands if not already loaded
-    if (brands.length === 0 && !brandsLoading) {
-      dispatch(fetchBrands());
-    }
-  }, [dispatch, brands.length, brandsLoading]);
+    videoRefs.current.forEach((video, index) => {
+      if (!video) return;
+      if (playState[index]) {
+        video.play().catch(e => console.log("Auto-play prevented:", e));
+      } else {
+        video.pause();
+      }
+      video.muted = muteState[index];
+    });
+  }, [playState, muteState]);
 
+  // Auto slide effect
   useEffect(() => {
     startAutoSlide();
     return () => clearTimeout(timeoutRef.current);
@@ -270,16 +272,10 @@ const handleLikeClick = async (brandId, isLiked) => {
           const logo =
             brand?.brandDetails?.brandLogo?.[0] ||
             brand?.brandDetails?.franchiseLogo?.[0];
-          const investmentRange =
-            brand?.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange;
-          const areaRequired =
-            brand?.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired;
-          const FranchiseType =
-            brand?.franchiseDetails?.modelsOfFranchise?.[0]?.franchiseType;
-          const Categories =
-            (brand?.personalDetails?.brandCategories || []).map(
-              (cat) => cat.child
-            ) || [];
+          const franchiseModel = brand?.franchiseDetails?.modelsOfFranchise?.[0] || {};
+          const categories = (brand?.personalDetails?.brandCategories || []).map(
+            (cat) => cat.child
+          );
 
           return (
             <Card
@@ -289,7 +285,7 @@ const handleLikeClick = async (brandId, isLiked) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               sx={{
-                width: isMobile ? 280 : isTablet ? 320 : 340,
+                width: cardWidth,
                 height: isMobile ? 420 : 450,
                 borderRadius: 4,
                 overflow: "hidden",
@@ -312,6 +308,7 @@ const handleLikeClick = async (brandId, isLiked) => {
                     muted={muteState[i]}
                     autoPlay={false}
                     loop
+                    playsInline
                     style={{
                       width: "100%",
                       height: "100%",
@@ -408,7 +405,7 @@ const handleLikeClick = async (brandId, isLiked) => {
                     </Typography>
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Typography variant="body2">
-                        {Categories.join(", ") || "N/A"}
+                        {categories.join(", ") || "N/A"}
                       </Typography>
                     </Stack>
                   </Box>
@@ -447,7 +444,7 @@ const handleLikeClick = async (brandId, isLiked) => {
                         <Box component="span" fontWeight="bold">
                           Type:{" "}
                         </Box>
-                        {FranchiseType || "N/A"}
+                        {franchiseModel.franchiseType || "N/A"}
                       </Typography>
                     </Stack>
                     <Stack direction="row" spacing={1} alignItems="center">
@@ -456,7 +453,7 @@ const handleLikeClick = async (brandId, isLiked) => {
                         <Box component="span" fontWeight="bold">
                           Area:{" "}
                         </Box>
-                        {areaRequired ? `${areaRequired} sq.ft` : "N/A"}
+                        {franchiseModel.areaRequired ? `${franchiseModel.areaRequired} sq.ft` : "N/A"}
                       </Typography>
                     </Stack>
                     <Stack direction="row" spacing={1} alignItems="center">
@@ -465,7 +462,7 @@ const handleLikeClick = async (brandId, isLiked) => {
                         <Box component="span" fontWeight="bold">
                           Investment:{" "}
                         </Box>
-                        {investmentRange || "N/A"}
+                        {franchiseModel.investmentRange || "N/A"}
                       </Typography>
                     </Stack>
                   </Stack>
@@ -533,6 +530,6 @@ const handleLikeClick = async (brandId, isLiked) => {
       )}
     </Box>
   );
-};
+});
 
 export default BestBrandSlider;
