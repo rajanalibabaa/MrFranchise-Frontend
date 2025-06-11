@@ -52,7 +52,7 @@ const OverviewTab = ({ brand }) => {
   const [userData, setUserData] = useState(null);
  
    const investorUUID = localStorage.getItem("investorUUID");
-  const AccessToken = localStorage.getItem("accessToken");
+   const AccessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
     const fetchInvestorDetails = async () => {
@@ -70,15 +70,15 @@ const OverviewTab = ({ brand }) => {
 
         console.log("Investor details response:", response.data.data);
         setUserData(response.data.data);
-        // const investor = response.data?.data;
-        // if (investor) {
-        //   setFormData((prev) => ({
-        //     ...prev,
-        //     fullName: investor.firstName || "",
-        //     investorEmail: investor.email || "",
-        //     mobileNumber: investor.mobileNumber || "",
-        //   }));
-        // }
+        const investor = response.data?.data;
+        if (investor) {
+          setFormData((prev) => ({
+            ...prev,
+            fullName: investor.firstName || "",
+            investorEmail: investor.email || "",
+            mobileNumber: investor.mobileNumber || "",
+          }));
+        }
       } catch (error) {
         console.error("Failed to fetch investor details:", error);
       }
@@ -152,13 +152,15 @@ const OverviewTab = ({ brand }) => {
     setIsSubmitting(true);
 
     try {
+
+      
       const payload = {
         ...formData,
         brandId: brand?.uuid,
-        brandName: brand?.personalDetails?.brandName || "",
-        brandEmail: brand.personalDetails?.email || "",
+        brandName: brand.personalDetails.brandName || "",
+        brandEmail: brand?.personalDetails?.email || "",
       };
-   console.log("payload", payload);
+      console.log("payload", payload);
       const token = localStorage.getItem("accessToken");
       const investorUUID = localStorage.getItem("investorUUID");
       const brandUUID = localStorage.getItem("brandUUID");
@@ -182,15 +184,15 @@ const OverviewTab = ({ brand }) => {
 
       if (response.data) {
         setSubmitSuccess(true);
-        setFormData({
-          fullName: "",
-          location: "",
-          // franchiseModel: "",
-          // franchiseType: "",
-          investmentRange: "",
-          planToInvest: "",
-          readyToInvest: "",
-        });
+        // setFormData({
+        //   fullName: "",
+        //   location: "",
+        //   // franchiseModel: "",
+        //   // franchiseType: "",
+        //   investmentRange: "",
+        //   planToInvest: "",
+        //   readyToInvest: "",
+        // });
    
       }
     } catch (error) {
@@ -388,7 +390,7 @@ const OverviewTab = ({ brand }) => {
               }} 
               onClick={() => {
                  // Debug: See what you get
-                 console.log("Auto-fill values:",  userData.firstName, userData.email, userData.mobileNumber );
+                  console.log("Auto-fill values:", userData?.firstName, userData?.email, userData?.mobileNumber);
                 setIsModalOpen(true);
               }}
             >
@@ -493,7 +495,7 @@ const OverviewTab = ({ brand }) => {
                           variant="outlined"
                           size="small"
                           sx={{ mb: 2 }}
-                          InputProps={{ readOnly: true }}
+                          InputProps={{ readOnly: false }}
                         />
                       </Grid>
                       <Grid item xs={12} md={6}>
@@ -507,7 +509,7 @@ const OverviewTab = ({ brand }) => {
                           variant="outlined"
                           size="small"
                           sx={{ mb: 2 }}
-                          InputProps={{ readOnly: true }}
+                          InputProps={{ readOnly: false }}
                         />
                       </Grid>
                       <Grid item xs={12} md={6}>
@@ -521,7 +523,7 @@ const OverviewTab = ({ brand }) => {
                           variant="outlined"
                           size="small"
                           sx={{ mb: 2 }}
-                          InputProps={{ readOnly: true }}
+                          InputProps={{ readOnly: false }}
                         />
                       </Grid>                   
                         <Grid item xs={12} md={6}>
@@ -661,6 +663,7 @@ const OverviewTab = ({ brand }) => {
                           whileHover={{ scale: 1.01 }}
                           whileTap={{ scale: 0.99 }}
                         >
+                          {/* <form onSubmit={handleSubmit}> */}
                           <Button
                             type="submit"
                             variant="contained"
@@ -682,9 +685,10 @@ const OverviewTab = ({ brand }) => {
                             {isSubmitting ? (
                               <CircularProgress size={24} color="inherit" />
                             ) : (
-                              "Apply"
+                              "Apply Now"
                             )}
                           </Button>
+                          {/* </form> */}
                         </motion.div>
                       </Grid>
                     </Grid>

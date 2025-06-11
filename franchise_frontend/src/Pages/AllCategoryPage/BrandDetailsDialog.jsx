@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect,useState, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -33,7 +33,7 @@ import { closeBrandDialog } from "../../Redux/Slices/brandSlice.jsx";
 import axios from "axios";
 
 const BrandDetailsDialog = () => {
-  const [tabIndex, setTabIndex] = useState(0);
+  const [tabIndex, setTabIndex] = useState(0);  
   const [openGallery, setOpenGallery] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const { openDialog, selectedBrand } = useSelector((state) => state.brands);
@@ -44,8 +44,8 @@ const BrandDetailsDialog = () => {
     fullName: "",
     investorEmail: "",
     mobileNumber: "",
-    franchiseModel: "",
-    franchiseType: "",
+    // franchiseModel: "",
+    // franchiseType: "",
     investmentRange: "",
     location: "",
     planToInvest: "",
@@ -53,6 +53,47 @@ const BrandDetailsDialog = () => {
   });
 
   const dispatch = useDispatch();
+
+      const [userData, setUserData] = useState(null);
+      
+     const investorUUID = localStorage.getItem("investorUUID");
+     const AccessToken = localStorage.getItem("accessToken");
+  
+    useEffect(() => {
+      const fetchInvestorDetails = async () => {
+
+        
+        
+        if (!investorUUID || !AccessToken) return;
+        try {
+          const response = await axios.get(
+            `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${AccessToken}`,
+              },
+            }
+          );
+  
+          console.log("Investor details response:", response.data.data);
+          setUserData(response.data.data);
+          const investor = response.data?.data;
+          if (investor) {
+            setFormData((prev) => ({
+              ...prev,
+              fullName: investor.firstName || "",
+              investorEmail: investor.email || "",
+              mobileNumber: investor.mobileNumber || "",
+            }));
+          }
+        } catch (error) {
+          console.error("Failed to fetch investor details:", error);
+        }
+      };
+  
+      fetchInvestorDetails();
+    }, [investorUUID, AccessToken]);
 
   const franchiseModels = [
     ...new Set(
@@ -109,16 +150,43 @@ const BrandDetailsDialog = () => {
         brandId: selectedBrand?.uuid,
         brandName: selectedBrand?.personalDetails?.brandName || "",
         brandEmail: selectedBrand.personalDetails?.email || "",
-        brandLogo:selectedBrand.brandDetails?.brandLogo || ""
-      };
+        brandLogo:Array.isArray(selectedBrand.brandDetails?.brandLogo)
+    ? selectedBrand.brandDetails.brandLogo[0] || ""
+    : selectedBrand.brandDetails?.brandLogo || ""
+};
+      
       console.log("payload", payload);
       const token = localStorage.getItem("accessToken");
       const investorUUID = localStorage.getItem("investorUUID");
       const brandUUID = localStorage.getItem("brandUUID");
-      
-
       const id = investorUUID || brandUUID;
+
       console.log(id, token);
+
+       // Check for missing id
+    if (!id) {
+      alert("User not logged in or missing ID. Please login again.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Check for missing required fields
+    if (
+      !payload.fullName ||
+      !payload.investorEmail ||
+      !payload.mobileNumber ||
+      !payload.location ||
+      !payload.investmentRange ||
+      !payload.planToInvest ||
+      !payload.readyToInvest
+    ) {
+      alert("Please fill all required fields.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Debug logs
+    console.log("Submitting with id:", id, "payload:", payload);
 
       const response = await axios.post(
         `http://localhost:5000/api/v1/instantapply/postApplication/${id}`,
@@ -136,18 +204,26 @@ const BrandDetailsDialog = () => {
       if (response.data) {
         setSubmitSuccess(true);
         setFormData({
-          fullName: "",
-          location: "",
-          franchiseModel: "",
-          franchiseType: "",
-          investmentRange: "",
-          planToInvest: "",
-          readyToInvest: "",
+          // fullName: "",
+          // location: "",
+          // franchiseModel: "",
+          // franchiseType: "",
+          // investmentRange: "",
+          // planToInvest: "",
+          // readyToInvest: "",
+
+        fullName: "",
+        location: "",
+        investmentRange: "",
+        planToInvest: "",
+        readyToInvest: "",
+        investorEmail: "",
+        mobileNumber: "",
         });
    
       }
     } catch (error) {
-      console.error("Submission error:", error);
+      // console.log("Submission error:", error?.response?.data || error.message);
       alert("❌Failed to submit application.");
     } finally {
       setIsSubmitting(false);
@@ -157,13 +233,21 @@ const BrandDetailsDialog = () => {
   const handleModalClose = () => {
     setIsModalOpen(false);
     setFormData({
-      fullName: "",
-      location: "",
-      franchiseModel: "",
-      franchiseType: "",
-      investmentRange: "",
-      planToInvest: "",
-      readyToInvest: "",
+      // fullName: "",
+      // location: "",
+      // franchiseModel: "",
+      // franchiseType: "",
+      // investmentRange: "",
+      // planToInvest: "",
+      // readyToInvest: "",
+
+        fullName: "",
+        location: "",
+        investmentRange: "",
+        planToInvest: "",
+        readyToInvest: "",
+        investorEmail: "",
+        mobileNumber: "",
     });
     setSubmitSuccess(false);
   };
@@ -279,17 +363,19 @@ const BrandDetailsDialog = () => {
                     gridTemplateColumns: "repeat(5, 1fr)",
                   }}
                 >
+                  
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
                       label="Full Name"
                       name="fullName"
-                      value={formData.fullName}
+                      value={formData.fullName || userData?.firstName || ""}
                       onChange={handleChange}
                       required
                       variant="outlined"
                       size="small"
                       sx={{ mb: 2 }}
+                      InputProps={{ readOnly: false }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -297,12 +383,13 @@ const BrandDetailsDialog = () => {
                       fullWidth
                       label="Email"
                       name="investorEmail"
-                      value={formData.investorEmail}
+                      value={formData.investorEmail || userData?.email || ""}
                       onChange={handleChange}
                       required
                       variant="outlined"
                       size="small"
                       sx={{ mb: 2 }}
+                      InputProps={{ readOnly: false }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -310,30 +397,43 @@ const BrandDetailsDialog = () => {
                       fullWidth
                       label="Mobile Number"
                       name="mobileNumber"
-                      value={formData.mobileNumber}
+                      value={formData.mobileNumber || userData?.mobileNumber || ""}
                       onChange={handleChange}
                       required
                       variant="outlined"
                       size="small"
                       sx={{ mb: 2 }}
+                      InputProps={{ readOnly: false }}
                     />
                   </Grid>
-
+                  
+                  
                   <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="Location"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleChange}
-                      required
-                      variant="outlined"
-                      size="small"
-                      sx={{ mb: 2 }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12} md={4}>
+                  <TextField
+                    select
+                    fullWidth
+                    label="Location"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    required
+                    variant="outlined"
+                    size="small"
+                    sx={{ mb: 2 }}
+                  >
+                    {(selectedBrand.personalDetails?.expansionLocation || []).length > 0 ? (
+                      selectedBrand.personalDetails.expansionLocation.map((loc, i) => (
+                        <MenuItem key={i} value={loc.city}>
+                          {loc.city}
+                        </MenuItem>
+                      ))
+                    ) : (
+                      <MenuItem value="">Not specified</MenuItem>
+                    )}
+                  </TextField>
+                </Grid>
+                
+                  {/* <Grid item xs={12} md={4}>
                     <TextField
                       select
                       fullWidth
@@ -352,9 +452,9 @@ const BrandDetailsDialog = () => {
                         </MenuItem>
                       ))}
                     </TextField>
-                  </Grid>
+                  </Grid> */}
 
-                  <Grid item xs={12} md={4}>
+                  {/* <Grid item xs={12} md={4}>
                     <TextField
                       select
                       fullWidth
@@ -373,7 +473,7 @@ const BrandDetailsDialog = () => {
                         </MenuItem>
                       ))}
                     </TextField>
-                  </Grid>
+                  </Grid> */}
 
                   <Grid item xs={12} md={4}>
                     <TextField
@@ -443,6 +543,7 @@ const BrandDetailsDialog = () => {
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
                     >
+                      {/* <form onSubmit={handleSubmit}> */}
                       <Button
                         type="submit"
                         variant="contained"
@@ -464,12 +565,14 @@ const BrandDetailsDialog = () => {
                         {isSubmitting ? (
                           <CircularProgress size={24} color="inherit" />
                         ) : (
-                          "Submit"
+                          "Apply Now"
                         )}
                       </Button>
+                      {/* </form> */}
                     </motion.div>
                   </Grid>
                 </Grid>
+                
               </form>
             )}
           </DialogContent>
@@ -755,8 +858,9 @@ const BrandDetailsDialog = () => {
           >
             Share
           </Button>
-          <Button
+             <Button
             variant="outlined"
+            disabled={!userData}
             sx={{
               color: "#ff9800",
               borderColor: "#ff9800",
@@ -767,12 +871,21 @@ const BrandDetailsDialog = () => {
               textTransform: "none",
               fontSize: "1rem",
             }}
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setFormData((prev) => ({
+                ...prev,
+                fullName: userData?.firstName || "",  
+                investorEmail: userData?.email || "",
+                mobileNumber: userData?.mobileNumber || "",
+              }));
+              setIsModalOpen(true);
+            }}
           >
-            Apply for Franchise
+            {/* Apply for Franchise */}
+            {userData ? "Apply for Franchise" : "Loading..."}
           </Button>
         </DialogActions>
-
+ 
         <Dialog
           open={openGallery}
           onClose={() => setOpenGallery(false)}
