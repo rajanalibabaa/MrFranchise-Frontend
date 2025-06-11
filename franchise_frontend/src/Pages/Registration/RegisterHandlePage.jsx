@@ -43,7 +43,7 @@ function RegisterHandleUser({boolean = true}) {
     navigate(path);
   };
   const handleSocialLogin = (provider) => {
-    window.location.href = `http://51.20.81.150:5000/api/v1/auth/${provider}`;
+    window.location.href = `https://franchise-backend-wgp6.onrender.com/api/v1/auth/${provider}`;
   };
 
   return (

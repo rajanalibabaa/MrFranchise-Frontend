@@ -111,7 +111,7 @@ const FeedbackForm = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/v1/feedback/createFeedback/${investorUUID}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/feedback/createFeedback/${investorUUID}`,
         { topic: category, rating, feedback },
         { headers: { "Content-Type": "application/json", Authorization: `Bearer ${AccessToken}` } }
       );
@@ -205,7 +205,7 @@ const ComplaintForm = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/v1/complaint/createComplaint/${investorUUID}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/complaint/createComplaint/${investorUUID}`,
         { topic: category, complaint },
         { headers: { "Content-Type": "application/json", Authorization: `Bearer ${AccessToken}` } }
       );

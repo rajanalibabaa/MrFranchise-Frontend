@@ -11,6 +11,7 @@ import PopupModal from "../../Components/PopUpModal/PopUpModal";
 import FilterDropdowns from "../../Components/Navbar/FilterDropdownsData";
 import { fetchBrands } from "../../Redux/Slices/brandSlice.jsx";
 import { useDispatch } from "react-redux";
+import Footer from "../../Components/Footers/Footer.jsx";
 // Dynamic Components - Import all your video sections
 const dynamicComponents = {
   TopBrandVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandTwoVdoSec")),
@@ -362,7 +363,7 @@ const HomeBannerSec = () => {
       <Box  sx={{ backgroundColor: '#fffaf7'}}>
         {pageConfig.sections.map((section, index) => renderSection(section, index))}
       </Box>
-<Footer />
+<Footer/>
     </>
   );
 };

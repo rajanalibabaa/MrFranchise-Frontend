@@ -24,8 +24,8 @@ export const toggleLikeBrand = createAsyncThunk(
       if (!isLiked) {
         // Like the brand - POST request
         await axios.post(
-          "http://51.20.81.150:5000/api/v1/like/post-favbrands",
-          // "http://localhost:5000/api/api/v1/like/post-favbrands",
+          "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
+          // "https://franchise-backend-wgp6.onrender.com/api/api/v1/like/post-favbrands",
           { branduuid: brandId },
           config
         );
@@ -33,8 +33,8 @@ export const toggleLikeBrand = createAsyncThunk(
         console.log("delete");
         // Unlike the brand - DELETE request
         const res = await axios.delete(
-          `http://51.20.81.150:5000/api/v1/like/delete-favbrand/${id}`,
-          // `http://localhost:5000/api/api/v1/like/delete-favbrand/${id}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${id}`,
+          // `https://franchise-backend-wgp6.onrender.com/api/api/v1/like/delete-favbrand/${id}`,
 
           {
             headers: {
@@ -61,7 +61,7 @@ export const toggleLikeBrand = createAsyncThunk(
 export const Likeshow = async () => {
   try {
     const response = await axios.get(
-      `http://51.20.81.150:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
+      `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -84,7 +84,7 @@ export const fetchBrands = createAsyncThunk(
 
       if (!token) {
         response = await axios.get(
-          "http://51.20.81.150:5000/api/v1/brandlisting/getAllBrandListing",
+          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
           {
             headers: {
               "Content-Type": "application/json",
@@ -95,7 +95,6 @@ export const fetchBrands = createAsyncThunk(
       if (token) {
         response = await Likeshow();
       }
-      console.log(" ===== ", response);
       return response.data.data;
     } catch (err) {
       return rejectWithValue(err.message || "Failed to fetch brands");
@@ -110,7 +109,7 @@ export const viewApi = createAsyncThunk(
 
     try {
       const res = await axios.post(
-        `http://51.20.81.150:5000/api/v1/view/postViewBrands/${id}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
 
         {
           headers: {

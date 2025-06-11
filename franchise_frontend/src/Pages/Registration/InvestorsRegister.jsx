@@ -365,12 +365,12 @@ const InvestorRegister = () => {
   //   if (type === "email") {
   //     fieldName = "email";
   //     endpoint =
-  //       "http://51.20.81.150:5000/api/v1/otpverify/send-otp-email";
+  //       "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-email";
   //     payload = { email: watch("email"), type: "email" };
   //   } else if (type === "mobile") {
   //     fieldName = "mobileNumber";
   //     endpoint =
-  //       "http://51.20.81.150:5000/api/v1/otpverify/send-otp-mobile";
+  //       "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-mobile";
   //     payload = {
   //       mobile: `${phonePrefix}${watch("mobileNumber")}`,
   //       type: "mobile",
@@ -378,7 +378,7 @@ const InvestorRegister = () => {
   //   } else if (type === "whatsapp") {
   //     fieldName = "whatsappNumber";
   //     endpoint =
-  //       "http://51.20.81.150:5000/api/v1/otpverify/send-otp-whatsapp";
+  //       "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-whatsapp";
   //     payload = {
   //       mobile: `${phonePrefix}${watch("whatsappNumber")}`,
   //       type: "whatsapp",
@@ -460,7 +460,7 @@ const InvestorRegister = () => {
 
     try {
       const response = await axios.post(
-        "http://51.20.81.150:5000/api/v1/otpverify/verify-otp",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/verify-otp",
         {
           identifier:
             type === "email"
@@ -573,8 +573,8 @@ const InvestorRegister = () => {
 
     try {
       const response = await axios.post(
-        "http://51.20.81.150:5000/api/v1/investor/createInvestor",
-        // "http://localhost:5000/api/v1/investor/createInvestor",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
+        // "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );

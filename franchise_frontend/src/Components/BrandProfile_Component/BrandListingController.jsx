@@ -30,8 +30,8 @@ const ProfileSection = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          // `http://51.20.81.150:5000/api/v1/brandlisting/getAllBrandListing/${brandUUID}`,
-          `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${brandUUID}`,
+          // `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing/${brandUUID}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingByUUID/${brandUUID}`,
           {
             headers: {
               "Content-Type": "application/json",

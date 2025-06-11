@@ -226,7 +226,7 @@ const handleLikeClick = async (brandId, isLiked) => {
     };
 
     fetchData();
-  }, []);
+  }, [ dispatch]);
 
   // Auto-rotate brands
   useEffect(() => {

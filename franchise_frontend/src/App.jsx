@@ -49,7 +49,7 @@ import Otherindustries from "./Components/Footers/QuickLinks/Otherindustries.jsx
 function App() {
   return (
     <>
-      <Provider store={store}>
+   
         <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 1100 }}>
         <Navbar />
       </Box>
@@ -105,7 +105,7 @@ function App() {
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
           <Route path="/otherindustries" element={<Otherindustries/>}/>
         </Routes>
-      </Provider>
+      
     </>
   );
 }

@@ -57,8 +57,8 @@ const FeedBack = () => {
   console.log(investorUUID)
   console.log(AccessToken)   
       const response = await axios.post(
-        // "http://51.20.81.150:5000/api/feedback/createFeedback",
-        `http://localhost:5000/api/v1/feedback/createFeedback/${investorUUID}`,
+        // "https://franchise-backend-wgp6.onrender.com/api/feedback/createFeedback",
+        `https://franchise-backend-wgp6.onrender.com/api/v1/feedback/createFeedback/${investorUUID}`,
         formattedData,
         { 
           headers: { "Content-Type": "application/json" },

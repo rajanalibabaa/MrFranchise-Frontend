@@ -56,7 +56,7 @@ const handleLikeClick = async (brandId, isLiked) => {
         flexDirection: "column",
         transition: "transform 0.3s, box-shadow 0.3s",
         position: "relative",
-        overflow: "hidden",
+        // overflow: "hidden",
         borderRadius: 2,
         "&:hover": {
           transform: "translateY(-5px)",
