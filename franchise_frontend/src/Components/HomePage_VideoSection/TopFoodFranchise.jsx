@@ -303,7 +303,7 @@ const BrandCard = React.memo(({
   );
 });
 
-const NewlyRegisteredBrandsSection = () => {
+const TopFoodFranchise = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
@@ -494,4 +494,4 @@ const NewlyRegisteredBrandsSection = () => {
   );
 };
 
-export default React.memo(NewlyRegisteredBrandsSection);
+export default React.memo(TopFoodFranchise);

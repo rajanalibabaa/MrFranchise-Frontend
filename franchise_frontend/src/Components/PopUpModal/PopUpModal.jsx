@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Modal, Typography, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import pop1 from '../../assets/Images/logoforReg.jpg';
+import pop1 from '../../assets/Images/investorimage.jpg';
 import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import { keyframes } from '@mui/system';
@@ -44,10 +44,8 @@ const style = {
 
 const imageStyle = {
   width: '100%',
-  height: '50vh',
-  borderRadius: '12px',
+  height: '40vh',
   objectFit: 'cover',
-  marginTop: '1.5rem',
 };
 
 const PopupModal = ({ open, onClose }) => {
@@ -79,7 +77,7 @@ const PopupModal = ({ open, onClose }) => {
   return (
     <>
       <Modal open={open} onClose={onClose} aria-labelledby="popup-title" aria-describedby="popup-description"
-        
+        sx={{maxHeight: '100vh', mt: 2}}
       >
         <Box sx={style}>
           <IconButton
@@ -100,12 +98,11 @@ const PopupModal = ({ open, onClose }) => {
 
           <Typography
             id="popup-title"
-            variant="h5"
-            component="h3"
+            variant="h6"
             gutterBottom
             sx={{
               fontWeight: 'bold',
-              color: '#FFBA00',
+              color: '#7ad03a',
               fontSize: {
                 xs: '1.2rem',
                 sm: '1.5rem',
@@ -114,12 +111,11 @@ const PopupModal = ({ open, onClose }) => {
               },
             }}
           >
-            Discover Franchise Opportunities with Us
+            Find Food & Beverage Franchise Opportunities with Us...
           </Typography>
+          <img src={pop1} alt="popup visual" style={imageStyle} loading="lazy"  />
 
-          <img src={pop1} alt="popup visual" style={imageStyle} loading="lazy" />
-
-          <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ mt: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
             <Button
               variant="contained"
               onClick={() => handleNavigation("/investor-register")}

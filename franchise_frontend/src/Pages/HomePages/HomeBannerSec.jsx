@@ -13,22 +13,10 @@ import { useDispatch } from "react-redux";
 import Footer from "../../Components/Footers/Footer.jsx";
 // Dynamic Components - Import all your video sections
 const dynamicComponents = {
-  TopBrandVdoCards: React.lazy(() =>
+  TopBrandThreevdocards: React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")
   ), //first video section
-  TopIndusVdoSec: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/TopIndusVdoSecRandomAll")
-  ), //second video section top leading industries
-  TopInvestVdoSec: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/TopInvestVdoSec.jsx")
-  ), //Top restaurant investment section
-  TopInvestVdo2: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/TopInvestVdo2")
-  ), //location cards
-  TopInvestVdocardround: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/ToTrendingBrands")
-  ), //last video section
-  TopCafeBrandsSection: React.lazy(() =>
+  TopCafeBrandsFranchise: React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
   ), //3rd video section
   TopFoodFranchise: React.lazy(() =>
@@ -40,6 +28,18 @@ const dynamicComponents = {
   TopDesertBakeryFranchise: React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopDesertBakerys.jsx")
   ),
+  TopLeadingFranchise: React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/TopLeadingFranchise.jsx")
+  ), //second video section top leading industries
+  TopRestaurantsFranchise: React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/TopRestaurantsFranchise.jsx")
+  ), //Top restaurant investment section
+  FindFranchiseLocations: React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/FindFranchiseLocations.jsx")
+  ), //location cards
+  ToTrendingBrands: React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
+  ), //last video section
 };
 
 // Configuration object for the entire page
@@ -68,49 +68,61 @@ const pageConfig = {
   // Section Configuration
   sections: [
     {
-      component: "TopBrandVdoCards",
+      component: "TopBrandThreevdocards",
       background: "white",
       backgroundOpacity: 0.1,
       animationDelay: 0.2,
     },
     {
-      component: "TopCafeBrandsSection",
+      component: "TopCafeBrandsFranchise",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+      animationDelay: 0.5,
     },
     {
       component: "TopFoodFranchise",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+      animationDelay: 0.5,
     },
     {
       component: "TopBeverageFranchise",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+      animationDelay: 0.5,
     },
     {
       component: "TopDesertBakeryFranchise",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+      animationDelay: 0.5,
     },
-    // {
-    //   component: "TopInvestVdoSec",
-    //   background: "white",
-    //   dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-    //   animationDelay: 0.6
-    // },
-    // {
-    //   component: "TopInvestVdo2",
-    //   background: "#fffaf7",
-    //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    //   animationDelay: 0.8
-    // },
     {
-      component: "TopInvestVdocardround",
-      title: "Trending Brands",
+      component: "TopLeadingFranchise",
+      background: "white",
       dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-      animationDelay: 1.0
-    }
+      animationDelay: 0.6,
+    },
+    {
+      component: "TopRestaurantsFranchise",
+      background: "white",
+      dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
+      animationDelay: 0.6,
+    },
+    {
+      component: "FindFranchiseLocations",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+      animationDelay: 0.8,
+    },
+    {
+      component: "ToTrendingBrands",
+      title: "Trending Brands",
+      backgroundImage:
+        "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80",
+      dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
+      animationDelay: 1.0,
+    },
   ],
 
   // Global Animation Settings

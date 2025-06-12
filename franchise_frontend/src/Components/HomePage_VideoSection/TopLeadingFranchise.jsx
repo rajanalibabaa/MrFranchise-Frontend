@@ -16,11 +16,13 @@ import {
   Stack,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import Favorite from "@mui/icons-material/Favorite";
-import ArrowRight from "@mui/icons-material/ArrowRight";
-import  MonetizationOn  from "@mui/icons-material/MonetizationOn";
-import Business from "@mui/icons-material/Business";
-import AreaChart from "@mui/icons-material/AreaChart";
+import {
+  ArrowRight,
+  MonetizationOn,
+  Business,
+  AreaChart,
+  Favorite,
+} from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
@@ -301,7 +303,7 @@ const BrandCard = React.memo(({
   );
 });
 
-const TopBeverageFranchise = () => {
+const TopLeadingFranchise = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
@@ -432,7 +434,7 @@ const TopBeverageFranchise = () => {
             },
           }}
         >
-          Top Beverage Franchise
+          Top Leading Franchise
         </Typography>
 
         <Button
@@ -492,4 +494,4 @@ const TopBeverageFranchise = () => {
   );
 };
 
-export default React.memo(TopBeverageFranchise);
+export default React.memo(TopLeadingFranchise);

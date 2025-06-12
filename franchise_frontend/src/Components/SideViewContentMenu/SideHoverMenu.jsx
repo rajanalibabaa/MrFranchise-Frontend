@@ -14,7 +14,6 @@ import {
   Divider,
   Skeleton,
   Chip,
-  Tooltip,
   Tabs,
   Tab,
   AppBar,
@@ -420,12 +419,12 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                       borderRadius: 2,
                       mb: 1.5,
                       color: activeCategory === index ? "white" : "text.primary",
-                      bgcolor: activeCategory === index ? "primary.main" : "background.paper",
+                      bgcolor: activeCategory === index ? "orange" : "background.paper",
                       fontWeight: "medium",
                       transition: "all 0.3s ease",
                       boxShadow: theme.shadows[1],
                       "&:hover": {
-                        bgcolor: activeCategory === index ? "primary.dark" : "action.hover",
+                        bgcolor: activeCategory === index ? "orange" : "action.hover",
                       },
                     }}
                   >
@@ -472,12 +471,12 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                           borderRadius: 2,
                           gap: 1.5,
                           mb: 1.5,
-                          bgcolor: activeSubCategory?.name === subCategory.name ? "primary.light" : "background.paper",
+                          bgcolor: activeSubCategory?.name === subCategory.name ? "orange" : "background.paper",
                           color: activeSubCategory?.name === subCategory.name ? "primary.contrastText" : "text.primary",
                           boxShadow: theme.shadows[1],
                           transition: "all 0.3s ease",
                           "&:hover": {
-                            bgcolor: activeSubCategory?.name === subCategory.name ? "primary.main" : "action.hover",
+                            bgcolor: activeSubCategory?.name === subCategory.name ? "orange" : "action.hover",
                           },
                         }}
                       >
@@ -544,7 +543,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                             boxShadow: theme.shadows[1],
                             transition: "all 0.3s ease",
                             "&:hover": {
-                              bgcolor: "action.hover",
+                              bgcolor: "orange",
                               boxShadow: theme.shadows[2],
                             },
                           }}
