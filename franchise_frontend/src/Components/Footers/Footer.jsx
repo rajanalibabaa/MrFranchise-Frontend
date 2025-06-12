@@ -20,11 +20,51 @@ import {
   Phone,
   LocationOn
 } from "@mui/icons-material";
+import axios from "axios";
 
 function Footer() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const [email, setEmail] = React.useState("")
+  const[successMsg, setSuccessMsg] = React.useState("")
+  const[response, setresponse] = React.useState('')
+
+  const handleSubscribe = async() => {
+    try {
+      
+      const res = await axios.post("http://localhost:5000/api/v1/subcribe/getsubscribe",
+        {email},
+        {
+          headers:{
+            "Content-Type":"application/json"
+          }
+        }
+  
+      )
+  
+      console.log("Response from server:", res.data);
+
+setresponse(res.data.success)
+
+      if (res.data.success) {
+        setSuccessMsg(res.data.message)
+      }else{
+        setSuccessMsg(res.data.message)
+      }
+  
+    } catch (error) {
+      console.error("Error subscribing:", error);
+    }finally{
+      setEmail("")
+      setTimeout(() => {
+        setSuccessMsg("")
+      }, 2000);
+    }
+
+
+  }
 
   return (
     <Box
@@ -256,10 +296,35 @@ function Footer() {
             <Typography variant="body2" color="#b0bec5" mb={2}>
               Subscribe to our newsletter for the latest franchise opportunities and industry insights.
             </Typography>
+            
+            {successMsg && (
+              <Box
+                sx={{
+                  position: "fixed",
+                  top: "40px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  backgroundColor: response ?"green":"red",
+                  color: "white",
+                  border: "1px solid #c3e6cb",
+                  borderRadius: "8px",
+                  padding: "8px 40px",
+                  fontSize: "0.95rem",
+                  zIndex: 1300, // ensures it floats above most content
+                  boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+                  transition: "opacity 0.3s ease-in-out",
+                }}
+              >
+                {successMsg}
+              </Box>
+            )}
+
+             
             <Box component="form" sx={{ display: "flex", mb: 3 }}>
               <input
-                type="email"
+                type ="email"
                 placeholder="Your email address"
+                value={email}
                 style={{
                   flex: 1,
                   padding: "12px 15px",
@@ -270,9 +335,10 @@ function Footer() {
                   color: "#fff",
                   outline: "none"
                 }}
+                onChange={(e) => setEmail(e.target.value)}
               />
               <Button
-                type="submit"
+                // type="submit"
                 variant="contained"
                 sx={{
                   borderRadius: "0 4px 4px 0",
@@ -283,6 +349,8 @@ function Footer() {
                   px: 3,
                   textTransform: "none"
                 }}
+
+                onClick={handleSubscribe}
               >
                 Subscribe
               </Button>
