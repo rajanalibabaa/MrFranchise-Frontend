@@ -303,7 +303,7 @@ const BrandCard = React.memo(({
   );
 });
 
-const TopCafeBrands = () => {
+const TopLeadingFranchise = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
@@ -434,7 +434,7 @@ const TopCafeBrands = () => {
             },
           }}
         >
-          Top Cafe Brands
+          Top Leading Franchise
         </Typography>
 
         <Button
@@ -494,4 +494,4 @@ const TopCafeBrands = () => {
   );
 };
 
-export default React.memo(TopCafeBrands);
+export default React.memo(TopLeadingFranchise);

@@ -303,7 +303,7 @@ const BrandCard = React.memo(({
   );
 });
 
-const NewlyRegisteredBrandsSection = () => {
+const TopBeverageFranchise = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
@@ -434,7 +434,7 @@ const NewlyRegisteredBrandsSection = () => {
             },
           }}
         >
-          Top Food Franchise
+          Top Beverage Franchise
         </Typography>
 
         <Button
@@ -494,4 +494,4 @@ const NewlyRegisteredBrandsSection = () => {
   );
 };
 
-export default React.memo(NewlyRegisteredBrandsSection);
+export default React.memo(TopBeverageFranchise);
