@@ -57,8 +57,9 @@ function Navbar() {
   // Fallback for ID if Redux state is empty (e.g., after refresh)
   const ID =
     localStorage.getItem("brandUUID") ||
-    localStorage.getItem("investorUUID");
-
+    localStorage.getItem("investorUUID") 
+    ;
+ 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);

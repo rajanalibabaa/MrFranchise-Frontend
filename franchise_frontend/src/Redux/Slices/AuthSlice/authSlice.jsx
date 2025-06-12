@@ -1,13 +1,24 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+// let id 
+// console.log("iddddddddddd: ",id)
 const tokenFromStorage = localStorage.getItem("accessToken");
 const investorFromStorage = localStorage.getItem("investorUUID");
 const brandFromStorage = localStorage.getItem("brandUUID");
+// const tokenFromStorage = localStorage.getItem(`accessToken ${id}`);
+// const investorFromStorage = localStorage.getItem(`investorUUID ${id}`);
+// const brandFromStorage = localStorage.getItem(`brandUUID ${id}`);
+
+// console.log(" == 0 == :",brandFromStorage,investorFromStorage,tokenFromStorage )
+
+
+
+
 
 const initialState = {
-  investorUUID: investorFromStorage || null,
+  investorUUID: investorFromStorage || null, 
   brandUUID: brandFromStorage || null,
-  AccessToken: tokenFromStorage || null,
+  AccessToken: tokenFromStorage || null,  
   isLogin: !!tokenFromStorage,
 };
 
@@ -24,10 +35,15 @@ const authSlice = createSlice({
       // state.userData = userData;
       console.log(userData)
 
+      //  id = investorUUID || brandUUID
+
       if (token) {
         localStorage.setItem("accessToken", token);
         if (investorUUID) localStorage.setItem("investorUUID", investorUUID);
         if (brandUUID) localStorage.setItem("brandUUID", brandUUID);
+      //    localStorage.setItem(`accessToken ${id}`, token);
+      //   if (investorUUID) localStorage.setItem(`investorUUID ${id}`, investorUUID);
+      //   if (brandUUID) localStorage.setItem(`brandUUID ${id}`, brandUUID);
       }
     },
     logout: (state) => {
@@ -42,6 +58,10 @@ const authSlice = createSlice({
       localStorage.removeItem("investorUUID");
       localStorage.removeItem("brandUUID");
       localStorage.removeItem("logoutTimestamp");
+      // localStorage.removeItem(`accessToken ${id}`);
+      // localStorage.removeItem(`investorUUID ${id}`);
+      // localStorage.removeItem(`brandUUID ${id}`);
+      // localStorage.removeItem(`logoutTimestamp ${id}`);
     },
   },
 });

@@ -26,7 +26,7 @@ import BrandAddVedios from './Components/BrandProfile_Component/BrandAddVedios';
 import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
 import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccount.jsx';
 import { Provider, useDispatch } from 'react-redux';
-import store from './Redux/Store/Index.jsx';
+// import store from './Redux/Store/Index.jsx';
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
 import BrandSearchus from './Components/BrandProfile_Component/BrandSearches.jsx';
 import BrandRegisterForm from './Pages/Registration/BrandLIstingRegister/BrandRegisterForm.jsx';
@@ -47,45 +47,54 @@ import { logout } from './Redux/Slices/AuthSlice/authSlice.jsx';
 function App() {
   const dispatch = useDispatch();
   const AccessToken = localStorage.getItem("accessToken");
-  console.log("Access Token:", AccessToken);
+  // console.log("Access Token:", AccessToken);
 
-useEffect(() => {
-  const logoutTimestamp = localStorage.getItem("logoutTimestamp");
+  useEffect(() => {
+    const logoutTimestamp = localStorage.getItem("logoutTimestamp");
 
-  if (!logoutTimestamp) {
-    console.log("No logout timestamp found. Skipping auto logout check.");
-    return;
-  }
+    if (!logoutTimestamp || !AccessToken) {
+      console.log("No logout timestamp or access token. Skipping auto logout.");
+      return;
+    }
 
-  if (AccessToken) {
+    const parsedLogoutTime = parseInt(logoutTimestamp, 10);
+    const now = Date.now();
+    const exitTime = parsedLogoutTime - now;
+
     const checkAutoLogout = () => {
       console.log("Checking auto logout...");
-      const storedLogoutTimestamp = localStorage.getItem("logoutTimestamp");
-      console.log("Logout timestamp:", storedLogoutTimestamp);
+      const currentTime = Date.now();
+      console.log("Current time:", currentTime);
+      console.log("Logout timestamp:", parsedLogoutTime);
+      console.log("Difference (ms):", parsedLogoutTime - currentTime);
 
-      if (storedLogoutTimestamp && Date.now() > parseInt(storedLogoutTimestamp, 10)) {
+      if (currentTime >= parsedLogoutTime) {
         console.log("Session expired. Logging out...");
-        // localStorage.clear();
         dispatch(logout());
         window.location.href = "/";
       }
     };
 
+    // ✅ 1. Call immediately on mount
     checkAutoLogout();
 
-  
-    const interval = setInterval(checkAutoLogout, 5 * 1000); 
-    console.log("Auto logout check started. Interval ID:", interval);
+    // ✅ 2. Schedule exact-time logout
+    const timeoutId = setTimeout(() => {
+      console.log("Timeout reached. Calling checkAutoLogout again...");
+      checkAutoLogout();
+    }, exitTime);
 
-    return () => clearInterval(interval);
-  }
-}, [AccessToken]);
-
+    // ✅ Cleanup on unmount
+    return () => {
+      clearTimeout(timeoutId);
+      console.log("Cleared logout timeout.");
+    };
+  }, [AccessToken, dispatch]);
   return (
   
     <>
 
-    <Provider store={store}>
+    {/* <Provider store={store}> */}
       <Routes>
   <Route path="/" element={<HomeBannerSec />} />
   {/* <Route path="/brandview" element={<BrandViewPage />} /> */}
@@ -138,7 +147,7 @@ useEffect(() => {
 
   
 </Routes>
-    </Provider>
+    {/* </Provider> */}
 
     </>
   );
