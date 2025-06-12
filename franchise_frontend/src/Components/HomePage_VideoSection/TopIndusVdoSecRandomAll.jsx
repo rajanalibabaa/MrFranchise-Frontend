@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import React, { useRef, useState, useCallback, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -39,9 +39,10 @@ const BestBrandSlider = React.memo(() => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
 
-  const videoRefs = useRef([]);
+  const videoRefs = useRef({});
   const scrollRef = useRef(null);
   const timeoutRef = useRef(null);
+  const observerRef = useRef(null);
   
   const [muteState, setMuteState] = useState({});
   const [playState, setPlayState] = useState({});
@@ -49,6 +50,7 @@ const BestBrandSlider = React.memo(() => {
   const [isHovered, setIsHovered] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [likeProcessing, setLikeProcessing] = useState({});
+  const [visibleCards, setVisibleCards] = useState(new Set());
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -66,11 +68,11 @@ const BestBrandSlider = React.memo(() => {
   const handleLikeClick = useCallback(async (brandId, isLiked) => {
     if (likeProcessing[brandId]) return;
 
-    setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
+    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
     try {
       await toggleLike(brandId, isLiked);
     } finally {
-      setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
+      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
     }
   }, [likeProcessing]);
 
@@ -140,7 +142,7 @@ const BestBrandSlider = React.memo(() => {
   }, [isHovered, handleNext, brands.length]);
 
   // Initialize video states when brands change
-  useEffect(() => {
+  const initializeVideoStates = useCallback(() => {
     if (brands.length > 0) {
       const initialMuteState = {};
       const initialPlayState = {};
@@ -154,8 +156,8 @@ const BestBrandSlider = React.memo(() => {
   }, [brands]);
 
   // Sync video play/pause with state
-  useEffect(() => {
-    videoRefs.current.forEach((video, index) => {
+  const syncVideoState = useCallback(() => {
+    Object.entries(videoRefs.current).forEach(([index, video]) => {
       if (!video) return;
       if (playState[index]) {
         video.play().catch(e => console.log("Auto-play prevented:", e));
@@ -166,11 +168,64 @@ const BestBrandSlider = React.memo(() => {
     });
   }, [playState, muteState]);
 
-  // Auto slide effect
-  useEffect(() => {
+  // Initialize Intersection Observer for lazy loading
+  const initIntersectionObserver = useCallback(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const newVisibleCards = new Set(visibleCards);
+        entries.forEach(entry => {
+          const index = parseInt(entry.target.dataset.index);
+          if (entry.isIntersecting) {
+            newVisibleCards.add(index);
+          } else {
+            newVisibleCards.delete(index);
+          }
+        });
+        setVisibleCards(newVisibleCards);
+      },
+      { threshold: 0.5 }
+    );
+
+    // Observe all cards
+    document.querySelectorAll('.brand-card').forEach(card => {
+      observerRef.current.observe(card);
+    });
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [visibleCards]);
+
+  // Combined effect for video states and auto-slide
+  React.useEffect(() => {
+    initializeVideoStates();
     startAutoSlide();
-    return () => clearTimeout(timeoutRef.current);
-  }, [currentSlide, startAutoSlide]);
+    
+    return () => {
+      clearTimeout(timeoutRef.current);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [initializeVideoStates, startAutoSlide]);
+
+  // Sync video state when playState or muteState changes
+  React.useEffect(() => {
+    syncVideoState();
+  }, [syncVideoState]);
+
+  // Initialize intersection observer when component mounts and brands change
+  React.useEffect(() => {
+    if (brands.length > 0) {
+      initIntersectionObserver();
+    }
+  }, [brands, initIntersectionObserver]);
 
   if (brandsLoading && brands.length === 0) {
     return (
@@ -279,6 +334,8 @@ const BestBrandSlider = React.memo(() => {
           return (
             <Card
               key={brand.uuid || i}
+              className="brand-card"
+              data-index={i}
               component={motion.div}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -297,79 +354,80 @@ const BestBrandSlider = React.memo(() => {
                 flexShrink: 0,
               }}
             >
-              {/* Video section */}
-              <Box sx={{ position: "relative", height: isMobile ? 180 : 200 }}>
-                {videoUrl ? (
-                  <video
-                    ref={(el) => (videoRefs.current[i] = el)}
-                    src={videoUrl}
-                    controls={false}
-                    muted={muteState[i]}
-                    autoPlay={false}
-                    loading="lazy"
-                    loop
-                    playsInline
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
+              {/* Video section - Only render if visible */}
+              {visibleCards.has(i) && (
+                <Box sx={{ position: "relative", height: isMobile ? 180 : 200 }}>
+                  {videoUrl ? (
+                    <video
+                      ref={(el) => videoRefs.current[i] = el}
+                      src={videoUrl}
+                      controls={false}
+                      muted={muteState[i]}
+                      autoPlay={false}
+                      loop
+                      playsInline
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <Box
+                      sx={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: theme.palette.grey[300],
+                      }}
+                    >
+                      <Typography>Video not available</Typography>
+                    </Box>
+                  )}
                   <Box
                     sx={{
-                      width: "100%",
-                      height: "100%",
+                      position: "absolute",
+                      top: 8,
+                      left: 8,
                       display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: theme.palette.grey[300],
+                      gap: 1,
                     }}
                   >
-                    <Typography>Video not available</Typography>
+                    <IconButton
+                      onClick={() => toggleMute(i)}
+                      sx={{
+                        bgcolor: "rgba(255,255,255,0.8)",
+                        p: 0.5,
+                        "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+                      }}
+                      size="small"
+                    >
+                      {muteState[i] ? (
+                        <VolumeOff fontSize="small" />
+                      ) : (
+                        <VolumeUp fontSize="small" />
+                      )}
+                    </IconButton>
+                    <IconButton
+                      onClick={() => togglePlay(i)}
+                      sx={{
+                        bgcolor: "rgba(255,255,255,0.8)",
+                        p: 0.5,
+                        "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+                      }}
+                      size="small"
+                    >
+                      {playState[i] ? (
+                        <Pause fontSize="small" />
+                      ) : (
+                        <PlayArrow fontSize="small" />
+                      )}
+                    </IconButton>
                   </Box>
-                )}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 8,
-                    left: 8,
-                    display: "flex",
-                    gap: 1,
-                  }}
-                >
-                  <IconButton
-                    onClick={() => toggleMute(i)}
-                    sx={{
-                      bgcolor: "rgba(255,255,255,0.8)",
-                      p: 0.5,
-                      "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                    }}
-                    size="small"
-                  >
-                    {muteState[i] ? (
-                      <VolumeOff fontSize="small" />
-                    ) : (
-                      <VolumeUp fontSize="small" />
-                    )}
-                  </IconButton>
-                  <IconButton
-                    onClick={() => togglePlay(i)}
-                    sx={{
-                      bgcolor: "rgba(255,255,255,0.8)",
-                      p: 0.5,
-                      "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                    }}
-                    size="small"
-                  >
-                    {playState[i] ? (
-                      <Pause fontSize="small" />
-                    ) : (
-                      <PlayArrow fontSize="small" />
-                    )}
-                  </IconButton>
                 </Box>
-              </Box>
+              )}
 
               <CardContent
                 sx={{
