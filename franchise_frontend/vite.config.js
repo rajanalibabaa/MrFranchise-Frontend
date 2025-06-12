@@ -1,7 +1,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
+  base: '/', // root path (for AWS this is usually correct)
   plugins: [react()],
+  build: {
+    target: 'es2015', // ensures broader browser compatibility
+    minify: 'terser',
+    sourcemap: false, // no sourcemaps in production
+    chunkSizeWarningLimit: 500,
+    outDir: 'dist', // default, good for S3/EC2
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+  },
 })

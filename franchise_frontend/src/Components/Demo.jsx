@@ -23,7 +23,7 @@ const Demo = () => {
 
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

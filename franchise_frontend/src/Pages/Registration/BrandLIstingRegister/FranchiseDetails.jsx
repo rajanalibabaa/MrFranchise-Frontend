@@ -187,11 +187,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       <Grid container spacing={3}>
         {/* Franchise Details Section */}
         <Grid item xs={12}>
-          <Paper
-            elevation={0}
-            sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 1 }}
-          >
-            <Typography variant="h6" sx={{ mb: 3, color: "primary.main" }}>
+          
+            <Typography variant="h6" sx={{ mb: 3, color: "#ff9800" }}>
               Franchise Details
             </Typography>
 
@@ -477,7 +474,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               {/* Third Row - Column 3 - Property Type */}
               <Grid item>
                 <FormControl component="fieldset" fullWidth error={!!errors["fico[0].propertyType"]} required>
-                  <FormLabel component="legend">Property Type*</FormLabel>
+                  <FormLabel component="legend" >Property Type*</FormLabel>
                   <Box sx={{ display: "flex", gap: 2 }}>
                     {propertyTypes.map((type) => (
                       <FormControlLabel
@@ -501,19 +498,18 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               </Grid>
 
               {/* Add FICO Model Button - spans remaining columns */}
-              <Grid item sx={{ gridColumn: { md: "4 / span 2", xs: "1" } }}>
+              <Grid item sx={{ gridColumn: { md: "3 / span 1", xs: "1" } }}>
                 <Button
                   variant="contained"
-                  color="primary"
                   onClick={handleAddFicoModel}
                   fullWidth
-                  sx={{ height: "50%", mt: 2 }}
+                  sx={{ height: "50%", mt: 2 ,backgroundColor: "#ff9800", color: "#fff", "&:hover": { backgroundColor: "#f57c00" } }}
                 >
                   Add FICO Model
                 </Button>
               </Grid>
             </Grid>
-          </Paper>
+         
         </Grid>
       </Grid>
 
@@ -529,11 +525,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       >
         {/* Franchise Network Section */}
         <Grid item xs={12}>
-          <Paper
-            elevation={0}
-            sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 1 }}
-          >
-            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: "bold" }}>
+          
+            <Typography variant="h6"  color="#ff9800" sx={{ mb: 2, fontWeight: "bold" }}>
               Franchise Network
             </Typography>
 
@@ -589,16 +582,13 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 />
               </Grid>
             </Grid>
-          </Paper>
+    
         </Grid>
 
         {/* Support and Training Section */}
         <Grid item xs={12}>
-          <Paper
-            elevation={0}
-            sx={{ p: 2, border: "1px solid #e0e0e0", borderRadius: 1 }}
-          >
-            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: "bold" }}>
+          
+            <Typography variant="h6"  color="#ff9800" sx={{ mb: 2, fontWeight: "bold" }}>
               Support and Training
             </Typography>
 
@@ -658,7 +648,6 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 </FormControl>
               </Grid>
             </Grid>
-          </Paper>
         </Grid>
       </Grid>
     </Box>

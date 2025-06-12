@@ -87,7 +87,7 @@ function LoginPage({ open, onClose }) {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/login/generateOTPforLogin",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
         otpRequestPayload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -119,13 +119,13 @@ function LoginPage({ open, onClose }) {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/login/",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
         otpVerifyPayload,
         { headers: { "Content-Type": "application/json" } }
       );
 
       if (response.status === 200) {
-        const logoutTime = Date.now() + 60 * 1000;
+        const logoutTime = Date.now() + 24 * 60 * 60 * 1000;
         localStorage.setItem("logoutTimestamp", logoutTime.toString());
 
         dispatch(
@@ -136,7 +136,10 @@ function LoginPage({ open, onClose }) {
           })
         );
 
-        const exitTime = logoutTime - Date.now();
+        const logoutTimestamp = localStorage.getItem("logoutTimestamp");
+        const parsedLogoutTime = parseInt(logoutTimestamp, 10);
+        const now = Date.now();
+        const exitTime = parsedLogoutTime - now;
         setTimeout(() => {
           dispatch(logout());
           navigate("/");
@@ -216,7 +219,7 @@ function LoginPage({ open, onClose }) {
                 <form onSubmit={handleSubmit}>
                   <TextField
                     fullWidth
-                    label="Email or Phone Number"
+                    label="Enter your registered Email"
                     id="username"
                     value={formData.username}
                     onChange={handleChange}
@@ -262,7 +265,7 @@ function LoginPage({ open, onClose }) {
                 )}
 
                 <Typography variant="body2" textAlign="center" mt={2}>
-                  Don’t have an account?{" "}
+                  New Registration{" "}
                   <Link
                     component="button"
                     onClick={() => {
@@ -271,7 +274,7 @@ function LoginPage({ open, onClose }) {
                     }}
                     sx={{ fontWeight: 500 }}
                   >
-                    Register here
+                    Click here
                   </Link>
                 </Typography>
               </Box>

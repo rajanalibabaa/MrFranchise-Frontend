@@ -107,7 +107,7 @@ function Navbar() {
     try {
       const response = await axios.post(
         // `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
-        // `http://localhost:5000/api/v1/logout/${ID}`,
+        // `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
         `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
         {},
         {
@@ -156,15 +156,15 @@ function Navbar() {
   };
 
   // Animation variants
-  const fadeIn = {
-    hidden: { opacity: 0, y: -20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-  };
+  // const fadeIn = {
+  //   hidden: { opacity: 0, y: -20 },
+  //   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  // };
 
-  const pulse = {
-    scale: [1, 1.05, 1],
-    transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-  };
+  // const pulse = {
+  //   scale: [1, 1.05, 1],
+  //   transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+  // };
 
   return (
     <>
@@ -291,7 +291,7 @@ function Navbar() {
           position: 'relative',
           zIndex: 1
         }}>
-          {['Expand Your Franchise', 'Investor', 'Advertise','Franchise promotion & Lead Distribution Packages'].map((text, index) => (
+          {['Expand Your Franchise', 'Investor', 'Advertise','Lead Distribution Packages','Other Industries'].map((text, index) => (
             <motion.div
               key={text}
               whileHover={{ scale: 1.05 }}
@@ -303,7 +303,8 @@ function Navbar() {
                   text === 'Expand Your Franchise' ? '/expandyourbrand' :
                   text === 'Investor' ? '/investfranchise' :
                   text === 'Advertise' ? '/advertisewithus' :
-                  text === 'Franchise promotion & Lead Distribution Packages' ? '/franchisepromotion' :''
+                  text === 'Lead Distribution Packages' ? '/franchisepromotion' : 
+                  text === 'Other Industries' ? '/otherindustries' : '/'
                 }
                 size="small"
                 sx={{ 

@@ -49,8 +49,9 @@ function RegisterHandleUser({boolean = true}) {
   return (
     <>
     {/* <Navbar/> */}
-    {boolean && <Navbar/>}
+    {/* {boolean && <Navbar/>} */}
     <Box
+    mt={isMobile ? 0 : 7}
       sx={{
         height: "100vh",
         overflow: "hidden",

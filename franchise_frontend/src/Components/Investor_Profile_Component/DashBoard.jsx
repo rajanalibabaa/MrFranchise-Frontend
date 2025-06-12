@@ -66,25 +66,25 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
         
         // Parallel API calls
         const [likedRes, viewedRes, appliedRes, userRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/v1/like/get-favbrands/${investorUUID}`, {
+          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/like/get-favbrands/${investorUUID}`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${AccessToken}`,
             },
           }),
-          axios.get(`http://localhost:5000/api/v1/view/getAllViewBrandByID/${investorUUID}`, {
+          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/view/getAllViewBrandByID/${investorUUID}`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${AccessToken}`,
             },
           }),
-          axios.get(`http://localhost:5000/api/v1/instantapply/getInstaApplyById/${investorUUID}`, {
+          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/getInstaApplyById/${investorUUID}`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${AccessToken}`,
             },
           }),
-          axios.get(`http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`, {
+          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${AccessToken}`,
@@ -134,7 +134,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       setStats(prev => ({ ...prev, totalLikes: prev.totalLikes - 1 }));
 
       await axios.delete(
-        `http://localhost:5000/api/v1/like/delete-favbrand/${investorUUID}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -160,7 +160,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       setStats(prev => ({ ...prev, totalViews: prev.totalViews - 1 }));
 
       await axios.delete(
-        `http://localhost:5000/api/v1/view/deleteViewBrandByID/${investorUUID}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/view/deleteViewBrandByID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -462,6 +462,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%)',
       p: { xs: 2, md: 4 }
+      
     }}>
 
       {/* Profile Section */}
@@ -469,9 +470,10 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
         mb: 1,
         borderRadius: 3,
         boxShadow: 3,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        
       }}>
-        {/* <Box sx={{
+        <Box sx={{
           display: 'flex',
           flexDirection: { xs: 'column', md: 'row' },
           alignItems: 'center',
@@ -502,7 +504,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
               {renderStatCard(<AssignmentTurnedIn />, 'Applied', stats.totalApplications, '33, 150, 243')}
             </Box>
           </Box>
-        </Box> */}
+        </Box>
       </Card>
 
       {/* Main Content */}

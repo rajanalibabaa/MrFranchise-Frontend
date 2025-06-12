@@ -33,6 +33,7 @@ import {
   openBrandDialog,
   closeBrandDialog,
   toggleLikeBrand,
+  viewApi,
 } from "../../Redux/Slices/brandSlice";
 import BrandDetailsDialog from "./BrandDetailsDialog";
 import { useLocation } from "react-router-dom";
@@ -132,18 +133,7 @@ function BrandList() {
 
   const handleOpenBrand = async(brand) => {
     console.log(brand.uuid)
-    const brandID = brand.uuid
-    const res = await axios.post(`https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
-      
-      {
-       headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          data:{brandID}
-        },
-      }
-    )
-    console.log("=res= :",res)
+    dispatch(viewApi(brand.uuid))
     dispatch(openBrandDialog(brand));
   };
 
@@ -164,11 +154,11 @@ function BrandList() {
 
   const toggleLike = async (brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");
-    if (!token) {
+    console.log("TOKEN:",token)
+    if (!token ) {
       setShowLogin(true);
       return;
     }
-
     console.log("isliked === :",isLiked)
     console.log("brandId :",brandId)
     try {
@@ -176,8 +166,7 @@ function BrandList() {
       // Optionally show success message
     } catch (error) {
       console.error("Like operation failed:", error);
-      // Show error to user
-      alert(error.message || "Failed to update like status");
+
     }
   };
   const activeFilterCount = Object.values(filters).filter(Boolean).length;

@@ -2,14 +2,13 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const token = localStorage.getItem("accessToken");
- const id = localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID")
+const id =localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID");
+
 export const toggleLikeBrand = createAsyncThunk(
   "brands/toggleLike",
   async ({ brandId, isLiked }, { rejectWithValue }) => {
-
-    console.log("=========== :",isLiked,brandId)
+    console.log("================ A:", isLiked, brandId);
     try {
-     
       if (!token) {
         return rejectWithValue("You need to log in to continue.");
       }
@@ -21,36 +20,32 @@ export const toggleLikeBrand = createAsyncThunk(
         },
       };
 
-        
-      const brandID = brandId 
+      const brandID = brandId;
       if (!isLiked) {
         // Like the brand - POST request
         await axios.post(
           "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
-          // "http://localhost:5000/api/api/v1/like/post-favbrands",
+          // "https://franchise-backend-wgp6.onrender.com/api/api/v1/like/post-favbrands",
           { branduuid: brandId },
           config
         );
-      } else 
-      if (isLiked) {
-
-        console.log("delete")
+      } else if (isLiked) {
+        console.log("delete");
         // Unlike the brand - DELETE request
         const res = await axios.delete(
           `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${id}`,
-          // `http://localhost:5000/api/api/v1/like/delete-favbrand/${id}`,
-          
+          // `https://franchise-backend-wgp6.onrender.com/api/api/v1/like/delete-favbrand/${id}`,
+
           {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            data:{ brandID},
-          },
-          
+            data: { brandID },
+          }
         );
 
-        console.log("res :",res)
+        console.log("res :", res);
       }
 
       return { brandId, isLiked: !isLiked };
@@ -63,7 +58,23 @@ export const toggleLikeBrand = createAsyncThunk(
   }
 );
 
-
+export const Likeshow = async () => {
+  try {
+    const response = await axios.get(
+      `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log(response.data.data);
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 export const fetchBrands = createAsyncThunk(
   "brands/fetchBrands",
@@ -80,22 +91,41 @@ export const fetchBrands = createAsyncThunk(
             },
           }
         );
-      } else {
-        const userId = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
-
-        response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${userId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
       }
+      if (token) {
+        response = await Likeshow();
+      }
+
+    console.log("arvindApi",response.data.data)
+
       return response.data.data;
     } catch (err) {
       return rejectWithValue(err.message || "Failed to fetch brands");
+    }
+  }
+);
+
+export const viewApi = createAsyncThunk(
+  "brands/viewApi",
+  async (brandID, { rejectWithValue }) => {
+    console.log("123458", brandID);
+
+    try {
+      const res = await axios.post(
+        `https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
+
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            data: { brandID },
+          },
+        }
+      );
+      console.log("viewres", res);
+      return res;
+    } catch (error) {
+      console.log(error);
     }
   }
 );
@@ -126,6 +156,7 @@ const brandSlice = createSlice({
     },
     openDialog: false,
     selectedBrand: null,
+    brandID: "",
   },
   reducers: {
     setFilters: (state, action) => {
@@ -156,16 +187,20 @@ const brandSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-    .addCase(toggleLikeBrand.fulfilled, (state, action) => {
-      const { brandId, isLiked } = action.payload;
-  
-      state.data = state.data.map((brand) =>
-        brand.uuid === brandId ? { ...brand, isLiked } : brand
-      );
-      state.filteredData = state.filteredData.map((brand) =>
-        brand.uuid === brandId ? { ...brand, isLiked } : brand
-      );
-    })
+      .addCase(toggleLikeBrand.fulfilled, (state, action) => {
+        const { brandId, isLiked } = action.payload;
+
+        state.data = state.data.map((brand) =>
+          brand.uuid === brandId ? { ...brand, isLiked } : brand
+        );
+        state.filteredData = state.filteredData.map((brand) =>
+          brand.uuid === brandId ? { ...brand, isLiked } : brand
+        );
+      })
+      .addCase(viewApi.fulfilled, (state, action) => {
+        const { brandID } = action.payload;
+        state.brandID = brandID;
+      })
 
       .addCase(fetchBrands.pending, (state) => {
         state.loading = true;
@@ -174,21 +209,24 @@ const brandSlice = createSlice({
       .addCase(fetchBrands.fulfilled, (state, action) => {
         state.loading = false;
         state.data = action.payload;
-            state.filteredData = applyFiltersToBrands(action.payload, state.filters);
+        state.filteredData = applyFiltersToBrands(
+          action.payload,
+          state.filters
+        );
 
         // Extract unique values for filters
-   // Extract unique categories with their hierarchy
+        // Extract unique categories with their hierarchy
         const categoryMap = {};
         const subCategoryMap = {};
         const childCategoryMap = {};
 
-       action.payload.forEach((brand) => {
+        action.payload.forEach((brand) => {
           brand.personalDetails?.brandCategories?.forEach((category) => {
             // Main categories
             if (category.main && !categoryMap[category.main]) {
               categoryMap[category.main] = {
                 id: category.main,
-                name: category.main
+                name: category.main,
               };
             }
 
@@ -197,7 +235,7 @@ const brandSlice = createSlice({
               subCategoryMap[category.sub] = {
                 id: category.sub,
                 name: category.sub,
-                parentCategory: category.main
+                parentCategory: category.main,
               };
             }
 
@@ -206,7 +244,7 @@ const brandSlice = createSlice({
               childCategoryMap[category.child] = {
                 id: category.child,
                 name: category.child,
-                parentSubCategory: category.sub
+                parentSubCategory: category.sub,
               };
             }
           });
@@ -215,7 +253,6 @@ const brandSlice = createSlice({
         state.categories = Object.values(categoryMap);
         state.subCategories = Object.values(subCategoryMap);
         state.childCategories = Object.values(childCategoryMap);
-
 
         state.modelTypes = [
           ...new Set(
@@ -284,7 +321,7 @@ const applyFiltersToBrands = (brands, filters) => {
       )
     );
   }
-     // Child categories filter
+  // Child categories filter
   if (filters.selectedChildCategories?.length > 0) {
     result = result.filter((brand) =>
       brand.personalDetails?.brandCategories?.some((cat) =>
@@ -292,7 +329,6 @@ const applyFiltersToBrands = (brands, filters) => {
       )
     );
   }
-
 
   if (filters.selectedModelType) {
     result = result.filter((brand) =>
@@ -322,10 +358,11 @@ const applyFiltersToBrands = (brands, filters) => {
     );
   }
 
- // Investment range filter
+  // Investment range filter
   if (filters.selectedInvestmentRange) {
     result = result.filter((brand) => {
-      const investmentRange = brand.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange || "";
+      const investmentRange =
+        brand.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange || "";
       return investmentRange === filters.selectedInvestmentRange;
     });
   }
