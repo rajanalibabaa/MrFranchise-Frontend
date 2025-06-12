@@ -14,20 +14,18 @@ import {
   Stack,
   CircularProgress,
 } from "@mui/material";
-import {
-  Favorite,
-  FavoriteBorder,
-  PlayCircle,
-  PauseCircle,
-  ChevronRight,
-  ChevronLeft,
-} from "@mui/icons-material";
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
+import Favorite from "@mui/icons-material/Favorite";
+import PlayCircle from "@mui/icons-material/PlayCircle";
+import PauseCircle from "@mui/icons-material/PauseCircle";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchBrands,
   openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
@@ -113,12 +111,6 @@ function TopBrandVdoCards() {
     });
   }, [brands]);
 
-  useEffect(() => {
-    // Fetch brands if not already loaded
-    if (brands.length === 0 && !brandsLoading) {
-      dispatch(fetchBrands());
-    }
-  }, [dispatch, brands.length, brandsLoading]);
 
   useEffect(() => {
     startAutoSlide();
@@ -340,6 +332,7 @@ function TopBrandVdoCards() {
                 >
                   <video
                     ref={(el) => (videoRefs.current[0] = el)}
+                    loading="lazy"
                     src={
                       mainBrand.brandDetails?.brandPromotionVideo?.[0] ||
                       mainBrand.brandDetails?.franchisePromotionVideo?.[0]
@@ -604,6 +597,7 @@ function TopBrandVdoCards() {
                   >
                     <video
                       ref={(el) => (videoRefs.current[i + 1] = el)}
+                      loading="lazy"
                       src={
                         brand.brandDetails?.brandPromotionVideo?.[0] ||
                         brand.brandDetails?.franchisePromotionVideo?.[0]

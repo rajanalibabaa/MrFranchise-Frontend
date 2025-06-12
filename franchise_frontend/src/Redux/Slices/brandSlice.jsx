@@ -95,6 +95,9 @@ export const fetchBrands = createAsyncThunk(
       if (token) {
         response = await Likeshow();
       }
+
+    console.log("arvindApi",response.data.data)
+
       return response.data.data;
     } catch (err) {
       return rejectWithValue(err.message || "Failed to fetch brands");

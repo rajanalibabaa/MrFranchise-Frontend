@@ -49,14 +49,14 @@ const handleLikeClick = async (brandId, isLiked) => {
   return (
     <Card
       sx={{
-        overflow:"scroll",
+        // overflow:"scroll",
         width: 320, // Fixed width
         height: 520, // Fixed height
         display: "flex",
         flexDirection: "column",
         transition: "transform 0.3s, box-shadow 0.3s",
         position: "relative",
-        // overflow: "hidden",
+        overflow: "hidden",
         borderRadius: 2,
         "&:hover": {
           transform: "translateY(-5px)",

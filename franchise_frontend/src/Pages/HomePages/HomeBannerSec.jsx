@@ -9,12 +9,12 @@ import {
 import { motion, useAnimation } from "framer-motion";
 import PopupModal from "../../Components/PopUpModal/PopUpModal";
 import FilterDropdowns from "../../Components/Navbar/FilterDropdownsData";
-import { fetchBrands } from "../../Redux/Slices/brandSlice.jsx";
 import { useDispatch } from "react-redux";
 import Footer from "../../Components/Footers/Footer.jsx";
+import img1 from '../../assets/Images/bgimg2.jpg';
 // Dynamic Components - Import all your video sections
 const dynamicComponents = {
-  TopBrandVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandTwoVdoSec")),
+
   TopBrandVdoCards: React.lazy(() => import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")),//first video section
   TopIndusVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopIndusVdoSecRandomAll")), //second video section top leading industries
   TopInvestVdoSec: React.lazy(() => import("../../Components/HomePage_VideoSection/TopInvestVdoSec.jsx")), //TOp restaurant investment section
@@ -31,9 +31,9 @@ TopDesertBakeryFranchise:React.lazy(()=>import('../../Components/HomePage_VideoS
 
 // Configuration object for the entire page
 const pageConfig = {
-  // Hero Banner Configuration
+  // Hero Banner ConfigurationF
   heroBanner: {
-    backgroundImage: "https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
+    backgroundImage: img1,
     overlayColor: "rgba(0, 0, 0, 0.3)",
     title: {
       text: "Welcome To Our MrFranchise Network",
@@ -56,92 +56,49 @@ const pageConfig = {
       component: "TopBrandVdoCards",
       background: "white",
       backgroundOpacity: 0.1,
-      animationDelay: 0.2
     },
     {
       component: "TopIndusVdoSec",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-      animationDelay: 0.4
     },
     {
       component: "TopCafeBrandsSection",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-      animationDelay: 0.5
     },
     {
       component: "TopFoodFranchise",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-      animationDelay: 0.5
     },
     {
       component: "TopBeverageFranchise",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-      animationDelay: 0.5
     },
     {
       component: "TopDesertBakeryFranchise",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-      animationDelay: 0.5
     },
     {
       component: "TopInvestVdoSec",
       background: "white",
       dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-      animationDelay: 0.6
     },
     {
       component: "TopInvestVdo2",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-      animationDelay: 0.8
     },
     {
       component: "TopInvestVdocardround",
       title: "Trending Brands",
-      backgroundImage: "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80",
       dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-      animationDelay: 1.0
     }
   ],
 
-  // Global Animation Settings
-  animations: {
-    banner: {
-      hidden: { opacity: 0 },
-      visible: {
-        opacity: 1,
-        transition: {
-          when: "beforeChildren",
-          staggerChildren: 0.3
-        }
-      }
-    },
-    item: {
-      hidden: { y: 20, opacity: 0 },
-      visible: {
-        y: 0,
-        opacity: 1,
-        transition: {
-          type: "spring",
-          damping: 10,
-          stiffness: 100
-        }
-      }
-    },
-    pulse: {
-      scale: [1, 1.02, 1],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }
-    }
-  }
 };
 
 const HomeBannerSec = () => {
@@ -150,13 +107,15 @@ const HomeBannerSec = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const controls = useAnimation();
-  const dispatch = useDispatch()
+  const dispatch =useDispatch()
+
 
   useEffect(() => {
     const navEntries = performance.getEntriesByType("navigation");
     const isReload = navEntries[0]?.type === "reload";
     const popupShown = sessionStorage.getItem("popup-shown");
-     dispatch(fetchBrands())
+       
+    // dispatch(fetchBrands)
 
     if (!popupShown || isReload) {
       setIsPopupOpen(true);
@@ -276,9 +235,11 @@ const HomeBannerSec = () => {
           <motion.div
             initial="hidden"
             animate={controls}
-            variants={pageConfig.animations.banner}
+            // variants={pageConfig.animations.banner}
           >
-            <motion.div variants={pageConfig.animations.item}>
+            <motion.div 
+            // variants={pageConfig.animations.item}
+            >
               <Typography 
                 component="div" 
                 sx={{
@@ -318,7 +279,9 @@ const HomeBannerSec = () => {
               </Typography>
             </motion.div>
             
-            <motion.div variants={pageConfig.animations.item}>
+            <motion.div 
+            // variants={pageConfig.animations.item}
+            >
               <Typography 
                 variant={isMobile ? "h6" : 'subtitle2'}
                 sx={{
@@ -333,7 +296,7 @@ const HomeBannerSec = () => {
                   textShadow: '0 2px 4px rgba(0,0,0,0.5)'
                 }}
                 component={motion.div}
-                animate={pageConfig.animations.pulse}
+                // animate={pageConfig.animations.pulse}
               >
                 {pageConfig.heroBanner.subtitle.text.split(pageConfig.heroBanner.subtitle.highlight.text)[0]}
                 <Typography variant="outlined" sx={{ 
@@ -347,7 +310,7 @@ const HomeBannerSec = () => {
             </motion.div>
 
             <motion.div 
-              variants={pageConfig.animations.item}
+              // variants={pageConfig.animations.item}
               style={{ 
                 marginTop: '2rem',
                 width: isMobile ? '100%' : '85%',
