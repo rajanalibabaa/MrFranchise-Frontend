@@ -34,7 +34,6 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../../assets/Images/logo.png";
 // import backgroundPattern from "../../assets/Images/network-pattern.png";
-import FilterDropdowns from "./FilterDropdownsData";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -218,7 +217,7 @@ function Navbar() {
             left: 0,
             right: 0,
             height: '4px',
-            background: 'linear-gradient(90deg, #ff9800, #ff5722, #ff9800)',
+            // background: 'linear-gradient(90deg, #ff9800, #ff5722, #ff9800)',
             backgroundSize: '200% 100%',
             animation: 'gradient 3s ease infinite',
           },

@@ -172,7 +172,7 @@ function BrandList() {
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 2, mb: 6 ,}}>
+    <Container maxWidth="xl" sx={{ mt: 3, mb: 6 ,}}>
       <Box sx={{ position: "fixed", right: 20, zIndex: 1000 }}>
         <Badge badgeContent={selectedForComparison.length} color="primary">
           <Button

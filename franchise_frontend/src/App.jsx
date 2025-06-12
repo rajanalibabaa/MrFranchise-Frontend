@@ -5,6 +5,7 @@ import InvestorRegister from './Pages/Registration/InvestorsRegister';
 import LoginPage from "./Pages/LoginPage/LoginPage";
 
 import "./App.css";
+import Nprogress from 'nprogress';
 import HomeBannerSec from "./Pages/HomePages/HomeBannerSec";
 import RegisterHandleUser from "./Pages/Registration/RegisterHandlePage";
 // import BrandListingFormPage from './Pages/BrandListingForm/BrandListingFormPage';
@@ -25,8 +26,7 @@ import BrandAddVedios from "./Components/BrandProfile_Component/BrandAddVedios";
 
 import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
 import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccount.jsx';
-import { Provider, useDispatch } from 'react-redux';
-import store from './Redux/Store/Index.jsx';
+import {useDispatch } from 'react-redux';
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
 import BrandSearchus from './Components/BrandProfile_Component/BrandSearches.jsx';
 import BrandRegisterForm from './Pages/Registration/BrandLIstingRegister/BrandRegisterForm.jsx';
@@ -44,7 +44,6 @@ import FranchisePromotion from './Components/Footers/QuickLinks/FranchisePromoti
 import { logout } from './Redux/Slices/AuthSlice/authSlice.jsx';
 
 import Navbar from "./Components/Navbar/NavBar.jsx";
-import Footer from "./Components/Footers/Footer.jsx";
 import { Box } from "@mui/material";
 import Otherindustries from "./Components/Footers/QuickLinks/Otherindustries.jsx";
 
