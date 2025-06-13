@@ -82,23 +82,42 @@ const TopInvestVdo2 = React.memo(() => {
     }
   }, [dispatch, likeProcessing]);
 
-  // Filter brands by location
-  const filteredBrands = useMemo(() => {
-    return selectedLocation && selectedLocation !== "All Locations"
-      ? brands.filter((brand) => brand.locations?.includes(selectedLocation))
-      : brands;
-  }, [brands, selectedLocation]);
+  // Filter brands to only include those with expansion locations
+  const brandsWithExpansion = useMemo(() => {
+    return brands.filter(brand => {
+      const hasPersonalExpansion = brand?.personalDetails?.expansionLocation?.length > 0;
+      const hasBrandExpansion = brand?.brandDetails?.expansionLocations?.length > 0;
+      return hasPersonalExpansion || hasBrandExpansion;
+    });
+  }, [brands]);
 
-  // Initialize data on mount
+  // Filter brands by selected location
+  const filteredBrands = useMemo(() => {
+    if (!selectedLocation || selectedLocation === "All Locations") {
+      return brandsWithExpansion;
+    }
+    
+    return brandsWithExpansion.filter((brand) => {
+      const personalLocations = brand?.personalDetails?.expansionLocation?.map(loc => loc.city) || [];
+      const brandLocations = brand?.brandDetails?.expansionLocations || [];
+      const allBrandLocations = [...personalLocations, ...brandLocations];
+      return allBrandLocations.includes(selectedLocation);
+    });
+  }, [brandsWithExpansion, selectedLocation]);
+
+  // Initialize locations data
   useEffect(() => {
     const initializeData = async () => {
       try {
-        if (brands) {
+        if (brandsWithExpansion.length > 0) {
           const locationsSet = new Set();
-          brands.forEach((brand) => {
-            const expansionLocations = brand?.personalDetails?.expansionLocation?.map(loc => loc.city) || 
-                                     brand?.brandDetails?.expansionLocations || [];
-            expansionLocations.forEach(loc => locationsSet.add(loc));
+          
+          brandsWithExpansion.forEach((brand) => {
+            const personalLocations = brand?.personalDetails?.expansionLocation?.map(loc => loc.city) || [];
+            const brandLocations = brand?.brandDetails?.expansionLocations || [];
+            
+            personalLocations.forEach(loc => locationsSet.add(loc));
+            brandLocations.forEach(loc => locationsSet.add(loc));
           });
 
           setAllLocations(["All Locations", ...Array.from(locationsSet).sort()]);
@@ -109,10 +128,7 @@ const TopInvestVdo2 = React.memo(() => {
     };
 
     initializeData();
-  }, [brands]);
-
-  // Auto-rotate brands effect (removed as it was causing unnecessary re-renders)
-  // Consider implementing this differently if needed
+  }, [brandsWithExpansion]);
 
   // Brand card component
   const BrandCard = React.memo(({ brand }) => {
@@ -122,13 +138,18 @@ const TopInvestVdo2 = React.memo(() => {
       personalDetails,
       brandDetails,
       franchiseDetails,
-      displayLocation,
     } = brand;
 
     const franchiseModel = franchiseDetails?.modelsOfFranchise?.[0] || {};
     const videoUrl = brandDetails?.brandPromotionVideo?.[0] || 
                     brandDetails?.franchisePromotionVideo?.[0];
     const category = personalDetails?.brandCategories?.[0]?.child || "No category";
+    
+    // Get all expansion locations for display
+    const personalLocations = personalDetails?.expansionLocation?.map(loc => loc.city) || [];
+    const brandLocations = brandDetails?.expansionLocations || [];
+    const allLocations = [...personalLocations, ...brandLocations];
+    const displayLocation = allLocations.length > 0 ? allLocations[0] : "N/A";
 
     return (
       <motion.div
@@ -460,9 +481,17 @@ const TopInvestVdo2 = React.memo(() => {
         ))}
       </Box>
 
+      {filteredBrands.length === 0 && !loading && (
+        <Box sx={{ p: 4, textAlign: "center" }}>
+          <Typography variant="body1" color="text.secondary">
+            No franchise opportunities found for the selected location.
+          </Typography>
+        </Box>
+      )}
+
       <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
     </Box>
   );
 });
 
-export default TopInvestVdo2; 
+export default TopInvestVdo2;
