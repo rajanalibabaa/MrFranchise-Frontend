@@ -782,9 +782,14 @@ function TopBrandVdoCards() {
                         }}
                       >
                         Categories:{" "}
-                        {(brand.personalDetails?.brandCategories).map(
-                          (cat) => cat.child
-                        )}
+                        {Array.isArray(brand.personalDetails?.brandCategories)
+    ? brand.personalDetails.brandCategories.map((cat, i) => (
+        <span key={i}>
+          {cat.child}
+          {i < brand.personalDetails.brandCategories.length - 1 ? ", " : ""}
+        </span>
+      ))
+    : "N/A"}
                       </Typography>
                       <Typography
                         variant="body2"

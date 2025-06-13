@@ -95,7 +95,7 @@ function TopInvestVdo2() {
     const initializeData = async () => {
       try {
         const response = await dispatch(fetchBrands());
-        if (response.payload) {
+        if (Array.isArray(response.payload)) {
           const locationsSet = new Set();
           const processedBrands = response.payload.map((brand) => {
             const expansionLocations = brand?.personalDetails?.expansionLocation?.map(loc => loc.city) || 

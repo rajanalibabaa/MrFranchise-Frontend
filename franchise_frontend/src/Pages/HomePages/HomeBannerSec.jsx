@@ -34,7 +34,7 @@ const pageConfig = {
     title: {
       text: "Welcome To Our MrFranchise Network",
       gradient: "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "3rem" }
     },
     subtitle: {
       text: "World's most comprehensive franchise platform with 1000+ opportunities waiting for you...",
@@ -199,7 +199,6 @@ const HomeBannerSec = () => {
         )}
         
         <Container  maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
-          
           <React.Suspense fallback={<div>Loading...</div>}>
             <motion.div
               initial={{ opacity: 0, y: 50 }}
