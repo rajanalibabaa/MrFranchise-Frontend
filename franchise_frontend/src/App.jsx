@@ -5,6 +5,7 @@ import InvestorRegister from './Pages/Registration/InvestorsRegister';
 import LoginPage from "./Pages/LoginPage/LoginPage";
 
 import "./App.css";
+import Nprogress from 'nprogress';
 import HomeBannerSec from "./Pages/HomePages/HomeBannerSec";
 import RegisterHandleUser from "./Pages/Registration/RegisterHandlePage";
 // import BrandListingFormPage from './Pages/BrandListingForm/BrandListingFormPage';
@@ -26,7 +27,7 @@ import BrandAddVedios from "./Components/BrandProfile_Component/BrandAddVedios";
 import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
 import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccount.jsx';
 import { Provider, useDispatch } from 'react-redux';
-import store from './Redux/Store/Index.jsx';
+// import store from './Redux/Store/Index.jsx';
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
 import BrandSearchus from './Components/BrandProfile_Component/BrandSearches.jsx';
 import BrandRegisterForm from './Pages/Registration/BrandLIstingRegister/BrandRegisterForm.jsx';
@@ -44,32 +45,32 @@ import FranchisePromotion from './Components/Footers/QuickLinks/FranchisePromoti
 import { logout } from './Redux/Slices/AuthSlice/authSlice.jsx';
 
 import Navbar from "./Components/Navbar/NavBar.jsx";
-import Footer from "./Components/Footers/Footer.jsx";
 import { Box } from "@mui/material";
 import Otherindustries from "./Components/Footers/QuickLinks/Otherindustries.jsx";
+import GlobalLoader from './Components/GLobalLoader.jsx';
 
 function App() {
   const dispatch = useDispatch();
   const AccessToken = localStorage.getItem("accessToken");
-  console.log("Access Token:", AccessToken);
+  // console.log("Access Token:", AccessToken);
 
-useEffect(() => {
-  const logoutTimestamp = localStorage.getItem("logoutTimestamp");
+  useEffect(() => {
+    const logoutTimestamp = localStorage.getItem("logoutTimestamp");
 
-  if (!logoutTimestamp) {
-    console.log("No logout timestamp found. Skipping auto logout check.");
-    return;
-  }
+    if (!logoutTimestamp || !AccessToken) {
+      // console.log("No logout timestamp or access token. Skipping auto logout.");
+      return;
+    }
 
-  if (AccessToken) {
+    const parsedLogoutTime = parseInt(logoutTimestamp, 10);
+    const now = Date.now();
+    const exitTime = parsedLogoutTime - now;
+
     const checkAutoLogout = () => {
-      console.log("Checking auto logout...");
-      const storedLogoutTimestamp = localStorage.getItem("logoutTimestamp");
-      console.log("Logout timestamp:", storedLogoutTimestamp);
+      const currentTime = Date.now();
 
-      if (storedLogoutTimestamp && Date.now() > parseInt(storedLogoutTimestamp, 10)) {
+      if (currentTime >= parsedLogoutTime) {
         console.log("Session expired. Logging out...");
-        // localStorage.clear();
         dispatch(logout());
         window.location.href = "/";
       }
@@ -77,17 +78,19 @@ useEffect(() => {
 
     checkAutoLogout();
 
-  
-    const interval = setInterval(checkAutoLogout, 5 * 1000); 
-    console.log("Auto logout check started. Interval ID:", interval);
+    const timeoutId = setTimeout(() => {
+      console.log("Timeout reached. Calling checkAutoLogout again...");
+      checkAutoLogout();
+    }, exitTime);
 
-    return () => clearInterval(interval);
-  }
-}, [AccessToken]);
-
+    return () => {
+      clearTimeout(timeoutId);
+      console.log("Cleared logout timeout.");
+    };
+  }, [AccessToken, dispatch]);
   return (
     <>
-   
+   <GlobalLoader/>
         <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 1100 }}>
         <Navbar />
       </Box>

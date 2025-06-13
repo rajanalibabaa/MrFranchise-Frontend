@@ -33,8 +33,8 @@ import { logout } from "../../Redux/Slices/AuthSlice/authSlice";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../../assets/Images/logo.png";
+import { showLoading } from "../../Redux/Slices/loadingSlice";
 // import backgroundPattern from "../../assets/Images/network-pattern.png";
-import FilterDropdowns from "./FilterDropdownsData";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -57,8 +57,9 @@ function Navbar() {
   // Fallback for ID if Redux state is empty (e.g., after refresh)
   const ID =
     localStorage.getItem("brandUUID") ||
-    localStorage.getItem("investorUUID");
-
+    localStorage.getItem("investorUUID") 
+    ;
+ 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -87,6 +88,7 @@ function Navbar() {
     navigate(path);
     dispatch(toggleMenu(false));
     setAnchorEl(null);
+    
   };
 
   const handleLoginSuccess = (userData) => {
@@ -155,15 +157,15 @@ function Navbar() {
   };
 
   // Animation variants
-  const fadeIn = {
-    hidden: { opacity: 0, y: -20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-  };
+  // const fadeIn = {
+  //   hidden: { opacity: 0, y: -20 },
+  //   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  // };
 
-  const pulse = {
-    scale: [1, 1.05, 1],
-    transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-  };
+  // const pulse = {
+  //   scale: [1, 1.05, 1],
+  //   transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+  // };
 
   return (
     <>
@@ -218,7 +220,7 @@ function Navbar() {
             left: 0,
             right: 0,
             height: '4px',
-            background: 'linear-gradient(90deg, #ff9800, #ff5722, #ff9800)',
+            // background: 'linear-gradient(90deg, #ff9800, #ff5722, #ff9800)',
             backgroundSize: '200% 100%',
             animation: 'gradient 3s ease infinite',
           },

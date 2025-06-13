@@ -5,12 +5,14 @@ import {
   Container,
   useMediaQuery,
   useTheme,
+  CircularProgress
 } from "@mui/material";
 import { motion, useAnimation } from "framer-motion";
 import PopupModal from "../../Components/PopUpModal/PopUpModal";
 import FilterDropdowns from "../../Components/Navbar/FilterDropdownsData";
 import { useDispatch } from "react-redux";
 import Footer from "../../Components/Footers/Footer.jsx";
+import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice.jsx";
 // Dynamic Components - Import all your video sections
 const dynamicComponents = {
   TopBrandThreevdocards: React.lazy(() =>
@@ -71,57 +73,46 @@ const pageConfig = {
       component: "TopBrandThreevdocards",
       background: "white",
       backgroundOpacity: 0.1,
-      animationDelay: 0.2,
     },
     {
       component: "TopCafeBrandsFranchise",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-      animationDelay: 0.5,
     },
     {
       component: "TopFoodFranchise",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-      animationDelay: 0.5,
     },
     {
       component: "TopBeverageFranchise",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-      animationDelay: 0.5,
     },
     {
       component: "TopDesertBakeryFranchise",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-      animationDelay: 0.5,
     },
     {
       component: "TopLeadingFranchise",
       background: "white",
       dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-      animationDelay: 0.6,
     },
     {
       component: "TopRestaurantsFranchise",
       background: "white",
       dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-      animationDelay: 0.6,
     },
     {
       component: "FindFranchiseLocations",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-      animationDelay: 0.8,
     },
     {
       component: "ToTrendingBrands",
       title: "Trending Brands",
-      backgroundImage:
-        "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80",
       dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-      animationDelay: 1.0,
     },
   ],
 
@@ -173,14 +164,18 @@ const HomeBannerSec = () => {
     const isReload = navEntries[0]?.type === "reload";
     const popupShown = sessionStorage.getItem("popup-shown");
 
+    dispatch(showLoading  ())
     // dispatch(fetchBrands)
 
-    if (!popupShown || isReload) {
+   setTimeout(() => {
+      if (!popupShown || isReload) {
       setIsPopupOpen(true);
       sessionStorage.setItem("popup-shown", "true");
     }
 
     controls.start("visible");
+    dispatch(hideLoading())
+   }, 1000);
   }, [controls]);
 
   const handlePopupClose = () => setIsPopupOpen(false);
@@ -220,7 +215,7 @@ const HomeBannerSec = () => {
         )}
 
         <Container maxWidth="xl" sx={{ position: "relative", zIndex: 1 }}>
-          <React.Suspense fallback={<div>Loading...</div>}>
+          <React.Suspense fallback={<CircularProgress />}>
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -240,7 +235,11 @@ const HomeBannerSec = () => {
 
   return (
     <>
-      <PopupModal open={isPopupOpen} onClose={handlePopupClose} />
+      {
+        !localStorage.getItem("accessToken") && (
+          <PopupModal open={isPopupOpen} onClose={handlePopupClose} />
+        )
+      }
 
       {/* Hero Banner */}
       <Box
