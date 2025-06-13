@@ -16,17 +16,16 @@ import {
   Stack,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  MonetizationOn,
-  Business,
-  AreaChart,
-  Favorite,
-} from "@mui/icons-material";
+import Favorite from "@mui/icons-material/Favorite";
+import ArrowRight from "@mui/icons-material/ArrowRight";
+import MonetizationOn from "@mui/icons-material/MonetizationOn";
+import Business from "@mui/icons-material/Business";
+import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import {
+  fetchBrands,
   openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
@@ -302,7 +301,7 @@ const BrandCard = React.memo(({
   );
 });
 
-const TopCafeBrands = () => {
+const TopCafeFranchises = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
@@ -318,6 +317,23 @@ const TopCafeBrands = () => {
   const dispatch = useDispatch();
   const { data: brands = [] } = useSelector((state) => state.brands);
 
+  // Filter brands that belong to Beverage Franchise subcategory
+// Filter brands that belong to Beverage Franchise subcategory and all its child categories
+const beverageBrands = useMemo(() => {
+  return brands.filter(brand => {
+    const categories = brand.personalDetails?.brandCategories || [];
+    return categories.some(cat => {
+      // Check if the subcategory is "Beverage Franchises" 
+      // OR if the parent category is "Food & Beverages" and subcategory is related to beverages
+      return (
+        // cat.sub === "Beverage Franchises" 
+        cat.child === "Coffee & Tea Cafes"
+       
+      );
+    });
+  });
+}, [brands]);
+
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
@@ -326,8 +342,8 @@ const TopCafeBrands = () => {
 
   const initializeData = useCallback(() => {
     try {
-      if (!brands || brands.length === 0) {
-        setError("No brands found.");
+      if (!beverageBrands || beverageBrands.length === 0) {
+        setError("No beverage franchises found.");
       } else {
         setError(null);
       }
@@ -337,7 +353,7 @@ const TopCafeBrands = () => {
     } finally {
       setLoading(false);
     }
-  }, [brands]);
+  }, [beverageBrands]);
 
   useEffect(() => {
     initializeData();
@@ -433,7 +449,7 @@ const TopCafeBrands = () => {
             },
           }}
         >
-          Top Cafe Brands
+          Top Cafe Franchises
         </Typography>
 
         <Button
@@ -471,7 +487,7 @@ const TopCafeBrands = () => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {brands.map((brand) => (
+        {beverageBrands.map((brand) => (
           <BrandCard 
             key={brand.uuid}
             brand={brand}
@@ -493,4 +509,4 @@ const TopCafeBrands = () => {
   );
 };
 
-export default React.memo(TopCafeBrands);
+export default React.memo(TopCafeFranchises);
