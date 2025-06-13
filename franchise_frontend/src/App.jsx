@@ -41,6 +41,7 @@ import AdvertiseWithUs from './Components/Footers/QuickLinks/AdvertiseWithUs.jsx
 import ExpandYourBrand from './Components/Footers/QuickLinks/ExpandYourBrand.jsx';
 import InvestFranchise from './Components/Footers/QuickLinks/InvestFranchise.jsx';
 import FranchisePromotion from './Components/Footers/QuickLinks/FranchisePromotion.jsx';
+import Otherindustries from './Components/Footers/QuickLinks/Otherindustries.jsx';
 
 
 function App() {
@@ -98,6 +99,7 @@ function App() {
   {/* <Route path='/franchiseconsulting' element={<FranchiseConsulting/>}/> */}
   <Route path='/investfranchise' element={<InvestFranchise/>}/>
   <Route path='/franchisepromotion' element={<FranchisePromotion/>}/>
+  <Route path = '/otherindustries' element = {<Otherindustries/>}/>
 
   
 </Routes>
