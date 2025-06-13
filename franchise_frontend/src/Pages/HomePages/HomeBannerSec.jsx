@@ -13,6 +13,7 @@ import FilterDropdowns from "../../Components/Navbar/FilterDropdownsData";
 import { useDispatch } from "react-redux";
 import Footer from "../../Components/Footers/Footer.jsx";
 import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice.jsx";
+import { AnimatePresence } from "framer-motion";
 // Dynamic Components - Import all your video sections
 const dynamicComponents = {
   TopBrandThreevdocards: React.lazy(() =>
@@ -46,7 +47,6 @@ const dynamicComponents = {
 
 // Configuration object for the entire page
 const pageConfig = {
-  // Hero Banner ConfigurationF
   heroBanner: {
     backgroundImage:
       "https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
@@ -151,8 +151,168 @@ const pageConfig = {
   },
 };
 
+// Array of banner texts (3 contents)
+const bannerTexts = [
+  {
+    title: {
+      text: "1000+ Food Brands. One Platform. Endless Possibilities",
+      gradient:
+        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+    },
+    subtitle: {
+      text: "Discover a universe of F&B franchise opportunities - from quick service restaurants to gourmet cafes - all under on powerful portal.",
+      highlight: {
+        text: "F&B franchise opportunities",
+        color: "#ff9800",
+        fontWeight: "bold"
+      }
+    }
+  },
+  {
+    title: {
+      text: "Turn Your Investment into a Tasteful Venture",
+      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+    },
+    subtitle: {
+      text: "Explore curated restaurant and cafe franchises with proven models designed for ROI, stability, and low opertational hassle.",
+      highlight: {
+        text: "proven models",
+        color: "#ff9800",
+        fontWeight: "bold"
+      }
+    }
+  },
+  {
+    title: {
+      text: "India's #1 F&B Franchise Marketplace – Your Food Business Starts Here",
+     gradient:
+        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+    },
+    subtitle: {
+      text: "From startup food kiosks to international food chains, we have everything you need to start your food franchise journey.",
+      highlight: {
+        text: "food franchise journey",
+        color: "#ff9800",
+        fontWeight: "bold"
+      }
+    }
+  },
+  {
+    title: {
+      text: "Serve Success Hot - Choose the Right F&B Franchise Today",
+       gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+    },
+    subtitle: {
+      text: "Invest in hot-selling food concepts with hight demand, fast scalability, and support from trusted brands.",
+      highlight: {
+        text: "F&B Franchise",
+        color: "#ff9800",
+        fontWeight: "bold"
+      }
+    }
+  },
+  {
+    title: {
+      text: "From Local Taste to Global Plates - Start Your Food Business Now",
+       gradient:
+        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+    },
+    subtitle: {
+      text: "Franchise options available in street food, bakeries, ice cream parlors, multicusine restaurants, and more.",
+      highlight: {
+        text: "Food Business",
+        color: "#ff9800",
+        fontWeight: "bold"
+      }
+    }
+  },
+  {
+    title: {
+      text: "Low Investment . High Appetite for Growth",
+     gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+    },
+    subtitle: {
+      text: "Start from just ₹5 Lakhs with multiple profitable options in cafes, cloud kitchens, and food trucks.",
+      highlight: {
+        text: "Low Investment",
+        color: "#ff9800",
+        fontWeight: "bold"
+      }
+    }
+  },
+  {
+    title: {
+      text: "Franchise a Restaurant. Own a Café. Lead a Cloud Kitchen",
+       gradient:
+        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+    },
+    subtitle: {
+      text: "Find franchise businesses across every food format to suit your budget, location, and business dream.",
+      highlight: {
+        text: "franchise businesses",
+        color: "#ff9800",
+        fontWeight: "bold"
+      }
+    }
+  },
+  {
+    title: {
+      text: "F&B Franchise Made Easy with MrFranchise.in",
+      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+    },
+    subtitle: {
+      text: "Step-by-step guidance, brand comparisons, and expert consultation to help you confidently invest.",
+      highlight: {
+        text: "consultation",
+        color: "#ff9800",
+        fontWeight: "bold"
+      }
+    }
+  },
+  {
+    title: {
+      text: "No Experience? No Problem! Proven Food Franchise Models Await You",
+      gradient:
+        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+    },
+    subtitle: {
+      text: "Get full training, support, marketing tools, and setup assistance with our zero-hassle franchise options.",
+      highlight: {
+        text: "zero-hassle",
+        color: "#ff9800",
+        fontWeight: "bold"
+      }
+    }
+  },
+  {
+    title: {
+      text: "Your Food Franchise Future Starts at foodandbeverage.mrfranchise.in",
+      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+    },
+    subtitle: {
+      text: "The one-stop portal for serious F&B investors looking to explore, compare, and close franchise deals.",
+      highlight: {
+        text: "franchise deals",
+        color: "#ff9800",
+        fontWeight: "bold"
+      }
+    }
+  },
+];
+
 const HomeBannerSec = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [bannerIndex, setBannerIndex] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -165,20 +325,26 @@ const HomeBannerSec = () => {
     const popupShown = sessionStorage.getItem("popup-shown");
 
     dispatch(showLoading  ())
-    // dispatch(fetchBrands)
-
    setTimeout(() => {
       if (!popupShown || isReload) {
       setIsPopupOpen(true);
       sessionStorage.setItem("popup-shown", "true");
     }
-
     controls.start("visible");
     dispatch(hideLoading())
-   }, 5000);
-  }, [controls]);
+   }, 1000);
+  }, [controls, dispatch]);
+  // Rotate text every 2 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBannerIndex((prev) => (prev + 1) % bannerTexts.length);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
 
   const handlePopupClose = () => setIsPopupOpen(false);
+
 
   // Render a dynamic section component
   const renderSection = (sectionConfig, index) => {
@@ -232,9 +398,12 @@ const HomeBannerSec = () => {
       </Box>
     );
   };
-
+  const currentText = bannerTexts[bannerIndex];
+  const { text, highlight } = currentText.subtitle;
+  const parts = text.split(highlight.text);
   return (
     <>
+ 
       {
         !localStorage.getItem("accessToken") && (
           <PopupModal open={isPopupOpen} onClose={handlePopupClose} />
@@ -288,14 +457,18 @@ const HomeBannerSec = () => {
             position: "relative",
             zIndex: 2,
             textAlign: isMobile ? "center" : "left",
+            
           }}
         >
+          <AnimatePresence mode="wait">
           <motion.div
-            initial="hidden"
-            animate={controls}
-            // variants={pageConfig.animations.banner}
-          >
-            <motion.div variants={pageConfig.animations.item}>
+           key={bannerIndex}
+    initial={{ opacity: 0, x: 80 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -80 }}
+    transition={{ duration: 0.6, type: "spring", bounce: 0.2 }}
+  >
+            {/* <motion.div variants={pageConfig.animations.item}> */}
               <Typography
                 component="div"
                 sx={{
@@ -305,10 +478,10 @@ const HomeBannerSec = () => {
                   mb: 1,
                   lineHeight: 1.2,
                   fontSize: isMobile
-                    ? pageConfig.heroBanner.title.fontSize.mobile
+                    ? currentText.title.fontSize.mobile
                     : isTablet
-                    ? pageConfig.heroBanner.title.fontSize.tablet
-                    : pageConfig.heroBanner.title.fontSize.desktop,
+                    ? currentText.fontSize.tablet
+                    : currentText.title.fontSize.desktop,
                 }}
               >
                 <Box
@@ -322,12 +495,12 @@ const HomeBannerSec = () => {
                     px: 1,
                   }}
                 >
-                  {pageConfig.heroBanner.title.text}
+                  {currentText.title.text}
                 </Box>
                 <Box
                   component="span"
                   sx={{
-                    background: pageConfig.heroBanner.title.gradient,
+                    background: currentText.title.gradient,
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     display: "inline",
@@ -359,27 +532,31 @@ const HomeBannerSec = () => {
                 // animate={pageConfig.animations.pulse}
               >
                 {
-                  pageConfig.heroBanner.subtitle.text.split(
-                    pageConfig.heroBanner.subtitle.highlight.text
+                  currentText.subtitle.text.split(
+                    currentText.subtitle.highlight.text
                   )[0]
                 }
                 <Typography
                   variant="outlined"
                   sx={{
                     fontWeight:
-                      pageConfig.heroBanner.subtitle.highlight.fontWeight,
-                    color: pageConfig.heroBanner.subtitle.highlight.color,
+                      currentText.subtitle.highlight.fontWeight,
+                    color: currentText.subtitle.highlight.color,
+                    display: "inline",
                   }}
+                  component="span"
                 >
-                  {pageConfig.heroBanner.subtitle.highlight.text}
+                  {currentText.subtitle.highlight.text}
                 </Typography>
                 {
-                  pageConfig.heroBanner.subtitle.text.split(
-                    pageConfig.heroBanner.subtitle.highlight.text
+                  currentText.subtitle.text.split(
+                  currentText.subtitle.highlight.text
                   )[1]
                 }
               </Typography>
             </motion.div>
+             </AnimatePresence> 
+             {/* </motion.div> */}
 
             <motion.div
               variants={pageConfig.animations.item}
@@ -392,7 +569,8 @@ const HomeBannerSec = () => {
             >
               <FilterDropdowns />
             </motion.div>
-          </motion.div>
+         
+         
         </Container>
       </Box>
 
