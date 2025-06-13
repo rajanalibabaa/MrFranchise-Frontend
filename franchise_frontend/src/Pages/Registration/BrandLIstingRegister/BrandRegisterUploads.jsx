@@ -389,7 +389,7 @@ const Uploads = ({
         
         <Grid container spacing={2} display={'flex'} flexDirection={'column'}>
           {/* Brand Promotion Videos */}
-          <Grid item xs={12} sm={6}>
+          {/* <Grid item xs={12} sm={6}>
             <FileUploadCard sx={{ 
               backgroundColor: '#fafafa',
               border: '2px dashed #e0e0e0',
@@ -478,7 +478,7 @@ const Uploads = ({
                 </Box>
               )}
             </FileUploadCard>
-          </Grid>
+          </Grid> */}
           
           {/* Franchise Promotion Videos */}
           <Grid item xs={12} sm={6}>
@@ -507,12 +507,13 @@ const Uploads = ({
                   onChange={handleFileChange("franchisePromotionVideo", {
                     maxFiles: 1,
                     allowedTypes: ["video/mp4", "video/quicktime"],
-                    maxSize: 100 * 1024 * 1024,
+                    // maxSize: 100 * 1024 * 1024,
+                    maxSize: 40 * 1024 * 1024,
                   })}
                 />
               </Button>
               <Typography variant="caption" color="textSecondary" display="block">
-                MP4, MOV (Max 100MB)
+                MP4, MOV (Max 40MB)
               </Typography>
               
               {safeData.franchisePromotionVideo?.length > 0 && (
@@ -641,12 +642,12 @@ const Uploads = ({
                   onChange={handleFileChange("pancard", {
                     maxFiles: 1,
                     allowedTypes: ["application/pdf", "image/jpeg", "image/png"],
-                    maxSize: 5,
+                    maxSize: 1 * 1024 * 1024,
                   })}
                 />
               </Button>
               <Typography variant="caption" color="textSecondary" display="block">
-                PDF, JPG, PNG (Max 5MB)
+                PDF, JPG, PNG (Max 1MB)
               </Typography>
               
               {safeData.pancard?.length > 0 && (
@@ -722,12 +723,12 @@ const Uploads = ({
                   onChange={handleFileChange("gstCertificate", {
                     maxFiles: 1,
                     allowedTypes: ["application/pdf", "image/jpeg", "image/png"],
-                    maxSize: 10 * 1024 * 1024,
+                    maxSize: 1 * 1024 * 1024,
                   })}
                 />
               </Button>
               <Typography variant="caption" color="textSecondary" display="block">
-                PDF, JPG, PNG (Max 10MB)
+                PDF, JPG, PNG (Max 1MB)
               </Typography>
               
               {safeData.gstCertificate?.length > 0 && (
@@ -809,14 +810,14 @@ const Uploads = ({
                   accept="image/jpeg,image/png"
                   multiple
                   onChange={handleFileChange("exteriorOutlet", {
-                    maxFiles: 10,
+                    maxFiles: 5,
                     allowedTypes: ["image/jpeg", "image/png"],
-                    maxSize: 10 * 1024 * 1024,
+                    maxSize: 3 * 1024 * 1024,
                   })}
                 />
               </Button>
               <Typography variant="caption" color="textSecondary" display="block">
-                JPG, PNG (Max 10MB each)
+                JPG, PNG (Max 3MB )
               </Typography>
               
               {safeData.exteriorOutlet?.length > 0 && (
@@ -917,14 +918,14 @@ const Uploads = ({
                   accept="image/jpeg,image/png"
                   multiple
                   onChange={handleFileChange("interiorOutlet", {
-                    maxFiles: 10,
+                    maxFiles: 5,
                     allowedTypes: ["image/jpeg", "image/png"],
-                    maxSize: 10 * 1024 * 1024,
+                    maxSize: 3 * 1024 * 1024,
                   })}
                 />
               </Button>
               <Typography variant="caption" color="textSecondary" display="block">
-                JPG, PNG (Max 10MB each)
+                JPG, PNG (Max 3MB )
               </Typography>
               
               {safeData.interiorOutlet?.length > 0 && (
