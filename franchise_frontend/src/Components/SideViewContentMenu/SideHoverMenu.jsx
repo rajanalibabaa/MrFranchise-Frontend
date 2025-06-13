@@ -793,52 +793,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
         </Box>
 
         {/* Brand Details Dialog */}
-        <Dialog
-          open={openDialog}
-          onClose={() => dispatch(closeBrandDialog())}
-          maxWidth="md"
-          fullWidth
-          PaperProps={{
-            sx: {
-              borderRadius: 3,
-              overflow: "hidden",
-              background: "linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%)",
-            },
-          }}
-          TransitionComponent={Slide}
-          transitionDuration={300}
-        >
-          <DialogTitle
-            sx={{
-              background: "linear-gradient(to right, #6a11cb 0%, #2575fc 100%)",
-              color: "white",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              py: 2,
-              px: 3,
-            }}
-          >
-            <Typography variant="h6" fontWeight="bold">
-              {selectedBrand?.personalDetails?.brandName || "Brand Details"}
-            </Typography>
-            <IconButton
-              aria-label="close"
-              onClick={() => dispatch(closeBrandDialog())}
-              sx={{ color: "white" }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent dividers sx={{ p: 3 }}>
-            {selectedBrand && (
-              <Box>
-                {/* Add your brand details content here */}
-                <Typography>Brand details will be shown here</Typography>
-              </Box>
-            )}
-          </DialogContent>
-        </Dialog>
+      
       </Box>
     </Drawer>
   );

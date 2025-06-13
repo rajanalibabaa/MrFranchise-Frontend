@@ -145,7 +145,7 @@ const FilterPanel = ({
           background: "#f1f1f1",
         },
         "&::-webkit-scrollbar-thumb": {
-          background: "#ff9800",
+          background: "lightgrey",
           borderRadius: "3px",
         },
         "&::-webkit-scrollbar-thumb:hover": {
