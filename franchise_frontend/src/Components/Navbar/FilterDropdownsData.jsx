@@ -13,6 +13,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setFilters,fetchBrands } from "../../Redux/Slices/brandSlice";
+import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice";
 
 const investmentRangeOptions = [
   { label: "All Ranges", value: "" },
@@ -46,9 +47,13 @@ dispatch(fetchBrands());
   };
 
   const handleFindBrands = () => {
+    dispatch(showLoading());
     navigate("/brandviewpage", {
       state: { filters }, // Pass current filters to the next page
     });
+setTimeout(() => {
+  dispatch(hideLoading());
+}, 2000);
   };
 
   return (
