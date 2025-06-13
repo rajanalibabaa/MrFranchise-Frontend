@@ -39,7 +39,7 @@ import img from "../../assets/images/brandLogo.jpg";
 const Dashboard = ({ selectedSection, sectionContent }) => {
   const dispatch = useDispatch();
   const [tabValue, setTabValue] = useState(0);
-  const [investorInfo, setInvestorInfo] = useState(null);
+  // const [investorInfo, setInvestorInfo] = useState(null);
   const [viewedBrands, setViewedBrands] = useState([]);
   const [likedBrands, setLikedBrands] = useState([]);
   const [appliedBrands, setAppliedBrands] = useState([]);
@@ -66,25 +66,25 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
         
         // Parallel API calls
         const [likedRes, viewedRes, appliedRes, userRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/v1/like/get-favbrands/${investorUUID}`, {
+          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/like/get-favbrands/${investorUUID}`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${AccessToken}`,
             },
           }),
-          axios.get(`http://localhost:5000/api/v1/view/getAllViewBrandByID/${investorUUID}`, {
+          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/view/getAllViewBrandByID/${investorUUID}`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${AccessToken}`,
             },
           }),
-          axios.get(`http://localhost:5000/api/v1/instantapply/getInstaApplyById/${investorUUID}`, {
+          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/getInstaApplyById/${investorUUID}`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${AccessToken}`,
             },
           }),
-          axios.get(`http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`, {
+          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${AccessToken}`,
@@ -134,7 +134,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       setStats(prev => ({ ...prev, totalLikes: prev.totalLikes - 1 }));
 
       await axios.delete(
-        `http://localhost:5000/api/v1/like/delete-favbrand/${investorUUID}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -160,7 +160,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       setStats(prev => ({ ...prev, totalViews: prev.totalViews - 1 }));
 
       await axios.delete(
-        `http://localhost:5000/api/v1/view/deleteViewBrandByID/${investorUUID}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/view/deleteViewBrandByID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",

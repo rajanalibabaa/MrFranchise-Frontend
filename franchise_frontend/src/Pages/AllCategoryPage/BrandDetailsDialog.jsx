@@ -121,7 +121,7 @@ const BrandDetailsDialog = () => {
       console.log(id, token);
 
       const response = await axios.post(
-        `http://localhost:5000/api/v1/instantapply/postApplication/${id}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication/${id}`,
         payload,
         {
           headers: {

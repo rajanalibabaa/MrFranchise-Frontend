@@ -25,7 +25,7 @@ export const toggleLikeBrand = createAsyncThunk(
         // Like the brand - POST request
         await axios.post(
           "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
-          // "http://localhost:5000/api/api/v1/like/post-favbrands",
+          // "https://franchise-backend-wgp6.onrender.com/api/api/v1/like/post-favbrands",
           { branduuid: brandId },
           config
         );
@@ -34,7 +34,7 @@ export const toggleLikeBrand = createAsyncThunk(
         // Unlike the brand - DELETE request
         const res = await axios.delete(
           `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${id}`,
-          // `http://localhost:5000/api/api/v1/like/delete-favbrand/${id}`,
+          // `https://franchise-backend-wgp6.onrender.com/api/api/v1/like/delete-favbrand/${id}`,
 
           {
             headers: {
@@ -95,7 +95,9 @@ export const fetchBrands = createAsyncThunk(
       if (token) {
         response = await Likeshow();
       }
-      console.log(" ===== ", response);
+
+    console.log("arvindApi",response.data.data)
+
       return response.data.data;
     } catch (err) {
       return rejectWithValue(err.message || "Failed to fetch brands");
