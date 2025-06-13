@@ -175,7 +175,7 @@ const HomeBannerSec = () => {
 
     controls.start("visible");
     dispatch(hideLoading())
-   }, 1000);
+   }, 5000);
   }, [controls]);
 
   const handlePopupClose = () => setIsPopupOpen(false);
