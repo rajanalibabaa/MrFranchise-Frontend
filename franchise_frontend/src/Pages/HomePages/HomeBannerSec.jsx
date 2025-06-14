@@ -14,6 +14,7 @@ import { useDispatch } from "react-redux";
 import Footer from "../../Components/Footers/Footer.jsx";
 import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice.jsx";
 import { AnimatePresence } from "framer-motion";
+
 // Dynamic Components - Import all your video sections
 const dynamicComponents = {
   TopBrandThreevdocards: React.lazy(() =>
@@ -44,6 +45,9 @@ const dynamicComponents = {
     import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
   ), //last video section
 };
+
+
+
 
 // Configuration object for the entire page
 const pageConfig = {
@@ -248,7 +252,7 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "Franchise a Restaurant. Own a Café. Lead a Cloud Kitchen",
+      text: "Franchise a Restaurant. Own a Cafe. Lead a Cloud Kitchen",
        gradient:
         "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
@@ -311,14 +315,13 @@ const bannerTexts = [
 ];
 
 const HomeBannerSec = () => {
+  const theme = useTheme();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
-  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const controls = useAnimation();
   const dispatch = useDispatch();
-
   useEffect(() => {
     const navEntries = performance.getEntriesByType("navigation");
     const isReload = navEntries[0]?.type === "reload";
@@ -399,7 +402,7 @@ const HomeBannerSec = () => {
     );
   };
   const currentText = bannerTexts[bannerIndex];
-  const { text, highlight } = currentText.subtitle;
+  // const { text, highlight } = currentText.subtitle;
   return (
     <>
  
@@ -411,7 +414,7 @@ const HomeBannerSec = () => {
 
       {/* Hero Banner */}
       <Box
-        mt={10}
+        mt={9}
         maxWidth={"xl"}
         sx={{
           background: `linear-gradient(${pageConfig.heroBanner.overlayColor}), url(${pageConfig.heroBanner.backgroundImage})`,
@@ -476,11 +479,7 @@ const HomeBannerSec = () => {
                   color: "white",
                   mb: 1,
                   lineHeight: 1.2,
-                  fontSize: isMobile
-                    ? currentText.title.fontSize.mobile
-                    : isTablet
-                    ? currentText.fontSize.tablet
-                    : currentText.title.fontSize.desktop,
+                  fontSize: isMobile ? "2rem" : "3rem",
                 }}
               >
                 <Box
@@ -496,7 +495,7 @@ const HomeBannerSec = () => {
                 >
                   {currentText.title.text}
                 </Box>
-                <Box
+                {/* <Box
                   component="span"
                   sx={{
                     background: currentText.title.gradient,
@@ -509,7 +508,7 @@ const HomeBannerSec = () => {
                 >
                   <br />
                   Food & Beverage
-                </Box>
+                </Box> */}
               </Typography>
             </motion.div>
 

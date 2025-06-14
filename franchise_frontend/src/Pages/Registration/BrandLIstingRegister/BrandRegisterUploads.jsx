@@ -647,7 +647,7 @@ const Uploads = ({
                 />
               </Button>
               <Typography variant="caption" color="textSecondary" display="block">
-                PDF, JPG, PNG (Max 1MB)
+                 JPG, PNG (Max 1MB)
               </Typography>
               
               {safeData.pancard?.length > 0 && (
@@ -728,7 +728,7 @@ const Uploads = ({
                 />
               </Button>
               <Typography variant="caption" color="textSecondary" display="block">
-                PDF, JPG, PNG (Max 1MB)
+                JPG, PNG (Max 1MB)
               </Typography>
               
               {safeData.gstCertificate?.length > 0 && (
