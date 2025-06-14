@@ -476,11 +476,11 @@ const HomeBannerSec = () => {
                   color: "white",
                   mb: 1,
                   lineHeight: 1.2,
-                  fontSize: isMobile
-                    ? currentText.title.fontSize.mobile
-                    : isTablet
-                    ? currentText.fontSize.tablet
-                    : currentText.title.fontSize.desktop,
+                  // fontSize: isMobile
+                  //   ? currentText.title.fontSize.mobile
+                  //   : isTablet
+                  //   ? currentText.fontSize.tablet
+                  //   : currentText.title.fontSize.desktop,
                 }}
               >
                 <Box
