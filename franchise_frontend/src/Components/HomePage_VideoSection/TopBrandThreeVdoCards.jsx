@@ -58,6 +58,7 @@ function TopBrandVdoCards() {
       width: isMobile ? "100%" : isTablet ? "100%" : "68%",
       height: isMobile ? 420 : isTablet ? 480 : 550,
       videoHeight: isMobile ? 250 : isTablet ? 300 : 450,
+      
     },
     side: {
       width: isMobile ? "100%" : isTablet ? "100%" : "30%",
@@ -557,7 +558,7 @@ function TopBrandVdoCards() {
             display: "flex",
             flexDirection: "column",
             gap: isMobile ? 3 : isTablet ? 3 : 4,
-            minWidth: isMobile ? "100%" : "30%",
+            minWidth: isMobile ? "100%" : "32%",
           }}
         >
           {nextBrands.map((brand, i) => (
@@ -675,17 +676,21 @@ function TopBrandVdoCards() {
                           }
                         >
                           <Typography
-                            variant="h6"
-                            color="#7ad03a"
-                            fontWeight="bold"
-                            noWrap
-                            sx={{
-                              flex: 1,
-                              minWidth: 0,
-                            }}
-                          >
-                            {brand.personalDetails?.brandName || brand.title}
-                          </Typography>
+  variant="h6"
+  color="#7ad03a"
+  fontWeight="bold"
+  noWrap={false}
+  sx={{
+    flex: 1,
+    minWidth: 0,
+    whiteSpace: 'normal',     // allow wrapping
+    wordBreak: 'break-word',  // break long words if needed
+    overflowWrap: 'break-word', // wraps at word boundaries
+  }}
+>
+  {brand.personalDetails?.brandName || brand.title}
+</Typography>
+
                         </Tooltip>
                         <IconButton
                           size="small"
