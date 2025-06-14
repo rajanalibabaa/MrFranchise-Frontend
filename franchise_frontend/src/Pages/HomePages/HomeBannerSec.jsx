@@ -161,7 +161,7 @@ const bannerTexts = [
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
     },
     subtitle: {
-      text: "Discover a universe of F&B franchise opportunities - from quick service restaurants to gourmet cafes - all under on powerful portal.",
+          text: "Discover a universe of F&B franchise opportunities - from quick service restaurants to gourmet cafes - all under on powerful portal.",
       highlight: {
         text: "F&B franchise opportunities",
         color: "#ff9800",

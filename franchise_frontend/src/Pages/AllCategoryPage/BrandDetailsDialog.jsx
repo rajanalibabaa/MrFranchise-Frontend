@@ -574,24 +574,22 @@ const BrandDetailsDialog = () => {
         <Typography variant="subtitle1" m={1}>
           {selectedBrand.personalDetails?.brandCategories &&
             selectedBrand.personalDetails.brandCategories.length > 0 && (
-              <Box>
+              <Box >
                 {selectedBrand.personalDetails.brandCategories.map(
                   (category, index) => (
                     <Box
                       key={index}
-                      display={"flex"}
-                      justifyContent={"space-around"}
-                      gap={1}
+                     
                     >
-                      <Typography variant="body2" m={1}>
-                       <label style={{ fontWeight: "bold" }}>Category:{" "}</label> 
+                      <Box display={"flex"} gap={30}><Typography variant="body2" m={1}>
+                       <label style={{ fontWeight: "bold" }}>Category:{"  "}</label> 
                         <label >
                           {category.child}
                         </label>
                       </Typography>
                       <Typography variant="body2" m={1}
                       >
-                      <label style={{ fontWeight: "bold" }}>Investment :</label>  
+                      <label style={{ fontWeight: "bold" }}>Investment : </label>  
                         <label >
                           {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
                             (model) => model.investmentRange
@@ -599,19 +597,21 @@ const BrandDetailsDialog = () => {
                         </label>
                       </Typography>
                       <Typography variant="body2" m={1} >
-                      <label style={{ fontWeight: "bold" }}>Area:</label>  
+                      <label style={{ fontWeight: "bold" }}>Area: </label>  
                         <label >
                           {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
                             (model) => model.areaRequired
-                          )}
+                          )} sq.ft
                         </label>
-                      </Typography>
+                      </Typography></Box>
+                      <Box></Box>
+                      
                       {selectedBrand.personalDetails?.expansionLocation?.length > 0 && (
             <Typography  variant="body2" m={1}>
                       <label style={{ fontWeight: "bold" }}>Expansions:</label>  
               <label >
                 {selectedBrand.personalDetails.expansionLocation.map(
-                  (location) => `${location.city}`
+                  (location) => `  ${location.city},  `
                 )}
               </label>
             </Typography>

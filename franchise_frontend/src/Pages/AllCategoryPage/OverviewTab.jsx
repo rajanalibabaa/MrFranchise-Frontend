@@ -13,7 +13,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   TextField,
   MenuItem,
   CircularProgress,
@@ -36,7 +35,6 @@ const OverviewTab = ({ brand }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const formRef = useRef(null);
   const [selectedModel, setSelectedModel] = useState(null);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -226,29 +224,7 @@ const OverviewTab = ({ brand }) => {
   const toArray = (val) => (Array.isArray(val) ? val : val ? [val] : []);
 
   const sections = [
-    {
-      title: "Brand Overview",
-      icon: <DescriptionIcon sx={{ color: "#ff9800" }} />,
-      items: [
-        { label: "Brand Name", value: brand.personalDetails?.brandName },
-        {
-          label: "Description",
-          value: brand.personalDetails?.brandDescription,
-        },
-        {
-          label: "Categories",
-          value: brand.personalDetails?.brandCategories?.map(
-            (categories, index) => (
-              <Box key={index} display={"flex"} flexDirection="row" gap={1}>
-                <Typography variant="body2">
-                  {categories.main || "Not specified"} & {categories.child || "Not specified"} & {categories.sub || "Not specified"}
-                </Typography>
-              </Box>
-            )
-          ),
-        },
-      ],
-    },
+   
     {
       title: "Franchise Models",
       icon: <AccountTree sx={{ color: "#ff9800" }} />,
@@ -308,9 +284,11 @@ const OverviewTab = ({ brand }) => {
                               : "inherit",
                         }}
                       >
-                        <TableCell>
-                          {model.franchiseModel || "Not specified"}
-                        </TableCell>
+<TableCell>
+  {(model.franchiseModel?.split(" ")[0] || "Not specified")}
+</TableCell>
+
+
                         <TableCell>
                           {model.franchiseType || "Not specified"}
                         </TableCell>
@@ -697,21 +675,6 @@ const OverviewTab = ({ brand }) => {
       ),
     },
     {
-      title: "Company Details",
-      icon: <Business sx={{ color: "#ff9800" }} />,
-      items: [
-        { label: "Company Name", value: brand.personalDetails?.companyName },
-        {
-          label: "Established Year",
-          value: brand.personalDetails?.establishedYear,
-        },
-        {
-          label: "Franchising Since",
-          value: brand.personalDetails?.franchiseSinceYear,
-        },
-      ],
-    },
-    {
       title: "Franchise Details",
       icon: <AttachMoney sx={{ color: "#ff9800" }} />,
       content: (
@@ -758,12 +721,16 @@ const OverviewTab = ({ brand }) => {
       icon: <Support sx={{ color: "#ff9800" }} />,
       items: [
         {
-          label: "Training Provided By",
+          label: "Staff Training",
           value: brand.franchiseDetails?.trainingProvidedBy,
         },
         {
-          label: "Requirement Support",
+          label: "Staff Requirement ",
           value: brand.franchiseDetails?.requirementSupport,
+        },
+        {
+          label: "Support",
+          value: brand.franchiseDetails?.supportProvidedBy,
         },
         // {
         //   label: "Expansion Locations",
@@ -777,6 +744,39 @@ const OverviewTab = ({ brand }) => {
         //     )
         //   ),
         // },
+      ],
+    },
+     {
+      title: "Brand Overview",
+      icon: <DescriptionIcon sx={{ color: "#ff9800" }} />,
+      items: [
+        // { label: "Brand Name", value: brand.personalDetails?.brandName },
+        
+        {
+          label: "Categories",
+          value: brand.personalDetails?.brandCategories?.map(
+            (categories, index) => (
+              <Box key={index} display={"flex"} flexDirection="row" gap={1}>
+                <Typography variant="body2">
+                  {categories.main || "Not specified"} / {categories.child || "Not specified"} / {categories.sub || "Not specified"}
+                </Typography>
+              </Box>
+            )
+          ),
+        },
+        //  { label: "Company Name", value: brand.personalDetails?.companyName },
+        {
+          label: "Established Year",
+          value: brand.personalDetails?.establishedYear,
+        },
+        {
+          label: "Franchising Since",
+          value: brand.personalDetails?.franchiseSinceYear,
+        },
+        {
+          label: "Description",
+          value: brand.personalDetails?.brandDescription,
+        },
       ],
     },
   ];
