@@ -400,7 +400,6 @@ const HomeBannerSec = () => {
   };
   const currentText = bannerTexts[bannerIndex];
   const { text, highlight } = currentText.subtitle;
-  const parts = text.split(highlight.text);
   return (
     <>
  

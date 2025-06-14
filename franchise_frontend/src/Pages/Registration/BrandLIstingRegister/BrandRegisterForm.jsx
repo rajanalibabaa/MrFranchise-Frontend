@@ -160,7 +160,7 @@ const initialFormData = {
   },
   uploads: {
     franchisePromotionVideo: [],
-    brandPromotionVideo: [],
+    // brandPromotionVideo: [],
     pancard: [],
     gstCertificate: [],
     brandLogo: [],
