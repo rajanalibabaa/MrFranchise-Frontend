@@ -51,8 +51,9 @@ function BrandList() {
 
   const initialFilters = location.state?.filters || {};
 
-   const id = localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID")
-   const token = localStorage.getItem("accessToken")
+  const id =
+    localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID");
+  const token = localStorage.getItem("accessToken");
 
   const {
     data: brands = [],
@@ -70,7 +71,22 @@ function BrandList() {
     selectedBrand,
   } = useSelector((state) => state.brands);
 
-  console.log("filteredData :", filteredBrands);
+  // console.log("filteredData :", filteredBrands);
+
+  //   let filter = [ ]
+
+  //   if(filteredBrands.length <= 100){
+  //     for(i=filteredBrands.length; ){
+  //     }
+  //   }else {
+  //       f
+  //   }
+
+  const extendedBrands = Array(9)
+    .fill()
+    .flatMap(() => [...filteredBrands]);
+
+  console.log(extendedBrands.length);
 
   // Add these for back to top button
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -131,9 +147,9 @@ function BrandList() {
     }
   }, [dispatch]);
 
-  const handleOpenBrand = async(brand) => {
-    console.log(brand.uuid)
-    dispatch(viewApi(brand.uuid))
+  const handleOpenBrand = async (brand) => {
+    console.log(brand.uuid);
+    dispatch(viewApi(brand.uuid));
     dispatch(openBrandDialog(brand));
   };
 
@@ -154,25 +170,24 @@ function BrandList() {
 
   const toggleLike = async (brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");
-    console.log("TOKEN:",token)
-    if (!token ) {
+    console.log("TOKEN:", token);
+    if (!token) {
       setShowLogin(true);
       return;
     }
-    console.log("isliked === :",isLiked)
-    console.log("brandId :",brandId)
+    console.log("isliked === :", isLiked);
+    console.log("brandId :", brandId);
     try {
       await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
       // Optionally show success message
     } catch (error) {
       console.error("Like operation failed:", error);
-
     }
   };
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 2, mb: 6 ,}}>
+    <Container maxWidth="xl" sx={{ mt: 3, mb: 6 }}>
       <Box sx={{ position: "fixed", right: 20, zIndex: 1000 }}>
         <Badge badgeContent={selectedForComparison.length} color="primary">
           <Button
@@ -284,7 +299,6 @@ function BrandList() {
             width: { md: 280 },
             flexShrink: 0,
             display: { xs: "none", md: "block" },
-            
           }}
         >
           <FilterPanel
@@ -335,14 +349,18 @@ function BrandList() {
         </Box>
 
         {/* Main Content */}
-        <Box display="flex" flexDirection={{ xs: "column", md: "column" }} gap={3}>
+        <Box
+          display="flex"
+          flexDirection={{ xs: "column", md: "column" }}
+          gap={3}
+        >
           {loading ? (
             <Box
               sx={{
-        width: { md: 300 },
-        flexShrink: 0,
-        display: { xs: "none", md: "block" },
-      }}
+                width: { md: 300 },
+                flexShrink: 0,
+                display: { xs: "none", md: "block" },
+              }}
             >
               <CircularProgress
                 size={60}
@@ -404,8 +422,15 @@ function BrandList() {
               </Typography>
 
               <Grid container spacing={3}>
-                {filteredBrands.map((brand) => (
-                  <Grid item xs={12} sm={6} md={4} lg={3} key={brand.uuid}>
+                {extendedBrands.map((brand, index) => (
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    lg={3}
+                    key={`${brand.uuid}-${index}`}
+                  >
                     <BrandCard
                       brand={brand}
                       handleOpenBrand={handleOpenBrand}

@@ -5,6 +5,7 @@ import InvestorRegister from './Pages/Registration/InvestorsRegister';
 import LoginPage from "./Pages/LoginPage/LoginPage";
 
 import "./App.css";
+// import Nprogress from 'nprogress';
 import HomeBannerSec from "./Pages/HomePages/HomeBannerSec";
 import RegisterHandleUser from "./Pages/Registration/RegisterHandlePage";
 // import BrandListingFormPage from './Pages/BrandListingForm/BrandListingFormPage';
@@ -44,14 +45,15 @@ import FranchisePromotion from './Components/Footers/QuickLinks/FranchisePromoti
 import { logout } from './Redux/Slices/AuthSlice/authSlice.jsx';
 
 import Navbar from "./Components/Navbar/NavBar.jsx";
-import Footer from "./Components/Footers/Footer.jsx";
 import { Box } from "@mui/material";
 import Otherindustries from "./Components/Footers/QuickLinks/Otherindustries.jsx";
+import GlobalLoader from './Components/GLobalLoader.jsx';
 
 function App() {
   const dispatch = useDispatch();
   const AccessToken = localStorage.getItem("accessToken");
   // console.log("Access Token:", AccessToken);
+
 
   useEffect(() => {
     const logoutTimestamp = localStorage.getItem("logoutTimestamp");
@@ -89,7 +91,7 @@ function App() {
   }, [AccessToken, dispatch]);
   return (
     <>
-   
+   <GlobalLoader/>
         <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 1100 }}>
         <Navbar />
       </Box>

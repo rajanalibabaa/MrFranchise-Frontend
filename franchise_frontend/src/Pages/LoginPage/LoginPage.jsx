@@ -20,6 +20,7 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setUUIDandTOKEN, logout } from "../../Redux/Slices/AuthSlice/authSlice";
 import CloseIcon from "@mui/icons-material/Close";
+import { showLoading } from "../../Redux/Slices/loadingSlice";
 
 function LoginPage({ open, onClose }) {
   const navigate = useNavigate();
@@ -83,8 +84,9 @@ function LoginPage({ open, onClose }) {
   }, [formData.username]);
 
   const handleOtpRequest = useCallback(async () => {
+
     if (!validateForm()) return;
-    setIsLoading(true);
+     setIsLoading(true);
     try {
       const response = await axios.post(
         "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",

@@ -30,6 +30,8 @@ const BrandCard = ({
 }) => {
 const [isProcessingLike, setIsProcessingLike] = useState({});
 
+// console.log("brand",brand.length)
+
 const handleLikeClick = async (brandId, isLiked) => {
   if (isProcessingLike[brandId]) return;
   

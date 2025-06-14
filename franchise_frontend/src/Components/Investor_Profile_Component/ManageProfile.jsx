@@ -151,7 +151,7 @@ const ManageProfile = () => {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otp/verifyExistingEmailOTP",
+        "http://51.20.81.150:5000/api/v1/otp/verifyExistingEmailOTP",
         {
           email: investorData.email,
           verifyOTP: otp
@@ -208,7 +208,7 @@ const ManageProfile = () => {
 
     try {
       await axios.patch(
-       ` https://franchise-backend-wgp6.onrender.com/api/v1/investor/updateInvestor/${investorUUID}`,
+       ` http://51.20.81.150:5000/api/v1/investor/updateInvestor/${investorUUID}`,
         dataToUpdate,
         {
           headers: {
@@ -397,32 +397,161 @@ const ManageProfile = () => {
 
   // Render preferences
   const renderPreferences = () => (
-    <Box mb={2}>
-      <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-        Preferences
-      </Typography>
-      {Array.isArray(investorData.preferences) && investorData.preferences.length > 0 ? (
-        <List>
-          {investorData.preferences.map((pref, idx) => (
-            <ListItem key={idx} divider>
-              <ListItemText
-                primary={
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2"><b>Category:</b> {pref.category}</Typography>
-                    <Typography variant="body2"><b>Investment:</b> {pref.investmentRange} - {pref.investmentAmount}</Typography>
-                    <Typography variant="body2"><b>Location:</b> {pref.preferredState} / {pref.preferredDistrict} / {pref.preferredCity}</Typography>
-                    <Typography variant="body2"><b>Property:</b> {pref.propertyType}{pref.propertyType === "Own Property" ? ` (${pref.propertySize})` : ""}</Typography>
-                  </Stack>
-                }
-              />
-            </ListItem>
-          ))}
-        </List>
-      ) : (
-        <Typography variant="body2" color="text.secondary">No preferences added yet.</Typography>
-      )}
-    </Box>
-  );
+  <Box mb={2}>
+    <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+      Preferences
+    </Typography>
+    {Array.isArray(investorData.preferences) && investorData.preferences.length > 0 ? (
+      <List>
+        {investorData.preferences.map((pref, idx) => (
+          <ListItem key={idx} divider>
+            <Stack spacing={1} sx={{ width: "100%" }}>
+              {/* Category */}
+              <Typography variant="body2" fontWeight={600}>Category</Typography>
+              {editMode ? (
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={pref.category}
+                  onChange={e => {
+                    const updated = [...investorData.preferences];
+                    updated[idx].category = e.target.value;
+                    setInvestorData({ ...investorData, preferences: updated });
+                  }}
+                />
+              ) : (
+                <Typography variant="body2">{pref.category}</Typography>
+              )}
+
+              {/* Investment Range */}
+              <Typography variant="body2" fontWeight={600}>Investment Range</Typography>
+              {editMode ? (
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={pref.investmentRange}
+                  onChange={e => {
+                    const updated = [...investorData.preferences];
+                    updated[idx].investmentRange = e.target.value;
+                    setInvestorData({ ...investorData, preferences: updated });
+                  }}
+                />
+              ) : (
+                <Typography variant="body2">{pref.investmentRange}</Typography>
+              )}
+
+              {/* Investment Amount */}
+              <Typography variant="body2" fontWeight={600}>Investment Amount</Typography>
+              {editMode ? (
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={pref.investmentAmount}
+                  onChange={e => {
+                    const updated = [...investorData.preferences];
+                    updated[idx].investmentAmount = e.target.value;
+                    setInvestorData({ ...investorData, preferences: updated });
+                  }}
+                />
+              ) : (
+                <Typography variant="body2">{pref.investmentAmount}</Typography>
+              )}
+
+              {/* Location */}
+              <Typography variant="body2" fontWeight={600}>Preferred State</Typography>
+              {editMode ? (
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={pref.preferredState}
+                  onChange={e => {
+                    const updated = [...investorData.preferences];
+                    updated[idx].preferredState = e.target.value;
+                    setInvestorData({ ...investorData, preferences: updated });
+                  }}
+                />
+              ) : (
+                <Typography variant="body2">{pref.preferredState}</Typography>
+              )}
+
+              <Typography variant="body2" fontWeight={600}>Preferred District</Typography>
+              {editMode ? (
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={pref.preferredDistrict}
+                  onChange={e => {
+                    const updated = [...investorData.preferences];
+                    updated[idx].preferredDistrict = e.target.value;
+                    setInvestorData({ ...investorData, preferences: updated });
+                  }}
+                />
+              ) : (
+                <Typography variant="body2">{pref.preferredDistrict}</Typography>
+              )}
+
+              <Typography variant="body2" fontWeight={600}>Preferred City</Typography>
+              {editMode ? (
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={pref.preferredCity}
+                  onChange={e => {
+                    const updated = [...investorData.preferences];
+                    updated[idx].preferredCity = e.target.value;
+                    setInvestorData({ ...investorData, preferences: updated });
+                  }}
+                />
+              ) : (
+                <Typography variant="body2">{pref.preferredCity}</Typography>
+              )}
+
+              {/* Property Type */}
+              <Typography variant="body2" fontWeight={600}>Property Type</Typography>
+              {editMode ? (
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={pref.propertyType}
+                  onChange={e => {
+                    const updated = [...investorData.preferences];
+                    updated[idx].propertyType = e.target.value;
+                    setInvestorData({ ...investorData, preferences: updated });
+                  }}
+                />
+              ) : (
+                <Typography variant="body2">{pref.propertyType}</Typography>
+              )}
+
+              {/* Property Size */}
+              {pref.propertyType === "Own Property" && (
+                <>
+                  <Typography variant="body2" fontWeight={600}>Property Size</Typography>
+                  {editMode ? (
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value={pref.propertySize}
+                      onChange={e => {
+                        const updated = [...investorData.preferences];
+                        updated[idx].propertySize = e.target.value;
+                        setInvestorData({ ...investorData, preferences: updated });
+                      }}
+                    />
+                  ) : (
+                    <Typography variant="body2">{pref.propertySize}</Typography>
+                  )}
+                </>
+              )}
+            </Stack>
+          </ListItem>
+        ))}
+      </List>
+    ) : (
+      <Typography variant="body2" color="text.secondary">No preferences added yet.</Typography>
+    )}
+  </Box>
+);
 
   if (loading) {
     return (

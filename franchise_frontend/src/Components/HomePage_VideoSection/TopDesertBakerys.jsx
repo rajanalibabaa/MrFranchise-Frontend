@@ -16,13 +16,11 @@ import {
   Stack,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  MonetizationOn,
-  Business,
-  AreaChart,
-  Favorite,
-} from "@mui/icons-material";
+import Favorite from "@mui/icons-material/Favorite";
+import ArrowRight from "@mui/icons-material/ArrowRight";
+import MonetizationOn from "@mui/icons-material/MonetizationOn";
+import Business from "@mui/icons-material/Business";
+import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
@@ -319,6 +317,21 @@ const TopDesertBakerys = () => {
   const dispatch = useDispatch();
   const { data: brands = [] } = useSelector((state) => state.brands);
 
+  // Filter brands that belong to Beverage Franchise subcategory
+// Filter brands that belong to Beverage Franchise subcategory and all its child categories
+const beverageBrands = useMemo(() => {
+  return brands.filter(brand => {
+    const categories = brand.personalDetails?.brandCategories || [];
+    return categories.some(cat => {
+      // Check if the subcategory is "Beverage Franchises" 
+      // OR if the parent category is "Food & Beverages" and subcategory is related to beverages
+      return (
+         cat.sub === "Dessert & Bakery" 
+      );
+    });
+  });
+}, [brands]);
+
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
@@ -327,8 +340,8 @@ const TopDesertBakerys = () => {
 
   const initializeData = useCallback(() => {
     try {
-      if (!brands || brands.length === 0) {
-        setError("No brands found.");
+      if (!beverageBrands || beverageBrands.length === 0) {
+        setError("No beverage franchises found.");
       } else {
         setError(null);
       }
@@ -338,7 +351,7 @@ const TopDesertBakerys = () => {
     } finally {
       setLoading(false);
     }
-  }, [brands]);
+  }, [beverageBrands]);
 
   useEffect(() => {
     initializeData();
@@ -434,7 +447,7 @@ const TopDesertBakerys = () => {
             },
           }}
         >
-          Top Desert Bakerys
+          Top Desert & Bakerys Franchises
         </Typography>
 
         <Button
@@ -472,7 +485,7 @@ const TopDesertBakerys = () => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {brands.map((brand) => (
+        {beverageBrands.map((brand) => (
           <BrandCard 
             key={brand.uuid}
             brand={brand}
