@@ -3,7 +3,6 @@ import { useForm, useWatch, Controller } from "react-hook-form";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import axios from "axios";
 import {
-  Container,
   Grid,
   TextField,
   Radio,
@@ -33,14 +32,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  AppBar,
   Toolbar,
-  Divider,
 } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
-import backgroundImage from "../../assets/Images/investorimage.jpg";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import Footer from "../../Components/Footers/Footer";
 
@@ -68,7 +64,6 @@ const InvestorRegister = () => {
     control,
     formState: { errors },
     clearErrors,
-    // trigger,
   } = useForm({
     defaultValues: {
       category: [],
@@ -89,7 +84,7 @@ const InvestorRegister = () => {
   const [isCategoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState("");
+  // const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
 
   const [indiaData, setIndiaData] = useState([]);
@@ -130,6 +125,7 @@ const InvestorRegister = () => {
   };
 
   const openLoginPopup = () => {
+    document.activeElement.blur();
     setLoginOpen(true);
   };
 
@@ -338,6 +334,7 @@ const InvestorRegister = () => {
   };
 
   // const openOtpModal = (type) => {
+    // document.activeElement.blur();
   //   setOtpModal({
   //     open: true,
   //     type,
@@ -1062,7 +1059,7 @@ console.log("Registration response:", response.data);
                 </TextField>
               </Grid>
               {occupationValue === "Other" && (
-                <Grid item sx={{ xs: 12, sm: 4 }}>
+                <Grid  sx={{ xs: 12, sm: 4 }}>
                   <TextField
                     fullWidth
                     label="Specify Occupation"
@@ -1321,7 +1318,7 @@ console.log("Registration response:", response.data);
                 </TextField>
               </Grid>
               {selectedRange && (
-                <Grid item sx={{ xs: 12, sm: 4 }}>
+                <Grid  sx={{ xs: 12, sm: 4 }}>
                   <Stack direction="row" alignItems="center" spacing={1}>
                     <TextField
                       select
@@ -1361,7 +1358,7 @@ console.log("Registration response:", response.data);
               )}
 
               {/* Preferred State Field (changed to text input) */}
-              <Grid item xs={12} sm={6}>
+              <Grid  xs={12} sm={6}>
                 <FormControl fullWidth error={!!errors.preferredState}>
                   <InputLabel>Preferred State *</InputLabel>
                   <Select
@@ -1392,7 +1389,7 @@ console.log("Registration response:", response.data);
               </Grid>
 
               {/* Preferred District Field  */}
-              <Grid item xs={12} sm={6}>
+              <Grid  xs={12} sm={6}>
                 <FormControl fullWidth error={!!errors.preferredDistrict}>
                   <InputLabel>Preferred District *</InputLabel>
                   <Select
@@ -1423,7 +1420,7 @@ console.log("Registration response:", response.data);
               </Grid>
 
               {/* Preferred City Field (changed to text input) */}
-              <Grid item xs={12} sm={6}>
+              <Grid  xs={12} sm={6}>
                 <FormControl fullWidth error={!!errors.preferredCity}>
                   <InputLabel>Preferred City *</InputLabel>
                   <Select
@@ -1449,7 +1446,7 @@ console.log("Registration response:", response.data);
                 </FormControl>
               </Grid>
               {/* Property Type Field */}
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid  xs={12} sm={6} md={4}>
                 <FormControl
                   component="fieldset"
                   fullWidth
@@ -1496,7 +1493,7 @@ console.log("Registration response:", response.data);
 
               {/* Property Size Field - Only show for Own Property */}
               {watch("propertyType") === "Own Property" && (
-                <Grid item xs={12} sm={6} md={4}>
+                <Grid  xs={12} sm={6} md={4}>
                   <TextField
                     select
                     fullWidth
@@ -1545,13 +1542,13 @@ console.log("Registration response:", response.data);
                 </Grid>
               )}
               {/* Add Preference Button */}
-              <Grid item xs={12} sm={6} md={4} mt={1} >
+              <Grid  xs={12} sm={6} md={4} mt={1} >
             <Button size="medium"  fullWidth  variant="contained" sx={{ bgcolor: '#7ad03a', '&:hover': { bgcolor: '#6fbf2a' } }}  onClick={handleAddPreference}>
               Add Preference
             </Button>
             
           </ Grid>
-              <Grid item xs={12} sm={6} md={4} mt={1} >
+              <Grid  xs={12} sm={6} md={4} mt={1} >
                 <Button
             
               variant="contained"
@@ -1559,7 +1556,9 @@ console.log("Registration response:", response.data);
               size="medium"
               fullWidth
               sx={{ bgcolor: '#ff9800', '&:hover': { bgcolor: '#f57c00' } }}
-              onClick={() => setPreferenceDialogOpen(true)}
+              onClick={() =>{
+document.activeElement.blur();
+                 setPreferenceDialogOpen(true);}}
               disabled={preferences.length === 0}
             >
               Show Added Preferences
@@ -1602,15 +1601,13 @@ console.log("Registration response:", response.data);
               <Button color="error"  variant ="contained" onClick={() => setPreferenceDialogOpen(false)}>Close</Button>
             </DialogActions>
           </Dialog>
-
-
-              
+  
             </Grid>
             {/* <Divider sx={{ borderColor: "#7ad03a", mt: 5 }} /> */}
             <Grid container spacing={2} sx={{ display: "flex", justifyContent: "center", flexDirection  : "column" }} mt={3}>
                 {/* Terms and Conditions Checkbox */}
                 <Grid
-                  item
+                  
                   xs={12}
                   sx={{ justifyContent: "center", display: "flex" }}
                 >
@@ -1638,7 +1635,7 @@ console.log("Registration response:", response.data);
 
                 {/* Submit Button */}
                 <Grid
-                  item
+                  
                   xs={12}
                   sx={{  display: "flex", justifyContent: "center" }}
                 >
@@ -1657,9 +1654,8 @@ console.log("Registration response:", response.data);
                     REGISTER
                   </Button>
                 </Grid>
-
                 {/* Sign In Link */}
-                <Grid item xs={12} sx={{ mt: 0, textAlign: "center" }}>
+                <Grid  xs={12} sx={{ mt: 0, textAlign: "center" }}>
                   <Typography>
                     Already have an account?{" "}
                     <Box

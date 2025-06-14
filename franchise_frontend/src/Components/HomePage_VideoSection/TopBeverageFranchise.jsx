@@ -301,7 +301,7 @@ const BrandCard = React.memo(({
   );
 });
 
-const TopBeverageFranchise = () => {
+const TopBeverageFranchises = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
@@ -326,7 +326,9 @@ const beverageBrands = useMemo(() => {
       // Check if the subcategory is "Beverage Franchises" 
       // OR if the parent category is "Food & Beverages" and subcategory is related to beverages
       return (
-         cat.sub === "Beverage Franchises" 
+        // cat.sub === "Beverage Franchises" 
+        cat.sub=== "Beverage Franchises"
+       
       );
     });
   });
@@ -447,7 +449,7 @@ const beverageBrands = useMemo(() => {
             },
           }}
         >
-          Top Beverage Franchises
+        Top Beverage Franchises
         </Typography>
 
         <Button
@@ -507,4 +509,4 @@ const beverageBrands = useMemo(() => {
   );
 };
 
-export default React.memo(TopBeverageFranchise);
+export default React.memo(TopBeverageFranchises);
