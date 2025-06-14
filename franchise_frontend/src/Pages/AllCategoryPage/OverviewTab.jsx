@@ -111,7 +111,7 @@ const OverviewTab = ({ brand }) => {
 
   const expansionLocations = (brand.personalDetails?.expansionLocation || []).map(
   (loc) =>
-    [loc.city, loc.state, loc.country].filter(Boolean).join(", ")
+    [loc.city].filter(Boolean).join(", ")
 );
 
   const investmentTimings = [
