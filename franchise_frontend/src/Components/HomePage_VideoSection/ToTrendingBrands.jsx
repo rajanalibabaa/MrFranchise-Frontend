@@ -146,6 +146,7 @@ const TopInvestVdocardround = () => {
               <Avatar
                 src={brand.brandDetails?.brandLogo}
                 alt={brand.personalDetails?.brandName}
+                loading="lazy"
                 sx={{
                   width: 70,
                   height: 70,

@@ -10,7 +10,6 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Box,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
@@ -69,7 +68,7 @@ const Otherindustries = () => {
   };
 
   return (
-    <Box
+    <div
       style={{
         maxWidth: "full",
         margin: "0 auto",
@@ -82,10 +81,11 @@ const Otherindustries = () => {
         color: "#fff",
         minHeight: "100vh",
         overflow: "hidden",
+        marginTop:"3%"
       }}
     >
       {/* Overlay */}
-      <Box
+      <div
         style={{
           position: "absolute",
           top: 0,
@@ -95,10 +95,10 @@ const Otherindustries = () => {
           backgroundColor: "rgba(0,0,0,0.6)",
           zIndex: 0,
         }}
-      ></Box>
+      ></div>
 
       {/* Main Content - Compact Layout */}
-      <Box
+      <div
         style={{
           display: "flex",
           position: "relative",
@@ -108,7 +108,7 @@ const Otherindustries = () => {
         }}
       >
         {/* Left Side - Text Content */}
-        <Box
+        <div
           style={{
             flex: 1,
             padding: "40px",
@@ -119,8 +119,7 @@ const Otherindustries = () => {
             maxHeight: "100%",
           }}
         >
-          <Typography
-          variant="h2"
+          <h2
             style={{
               fontSize: "32px",
               marginBottom: "20px",
@@ -128,10 +127,9 @@ const Otherindustries = () => {
             }}
           >
             Mr Franchise Business Opportunities
-          </Typography>
+          </h2>
 
-          <Typography
-          variant="body"
+          <p
             style={{
               fontSize: "16px",
               lineHeight: "1.6",
@@ -142,7 +140,7 @@ const Otherindustries = () => {
             Join established business systems with comprehensive support. Our partners offer 
   turnkey operations with training, marketing tools, and ongoing guidance to help 
   you succeed in your entrepreneurial journey.
-          </Typography>
+          </p>
 
           <Button
             variant="contained"
@@ -160,10 +158,10 @@ const Otherindustries = () => {
           >
             Learn More
           </Button>
-        </Box>
+        </div>
 
         {/* Right Side - Form */}
-        <Box
+        <div
           style={{
             flex: 1,
             padding: "40px",
@@ -173,7 +171,7 @@ const Otherindustries = () => {
             maxHeight: "100%",
           }}
         >
-          <Box
+          <div
             style={{
               backgroundColor: "rgba(255,255,255,0.9)",
               padding: "30px",
@@ -183,8 +181,7 @@ const Otherindustries = () => {
               boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
             }}
           >
-            <Typography
-            variant="h2"
+            <h2
               style={{
                 textAlign: "center",
                 marginBottom: "20px",
@@ -193,10 +190,10 @@ const Otherindustries = () => {
               }}
             >
               Contact With Us
-            </Typography>
+            </h2>
 
             <form onSubmit={handleSubmit}>
-              <Box
+              <div
                 style={{
                   display: "grid",
                   gap: "15px",
@@ -310,9 +307,9 @@ const Otherindustries = () => {
                   fullWidth
                   size="small"
                 />
-              </Box>
+              </div>
 
-              <Box style={{ textAlign: "center", marginTop: "25px" }}>
+              <div style={{ textAlign: "center", marginTop: "25px" }}>
                 <Button
                   type="submit"
                   variant="contained"
@@ -330,14 +327,14 @@ const Otherindustries = () => {
                 >
                   Submit
                 </Button>
-              </Box>
+              </div>
             </form>
-          </Box>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
 
       {/* FAQ Section */}
-      <Box
+      <div
         style={{
           position: "relative",
           zIndex: 1,
@@ -358,7 +355,7 @@ const Otherindustries = () => {
           Why Register With Us?
         </Typography>
 
-        <Box style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
           <Accordion
             style={{
               borderRadius: "8px",
@@ -456,9 +453,9 @@ const Otherindustries = () => {
               </ul>
             </AccordionDetails>
           </Accordion>
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 };
 

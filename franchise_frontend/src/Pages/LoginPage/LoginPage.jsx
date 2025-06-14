@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Grid,
@@ -18,9 +18,9 @@ import {
 import illustration from "../../assets/Images/Login_illustration.jpg";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setUUIDandTOKEN } from "../../Redux/Slices/AuthSlice/authSlice";
+import { setUUIDandTOKEN, logout } from "../../Redux/Slices/AuthSlice/authSlice";
 import CloseIcon from "@mui/icons-material/Close";
-import { logout } from "../../Redux/Slices/AuthSlice/authSlice";
+import { showLoading } from "../../Redux/Slices/loadingSlice";
 
 function LoginPage({ open, onClose }) {
   const navigate = useNavigate();
@@ -30,35 +30,46 @@ function LoginPage({ open, onClose }) {
   const [errors, setErrors] = useState({});
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [timer, setTimer] = useState(30);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
-  const [resendDisabled, setResendDisabled] = useState(false);
-  const [timer, setTimer] = useState(30);
 
-  
+  const isEmail = useMemo(() => formData.username.includes("@"), [formData.username]);
+
+  const otpRequestPayload = useMemo(() => {
+    const trimmed = formData.username.trim();
+    return isEmail ? { email: trimmed } : { mobileNumber: `+91${trimmed}` };
+  }, [formData.username, isEmail]);
+
+  const otpVerifyPayload = useMemo(() => {
+    const trimmed = formData.username.trim();
+    return {
+      verifyOtp: formData.otp,
+      [isEmail ? "email" : "phone"]: isEmail ? trimmed : `+91${trimmed}`,
+    };
+  }, [formData.otp, formData.username, isEmail]);
 
   useEffect(() => {
     if (resendDisabled && timer > 0) {
-      const interval = setInterval(() => {
-        setTimer((prev) => prev - 1);
-      }, 1000);
+      const interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
       return () => clearInterval(interval);
     } else if (timer === 0) {
       setResendDisabled(false);
-      setTimer(30); // Reset timer
+      setTimer(30);
     }
   }, [resendDisabled, timer]);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
     setErrors((prev) => ({ ...prev, [id]: "" }));
-  };
+  }, []);
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors = {};
     if (!formData.username) {
       newErrors.username = "Username is required";
@@ -70,25 +81,19 @@ function LoginPage({ open, onClose }) {
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData.username]);
 
-  const handleOtpRequest = async () => {
+  const handleOtpRequest = useCallback(async () => {
+
     if (!validateForm()) return;
-    setIsLoading(true);
-
-    const isEmail = formData.username.includes("@");
-    const payload = isEmail
-      ? { email: formData.username.trim() }
-      : { mobileNumber: "+91" + formData.username.trim() };
-
+     setIsLoading(true);
     try {
       const response = await axios.post(
-        // "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
-        "http://localhost:5000/api/v1/login/generateOTPforLogin",
-        payload,
+        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
+        otpRequestPayload,
         { headers: { "Content-Type": "application/json" } }
       );
-      
+
       if (response.data.success) {
         setSnackbar({
           open: true,
@@ -97,7 +102,6 @@ function LoginPage({ open, onClose }) {
         });
         setIsOtpSent(true);
         setResendDisabled(true);
-
       } else {
         throw new Error(response.data.message || "Failed to send OTP");
       }
@@ -106,63 +110,57 @@ function LoginPage({ open, onClose }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [otpRequestPayload, validateForm]);
 
-  const handleVerifyOtp = async () => {
+  const handleVerifyOtp = useCallback(async () => {
     if (!formData.otp) {
       setErrors((prev) => ({ ...prev, otp: "OTP is required" }));
       return;
     }
 
     setIsLoading(true);
-    const isEmail = formData.username.includes("@");
-    const payload = {
-      verifyOtp: formData.otp,
-      [isEmail ? "email" : "phone"]: isEmail
-        ? formData.username.trim()
-        : "+91" + formData.username.trim(),
-    };
-
     try {
       const response = await axios.post(
-        // "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
-        "http://localhost:5000/api/v1/login/",
-        payload,
+        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        otpVerifyPayload,
         { headers: { "Content-Type": "application/json" } }
       );
 
-      console.log("response :",response.data.data)
-
       if (response.status === 200) {
+        const logoutTime = Date.now() + 24 * 60 * 60 * 1000;
+        localStorage.setItem("logoutTimestamp", logoutTime.toString());
+
         dispatch(
           setUUIDandTOKEN({
             investorUUID: response.data.data.investorUUID,
             brandUUID: response.data.data.brandUserUUID,
             token: response.data.data.AccessToken,
-            // userData: response.data.data.userData,
           })
-
         );
 
+        const logoutTimestamp = localStorage.getItem("logoutTimestamp");
+        const parsedLogoutTime = parseInt(logoutTimestamp, 10);
+        const now = Date.now();
+        const exitTime = parsedLogoutTime - now;
         setTimeout(() => {
           dispatch(logout());
+          navigate("/");
+        }, exitTime);
 
-        },24*60 * 60 * 1000);
-
-      setSnackbar({
+        setSnackbar({
           open: true,
           message: "Login successful! Redirecting...",
           severity: "success",
         });
+
         setTimeout(() => {
-          onClose(); // Close the modal
+          onClose();
           setFormData({ username: "", otp: "" });
           setIsOtpSent(false);
           setResendDisabled(false);
           setTimer(30);
           setErrors({});
-          setIsLoading(false); // optional safety
-          navigate("/"); // Navigate home
+          navigate("/");
         }, 1000);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
@@ -172,114 +170,58 @@ function LoginPage({ open, onClose }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [otpVerifyPayload, formData.otp, dispatch, navigate, onClose]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    isOtpSent ? handleVerifyOtp() : handleOtpRequest();
-  };
+  const handleSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
+      isOtpSent ? handleVerifyOtp() : handleOtpRequest();
+    },
+    [isOtpSent, handleOtpRequest, handleVerifyOtp]
+  );
 
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
+  const handleCloseSnackbar = useCallback(() => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  }, []);
 
   return (
     <>
-      <Dialog
-        open={open}
-        onClose={onClose}
-        maxWidth="md"
-        fullWidth
-        TransitionProps={{ timeout: 500 }}
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            overflow: "hidden",
-            color: "black",
-          },
-        }}
-      >
+      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
         <DialogTitle
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             bgcolor: "#ffba00",
-            color: "black",
             px: 3,
             py: 2,
           }}
         >
-          {/* Corrected Heading Structure */}
           <Typography variant="h5">Login</Typography>
-          <IconButton onClick={onClose} sx={{ color: "white" }}>
+          <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
 
         <DialogContent sx={{ p: 0 }}>
           <Grid container sx={{ minHeight: "65vh" }}>
-            <Grid
-              item
-              xs={12}
-              md={6}
-              sx={{
-                display: { xs: "none", md: "flex" },
-                alignItems: "center",
-                justifyContent: "center",
-                bgcolor: "white",
-                p: 0,
-                order: { xs: 1, md: 0 }, 
-              }}
-            >
-              <Box
-                component="img"
-                src={illustration}
-                alt="Login Illustration"
-                sx={{
-          width: { xs: "100%", sm: "80%", md: "100%" },
-          maxWidth: 400,
-          borderRadius: 2,
-          mx: "auto",
-          display: "block",
-        }}
-              />
+            <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center", alignItems: "center", bgcolor: "white" }}>
+              <Box component="img" src={illustration} alt="Login" sx={{ width: "100%", maxWidth: 400, borderRadius: 2 }} />
             </Grid>
 
-            <Grid
-              item
-              xs={12}
-              md={6}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                p: { xs: 2, md: 4 },
-        order: { xs: 2, md: 1 },
-              }}
-            >
+            <Grid item xs={12} md={6} sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 4 }}>
               <Box sx={{ width: "100%", maxWidth: 400 }}>
-                <Typography
-                  variant="h4"
-                  gutterBottom
-                  textAlign="center"
-                  fontWeight="bold"
-                >
+                <Typography variant="h4" textAlign="center" fontWeight="bold" gutterBottom>
                   Welcome Back!
                 </Typography>
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  textAlign="center"
-                  mb={3}
-                >
+                <Typography variant="body1" textAlign="center" color="text.secondary" mb={3}>
                   Please log in to your account to continue.
                 </Typography>
 
                 <form onSubmit={handleSubmit}>
                   <TextField
                     fullWidth
-                    label="Email or Phone Number"
+                    label="Enter your registered Email"
                     id="username"
                     value={formData.username}
                     onChange={handleChange}
@@ -309,38 +251,23 @@ function LoginPage({ open, onClose }) {
                     variant="contained"
                     size="large"
                     disabled={isLoading}
-                    sx={{
-                      height: 48,
-                      mb: 2,
-                      bgcolor: "#007BFF",
-                      "&:hover": { bgcolor: "#0056b3" },
-                    }}
+                    sx={{ height: 48, mb: 2, bgcolor: "#007BFF", "&:hover": { bgcolor: "#0056b3" } }}
                   >
-                    {isLoading ? (
-                      <CircularProgress size={24} color="inherit" />
-                    ) : isOtpSent ? (
-                      "Verify OTP"
-                    ) : (
-                      "Request OTP"
-                    )}
+                    {isLoading ? <CircularProgress size={24} color="inherit" /> : isOtpSent ? "Verify OTP" : "Request OTP"}
                   </Button>
                 </form>
 
                 {isOtpSent && (
                   <Typography variant="body2" textAlign="center" mb={2}>
                     Didn’t receive OTP?{" "}
-                    <Link
-                      component="button"
-                      onClick={handleOtpRequest}
-                      disabled={resendDisabled}
-                    >
+                    <Link component="button" onClick={handleOtpRequest} disabled={resendDisabled}>
                       {resendDisabled ? `Resend in ${timer}s` : "Resend OTP"}
                     </Link>
                   </Typography>
                 )}
 
                 <Typography variant="body2" textAlign="center" mt={2}>
-                  Don’t have an account?{" "}
+                  New Registration{" "}
                   <Link
                     component="button"
                     onClick={() => {
@@ -349,7 +276,7 @@ function LoginPage({ open, onClose }) {
                     }}
                     sx={{ fontWeight: 500 }}
                   >
-                    Register here
+                    Click here
                   </Link>
                 </Typography>
               </Box>
@@ -364,11 +291,7 @@ function LoginPage({ open, onClose }) {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
