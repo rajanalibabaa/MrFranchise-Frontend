@@ -284,7 +284,7 @@ function BrandList() {
 
     console.log(brand.uuid)
 
-    const viewResponse = await axios.post(`http://localhost:5000/api/v1/view/postViewBrands/${Id}`,
+    const viewResponse = await axios.post(`https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${Id}`,
       {viewedID:brand.uuid},
       {
           headers: {
@@ -803,7 +803,7 @@ const closePopup = () => {
             };
 
             const response = await axios.post(
-                "http://localhost:5000/api/v1/brandlisting/createInstaApply",
+                "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createInstaApply",
                 payload,
                 {
                     headers: {
@@ -1737,7 +1737,7 @@ const closePopup = () => {
         console.log(payload);
 
         const response = await axios.post(
-          "http://localhost:5000/api/v1/brandlisting/createInstaApply",
+          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createInstaApply",
           payload,
           {
             headers: {

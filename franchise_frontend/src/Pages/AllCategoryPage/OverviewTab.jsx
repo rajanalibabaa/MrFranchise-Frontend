@@ -59,7 +59,7 @@ const OverviewTab = ({ brand }) => {
       if (!investorUUID || !AccessToken) return;
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -170,7 +170,7 @@ const OverviewTab = ({ brand }) => {
       console.log(id, token);
 
       const response = await axios.post(
-        `http://localhost:5000/api/v1/instantapply/postApplication/${id}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication/${id}`,
         payload,
         {
           headers: {
@@ -390,7 +390,7 @@ const OverviewTab = ({ brand }) => {
               }} 
               onClick={() => {
                  // Debug: See what you get
-                  console.log("Auto-fill values:", userData?.firstName, userData?.email, userData?.mobileNumber);
+                 console.log("Auto-fill values:",  userData?.firstName, userData?.email, userData?.mobileNumber );
                 setIsModalOpen(true);
               }}
             >

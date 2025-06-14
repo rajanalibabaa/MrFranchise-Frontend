@@ -1,10 +1,11 @@
-import React from "react";
-import { Route, Routes } from "react-router-dom";
-import InvestorRegister from "./Pages/Registration/InvestorsRegister";
+import React, { useEffect } from 'react'
+import { Route, Routes } from "react-router-dom"
+import InvestorRegister from './Pages/Registration/InvestorsRegister';
 // import BrandRegister from './Pages/Registration/BrandRegister';
 import LoginPage from "./Pages/LoginPage/LoginPage";
 
 import "./App.css";
+// import Nprogress from 'nprogress';
 import HomeBannerSec from "./Pages/HomePages/HomeBannerSec";
 import RegisterHandleUser from "./Pages/Registration/RegisterHandlePage";
 // import BrandListingFormPage from './Pages/BrandListingForm/BrandListingFormPage';
@@ -23,33 +24,74 @@ import BrandFeedBack from "./Components/BrandProfile_Component/BrandFeedback";
 import BrandComplaint from "./Components/BrandProfile_Component/BrandComplaint";
 import BrandAddVedios from "./Components/BrandProfile_Component/BrandAddVedios";
 
-import BrandListingController from "./Components/BrandProfile_Component/BrandListingController.jsx";
-import Upgradeaccount from "./Components/Investor_Profile_Component/Upgradeaccount.jsx";
-import { Provider } from "react-redux";
-import store from "./Redux/Store/Index.jsx";
-import BrandCategroyViewPage from "./Pages/AllCategoryPage/BrandCategroyViewPage.jsx";
-import BrandSearchus from "./Components/BrandProfile_Component/BrandSearches.jsx";
-import BrandRegisterForm from "./Pages/Registration/BrandLIstingRegister/BrandRegisterForm.jsx";
-import AboutUs from "./Components/Footers/HelpAndSupport/AboutUs.jsx";
-import ContactUs from "./Components/Footers/HelpAndSupport/ContactUs.jsx";
-import FAQs from "./Components/Footers/HelpAndSupport/FAQs.jsx";
-import Help from "./Components/Footers/HelpAndSupport/Help.jsx";
-import PrivacyPolicy from "./Components/Footers/HelpAndSupport/PrivacyPolicy.jsx";
-import TermsAndConditions from "./Components/Footers/HelpAndSupport/TermsAndConditions.jsx";
-import AdvertiseWithUs from "./Components/Footers/QuickLinks/AdvertiseWithUs.jsx";
+import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
+import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccount.jsx';
+import { Provider, useDispatch } from 'react-redux';
+// import store from './Redux/Store/Index.jsx';
+import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
+import BrandSearchus from './Components/BrandProfile_Component/BrandSearches.jsx';
+import BrandRegisterForm from './Pages/Registration/BrandLIstingRegister/BrandRegisterForm.jsx';
+import AboutUs from './Components/Footers/HelpAndSupport/AboutUs.jsx';
+import ContactUs from './Components/Footers/HelpAndSupport/ContactUs.jsx';
+import FAQs from './Components/Footers/HelpAndSupport/FAQs.jsx';
+import Help from './Components/Footers/HelpAndSupport/Help.jsx';
+import PrivacyPolicy from './Components/Footers/HelpAndSupport/PrivacyPolicy.jsx';
+import TermsAndConditions from './Components/Footers/HelpAndSupport/TermsAndConditions.jsx';
+import AdvertiseWithUs from './Components/Footers/QuickLinks/AdvertiseWithUs.jsx';
 
-import ExpandYourBrand from "./Components/Footers/QuickLinks/ExpandYourBrand.jsx";
-import InvestFranchise from "./Components/Footers/QuickLinks/InvestFranchise.jsx";
-import FranchisePromotion from "./Components/Footers/QuickLinks/FranchisePromotion.jsx";
+import ExpandYourBrand from './Components/Footers/QuickLinks/ExpandYourBrand.jsx';
+import InvestFranchise from './Components/Footers/QuickLinks/InvestFranchise.jsx';
+import FranchisePromotion from './Components/Footers/QuickLinks/FranchisePromotion.jsx';
+import { logout } from './Redux/Slices/AuthSlice/authSlice.jsx';
+
 import Navbar from "./Components/Navbar/NavBar.jsx";
-import Footer from "./Components/Footers/Footer.jsx";
 import { Box } from "@mui/material";
 import Otherindustries from "./Components/Footers/QuickLinks/Otherindustries.jsx";
+import GlobalLoader from './Components/GLobalLoader.jsx';
 
 function App() {
+  const dispatch = useDispatch();
+  const AccessToken = localStorage.getItem("accessToken");
+  // console.log("Access Token:", AccessToken);
+
+
+  useEffect(() => {
+    const logoutTimestamp = localStorage.getItem("logoutTimestamp");
+
+    if (!logoutTimestamp || !AccessToken) {
+      // console.log("No logout timestamp or access token. Skipping auto logout.");
+      return;
+    }
+
+    const parsedLogoutTime = parseInt(logoutTimestamp, 10);
+    const now = Date.now();
+    const exitTime = parsedLogoutTime - now;
+
+    const checkAutoLogout = () => {
+      const currentTime = Date.now();
+
+      if (currentTime >= parsedLogoutTime) {
+        console.log("Session expired. Logging out...");
+        dispatch(logout());
+        window.location.href = "/";
+      }
+    };
+
+    checkAutoLogout();
+
+    const timeoutId = setTimeout(() => {
+      console.log("Timeout reached. Calling checkAutoLogout again...");
+      checkAutoLogout();
+    }, exitTime);
+
+    return () => {
+      clearTimeout(timeoutId);
+      console.log("Cleared logout timeout.");
+    };
+  }, [AccessToken, dispatch]);
   return (
     <>
-      <Provider store={store}>
+   <GlobalLoader/>
         <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 1100 }}>
         <Navbar />
       </Box>
@@ -105,7 +147,7 @@ function App() {
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
           <Route path="/otherindustries" element={<Otherindustries/>}/>
         </Routes>
-      </Provider>
+      
     </>
   );
 }

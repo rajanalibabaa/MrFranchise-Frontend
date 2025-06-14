@@ -33,8 +33,8 @@ import { logout } from "../../Redux/Slices/AuthSlice/authSlice";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../../assets/Images/logo.png";
+import { showLoading } from "../../Redux/Slices/loadingSlice";
 // import backgroundPattern from "../../assets/Images/network-pattern.png";
-import FilterDropdowns from "./FilterDropdownsData";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -57,8 +57,9 @@ function Navbar() {
   // Fallback for ID if Redux state is empty (e.g., after refresh)
   const ID =
     localStorage.getItem("brandUUID") ||
-    localStorage.getItem("investorUUID");
-
+    localStorage.getItem("investorUUID") 
+    ;
+ 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -87,9 +88,12 @@ function Navbar() {
     navigate(path);
     dispatch(toggleMenu(false));
     setAnchorEl(null);
+    
   };
 
   const handleLoginSuccess = (userData) => {
+
+    console.log("User Data:", userData);
     dispatch(loginSuccess(userData));
     setLoginModalOpen(false);
   };
@@ -104,7 +108,7 @@ function Navbar() {
     try {
       const response = await axios.post(
         // `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
-        // `http://localhost:5000/api/v1/logout/${ID}`,
+        // `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
         `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
         {},
         {
@@ -153,15 +157,15 @@ function Navbar() {
   };
 
   // Animation variants
-  const fadeIn = {
-    hidden: { opacity: 0, y: -20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-  };
+  // const fadeIn = {
+  //   hidden: { opacity: 0, y: -20 },
+  //   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  // };
 
-  const pulse = {
-    scale: [1, 1.05, 1],
-    transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-  };
+  // const pulse = {
+  //   scale: [1, 1.05, 1],
+  //   transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+  // };
 
   return (
     <>
@@ -216,7 +220,7 @@ function Navbar() {
             left: 0,
             right: 0,
             height: '4px',
-            background: 'linear-gradient(90deg, #ff9800, #ff5722, #ff9800)',
+            // background: 'linear-gradient(90deg, #ff9800, #ff5722, #ff9800)',
             backgroundSize: '200% 100%',
             animation: 'gradient 3s ease infinite',
           },
@@ -288,7 +292,7 @@ function Navbar() {
           position: 'relative',
           zIndex: 1
         }}>
-          {['Expand Your Franchise', 'Investor', 'Advertise','Franchise promotion & Lead Distribution Packages'].map((text, index) => (
+          {['Expand Your Franchise', 'Investor', 'Advertise','Lead Distribution Packages','Other Industries'].map((text, index) => (
             <motion.div
               key={text}
               whileHover={{ scale: 1.05 }}
@@ -300,7 +304,8 @@ function Navbar() {
                   text === 'Expand Your Franchise' ? '/expandyourbrand' :
                   text === 'Investor' ? '/investfranchise' :
                   text === 'Advertise' ? '/advertisewithus' :
-                  text === 'Franchise promotion & Lead Distribution Packages' ? '/franchisepromotion' :''
+                  text === 'Lead Distribution Packages' ? '/franchisepromotion' : 
+                  text === 'Other Industries' ? '/otherindustries' : '/'
                 }
                 size="small"
                 sx={{ 
@@ -531,13 +536,13 @@ function Navbar() {
           position: 'relative',
           zIndex: 1
         }}>
-          <motion.div whileHover={{ scale: 1.1 }}>
+          {/* <motion.div whileHover={{ scale: 1.1 }}>
             <IconButton size="small" sx={{ color: 'rgba(253, 182, 16, 0.9)' }}>
               <Badge badgeContent={3} color="error">
                 <MessageSquare size={18} />
               </Badge>
             </IconButton>
-          </motion.div>
+          </motion.div> */}
           
           <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 10 }}>
             <Select
@@ -557,8 +562,8 @@ function Navbar() {
                   borderBottom: 'none'
                 }
               }}
-            >
-              <MenuItem value="en" sx={{ color: '#ff9800' }}>
+            > 
+              <MenuItem value="en" sx={{ color: '#ff9800'}}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Globe size={18} color="rgba(5, 5, 5, 0.9)" /> 
                   <span>EN</span>

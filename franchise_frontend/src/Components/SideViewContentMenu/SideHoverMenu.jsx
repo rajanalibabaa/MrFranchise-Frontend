@@ -14,7 +14,6 @@ import {
   Divider,
   Skeleton,
   Chip,
-  Tooltip,
   Tabs,
   Tab,
   AppBar,
@@ -49,7 +48,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
     setError(null);
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
         {
           headers: {
             "Content-Type": "application/json",
@@ -295,13 +294,13 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
       onClose={onHoverLeave}
       PaperProps={{
         sx: {
-          height: isMobile ? "85vh" : isTablet ? "65vh" : 500,
-          background: "linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)",
-          boxShadow: theme.shadows[10],
-          borderBottomLeftRadius: 16,
-          borderBottomRightRadius: 16,
-          overflow: "hidden",
-          border: `1px solid ${theme.palette.divider}`,
+           height: isMobile ? "85vh" : isTablet ? "65vh" : 500,
+    background: "rgba(255,255,255,0.7)",
+    backdropFilter: "blur(12px)",
+    boxShadow: "0 8px 32px 0 rgba(60,72,88,0.18)",
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    border: "1.5px solid rgba(255,255,255,0.25)",
         },
       }}
       SlideProps={{
@@ -420,12 +419,12 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                       borderRadius: 2,
                       mb: 1.5,
                       color: activeCategory === index ? "white" : "text.primary",
-                      bgcolor: activeCategory === index ? "primary.main" : "background.paper",
+                      bgcolor: activeCategory === index ? "orange" : "background.paper",
                       fontWeight: "medium",
                       transition: "all 0.3s ease",
                       boxShadow: theme.shadows[1],
                       "&:hover": {
-                        bgcolor: activeCategory === index ? "primary.dark" : "action.hover",
+                        bgcolor: activeCategory === index ? "orange" : "action.hover",
                       },
                     }}
                   >
@@ -472,12 +471,12 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                           borderRadius: 2,
                           gap: 1.5,
                           mb: 1.5,
-                          bgcolor: activeSubCategory?.name === subCategory.name ? "primary.light" : "background.paper",
+                          bgcolor: activeSubCategory?.name === subCategory.name ? "orange" : "background.paper",
                           color: activeSubCategory?.name === subCategory.name ? "primary.contrastText" : "text.primary",
                           boxShadow: theme.shadows[1],
                           transition: "all 0.3s ease",
                           "&:hover": {
-                            bgcolor: activeSubCategory?.name === subCategory.name ? "primary.main" : "action.hover",
+                            bgcolor: activeSubCategory?.name === subCategory.name ? "orange" : "action.hover",
                           },
                         }}
                       >
@@ -544,7 +543,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                             boxShadow: theme.shadows[1],
                             transition: "all 0.3s ease",
                             "&:hover": {
-                              bgcolor: "action.hover",
+                              bgcolor: "orange",
                               boxShadow: theme.shadows[2],
                             },
                           }}
@@ -794,52 +793,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
         </Box>
 
         {/* Brand Details Dialog */}
-        <Dialog
-          open={openDialog}
-          onClose={() => dispatch(closeBrandDialog())}
-          maxWidth="md"
-          fullWidth
-          PaperProps={{
-            sx: {
-              borderRadius: 3,
-              overflow: "hidden",
-              background: "linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%)",
-            },
-          }}
-          TransitionComponent={Slide}
-          transitionDuration={300}
-        >
-          <DialogTitle
-            sx={{
-              background: "linear-gradient(to right, #6a11cb 0%, #2575fc 100%)",
-              color: "white",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              py: 2,
-              px: 3,
-            }}
-          >
-            <Typography variant="h6" fontWeight="bold">
-              {selectedBrand?.personalDetails?.brandName || "Brand Details"}
-            </Typography>
-            <IconButton
-              aria-label="close"
-              onClick={() => dispatch(closeBrandDialog())}
-              sx={{ color: "white" }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent dividers sx={{ p: 3 }}>
-            {selectedBrand && (
-              <Box>
-                {/* Add your brand details content here */}
-                <Typography>Brand details will be shown here</Typography>
-              </Box>
-            )}
-          </DialogContent>
-        </Dialog>
+      
       </Box>
     </Drawer>
   );

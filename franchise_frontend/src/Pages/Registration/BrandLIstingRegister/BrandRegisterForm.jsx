@@ -49,7 +49,6 @@ import {
 import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress from "@mui/material/CircularProgress";
-import Navbar from "../../../Components/Navbar/NavBar";
 import Footer from "../../../Components/Footers/Footer";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
@@ -388,7 +387,7 @@ const BrandRegisterForm = () => {
   console.log("fileFields.....:", formDataSend);
         const response = await axios.post(
           "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
-          // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
+          // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {
@@ -704,7 +703,7 @@ const BrandRegisterForm = () => {
     ];
 
     return (
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         <Accordion elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
@@ -1164,7 +1163,7 @@ const BrandRegisterForm = () => {
            <Button
           disabled={activeStep === 0 || isSubmitting}
           onClick={handleBack}
-          sx={{ mr: 2 }}
+          sx={{ mr: 2,color:'white',backgroundColor: 'black', "&:hover": { backgroundColor: '#e0e0e0' } } }
         >
           Back
         </Button>
@@ -1191,6 +1190,7 @@ const BrandRegisterForm = () => {
               {activeStep === steps.length - 1 ? (
           <Button 
             variant="contained" 
+            sx={{color: "white", backgroundColor: "#4caf50", "&:hover": { backgroundColor: "#45a049" }}}
             onClick={handleSubmit}
             disabled={isSubmitting}
             startIcon={
@@ -1250,6 +1250,7 @@ const BrandRegisterForm = () => {
         </Alert>
       </Snackbar>
     </Box>
+    <Footer />
     </>
   );
 };

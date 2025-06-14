@@ -3,7 +3,6 @@ import { useForm, useWatch, Controller } from "react-hook-form";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import axios from "axios";
 import {
-  Container,
   Grid,
   TextField,
   Radio,
@@ -33,17 +32,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  AppBar,
   Toolbar,
-  Divider,
 } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
-import backgroundImage from "../../assets/Images/investorimage.jpg";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import Footer from "../../Components/Footers/Footer";
-import Navbar from "../../Components/Navbar/NavBar";
 
 const phoneCodes = {
   India: "+91",
@@ -69,7 +64,6 @@ const InvestorRegister = () => {
     control,
     formState: { errors },
     clearErrors,
-    // trigger,
   } = useForm({
     defaultValues: {
       category: [],
@@ -90,7 +84,7 @@ const InvestorRegister = () => {
   const [isCategoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState("");
+  // const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
 
   const [indiaData, setIndiaData] = useState([]);
@@ -131,6 +125,7 @@ const InvestorRegister = () => {
   };
 
   const openLoginPopup = () => {
+    document.activeElement.blur();
     setLoginOpen(true);
   };
 
@@ -339,6 +334,7 @@ const InvestorRegister = () => {
   };
 
   // const openOtpModal = (type) => {
+    // document.activeElement.blur();
   //   setOtpModal({
   //     open: true,
   //     type,
@@ -461,7 +457,7 @@ const InvestorRegister = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/otpverify/verify-otp",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/verify-otp",
         {
           identifier:
             type === "email"
@@ -519,35 +515,45 @@ const InvestorRegister = () => {
     localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formData));
   }, [formData]);
 
-  const onSubmit = async (data) => {
-    if (!preferences.length) {
-      showSnackbar("Please add at least one preference before submitting.", "error");
-      return;
-    }
-    const formattedData = {
-      firstName: data.firstName || "",
-      email: data.email || "",
-      mobileNumber: `${phonePrefix}${data.mobileNumber || ""}`.trim(),
-      whatsappNumber: `${phonePrefix}${data.whatsappNumber || ""}`.trim(),
-      address: data.address || "",
-      pincode: data.pincode || "",
-      country: data.country || "",
-      state: data.state || "",
-      city: data.city || "",
-      occupation: data.occupation || "",
-      ...(data.occupation === "Other" && {
-        specifyOccupation: data.otherOccupation || "",
-      }),
-      preferences: preferences.map(pref => ({
-        category: pref.category,
-        investmentRange: pref.investmentRange,
-        investmentAmount: pref.investmentAmount,
-        preferredState: pref.preferredState,
-        preferredDistrict: pref.preferredDistrict,
-        preferredCity: pref.preferredCity,
-        propertyType: pref.propertyType,
-        propertySize: pref.propertyType === "Own Property" ? pref.propertySize : "",
-      })),
+ const onSubmit = async (data) => {
+  if (!preferences.length) {
+    showSnackbar("Please add at least one preference before submitting.", "error");
+    return;
+  }
+  const formatNumber = (num) => {
+    if (!num) return "";
+    const trimmed = num.trim();
+    return trimmed.startsWith(phonePrefix) ? trimmed : `${phonePrefix}${trimmed}`;
+  };
+
+  const formattedData = {
+    firstName: data.firstName || "",
+    email: data.email || "",
+    mobileNumber: formatNumber(data.mobileNumber),
+    whatsappNumber: formatNumber(data.whatsappNumber),
+    address: data.address || "",
+    pincode: data.pincode || "",
+    country: data.country || "",
+    state: data.state || "",
+    city: data.city || "",
+    occupation: data.occupation || "",
+    ...(data.occupation === "Other" && {
+      specifyOccupation: data.otherOccupation || "",
+    }),
+    preferences: preferences.map(pref => ({
+    category: Array.isArray(pref.category)
+      ? pref.category.map(c => `${c.main} > ${c.sub} > ${c.child}`).join(", ")
+      : typeof pref.category === "string"
+        ? pref.category
+        : "",
+    investmentRange: pref.investmentRange,
+    investmentAmount: pref.investmentAmount,
+    propertyType: pref.propertyType,
+    propertySize: pref.propertyType === "Own Property" ? pref.propertySize : "",
+    preferredState: pref.preferredState,
+    preferredDistrict: pref.preferredDistrict,
+    preferredCity: pref.preferredCity,
+  })),
       // category: selectedCategories,
       // investmentRange: data.investmentRange || "",
       // investmentAmount: data.investmentAmount || "",
@@ -564,13 +570,13 @@ const InvestorRegister = () => {
 
     try {
       const response = await axios.post(
+        "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
         // "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
-        "http://localhost:5000/api/v1/investor/createInvestor",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
+console.log("Registration response:", response.data);
 
-      console.log("Registration response:", response.data);
       if (response.status === 201) {
         if (formattedData.firstName) {
     localStorage.setItem("investorName", formattedData.firstName);
@@ -595,23 +601,29 @@ const InvestorRegister = () => {
         );
       }
     } catch (error) {
-      console.error("Registration error:", error);
-      if (
-        error.response?.status === 409 ||
-        error.response?.data?.message === "User already registered"
-      ) {
-        showSnackbar(
-          "This user is already registered. Please log in.",
-          "error"
-        );
-      } else {
-        showSnackbar(
-          error.response?.data?.message ||
-            "An unexpected error occurred. Please try again.",
-          "error"
-        );
-      }
-    }
+  console.error("Registration error:", error);
+  if (error.response?.data?.errors) {
+    console.error("Validation errors:", error.response.data.errors);
+    showSnackbar(
+      error.response.data.errors.join(", "),
+      "error"
+    );
+  } else if (
+    error.response?.status === 409 ||
+    error.response?.data?.message === "User already registered"
+  ) {
+    showSnackbar(
+      "This user is already registered. Please log in.",
+      "error"
+    );
+  } else {
+    showSnackbar(
+      error.response?.data?.message ||
+        "An unexpected error occurred. Please try again.",
+      "error"
+    );
+  }
+}
   };
 
   useEffect(() => {
@@ -1036,22 +1048,18 @@ const InvestorRegister = () => {
                   helperText={errors.occupation?.message}
                 >
                   <option value="">Select Occupation</option>
-                  <option value="Student">Student</option>
-                  <option value="Salaried Professional">
-                    Salaried Professional
-                  </option>
-                  <option value="Business Owner/ Self-Employed">
-                    Business Owner/ Self-Employed
-                  </option>
-                  <option value="retired">Retired</option>
-                  <option value="freelancer">Freelancer / Consultant</option>
-                  <option value="investor">Investor</option>
-                  <option value="homemaker">Homemaker</option>
-                  <option value="Other">Other</option>
+  <option value="Student">Student</option>
+  <option value="Salaried Professional">Salaried Professional</option>
+  <option value="Business Owner/ Self-Employed">Business Owner/ Self-Employed</option>
+  <option value="Retired">Retired</option>
+  <option value="Freelancer/ Consultant">Freelancer/ Consultant</option>
+  <option value="Homemaker">Homemaker</option>
+  <option value="Investor">Investor</option>
+  <option value="Other">Other</option>
                 </TextField>
               </Grid>
               {occupationValue === "Other" && (
-                <Grid item sx={{ xs: 12, sm: 4 }}>
+                <Grid  sx={{ xs: 12, sm: 4 }}>
                   <TextField
                     fullWidth
                     label="Specify Occupation"
@@ -1310,7 +1318,7 @@ const InvestorRegister = () => {
                 </TextField>
               </Grid>
               {selectedRange && (
-                <Grid item sx={{ xs: 12, sm: 4 }}>
+                <Grid  sx={{ xs: 12, sm: 4 }}>
                   <Stack direction="row" alignItems="center" spacing={1}>
                     <TextField
                       select
@@ -1350,7 +1358,7 @@ const InvestorRegister = () => {
               )}
 
               {/* Preferred State Field (changed to text input) */}
-              <Grid item xs={12} sm={6}>
+              <Grid  xs={12} sm={6}>
                 <FormControl fullWidth error={!!errors.preferredState}>
                   <InputLabel>Preferred State *</InputLabel>
                   <Select
@@ -1381,7 +1389,7 @@ const InvestorRegister = () => {
               </Grid>
 
               {/* Preferred District Field  */}
-              <Grid item xs={12} sm={6}>
+              <Grid  xs={12} sm={6}>
                 <FormControl fullWidth error={!!errors.preferredDistrict}>
                   <InputLabel>Preferred District *</InputLabel>
                   <Select
@@ -1412,7 +1420,7 @@ const InvestorRegister = () => {
               </Grid>
 
               {/* Preferred City Field (changed to text input) */}
-              <Grid item xs={12} sm={6}>
+              <Grid  xs={12} sm={6}>
                 <FormControl fullWidth error={!!errors.preferredCity}>
                   <InputLabel>Preferred City *</InputLabel>
                   <Select
@@ -1438,7 +1446,7 @@ const InvestorRegister = () => {
                 </FormControl>
               </Grid>
               {/* Property Type Field */}
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid  xs={12} sm={6} md={4}>
                 <FormControl
                   component="fieldset"
                   fullWidth
@@ -1485,7 +1493,7 @@ const InvestorRegister = () => {
 
               {/* Property Size Field - Only show for Own Property */}
               {watch("propertyType") === "Own Property" && (
-                <Grid item xs={12} sm={6} md={4}>
+                <Grid  xs={12} sm={6} md={4}>
                   <TextField
                     select
                     fullWidth
@@ -1534,13 +1542,13 @@ const InvestorRegister = () => {
                 </Grid>
               )}
               {/* Add Preference Button */}
-              <Grid item xs={12} sm={6} md={4} mt={1} >
+              <Grid  xs={12} sm={6} md={4} mt={1} >
             <Button size="medium"  fullWidth  variant="contained" sx={{ bgcolor: '#7ad03a', '&:hover': { bgcolor: '#6fbf2a' } }}  onClick={handleAddPreference}>
               Add Preference
             </Button>
             
           </ Grid>
-              <Grid item xs={12} sm={6} md={4} mt={1} >
+              <Grid  xs={12} sm={6} md={4} mt={1} >
                 <Button
             
               variant="contained"
@@ -1548,7 +1556,9 @@ const InvestorRegister = () => {
               size="medium"
               fullWidth
               sx={{ bgcolor: '#ff9800', '&:hover': { bgcolor: '#f57c00' } }}
-              onClick={() => setPreferenceDialogOpen(true)}
+              onClick={() =>{
+document.activeElement.blur();
+                 setPreferenceDialogOpen(true);}}
               disabled={preferences.length === 0}
             >
               Show Added Preferences
@@ -1591,15 +1601,13 @@ const InvestorRegister = () => {
               <Button color="error"  variant ="contained" onClick={() => setPreferenceDialogOpen(false)}>Close</Button>
             </DialogActions>
           </Dialog>
-
-
-              
+  
             </Grid>
             {/* <Divider sx={{ borderColor: "#7ad03a", mt: 5 }} /> */}
             <Grid container spacing={2} sx={{ display: "flex", justifyContent: "center", flexDirection  : "column" }} mt={3}>
                 {/* Terms and Conditions Checkbox */}
                 <Grid
-                  item
+                  
                   xs={12}
                   sx={{ justifyContent: "center", display: "flex" }}
                 >
@@ -1627,7 +1635,7 @@ const InvestorRegister = () => {
 
                 {/* Submit Button */}
                 <Grid
-                  item
+                  
                   xs={12}
                   sx={{  display: "flex", justifyContent: "center" }}
                 >
@@ -1646,9 +1654,8 @@ const InvestorRegister = () => {
                     REGISTER
                   </Button>
                 </Grid>
-
                 {/* Sign In Link */}
-                <Grid item xs={12} sx={{ mt: 0, textAlign: "center" }}>
+                <Grid  xs={12} sx={{ mt: 0, textAlign: "center" }}>
                   <Typography>
                     Already have an account?{" "}
                     <Box
