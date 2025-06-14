@@ -150,8 +150,8 @@ const BrandDetailsDialog = () => {
         brandId: selectedBrand?.uuid,
         brandName: selectedBrand?.personalDetails?.brandName || "",
         brandEmail: selectedBrand.personalDetails?.email || "",
-        brandLogo:Array.isArray(selectedBrand.brandDetails?.brandLogo)
-    ? selectedBrand.brandDetails.brandLogo[0] || "" : selectedBrand.brandDetails?.brandLogo || ""};
+        brandLogo:Array.isArray(selectedBrand.brandDetails?.brandLogo)?selectedBrand.brandDetails.brandLogo[0] || "" : selectedBrand.brandDetails?.brandLogo || ""}; 
+
       
       console.log("payload", payload);
       const token = localStorage.getItem("accessToken");
