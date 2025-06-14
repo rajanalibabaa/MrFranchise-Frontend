@@ -238,7 +238,7 @@ const OverviewTab = ({ brand }) => {
             <TableContainer 
               component={Paper} 
               sx={{ 
-                mb: 3,
+                mb: 1,
                 overflow: "hidden",
                 borderRadius: "12px",
                 border: "1px solid rgba(0,0,0,0.1)"
@@ -263,7 +263,7 @@ const OverviewTab = ({ brand }) => {
                     <TableCell sx={{ width: "8%" }}>Exterior</TableCell>
                     <TableCell sx={{ width: "8%" }}>ROI</TableCell>
                     <TableCell sx={{ width: "8%" }}>BreakEven</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Margin on Sale</TableCell> 
+                    <TableCell sx={{ width: "8%" }}>Margin On Sale</TableCell> 
                     <TableCell sx={{ width: "8%" }}>Fixed Return</TableCell> 
                     {/* <TableCell sx={{ width: "8%" }}>Select</TableCell> */}
                   </TableRow>
@@ -346,6 +346,18 @@ const OverviewTab = ({ brand }) => {
               </Table>
             </TableContainer>
           </motion.div>
+<Box display={"flex"} justifyContent={"space-evenly"} >
+  <Typography fontSize={"0.7rem"}>FOFO (Franchise Owned Franchise Operated)
+   </Typography>
+  <Typography fontSize={"0.7rem"}>
+    FOCO (Franchise Owned Company Operated)
+    </Typography>
+  <Typography fontSize={"0.7rem"}>
+    FICO (Franchise Invested Company Operated)
+    </Typography>
+  <Typography fontSize={"0.7rem"} >
+    COCO (Company Owned Company Operated)</Typography>
+</Box>
 
           <motion.div
             whileHover={{ scale: 1.02 }}
@@ -362,7 +374,8 @@ const OverviewTab = ({ brand }) => {
                 py: 1.5,
                 borderRadius: "8px",
                 textTransform: "none",
-                fontSize: "1rem"
+                fontSize: "1rem",
+                mt: 1
               }} 
               onClick={() => {
                  // Debug: See what you get
@@ -372,7 +385,6 @@ const OverviewTab = ({ brand }) => {
             >
               Apply for Franchise
              </Button>
-
           </motion.div>
 
           <Dialog
@@ -450,19 +462,21 @@ const OverviewTab = ({ brand }) => {
                     </Box>
                   </motion.div>
                 ) : (
-                  <form onSubmit={handleSubmit}>
+                  <form onSubmit={handleSubmit} >
                     <Grid
                       container
+                      display={"flex"}
+                      flexDirection={"column"}
                       spacing={2}
-                      sx={{
-                        display: "grid",
-                        pt: 2,
-                        gridTemplateColumns: "repeat(5, 1fr)",
-                      }}
+                      // sx={{
+                      //   display: "grid",
+                      //   pt: 2,
+                      //   gridTemplateColumns: "repeat(5, 1fr)",
+                      // }}
                     >
-                      <Grid item xs={12} md={6}>
+                      <Box sx={{ display: "flex", justifyContent: "space-between" }} mt={2}><Grid item xs={12} md={6}>
                         <TextField
-                          fullWidth
+                          // fullWidth
                           label="Full Name"
                           name="fullName"
                           value={formData.fullName || userData?.firstName || ""}  
@@ -476,7 +490,7 @@ const OverviewTab = ({ brand }) => {
                       </Grid>
                       <Grid item xs={12} md={6}>
                         <TextField
-                          fullWidth
+                          // fullWidth
                           label="Email"
                           name="investorEmail"
                           value={formData.investorEmail || userData?.email || ""}
@@ -490,7 +504,7 @@ const OverviewTab = ({ brand }) => {
                       </Grid>
                       <Grid item xs={12} md={6}>
                         <TextField
-                          fullWidth
+                          // fullWidth
                           label="Mobile Number"
                           name="mobileNumber"
                           value={formData.mobileNumber || userData?.mobileNumber || ""}
@@ -501,7 +515,7 @@ const OverviewTab = ({ brand }) => {
                           sx={{ mb: 2 }}
                           InputProps={{ readOnly: true }}
                         />
-                      </Grid>                   
+                      </Grid> </Box>                  
                         <Grid item xs={12} md={6}>
                           <
                             TextField
