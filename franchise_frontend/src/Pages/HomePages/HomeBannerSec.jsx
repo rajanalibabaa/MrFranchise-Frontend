@@ -405,7 +405,7 @@ const HomeBannerSec = () => {
   return (
     <>
   <head>
-    <link rel="icon" href="BrandLogo" />
+    <link rel="icon" href="BrandLogo" /> 
         <title>Mr Franchise.in</title>
       </head>
       {
