@@ -199,7 +199,7 @@ function TopBrandVdoCards() {
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-    >
+    > 
       {/* Header and navigation buttons */}
       <Box
         sx={{
@@ -367,13 +367,14 @@ function TopBrandVdoCards() {
                   <Stack
                     direction={{ xs: "column", sm: "row" }}
                     alignItems={{ xs: "flex-start", sm: "center" }}
-                    spacing={2}
+                    ml={{xs:3}}
+                    spacing={1}
                     sx={{ flex: 1, minWidth: 0 }}
                   >
                     {/* Avatar and brand name */}
                     <Stack
                       direction="row"
-                      spacing={2}
+                      spacing={1}
                       alignItems="center"
                       sx={{ minWidth: 0, flex: 1 }}
                     >
@@ -422,13 +423,18 @@ function TopBrandVdoCards() {
                       </Box>
                     </Stack>
 
+               <Stack
+                    direction={{ xs: "row" }}
+                    alignItems={{ xs: "flex-start", sm: "center" }}
+                    spacing={10}
+                    sx={{ flex: 1, minWidth: 0 }}
+                  >
+
                     {/* Key facts */}
                     <Stack
-                      marginTop={0}
-                      direction="row"
-                      spacing={2}
-                      flexWrap="wrap"
-                      justifyContent={{ xs: "flex-start", sm: "center" }}
+                      direction="column"
+                      spacing={1}
+                     
                     >
                       <Fact
                         label="Investment"
@@ -499,6 +505,7 @@ function TopBrandVdoCards() {
                           )}
                         </IconButton>
                       </Tooltip>
+                    </Stack>
                     </Stack>
                   </Stack>
                 </CardContent>
