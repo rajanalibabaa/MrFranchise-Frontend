@@ -24,6 +24,7 @@ import {
   List,
   ListItemText,
   Box,
+  Chip,
   ListItem,
   CircularProgress,
   Alert,
@@ -33,13 +34,23 @@ import {
   DialogContent,
   DialogActions,
   Toolbar,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  IconButton,
+  Divider,  
 } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import Footer from "../../Components/Footers/Footer";
-
+import { DeleteIcon } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 const phoneCodes = {
   India: "+91",
   USA: "+1",
@@ -75,6 +86,7 @@ const InvestorRegister = () => {
   });
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [phonePrefix, setPhonePrefix] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("India");
 
@@ -98,7 +110,9 @@ const InvestorRegister = () => {
   const [loginOpen, setLoginOpen] = useState(false);
   const [preferences, setPreferences] = useState([]);
   const [preferenceDialogOpen, setPreferenceDialogOpen] = useState(false);
-
+const [selectedMainCategory, setSelectedMainCategory] = useState('');
+const [selectedSubCategory, setSelectedSubCategory] = useState('');
+const [selectedChild, setSelectedChild] = useState('');
 
   const FORM_DATA_KEY = "investor_form_data";
   const initialFormData = {
@@ -338,7 +352,7 @@ const InvestorRegister = () => {
   //   setOtpModal({
   //     open: true,
   //     type,
-  //     otp: "",
+  //     otp: "",F
   //     loading: false,
   //     verified: otpStates[type]?.verified || false,
   //   });
@@ -516,6 +530,7 @@ const InvestorRegister = () => {
   }, [formData]);
 
  const onSubmit = async (data) => {
+  
   if (!preferences.length) {
     showSnackbar("Please add at least one preference before submitting.", "error");
     return;
@@ -540,20 +555,28 @@ const InvestorRegister = () => {
     ...(data.occupation === "Other" && {
       specifyOccupation: data.otherOccupation || "",
     }),
-    preferences: preferences.map(pref => ({
-    category: Array.isArray(pref.category)
-      ? pref.category.map(c => `${c.main} > ${c.sub} > ${c.child}`).join(", ")
-      : typeof pref.category === "string"
-        ? pref.category
-        : "",
-    investmentRange: pref.investmentRange,
-    investmentAmount: pref.investmentAmount,
-    propertyType: pref.propertyType,
-    propertySize: pref.propertyType === "Own Property" ? pref.propertySize : "",
-    preferredState: pref.preferredState,
-    preferredDistrict: pref.preferredDistrict,
-    preferredCity: pref.preferredCity,
-  })),
+  preferences: preferences.map(pref => ({
+  category: Array.isArray(pref.category)
+    ? pref.category.map(c => ({
+        main: c.main || "",
+        sub: c.sub || "",
+        child: c.child || ""
+      }))
+    : typeof pref.category === "string"
+      ? [(() => {
+          const [main, sub, child] = pref.category.split(">").map(s => s.trim());
+          return { main, sub, child };
+        })()]
+      : [],
+  investmentRange: pref.investmentRange,
+  investmentAmount: pref.investmentAmount,
+  propertyType: pref.propertyType,
+  propertySize: pref.propertyType === "Own Property" ? pref.propertySize : "",
+  preferredState: pref.preferredState,
+  preferredDistrict: pref.preferredDistrict,
+  preferredCity: pref.preferredCity,
+}))
+
       // category: selectedCategories,
       // investmentRange: data.investmentRange || "",
       // investmentAmount: data.investmentAmount || "",
@@ -569,8 +592,9 @@ const InvestorRegister = () => {
     console.log("Submitting data:", formattedData);
 
     try {
+      dispatch(showLoading());
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
+        "http://localhost:5000/api/v1/investor/createInvestor",
         // "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
@@ -594,6 +618,10 @@ console.log("Registration response:", response.data);
         );
         setLoginOpen(true);
         // setTimeout(() => navigate("/"), 2000);
+setTimeout(() => {
+  dispatch(hideLoading());
+}, 2000);
+
       } else {
         showSnackbar(
           "An unexpected error occurred. Please try again.",
@@ -700,7 +728,7 @@ console.log("Registration response:", response.data);
     mt={5}
       sx={{
         // backgroundImage: `url(${backgroundImage})` ,
-        backgroundColor: "#f0f0f0",
+        // backgroundColor: "#f0f0f0",
         backgroundSize: "contain",
         backgroundPosition: "center",
         // backgroundRepeat: "no-repeat",
@@ -718,7 +746,6 @@ console.log("Registration response:", response.data);
             maxWidth:'500vh',
             borderRadius: "10px",
             boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-            // bgcolor: "#e6f2de",
             display: "flex",
             flexDirection: "column",
             position: "relative",
@@ -730,7 +757,7 @@ console.log("Registration response:", response.data);
             variant="h4"
             gutterBottom
             fontWeight="bold"
-            sx={{ textAlign: "center", mb: 1, color: "black", mt: 3 }}
+            sx={{ textAlign: "center", mb: 1, color: "#7ad03a", mt: 3 }}
           >
             Investor Registration
           </Typography>
@@ -1090,209 +1117,135 @@ console.log("Registration response:", response.data);
               container
               spacing={2}
               sx={{
-                display: "grid",
-                gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+                // display: "grid",
+                // gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
                 gap: 2,
               }}
             >
               {/* Category Field */}
-              <Grid sx={{ position: "relative" }}>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <TextField
-                    fullWidth
-                    label="Select Preferred Categories"
-                    value={
-                      selectedCategories
-                        .map((c) => `${c.main} > ${c.sub} > ${c.child}`)
-                        .join(", ") || ""
-                    }
-                    onClick={() =>
-                      setCategoryDropdownOpen(!isCategoryDropdownOpen)
-                    }
-                    InputProps={{
-                      readOnly: true,
-                    }}
-                    error={!!errors.category}
-                    helperText={errors.category?.message}
-                    {...register("category"
-                    //   , {
-                    //   validate: (value) =>
-                    //     value?.length > 0 ||
-                    //     "At least one category is required",
-                    // }
-                  )}
-                  />
+              {/* Category Selection - Multi-Level Dropdown */}
+<Grid item xs={12}>
+  <Stack direction="row"  spacing={2} alignItems="center"  >
+    {/* Main Category Dropdown */}
+    <FormControl sx={{ minWidth: 200 }} >
+      <InputLabel>Main Category</InputLabel>
+      <Select
+        value={selectedMainCategory || ''}
+        onChange={(e) => {
+          setSelectedMainCategory(e.target.value);
+          setSelectedSubCategory('');
+          setSelectedChild('');
+        }}
+        label="Main Category"
+      >
+        <MenuItem value="">Select Main Category</MenuItem>
+        {categories.map((category, index) => (
+          <MenuItem key={index} value={category.name}>
+            {category.name}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
 
-                  {isCategoryDropdownOpen && (
-                    <Paper
-                      ref={dropdownRef}
-                      sx={{
-                        position: "absolute",
-                        bottom: "100%",
-                        left: 0,
-                        zIndex: 1300,
-                        mt: 1,
-                        width: "200%",
-                        display: "flex",
-                        boxShadow: 3,
-                        maxHeight: "260px",
-                        overflowY: "auto",
-                      }}
-                    >
-                      {/* Main Categories */}
-                      <Box sx={{ flex: 1, borderRight: "1px solid #eee" }}>
-                        <Typography
-                          sx={{
-                            p: 1,
-                            fontWeight: "bold",
-                            bgcolor: "grey.100",
-                            width: "100%",
-                          }}
-                        >
-                          Main Categories
-                        </Typography>
-                        <List>
-                          {categories.map((category, index) => (
-                            <ListItem
-                              key={index}
-                              button="true"
-                              onMouseEnter={() => setActiveCategory(index)}
-                              selected={activeCategory === index}
-                            >
-                              <ListItemText
-                                primary={category.name}
-                                sx={{
-                                  fontWeight:
-                                    activeCategory === index
-                                      ? "bold"
-                                      : "normal",
-                                  color:
-                                    activeCategory === index
-                                      ? "primary.main"
-                                      : "inherit",
-                                }}
-                              />
-                              {category.children &&
-                                category.children.length > 0 && (
-                                  <ChevronRightIcon
-                                    sx={{
-                                      color:
-                                        activeCategory === index
-                                          ? "primary.main"
-                                          : "inherit",
-                                    }}
-                                  />
-                                )}
-                            </ListItem>
-                          ))}
-                        </List>
-                      </Box>
+    {/* Subcategory Dropdown */}
+    <FormControl sx={{ minWidth: 200 }} disabled={!selectedMainCategory}>
+      <InputLabel>Subcategory</InputLabel>
+      <Select
+        value={selectedSubCategory || ''}
+        onChange={(e) => {
+          setSelectedSubCategory(e.target.value);
+          setSelectedChild('');
+        }}
+        label="Subcategory"
+      >
+        <MenuItem value="">Select Subcategory</MenuItem>
+        {selectedMainCategory && 
+          categories.find(c => c.name === selectedMainCategory)?.children?.map((sub, index) => (
+            <MenuItem key={index} value={sub.name}>
+              {sub.name}
+            </MenuItem>
+          ))
+        }
+      </Select>
+    </FormControl>
 
-                      {/* Subcategories */}
-                      <Box
-                        sx={{
-                          flex: 1,
-                          borderRight: "1px solid #eee",
-                          width: "70%",
-                        }}
-                      >
-                        <Typography
-                          sx={{ p: 1, fontWeight: "bold", bgcolor: "grey.100" }}
-                        >
-                          Subcategories
-                        </Typography>
-                        {activeCategory !== null &&
-                          categories[activeCategory]?.children && (
-                            <List>
-                              {categories[activeCategory].children.map(
-                                (subCategory, subIndex) => (
-                                  <ListItem
-                                    key={subIndex}
-                                    button="true"
-                                    onMouseEnter={() =>
-                                      setActiveSubCategory(subCategory)
-                                    }
-                                    selected={
-                                      activeSubCategory?.name ===
-                                      subCategory.name
-                                    }
-                                  >
-                                    <ListItemText
-                                      primary={subCategory.name}
-                                      sx={{
-                                        fontWeight:
-                                          activeSubCategory?.name ===
-                                          subCategory.name
-                                            ? "bold"
-                                            : "normal",
-                                        color:
-                                          activeSubCategory?.name ===
-                                          subCategory.name
-                                            ? "primary.main"
-                                            : "inherit",
-                                      }}
-                                    />
-                                    {subCategory.children &&
-                                      subCategory.children.length > 0 && (
-                                        <ChevronRightIcon
-                                          sx={{
-                                            color:
-                                              activeSubCategory?.name ===
-                                              subCategory.name
-                                                ? "primary.main"
-                                                : "inherit",
-                                          }}
-                                        />
-                                      )}
-                                  </ListItem>
-                                )
-                              )}
-                            </List>
-                          )}
-                      </Box>
+    {/* Child Item Dropdown */}
+    <FormControl sx={{ minWidth: 200 }} disabled={!selectedSubCategory}>
+      <InputLabel>Item</InputLabel>
+      <Select
+        value={selectedChild || ''}
+        onChange={(e) => setSelectedChild(e.target.value)}
+        label="Item"
+      >
+        <MenuItem value="">Select Item</MenuItem>
+        {selectedMainCategory && selectedSubCategory && 
+          categories.find(c => c.name === selectedMainCategory)
+            ?.children?.find(s => s.name === selectedSubCategory)
+            ?.children?.map((child, index) => (
+              <MenuItem key={index} value={child}>
+                {child}
+              </MenuItem>
+            ))
+        }
+      </Select>
+    </FormControl>
 
-                      {/* Sub-Child Categories */}
-                      <Box
-                        sx={{
-                          flex: 1,
-                          borderRight: "1px solid #eee",
-                          width: "70%",
-                        }}
-                      >
-                        <Typography
-                          sx={{ p: 1, fontWeight: "bold", bgcolor: "grey.100" }}
-                        >
-                          Items
-                        </Typography>
-                        {activeSubCategory?.children && (
-                          <List>
-                            {activeSubCategory.children.map((child, index) => (
-                              <ListItem
-                                key={index}
-                                button="true"
-                                onClick={() =>
-                                  handleCategorySelection(
-                                    categories[activeCategory]?.name,
-                                    activeSubCategory?.name,
-                                    child
-                                  )
-                                }
-                              >
-                                <ListItemText primary={child} />
-                              </ListItem>
-                            ))}
-                          </List>
-                        )}
-                      </Box>
-                    </Paper>
-                  )}
-                  <Tooltip title="Select your preferred category to invest">
-                    <InfoIcon
-                      sx={{ color: "#ff9800", cursor: "pointer", mt: 1 }}
-                    />
-                  </Tooltip>
-                </Stack>
-              </Grid>
+    {/* Add Category Button */}
+    <Button
+      variant="contained"
+      color="success"
+      disabled={!selectedChild}
+      onClick={() => {
+        if (selectedMainCategory && selectedSubCategory && selectedChild) {
+          const newCategory = {
+            main: selectedMainCategory,
+            sub: selectedSubCategory,
+            child: selectedChild
+          };
+          
+          setSelectedCategories(prev => {
+            const exists = prev.some(c => 
+              c.main === newCategory.main && 
+              c.sub === newCategory.sub && 
+              c.child === newCategory.child
+            );
+            return exists ? prev : [...prev, newCategory];
+          });
+          
+          // Reset selections
+          setSelectedMainCategory('');
+          setSelectedSubCategory('');
+          setSelectedChild('');
+        }
+      }}
+      sx={{ height: '56px' }} // Match select height
+    >
+      Add Category
+    </Button>
+  </Stack>
+
+  {/* Display Selected Categories */}
+  {selectedCategories.length > 0 && (
+    <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+      {selectedCategories.map((cat, index) => (
+        <Chip
+          key={index}
+          label={`${cat.main} > ${cat.sub} > ${cat.child}`}
+          onDelete={() => {
+            setSelectedCategories(selectedCategories.filter((_, i) => i !== index));
+          }}
+          sx={{ 
+            backgroundColor: '#e3f2fd',
+            color: '#1976d2',
+            '& .MuiChip-deleteIcon': {
+              color: '#1976d2'
+            }
+          }}
+        />
+      ))}
+    </Box>
+  )}
+</Grid>
 
               {/* {preferred investment range field} */}
               <Grid sx={{ xs: 12, sm: 4 }}>
@@ -1359,7 +1312,7 @@ console.log("Registration response:", response.data);
 
               {/* Preferred State Field (changed to text input) */}
               <Grid  xs={12} sm={6}>
-                <FormControl fullWidth error={!!errors.preferredState}>
+                <FormControl sx={{ minWidth: 200 }} error={!!errors.preferredState}>
                   <InputLabel>Preferred State *</InputLabel>
                   <Select
                     label="Preferred State"
@@ -1390,7 +1343,7 @@ console.log("Registration response:", response.data);
 
               {/* Preferred District Field  */}
               <Grid  xs={12} sm={6}>
-                <FormControl fullWidth error={!!errors.preferredDistrict}>
+                <FormControl sx={{ minWidth: 200 }} error={!!errors.preferredDistrict}>
                   <InputLabel>Preferred District *</InputLabel>
                   <Select
                     label="Preferred District"
@@ -1421,7 +1374,7 @@ console.log("Registration response:", response.data);
 
               {/* Preferred City Field (changed to text input) */}
               <Grid  xs={12} sm={6}>
-                <FormControl fullWidth error={!!errors.preferredCity}>
+                <FormControl sx={{ minWidth: 200 }} error={!!errors.preferredCity}>
                   <InputLabel>Preferred City *</InputLabel>
                   <Select
                     label="Preferred City"
@@ -1449,7 +1402,7 @@ console.log("Registration response:", response.data);
               <Grid  xs={12} sm={6} md={4}>
                 <FormControl
                   component="fieldset"
-                  fullWidth
+                  sx={{ minWidth: 200 }}
                   // error={!!errors.propertyType}
                 >
                   <FormLabel component="legend">Property Type *</FormLabel>
@@ -1496,7 +1449,7 @@ console.log("Registration response:", response.data);
                 <Grid  xs={12} sm={6} md={4}>
                   <TextField
                     select
-                    fullWidth
+                    sx={{ minWidth: 200 }}
                     label="Property Size *"
                     {...register("propertySize", {
                       required: "Property size is required for own property",
@@ -1548,25 +1501,10 @@ console.log("Registration response:", response.data);
             </Button>
             
           </ Grid>
-              <Grid  xs={12} sm={6} md={4} mt={1} >
-                <Button
-            
-              variant="contained"
-              color='warning'
-              size="medium"
-              fullWidth
-              sx={{ bgcolor: '#ff9800', '&:hover': { bgcolor: '#f57c00' } }}
-              onClick={() =>{
-document.activeElement.blur();
-                 setPreferenceDialogOpen(true);}}
-              disabled={preferences.length === 0}
-            >
-              Show Added Preferences
-            </Button>
-                </Grid>
+ 
 
           {/* Preferences Dialog */}
-          <Dialog open={preferenceDialogOpen} onClose={() => setPreferenceDialogOpen(false)} maxWidth="md" fullWidth>
+          {/* <Dialog open={preferenceDialogOpen} onClose={() => setPreferenceDialogOpen(false)} maxWidth="md" fullWidth>
             <DialogTitle color="orange" fontWeight="bold">Added Preferences</DialogTitle>
             <DialogContent>
               {preferences.length === 0 ? (
@@ -1600,10 +1538,102 @@ document.activeElement.blur();
             <DialogActions>
               <Button color="error"  variant ="contained" onClick={() => setPreferenceDialogOpen(false)}>Close</Button>
             </DialogActions>
-          </Dialog>
+          </Dialog> */}
   
+
             </Grid>
-            {/* <Divider sx={{ borderColor: "#7ad03a", mt: 5 }} /> */}
+                        <Grid item xs={12}>
+  {/* <Button
+    variant="contained"
+    color="warning"
+    size="medium"
+    fullWidth
+    sx={{ 
+      bgcolor: '#ff9800', 
+      '&:hover': { bgcolor: '#f57c00' },
+      mt: 2,
+      mb: 2
+    }}
+    onClick={() => document.activeElement.blur()}
+    disabled={preferences.length === 0}
+  >
+    {preferences.length > 0 ? `View ${preferences.length} Added Preferences` : "No Preferences Added Yet"}
+  </Button> */}
+
+  {preferences.length > 0 && (
+    <TableContainer component={Paper} sx={{ mt: 2, mb: 3 }}>
+      <Table size="small" aria-label="added preferences table">
+        <TableHead>
+          <TableRow sx={{ bgcolor: 'grey.100' }}>
+            <TableCell sx={{ fontWeight: 'bold' }}>#</TableCell>
+            <TableCell sx={{ fontWeight: 'bold' }}>Categories</TableCell>
+            <TableCell sx={{ fontWeight: 'bold' }}>Investment</TableCell>
+            <TableCell sx={{ fontWeight: 'bold' }}>Location</TableCell>
+            <TableCell sx={{ fontWeight: 'bold' }}>Property</TableCell>
+            <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {preferences.map((pref, idx) => (
+            <TableRow key={idx}>
+              <TableCell>{idx + 1}</TableCell>
+              <TableCell>
+                {Array.isArray(pref.category) ? (
+                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                    {pref.category.map((cat, i) => (
+                      <Typography key={i} variant="body2">
+                        {`${cat.main} > ${cat.sub} > ${cat.child}`}
+                      </Typography>
+                    ))}
+                  </Box>
+                ) : null}
+              </TableCell>
+              <TableCell>
+                <Typography variant="body2">
+                  <Box component="span" fontWeight="bold">Range:</Box> {pref.investmentRange}
+                </Typography>
+                <Typography variant="body2">
+                  <Box component="span" fontWeight="bold">Amount:</Box> {pref.investmentAmount}
+                </Typography>
+              </TableCell>
+              <TableCell>
+                <Typography variant="body2">
+                  <Box component="span" fontWeight="bold">State:</Box> {pref.preferredState}
+                </Typography>
+                <Typography variant="body2">
+                  <Box component="span" fontWeight="bold">District:</Box> {pref.preferredDistrict}
+                </Typography>
+                <Typography variant="body2">
+                  <Box component="span" fontWeight="bold">City:</Box> {pref.preferredCity}
+                </Typography>
+              </TableCell>
+              <TableCell>
+                <Typography variant="body2">
+                  <Box component="span" fontWeight="bold">Type:</Box> {pref.propertyType}
+                </Typography>
+                {pref.propertyType === "Own Property" && (
+                  <Typography variant="body2">
+                    <Box component="span" fontWeight="bold">Size:</Box> {pref.propertySize}
+                  </Typography>
+                )}
+              </TableCell>
+              <TableCell>
+                <IconButton
+                  color="error"
+                  onClick={() => handleRemovePreference(idx)}
+                  aria-label="remove preference"
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  )}
+</Grid>
+            <Divider sx={{ borderColor: "#7ad03a", mt: 5 }} />
             <Grid container spacing={2} sx={{ display: "flex", justifyContent: "center", flexDirection  : "column" }} mt={3}>
                 {/* Terms and Conditions Checkbox */}
                 <Grid
@@ -1754,36 +1784,48 @@ document.activeElement.blur();
             {snackbar.message}
           </Alert>
         </Snackbar>
-        <Snackbar
+
+<Snackbar
   open={showWhatsappSnackbar}
-  anchorOrigin={{ vertical: "top", horizontal: "center",width:"10%" }}
+  autoHideDuration={6000}
   onClose={() => setShowWhatsappSnackbar(false)}
-  message="Is your WhatsApp number same as your phone number?"
-  action={
-    <>
-      <Button
-        color="primary"
-        size="small"
-        onClick={() => {
-          setValue("whatsappNumber", watch("mobileNumber"));
-          setShowWhatsappSnackbar(false);
-          setWhatsappEnabled(true);
-          showSnackbar("WhatsApp number auto-filled.", "success");
-        }}
-      >
-        Yes
-      </Button>
-      <Button
-        color="secondary"
-        size="small"
-        onClick={() => {setShowWhatsappSnackbar(false);
-          setWhatsappEnabled(true);}}
-      >
-        No
-      </Button>
-    </>
-  }
-/>
+  anchorOrigin={{ vertical: 'top',  horizontal: 'center', }}
+  sx={{ width: '100%', maxWidth: '800px' }}
+>
+  <Alert
+    onClose={() => setShowWhatsappSnackbar(false)}
+    severity="info"
+    sx={{ width: '100%', }}
+    action={
+      <>
+        <Button
+          color="success"
+          size="medium"
+          onClick={() => {
+            setValue("whatsappNumber", watch("mobileNumber"));
+            setShowWhatsappSnackbar(false);
+            setWhatsappEnabled(true);
+            showSnackbar("WhatsApp number auto-filled.", "success");
+          }}
+        >
+          Yes
+        </Button>
+        <Button
+          color="warning"
+          size="medium"
+          onClick={() => {
+            setShowWhatsappSnackbar(false);
+            setWhatsappEnabled(true);
+          }}
+        >
+          No
+        </Button>
+      </>
+    }
+  >
+    Is your WhatsApp number same as your phone number?
+  </Alert>
+</Snackbar>
      
       <Footer />
     </Box>
@@ -1791,3 +1833,5 @@ document.activeElement.blur();
 };
 
 export default InvestorRegister;
+
+
