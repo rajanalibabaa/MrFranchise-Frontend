@@ -218,10 +218,9 @@ const BrandDetailsDialog = () => {
         investorEmail: "",
         mobileNumber: "",
         });
-   
       }
     } catch (error) {
-      // console.log("Submission error:", error?.response?.data || error.message);
+      console.log("Submission error:", error?.response?.data || error.message);
       alert("❌Failed to submit application.");
     } finally {
       setIsSubmitting(false);
