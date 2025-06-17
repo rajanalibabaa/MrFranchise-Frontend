@@ -89,10 +89,12 @@ function LoginPage({ open, onClose }) {
      setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
+        "http://localhost:5000/api/v1/login/generateOTPforLogin",
         otpRequestPayload,
         { headers: { "Content-Type": "application/json" } }
       );
+
+      console.log(response.data)
 
       if (response.data.success) {
         setSnackbar({
@@ -121,7 +123,7 @@ function LoginPage({ open, onClose }) {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        "http://localhost:5000/api/v1/login/",
         otpVerifyPayload,
         { headers: { "Content-Type": "application/json" } }
       );

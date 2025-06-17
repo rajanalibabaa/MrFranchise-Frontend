@@ -24,8 +24,8 @@ export const toggleLikeBrand = createAsyncThunk(
       if (!isLiked) {
         // Like the brand - POST request
         await axios.post(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
-          // "https://franchise-backend-wgp6.onrender.com/api/api/v1/like/post-favbrands",
+          "http://localhost:5000/api/v1/like/post-favbrands",
+          // "http://localhost:5000/api/api/v1/like/post-favbrands",
           { branduuid: brandId },
           config
         );
@@ -33,8 +33,8 @@ export const toggleLikeBrand = createAsyncThunk(
         console.log("delete");
         // Unlike the brand - DELETE request
         const res = await axios.delete(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${id}`,
-          // `https://franchise-backend-wgp6.onrender.com/api/api/v1/like/delete-favbrand/${id}`,
+          `http://localhost:5000/api/v1/like/delete-favbrand/${id}`,
+          // `http://localhost:5000/api/api/v1/like/delete-favbrand/${id}`,
 
           {
             headers: {
@@ -61,7 +61,7 @@ export const toggleLikeBrand = createAsyncThunk(
 export const Likeshow = async () => {
   try {
     const response = await axios.get(
-      `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
+      `http://localhost:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -84,7 +84,7 @@ export const fetchBrands = createAsyncThunk(
 
       if (!token) {
         response = await axios.get(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+          "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
           {
             headers: {
               "Content-Type": "application/json",
@@ -96,7 +96,7 @@ export const fetchBrands = createAsyncThunk(
         response = await Likeshow();
       }
 
-    console.log("arvindApi",response.data.data)
+    console.log("arvindApi",response)
 
       return response.data.data;
     } catch (err) {
@@ -112,7 +112,7 @@ export const viewApi = createAsyncThunk(
 
     try {
       const res = await axios.post(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
+        `http://localhost:5000/api/v1/view/postViewBrands/${id}`,
 
         {
           headers: {
