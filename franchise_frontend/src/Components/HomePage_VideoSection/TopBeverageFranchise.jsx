@@ -30,6 +30,7 @@ import {
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
 import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
+import { showLoading , hideLoading} from "../../Redux/Slices/loadingSlice";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -465,7 +466,12 @@ const beverageBrands = useMemo(() => {
               backgroundColor: "transparent",
             },
           }}
-          onClick={() => navigate("/brandviewpage")}
+          onClick={() => 
+          {dispatch(showLoading());
+            navigate("/brandviewpage");
+            setTimeout(() => {
+              dispatch(hideLoading());
+            }, 2000);}}
         >
           View More
         </Button>

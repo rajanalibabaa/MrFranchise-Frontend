@@ -58,6 +58,7 @@ function TopBrandVdoCards() {
       width: isMobile ? "100%" : isTablet ? "100%" : "68%",
       height: isMobile ? 420 : isTablet ? 480 : 550,
       videoHeight: isMobile ? 250 : isTablet ? 300 : 450,
+      
     },
     side: {
       width: isMobile ? "100%" : isTablet ? "100%" : "30%",
@@ -199,7 +200,7 @@ function TopBrandVdoCards() {
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-    >
+    > 
       {/* Header and navigation buttons */}
       <Box
         sx={{
@@ -367,13 +368,14 @@ function TopBrandVdoCards() {
                   <Stack
                     direction={{ xs: "column", sm: "row" }}
                     alignItems={{ xs: "flex-start", sm: "center" }}
-                    spacing={2}
+                    ml={{xs:3}}
+                    spacing={1}
                     sx={{ flex: 1, minWidth: 0 }}
                   >
                     {/* Avatar and brand name */}
                     <Stack
                       direction="row"
-                      spacing={2}
+                      spacing={1}
                       alignItems="center"
                       sx={{ minWidth: 0, flex: 1 }}
                     >
@@ -422,13 +424,18 @@ function TopBrandVdoCards() {
                       </Box>
                     </Stack>
 
+               <Stack
+                    direction={{ xs: "row" }}
+                    alignItems={{ xs: "flex-start", sm: "center" }}
+                    spacing={10}
+                    sx={{ flex: 1, minWidth: 0 }}
+                  >
+
                     {/* Key facts */}
                     <Stack
-                      marginTop={0}
-                      direction="row"
-                      spacing={2}
-                      flexWrap="wrap"
-                      justifyContent={{ xs: "flex-start", sm: "center" }}
+                      direction="column"
+                      spacing={1}
+                     
                     >
                       <Fact
                         label="Investment"
@@ -500,6 +507,7 @@ function TopBrandVdoCards() {
                         </IconButton>
                       </Tooltip>
                     </Stack>
+                    </Stack>
                   </Stack>
                 </CardContent>
               </Card>
@@ -557,7 +565,7 @@ function TopBrandVdoCards() {
             display: "flex",
             flexDirection: "column",
             gap: isMobile ? 3 : isTablet ? 3 : 4,
-            minWidth: isMobile ? "100%" : "30%",
+            minWidth: isMobile ? "100%" : "32%",
           }}
         >
           {nextBrands.map((brand, i) => (
@@ -675,17 +683,21 @@ function TopBrandVdoCards() {
                           }
                         >
                           <Typography
-                            variant="h6"
-                            color="#7ad03a"
-                            fontWeight="bold"
-                            noWrap
-                            sx={{
-                              flex: 1,
-                              minWidth: 0,
-                            }}
-                          >
-                            {brand.personalDetails?.brandName || brand.title}
-                          </Typography>
+  variant="h6"
+  color="#7ad03a"
+  fontWeight="bold"
+  noWrap={false}
+  sx={{
+    flex: 1,
+    minWidth: 0,
+    whiteSpace: 'normal',     // allow wrapping
+    wordBreak: 'break-word',  // break long words if needed
+    overflowWrap: 'break-word', // wraps at word boundaries
+  }}
+>
+  {brand.personalDetails?.brandName || brand.title}
+</Typography>
+
                         </Tooltip>
                         <IconButton
                           size="small"

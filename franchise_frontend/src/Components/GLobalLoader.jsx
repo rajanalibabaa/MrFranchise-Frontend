@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Box } from '@mui/material';
 import Lottie from 'lottie-react';
-import loadingAnimation from '../assets/videos/Animation - 1749816697493.json';
+import loadingAnimation from '../assets/videos/Animation - 1750051841214.json';
 
 const GlobalLoader = () => {
   const isLoading = useSelector((state) => state.loading.isLoading);

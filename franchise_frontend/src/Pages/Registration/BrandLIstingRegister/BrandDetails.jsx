@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   TextField,
@@ -12,25 +11,25 @@ import {
   List,
   ListItem,
   ListItemText,
-  IconButton,
-  Tooltip,
   Paper,
   Box,
-  styled,
-  useTheme,
-  useMediaQuery,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
-  Chip,
   CircularProgress,
+  Snackbar,
+  Alert,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import categories from "./BrandCategories.jsx";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
+import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
 
 const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
@@ -43,6 +42,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   };
 
   const [selectedCategory, setSelectedCategory] = useState({
+    groupId: "",
     main: "",
     sub: "",
     child: "",
@@ -53,933 +53,1616 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     const { name, value } = e.target;
     onChange({ [name]: value });
   };
+  const [pincodeError, setPincodeError] = useState(null);
+  const [loadingPincode, setLoadingPincode] = useState(false);
 
+  // Expansion Location Modal State
   const [openLocationModal, setOpenLocationModal] = useState(false);
+  const [locationType, setLocationType] = useState("domestic"); // 'domestic' or 'international'
   const [newLocation, setNewLocation] = useState({
+    type: "domestic",
     country: "India",
     state: "",
     district: "",
     city: "",
   });
-  const [statesData, setStatesData] = useState([]); // full data
+
+  // Domestic Location Data
+  const [statesData, setStatesData] = useState([]);
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
-const [stateCities, setStateCities] = useState([]);
-  const [apiError, setApiError] = useState(null);
-  const [pincodeError, setPincodeError] = useState(null);
-  const [loadingPincode, setLoadingPincode] = useState(false);
+  const [cities, setCities] = useState([]);
 
- const [loading, setLoading] = useState({
+  // International Location Data
+  const [countries, setCountries] = useState([]);
+  const [internationalStates, setInternationalStates] = useState([]);
+  const [internationalCities, setInternationalCities] = useState([]);
+
+  const [loading, setLoading] = useState({
     states: false,
     districts: false,
-    cities: false
+    cities: false,
+    countries: false,
+    intStates: false,
+    intCities: false,
   });
 
-const [selectedState, setSelectedState] = useState("");
-  const [selectedDistrict, setSelectedDistrict] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
+  const [apiError, setApiError] = useState(null);
+
   // Fetch all Indian states on component mount
- useEffect(() => {
-  const fetchStates = async () => {
-    setLoading(prev => ({ ...prev, states: true }));
-    try {
-      const response = await axios.get(
-        "https://raw.githubusercontent.com/prasad-gowda/india-state-district-cities/master/India-state-district-city.json"
-      );
-      setStatesData(response.data);
-      console.log("States Data:", response.data);
-      
-      setStates(response.data.map(state => ({ id: state.iso2, name: state.name })).sort((a, b) => a.name.localeCompare(b.name)));
-      // Set the first state as selected by default
-
-    } catch (error) {
-      setApiError("Failed to load states. Please try again later.");
-      console.error("Error fetching states:", error);
-    } finally {
-      setLoading(prev => ({ ...prev, states: false }));
-    }
-  };
-
-  fetchStates();
-}, []);
-
-const handleStateChange = (e) => {
-  const stateName = e.target.value;
-  setSelectedState(stateName);
-  setSelectedDistrict("");
-  setSelectedCity("");
-
-  setNewLocation((prev) => ({
-    ...prev,
-    state: stateName,
-    district: "",
-    city: ""
-  }));
-
-  const stateObj = statesData.find(s => s.name === stateName);
-  if (stateObj) {
-    setDistricts(stateObj.districts.sort());
-    setStateCities(stateObj.cities);
-    setCities([]);
-  } else {
-    setDistricts([]);
-    setStateCities([]);
-    setCities([]);
-  }
-};
-
-
-
-
-const handleDistrictChange = (e) => {
-  const district = e.target.value;
-  setSelectedDistrict(district);
-  setSelectedCity("");
-
-  setNewLocation((prev) => ({
-    ...prev,
-    district,
-    city: ""
-  }));
-
-  const filteredCities = stateCities.filter(
-    (city) => city.district === district
-  );
-
-  const sortedCities = filteredCities.sort((a, b) =>
-    a.name.localeCompare(b.name)
-  );
-
-  setCities(sortedCities);
-};
-
-
-
-
-  const handleCityChange = (e) => {
-  const city = e.target.value;
-  setSelectedCity(city);
-  setNewLocation((prev) => ({
-    ...prev,
-    city
-  }));
-};
-
-
-
-
-  // Handle pincode change with debounce
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (data.pincode && data.pincode.length === 6) {
-        fetchAddressFromPincode(data.pincode);
+    const fetchDomesticData = async () => {
+      setLoading((prev) => ({ ...prev, states: true }));
+      try {
+        const response = await axios.get(
+          "https://raw.githubusercontent.com/prasad-gowda/india-state-district-cities/master/India-state-district-city.json"
+        );
+        setStatesData(response.data);
+        setStates(
+          response.data
+            .map((state) => ({ id: state.iso2, name: state.name }))
+            .sort((a, b) => a.name.localeCompare(b.name))
+        );
+      } catch (error) {
+        setApiError(
+          "Failed to load domestic locations. Please try again later."
+        );
+        console.error("Error fetching domestic data:", error);
+      } finally {
+        setLoading((prev) => ({ ...prev, states: false }));
       }
-    }, 1000);
+    };
 
-    return () => clearTimeout(timer);
-  }, [data.pincode]);
-
-  const fetchAddressFromPincode = async (pincode) => {
-    setLoadingPincode(true);
-    setPincodeError(null);
-
-    try {
-      const response = await axios.get(
-        `https://api.postalpincode.in/pincode/${pincode}`
-      );
-
-      if (response.data && response.data[0].Status === "Success") {
-        const postOffice = response.data[0].PostOffice[0];
-        const updates = {
-          state: postOffice.State,
-          city: postOffice.District,
-          headOfficeAddress: `${postOffice.Name}, ${postOffice.District}, ${postOffice.State}`,
-        };
-        onChange(updates);
-      } else {
-        setPincodeError("Could not find address for this pincode");
+    const fetchInternationalData = async () => {
+      setLoading((prev) => ({ ...prev, countries: true }));
+      try {
+        // Example API for countries - you might need a different one
+        const response = await axios.get(
+          "https://restcountries.com/v3.1/all?fields=name,cca2"
+        );
+        setCountries(
+          response.data
+            .map((country) => ({
+              id: country.cca2,
+              name: country.name.common,
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name))
+        );
+      } catch (error) {
+        setApiError(
+          "Failed to load international countries. Please try again later."
+        );
+        console.error("Error fetching international data:", error);
+      } finally {
+        setLoading((prev) => ({ ...prev, countries: false }));
       }
-    } catch (error) {
-      console.error("Error fetching pincode details:", error);
-      setPincodeError(
-        "Failed to fetch address details. Please enter manually."
-      );
-    } finally {
-      setLoadingPincode(false);
+    };
+
+    fetchDomesticData();
+    fetchInternationalData();
+  }, []);
+
+  // Handle location type change (domestic/international)
+  const handleLocationTypeChange = (e) => {
+    const type = e.target.value;
+    setLocationType(type);
+    setNewLocation({
+      type,
+      country: type === "domestic" ? "India" : "",
+      state: "",
+      district: type === "domestic" ? "" : undefined,
+      city: "",
+    });
+  };
+
+  // Handle domestic state change
+  const handleDomesticStateChange = (e) => {
+    const stateName = e.target.value;
+    setNewLocation((prev) => ({
+      ...prev,
+      state: stateName,
+      district: "",
+      city: "",
+    }));
+
+    const stateObj = statesData.find((s) => s.name === stateName);
+    if (stateObj) {
+      setDistricts(stateObj.districts.sort());
+      setCities([]);
+    } else {
+      setDistricts([]);
+      setCities([]);
     }
   };
 
+  // Handle domestic district change
+  const handleDomesticDistrictChange = (e) => {
+    const district = e.target.value;
+    setNewLocation((prev) => ({
+      ...prev,
+      district,
+      city: "",
+    }));
 
-const handleAddLocation = () => {
-  console.log("Attempting to add location:", newLocation);
+    const stateObj = statesData.find((s) => s.name === newLocation.state);
+    if (stateObj) {
+      const filteredCities = stateObj.cities.filter(
+        (city) => city.district === district
+      );
+      setCities(filteredCities.sort((a, b) => a.name.localeCompare(b.name)));
+    }
+  };
 
-  if (
-    newLocation.state?.trim() &&
-    newLocation.district?.trim() &&
-    newLocation.city?.trim()
-  ) {
-    const updatedLocations = Array.isArray(data.expansionLocation)
-      ? [...data.expansionLocation, { ...newLocation }]
-      : [{ ...newLocation }];
+  // Handle domestic city change
+  const handleDomesticCityChange = (e) => {
+    const city = e.target.value;
+    setNewLocation((prev) => ({
+      ...prev,
+      city,
+    }));
+  };
 
-    console.log("Updated locations:", updatedLocations);
+  // Handle international country change
+  const handleInternationalCountryChange = async (e) => {
+    const country = e.target.value;
+    setNewLocation((prev) => ({
+      ...prev,
+      country,
+      state: "",
+      city: "",
+    }));
 
-    onChange({ expansionLocation: updatedLocations });
+    setLoading((prev) => ({ ...prev, intStates: true }));
+    try {
+      // Example API for states - you'll need to replace with a real API
+      const response = await axios.get(
+        `https://example-api.com/states?country=${country}`
+      );
+      setInternationalStates(response.data);
+    } catch (error) {
+      console.error("Error fetching international states:", error);
+      setApiError("Failed to load states for selected country");
+    } finally {
+      setLoading((prev) => ({ ...prev, intStates: false }));
+    }
+  };
 
-    setNewLocation({ country: "India", state: "", district: "", city: "" });
-    setOpenLocationModal(false);
-  } else {
-    console.warn("Missing state/district/city:", newLocation);
-  }
-};
+  // Handle international state change
+  const handleInternationalStateChange = async (e) => {
+    const state = e.target.value;
+    setNewLocation((prev) => ({
+      ...prev,
+      state,
+      city: "",
+    }));
 
+    setLoading((prev) => ({ ...prev, intCities: true }));
+    try {
+      // Example API for cities - you'll need to replace with a real API
+      const response = await axios.get(
+        `https://example-api.com/cities?country=${newLocation.country}&state=${state}`
+      );
+      setInternationalCities(response.data);
+    } catch (error) {
+      console.error("Error fetching international cities:", error);
+      setApiError("Failed to load cities for selected state");
+    } finally {
+      setLoading((prev) => ({ ...prev, intCities: false }));
+    }
+  };
 
+  // Handle international city change
+  const handleInternationalCityChange = (e) => {
+    const city = e.target.value;
+    setNewLocation((prev) => ({
+      ...prev,
+      city,
+    }));
+  };
 
+  // Add location to the list
+  const handleAddLocation = () => {
+    if (
+      (locationType === "domestic" &&
+        newLocation.state &&
+        newLocation.district &&
+        newLocation.city) ||
+      (locationType === "international" &&
+        newLocation.country &&
+        newLocation.state &&
+        newLocation.city)
+    ) {
+      const locationToAdd = {
+        type: locationType,
+        country: newLocation.country,
+        state: newLocation.state,
+        ...(locationType === "domestic" && { district: newLocation.district }),
+        city: newLocation.city,
+      };
+
+      const updatedLocations = Array.isArray(data.expansionLocation)
+        ? [...data.expansionLocation, locationToAdd]
+        : [locationToAdd];
+
+      onChange({ expansionLocation: updatedLocations });
+
+      // Reset form
+      setNewLocation({
+        type: locationType,
+        country: locationType === "domestic" ? "India" : "",
+        state: "",
+        district: locationType === "domestic" ? "" : undefined,
+        city: "",
+      });
+
+      setOpenLocationModal(false);
+    }
+  };
+
+  // Remove location from list
   const handleRemoveLocation = (index) => {
     const updatedLocations = [...data.expansionLocation];
     updatedLocations.splice(index, 1);
     onChange({ expansionLocation: updatedLocations });
   };
-
   const handleCategoryHover = (level, value) => {
-    setSelectedCategory((prev) => {
-      if (level === "main") return { main: value, sub: "", child: "" };
-      if (level === "sub") return { ...prev, sub: value, child: "" };
-      if (level === "child") return { ...prev, child: value };
-      return prev;
-    });
+    if (level === "main") {
+      setSelectedCategory({ main: value, sub: "", child: "", groupId: "" });
+    } else if (level === "sub") {
+      // Find the selected main category and subcategory to get groupId
+      const mainCat = categories.find(
+        (cat) => cat.name === selectedCategory.main
+      );
+      const subCat = mainCat?.children?.find((sub) => sub.name === value);
+      setSelectedCategory((prev) => ({
+        ...prev,
+        sub: value,
+        groupId: subCat?.groupId || "",
+        child: "",
+      }));
+    } else if (level === "child") {
+      setSelectedCategory((prev) => ({
+        ...prev,
+        child: value,
+      }));
+    }
   };
 
   const handleAddCategory = () => {
     if (selectedCategory.child) {
-      const isDuplicate = Array.isArray(data.brandCategories) && data.brandCategories.some(
-        (cat) =>
-          cat.main === selectedCategory.main &&
-          cat.sub === selectedCategory.sub &&
-          cat.child === selectedCategory.child
-      );
+      const isDuplicate =
+        Array.isArray(data.brandCategories) &&
+        data.brandCategories.some(
+          (cat) =>
+            cat.main === selectedCategory.main &&
+            cat.sub === selectedCategory.sub &&
+            cat.child === selectedCategory.child &&
+            cat.groupId === selectedCategory.groupId
+        );
 
       if (!isDuplicate) {
         const updatedCategories = [
- ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
-  { ...selectedCategory },        ];
+          ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
+          {
+            main: selectedCategory.main,
+            sub: selectedCategory.sub,
+            child: selectedCategory.child,
+            groupId: selectedCategory.groupId,
+          },
+        ];
         onChange({ brandCategories: updatedCategories });
         setSelectedCategory((prev) => ({ ...prev, child: "" }));
       }
     }
   };
-
   useEffect(() => {
     if (selectedCategory.child) {
       handleAddCategory();
     }
   }, [selectedCategory.child]);
 
+  // OTP Verification States
+  const [verificationState, setVerificationState] = useState({
+    email: {
+      verified: false,
+      otpSent: false,
+      showDialog: false,
+      loading: false,
+      error: null,
+    },
+    mobileNumber: {
+      verified: false,
+      otpSent: false,
+      showDialog: false,
+      loading: false,
+      error: null,
+    },
+  });
+
+  const [otpInput, setOtpInput] = useState("");
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  // Handle OTP verification dialog open/close
+  const handleVerificationDialog = (field, open) => {
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        showDialog: open,
+        error: null,
+      },
+    }));
+    setOtpInput("");
+  };
+
+  // Send OTP for verification
+  const handleSendOtp = async (field) => {
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        loading: true,
+        error: null,
+      },
+    }));
+
+    try {
+      // Call your OTP API endpoint
+      const response = await axios.post("/api/send-otp", {
+        [field === "email" ? "email" : "phone"]: data[field],
+        type: field,
+      });
+
+      if (response.data.success) {
+        setVerificationState((prev) => ({
+          ...prev,
+          [field]: {
+            ...prev[field],
+            otpSent: true,
+            loading: false,
+          },
+        }));
+        setSnackbar({
+          open: true,
+          message: `OTP sent successfully to your ${field}`,
+          severity: "success",
+        });
+      } else {
+        throw new Error(response.data.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.error(`Error sending OTP for ${field}:`, error);
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          loading: false,
+          error: error.response?.data?.message || error.message,
+        },
+      }));
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || "Failed to send OTP",
+        severity: "error",
+      });
+    }
+  };
+
+  // Verify the entered OTP
+  const handleVerifyOtp = async (field) => {
+    if (!otpInput || otpInput.length !== 6) {
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          error: "Please enter a valid 6-digit OTP",
+        },
+      }));
+      return;
+    }
+
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        loading: true,
+        error: null,
+      },
+    }));
+
+    try {
+      // Call your OTP verification API endpoint
+      const response = await axios.post("/api/verify-otp", {
+        [field === "email" ? "email" : "phone"]: data[field],
+        otp: otpInput,
+        type: field,
+      });
+
+      if (response.data.success) {
+        setVerificationState((prev) => ({
+          ...prev,
+          [field]: {
+            ...prev[field],
+            verified: true,
+            showDialog: false,
+            loading: false,
+          },
+        }));
+        setSnackbar({
+          open: true,
+          message: `${
+            field === "email" ? "Email" : "Mobile number"
+          } verified successfully!`,
+          severity: "success",
+        });
+      } else {
+        throw new Error(response.data.message || "OTP verification failed");
+      }
+    } catch (error) {
+      console.error(`Error verifying OTP for ${field}:`, error);
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          loading: false,
+          error: error.response?.data?.message || error.message,
+        },
+      }));
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || "OTP verification failed",
+        severity: "error",
+      });
+    }
+  };
+
+  // Resend OTP
+  const handleResendOtp = (field) => {
+    handleSendOtp(field);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
   return (
     <Box sx={{ overflowY: "auto", pr: 1, mt: 0 }}>
       {/* Brand Details Section - Now in 5 columns for desktop */}
-      
-        <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
-          Brand Details
-        </Typography>
+      <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
+        Personal Details
+      </Typography>
 
-        <Grid
-          container
-          spacing={2}
-          sx={{
-            mt:2,
-            display: "grid",
-            gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
-            gap: 2,
-            
-          }}
-        >
-          {/* Company Name */}
-          <Grid item xs={12} sm={6}>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+          gap: 2,
+          mb: 2,
+        }}
+      >
+        {/* Email with Verification */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            type="email"
+            value={data.email || ""}
+            onChange={handleChange}
+            error={!!errors.email}
+            helperText={errors.email}
+            variant="outlined"
+            size="small"
+            required
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  {verificationState.email.verified ? (
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      color="success.main"
+                    >
+                      <CheckCircleIcon fontSize="small" />
+                      <Typography variant="caption" sx={{ ml: 0.5 }}>
+                        Verified
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleVerificationDialog("email", true)}
+                      disabled={!data.email || verificationState.email.loading}
+                      startIcon={
+                        verificationState.email.loading ? (
+                          <CircularProgress size={14} />
+                        ) : (
+                          <SendIcon fontSize="small" />
+                        )
+                      }
+                    >
+                      Verify
+                    </Button>
+                  )}
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Mobile Number with Verification */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Mobile Number"
+            name="mobileNumber"
+            value={data.mobileNumber || ""}
+            onChange={handleChange}
+            error={!!errors.mobileNumber}
+            helperText={errors.mobileNumber}
+            variant="outlined"
+            size="small"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  {verificationState.mobileNumber.verified ? (
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      color="success.main"
+                    >
+                      <CheckCircleIcon fontSize="small" />
+                      <Typography variant="caption" sx={{ ml: 0.5 }}>
+                        Verified
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() =>
+                        handleVerificationDialog("mobileNumber", true)
+                      }
+                      disabled={
+                        !data.mobileNumber ||
+                        verificationState.mobileNumber.loading
+                      }
+                      startIcon={
+                        verificationState.mobileNumber.loading ? (
+                          <CircularProgress size={14} />
+                        ) : (
+                          <SendIcon fontSize="small" />
+                        )
+                      }
+                    >
+                      Verify
+                    </Button>
+                  )}
+                </InputAdornment>
+              ),
+            }}
+            required
+          />
+        </Grid>
+      </Grid>
+
+      {/* OTP Verification Dialogs */}
+      {/* Email Verification Dialog */}
+      <Dialog
+        open={verificationState.email.showDialog}
+        onClose={() => handleVerificationDialog("email", false)}
+      >
+        <DialogTitle>Verify Email</DialogTitle>
+        <DialogContent>
+          <Box sx={{ minWidth: 300, pt: 1 }}>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              We've sent a 6-digit OTP to {data.email}
+            </Typography>
             <TextField
               fullWidth
-              label="Company Name"
-              name="companyName"
-              value={formData.companyName || ""}
-              onChange={handleChange}
+              label="Enter OTP"
+              value={otpInput}
+              onChange={(e) =>
+                setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
               variant="outlined"
               size="small"
-              error={!!errors.companyName}
-              helperText={errors.companyName}
-              required
+              inputProps={{ maxLength: 6 }}
+              error={!!verificationState.email.error}
+              helperText={verificationState.email.error}
             />
-          </Grid>
-
-          {/* Brand Name */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="Brand Name"
-              name="brandName"
-              value={formData.brandName || ""}
-              onChange={handleChange}
-              variant="outlined"
-              size="small"
-              error={!!errors.brandName}
-              helperText={errors.brandName}
-              required
-            />
-          </Grid>
-
-          {/* Established Year */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <FormControl fullWidth error={!!errors.establishedYear}>
-              <InputLabel size="small">Established Year</InputLabel>
-              <Select
-                name="establishedYear"
-                value={data.establishedYear || ""}
-                label="Established Year"
-                onChange={handleChange}
-                variant="outlined"
-                size="small"
-                required
-              >
-                {Array.from(
-                  { length: 100 },
-                  (_, i) => new Date().getFullYear() - i
-                ).map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.establishedYear && (
-                <Typography variant="caption" color="error">
-                  {errors.establishedYear}
-                </Typography>
-              )}
-            </FormControl>
-          </Grid>
-
-          {/* Franchise Since Year */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <FormControl fullWidth error={!!errors.franchiseSinceYear}>
-              <InputLabel size="small">Franchise Since Year</InputLabel>
-              <Select
-                name="franchiseSinceYear"
-                value={data.franchiseSinceYear || ""}
-                label="Franchise Since Year"
-                onChange={handleChange}
-                variant="outlined"
-                size="small"  
-                required
-              >
-                {Array.from(
-                  { length: 100 },
-                  (_, i) => new Date().getFullYear() - i
-                ).map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.franchiseSinceYear && (
-                <Typography variant="caption" color="error">
-                  {errors.franchiseSinceYear}
-                </Typography>
-              )}
-            </FormControl>
-          </Grid>
-
-          {/* Expansion Location - Full width */}
-          <Grid item xs={12}>
-            <Box>
+            <Box
+              sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}
+            >
               <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenLocationModal(true)}
-                sx={{
-                  color: errors.expansionLocation
-                    ? "error.main"
-                    : "primary.main",
+                onClick={() => handleResendOtp("email")}
+                disabled={verificationState.email.loading}
+                sx={{ color: "#ff9800" }}
+              >
+                {verificationState.email.loading ? "Sending..." : "Resend OTP"}
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleVerifyOtp("email")}
+                disabled={
+                  otpInput.length !== 6 || verificationState.email.loading
+                }
+                startIcon={
+                  verificationState.email.loading ? (
+                    <CircularProgress size={14} />
+                  ) : null
+                }
+                sx={{ bgcolor: "green" }}
+              >
+                {verificationState.email.loading ? "Verifying..." : "Verify"}
+              </Button>
+            </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mobile Verification Dialog */}
+      <Dialog
+        open={verificationState.mobileNumber.showDialog}
+        onClose={() => handleVerificationDialog("mobileNumber", false)}
+      >
+        <DialogTitle>Verify Mobile Number</DialogTitle>
+        <DialogContent>
+          <Box sx={{ minWidth: 300, pt: 1 }}>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              We've sent a 6-digit OTP to +91 {data.mobileNumber}
+            </Typography>
+            <TextField
+              fullWidth
+              label="Enter OTP"
+              value={otpInput}
+              onChange={(e) =>
+                setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
+              variant="outlined"
+              size="small"
+              inputProps={{ maxLength: 6 }}
+              error={!!verificationState.mobileNumber.error}
+              helperText={verificationState.mobileNumber.error}
+            />
+            <Box
+              sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}
+            >
+              <Button
+                onClick={() => handleResendOtp("mobileNumber")}
+                disabled={verificationState.mobileNumber.loading}
+                sx={{ color: "#ff9800" }}
+              >
+                {verificationState.mobileNumber.loading
+                  ? "Sending..."
+                  : "Resend OTP"}
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleVerifyOtp("mobileNumber")}
+                disabled={
+                  otpInput.length !== 6 ||
+                  verificationState.mobileNumber.loading
+                }
+                startIcon={
+                  verificationState.mobileNumber.loading ? (
+                    <CircularProgress size={14} />
+                  ) : null
+                }
+                sx={{ bgcolor: "green" }}
+              >
+                {verificationState.mobileNumber.loading
+                  ? "Verifying..."
+                  : "Verify"}
+              </Button>
+            </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
+        Brand Details
+      </Typography>
+
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
+        {/* Company Name */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Company Name"
+            name="companyName"
+            value={formData.companyName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.companyName}
+            helperText={errors.companyName}
+            required
+          />
+        </Grid>
+        {/* Brand Name */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Brand Name"
+            name="brandName"
+            value={formData.brandName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.brandName}
+            helperText={errors.brandName}
+            required
+          />
+        </Grid>
+       
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Name"
+            name="ceoName"
+            value={data.ceoName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.ceoName}
+            helperText={errors.ceoName}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Email"
+            name="ceoEmail"
+            type="email"
+            value={data.ceoEmail || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.ceoEmail}
+            helperText={errors.ceoEmail}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Mobile No"
+            name="ceoMobile"
+            value={data.ceoMobile || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+            }}
+            error={!!errors.ceoMobile}
+            helperText={errors.ceoMobile}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Manager Name"
+            name="managerName"
+            value={data.managerName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.managerName}
+            helperText={errors.managerName}
+          />
+        </Grid>
+        {/* Established Year */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.establishedYear}>
+            <InputLabel size="small">Established Year</InputLabel>
+            <Select
+              name="establishedYear"
+              value={data.establishedYear || ""}
+              label="Established Year"
+              onChange={handleChange}
+              variant="outlined"
+              size="small"
+              required
+            >
+              {Array.from(
+                { length: 100 },
+                (_, i) => new Date().getFullYear() - i
+              ).map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.establishedYear && (
+              <Typography variant="caption" color="error">
+                {errors.establishedYear}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+        {/* Franchise Since Year */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.franchiseSinceYear}>
+            <InputLabel size="small">Franchise Since Year</InputLabel>
+            <Select
+              name="franchiseSinceYear"
+              value={data.franchiseSinceYear || ""}
+              label="Franchise Since Year"
+              onChange={handleChange}
+              variant="outlined"
+              size="small"
+              required
+            >
+              {Array.from(
+                { length: 100 },
+                (_, i) => new Date().getFullYear() - i
+              ).map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.franchiseSinceYear && (
+              <Typography variant="caption" color="error">
+                {errors.franchiseSinceYear}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+        {/* Expansion Location Section */}
+        <Grid item xs={12}>
+          <Box>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() => setOpenLocationModal(true)}
+              sx={{
+                color: errors.expansionLocation ? "error.main" : "primary.main",
+                borderColor: errors.expansionLocation
+                  ? "error.main"
+                  : "primary.main",
+                "&:hover": {
                   borderColor: errors.expansionLocation
                     ? "error.main"
                     : "primary.main",
-                  "&:hover": {
-                    borderColor: errors.expansionLocation
-                      ? "error.main"
-                      : "primary.main",
-                  },
-                }}
-              >
-                Add Expansion Location
-              </Button>
-              <Box sx={{ color: "error.main", fontSize: "0.875rem", mt: 1 }}>
-                {errors.expansionLocation}
-              </Box>
+                },
+              }}
+            >
+              Add Expansion Location
+            </Button>
+            <Box sx={{ color: "error.main", fontSize: "0.875rem", mt: 1 }}>
+              {errors.expansionLocation}
             </Box>
 
-            {/* Expansion Location Modal */}
-            <Dialog
-              open={openLocationModal}
-              onClose={() => setOpenLocationModal(false)}
-            >
-              <DialogTitle>Add Expansion Location</DialogTitle>
-              <DialogContent>
-                <Box sx={{ minWidth: 300, pt: 1 }}>
-                  {apiError && (
-                    <Typography color="error" sx={{ mb: 2 }}>
-                      {apiError}
-                    </Typography>
-                  )}
+            {/* Display selected locations */}
+            {data.expansionLocation?.length > 0 && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                  Selected Locations:
+                </Typography>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {data.expansionLocation.map((loc, index) => (
+                    <Chip
+                      key={index}
+                      label={
+                        loc.type === "domestic"
+                          ? `${loc.city}, ${loc.district}, ${loc.state}, ${loc.country}`
+                          : `${loc.city}, ${loc.state}, ${loc.country}`
+                      }
+                      onDelete={() => handleRemoveLocation(index)}
+                      deleteIcon={<CloseIcon />}
+                      variant="outlined"
+                    />
+                  ))}
+                </Box>
+              </Box>
+            )}
+          </Box>
 
-                  {/* Country is fixed to India */}
-                  <TextField
-                    fullWidth
-                    label="Country"
-                    value="India"
-                    disabled
-                    sx={{ mb: 2 }}
-                  />
+          {/* Expansion Location Modal */}
+          <Dialog
+            open={openLocationModal}
+            onClose={() => setOpenLocationModal(false)}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle>Add Expansion Location</DialogTitle>
+            <DialogContent>
+              <Box sx={{ minWidth: 300, pt: 1 }}>
+                {apiError && (
+                  <Typography color="error" sx={{ mb: 2 }}>
+                    {apiError}
+                  </Typography>
+                )}
 
-                  <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel>State</InputLabel>
-                    <Select
-                      value={selectedState}
-                      onChange={handleStateChange}
-                      label="State"
-                      disabled={loading.states}
-                    >
-                      {states.map((state) => (
-                        <MenuItem key={state.id} value={state.name}>
-                          {state.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-{selectedState && (  <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel>District</InputLabel>
-                    <Select
-                      value={selectedDistrict}
-                      onChange={handleDistrictChange}
-                      
-                      label="District"
-                      disabled={loading.districts}
-                    >
-                      {districts.map((district, index) => (
-                        <MenuItem key={index} value={district}>
-                          {district}
-                        </MenuItem>
-                      ))}
-                      
-                    </Select>
-                  </FormControl>)}
-                 
-{selectedDistrict && ( 
-                  <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel>City</InputLabel>
-                    <Select
-                      value={selectedCity}
-                      onChange={handleCityChange}
-                      label="City"
-                      disabled={loading.cities}
-                    >
-                      {stateCities.map((city, index) => (
-                        <MenuItem key={index} value={city.name}>
-                          {city.name} ({city.status})
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>)}
-                </Box> 
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setOpenLocationModal(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleAddLocation}
-                  disabled={!newLocation.city}
-                  variant="contained"
-                >
-                  Add Location
-                </Button>
-              </DialogActions>
-            </Dialog>
-          </Grid>
-
-          {/* Categories Section - Full width */}
-          <Grid item xs={12}>
-            <Box sx={{ display: "flex", mb: 2, gap: 1 }}>
-              <Box sx={{ position: "relative", flexGrow: 1 }}>
-                <TextField
-                  label="Select Category"
-                  value={
-                    selectedCategory.child
-                      ? `${selectedCategory.main} > ${selectedCategory.sub} > ${selectedCategory.child}`
-                      : ""
-                  }
-                  onFocus={() => setDropdownOpen(true)}
-                  onChange={() => {}}
-                  fullWidth
-                  size="small"
-                  error={!!errors.brandCategories}
-                  helperText={
-                    errors.brandCategories || "Select at least one category"
-                  }
-                />
-                {isDropdownOpen && (
-                  <Paper
-                    sx={{
-                      position: "absolute",
-                      zIndex: 2,
-                      mt: 1,
-                      width: "100%",
-                      display: "flex",
-                      boxShadow: 3,
-                      minHeight: 300,
-                    }}
-                    onMouseLeave={() => setDropdownOpen(false)}
+                {/* Location Type Selection */}
+                <FormControl component="fieldset" sx={{ mb: 3 }}>
+                  <RadioGroup
+                    row
+                    value={locationType}
+                    onChange={handleLocationTypeChange}
                   >
-                    {/* Parent Categories */}
-                    <Box sx={{ flex: 1, borderRight: "1px solid #eee" }}>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{ p: 1, fontWeight: "bold", bgcolor: "grey.100" }}
+                    <FormControlLabel
+                      value="domestic"
+                      control={<Radio />}
+                      label="Domestic (India)"
+                    />
+                    <FormControlLabel
+                      value="international"
+                      control={<Radio />}
+                      label="International"
+                    />
+                  </RadioGroup>
+                </FormControl>
+
+                {/* Domestic Location Form */}
+                {locationType === "domestic" ? (
+                  <>
+                    <TextField
+                      fullWidth
+                      label="Country"
+                      value="India"
+                      disabled
+                      sx={{ mb: 2 }}
+                    />
+
+                    <FormControl fullWidth sx={{ mb: 2 }}>
+                      <InputLabel>State</InputLabel>
+                      <Select
+                        value={newLocation.state}
+                        onChange={handleDomesticStateChange}
+                        label="State"
+                        disabled={loading.states}
                       >
-                        Main Categories
-                      </Typography>
-                      <List sx={{ maxHeight: 300, overflow: "auto" }}>
-                        {categories.map((category) => (
-                          <ListItem
-                            key={category.name}
-                            button
-                            selected={selectedCategory.main === category.name}
-                            onMouseEnter={() =>
-                              handleCategoryHover("main", category.name)
-                            }
-                            dense
-                          >
-                            <ListItemText
-                              primary={category.name}
-                              primaryTypographyProps={{
-                                fontWeight:
-                                  selectedCategory.main === category.name
-                                    ? "bold"
-                                    : "normal",
-                                color:
-                                  selectedCategory.main === category.name
-                                    ? "primary.main"
-                                    : "text.primary",
-                              }}
-                            />
-                            {category.children &&
-                              category.children.length > 0 && (
-                                <ChevronRightIcon
-                                  fontSize="small"
-                                  color="action"
-                                />
-                              )}
-                          </ListItem>
+                        {states.map((state) => (
+                          <MenuItem key={state.id} value={state.name}>
+                            {state.name}
+                          </MenuItem>
                         ))}
-                      </List>
-                    </Box>
+                      </Select>
+                    </FormControl>
 
-                    {/* Subcategories */}
-                    {selectedCategory.main && (
-                      <Box
-                        sx={{
-                          flex: 1,
-                          borderRight: "1px solid #eee",
-                          bgcolor: "background.paper",
-                        }}
+                    {newLocation.state && (
+                      <FormControl fullWidth sx={{ mb: 2 }}>
+                        <InputLabel>District</InputLabel>
+                        <Select
+                          value={newLocation.district}
+                          onChange={handleDomesticDistrictChange}
+                          label="District"
+                          disabled={loading.districts}
+                        >
+                          {districts.map((district, index) => (
+                            <MenuItem key={index} value={district}>
+                              {district}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+
+                    {newLocation.district && (
+                      <FormControl fullWidth sx={{ mb: 2 }}>
+                        <InputLabel>City</InputLabel>
+                        <Select
+                          value={newLocation.city}
+                          onChange={handleDomesticCityChange}
+                          label="City"
+                          disabled={loading.cities}
+                        >
+                          {cities.map((city, index) => (
+                            <MenuItem key={index} value={city.name}>
+                              {city.name} ({city.status})
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  </>
+                ) : (
+                  /* International Location Form */
+                  <>
+                    <FormControl fullWidth sx={{ mb: 2 }}>
+                      <InputLabel>Country</InputLabel>
+                      <Select
+                        value={newLocation.country}
+                        onChange={handleInternationalCountryChange}
+                        label="Country"
+                        disabled={loading.countries}
                       >
-                        <Typography
-                          variant="subtitle1"
-                          sx={{
-                            p: 1,
-                            fontWeight: "bold",
-                            bgcolor: "grey.100",
-                          }}
+                        {countries.map((country) => (
+                          <MenuItem key={country.id} value={country.name}>
+                            {country.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    {newLocation.country && (
+                      <FormControl fullWidth sx={{ mb: 2 }}>
+                        <InputLabel>State/Province</InputLabel>
+                        <Select
+                          value={newLocation.state}
+                          onChange={handleInternationalStateChange}
+                          label="State/Province"
+                          disabled={loading.intStates}
                         >
-                          Subcategories
-                        </Typography>
-                        <List sx={{ maxHeight: 300, overflow: "auto" }}>
-                          {categories
-                            .find((cat) => cat.name === selectedCategory.main)
-                            ?.children?.map((subCategory) => (
-                              <ListItem
-                                key={subCategory.name}
-                                button
-                                selected={
-                                  selectedCategory.sub === subCategory.name
-                                }
-                                onMouseEnter={() =>
-                                  handleCategoryHover("sub", subCategory.name)
-                                }
-                                dense
-                              >
-                                <ListItemText
-                                  primary={subCategory.name}
-                                  primaryTypographyProps={{
-                                    fontWeight:
-                                      selectedCategory.sub === subCategory.name
-                                        ? "bold"
-                                        : "normal",
-                                    color:
-                                      selectedCategory.sub === subCategory.name
-                                        ? "primary.main"
-                                        : "text.primary",
-                                  }}
-                                />
-                                {subCategory.children &&
-                                  subCategory.children.length > 0 && (
-                                    <ChevronRightIcon
-                                      fontSize="small"
-                                      color="action"
-                                    />
-                                  )}
-                              </ListItem>
-                            ))}
-                        </List>
-                      </Box>
+                          {internationalStates.map((state, index) => (
+                            <MenuItem key={index} value={state.name}>
+                              {state.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     )}
 
-                    {/* Child Categories */}
-                    {selectedCategory.sub && (
-                      <Box sx={{ flex: 1, bgcolor: "background.paper" }}>
-                        <Typography
-                          variant="subtitle1"
-                          sx={{
-                            p: 1,
-                            fontWeight: "bold",
-                            bgcolor: "grey.100",
-                          }}
+                    {newLocation.state && (
+                      <FormControl fullWidth sx={{ mb: 2 }}>
+                        <InputLabel>City</InputLabel>
+                        <Select
+                          value={newLocation.city}
+                          onChange={handleInternationalCityChange}
+                          label="City"
+                          disabled={loading.intCities}
                         >
-                          Items
-                        </Typography>
-                        <List sx={{ maxHeight: 300, overflow: "auto" }}>
-                          {categories
-                            .find((cat) => cat.name === selectedCategory.main)
-                            ?.children?.find(
-                              (sub) => sub.name === selectedCategory.sub
-                            )
-                            ?.children?.map((child, index) => (
-                              <ListItem
-                                key={index}
-                                button
-                                selected={selectedCategory.child === child}
-                                onClick={() =>
-                                  handleCategoryHover("child", child)
-                                }
-                                dense
-                              >
-                                <ListItemText
-                                  primary={child}
-                                  primaryTypographyProps={{
-                                    color:
-                                      selectedCategory.child === child
-                                        ? "primary.main"
-                                        : "text.primary",
-                                    fontWeight:
-                                      selectedCategory.child === child
-                                        ? "bold"
-                                        : "normal",
-                                  }}
-                                />
-                              </ListItem>
-                            ))}
-                        </List>
-                      </Box>
+                          {internationalCities.map((city, index) => (
+                            <MenuItem key={index} value={city.name}>
+                              {city.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     )}
-                  </Paper>
+                  </>
                 )}
               </Box>
-            </Box>
-          </Grid>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenLocationModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddLocation}
+                disabled={
+                  locationType === "domestic"
+                    ? !newLocation.city ||
+                      !newLocation.district ||
+                      !newLocation.state
+                    : !newLocation.city ||
+                      !newLocation.state ||
+                      !newLocation.country
+                }
+                variant="contained"
+              >
+                Add Location
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Grid>
+        {/* Categories Section - Full width */}
+        <Grid item xs={12}>
+          <Box sx={{ display: "flex", mb: 2, gap: 1 }}>
+            <Box sx={{ position: "relative", flexGrow: 1 }}>
+              <TextField
+                label="Select Category"
+                value={
+                  selectedCategory.child
+                    ? `${selectedCategory.main} > ${selectedCategory.sub} > ${selectedCategory.child}`
+                    : ""
+                }
+                onFocus={() => setDropdownOpen(true)}
+                onChange={() => {}}
+                fullWidth
+                size="small"
+                error={!!errors.brandCategories}
+                helperText={
+                  errors.brandCategories || "Select at least one category"
+                }
+              />
+              {isDropdownOpen && (
+                <Paper
+                  sx={{
+                    position: "absolute",
+                    zIndex: 2,
+                    mt: 1,
+                    width: "100%",
+                    display: "flex",
+                    boxShadow: 3,
+                    minHeight: 300,
+                  }}
+                  onMouseLeave={() => setDropdownOpen(false)}
+                >
+                  {/* Parent Categories */}
+                  <Box sx={{ flex: 1, borderRight: "1px solid #eee" }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ p: 1, fontWeight: "bold", bgcolor: "grey.100" }}
+                    >
+                      Main Categories
+                    </Typography>
+                    <List sx={{ maxHeight: 300, overflow: "auto" }}>
+                      {categories.map((category) => (
+                        <ListItem
+                          key={category.name}
+                          button
+                          selected={selectedCategory.main === category.name}
+                          onMouseEnter={() =>
+                            handleCategoryHover("main", category.name)
+                          }
+                          dense
+                        >
+                          <ListItemText
+                            primary={category.name}
+                            primaryTypographyProps={{
+                              fontWeight:
+                                selectedCategory.main === category.name
+                                  ? "bold"
+                                  : "normal",
+                              color:
+                                selectedCategory.main === category.name
+                                  ? "primary.main"
+                                  : "text.primary",
+                            }}
+                          />
+                          {category.children &&
+                            category.children.length > 0 && (
+                              <ChevronRightIcon
+                                fontSize="small"
+                                color="action"
+                              />
+                            )}
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Box>
+
+                  {/* Subcategories */}
+                  {selectedCategory.main && (
+                    <Box
+                      sx={{
+                        flex: 1,
+                        borderRight: "1px solid #eee",
+                        bgcolor: "background.paper",
+                      }}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          p: 1,
+                          fontWeight: "bold",
+                          bgcolor: "grey.100",
+                        }}
+                      >
+                        Subcategories
+                      </Typography>
+                      <List sx={{ maxHeight: 300, overflow: "auto" }}>
+                        {categories
+                          .find((cat) => cat.name === selectedCategory.main)
+                          ?.children?.map((subCategory) => (
+                            <ListItem
+                              key={subCategory.name}
+                              button
+                              selected={
+                                selectedCategory.sub === subCategory.name
+                              }
+                              onMouseEnter={() =>
+                                handleCategoryHover("sub", subCategory.name)
+                              }
+                              dense
+                            >
+                              <ListItemText
+                                primary={subCategory.name}
+                                primaryTypographyProps={{
+                                  fontWeight:
+                                    selectedCategory.sub === subCategory.name
+                                      ? "bold"
+                                      : "normal",
+                                  color:
+                                    selectedCategory.sub === subCategory.name
+                                      ? "primary.main"
+                                      : "text.primary",
+                                }}
+                              />
+                              {subCategory.children &&
+                                subCategory.children.length > 0 && (
+                                  <ChevronRightIcon
+                                    fontSize="small"
+                                    color="action"
+                                  />
+                                )}
+                            </ListItem>
+                          ))}
+                      </List>
+                    </Box>
+                  )}
+
+                  {/* Child Categories */}
+                  {selectedCategory.sub && (
+                    <Box sx={{ flex: 1, bgcolor: "background.paper" }}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          p: 1,
+                          fontWeight: "bold",
+                          bgcolor: "grey.100",
+                        }}
+                      >
+                        Items
+                      </Typography>
+                      <List sx={{ maxHeight: 300, overflow: "auto" }}>
+                        {categories
+                          .find((cat) => cat.name === selectedCategory.main)
+                          ?.children?.find(
+                            (sub) => sub.name === selectedCategory.sub
+                          )
+                          ?.children?.map((child, index) => (
+                            <ListItem
+                              key={index}
+                              button
+                              selected={selectedCategory.child === child}
+                              onClick={() =>
+                                handleCategoryHover("child", child)
+                              }
+                              dense
+                            >
+                              <ListItemText
+                                primary={child}
+                                primaryTypographyProps={{
+                                  color:
+                                    selectedCategory.child === child
+                                      ? "primary.main"
+                                      : "text.primary",
+                                  fontWeight:
+                                    selectedCategory.child === child
+                                      ? "bold"
+                                      : "normal",
+                                }}
+                              />
+                            </ListItem>
+                          ))}
+                      </List>
+                    </Box>
+                  )}
+                </Paper>
+              )}
+            </Box>
+          </Box>
+        </Grid>
+      </Grid>
 
       {/* Communication Information Section - 5 columns */}
-     
-        <Typography variant="h6" sx={{ mb: 3, color: "#ff9800" }}>
-          Communication Information
-        </Typography>
-        <Grid
-          container
-          spacing={2}
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
-            gap: 2,
-          }}
-        >
-          {/* Full Name */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="Full Name"
-              name="fullName"
-              value={data.fullName || ""}
-              onChange={handleChange}
-              error={!!errors.fullName}
-              helperText={errors.fullName}
-              variant="outlined"
-              size="small"
-              required
-            />
-          </Grid>
 
-          {/* Email */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="Email"
-              name="email"
-              type="email"
-              value={data.email || ""}
-              onChange={handleChange}
-              error={!!errors.email}
-              helperText={errors.email}
-              variant="outlined"
-              size="small"
-              required
-            />
-          </Grid>
-
-          {/* Mobile Number */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="Mobile Number"
-              name="mobileNumber"
-              value={data.mobileNumber || ""}
-              onChange={handleChange}
-              error={!!errors.mobileNumber}
-              helperText={errors.mobileNumber}
-              variant="outlined"
-              size="small"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">+91</InputAdornment>
-                ),
-              }}
-              required
-            />
-          </Grid>
-
-          {/* WhatsApp Number */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="WhatsApp Number"
-              name="whatsappNumber"
-              value={data.whatsappNumber || ""}
-              onChange={handleChange}
-              error={!!errors.whatsappNumber}
-              helperText={errors.whatsappNumber}
-              variant="outlined"
-              size="small"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">+91</InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-
-          {/* Pincode */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="Pincode"
-              name="pincode"
-              value={data.pincode || ""}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, "").slice(0, 6);
-                onChange({ pincode: value });
-              }}
-              error={!!errors.pincode || !!pincodeError}
-              helperText={errors.pincode || pincodeError}
-              variant="outlined"
-              size="small"
-              required
-              InputProps={{
-                endAdornment: loadingPincode ? (
-                  <InputAdornment position="end">
-                    <CircularProgress size={20} />
-                  </InputAdornment>
-                ) : null,
-              }}
-            />
-          </Grid>
-
-          {/* Head Office Address - Full width on mobile, 5th column on desktop */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="Head Office Address"
-              name="headOfficeAddress"
-              value={data.headOfficeAddress || ""}
-              onChange={handleChange}
-              error={!!errors.headOfficeAddress}
-              helperText={errors.headOfficeAddress}
-              variant="outlined"
-              size="small"
-              required
-            />
-          </Grid>
-
-          {/* State */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <FormControl fullWidth error={!!errors.state}>
-              <InputLabel size="small">State</InputLabel>
-              <Select
-                name="state"
-                value={data.state || ""}
-                label="State"
-                onChange={handleChange}
-                variant="outlined"
-                size="small"
-                required
-              >
-                {states.map((state) => (
-                  <MenuItem key={state.iso2} value={state.name}>
-                    {state.name}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.state && (
-                <Typography variant="caption" color="error">
-                  {errors.state}
-                </Typography>
-              )}
-            </FormControl>
-          </Grid>
-
-          {/* City */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="City"
-              name="city"
-              value={data.city || ""}
-              onChange={handleChange}
-              error={!!errors.city}
-              helperText={errors.city}
-              variant="outlined"
-              size="small"
-              required
-            />
-          </Grid>
+      <Typography variant="h6" sx={{ mb: 3, color: "#ff9800" }}>
+        Communication Information
+      </Typography>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
+        {/* Full Name */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Full Name"
+            name="fullName"
+            value={data.fullName || ""}
+            onChange={handleChange}
+            error={!!errors.fullName}
+            helperText={errors.fullName}
+            variant="outlined"
+            size="small"
+            required
+          />
         </Grid>
-      
+
+        {/* Email */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Secondary Email"
+            name="secondaryEmail"
+            type="secondaryEmail"
+            value={data.secondaryEmail || ""}
+            onChange={handleChange}
+            error={!!errors.secondaryEmail}
+            helperText={errors.secondaryEmail}
+            variant="outlined"
+            size="small"
+            required
+          />
+        </Grid>
+
+        {/* Mobile Number
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Mobile Number"
+            name="mobileNumber"
+            value={data.mobileNumber || ""}
+            onChange={handleChange}
+            error={!!errors.mobileNumber}
+            helperText={errors.mobileNumber}
+            variant="outlined"
+            size="small"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+            }}
+            required
+          />
+        </Grid> */}
+
+        {/* WhatsApp Number */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="WhatsApp Number"
+            name="whatsappNumber"
+            value={data.whatsappNumber || ""}
+            onChange={handleChange}
+            error={!!errors.whatsappNumber}
+            helperText={errors.whatsappNumber}
+            variant="outlined"
+            size="small"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Pincode */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Pincode"
+            name="pincode"
+            value={data.pincode || ""}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+              onChange({ pincode: value });
+            }}
+            error={!!errors.pincode || !!pincodeError}
+            helperText={errors.pincode || pincodeError}
+            variant="outlined"
+            size="small"
+            required
+            InputProps={{
+              endAdornment: loadingPincode ? (
+                <InputAdornment position="end">
+                  <CircularProgress size={20} />
+                </InputAdornment>
+              ) : null,
+            }}
+          />
+        </Grid>
+
+        {/* Head Office Address - Full width on mobile, 5th column on desktop */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Head Office Address"
+            name="headOfficeAddress"
+            value={data.headOfficeAddress || ""}
+            onChange={handleChange}
+            error={!!errors.headOfficeAddress}
+            helperText={errors.headOfficeAddress}
+            variant="outlined"
+            size="small"
+            required
+          />
+        </Grid>
+
+        {/* State */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.state}>
+            <InputLabel size="small">State</InputLabel>
+            <Select
+              name="state"
+              value={data.state || ""}
+              label="State"
+              onChange={handleChange}
+              variant="outlined"
+              size="small"
+              required
+            >
+              {states.map((state) => (
+                <MenuItem key={state.iso2} value={state.name}>
+                  {state.name}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.state && (
+              <Typography variant="caption" color="error">
+                {errors.state}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+
+        {/* City */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="City"
+            name="city"
+            value={data.city || ""}
+            onChange={handleChange}
+            error={!!errors.city}
+            helperText={errors.city}
+            variant="outlined"
+            size="small"
+            required
+          />
+        </Grid>
+      </Grid>
 
       {/* Social Media Section - 5 columns */}
 
-        <Typography variant="h6" sx={{ mb: 2, mt:4, color: "#ff9800" }}>
-          Social Media & Web Presence
-        </Typography>
+      <Typography variant="h6" sx={{ mb: 2, mt: 4, color: "#ff9800" }}>
+        Social Media & Web Presence
+      </Typography>
 
-        <Grid
-          container
-          spacing={2}
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
-            gap: 2,
-          }}
-        >
-          {/* Website */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="Website"
-              name="website"
-              value={data.website || ""}
-              onChange={handleChange}
-              variant="outlined"
-              size="small"
-              error={!!errors.website}
-              helperText={errors.website}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">https://</InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-
-          {/* Facebook */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="Facebook"
-              name="facebook"
-              value={data.facebook || ""}
-              onChange={handleChange}
-              variant="outlined"
-              size="small"
-              error={!!errors.facebook}
-              helperText={errors.facebook}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">@</InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-
-          {/* Instagram */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="Instagram"
-              name="instagram"
-              value={data.instagram || ""}
-              onChange={handleChange}
-              variant="outlined"
-              size="small"
-              error={!!errors.instagram}
-              helperText={errors.instagram}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">@</InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-
-          {/* LinkedIn */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="LinkedIn"
-              name="linkedin"
-              value={data.linkedin || ""}
-              onChange={handleChange}
-              variant="outlined"
-              size="small"
-              error={!!errors.linkedin}
-              helperText={errors.linkedin}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">@</InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-
-          {/* Brand Description - Full width */}
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Brand Description"
-              name="brandDescription"
-              value={data.brandDescription || ""}
-              onChange={handleChange}
-              variant="outlined"
-              size="small"
-              error={!!errors.brandDescription}
-              helperText={errors.brandDescription}
-            />
-          </Grid>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
+        {/* Website */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Website"
+            name="website"
+            value={data.website || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.website}
+            helperText={errors.website}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">https://</InputAdornment>
+              ),
+            }}
+          />
         </Grid>
-     
+
+        {/* Facebook */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Facebook"
+            name="facebook"
+            value={data.facebook || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.facebook}
+            helperText={errors.facebook}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Instagram */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Instagram"
+            name="instagram"
+            value={data.instagram || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.instagram}
+            helperText={errors.instagram}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* LinkedIn */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="LinkedIn"
+            name="linkedin"
+            value={data.linkedin || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.linkedin}
+            helperText={errors.linkedin}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Brand Description - Full width */}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Brand Description"
+            name="brandDescription"
+            value={data.brandDescription || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.brandDescription}
+            helperText={errors.brandDescription}
+          />
+        </Grid>
+      </Grid>
     </Box>
   );
 };

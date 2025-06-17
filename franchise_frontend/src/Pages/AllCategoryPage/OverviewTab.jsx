@@ -13,7 +13,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   TextField,
   MenuItem,
   CircularProgress,
@@ -36,7 +35,6 @@ const OverviewTab = ({ brand }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const formRef = useRef(null);
   const [selectedModel, setSelectedModel] = useState(null);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -52,7 +50,7 @@ const OverviewTab = ({ brand }) => {
   const [userData, setUserData] = useState(null);
  
    const investorUUID = localStorage.getItem("investorUUID");
-  const AccessToken = localStorage.getItem("accessToken");
+   const AccessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
     const fetchInvestorDetails = async () => {
@@ -70,15 +68,15 @@ const OverviewTab = ({ brand }) => {
 
         console.log("Investor details response:", response.data.data);
         setUserData(response.data.data);
-        // const investor = response.data?.data;
-        // if (investor) {
-        //   setFormData((prev) => ({
-        //     ...prev,
-        //     fullName: investor.firstName || "",
-        //     investorEmail: investor.email || "",
-        //     mobileNumber: investor.mobileNumber || "",
-        //   }));
-        // }
+        const investor = response.data?.data;
+        if (investor) {
+          setFormData((prev) => ({
+            ...prev,
+            fullName: investor.firstName || "",
+            investorEmail: investor.email || "",
+            mobileNumber: investor.mobileNumber || "",
+          }));
+        }
       } catch (error) {
         console.error("Failed to fetch investor details:", error);
       }
@@ -113,7 +111,7 @@ const OverviewTab = ({ brand }) => {
 
   const expansionLocations = (brand.personalDetails?.expansionLocation || []).map(
   (loc) =>
-    [loc.city, loc.state, loc.country].filter(Boolean).join(", ")
+    [loc.city].filter(Boolean).join(", ")
 );
 
   const investmentTimings = [
@@ -152,13 +150,15 @@ const OverviewTab = ({ brand }) => {
     setIsSubmitting(true);
 
     try {
+
+      
       const payload = {
         ...formData,
         brandId: brand?.uuid,
-        brandName: brand?.personalDetails?.brandName || "",
-        brandEmail: brand.personalDetails?.email || "",
+        brandName: brand.personalDetails.brandName || "",
+        brandEmail: brand?.personalDetails?.email || "",
       };
-   console.log("payload", payload);
+      console.log("payload", payload);
       const token = localStorage.getItem("accessToken");
       const investorUUID = localStorage.getItem("investorUUID");
       const brandUUID = localStorage.getItem("brandUUID");
@@ -182,15 +182,15 @@ const OverviewTab = ({ brand }) => {
 
       if (response.data) {
         setSubmitSuccess(true);
-        setFormData({
-          fullName: "",
-          location: "",
-          // franchiseModel: "",
-          // franchiseType: "",
-          investmentRange: "",
-          planToInvest: "",
-          readyToInvest: "",
-        });
+        // setFormData({
+        //   fullName: "",
+        //   location: "",
+        //   // franchiseModel: "",
+        //   // franchiseType: "",
+        //   investmentRange: "",
+        //   planToInvest: "",
+        //   readyToInvest: "",
+        // });
    
       }
     } catch (error) {
@@ -226,29 +226,7 @@ const OverviewTab = ({ brand }) => {
   const toArray = (val) => (Array.isArray(val) ? val : val ? [val] : []);
 
   const sections = [
-    {
-      title: "Brand Overview",
-      icon: <DescriptionIcon sx={{ color: "#ff9800" }} />,
-      items: [
-        { label: "Brand Name", value: brand.personalDetails?.brandName },
-        {
-          label: "Description",
-          value: brand.personalDetails?.brandDescription,
-        },
-        {
-          label: "Categories",
-          value: brand.personalDetails?.brandCategories?.map(
-            (categories, index) => (
-              <Box key={index} display={"flex"} flexDirection="row" gap={1}>
-                <Typography variant="body2">
-                  {categories.main || "Not specified"} & {categories.child || "Not specified"} & {categories.sub || "Not specified"}
-                </Typography>
-              </Box>
-            )
-          ),
-        },
-      ],
-    },
+   
     {
       title: "Franchise Models",
       icon: <AccountTree sx={{ color: "#ff9800" }} />,
@@ -262,7 +240,7 @@ const OverviewTab = ({ brand }) => {
             <TableContainer 
               component={Paper} 
               sx={{ 
-                mb: 3,
+                mb: 1,
                 overflow: "hidden",
                 borderRadius: "12px",
                 border: "1px solid rgba(0,0,0,0.1)"
@@ -287,7 +265,7 @@ const OverviewTab = ({ brand }) => {
                     <TableCell sx={{ width: "8%" }}>Exterior</TableCell>
                     <TableCell sx={{ width: "8%" }}>ROI</TableCell>
                     <TableCell sx={{ width: "8%" }}>BreakEven</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Margin on Sale</TableCell> 
+                    <TableCell sx={{ width: "8%" }}>Margin On Sale</TableCell> 
                     <TableCell sx={{ width: "8%" }}>Fixed Return</TableCell> 
                     {/* <TableCell sx={{ width: "8%" }}>Select</TableCell> */}
                   </TableRow>
@@ -308,9 +286,11 @@ const OverviewTab = ({ brand }) => {
                               : "inherit",
                         }}
                       >
-                        <TableCell>
-                          {model.franchiseModel || "Not specified"}
-                        </TableCell>
+<TableCell>
+  {(model.franchiseModel?.split(" ")[0] || "Not specified")}
+</TableCell>
+
+
                         <TableCell>
                           {model.franchiseType || "Not specified"}
                         </TableCell>
@@ -368,6 +348,18 @@ const OverviewTab = ({ brand }) => {
               </Table>
             </TableContainer>
           </motion.div>
+<Box display={"flex"} justifyContent={"space-evenly"} >
+  <Typography fontSize={"0.7rem"}>FOFO (Franchise Owned Franchise Operated)
+   </Typography>
+  <Typography fontSize={"0.7rem"}>
+    FOCO (Franchise Owned Company Operated)
+    </Typography>
+  <Typography fontSize={"0.7rem"}>
+    FICO (Franchise Invested Company Operated)
+    </Typography>
+  <Typography fontSize={"0.7rem"} >
+    COCO (Company Owned Company Operated)</Typography>
+</Box>
 
           <motion.div
             whileHover={{ scale: 1.02 }}
@@ -384,7 +376,8 @@ const OverviewTab = ({ brand }) => {
                 py: 1.5,
                 borderRadius: "8px",
                 textTransform: "none",
-                fontSize: "1rem"
+                fontSize: "1rem",
+                mt: 1
               }} 
               onClick={() => {
                  // Debug: See what you get
@@ -394,7 +387,6 @@ const OverviewTab = ({ brand }) => {
             >
               Apply for Franchise
              </Button>
-
           </motion.div>
 
           <Dialog
@@ -472,19 +464,21 @@ const OverviewTab = ({ brand }) => {
                     </Box>
                   </motion.div>
                 ) : (
-                  <form onSubmit={handleSubmit}>
+                  <form onSubmit={handleSubmit} >
                     <Grid
                       container
+                      display={"flex"}
+                      flexDirection={"column"}
                       spacing={2}
-                      sx={{
-                        display: "grid",
-                        pt: 2,
-                        gridTemplateColumns: "repeat(5, 1fr)",
-                      }}
+                      // sx={{
+                      //   display: "grid",
+                      //   pt: 2,
+                      //   gridTemplateColumns: "repeat(5, 1fr)",
+                      // }}
                     >
-                      <Grid item xs={12} md={6}>
+                      <Box sx={{ display: "flex", justifyContent: "space-between" }} mt={2}><Grid item xs={12} md={6}>
                         <TextField
-                          fullWidth
+                          // fullWidth
                           label="Full Name"
                           name="fullName"
                           value={formData.fullName || userData?.firstName || ""}  
@@ -493,12 +487,12 @@ const OverviewTab = ({ brand }) => {
                           variant="outlined"
                           size="small"
                           sx={{ mb: 2 }}
-                          InputProps={{ readOnly: true }}
+                          InputProps={{ readOnly: false }}
                         />
                       </Grid>
                       <Grid item xs={12} md={6}>
                         <TextField
-                          fullWidth
+                          // fullWidth
                           label="Email"
                           name="investorEmail"
                           value={formData.investorEmail || userData?.email || ""}
@@ -507,12 +501,12 @@ const OverviewTab = ({ brand }) => {
                           variant="outlined"
                           size="small"
                           sx={{ mb: 2 }}
-                          InputProps={{ readOnly: true }}
+                          InputProps={{ readOnly: false }}
                         />
                       </Grid>
                       <Grid item xs={12} md={6}>
                         <TextField
-                          fullWidth
+                          // fullWidth
                           label="Mobile Number"
                           name="mobileNumber"
                           value={formData.mobileNumber || userData?.mobileNumber || ""}
@@ -521,9 +515,9 @@ const OverviewTab = ({ brand }) => {
                           variant="outlined"
                           size="small"
                           sx={{ mb: 2 }}
-                          InputProps={{ readOnly: true }}
+                          InputProps={{ readOnly: false }}
                         />
-                      </Grid>                   
+                      </Grid> </Box>                  
                         <Grid item xs={12} md={6}>
                           <
                             TextField
@@ -661,6 +655,7 @@ const OverviewTab = ({ brand }) => {
                           whileHover={{ scale: 1.01 }}
                           whileTap={{ scale: 0.99 }}
                         >
+                          {/* <form onSubmit={handleSubmit}> */}
                           <Button
                             type="submit"
                             variant="contained"
@@ -682,9 +677,10 @@ const OverviewTab = ({ brand }) => {
                             {isSubmitting ? (
                               <CircularProgress size={24} color="inherit" />
                             ) : (
-                              "Apply"
+                              "Apply Now"
                             )}
                           </Button>
+                          {/* </form> */}
                         </motion.div>
                       </Grid>
                     </Grid>
@@ -695,21 +691,6 @@ const OverviewTab = ({ brand }) => {
           </Dialog>
         </>
       ),
-    },
-    {
-      title: "Company Details",
-      icon: <Business sx={{ color: "#ff9800" }} />,
-      items: [
-        { label: "Company Name", value: brand.personalDetails?.companyName },
-        {
-          label: "Established Year",
-          value: brand.personalDetails?.establishedYear,
-        },
-        {
-          label: "Franchising Since",
-          value: brand.personalDetails?.franchiseSinceYear,
-        },
-      ],
     },
     {
       title: "Franchise Details",
@@ -758,12 +739,16 @@ const OverviewTab = ({ brand }) => {
       icon: <Support sx={{ color: "#ff9800" }} />,
       items: [
         {
-          label: "Training Provided By",
+          label: "Staff Training",
           value: brand.franchiseDetails?.trainingProvidedBy,
         },
         {
-          label: "Requirement Support",
+          label: "Staff Requirement ",
           value: brand.franchiseDetails?.requirementSupport,
+        },
+        {
+          label: "Support",
+          value: brand.franchiseDetails?.supportProvidedBy,
         },
         // {
         //   label: "Expansion Locations",
@@ -777,6 +762,39 @@ const OverviewTab = ({ brand }) => {
         //     )
         //   ),
         // },
+      ],
+    },
+     {
+      title: "Brand Overview",
+      icon: <DescriptionIcon sx={{ color: "#ff9800" }} />,
+      items: [
+        // { label: "Brand Name", value: brand.personalDetails?.brandName },
+        
+        {
+          label: "Categories",
+          value: brand.personalDetails?.brandCategories?.map(
+            (categories, index) => (
+              <Box key={index} display={"flex"} flexDirection="row" gap={1}>
+                <Typography variant="body2">
+                  {categories.main || "Not specified"} / {categories.child || "Not specified"} / {categories.sub || "Not specified"}
+                </Typography>
+              </Box>
+            )
+          ),
+        },
+        //  { label: "Company Name", value: brand.personalDetails?.companyName },
+        {
+          label: "Established Year",
+          value: brand.personalDetails?.establishedYear,
+        },
+        {
+          label: "Franchising Since",
+          value: brand.personalDetails?.franchiseSinceYear,
+        },
+        {
+          label: "Description",
+          value: brand.personalDetails?.brandDescription,
+        },
       ],
     },
   ];

@@ -43,7 +43,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e) => { 
     const { name, value } = e.target;
 
     if (name === "companyOwnedOutlets" || name === "franchiseOutlets") {
@@ -602,7 +602,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   name="companyOwnedOutlets"
                   value={data.companyOwnedOutlets || ""}
                   onChange={handleChange}
-                  type="number"
+                  placeholder="0"
+                  inputProps={{ min: 0 }}
                   error={!!errors.companyOwnedOutlets}
                   helperText={errors.companyOwnedOutlets}
                   required
@@ -616,7 +617,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   name="franchiseOutlets"
                   value={data.franchiseOutlets || ""}
                   onChange={handleChange}
-                  type="number"
+                  placeholder="0"
+                  inputProps={{min: 0}}
                   error={!!errors.franchiseOutlets}
                   helperText={errors.franchiseOutlets}
                   required
