@@ -238,7 +238,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               sx={{
                 display: "grid",
                 gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
-                gap: 2,
+                gap: 5,
               }}
             >
               {/* Column 1 - Investment Range */}
@@ -524,7 +524,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               <Grid item>
                 <FormControl component="fieldset" fullWidth error={!!errors["fico[0].propertyType"]} required>
                   <FormLabel component="legend" >Property Type</FormLabel>
-                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <Box sx={{ display: "flex", flexDirection: "row" }}>
                     {propertyTypes.map((type) => (
                       <FormControlLabel
                         key={type}
@@ -553,9 +553,10 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   variant="contained"
                   onClick={handleAddFicoModel}
                   fullWidth
-                  sx={{ height: "50%", mt: 2 ,backgroundColor: "#ff9800", color: "#fff", "&:hover": { backgroundColor: "#f57c00" } }}
+                  size="large"
+                  sx={{ height: "70%" ,backgroundColor: "#ff9800", color: "#fff", "&:hover": { backgroundColor: "#f57c00" } }}
                 >
-                  Add FICO Model
+                  Add Your Model
                 </Button>
               </Grid>
             </Grid>

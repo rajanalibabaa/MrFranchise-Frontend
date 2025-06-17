@@ -522,7 +522,7 @@ function TopBrandVdoCards() {
                <Stack
                     direction={{ xs: "row" }}
                     alignItems={{ xs: "flex-start", sm: "center" }}
-                    spacing={10}
+                    spacing={5}
                     sx={{ flex: 1, minWidth: 0 }}
                   >
 

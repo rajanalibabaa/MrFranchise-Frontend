@@ -16,6 +16,7 @@ import {
   TextField,
   MenuItem,
   CircularProgress,
+  Modal
 } from "@mui/material";
 import {
   Close,
@@ -26,6 +27,9 @@ import {
   StarBorder,
   Business as BusinessIcon,
 } from "@mui/icons-material";
+import CloseIcon from '@mui/icons-material/Close';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import OverviewTab from "./OverviewTab";
 import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
@@ -40,6 +44,11 @@ const BrandDetailsDialog = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+
   const [formData, setFormData] = useState({
     fullName: "",
     investorEmail: "",
@@ -693,85 +702,227 @@ const BrandDetailsDialog = () => {
               maxHeight: "70vh",
             }}
           >
-            <Grid
-              display={"flex"}
-              flexDirection={"row"}
-              justifyContent={"space-between"}
-            >
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={12}>
-                  <Paper elevation={1} sx={{ p: 1.5, borderRadius: 2 }}>
-                    <Tabs
-                      value={tabIndex}
-                      onChange={(e, newValue) => setTabIndex(newValue)}
-                      centered
-                      sx={{ mb: 1 }}
-                    >
-                      <Tab label="Video" />
-                      <Tab label="Images" />
-                    </Tabs>
 
-                    {tabIndex === 0 ? (
-                      <Box display="flex" gap={2}>
-                        {allVideos.map((videoUrl, index) => (
-                          <Box
-                            key={index}
-                            sx={{
-                              width: { xs: "100%", sm: "48%", md: "78%" },
-                              maxHeight: 350,
-                              borderRadius: 2,
-                              overflow: "hidden",
-                              backgroundColor: "#f5f5f5",
-                              cursor: "pointer",
-                            }}
-                            onClick={() => handleMediaClick(videoUrl)}
-                          >
-                            <video
-                              controls
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "contain",
-                              }}
-                            >
-                              <source src={videoUrl} type="video/mp4" />
-                              Your browser does not support the video tag.
-                            </video>
-                          </Box>
-                        ))}
-                      </Box>
-                    ) : (
-                      <Box display="flex" flexWrap="wrap" gap={2}>
-                        {allImages.map((imageUrl, index) => (
-                          <Box
-                            key={index}
-                            sx={{
-                              width: { xs: "100%", sm: "30%", md: "23%" },
-                              maxHeight: 200,
-                              borderRadius: 2,
-                              overflow: "hidden",
-                              backgroundColor: "#f5f5f5",
-                              cursor: "pointer",
-                            }}
-                            onClick={() => handleMediaClick(imageUrl)}
-                          >
-                            <img
-                              src={imageUrl}
-                              alt={`Gallery ${index}`}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                              }}
-                            />
-                          </Box>
-                        ))}
-                      </Box>
-                    )}
-                  </Paper>
-                </Grid>
-              </Grid>
-            </Grid>
+
+ <Grid container spacing={2}>
+  <Grid item xs={12} md={12}>
+    <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={1}>
+      {/* Video Section - Left Side (Fixed Size) */}
+      <Box sx={{ 
+        width: { xs: '100%', md: '70%' },
+        height: 430, // Fixed height
+        borderRadius: 2,
+        overflow: 'hidden',
+        backgroundColor: '#f5f5f5'
+      }}>
+        {allVideos.length > 0 ? (
+          allVideos.map((videoUrl, index) => (
+            <Box
+              key={index}
+              sx={{
+                width: '100%',
+                height: '100%',
+                cursor: 'pointer'
+              }}
+            >
+              <video
+                controls
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              >
+                <source src={videoUrl} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </Box>
+          ))
+        ) : (
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '100%' 
+          }}>
+            <Typography>No videos available</Typography>
+          </Box>
+        )}
+      </Box>
+
+      {/* Images Section - Right Side (Scrollable) */}
+      <Box sx={{ 
+        width: { xs: '100%', md: '40%' },
+        maxHeight: 430,
+        overflowY: 'auto',
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 2,
+        pr: 1 // Add some padding for scrollbar
+      }}>
+        {allImages.map((imageUrl, index) => (
+          <Box
+            key={index}
+            sx={{
+              width: { xs: '100%', sm: '48%' },
+              height: 200,
+              borderRadius: 2,
+              overflow: 'hidden',
+              backgroundColor: '#f5f5f5',
+              cursor: 'pointer',
+              flexShrink: 0
+            }}
+            onClick={() => {
+              setCurrentImageIndex(index);
+              setImageModalOpen(true);
+            }}
+          >
+            <img
+              src={imageUrl}
+              alt={`Gallery ${index}`}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  </Grid>
+</Grid>
+
+{/* Full-screen Image Modal */}
+<Dialog
+  open={imageModalOpen}
+  onClose={() => setImageModalOpen(false)}
+  maxWidth="lg"
+  fullWidth
+  sx={{
+    '& .MuiDialog-paper': {
+      backgroundColor: 'rgba(0,0,0,0.9)',
+      overflow: 'hidden'
+    }
+  }}
+>
+  <DialogTitle sx={{ 
+    display: 'flex', 
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    color: 'white'
+  }}>
+    <Typography>
+      Image {currentImageIndex + 1} of {allImages.length}
+    </Typography>
+    <IconButton onClick={() => setImageModalOpen(false)} color="inherit">
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+  
+  <DialogContent sx={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '70vh'
+  }}>
+    <Box sx={{
+      position: 'relative',
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center'
+    }}>
+      <IconButton
+        sx={{ 
+          position: 'absolute', 
+          left: 16,
+          color: 'white',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          '&:hover': {
+            backgroundColor: 'rgba(0,0,0,0.7)'
+          }
+        }}
+        onClick={() => setCurrentImageIndex(prev => 
+          prev === 0 ? allImages.length - 1 : prev - 1
+        )}
+      >
+        <ArrowBackIcon fontSize="large" />
+      </IconButton>
+      
+      <img
+        src={allImages[currentImageIndex]}
+        alt={`Gallery ${currentImageIndex}`}
+        style={{
+          maxWidth: '100%',
+          maxHeight: '100%',
+          objectFit: 'contain',
+          margin: '0 auto'
+        }}
+      />
+      
+      <IconButton
+        sx={{ 
+          position: 'absolute', 
+          right: 16,
+          color: 'white',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          '&:hover': {
+            backgroundColor: 'rgba(0,0,0,0.7)'
+          }
+        }}
+        onClick={() => setCurrentImageIndex(prev => 
+          prev === allImages.length - 1 ? 0 : prev + 1
+        )}
+      >
+        <ArrowForwardIcon fontSize="large" />
+      </IconButton>
+    </Box>
+  </DialogContent>
+  
+  <DialogActions sx={{
+    justifyContent: 'center',
+    pb: 3
+  }}>
+    <Box sx={{
+      display: 'flex',
+      gap: 1,
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      maxWidth: '100%',
+      overflowX: 'auto',
+      px: 2,
+      py: 1
+    }}>
+      {allImages.map((img, index) => (
+        <Box
+          key={index}
+          onClick={() => setCurrentImageIndex(index)}
+          sx={{
+            width: 60,
+            height: 60,
+            borderRadius: 1,
+            overflow: 'hidden',
+            cursor: 'pointer',
+            border: currentImageIndex === index ? '2px solid #1976d2' : '1px solid #555',
+            opacity: currentImageIndex === index ? 1 : 0.7,
+            flexShrink: 0
+          }}
+        >
+          <img
+            src={img}
+            alt={`Thumbnail ${index}`}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+        </Box>
+      ))}
+    </Box>
+  </DialogActions>
+</Dialog>
 
 
 
