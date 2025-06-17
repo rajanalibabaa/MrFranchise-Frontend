@@ -128,9 +128,13 @@ const initialFormData = {
   brandDetails: {
     fullName: "",
     brandName: "",
+    ceoEmail: "",
+    ceoMobile: "",
+    ceoName: "",
+    managerName: "",
     companyName: "",
     email: "",
-    secondaryEmail:"",
+    secondaryEmail: "",
     mobileNumber: "",
     country: "IN",
     whatsappNumber: "",
@@ -177,7 +181,6 @@ const BrandRegisterForm = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // <600px
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md")); // 600px - 900px
   const isLaptop = useMediaQuery(theme.breakpoints.up("md")); // >=900px
-
 
   const [formData, setFormData] = useState(() => {
     const savedData = localStorage.getItem(FORM_DATA_KEY);
@@ -293,6 +296,10 @@ const BrandRegisterForm = () => {
             fullName: formData.brandDetails.fullName,
             email: formData.brandDetails.email,
             mobileNumber: formData.brandDetails.mobileNumber,
+            ceoEmail: formData.brandDetails.ceoEmail,
+            ceoMobile: formData.brandDetails.ceoMobile,
+            ceoName: formData.brandDetails.ceoName,
+            managerName: formData.brandDetails.managerName,
             brandName: formData.brandDetails.brandName,
             companyName: formData.brandDetails.companyName,
             country:
@@ -338,7 +345,7 @@ const BrandRegisterForm = () => {
           franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
           // brandPromotionVideo: formData.uploads.brandPromotionVideo,
         };
-     
+
         Object.entries(fileFields).forEach(([fieldName, files]) => {
           if (files && files.length > 0) {
             files.forEach((file) => {
@@ -346,8 +353,6 @@ const BrandRegisterForm = () => {
             });
           }
         });
-     
-
 
         //   const apiData = {
         //   personalDetails: {
@@ -385,7 +390,7 @@ const BrandRegisterForm = () => {
         //     brandPromotionVideo: formData.uploads.brandPromotionVideo,
         //   }
         // };
-  console.log("fileFields.....:", formDataSend);
+        console.log("fileFields.....:", formDataSend);
         const response = await axios.post(
           "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
@@ -398,8 +403,8 @@ const BrandRegisterForm = () => {
           }
         );
 
-        console.log("response.data ====:",response);
-        console.log("response.data ====:",response.data.message);
+        console.log("response.data ====:", response);
+        console.log("response.data ====:", response.data.message);
 
         // if (response.status !== 200 && response.status !== 201) {
         //   throw new Error(response.data.message || "Submission failed");
@@ -407,14 +412,12 @@ const BrandRegisterForm = () => {
 
         if (response.status === 200) {
           setSubmitSuccess(true);
-        setSnackbar({
-          open: true,
-          message: "Form submitted successfully!",
-          severity: "success",
-        });
+          setSnackbar({
+            open: true,
+            message: "Form submitted successfully!",
+            severity: "success",
+          });
         }
-
-        
 
         // Reset form after successful submission
         localStorage.removeItem(FORM_DATA_KEY);
@@ -424,15 +427,15 @@ const BrandRegisterForm = () => {
         setTimeout(() => {
           navigate("/");
         }, 1500);
-
       } catch (error) {
         // console.log("submission error", error);
         setSnackbar({
           open: true,
-          message: "Submission failed. Please try again. or email already exists",
+          message:
+            "Submission failed. Please try again. or email already exists",
           severity: "error",
         });
-      }finally {
+      } finally {
         setIsSubmitting(false); // Stop loading regardless of success/failure
       }
     }
@@ -963,16 +966,31 @@ const BrandRegisterForm = () => {
     };
 
     return (
-      <Box sx={{ mt: 2 , px: { xs: 0.5, sm: 2, md: 4 },
-    width: "100%",
-    maxWidth: "100vw",}}>
-        <TableContainer component={Paper} sx={{ mb: 4,
-      boxShadow: { xs: 0, sm: 1 },
-      borderRadius: { xs: 0, sm: 2 },
-      overflowX: "auto", }}>
+      <Box
+        sx={{
+          mt: 2,
+          px: { xs: 0.5, sm: 2, md: 4 },
+          width: "100%",
+          maxWidth: "100vw",
+        }}
+      >
+        <TableContainer
+          component={Paper}
+          sx={{
+            mb: 4,
+            boxShadow: { xs: 0, sm: 1 },
+            borderRadius: { xs: 0, sm: 2 },
+            overflowX: "auto",
+          }}
+        >
           <Typography
             variant="subtitle1"
-            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5", fontSize: { xs: 16, sm: 18 }, }}
+            sx={{
+              p: 2,
+              fontWeight: "bold",
+              backgroundColor: "#f5f5f5",
+              fontSize: { xs: 16, sm: 18 },
+            }}
           >
             Brand Details
           </Typography>
@@ -985,23 +1003,32 @@ const BrandRegisterForm = () => {
                 }
                 return (
                   <TableRow key={key}>
-                    <TableCell  sx={{
-                  fontWeight: "bold",
-                  width: { xs: "45%", sm: "30%" },
-                  fontSize: { xs: 13, sm: 15 },
-                  wordBreak: "break-word" }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        width: { xs: "45%", sm: "30%" },
+                        fontSize: { xs: 13, sm: 15 },
+                        wordBreak: "break-word",
+                      }}
+                    >
                       {formatFieldName(key)}
                     </TableCell>
-                    <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>{formatFieldValue(value)}</TableCell>
+                    <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
+                      {formatFieldValue(value)}
+                    </TableCell>
                   </TableRow>
                 );
               })}
 
               {/* Brand Categories row */}
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold",
-              width: { xs: "45%", sm: "30%" },
-              fontSize: { xs: 13, sm: 15 }, }}>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    width: { xs: "45%", sm: "30%" },
+                    fontSize: { xs: 13, sm: 15 },
+                  }}
+                >
                   Brand Categories
                 </TableCell>
                 <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
@@ -1011,9 +1038,13 @@ const BrandRegisterForm = () => {
 
               {/* Expansion Locations row */}
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold",
-              width: { xs: "45%", sm: "30%" },
-              fontSize: { xs: 13, sm: 15 }, }}>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    width: { xs: "45%", sm: "30%" },
+                    fontSize: { xs: 13, sm: 15 },
+                  }}
+                >
                   Expansion Locations
                 </TableCell>
                 <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
@@ -1024,13 +1055,23 @@ const BrandRegisterForm = () => {
           </Table>
         </TableContainer>
 
-        <TableContainer component={Paper} sx={{ mb: 2,
-      boxShadow: { xs: 0, sm: 1 },
-      borderRadius: { xs: 0, sm: 2 },
-      overflowX: "auto",}}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            mb: 2,
+            boxShadow: { xs: 0, sm: 1 },
+            borderRadius: { xs: 0, sm: 2 },
+            overflowX: "auto",
+          }}
+        >
           <Typography
             variant="subtitle1"
-            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#ff9800",fontSize: { xs: 16, sm: 18 } }}
+            sx={{
+              p: 2,
+              fontWeight: "bold",
+              backgroundColor: "#ff9800",
+              fontSize: { xs: 16, sm: 18 },
+            }}
           >
             Franchise Details
           </Typography>
@@ -1088,171 +1129,191 @@ const BrandRegisterForm = () => {
   };
   return (
     <>
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" ,mt: 8 }}>
       <Box
         sx={{
-          flexGrow: 1,
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden",
-          p: 2,
+          height: "100vh",
+          mt: 8,
         }}
       >
-        <Box>
-          <Stepper
-            activeStep={activeStep}
-            alternativeLabel
-            connector={<ColorlibConnector />}
-          >
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel StepIconComponent={ColorlibStepIcon}>
-                  {label}
-                </StepLabel>
-              </Step>
-            ))}
-            <Toolbar sx={{ justifyContent: "flex-end" }}>
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <Select
-                  value={formData.brandDetails.country}
-                  onChange={handleCountryChange}
-                  displayEmpty
-                  inputProps={{ "aria-label": "Select country" }}
-                >
-                  {countries.map((country) => (
-                    <MenuItem key={country.code} value={country.code}>
-                      {country.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Toolbar>
-          </Stepper>
-          <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
-            <Box width="30%">
-              {" "}
-              {activeStep >= 0 && renderSelectedCategories()}
-            </Box>
-            <Box width="25%">
-              {" "}
-              {activeStep >= 0 && renderExpansionLocations()}
-            </Box>
-            <Box width="45%"> {activeStep >= 1 && renderFicoModels()}</Box>
-          </Box>
-        </Box>
-
         <Box
           sx={{
             flexGrow: 1,
-            border: "1px solid #e0e0e0",
-            borderRadius: 2,
-            mb: 0,
-            pl: 1,
-            overflow: "auto",
-          }}
-        >
-          <Box sx={{ p: 2 }}>{getStepContent(activeStep)}</Box>
-        </Box>
-
-        <Box
-          sx={{
             display: "flex",
-            justifyContent: "center",
-            pt: 2,
-            borderTop: "1px solid #e0e0e0",
+            flexDirection: "column",
+            overflow: "hidden",
+            p: 2,
           }}
         >
-           <Button
-          disabled={activeStep === 0 || isSubmitting}
-          onClick={handleBack}
-          sx={{ mr: 2,color:'white',backgroundColor: 'black', "&:hover": { backgroundColor: '#e0e0e0' } } }
-        >
-          Back
-        </Button>
+          <Box>
+            <Stepper
+              activeStep={activeStep}
+              alternativeLabel
+              connector={<ColorlibConnector />}
+            >
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel StepIconComponent={ColorlibStepIcon}>
+                    {label}
+                  </StepLabel>
+                </Step>
+              ))}
+              <Toolbar sx={{ justifyContent: "flex-end" }}>
+                <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <Select
+                    value={formData.brandDetails.country}
+                    onChange={handleCountryChange}
+                    displayEmpty
+                    inputProps={{ "aria-label": "Select country" }}
+                  >
+                    {countries.map((country) => (
+                      <MenuItem key={country.code} value={country.code}>
+                        {country.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Toolbar>
+            </Stepper>
+            <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
+              <Box width="30%">
+                {" "}
+                {activeStep >= 0 && renderSelectedCategories()}
+              </Box>
+              <Box width="25%">
+                {" "}
+                {activeStep >= 0 && renderExpansionLocations()}
+              </Box>
+              <Box width="45%"> {activeStep >= 1 && renderFicoModels()}</Box>
+            </Box>
+          </Box>
 
-          <Button 
-          variant="outlined" 
-          onClick={handlePreviewOpen} 
-          sx={{ mr: 2 }}
-          disabled={isSubmitting}
-        >
-          Preview
-        </Button>
+          <Box
+            sx={{
+              flexGrow: 1,
+              border: "1px solid #e0e0e0",
+              borderRadius: 2,
+              mb: 0,
+              pl: 1,
+              overflow: "auto",
+            }}
+          >
+            <Box sx={{ p: 2 }}>{getStepContent(activeStep)}</Box>
+          </Box>
 
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={handleCancel}
-            sx={{ mr: 2 }}
-            disabled={isSubmitting}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              pt: 2,
+              borderTop: "1px solid #e0e0e0",
+            }}
           >
-            Cancel
-          </Button>
+            <Button
+              disabled={activeStep === 0 || isSubmitting}
+              onClick={handleBack}
+              sx={{
+                mr: 2,
+                color: "white",
+                backgroundColor: "black",
+                "&:hover": { backgroundColor: "#e0e0e0" },
+              }}
+            >
+              Back
+            </Button>
 
-              {activeStep === steps.length - 1 ? (
-          <Button 
-            variant="contained" 
-            sx={{color: "white", backgroundColor: "#4caf50", "&:hover": { backgroundColor: "#45a049" }}}
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            startIcon={
-              isSubmitting ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : submitSuccess ? (
-                <CheckCircleIcon />
-              ) : null
-            }
-          >
-            {isSubmitting ? "Submitting..." : submitSuccess ? "Submitted!" : "Submit"}
-          </Button>
-        ) : (
-          <Button 
-            variant="contained" 
-            onClick={handleNext}
-            disabled={isSubmitting}
-          >
-            Next
-          </Button>
-        )}
+            <Button
+              variant="outlined"
+              onClick={handlePreviewOpen}
+              sx={{ mr: 2 }}
+              disabled={isSubmitting}
+            >
+              Preview
+            </Button>
+
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleCancel}
+              sx={{ mr: 2 }}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+
+            {activeStep === steps.length - 1 ? (
+              <Button
+                variant="contained"
+                sx={{
+                  color: "white",
+                  backgroundColor: "#4caf50",
+                  "&:hover": { backgroundColor: "#45a049" },
+                }}
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                startIcon={
+                  isSubmitting ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : submitSuccess ? (
+                    <CheckCircleIcon />
+                  ) : null
+                }
+              >
+                {isSubmitting
+                  ? "Submitting..."
+                  : submitSuccess
+                  ? "Submitted!"
+                  : "Submit"}
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                onClick={handleNext}
+                disabled={isSubmitting}
+              >
+                Next
+              </Button>
+            )}
+          </Box>
         </Box>
-      </Box>
 
-      {/* Preview Dialog */}
-      <Dialog
-        open={openPreview}
-        onClose={handlePreviewClose}
-        maxWidth="md"
-        fullWidth
-        scroll="paper"
-      >
-        <DialogTitle sx={{ borderBottom: "1px solid #e0e0e0" }}>
-          Form Data Preview
-        </DialogTitle>
-        <DialogContent dividers>{renderPreviewContent()}</DialogContent>
-        <DialogActions sx={{ borderTop: "1px solid #e0e0e0" }}>
-          <Button onClick={handlePreviewClose} variant="contained">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
+        {/* Preview Dialog */}
+        <Dialog
+          open={openPreview}
+          onClose={handlePreviewClose}
+          maxWidth="md"
+          fullWidth
+          scroll="paper"
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
-    <Footer />
+          <DialogTitle sx={{ borderBottom: "1px solid #e0e0e0" }}>
+            Form Data Preview
+          </DialogTitle>
+          <DialogContent dividers>{renderPreviewContent()}</DialogContent>
+          <DialogActions sx={{ borderTop: "1px solid #e0e0e0" }}>
+            <Button onClick={handlePreviewClose} variant="contained">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Box>
+      <Footer />
     </>
   );
 };
