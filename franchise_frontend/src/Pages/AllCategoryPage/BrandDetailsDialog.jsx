@@ -672,7 +672,101 @@ const BrandDetailsDialog = () => {
           </Box>
         </DialogTitle>
 
-        <Typography variant="subtitle1" m={1}>
+        
+
+        <DialogContent
+          dividers
+          sx={{
+            display: "flex",
+            p: 1,
+            position: "relative",
+            flexDirection: { xs: "column", md: "row" },
+          }}
+        >
+          <Box
+            sx={{
+              flex: 1,
+              // p: 3,
+              overflowY: "auto",
+              maxHeight: "70vh",
+            }}
+          >
+            <Grid
+              display={"flex"}
+              flexDirection={"row"}
+              justifyContent={"space-between"}
+            >
+
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={12}>
+                    <Tabs
+                      value={tabIndex}
+                      onChange={(e, newValue) => setTabIndex(newValue)}
+                      centered
+                      sx={{ mb: 1 }}
+                    >
+                      <Tab label="Video" />
+                      <Tab label="Images" />
+                    </Tabs>
+
+                    {tabIndex === 0 ? (
+                      <Box display="flex" gap={2}>
+                        {allVideos.map((videoUrl, index) => (
+                          <Box
+                            key={index}
+                            sx={{
+                              width: { xs: "100%", sm: "48%", md: "78%" },
+                              maxHeight:350,
+                              borderRadius: 2,
+                              overflow: "hidden",
+                              backgroundColor: "#f5f5f5",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => handleMediaClick(videoUrl)}
+                          >
+                            <video
+                              controls
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            >
+                              <source src={videoUrl} type="video/mp4" />
+                              Your browser does not support the video tag.
+                            </video>
+                          </Box>
+                        ))}
+                      </Box>
+                    ) : (
+                      <Box display="flex" flexWrap="wrap" gap={2}>
+                        {allImages.map((imageUrl, index) => (
+                          <Box
+                            key={index}
+                            sx={{
+                              width: { xs: "100%", sm: "30%", md: "23%" },
+                              maxHeight: 200,
+                              borderRadius: 2,
+                              overflow: "hidden",
+                              backgroundColor: "#f5f5f5",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => handleMediaClick(imageUrl)}
+                          >
+                            <img
+                              src={imageUrl}
+                              alt={`Gallery ${index}`}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  <Typography variant="subtitle1" m={1}>
           {selectedBrand.personalDetails?.brandCategories &&
             selectedBrand.personalDetails.brandCategories.length > 0 && (
               <Box >
@@ -724,101 +818,6 @@ const BrandDetailsDialog = () => {
             )}
           
         </Typography>
-
-        <DialogContent
-          dividers
-          sx={{
-            display: "flex",
-            p: 1,
-            position: "relative",
-            flexDirection: { xs: "column", md: "row" },
-          }}
-        >
-          <Box
-            sx={{
-              flex: 1,
-              // p: 3,
-              overflowY: "auto",
-              maxHeight: "70vh",
-            }}
-          >
-            <Grid
-              display={"flex"}
-              flexDirection={"row"}
-              justifyContent={"space-between"}
-            >
-
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={12}>
-                  <Paper elevation={1} sx={{ p: 1.5, borderRadius: 2 }}>
-                    <Tabs
-                      value={tabIndex}
-                      onChange={(e, newValue) => setTabIndex(newValue)}
-                      centered
-                      sx={{ mb: 1 }}
-                    >
-                      <Tab label="Video" />
-                      <Tab label="Images" />
-                    </Tabs>
-
-                    {tabIndex === 0 ? (
-                      <Box display="flex" gap={2}>
-                        {allVideos.map((videoUrl, index) => (
-                          <Box
-                            key={index}
-                            sx={{
-                              width: { xs: "100%", sm: "48%", md: "78%" },
-                              maxHeight:350,
-                              borderRadius: 2,
-                              overflow: "hidden",
-                              backgroundColor: "#f5f5f5",
-                              cursor: "pointer",
-                            }}
-                            onClick={() => handleMediaClick(videoUrl)}
-                          >
-                            <video
-                              controls
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "contain",
-                              }}
-                            >
-                              <source src={videoUrl} type="video/mp4" />
-                              Your browser does not support the video tag.
-                            </video>
-                          </Box>
-                        ))}
-                      </Box>
-                    ) : (
-                      <Box display="flex" flexWrap="wrap" gap={2}>
-                        {allImages.map((imageUrl, index) => (
-                          <Box
-                            key={index}
-                            sx={{
-                              width: { xs: "100%", sm: "30%", md: "23%" },
-                              maxHeight: 200,
-                              borderRadius: 2,
-                              overflow: "hidden",
-                              backgroundColor: "#f5f5f5",
-                              cursor: "pointer",
-                            }}
-                            onClick={() => handleMediaClick(imageUrl)}
-                          >
-                            <img
-                              src={imageUrl}
-                              alt={`Gallery ${index}`}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                              }}
-                            />
-                          </Box>
-                        ))}
-                      </Box>
-                    )}
-                  </Paper>
                 </Grid>
               </Grid>
             </Grid>

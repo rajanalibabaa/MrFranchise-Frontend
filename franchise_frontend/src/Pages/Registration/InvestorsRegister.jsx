@@ -754,7 +754,7 @@ setTimeout(() => {
           
           
           <Typography
-            variant="h4"
+            variant="h3"
             gutterBottom
             fontWeight="bold"
             sx={{ textAlign: "center", mb: 1, color: "#7ad03a", mt: 3 }}
@@ -791,7 +791,7 @@ setTimeout(() => {
           </Toolbar>
           <form   onSubmit={handleSubmit(onSubmit)}  >
             <Typography
-              variant="h5"
+              variant="h4"
               sx={{
                 marginBottom: "25px",
                 marginTop: "5px",
@@ -805,17 +805,18 @@ setTimeout(() => {
               container
               spacing={2}
               sx={{
-                display: "grid",
-                gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+                display: "flex",
+                flexDirection: "column",
+                // gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
                 gap: 2,
                 
               }}
             >
               {" "}
               {/* Name Field */}
-              <Grid sx={{ xs: 12, sm: 6, mb: -2 }}>
+              <Grid display={"flex"} >
+                <Typography>First Name</Typography>
                 <TextField
-                  fullWidth
                   label="Name"
                   {...register("firstName", {
                     required: "First name is required",
@@ -825,9 +826,9 @@ setTimeout(() => {
                 />
               </Grid>
               {/* {email field} */}
-              <Grid sx={{ xs: 12, sm: 6, mb: -2 }}>
+              <Grid display={"flex"} >
+                <Typography>Email</Typography>
                 <TextField
-                  fullWidth
                   label="Email"
                   type="email"
                   {...register("email", {
@@ -867,10 +868,10 @@ setTimeout(() => {
                 />
               </Grid>
               {/* Mobile number field */}
-              <Grid sx={{ xs: 12, sm: 6, mb: -2 }}>
+              <Grid display={"flex"}>
+                <Typography>Mobile Number</Typography>
                 <TextField
-                  fullWidth
-                  label="Phone Number"
+                  label="Mobile Number"
                   {...register("mobileNumber", {
                     required: "Phone number is required",
                     pattern: {
@@ -930,9 +931,9 @@ setTimeout(() => {
                 />
               </Grid>
               {/* WhatsApp Field */}
-              <Grid sx={{ xs: 12, sm: 6, mb: -2 }}>
+              <Grid display={"flex"}>
+                <Typography>WhatsApp Number</Typography>
                 <TextField
-                  fullWidth
                   label="WhatsApp Number"
                   {...register("whatsappNumber", {
                     required: "WhatsApp number is required",
@@ -1002,9 +1003,9 @@ setTimeout(() => {
               </TextField>
             </Grid> */}
               {/* {address} */}
-              <Grid sx={{ xs: 12, sm: 6 }}>
+              <Grid display={"flex"}>
+                <Typography>Address</Typography>
                 <TextField 
-                fullWidth 
                 label="Address" {...register("address",
                   {
                     required: "Address is required",
@@ -1015,9 +1016,9 @@ setTimeout(() => {
                  />
               </Grid>
               {/* {pincode} */}
-              <Grid sx={{ xs: 12, sm: 3, mb: -2 }}>
+              <Grid display={"flex"}>
+                <Typography>Pincode</Typography>
                 <TextField
-                  fullWidth
                   label="Pincode"
                   {...register("pincode", {
                     required: "Pincode is required",
@@ -1031,9 +1032,9 @@ setTimeout(() => {
                 />
               </Grid>
               {/* {state} */}
-              <Grid sx={{ xs: 12, sm: 3 }}>
+              <Grid display={"flex"}>
+                <Typography>State</Typography>
                 <TextField
-                  fullWidth
                   label="State"
                   value={watch("state") || ""}
                   {...register("state")}
@@ -1042,9 +1043,9 @@ setTimeout(() => {
                 />
               </Grid>
               {/* {city} */}
-              <Grid sx={{ xs: 12, sm: 6 }}>
+              <Grid display={"flex"}>
+                <Typography>City</Typography>
                 <TextField
-                  fullWidth
                   label="City"
                   value={watch("city") || ""}
                   {...register("city")}
@@ -1064,10 +1065,10 @@ setTimeout(() => {
               />
             </Grid> */}
               {/* Occupation Field */}
-              <Grid sx={{ xs: 12, sm: 4 }}>
+              <Grid display={"flex"}>
+                <Typography> Occupation</Typography>
                 <TextField
                   select
-                  fullWidth
                   defaultValue=""
                   SelectProps={{ native: true }}
                   {...register("occupation")}
@@ -1117,7 +1118,8 @@ setTimeout(() => {
               container
               spacing={2}
               sx={{
-                // display: "grid",
+                display: "flex",
+                flexDirection: "column",
                 // gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
                 gap: 2,
               }}
@@ -1126,9 +1128,10 @@ setTimeout(() => {
               {/* Category Selection - Multi-Level Dropdown */}
 <Grid item xs={12}>
   <Stack direction="row"  spacing={2} alignItems="center"  >
+    <Typography>Category</Typography>
     {/* Main Category Dropdown */}
     <FormControl sx={{ minWidth: 200 }} >
-      <InputLabel>Main Category</InputLabel>
+      <InputLabel>Industry</InputLabel>
       <Select
         value={selectedMainCategory || ''}
         onChange={(e) => {
@@ -1138,7 +1141,7 @@ setTimeout(() => {
         }}
         label="Main Category"
       >
-        <MenuItem value="">Select Main Category</MenuItem>
+        <MenuItem value="">Select Industry</MenuItem>
         {categories.map((category, index) => (
           <MenuItem key={index} value={category.name}>
             {category.name}
@@ -1149,7 +1152,7 @@ setTimeout(() => {
 
     {/* Subcategory Dropdown */}
     <FormControl sx={{ minWidth: 200 }} disabled={!selectedMainCategory}>
-      <InputLabel>Subcategory</InputLabel>
+      <InputLabel>Main category</InputLabel>
       <Select
         value={selectedSubCategory || ''}
         onChange={(e) => {
@@ -1158,7 +1161,7 @@ setTimeout(() => {
         }}
         label="Subcategory"
       >
-        <MenuItem value="">Select Subcategory</MenuItem>
+        <MenuItem value="">Select Main category</MenuItem>
         {selectedMainCategory && 
           categories.find(c => c.name === selectedMainCategory)?.children?.map((sub, index) => (
             <MenuItem key={index} value={sub.name}>
@@ -1171,13 +1174,13 @@ setTimeout(() => {
 
     {/* Child Item Dropdown */}
     <FormControl sx={{ minWidth: 200 }} disabled={!selectedSubCategory}>
-      <InputLabel>Item</InputLabel>
+      <InputLabel>Sub Category</InputLabel>
       <Select
         value={selectedChild || ''}
         onChange={(e) => setSelectedChild(e.target.value)}
         label="Item"
       >
-        <MenuItem value="">Select Item</MenuItem>
+        <MenuItem value="">Select Sub Category</MenuItem>
         {selectedMainCategory && selectedSubCategory && 
           categories.find(c => c.name === selectedMainCategory)
             ?.children?.find(s => s.name === selectedSubCategory)
@@ -1248,10 +1251,10 @@ setTimeout(() => {
 </Grid>
 
               {/* {preferred investment range field} */}
-              <Grid sx={{ xs: 12, sm: 4 }}>
+              <Grid display={'flex'}>
+                <Typography>Preferred Investment Range</Typography>
                 <TextField
                   select
-                  fullWidth
                   defaultValue=""
                   SelectProps={{ native: true }}
                   {...register("investmentRange"
@@ -1271,11 +1274,11 @@ setTimeout(() => {
                 </TextField>
               </Grid>
               {selectedRange && (
-                <Grid  sx={{ xs: 12, sm: 4 }}>
+                <Grid  display={'flex'}>
                   <Stack direction="row" alignItems="center" spacing={1}>
+                    <Typography>Preferred Investment Amount</Typography>
                     <TextField
                       select
-                      fullWidth
                       defaultValue=""
                       SelectProps={{ native: true }}
                       {...register("investmentAmount"
@@ -1311,8 +1314,10 @@ setTimeout(() => {
               )}
 
               {/* Preferred State Field (changed to text input) */}
-              <Grid  xs={12} sm={6}>
+              <Grid  display={'flex'}>
+                <Typography>Preferred State</Typography>
                 <FormControl sx={{ minWidth: 200 }} error={!!errors.preferredState}>
+
                   <InputLabel>Preferred State *</InputLabel>
                   <Select
                     label="Preferred State"
@@ -1342,7 +1347,8 @@ setTimeout(() => {
               </Grid>
 
               {/* Preferred District Field  */}
-              <Grid  xs={12} sm={6}>
+              <Grid display={'flex'}>
+                <Typography>Preferred District</Typography>
                 <FormControl sx={{ minWidth: 200 }} error={!!errors.preferredDistrict}>
                   <InputLabel>Preferred District *</InputLabel>
                   <Select
@@ -1373,7 +1379,8 @@ setTimeout(() => {
               </Grid>
 
               {/* Preferred City Field (changed to text input) */}
-              <Grid  xs={12} sm={6}>
+              <Grid  display={'flex'}>
+                <Typography>Preferred City</Typography>
                 <FormControl sx={{ minWidth: 200 }} error={!!errors.preferredCity}>
                   <InputLabel>Preferred City *</InputLabel>
                   <Select
@@ -1399,13 +1406,13 @@ setTimeout(() => {
                 </FormControl>
               </Grid>
               {/* Property Type Field */}
-              <Grid  xs={12} sm={6} md={4}>
+              <Grid  display={'flex'}>
+                <Typography>Property Type</Typography>
                 <FormControl
                   component="fieldset"
                   sx={{ minWidth: 200 }}
                   // error={!!errors.propertyType}
                 >
-                  <FormLabel component="legend">Property Type *</FormLabel>
                   <Controller
                     name="propertyType"
                     control={control}
@@ -1446,7 +1453,8 @@ setTimeout(() => {
 
               {/* Property Size Field - Only show for Own Property */}
               {watch("propertyType") === "Own Property" && (
-                <Grid  xs={12} sm={6} md={4}>
+                <Grid  display={'flex'}>
+                  <Typography>Property Size</Typography>
                   <TextField
                     select
                     sx={{ minWidth: 200 }}
@@ -1503,63 +1511,11 @@ setTimeout(() => {
           </ Grid>
  
 
-          {/* Preferences Dialog */}
-          {/* <Dialog open={preferenceDialogOpen} onClose={() => setPreferenceDialogOpen(false)} maxWidth="md" fullWidth>
-            <DialogTitle color="orange" fontWeight="bold">Added Preferences</DialogTitle>
-            <DialogContent>
-              {preferences.length === 0 ? (
-                <Typography variant="body1" color="text.secondary">No preferences added yet.</Typography>
-              ) : (
-                <List>
-                  {preferences.map((pref, idx) => (
-                    <ListItem key={idx} divider
-                      secondaryAction={
-                        <Button size="small" variant="outlined" color="error" onClick={() => handleRemovePreference(idx)}>
-                          Remove
-                        </Button>
-                      }
-                    >
-                      <ListItemText
-                       
-                        secondary={
-                          <>
-                            <Box sx={{ fontWeight: "bold" }}>State: {pref.preferredState} - {pref.preferredDistrict} - {pref.preferredCity}</Box>
-                            <Box sx={{ fontWeight: "bold" }}>Category: {Array.isArray(pref.category) ? pref.category.map(c => `${c.main} > ${c.sub} > ${c.child}`).join(", ") : ""}</Box>
-                            <Box sx={{ fontWeight: "bold" }}>Investment: {pref.investmentRange} - {pref.investmentAmount}</Box>
-                            <Box sx={{ fontWeight: "bold" }}>Property: {pref.propertyType}{pref.propertyType === "Own Property" ? ` (${pref.propertySize})` : ""}</Box>
-                          </>
-                        }
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button color="error"  variant ="contained" onClick={() => setPreferenceDialogOpen(false)}>Close</Button>
-            </DialogActions>
-          </Dialog> */}
-  
+         
 
             </Grid>
                         <Grid item xs={12}>
-  {/* <Button
-    variant="contained"
-    color="warning"
-    size="medium"
-    fullWidth
-    sx={{ 
-      bgcolor: '#ff9800', 
-      '&:hover': { bgcolor: '#f57c00' },
-      mt: 2,
-      mb: 2
-    }}
-    onClick={() => document.activeElement.blur()}
-    disabled={preferences.length === 0}
-  >
-    {preferences.length > 0 ? `View ${preferences.length} Added Preferences` : "No Preferences Added Yet"}
-  </Button> */}
-
+  
   {preferences.length > 0 && (
     <TableContainer component={Paper} sx={{ mt: 2, mb: 3 }}>
       <Table size="small" aria-label="added preferences table">

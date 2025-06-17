@@ -130,6 +130,7 @@ const initialFormData = {
     brandName: "",
     companyName: "",
     email: "",
+    secondaryEmail:"",
     mobileNumber: "",
     country: "IN",
     whatsappNumber: "",
