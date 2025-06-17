@@ -672,58 +672,7 @@ const BrandDetailsDialog = () => {
           </Box>
         </DialogTitle>
 
-        <Typography variant="subtitle1" m={1}>
-          {selectedBrand.personalDetails?.brandCategories &&
-            selectedBrand.personalDetails.brandCategories.length > 0 && (
-              <Box >
-                {selectedBrand.personalDetails.brandCategories.map(
-                  (category, index) => (
-                    <Box
-                      key={index}
-                     
-                    >
-                      <Box display={"flex"} gap={30}><Typography variant="body2" m={1}>
-                       <label style={{ fontWeight: "bold" }}>Category:{"  "}</label> 
-                        <label >
-                          {category.child}
-                        </label>
-                      </Typography>
-                      <Typography variant="body2" m={1}
-                      >
-                      <label style={{ fontWeight: "bold" }}>Investment : </label>  
-                        <label >
-                          {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
-                            (model) => model.investmentRange
-                          )}
-                        </label>
-                      </Typography>
-                      <Typography variant="body2" m={1} >
-                      <label style={{ fontWeight: "bold" }}>Area: </label>  
-                        <label >
-                          {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
-                            (model) => model.areaRequired
-                          )} sq.ft
-                        </label>
-                      </Typography></Box>
-                      <Box></Box>
-                      
-                      {selectedBrand.personalDetails?.expansionLocation?.length > 0 && (
-            <Typography  variant="body2" m={1}>
-                      <label style={{ fontWeight: "bold" }}>Expansions:</label>  
-              <label >
-                {selectedBrand.personalDetails.expansionLocation.map(
-                  (location) => `  ${location.city},  `
-                )}
-              </label>
-            </Typography>
-          )}
-                    </Box>
-                  )
-                )}
-              </Box>
-            )}
-          
-        </Typography>
+        
 
         <DialogContent
           dividers
@@ -750,7 +699,7 @@ const BrandDetailsDialog = () => {
 
               <Grid container spacing={2}>
                 <Grid item xs={12} md={12}>
-                  <Paper elevation={1} sx={{ p: 1.5, borderRadius: 2 }}>
+                  {/* <Paper elevation={1} sx={{ p: 1.5, borderRadius: 2 }}> */}
                     <Tabs
                       value={tabIndex}
                       onChange={(e, newValue) => setTabIndex(newValue)}
@@ -818,7 +767,58 @@ const BrandDetailsDialog = () => {
                         ))}
                       </Box>
                     )}
-                  </Paper>
+                  <Typography variant="subtitle1" m={1}>
+          {selectedBrand.personalDetails?.brandCategories &&
+            selectedBrand.personalDetails.brandCategories.length > 0 && (
+              <Box >
+                {selectedBrand.personalDetails.brandCategories.map(
+                  (category, index) => (
+                    <Box
+                      key={index}
+                     
+                    >
+                      <Box display={"flex"} gap={30}><Typography variant="body2" m={1}>
+                       <label style={{ fontWeight: "bold" }}>Category:{"  "}</label> 
+                        <label >
+                          {category.child}
+                        </label>
+                      </Typography>
+                      <Typography variant="body2" m={1}
+                      >
+                      <label style={{ fontWeight: "bold" }}>Investment : </label>  
+                        <label >
+                          {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
+                            (model) => model.investmentRange
+                          )}
+                        </label>
+                      </Typography>
+                      <Typography variant="body2" m={1} >
+                      <label style={{ fontWeight: "bold" }}>Area: </label>  
+                        <label >
+                          {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
+                            (model) => model.areaRequired
+                          )} sq.ft
+                        </label>
+                      </Typography></Box>
+                      <Box></Box>
+                      
+                      {selectedBrand.personalDetails?.expansionLocation?.length > 0 && (
+            <Typography  variant="body2" m={1}>
+                      <label style={{ fontWeight: "bold" }}>Expansions:</label>  
+              <label >
+                {selectedBrand.personalDetails.expansionLocation.map(
+                  (location) => `  ${location.city},  `
+                )}
+              </label>
+            </Typography>
+          )}
+                    </Box>
+                  )
+                )}
+              </Box>
+            )}
+          
+        </Typography>
                 </Grid>
               </Grid>
             </Grid>
