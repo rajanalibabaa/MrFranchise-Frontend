@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useForm, useWatch, Controller } from "react-hook-form";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import axios from "axios";
+import { useDispatch } from "react-redux";
 import {
   Grid,
   TextField,
@@ -35,6 +36,8 @@ import {
   Toolbar,
 } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
+import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice.jsx";
+// import CircularProgress from "@mui/material/CircularProgress";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
@@ -77,6 +80,7 @@ const InvestorRegister = () => {
   const navigate = useNavigate();
   const [phonePrefix, setPhonePrefix] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("India");
+  const dispatch = useDispatch();
 
   const dropdownRef = useRef(null);
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
@@ -98,7 +102,7 @@ const InvestorRegister = () => {
   const [loginOpen, setLoginOpen] = useState(false);
   const [preferences, setPreferences] = useState([]);
   const [preferenceDialogOpen, setPreferenceDialogOpen] = useState(false);
-
+const [isSubmitting, setIsSubmitting] = useState(false);
 
   const FORM_DATA_KEY = "investor_form_data";
   const initialFormData = {
@@ -263,7 +267,7 @@ const InvestorRegister = () => {
       "investmentAmount",   
       "category",
     ])
-    showSnackbar("Preference added!", "success");
+    showSnackbar("Preference added successfully!", "success");
   };
 
   // Remove preference handler
@@ -520,11 +524,23 @@ const InvestorRegister = () => {
     showSnackbar("Please add at least one preference before submitting.", "error");
     return;
   }
+  setIsSubmitting(true);
+  dispatch(showLoading());
+  
+  try{
   const formatNumber = (num) => {
     if (!num) return "";
     const trimmed = num.trim();
     return trimmed.startsWith(phonePrefix) ? trimmed : `${phonePrefix}${trimmed}`;
   };
+  const categoryString = preferences
+  .map(pref => 
+    Array.isArray(pref.category) 
+      ? pref.category.map(c => `${c.main} > ${c.sub} > ${c.child}`).join(", ")
+      : pref.category
+  )
+  .filter(Boolean)
+  .join("; ");
 
   const formattedData = {
     firstName: data.firstName || "",
@@ -541,11 +557,7 @@ const InvestorRegister = () => {
       specifyOccupation: data.otherOccupation || "",
     }),
     preferences: preferences.map(pref => ({
-    category: Array.isArray(pref.category)
-      ? pref.category.map(c => `${c.main} > ${c.sub} > ${c.child}`).join(", ")
-      : typeof pref.category === "string"
-        ? pref.category
-        : "",
+     category: categoryString,
     investmentRange: pref.investmentRange,
     investmentAmount: pref.investmentAmount,
     propertyType: pref.propertyType,
@@ -568,13 +580,14 @@ const InvestorRegister = () => {
     };
     console.log("Submitting data:", formattedData);
 
-    try {
+   
       const response = await axios.post(
         "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
         // "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
+      
 console.log("Registration response:", response.data);
 
       if (response.status === 201) {
@@ -589,7 +602,7 @@ console.log("Registration response:", response.data);
   }
 
         showSnackbar(
-          "Registration successful! Redirecting to login...",
+          "🎉 Registration successful! Please login to continue...",
           "success"
         );
         setLoginOpen(true);
@@ -601,9 +614,9 @@ console.log("Registration response:", response.data);
         );
       }
     } catch (error) {
-  console.error("Registration error:", error);
+   console.error("Registration error:", error.response?.data?.details|| error.message);
   if (error.response?.data?.errors) {
-    console.error("Validation errors:", error.response.data.errors);
+    // console.error("Validation errors:", error.response.data.errors);
     showSnackbar(
       error.response.data.errors.join(", "),
       "error"
@@ -623,6 +636,9 @@ console.log("Registration response:", response.data);
       "error"
     );
   }
+}finally{
+  setIsSubmitting(false);
+    dispatch(hideLoading());
 }
   };
 
@@ -704,7 +720,7 @@ console.log("Registration response:", response.data);
         backgroundSize: "contain",
         backgroundPosition: "center",
         // backgroundRepeat: "no-repeat",
-        height: "100vh",
+        height: "100%",
       }}
     >
  
@@ -1050,7 +1066,7 @@ console.log("Registration response:", response.data);
                   <option value="">Select Occupation</option>
   <option value="Student">Student</option>
   <option value="Salaried Professional">Salaried Professional</option>
-  <option value="Business Owner/ Self-Employed">Business Owner/ Self-Employed</option>
+  <option value="Bussiness Owner/ Self-Employed">Bussiness Owner/ Self-Employed</option>
   <option value="Retired">Retired</option>
   <option value="Freelancer/ Consultant">Freelancer/ Consultant</option>
   <option value="Homemaker">Homemaker</option>
@@ -1650,8 +1666,11 @@ document.activeElement.blur();
                       color: "white",
                       "&:hover": { bgcolor: "#7ad033" },
                     }}
-                  >
-                    REGISTER
+                  >{isSubmitting ? (
+    <CircularProgress size={24} sx={{ color: "white" }} />
+  ) : (
+    "REGISTER"
+  )}
                   </Button>
                 </Grid>
                 {/* Sign In Link */}

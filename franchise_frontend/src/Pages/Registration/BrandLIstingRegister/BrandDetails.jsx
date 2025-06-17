@@ -985,4 +985,3 @@ const handleAddLocation = () => {
 };
 
 export default BrandDetails;
-

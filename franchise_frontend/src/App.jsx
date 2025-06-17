@@ -5,7 +5,7 @@ import InvestorRegister from './Pages/Registration/InvestorsRegister';
 import LoginPage from "./Pages/LoginPage/LoginPage";
 
 import "./App.css";
-import Nprogress from 'nprogress';
+// import Nprogress from 'nprogress';
 import HomeBannerSec from "./Pages/HomePages/HomeBannerSec";
 import RegisterHandleUser from "./Pages/Registration/RegisterHandlePage";
 // import BrandListingFormPage from './Pages/BrandListingForm/BrandListingFormPage';
@@ -53,6 +53,7 @@ function App() {
   const dispatch = useDispatch();
   const AccessToken = localStorage.getItem("accessToken");
   // console.log("Access Token:", AccessToken);
+
 
   useEffect(() => {
     const logoutTimestamp = localStorage.getItem("logoutTimestamp");

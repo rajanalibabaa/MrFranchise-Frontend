@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import BrandLogo from "../../assets/Images/brandLogo.jpg"
 import {
   Box,
   Typography,
@@ -19,7 +18,7 @@ import { AnimatePresence } from "framer-motion";
 const dynamicComponents = {
   TopBrandThreevdocards: React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")
-  ), //first video section
+  ), //first video section0
   TopCafeBrandsFranchise: React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
   ), //3rd video section
@@ -404,10 +403,7 @@ const HomeBannerSec = () => {
   const parts = text.split(highlight.text);
   return (
     <>
-  <head>
-    <link rel="icon" href="BrandLogo" /> 
-        <title>Mr Franchise.in</title>
-      </head>
+ 
       {
         !localStorage.getItem("accessToken") && (
           <PopupModal open={isPopupOpen} onClose={handlePopupClose} />

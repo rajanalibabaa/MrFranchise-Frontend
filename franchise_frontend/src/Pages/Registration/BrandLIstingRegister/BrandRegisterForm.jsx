@@ -154,9 +154,18 @@ const initialFormData = {
     companyOwnedOutlets: "",
     franchiseOutlets: "",
     totalOutlets: "",
+    currentOutletsLocatedAt: [],
+    internationalExpansion: "",
+    aidFinancing: "",
     requirementSupport: "",
-    trainingProvidedBy: "",
+    staffTraining: "",
+    staffRecruitment: "",
     agreementPeriod: "",
+    statergicPlan: "",
+    operatingProcedure: "",
+    finacialOperating: "",
+    marketingSales: "",
+    agreementFranchise:""
   },
   uploads: {
     franchisePromotionVideo: [],
@@ -321,9 +330,18 @@ const BrandRegisterForm = () => {
             companyOwnedOutlets: formData.franchiseDetails.companyOwnedOutlets,
             franchiseOutlets: formData.franchiseDetails.franchiseOutlets,
             totalOutlets: formData.franchiseDetails.totalOutlets,
+            currentOutletsLocatedAt: formData.franchiseDetails.currentOutletsLocatedAt,
+            internationalExpansion: formData.franchiseDetails.internationalExpansion,
+            aidFinancing: formData.franchiseDetails.aidFinancing,
             requirementSupport: formData.franchiseDetails.requirementSupport,
-            trainingProvidedBy: formData.franchiseDetails.trainingProvidedBy,
+            staffTraining: formData.franchiseDetails.staffTraining,
+            staffRecruitment: formData.franchiseDetails.staffRecruitment,
             agreementPeriod: formData.franchiseDetails.agreementPeriod,
+            statergicPlan: formData.franchiseDetails.statergicPlan,
+            operatingProcedure: formData.franchiseDetails.operatingProcedure,
+            finacialOperating: formData.franchiseDetails.finacialOperating,
+            marketingSales: formData.franchiseDetails.marketingSales,
+            agreementFranchise: formData.franchiseDetails.agreementFranchise,
           })
         );
         formDataSend.append("brandDetails", JSON.stringify({}));
@@ -691,15 +709,17 @@ const BrandRegisterForm = () => {
       "franchiseFee",
       "royaltyFee",
       "interiorCost",
-      "exteriorCost",
+      "stockCost",
       "otherCost",
       "roi",
-      "roiPeriod",
+      // "roiPeriod",
+      "payBackPeriod",
       "breakEven",
-      "requireInvestmentCapital",
+      "requireWorkingCapital",
       "marginOnSales",
-      "fixedReturn",
+      // "fixedReturn",
       "propertyType",
+
     ];
 
     return (

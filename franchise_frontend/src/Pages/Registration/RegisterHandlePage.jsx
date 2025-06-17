@@ -7,9 +7,11 @@ import {
   Button,
   useTheme,
   useMediaQuery,
-  Dialog
+  Dialog,
+  Container,
+  CircularProgress
 } from "@mui/material";
-
+import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice.jsx";
 import businessLogo from "../../assets/images/Business_logo.png";
 import FacebookIcon from "../../Assets/Images/FacebookIcon.png";
 // import LinkedInIcon from "../../Assets/Images/LinkedinIcon.png";
@@ -22,16 +24,17 @@ import Navbar from "../../Components/Navbar/NavBar";
 
 function RegisterHandleUser({boolean = true}) {
 
-  console.log("boolean",boolean)
-  
-  
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [loginOpen, setLoginOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
 
   const openLoginPopup = () => {
+    setIsSubmitting(true);
     setLoginOpen(true);
   };
 
@@ -40,9 +43,11 @@ function RegisterHandleUser({boolean = true}) {
   };
 
   const handleNavigation = (path) => {
+    setIsSubmitting(true);
     navigate(path);
   };
   const handleSocialLogin = (provider) => {
+    setIsSubmitting(true);
     window.location.href = `https://franchise-backend-wgp6.onrender.com/api/v1/auth/${provider}`;
   };
 
@@ -129,7 +134,11 @@ function RegisterHandleUser({boolean = true}) {
             maxWidth: 250,
           }}
         >
-          Investor Register
+          {isLoading && activeButton === "investor" ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Investor Registration"
+                )}
         </Button>
 
         <Button
@@ -145,7 +154,11 @@ function RegisterHandleUser({boolean = true}) {
             maxWidth: 250,
           }}
         >
-          Brand Register
+          {isLoading && activeButton === "brand" ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Brand Registration"
+                )}
         </Button>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
