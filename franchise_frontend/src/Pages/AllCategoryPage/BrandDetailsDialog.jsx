@@ -699,7 +699,6 @@ const BrandDetailsDialog = () => {
 
               <Grid container spacing={2}>
                 <Grid item xs={12} md={12}>
-                  {/* <Paper elevation={1} sx={{ p: 1.5, borderRadius: 2 }}> */}
                     <Tabs
                       value={tabIndex}
                       onChange={(e, newValue) => setTabIndex(newValue)}
@@ -730,7 +729,7 @@ const BrandDetailsDialog = () => {
                               style={{
                                 width: "100%",
                                 height: "100%",
-                                objectFit: "contain",
+                                objectFit: "cover",
                               }}
                             >
                               <source src={videoUrl} type="video/mp4" />
