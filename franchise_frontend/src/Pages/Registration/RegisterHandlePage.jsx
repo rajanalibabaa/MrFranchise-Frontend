@@ -21,7 +21,7 @@ import GoogleIcon from "../../Assets/Images/GoogleIcon.png";
 import LoginPage from "../../Pages/LoginPage/LoginPage"
 import Footer from "../../Components/Footers/Footer";
 import { useDispatch } from "react-redux";
-import { showLoading , hideLoading} from "../../Redux/Slices/loadingSlice";
+  
 
 function RegisterHandleUser({boolean = true}) {
 

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useForm, useWatch, Controller } from "react-hook-form";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import axios from "axios";
-import { useDispatch } from "react-redux";
 import {
   Grid,
   TextField,
@@ -84,7 +83,6 @@ const InvestorRegister = () => {
   const dispatch = useDispatch();
   const [phonePrefix, setPhonePrefix] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("India");
-  const dispatch = useDispatch();
 
   const dropdownRef = useRef(null);
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
@@ -546,23 +544,11 @@ useEffect(() => {
     showSnackbar("Please add at least one preference before submitting.", "error");
     return;
   }
-  setIsSubmitting(true);
-  dispatch(showLoading());
-  
-  try{
   const formatNumber = (num) => {
     if (!num) return "";
     const trimmed = num.trim();
     return trimmed.startsWith(phonePrefix) ? trimmed : `${phonePrefix}${trimmed}`;
   };
-  const categoryString = preferences
-  .map(pref => 
-    Array.isArray(pref.category) 
-      ? pref.category.map(c => `${c.main} > ${c.sub} > ${c.child}`).join(", ")
-      : pref.category
-  )
-  .filter(Boolean)
-  .join("; ");
 
   const formattedData = {
     firstName: data.firstName || "",
@@ -622,7 +608,6 @@ useEffect(() => {
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
-      
 console.log("Registration response:", response.data);
 
       if (response.status === 201) {
@@ -637,7 +622,7 @@ console.log("Registration response:", response.data);
   }
 
         showSnackbar(
-          "🎉 Registration successful! Please login to continue...",
+          "Registration successful! Redirecting to login...",
           "success"
         );
         setLoginOpen(true);
@@ -659,7 +644,7 @@ dispatch(hideLoading());
   console.error("Registration error:", error);
   dispatch(hideLoading());
   if (error.response?.data?.errors) {
-    // console.error("Validation errors:", error.response.data.errors);
+    console.error("Validation errors:", error.response.data.errors);
     showSnackbar(
       error.response.data.errors.join(", "),
       "error"
@@ -2018,5 +2003,3 @@ useEffect(() => {
 };
 
 export default InvestorRegister;
-
-

@@ -47,9 +47,10 @@ import PublicIcon from '@mui/icons-material/Public';
 import LanguageIcon from '@mui/icons-material/Language';
 import FlagIcon from '@mui/icons-material/Flag';
 import { Editor } from "@tinymce/tinymce-react";
+import { width } from "@mui/system";
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
+// const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+// const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const formData = {
@@ -66,7 +67,6 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     sub: "",
     child: "",
   });
-  const [isDropdownOpen, setDropdownOpen] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -101,6 +101,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const [countries, setCountries] = useState([]);
   const [internationalStates, setInternationalStates] = useState([]);
   const [internationalCities, setInternationalCities] = useState([]);
+
   const [loading, setLoading] = useState({
     states: false,
     districts: false,
@@ -328,61 +329,65 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     onChange({ expansionLocation: updatedLocations });
   };
 
-  const handleCategoryHover = (level, value) => {
-    if (level === "main") {
-      setSelectedCategory({ main: value, sub: "", child: "", groupId: "" });
-    } else if (level === "sub") {
-      const mainCat = categories.find(
-        (cat) => cat.name === selectedCategory.main
+
+
+const handleMainCategoryChange = (e) => {
+  const mainCat = e.target.value;
+  setSelectedCategory({
+    main: mainCat,
+    sub: "",
+    child: "",
+    groupId: ""
+  });
+};
+
+const handleSubCategoryChange = (e) => {
+  const subCat = e.target.value;
+  const mainCatObj = categories.find(cat => cat.name === selectedCategory.main);
+  const subCatObj = mainCatObj?.children?.find(sub => sub.name === subCat);
+  
+  setSelectedCategory(prev => ({
+    ...prev,
+    sub: subCat,
+    groupId: subCatObj?.groupId || "",
+    child: ""
+  }));
+};
+
+const handleChildCategoryChange = (e) => {
+  setSelectedCategory(prev => ({
+    ...prev,
+    child: e.target.value
+  }));
+};
+
+const handleAddCategory = () => {
+  if (selectedCategory.child) {
+    const isDuplicate =
+      Array.isArray(data.brandCategories) &&
+      data.brandCategories.some(
+        (cat) =>
+          cat.main === selectedCategory.main &&
+          cat.sub === selectedCategory.sub &&
+          cat.child === selectedCategory.child
       );
-      const subCat = mainCat?.children?.find((sub) => sub.name === value);
-      setSelectedCategory((prev) => ({
-        ...prev,
-        sub: value,
-        groupId: subCat?.groupId || "",
-        child: "",
-      }));
-    } else if (level === "child") {
-      setSelectedCategory((prev) => ({
-        ...prev,
-        child: value,
-      }));
-    }
-  };
 
-  const handleAddCategory = () => {
-    if (selectedCategory.child) {
-      const isDuplicate =
-        Array.isArray(data.brandCategories) &&
-        data.brandCategories.some(
-          (cat) =>
-            cat.main === selectedCategory.main &&
-            cat.sub === selectedCategory.sub &&
-            cat.child === selectedCategory.child &&
-            cat.groupId === selectedCategory.groupId
-        );
-
-      if (!isDuplicate) {
-        const updatedCategories = [
-          ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
-          {
-            main: selectedCategory.main,
-            sub: selectedCategory.sub,
-            child: selectedCategory.child,
-            groupId: selectedCategory.groupId,
-          },
-        ];
-        onChange({ brandCategories: updatedCategories });
-        setSelectedCategory((prev) => ({ ...prev, child: "" }));
-      }
+    if (!isDuplicate) {
+      const updatedCategories = [
+        ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
+        {
+          main: selectedCategory.main,
+          sub: selectedCategory.sub,
+          child: selectedCategory.child,
+          groupId: selectedCategory.groupId
+        },
+      ];
+      onChange({ brandCategories: updatedCategories });
+      // Reset the child category selection after adding
+      setSelectedCategory(prev => ({ ...prev, child: "" }));
     }
-  };
-
-  useEffect(() => {
-    if (selectedCategory.child) {
-      handleAddCategory();
-    }
-  }, [selectedCategory.child]);
+  }
+};
 
   // OTP Verification States
   const [verificationState, setVerificationState] = useState({
@@ -555,12 +560,11 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
 
  // Add this to your existing state declarations
 const [descriptionModalOpen, setDescriptionModalOpen] = useState(false);
-const [description, setDescription] = useState(data.description || "");
+// const [description, setDescription] = useState(data.description || "");
 
 // Add this handler function
 const handleDescriptionChange = (content) => {
-  setDescription(content);
-  onChange({ description: content }); // Update the parent form data
+  onChange({ brandDescription: content }); // Update the parent form data directly
 };
 
   // Location card component
@@ -1794,210 +1798,170 @@ const handleDescriptionChange = (content) => {
     )}
     
     {/* Preview of the description (first 100 characters) */}
-    {description && (
-      <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e3e7', borderRadius: 1 }}>
-        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-          Description Preview
-        </Typography>
-        <div dangerouslySetInnerHTML={{ 
-          __html: description.length > 100 
-            ? `${description.substring(0, 100)}...` 
-            : description 
-        }} />
-      </Box>
-    )}
+   {data.brandDescription && (
+  <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e3e7', borderRadius: 1 }}>
+    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+      Description Preview
+    </Typography>
+    <div dangerouslySetInnerHTML={{ 
+      __html: data.brandDescription.length > 100 
+        ? `${data.brandDescription.substring(0, 100)}...` 
+        : data.brandDescription 
+    }} />
+  </Box>
+)}
   </Box>
 </Grid>
 
-        {/* Categories Section - Full width */}
-        <Grid item xs={12}>
-          <Box sx={{ display: "flex", mb: 2, gap: 1 }}>
-            <Box sx={{ position: "relative", flexGrow: 1 }}>
-              <TextField
-                label="Select Category"
-                value={
-                  selectedCategory.child
-                    ? `${selectedCategory.main} > ${selectedCategory.sub} > ${selectedCategory.child}`
-                    : ""
-                }
-                onFocus={() => setDropdownOpen(true)}
-                onChange={() => {}}
-                fullWidth
-                size="small"
-                error={!!errors.brandCategories}
-                helperText={
-                  errors.brandCategories || "Select at least one category"
-                }
-              />
-              {isDropdownOpen && (
-                <Paper
-                  sx={{
-                    position: "absolute",
-                    zIndex: 2,
-                    mt: 1,
-                    width: "100%",
-                    display: "flex",
-                    boxShadow: 3,
-                    minHeight: 300,
-                  }}
-                  onMouseLeave={() => setDropdownOpen(false)}
-                >
-                  {/* Parent Categories */}
-                  <Box sx={{ flex: 1, borderRight: "1px solid #eee" }}>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ p: 1, fontWeight: "bold", bgcolor: "grey.100" }}
-                    >
-                      Main Categories
-                    </Typography>
-                    <List sx={{ maxHeight: 300, overflow: "auto" }}>
-                      {categories.map((category) => (
-                        <ListItem
-                          key={category.name}
-                          button
-                          selected={selectedCategory.main === category.name}
-                          onMouseEnter={() =>
-                            handleCategoryHover("main", category.name)
-                          }
-                          dense
-                        >
-                          <ListItemText
-                            primary={category.name}
-                            primaryTypographyProps={{
-                              fontWeight:
-                                selectedCategory.main === category.name
-                                  ? "bold"
-                                  : "normal",
-                              color:
-                                selectedCategory.main === category.name
-                                  ? "primary.main"
-                                  : "text.primary",
-                            }}
-                          />
-                          {category.children &&
-                            category.children.length > 0 && (
-                              <ChevronRightIcon
-                                fontSize="small"
-                                color="action"
-                              />
-                            )}
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Box>
 
-                  {/* Subcategories */}
-                  {selectedCategory.main && (
-                    <Box
-                      sx={{
-                        flex: 1,
-                        borderRight: "1px solid #eee",
-                        bgcolor: "background.paper",
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          p: 1,
-                          fontWeight: "bold",
-                          bgcolor: "grey.100",
-                        }}
-                      >
-                        Subcategories
-                      </Typography>
-                      <List sx={{ maxHeight: 300, overflow: "auto" }}>
-                        {categories
-                          .find((cat) => cat.name === selectedCategory.main)
-                          ?.children?.map((subCategory) => (
-                            <ListItem
-                              key={subCategory.name}
-                              button
-                              selected={
-                                selectedCategory.sub === subCategory.name
-                              }
-                              onMouseEnter={() =>
-                                handleCategoryHover("sub", subCategory.name)
-                              }
-                              dense
-                            >
-                              <ListItemText
-                                primary={subCategory.name}
-                                primaryTypographyProps={{
-                                  fontWeight:
-                                    selectedCategory.sub === subCategory.name
-                                      ? "bold"
-                                      : "normal",
-                                  color:
-                                    selectedCategory.sub === subCategory.name
-                                      ? "primary.main"
-                                      : "text.primary",
-                                }}
-                              />
-                              {subCategory.children &&
-                                subCategory.children.length > 0 && (
-                                  <ChevronRightIcon
-                                    fontSize="small"
-                                    color="action"
-                                  />
-                                )}
-                            </ListItem>
-                          ))}
-                      </List>
-                    </Box>
-                  )}
 
-                  {/* Child Categories */}
-                  {selectedCategory.sub && (
-                    <Box sx={{ flex: 1, bgcolor: "background.paper" }}>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          p: 1,
-                          fontWeight: "bold",
-                          bgcolor: "grey.100",
-                        }}
-                      >
-                        Items
-                      </Typography>
-                      <List sx={{ maxHeight: 300, overflow: "auto" }}>
-                        {categories
-                          .find((cat) => cat.name === selectedCategory.main)
-                          ?.children?.find(
-                            (sub) => sub.name === selectedCategory.sub
-                          )
-                          ?.children?.map((child, index) => (
-                            <ListItem
-                              key={index}
-                              button
-                              selected={selectedCategory.child === child}
-                              onClick={() =>
-                                handleCategoryHover("child", child)
-                              }
-                              dense
-                            >
-                              <ListItemText
-                                primary={child}
-                                primaryTypographyProps={{
-                                  color:
-                                    selectedCategory.child === child
-                                      ? "primary.main"
-                                      : "text.primary",
-                                  fontWeight:
-                                    selectedCategory.child === child
-                                      ? "bold"
-                                      : "normal",
-                                }}
-                              />
-                            </ListItem>
-                          ))}
-                      </List>
-                    </Box>
-                  )}
-                </Paper>
-              )}
-            </Box>
-          </Box>
-        </Grid>
+{/* Categories Section - Three Dropdowns with Add Button */}
+<Grid item xs={12}>
+  <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
+    Brand Categories
+  </Typography>
+  
+  <Box sx={{ 
+    display: 'grid',
+    gridTemplateColumns: { md: 'repeat(4, 1fr)', xs: '1fr' },
+    gap: 2,
+    alignItems: 'flex-end'
+  }}>
+    {/* Main Category Dropdown */}
+    <FormControl  sx={{width:200}}size="small">
+      <InputLabel>Main Category</InputLabel>
+      <Select
+        value={selectedCategory.main || ""}
+        label="Main Category"
+        onChange={(e) => {
+          const mainCat = e.target.value;
+          setSelectedCategory({
+            main: mainCat,
+            sub: "",
+            child: "",
+            groupId: ""
+          });
+        }}
+      >
+        {categories.map((category) => (
+          <MenuItem key={category.name} value={category.name}>
+            {category.name}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+    {/* Sub Category Dropdown */}
+    <FormControl  size="small" sx={{width:200}} disabled={!selectedCategory.main}>
+      <InputLabel>Sub Category</InputLabel>
+      <Select
+        value={selectedCategory.sub || ""}
+        label="Sub Category"
+        onChange={(e) => {
+          const subCat = e.target.value;
+          const mainCatObj = categories.find(cat => cat.name === selectedCategory.main);
+          const subCatObj = mainCatObj?.children?.find(sub => sub.name === subCat);
+          
+          setSelectedCategory(prev => ({
+            ...prev,
+            sub: subCat,
+            groupId: subCatObj?.groupId || "",
+            child: ""
+          }));
+        }}
+      >
+        {selectedCategory.main && 
+          categories.find(cat => cat.name === selectedCategory.main)?.children?.map((subCategory) => (
+            <MenuItem key={subCategory.name} value={subCategory.name}>
+              {subCategory.name}
+            </MenuItem>
+          ))
+        }
+      </Select>
+    </FormControl>
+
+    {/* Child Category Dropdown */}
+    <FormControl fullWidth size="small" disabled={!selectedCategory.sub} sx={{width:200}}>
+      <InputLabel>Child Category</InputLabel>
+      <Select
+        value={selectedCategory.child || ""}
+        label="Child Category"
+        onChange={(e) => {
+          setSelectedCategory(prev => ({
+            ...prev,
+            child: e.target.value
+          }));
+        }}
+      >
+        {selectedCategory.sub && 
+          categories
+            .find(cat => cat.name === selectedCategory.main)
+            ?.children?.find(sub => sub.name === selectedCategory.sub)
+            ?.children?.map((child, index) => (
+              <MenuItem key={index} value={child}>
+                {child}
+              </MenuItem>
+            ))
+        }
+      </Select>
+    </FormControl>
+
+    {/* Add Button */}
+    <Button
+      variant="contained"
+      onClick={handleAddCategory}
+      disabled={!selectedCategory.child}
+      sx={{
+        height: 40,
+        p:2,
+        pr:6,
+        pl:6,
+        bgcolor: '#ff9800',
+        '&:hover': { bgcolor: '#fb8c00' },
+        boxShadow: 'none',
+        textTransform: 'none',
+      
+        borderRadius: 1
+      }}
+    >
+      Add 
+    </Button>
+  </Box>
+
+  {/* Selected Categories Display */}
+  {Array.isArray(data.brandCategories) && data.brandCategories.length > 0 && (
+    <Box sx={{ mt: 2 }}>
+      <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+        Selected Categories
+      </Typography>
+      <Box sx={{ 
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 1
+      }}>
+        {data.brandCategories.map((category, index) => (
+          <Chip
+            key={index}
+            label={`${category.main} > ${category.sub} > ${category.child}`}
+            onDelete={() => {
+              const updatedCategories = [...data.brandCategories];
+              updatedCategories.splice(index, 1);
+              onChange({ brandCategories: updatedCategories });
+            }}
+            color="primary"
+            variant="outlined"
+            size="small"
+            sx={{
+              '& .MuiChip-deleteIcon': {
+                color: '#1976d2'
+              }
+            }}
+          />
+        ))}
+      </Box>
+    </Box>
+  )}
+</Grid>
       </Grid>
 
       {/* Communication Information Section */}
@@ -2286,27 +2250,27 @@ const handleDescriptionChange = (content) => {
   
   <DialogContent sx={{ py: 3, px: 3 }}>
     <Box sx={{ mt: 2 }}>
-      <Editor
-        apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
-        value={description}
-        init={{
-          height: 400,
-          menubar: true,
-          plugins: [
-            "advlist autolink lists link image charmap print preview anchor",
-            "searchreplace visualblocks code fullscreen",
-            "insertdatetime media table paste help wordcount",
-          ],
-          toolbar:
-            "undo redo | formatselect | bold italic backcolor | \
-             alignleft aligncenter alignright alignjustify | \
-             bullist numlist outdent indent | removeformat | help | image",
-          images_upload_url: '/api/upload-image', // Add your image upload endpoint
-          automatic_uploads: true,
-          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-        }}
-        onEditorChange={handleDescriptionChange}
-      />
+     <Editor
+  apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
+  value={data.brandDescription || ""}
+  init={{
+    height: 400,
+    menubar: true,
+    plugins: [
+      "advlist autolink lists link image charmap print preview anchor",
+      "searchreplace visualblocks code fullscreen",
+      "insertdatetime media table paste help wordcount",
+    ],
+    toolbar:
+      "undo redo | formatselect | bold italic backcolor | \
+       alignleft aligncenter alignright alignjustify | \
+       bullist numlist outdent indent | removeformat | help | image",
+    images_upload_url: '/api/upload-image',
+    automatic_uploads: true,
+    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+  }}
+  onEditorChange={handleDescriptionChange}
+/>
     </Box>
   </DialogContent>
   
@@ -2333,23 +2297,20 @@ const handleDescriptionChange = (content) => {
       Cancel
     </Button>
     <Button
-      onClick={() => {
-        onChange({ description });
-        setDescriptionModalOpen(false);
-      }}
-      variant="contained"
-      sx={{
-        bgcolor: '#4caf50',
-        '&:hover': {
-          bgcolor: '#43a047'
-        },
-        textTransform: 'none',
-        fontWeight: 500,
-        borderRadius: 1
-      }}
-    >
-      Save Description
-    </Button>
+  onClick={() => setDescriptionModalOpen(false)}
+  variant="contained"
+  sx={{
+    bgcolor: '#4caf50',
+    '&:hover': {
+      bgcolor: '#43a047'
+    },
+    textTransform: 'none',
+    fontWeight: 500,
+    borderRadius: 1
+  }}
+>
+  Save
+</Button>
   </DialogActions>
 </Dialog>
 
