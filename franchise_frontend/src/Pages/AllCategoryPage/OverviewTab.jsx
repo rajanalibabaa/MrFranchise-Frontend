@@ -182,15 +182,23 @@ const OverviewTab = ({ brand }) => {
 
       if (response.data) {
         setSubmitSuccess(true);
-        // setFormData({
-        //   fullName: "",
-        //   location: "",
-        //   // franchiseModel: "",
-        //   // franchiseType: "",
-        //   investmentRange: "",
-        //   planToInvest: "",
-        //   readyToInvest: "",
-        // });
+        setFormData({
+          // fullName: "",
+          // location: "",
+          // franchiseModel: "",
+          // franchiseType: "",
+          // investmentRange: "",
+          // planToInvest: "",
+          // readyToInvest: "",
+
+        fullName: "",
+        location: "",
+        investmentRange: "",
+        planToInvest: "",
+        readyToInvest: "",
+        investorEmail: "",
+        mobileNumber: "",
+        });
    
       }
     } catch (error) {

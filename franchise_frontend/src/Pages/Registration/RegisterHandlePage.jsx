@@ -20,11 +20,13 @@ import FacebookIcon from "../../Assets/Images/FacebookIcon.png";
 import GoogleIcon from "../../Assets/Images/GoogleIcon.png";
 import LoginPage from "../../Pages/LoginPage/LoginPage"
 import Footer from "../../Components/Footers/Footer";
-import Navbar from "../../Components/Navbar/NavBar";
+import { useDispatch } from "react-redux";
+import { showLoading , hideLoading} from "../../Redux/Slices/loadingSlice";
 
 function RegisterHandleUser({boolean = true}) {
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -123,7 +125,13 @@ function RegisterHandleUser({boolean = true}) {
 
         <Button
           variant="contained"
-          onClick={() => handleNavigation("/investor-register")}
+          onClick={() => 
+          {   dispatch(showLoading())
+            handleNavigation("/investor-register")
+            setTimeout(() => {
+              dispatch(hideLoading());
+            },  2000);
+          }}
           sx={{
             mb: 2,
             bgcolor: "#7ad03a",
@@ -143,7 +151,13 @@ function RegisterHandleUser({boolean = true}) {
 
         <Button
           variant="contained"
-          onClick={() => handleNavigation("/brandlistingform")}
+          onClick={() =>
+           { dispatch(showLoading());
+            handleNavigation("/brandlistingform");
+            setTimeout(() => {
+              dispatch(hideLoading());
+            }, 2000);
+          }}
           sx={{
             mb: 2,
             bgcolor: "#e99830",
@@ -192,7 +206,13 @@ function RegisterHandleUser({boolean = true}) {
         loading="lazy"
         src={GoogleIcon}
         alt="Google"
-        onClick={() => handleSocialLogin("google")}
+        onClick={() => 
+        { dispatch(showLoading())
+          handleSocialLogin("google")
+          setTimeout(() => {
+            dispatch(hideLoading());
+          }, 2000);
+        }}
         sx={{
           width: 32,
           height: 32,
@@ -212,7 +232,13 @@ function RegisterHandleUser({boolean = true}) {
         loading="lazy"
         src={FacebookIcon}
         alt="Facebook"
-        onClick={() => handleSocialLogin("facebook")}
+        onClick={() => 
+        { dispatch(showLoading())
+          handleSocialLogin("facebook")
+          setTimeout(() => {
+            dispatch(hideLoading());
+          }, 2000);
+        } }
         sx={{
           width: 32,
           height: 32,
