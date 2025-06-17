@@ -20,7 +20,7 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setUUIDandTOKEN, logout } from "../../Redux/Slices/AuthSlice/authSlice";
 import CloseIcon from "@mui/icons-material/Close";
-import { showLoading } from "../../Redux/Slices/loadingSlice";
+import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 
 function LoginPage({ open, onClose }) {
   const navigate = useNavigate();
@@ -271,8 +271,12 @@ function LoginPage({ open, onClose }) {
                   <Link
                     component="button"
                     onClick={() => {
+                      dispatch(showLoading());
                       onClose();
                       navigate("/registerhandleuser");
+                      setTimeout(() => {
+                        dispatch(hideLoading());
+                      }, 1000);
                     }}
                     sx={{ fontWeight: 500 }}
                   >

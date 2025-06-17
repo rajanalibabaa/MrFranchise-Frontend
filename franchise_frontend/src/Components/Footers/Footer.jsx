@@ -34,7 +34,7 @@ function Footer() {
   const handleSubscribe = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/v1/subcribe/getsubscribe",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/subcribe/getsubscribe",
         { email },
         {
           headers: {
@@ -64,9 +64,10 @@ function Footer() {
     <Box
       component="footer"
       sx={{
-        backgroundColor: "#0a1929",
+        // backgroundColor: "#0a1929",
+        backgroundColor: "#000",
         color: "#fff",
-        pt: 6,
+        pt: 2.5,
         pb: 3,
         position: "relative",
         "&::before": {
@@ -85,7 +86,7 @@ function Footer() {
           {/* Brand Column */}
           <Grid item xs={12} md={4}>
             <Box
-              sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+              sx={{ display: "flex", flexDirection: "column", justifyContent:'space-evenly', height: "100%" }}
             >
               <Box
                 component="img"
@@ -101,7 +102,7 @@ function Footer() {
                 onClick={scrollToTop}
               />
               <Typography
-                variant="h6"
+                variant="body1"
                 sx={{
                   color: "#ffba00",
                   fontWeight: 700,
@@ -246,87 +247,7 @@ function Footer() {
             </Box>
           </Grid>
 
-          <Box>
-            {/* Contact Details Section */}
-
-            <Box sx={{ mt: 1, mr: 6, mb: 2 }}>
-              <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
-                <Phone sx={{ color: "#ffba00", mr: 1.5, fontSize: "1.2rem" }} />
-                <Link
-                  href="tel:+917449213799"
-                  color="#b0bec5"
-                  underline="hover"
-                >
-                  +91 7449213799
-                </Link>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <LocationOn
-                  sx={{ color: "#ffba00", mr: 1.5, fontSize: "1.2rem" }}
-                />
-                <Typography variant="body2" color="#b0bec5">
-                  Chennai, India
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box sx={{ flex: 1 }}>
-              <Typography
-                variant="h6"
-                sx={{ color: "#ffba00", mb: 2, fontSize: "1rem" }}
-              >
-                Want to "ADVERTISE YOUR BRAND" on www.MrFranchise.in?
-              </Typography>
-              <Typography variant="body1" color="#b0bec5">
-                Mail to{" "}
-                <Link
-                  href="mailto:sales@mrfranchise.in"
-                  color="primary.main"
-                  underline="hover"
-                >
-                  sales@mrfranchise.in
-                </Link>
-              </Typography>
-            </Box>
-
-            <Box sx={{ flex: 1 }}>
-              <Typography
-                variant="h6"
-                sx={{ color: "#ffba00", mb: 2, fontSize: "1rem" }}
-              >
-                Want to "START A FOOD AND BEVERAGE BUSINESS" and need support?
-              </Typography>
-              <Typography variant="body1" color="#b0bec5">
-                Mail to{" "}
-                <Link
-                  href="mailto:investor@mrfranchise.in"
-                  color="primary.main"
-                  underline="hover"
-                >
-                  investor@mrfranchise.in
-                </Link>
-              </Typography>
-            </Box>
-
-            <Box sx={{ flex: 1 }}>
-              <Typography
-                variant="h6"
-                sx={{ color: "#ffba00", mb: 2, fontSize: "1rem" }}
-              >
-                Want to "CHANGE YOUR LISTING INFORMATION" on www.MrFranchise.in?
-              </Typography>
-              <Typography variant="body1" color="#b0bec5">
-                Mail to{" "}
-                <Link
-                  href="mailto:support@mrfranchise.in"
-                  color="primary.main"
-                  underline="hover"
-                >
-                  support@mrfranchise.in
-                </Link>
-              </Typography>
-            </Box>
-          </Box>
+         
 
           {/* Newsletter Column */}
           <Grid item xs={12} md={4}>
@@ -440,6 +361,111 @@ function Footer() {
               </Box>
             </Box>
           </Grid>
+             <Box >
+            {/* Contact Details Section */}
+
+            <Box  >
+              <Typography
+                variant="h6"
+              sx={{
+                color: "#ffba00",
+                fontWeight: 700,
+                mb: 2.5,
+                fontSize: "1.1rem",
+                position: "relative",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: -8,
+                  left: 0,
+                  width: "50px",
+                  height: "3px",
+                  backgroundColor: "#ff6d00",
+                },
+              }}
+              >
+                Contact Details
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 1.5,gap:2 }}>
+                <Phone sx={{ color: "#ffba00", mr: 1.5, fontSize: "1.2rem" }} />
+                <Link
+                  href="tel:+917449213799"
+                  color="#b0bec5"
+                  underline="hover"
+                  variant="body2"
+                >
+                  +91 7449213799
+                </Link>
+                 <Box sx={{ display: "flex", alignItems: "center" }}>
+                <LocationOn
+                  sx={{ color: "#ffba00", fontSize: "1.2rem" }}
+                />
+                <Typography variant="body2" color="#b0bec5" 
+>
+                  Chennai, India
+                </Typography>
+              </Box>
+              </Box>
+             
+            </Box>
+
+            <Box sx={{ flex: 1 }} mb={2}>
+              <Typography
+                  variant="subtitle2"
+                sx={{ color: "#ffba00",  fontSize: "0.9rem" }}
+              >
+                Want to "ADVERTISE YOUR BRAND" on www.MrFranchise.in?
+              </Typography>
+              <Typography variant="text" color="#b0bec5">
+                Mail to{" "}
+                <Link
+                  href="mailto:sales@mrfranchise.in"
+                  color="primary.main"
+                  underline="hover"
+                >
+                  sales@mrfranchise.in
+                </Link>
+              </Typography>
+            </Box>
+
+            <Box sx={{ flex: 1 }} mb={2}>
+              <Typography
+                variant="body2"
+                sx={{ color: "#ffba00", fontSize: "0.9rem" }}
+              >
+                Want to "START A FOOD AND BEVERAGE BUSINESS" and need support?
+              </Typography>
+              <Typography variant="text" color="#b0bec5">
+                Mail to{" "}
+                <Link
+                  href="mailto:investor@mrfranchise.in"
+                  color="primary.main"
+                  underline="hover"
+                >
+                  investor@mrfranchise.in
+                </Link>
+              </Typography>
+            </Box>
+
+            <Box sx={{ flex: 1 }} mb={2}>
+              <Typography
+                variant="body2"
+                sx={{ color: "#ffba00", fontSize: "0.9rem" }}
+              >
+                Want to "CHANGE YOUR LISTING INFORMATION" on www.MrFranchise.in?
+              </Typography>
+              <Typography variant="text" color="#b0bec5">
+                Mail to{" "}
+                <Link
+                  href="mailto:support@mrfranchise.in"
+                  color="primary.main"
+                  underline="hover"
+                >
+                  support@mrfranchise.in
+                </Link>
+              </Typography>
+            </Box>
+          </Box>
         </Grid>
 
         {/* Bottom Bar */}

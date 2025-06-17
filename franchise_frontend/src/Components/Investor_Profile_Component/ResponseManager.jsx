@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import {
   Box, Typography, Paper, Button, FormControl, InputLabel,
   Select, MenuItem, TextField, Rating, Avatar, Divider,
-  IconButton, Chip, Badge, useMediaQuery, useTheme
+  IconButton, Chip, Badge, useMediaQuery, useTheme, Snackbar, Alert
 } from "@mui/material";
 import {
   Star, StarBorder, Email, Feedback, 
-  Report, ContactSupport, CheckCircle,
-  Close, Menu, ArrowBack
+  Report, CheckCircle, Menu, ArrowBack
 } from '@mui/icons-material';
 import { alpha } from '@mui/material/styles';
 
@@ -91,20 +90,19 @@ const CustomRating = ({ value, onChange }) => (
 );
 
 // Feedback Form Component
-const FeedbackForm = () => {
+const FeedbackForm = ({ showSnackbar }) => {
   const [rating, setRating] = useState(3);
   const [category, setCategory] = useState('');
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '' });
-  const { investorUUID, AccessToken } = useSelector(( state ) => state.auth || {});
+  const { investorUUID, AccessToken } = useSelector((state) => state.auth || {});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     if (!investorUUID || !AccessToken) {
-      setSnackbar({ open: true, message: "Please login to submit feedback" });
+      showSnackbar("Please login to submit feedback", "error");
       setIsSubmitting(false);
       return;
     }
@@ -115,12 +113,12 @@ const FeedbackForm = () => {
         { topic: category, rating, feedback },
         { headers: { "Content-Type": "application/json", Authorization: `Bearer ${AccessToken}` } }
       );
-      setSnackbar({ open: true, message: response.data.message || "Feedback submitted!" });
+      showSnackbar(response.data.message || "Feedback submitted!", "success");
       setCategory('');
       setFeedback('');
       setRating(3);
     } catch (error) {
-      setSnackbar({ open: true, message: error.response?.data?.message || "Submission failed" });
+      showSnackbar(error.response?.data?.message || "Submission failed", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -186,19 +184,18 @@ const FeedbackForm = () => {
 };
 
 // Complaint Form Component
-const ComplaintForm = () => {
+const ComplaintForm = ({ showSnackbar }) => {
   const [category, setCategory] = useState('');
   const [complaint, setComplaint] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '' });
-  const { investorUUID, AccessToken } = useSelector(( state ) => state.auth || {});
+  const { investorUUID, AccessToken } = useSelector((state) => state.auth || {});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     if (!investorUUID || !AccessToken) {
-      setSnackbar({ open: true, message: "Please login to submit a complaint" });
+      showSnackbar("Please login to submit a complaint", "error");
       setIsSubmitting(false);
       return;
     }
@@ -209,11 +206,11 @@ const ComplaintForm = () => {
         { topic: category, complaint },
         { headers: { "Content-Type": "application/json", Authorization: `Bearer ${AccessToken}` } }
       );
-      setSnackbar({ open: true, message: response.data.message || "Complaint submitted!" });
+      showSnackbar(response.data.message || "Complaint submitted!", "success");
       setCategory('');
       setComplaint('');
     } catch (error) {
-      setSnackbar({ open: true, message: error.response?.data?.message || "Submission failed" });
+      showSnackbar(error.response?.data?.message || "Submission failed", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -286,27 +283,25 @@ const ContactUs = () => (
         Have questions? Reach out to our support team directly.
       </Typography>
       
-  <Chip
-  icon={<Email />}
-  label="support@mrfranchise.com"
-  component="a"
-  href="https://mail.google.com/mail/?view=cm&fs=1&to=support@mrfranchise.com&su=Support%20Request&body=Hi%20Team%2C%20I%20have%20a%20question..."
-  target="_blank" // Opens in a new tab
-  rel="noopener noreferrer" // Security best practice
-  clickable
-  sx={{
-    p: 2,
-    fontSize: '1rem',
-    backgroundColor: colors.pistachio,
-    color: colors.white,
-    '&:hover': {
-      backgroundColor: '#7DA95D'
-    }
-  }}
-/>
+      <Chip
+        icon={<Email />}
+        label="support@mrfranchise.com"
+        component="a"
+        href="https://mail.google.com/mail/?view=cm&fs=1&to=support@mrfranchise.com&su=Support%20Request&body=Hi%20Team%2C%20I%20have%20a%20question..."
+        target="_blank"
+        rel="noopener noreferrer"
+        clickable
+        sx={{
+          p: 2,
+          fontSize: '1rem',
+          backgroundColor: colors.pistachio,
+          color: colors.white,
+          '&:hover': {
+            backgroundColor: '#7DA95D'
+          }
+        }}
+      />
 
-
-      
       <Typography variant="body2" color={colors.darkGray} mt={3}>
         We typically respond within 24 hours.
       </Typography>
@@ -320,137 +315,188 @@ const ResponseManagerDashboard = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [activeTab, setActiveTab] = useState('feedback');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success' // 'success', 'error', 'warning', 'info'
+  });
+
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity
+    });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   const tabs = [
-    { id: 'feedback', label: 'Feedback', icon: <Feedback />, component: <FeedbackForm /> },
-    { id: 'complaint', label: 'Complaint', icon: <Report />, component: <ComplaintForm /> },
-    { id: 'contact', label: 'Contact Us', icon: <Email />, component: <ContactUs /> }
+    { 
+      id: 'feedback', 
+      label: 'Feedback', 
+      icon: <Feedback />, 
+      component: <FeedbackForm showSnackbar={showSnackbar} /> 
+    },
+    { 
+      id: 'complaint', 
+      label: 'Complaint', 
+      icon: <Report />, 
+      component: <ComplaintForm showSnackbar={showSnackbar} /> 
+    },
+    { 
+      id: 'contact', 
+      label: 'Contact Us', 
+      icon: <Email />, 
+      component: <ContactUs /> 
+    }
   ];
 
   return (
-    <DashboardContainer>
-      {isMobile ? (
-        // Mobile View
-        <Box>
-          {mobileMenuOpen ? (
-            <Box>
-              <SectionHeader>
-                <IconButton onClick={() => setMobileMenuOpen(false)} sx={{ color: colors.white }}>
-                  <ArrowBack />
-                </IconButton>
-                <Typography variant="h6" ml={2}>Menu</Typography>
-              </SectionHeader>
-              
-              <Box p={2}>
-                {tabs.map(tab => (
-                  <Box 
-                    key={tab.id}
-                    onClick={() => {
-                      setActiveTab(tab.id);
-                      setMobileMenuOpen(false);
-                    }}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      p: 2,
-                      mb: 1,
-                      borderRadius: '8px',
-                      backgroundColor: activeTab === tab.id ? alpha(colors.pistachio, 0.1) : 'transparent',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        backgroundColor: alpha(colors.pistachio, 0.05)
-                      }
-                    }}
-                  >
-                    <Avatar sx={{ 
-                      bgcolor: activeTab === tab.id ? colors.pistachio : colors.lightGray,
-                      color: activeTab === tab.id ? colors.white : colors.darkGray,
-                      mr: 2,
-                      width: 36,
-                      height: 36
-                    }}>
-                      {tab.icon}
-                    </Avatar>
-                    <Typography fontWeight={activeTab === tab.id ? 600 : 400}>
-                      {tab.label}
-                    </Typography>
-                  </Box>
-                ))}
+    <>
+      <DashboardContainer>
+        {isMobile ? (
+          // Mobile View
+          <Box>
+            {mobileMenuOpen ? (
+              <Box>
+                <SectionHeader>
+                  <IconButton onClick={() => setMobileMenuOpen(false)} sx={{ color: colors.white }}>
+                    <ArrowBack />
+                  </IconButton>
+                  <Typography variant="h6" ml={2}>Menu</Typography>
+                </SectionHeader>
+                
+                <Box p={2}>
+                  {tabs.map(tab => (
+                    <Box 
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        setMobileMenuOpen(false);
+                      }}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        p: 2,
+                        mb: 1,
+                        borderRadius: '8px',
+                        backgroundColor: activeTab === tab.id ? alpha(colors.pistachio, 0.1) : 'transparent',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: alpha(colors.pistachio, 0.05)
+                        }
+                      }}
+                    >
+                      <Avatar sx={{ 
+                        bgcolor: activeTab === tab.id ? colors.pistachio : colors.lightGray,
+                        color: activeTab === tab.id ? colors.white : colors.darkGray,
+                        mr: 2,
+                        width: 36,
+                        height: 36
+                      }}>
+                        {tab.icon}
+                      </Avatar>
+                      <Typography fontWeight={activeTab === tab.id ? 600 : 400}>
+                        {tab.label}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
               </Box>
-            </Box>
-          ) : (
-            <Box>
-              <SectionHeader>
-                <IconButton onClick={() => setMobileMenuOpen(true)} sx={{ color: colors.white }}>
-                  <Menu />
-                </IconButton>
-                <Typography variant="h6" ml={2}>
-                  {tabs.find(t => t.id === activeTab)?.label}
-                </Typography>
-              </SectionHeader>
-              
-              <Box p={2}>
-                {tabs.find(t => t.id === activeTab)?.component}
+            ) : (
+              <Box>
+                <SectionHeader>
+                  <IconButton onClick={() => setMobileMenuOpen(true)} sx={{ color: colors.white }}>
+                    <Menu />
+                  </IconButton>
+                  <Typography variant="h6" ml={2}>
+                    {tabs.find(t => t.id === activeTab)?.label}
+                  </Typography>
+                </SectionHeader>
+                
+                <Box p={2}>
+                  {tabs.find(t => t.id === activeTab)?.component}
+                </Box>
               </Box>
-            </Box>
-          )}
-        </Box>
-      ) : (
-        // Desktop View
-        <Box display="flex" maxWidth={1200} mx="auto">
-          {/* Sidebar */}
-          <Box width={240} mr={3}>
-            <DashboardCard>
-              <SectionHeader>
-                <Typography variant="h6" fontWeight="600">Support Center</Typography>
-              </SectionHeader>
-              
-              <Box p={2}>
-                {tabs.map(tab => (
-                  <Box 
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      p: 2,
-                      mb: 1,
-                      borderRadius: '8px',
-                      backgroundColor: activeTab === tab.id ? alpha(colors.pistachio, 0.1) : 'transparent',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        backgroundColor: alpha(colors.pistachio, 0.05)
-                      }
-                    }}
-                  >
-                    <Avatar sx={{ 
-                      bgcolor: activeTab === tab.id ? colors.pistachio : colors.lightGray,
-                      color: activeTab === tab.id ? colors.white : colors.darkGray,
-                      mr: 2,
-                      width: 36,
-                      height: 36
-                    }}>
-                      {tab.icon}
-                    </Avatar>
-                    <Typography fontWeight={activeTab === tab.id ? 600 : 400}>
-                      {tab.label}
-                    </Typography>
-                    {tab.id === 'complaint' && (
-                      <Badge  color="error" sx={{ ml: 'auto' }} />
-                    )}
-                  </Box>
-                ))}
-              </Box>
-            </DashboardCard>
+            )}
           </Box>
-          
-          {/* Main Content */}
-          <Box flex={1}>
-            {tabs.find(t => t.id === activeTab)?.component}
+        ) : (
+          // Desktop View
+          <Box display="flex" maxWidth={1200} mx="auto">
+            {/* Sidebar */}
+            <Box width={240} mr={3}>
+              <DashboardCard>
+                <SectionHeader>
+                  <Typography variant="h6" fontWeight="600">Support Center</Typography>
+                </SectionHeader>
+                
+                <Box p={2}>
+                  {tabs.map(tab => (
+                    <Box 
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        p: 2,
+                        mb: 1,
+                        borderRadius: '8px',
+                        backgroundColor: activeTab === tab.id ? alpha(colors.pistachio, 0.1) : 'transparent',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: alpha(colors.pistachio, 0.05)
+                        }
+                      }}
+                    >
+                      <Avatar sx={{ 
+                        bgcolor: activeTab === tab.id ? colors.pistachio : colors.lightGray,
+                        color: activeTab === tab.id ? colors.white : colors.darkGray,
+                        mr: 2,
+                        width: 36,
+                        height: 36
+                      }}>
+                        {tab.icon}
+                      </Avatar>
+                      <Typography fontWeight={activeTab === tab.id ? 600 : 400}>
+                        {tab.label}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </DashboardCard>
+            </Box>
+            
+            {/* Main Content */}
+            <Box flex={1}>
+              {tabs.find(t => t.id === activeTab)?.component}
+            </Box>
           </Box>
-        </Box>
-      )}
-    </DashboardContainer>
+        )}
+      </DashboardContainer>
+
+      {/* Global Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={2000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 

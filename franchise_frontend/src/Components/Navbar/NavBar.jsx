@@ -136,6 +136,7 @@ function Navbar() {
   };
 
   const handleMyProfileNavigate = () => {
+
     if(localStorage.getItem("investorUUID")){
       navigate("/investordashboard")
     }else if(localStorage.getItem("brandUUID")){
