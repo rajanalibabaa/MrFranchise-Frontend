@@ -12,20 +12,14 @@ import {
   FormControl,
   InputLabel,
   Checkbox,
-  FormLabel,
   FormControlLabel,
   Button,
   Typography,
   Link,
   Paper,
   InputAdornment,
-  Stack,
-  Tooltip,
-  List,
-  ListItemText,
   Box,
   Chip,
-  ListItem,
   CircularProgress,
   Alert,
   Snackbar,
@@ -41,9 +35,8 @@ import {
   TableCell,
   TableBody,
   IconButton,
-  Divider,  
 } from "@mui/material";
-import InfoIcon from "@mui/icons-material/Info";
+import { FavoriteBorderOutlined, Person, PersonOutlined, WhatsApp,Email, Phone, Home, LocationCity, Work, HomeWork, MeetingRoom } from "@mui/icons-material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
@@ -51,6 +44,7 @@ import Footer from "../../Components/Footers/Footer";
 import { DeleteIcon } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
+import RegisterationMediaHandling from "./RegisterationMediaHandling";
 const phoneCodes = {
   India: "+91",
   USA: "+1",
@@ -137,6 +131,11 @@ const [selectedChild, setSelectedChild] = useState('');
     preferredCity: "",
     terms: false,
   };
+
+
+
+
+
 
   const openLoginPopup = () => {
     document.activeElement.blur();
@@ -278,6 +277,9 @@ const [selectedChild, setSelectedChild] = useState('');
       "category",
     ])
     showSnackbar("Preference added!", "success");
+    setTimeout(() => {
+alert('Add Multiple preferences to get more offers from us!','info')  
+  },2000)
   };
 
   // Remove preference handler
@@ -519,15 +521,22 @@ const [selectedChild, setSelectedChild] = useState('');
       setOtpModal((prev) => ({ ...prev, loading: false }));
     }
   };
+
   const [formData, setFormData] = useState(() => {
     const savedData = localStorage.getItem(FORM_DATA_KEY);
     return savedData ? JSON.parse(savedData) : initialFormData;
   });
 
-  // Save to localStorage whenever formData changes
-  useEffect(() => {
-    localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formData));
-  }, [formData]);
+  // Initialize react-hook-form with the stored data
+
+
+  // Save to localStorage whenever form data changes
+useEffect(() => {
+  const subscription = watch((value) => {
+    localStorage.setItem(FORM_DATA_KEY, JSON.stringify(value));
+  });
+  return () => subscription.unsubscribe();
+}, [watch]);
 
  const onSubmit = async (data) => {
   
@@ -623,13 +632,17 @@ setTimeout(() => {
 }, 2000);
 
       } else {
+dispatch(hideLoading());
         showSnackbar(
           "An unexpected error occurred. Please try again.",
           "error"
         );
+      
       }
+  localStorage.removeItem(FORM_DATA_KEY);
     } catch (error) {
   console.error("Registration error:", error);
+  dispatch(hideLoading());
   if (error.response?.data?.errors) {
     console.error("Validation errors:", error.response.data.errors);
     showSnackbar(
@@ -650,9 +663,33 @@ setTimeout(() => {
         "An unexpected error occurred. Please try again.",
       "error"
     );
+
   }
+  
 }
   };
+
+
+  // Make sure to also save preferences to localStorage
+useEffect(() => {
+  const savedData = localStorage.getItem(FORM_DATA_KEY);
+  if (savedData) {
+    const parsedData = JSON.parse(savedData);
+    if (parsedData.preferences) {
+      setPreferences(parsedData.preferences);
+    }
+  }
+}, []);
+
+// Update localStorage when preferences change
+useEffect(() => {
+  const currentData = JSON.parse(localStorage.getItem(FORM_DATA_KEY) || {});
+  localStorage.setItem(FORM_DATA_KEY, JSON.stringify({
+    ...currentData,
+    preferences
+  }));
+}, [preferences]);
+
 
   useEffect(() => {
     if (selectedCountry && phoneCodes[selectedCountry]) {
@@ -724,160 +761,184 @@ setTimeout(() => {
   // );
 
   return (
-    <Box
-    mt={5}
-      sx={{
-        // backgroundImage: `url(${backgroundImage})` ,
-        // backgroundColor: "#f0f0f0",
-        backgroundSize: "contain",
-        backgroundPosition: "center",
-        // backgroundRepeat: "no-repeat",
-        height: "100vh",
-      }}
-    >
- 
-    
-        <Box
-          ref={dropdownRef}
-          // elevation={3}
-          
+    <>
+     <Typography
+        variant="h3"
+        gutterBottom
+        fontWeight="bold"
+        sx={{ 
+          color: "#7ad03a", 
+          // mb: 2,
+          mt: 10,
+          textAlign: 'center',
+          textDecoration: 'underline',
+          fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.5rem' }
+        }}
+      >
+        Investor Registration
+      </Typography>
+        <Toolbar sx={{ 
+      display: "flex", 
+      justifyContent: "flex-end", 
+      mt:9,
+      mb: 1,
+      position: 'absolute',
+      top: 16,
+      right: 16
+    }}>
+      <FormControl
+        size="small"
+        sx={{
+          minWidth: 130,
+          backgroundColor: "background.paper",
+          borderRadius: "8px",
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}
+      >
+        <Select
+          value={watch("country") || "India"}
+          onChange={(e) => {
+            setValue("country", e.target.value);
+            setSelectedCountry(e.target.value);
+          }}
+          displayEmpty
+          inputProps={{ "aria-label": "Select country" }}
           sx={{
-            p: 2,
-            maxWidth:'500vh',
-            borderRadius: "10px",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
+            borderRadius: '8px',
+            '& .MuiSelect-select': {
+              py: 1
+            }
           }}
         >
-          
-          
-          <Typography
-            variant="h4"
-            gutterBottom
-            fontWeight="bold"
-            sx={{ textAlign: "center", mb: 1, color: "#7ad03a", mt: 3 }}
-          >
-            Investor Registration
-          </Typography>
-<Toolbar
-            sx={{ display: "flex", justifyContent: "flex-end", mb: -2, mt: -2 }}
-          >
-            <FormControl
-              size="small"
-              sx={{
-                minWidth: 130,
-                backgroundColor: "white",
-                borderRadius: "4px",
-              }}
-            >
-              <Select
-                value={watch("country") || "India"}
-                onChange={(e) => {
-                  setValue("country", e.target.value);
-                  setSelectedCountry(e.target.value);
-                }}
-                displayEmpty
-                inputProps={{ "aria-label": "Select country" }}
-              >
-                {countries.map((country) => (
-                  <MenuItem key={country.code} value={country.name}>
-                    {country.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Toolbar>
-          <form   onSubmit={handleSubmit(onSubmit)}  >
-            <Typography
-              variant="h5"
-              sx={{
-                marginBottom: "25px",
-                marginTop: "5px",
-                fontWeight: "bold",
-                color: "black",
-              }}
-            >
-              Personal Details
-            </Typography>
-            <Grid
-              container
-              spacing={2}
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
-                gap: 2,
-                
-              }}
-            >
-              {" "}
-              {/* Name Field */}
-              <Grid sx={{ xs: 12, sm: 6, mb: -2 }}>
+          {countries.map((country) => (
+            <MenuItem key={country.code} value={country.name}>
+              {country.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Toolbar>
+    <Box
+  sx={{
+    // backgroundSize: "cover",
+    // backgroundPosition: "center",
+    minHeight: "100vh",
+    display: "flex",
+    // justifyContent: "center",
+    alignItems: "center",
+  }}
+>
+  
+  <Box
+    ref={dropdownRef}
+    ml={13}
+    sx={{
+      p: 4,
+      width: "100%",
+      maxWidth: "900px",
+      
+      position: "relative",
+ 
+      borderColor: "divider"
+    }}
+  >
+    <Box sx={{ textAlign: "center", mb: 4 }}>
+     
+      
+    </Box>
+
+  
+
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {/* Personal Details Section */}
+    
+        <Typography
+          variant="h5"
+          sx={{
+            mb: 3,
+            fontWeight: "bold",
+            color: "text.primary",
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
+        >
+          <PersonOutlined color="primary" /> Personal Details
+        </Typography>
+
+        <Grid  spacing={3}>
+          {/* First Name */}
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="firstName"
+              control={control}
+              render={({ field }) => (
                 <TextField
+                  {...field}
+                  label="First Name"
                   fullWidth
-                  label="Name"
-                  {...register("firstName", {
-                    required: "First name is required",
-                  })}
+                  variant="outlined"
                   error={!!errors.firstName}
                   helperText={errors.firstName?.message || " "}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    }
+                  }}
                 />
-              </Grid>
-              {/* {email field} */}
-              <Grid sx={{ xs: 12, sm: 6, mb: -2 }}>
+              )}
+            />
+          </Grid>
+
+          {/* Email */}
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
                 <TextField
-                  fullWidth
+                  {...field}
                   label="Email"
                   type="email"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Invalid email address",
-                    },
-                  })}
+                  fullWidth
+                  variant="outlined"
                   error={!!errors.email}
                   helperText={errors.email?.message || " "}
-                  // InputProps={{
-                  //   endAdornment: (
-                  //     <InputAdornment position="end">
-                  //       <Button
-                  //         size="small"
-                  //         variant="outlined"
-                  //         onClick={() => {
-                  //           if (otpStates.email.verified) return;
-                  //           sendOtp("email");
-                  //         }}
-                  //         disabled={otpStates.email.loading || otpStates.email.verified}
-                  //       >
-                  //         {otpStates.email.loading ? (
-                  //           <CircularProgress size={20} />
-                  //         ) : otpStates.email.verified ? (
-                  //           "Verified"
-                  //         ) : otpStates.email.sent ? (
-                  //           "Resend OTP"
-                  //         ) : (
-                  //           "Send OTP"
-                  //         )}
-                  //       </Button>
-                  //     </InputAdornment>
-                  //   ),
-                  // }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    }
+                  }}
                 />
-              </Grid>
-              {/* Mobile number field */}
-              <Grid sx={{ xs: 12, sm: 6, mb: -2 }}>
+              )}
+            />
+          </Grid>
+
+          {/* Mobile Number */}
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="mobileNumber"
+              control={control}
+              render={({ field }) => (
                 <TextField
+                  {...field}
+                  label="Mobile Number"
                   fullWidth
-                  label="Phone Number"
-                  {...register("mobileNumber", {
-                    required: "Phone number is required",
-                    pattern: {
-                      value: /^[0-9]{10}$/,
-                      message: "Invalid phone number (10 digits required)",
-                    },
-                  })}
+                  variant="outlined"
                   error={!!errors.mobileNumber}
                   helperText={errors.mobileNumber?.message || " "}
                   inputProps={{
@@ -889,58 +950,46 @@ setTimeout(() => {
                     e.target.value = e.target.value
                       .replace(/\D/g, "")
                       .slice(0, 10);
-                      setWhatsappEnabled(false);
+                    setWhatsappEnabled(false);
                   }}
                   onBlur={(e) => {
-    if (e.target.value.length === 10) {
-      setShowWhatsappSnackbar(true);
-      setWhatsappEnabled(false);
-    }
-  }}
+                    if (e.target.value.length === 10) {
+                      setShowWhatsappSnackbar(true);
+                      setWhatsappEnabled(false);
+                    }
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        {phonePrefix}
+                        <Phone color="action" />
+                        <Typography variant="body1" sx={{ ml: 1 }}>
+                          {phonePrefix}
+                        </Typography>
                       </InputAdornment>
                     ),
-                    //   endAdornment: (
-                    //     <InputAdornment position="end">
-                    //       <Button
-                    //         size="small"
-                    //         variant="outlined"
-                    //         onClick={() => {
-                    //           if (otpStates.mobile.verified) return;
-                    //           sendOtp("mobile");
-                    //         }}
-                    //         disabled={otpStates.mobile.loading || otpStates.mobile.verified}
-                    //       >
-                    //         {otpStates.mobile.loading ? (
-                    //           <CircularProgress size={20} />
-                    //         ) : otpStates.mobile.verified ? (
-                    //           "Verified"
-                    //         ) : otpStates.mobile.sent ? (
-                    //           "Resend OTP"
-                    //         ) : (
-                    //           "Send OTP"
-                    //         )}
-                    //       </Button>
-                    //     </InputAdornment>
-                    //   ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    }
                   }}
                 />
-              </Grid>
-              {/* WhatsApp Field */}
-              <Grid sx={{ xs: 12, sm: 6, mb: -2 }}>
+              )}
+            />
+          </Grid>
+
+          {/* WhatsApp Number */}
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="whatsappNumber"
+              control={control}
+              render={({ field }) => (
                 <TextField
-                  fullWidth
+                  {...field}
                   label="WhatsApp Number"
-                  {...register("whatsappNumber", {
-                    required: "WhatsApp number is required",
-                    pattern: {
-                      value: /^[0-9]{10}$/,
-                      message: "Invalid WhatsApp number (10 digits required)",
-                    },
-                  })}
+                  fullWidth
+                  variant="outlined"
+                  disabled={!whatsappEnabled}
                   error={!!errors.whatsappNumber}
                   helperText={errors.whatsappNumber?.message || " "}
                   inputProps={{
@@ -953,509 +1002,611 @@ setTimeout(() => {
                       .replace(/\D/g, "")
                       .slice(0, 10);
                   }}
-                  disabled={!whatsappEnabled}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        {phonePrefix}
+                        <Phone color="action" />
+                        <Typography variant="body1" sx={{ ml: 1 }}>
+                          {phonePrefix}
+                        </Typography>
                       </InputAdornment>
                     ),
-                    //   endAdornment: (
-                    //     <InputAdornment position="end">
-                    //       <Button
-                    //         size="small"
-                    //         variant="outlined"
-                    //         onClick={() => {
-                    //           if(otpStates.whatsapp.verified) return;
-                    //           sendOtp("whatsapp");
-                    //         }}
-                    //         disabled={otpStates.whatsapp.loading || otpStates.whatsapp.verified}
-                    //       >
-                    //         {otpStates.whatsapp.loading ? (
-                    //           <CircularProgress size={20} />
-                    //         ) : otpStates.whatsapp.verified ? (
-                    //           "Verified"
-                    //         ) : otpStates.whatsapp.sent ? (
-                    //           "Resend OTP"
-                    //         ) : (
-                    //           "Send OTP"
-                    //         )}
-                    //       </Button>
-                    //     </InputAdornment>
-                    //   ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    }
                   }}
                 />
-              </Grid>
-              {/* {country} */}
-              {/* <Grid sx={{ width: "21%", xs: 12, sm: 3 }}>
-              <TextField
-                select
-                fullWidth
-                defaultValue="India"
-                SelectProps={{ native: true }}
-                label="Country"
-                {...register("country", { required: "Country is required" })}
-                error={!!errors.country}
-                helperText={errors.country?.message || " "}
-              >
-                <option value="India">India</option>
-              </TextField>
-            </Grid> */}
-              {/* {address} */}
-              <Grid sx={{ xs: 12, sm: 6 }}>
-                <TextField 
-                fullWidth 
-                label="Address" {...register("address",
-                  {
-                    required: "Address is required",
-                  }
-                 
-                )} error={!!errors.address}
-                helperText={errors.address?.message || " "}
-                 />
-              </Grid>
-              {/* {pincode} */}
-              <Grid sx={{ xs: 12, sm: 3, mb: -2 }}>
+              )}
+            />
+          </Grid>
+
+          {/* Address */}
+          <Grid item xs={12}>
+            <Controller
+              name="address"
+              control={control}
+              render={({ field }) => (
                 <TextField
+                  {...field}
+                  label="Address"
                   fullWidth
+                  variant="outlined"
+                  multiline
+                  rows={2}
+                  error={!!errors.address}
+                  helperText={errors.address?.message || " "}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Home color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    }
+                  }}
+                />
+              )}
+            />
+          </Grid>
+
+          {/* Pincode */}
+          <Grid item xs={12} md={4}>
+            <Controller
+              name="pincode"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
                   label="Pincode"
-                  {...register("pincode", {
-                    required: "Pincode is required",
-                    pattern: {
-                      value: /^\d{6}$/,
-                      message: "Pincode must be 6 digits",
-                    },
-                  })}
+                  fullWidth
+                  variant="outlined"
                   error={!!errors.pincode}
                   helperText={errors.pincode?.message || " "}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LocationCity color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    }
+                  }}
                 />
-              </Grid>
-              {/* {state} */}
-              <Grid sx={{ xs: 12, sm: 3 }}>
+              )}
+            />
+          </Grid>
+
+          {/* State */}
+          <Grid item xs={12} md={4}>
+            <Controller
+              name="state"
+              control={control}
+              render={({ field }) => (
                 <TextField
-                  fullWidth
+                  {...field}
                   label="State"
+                  fullWidth
+                  variant="outlined"
                   value={watch("state") || ""}
-                  {...register("state")}
                   InputProps={{ readOnly: true }}
                   error={!!errors.state}
+                  helperText={errors.state?.message || " "}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                      backgroundColor: 'action.hover'
+                    }
+                  }}
                 />
-              </Grid>
-              {/* {city} */}
-              <Grid sx={{ xs: 12, sm: 6 }}>
+              )}
+            />
+          </Grid>
+
+          {/* City */}
+          <Grid item xs={12} md={4}>
+            <Controller
+              name="city"
+              control={control}
+              render={({ field }) => (
                 <TextField
-                  fullWidth
+                  {...field}
                   label="City"
+                  fullWidth
+                  variant="outlined"
                   value={watch("city") || ""}
-                  {...register("city")}
                   InputProps={{ readOnly: true }}
                   error={!!errors.city}
+                  helperText={errors.city?.message || " "}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                      backgroundColor: 'action.hover'
+                    }
+                  }}
                 />
-              </Grid>
-              {/* {district} */}
-              {/* <Grid sx={{ width: "21%", xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label="District"
-                value={watch("district") || ""}
-                {...register("district")}
-                InputProps={{ readOnly: true }}
-                error={!!errors.district}
-              />
-            </Grid> */}
-              {/* Occupation Field */}
-              <Grid sx={{ xs: 12, sm: 4 }}>
+              )}
+            />
+          </Grid>
+
+          {/* Occupation */}
+          <Grid item xs={12}>
+            <Controller
+              name="occupation"
+              control={control}
+              render={({ field }) => (
                 <TextField
+                  {...field}
                   select
+                  label="Occupation"
                   fullWidth
-                  defaultValue=""
-                  SelectProps={{ native: true }}
-                  {...register("occupation")}
+                  variant="outlined"
                   error={!!errors.occupation}
-                  helperText={errors.occupation?.message}
+                  helperText={errors.occupation?.message || " "}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Work color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    },
+                    textAlign: 'left'
+                  }}
                 >
-                  <option value="">Select Occupation</option>
-  <option value="Student">Student</option>
-  <option value="Salaried Professional">Salaried Professional</option>
-  <option value="Business Owner/ Self-Employed">Business Owner/ Self-Employed</option>
-  <option value="Retired">Retired</option>
-  <option value="Freelancer/ Consultant">Freelancer/ Consultant</option>
-  <option value="Homemaker">Homemaker</option>
-  <option value="Investor">Investor</option>
-  <option value="Other">Other</option>
+                  <MenuItem value="">Select Occupation</MenuItem>
+                  <MenuItem value="Student">Student</MenuItem>
+                  <MenuItem value="Salaried Professional">Salaried Professional</MenuItem>
+                  <MenuItem value="Business Owner/ Self-Employed">Business Owner/ Self-Employed</MenuItem>
+                  <MenuItem value="Retired">Retired</MenuItem>
+                  <MenuItem value="Freelancer/ Consultant">Freelancer/ Consultant</MenuItem>
+                  <MenuItem value="Homemaker">Homemaker</MenuItem>
+                  <MenuItem value="Investor">Investor</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
                 </TextField>
-              </Grid>
-              {occupationValue === "Other" && (
-                <Grid  sx={{ xs: 12, sm: 4 }}>
-                  <TextField
-                    fullWidth
-                    label="Specify Occupation"
-                    {...register("otherOccupation", {
-                      required: "please Specify Occupation is required",
-                    })}
-                    error={!!errors.otherOccupation}
-                    helperText={errors.otherOccupation?.message}
-                  />
-                </Grid>
               )}
+            />
+          </Grid>
+
+          {/* Other Occupation */}
+          {occupationValue === "Other" && (
+            <Grid item xs={12}>
+              <Controller
+                name="otherOccupation"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Specify Occupation"
+                    fullWidth
+                    variant="outlined"
+                    error={!!errors.otherOccupation}
+                    helperText={errors.otherOccupation?.message || " "}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '8px',
+                      }
+                    }}
+                  />
+                )}
+              />
             </Grid>
-            {/* <Divider sx={{ borderColor: "#7ad03a", mt: 5 }} /> */}
+          )}
+        </Grid>
 
-            <Typography
-              variant="h5"
-              sx={{
-                marginBottom: "25px",
-                marginTop: "20px",
-                fontWeight: "bold",
-                color: "black",
+      {/* Preferences Section */}
+   
+        <Typography
+          variant="h5"
+          sx={{
+            mb: 3,
+            fontWeight: "bold",
+            color: "text.primary",
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
+        >
+          <FavoriteBorderOutlined color="primary" /> Preferences
+        </Typography>
+
+        {/* Category Selection */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 500, mb: 1 }}>
+            Investment Categories
+          </Typography>
+          
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 2 }}>
+            {/* Main Category Dropdown */}
+            <FormControl fullWidth sx={{ minWidth: 120 }}>
+              <InputLabel>Industry</InputLabel>
+              <Select
+                value={selectedMainCategory || ''}
+                onChange={(e) => {
+                  setSelectedMainCategory(e.target.value);
+                  setSelectedSubCategory('');
+                  setSelectedChild('');
+                }}
+                label="Industry"
+                sx={{ borderRadius: '8px' }}
+              >
+                <MenuItem value="">Select Industry</MenuItem>
+                {categories.map((category, index) => (
+                  <MenuItem key={index} value={category.name}>
+                    {category.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Subcategory Dropdown */}
+            <FormControl fullWidth sx={{ minWidth: 120 }} disabled={!selectedMainCategory}>
+              <InputLabel>Main category</InputLabel>
+              <Select
+                value={selectedSubCategory || ''}
+                onChange={(e) => {
+                  setSelectedSubCategory(e.target.value);
+                  setSelectedChild('');
+                }}
+                label="Main category"
+                sx={{ borderRadius: '8px' }}
+              >
+                <MenuItem value="">Select Main category</MenuItem>
+                {selectedMainCategory && 
+                  categories.find(c => c.name === selectedMainCategory)?.children?.map((sub, index) => (
+                    <MenuItem key={index} value={sub.name}>
+                      {sub.name}
+                    </MenuItem>
+                  ))
+                }
+              </Select>
+            </FormControl>
+
+            {/* Child Item Dropdown */}
+            <FormControl fullWidth sx={{ minWidth: 120 }} disabled={!selectedSubCategory}>
+              <InputLabel>Sub Category</InputLabel>
+              <Select
+                value={selectedChild || ''}
+                onChange={(e) => setSelectedChild(e.target.value)}
+                label="Sub Category"
+                sx={{ borderRadius: '8px' }}
+              >
+                <MenuItem value="">Select Sub Category</MenuItem>
+                {selectedMainCategory && selectedSubCategory && 
+                  categories.find(c => c.name === selectedMainCategory)
+                    ?.children?.find(s => s.name === selectedSubCategory)
+                    ?.children?.map((child, index) => (
+                      <MenuItem key={index} value={child}>
+                        {child}
+                      </MenuItem>
+                    ))
+                }
+              </Select>
+            </FormControl>
+
+            {/* Add Category Button */}
+            <Button
+              variant="contained"
+              
+              disabled={!selectedChild}
+              onClick={() => {
+                if (selectedMainCategory && selectedSubCategory && selectedChild) {
+                  const newCategory = {
+                    main: selectedMainCategory,
+                    sub: selectedSubCategory,
+                    child: selectedChild
+                  };
+                  
+                  setSelectedCategories(prev => {
+                    const exists = prev.some(c => 
+                      c.main === newCategory.main && 
+                      c.sub === newCategory.sub && 
+                      c.child === newCategory.child
+                    );
+                    return exists ? prev : [...prev, newCategory];
+                  });
+                  
+                  // Reset selections
+                  setSelectedMainCategory('');
+                  setSelectedSubCategory('');
+                  setSelectedChild('');
+                }
+              }}
+              sx={{ 
+                height: '56px',
+                borderRadius: '8px',
+                minWidth: '170px',
+                backgroundColor: '#7ad03a',
               }}
             >
-              Preferences
-            </Typography>
+              Add Category
+            </Button>
+          </Box>
 
-            <Grid
-              container
-              spacing={2}
-              sx={{
-                // display: "grid",
-                // gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
-                gap: 2,
-              }}
-            >
-              {/* Category Field */}
-              {/* Category Selection - Multi-Level Dropdown */}
-<Grid item xs={12}>
-  <Stack direction="row"  spacing={2} alignItems="center"  >
-    {/* Main Category Dropdown */}
-    <FormControl sx={{ minWidth: 200 }} >
-      <InputLabel>Main Category</InputLabel>
-      <Select
-        value={selectedMainCategory || ''}
-        onChange={(e) => {
-          setSelectedMainCategory(e.target.value);
-          setSelectedSubCategory('');
-          setSelectedChild('');
-        }}
-        label="Main Category"
-      >
-        <MenuItem value="">Select Main Category</MenuItem>
-        {categories.map((category, index) => (
-          <MenuItem key={index} value={category.name}>
-            {category.name}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+          {/* Display Selected Categories */}
+          {selectedCategories.length > 0 && (
+            <Box sx={{ 
+              mt: 2, 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: 1,
+              p: 2,
+              backgroundColor: 'background.paper',
+              borderRadius: '8px',
+              border: '1px solid',
+              borderColor: 'divider'
+            }}>
+              {selectedCategories.map((cat, index) => (
+                <Chip
+                  key={index}
+                  label={`${cat.main} > ${cat.sub} > ${cat.child}`}
+                  onDelete={() => {
+                    setSelectedCategories(selectedCategories.filter((_, i) => i !== index));
+                  }}
+                  sx={{ 
+                    backgroundColor: '#7ad03a',
+                    color: 'primary.contrastText',
+                    '& .MuiChip-deleteIcon': {
+                      color: 'primary.contrastText'
+                    }
+                  }}
+                />
+              ))}
+            </Box>
+          )}
+        </Box>
 
-    {/* Subcategory Dropdown */}
-    <FormControl sx={{ minWidth: 200 }} disabled={!selectedMainCategory}>
-      <InputLabel>Subcategory</InputLabel>
-      <Select
-        value={selectedSubCategory || ''}
-        onChange={(e) => {
-          setSelectedSubCategory(e.target.value);
-          setSelectedChild('');
-        }}
-        label="Subcategory"
-      >
-        <MenuItem value="">Select Subcategory</MenuItem>
-        {selectedMainCategory && 
-          categories.find(c => c.name === selectedMainCategory)?.children?.map((sub, index) => (
-            <MenuItem key={index} value={sub.name}>
-              {sub.name}
-            </MenuItem>
-          ))
-        }
-      </Select>
-    </FormControl>
-
-    {/* Child Item Dropdown */}
-    <FormControl sx={{ minWidth: 200 }} disabled={!selectedSubCategory}>
-      <InputLabel>Item</InputLabel>
-      <Select
-        value={selectedChild || ''}
-        onChange={(e) => setSelectedChild(e.target.value)}
-        label="Item"
-      >
-        <MenuItem value="">Select Item</MenuItem>
-        {selectedMainCategory && selectedSubCategory && 
-          categories.find(c => c.name === selectedMainCategory)
-            ?.children?.find(s => s.name === selectedSubCategory)
-            ?.children?.map((child, index) => (
-              <MenuItem key={index} value={child}>
-                {child}
-              </MenuItem>
-            ))
-        }
-      </Select>
-    </FormControl>
-
-    {/* Add Category Button */}
-    <Button
-      variant="contained"
-      color="success"
-      disabled={!selectedChild}
-      onClick={() => {
-        if (selectedMainCategory && selectedSubCategory && selectedChild) {
-          const newCategory = {
-            main: selectedMainCategory,
-            sub: selectedSubCategory,
-            child: selectedChild
-          };
-          
-          setSelectedCategories(prev => {
-            const exists = prev.some(c => 
-              c.main === newCategory.main && 
-              c.sub === newCategory.sub && 
-              c.child === newCategory.child
-            );
-            return exists ? prev : [...prev, newCategory];
-          });
-          
-          // Reset selections
-          setSelectedMainCategory('');
-          setSelectedSubCategory('');
-          setSelectedChild('');
-        }
-      }}
-      sx={{ height: '56px' }} // Match select height
-    >
-      Add Category
-    </Button>
-  </Stack>
-
-  {/* Display Selected Categories */}
-  {selectedCategories.length > 0 && (
-    <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-      {selectedCategories.map((cat, index) => (
-        <Chip
-          key={index}
-          label={`${cat.main} > ${cat.sub} > ${cat.child}`}
-          onDelete={() => {
-            setSelectedCategories(selectedCategories.filter((_, i) => i !== index));
-          }}
-          sx={{ 
-            backgroundColor: '#e3f2fd',
-            color: '#1976d2',
-            '& .MuiChip-deleteIcon': {
-              color: '#1976d2'
-            }
-          }}
-        />
-      ))}
-    </Box>
-  )}
-</Grid>
-
-              {/* {preferred investment range field} */}
-              <Grid sx={{ xs: 12, sm: 4 }}>
+        {/* Investment Range */}
+        <Grid spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Controller
+              name="investmentRange"
+              control={control}
+              render={({ field }) => (
                 <TextField
+                  {...field}
                   select
                   fullWidth
-                  defaultValue=""
-                  SelectProps={{ native: true }}
-                  {...register("investmentRange"
-                  //   , {
-                  //   required: "Preferred investment range is required",
-                  // }
-                )}
+                  label="Preferred Investment Range"
+                  variant="outlined"
                   error={!!errors.investmentRange}
-                  helperText={errors.investmentRange?.message}
+                  helperText={errors.investmentRange?.message || " "}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    }
+                  }}
                 >
-                  <option value="">Select Preferred Investment Range</option>
-                  <option value="having amount">
+                  <MenuItem value="">Select Preferred Investment Range</MenuItem>
+                  <MenuItem value="having amount">
                     Having Investment Amount Ready
-                  </option>
-                  <option value="take loan">Planning to take a Loan</option>
-                  <option value="need loan">Need Loan Assistance</option>
+                  </MenuItem>
+                  <MenuItem value="take loan">Planning to take a Loan</MenuItem>
+                  <MenuItem value="need loan">Need Loan Assistance</MenuItem>
                 </TextField>
-              </Grid>
-              {selectedRange && (
-                <Grid  sx={{ xs: 12, sm: 4 }}>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <TextField
-                      select
-                      fullWidth
-                      defaultValue=""
-                      SelectProps={{ native: true }}
-                      {...register("investmentAmount"
-                      //   , {
-                      //   required: "Please select an amount range",
-                      // }
-                    )}
-                      error={!!errors.investmentAmount}
-                      helperText={errors.investmentAmount?.message}
-                    >
-                      <option value="">
-                        Select preferred Investment Amount
-                      </option>
-                      <option value="Below-50,000">Below - Rs.50 K</option>
-                      <option value="Rs.50,000-2L">Rs.50 K - 2 L</option>
-                      <option value="Rs.2L-5L">Rs.2 L - 5 L</option>
-                      <option value="Rs.5L-10L">Rs.5 L - 10 L</option>
-                      <option value="Rs.10L-20L">Rs.10 L - 20 L</option>
-                      <option value="Rs.20L-30L">Rs.20 L - 30 L</option>
-                      <option value="Rs.30L-50L">Rs.30 L - 50 L</option>
-                      <option value="Rs.50L-1Cr">Rs.50 L - 1 Cr</option>
-                      <option value="Rs.1Cr-2Cr">Rs.1 Cr - 2 Cr</option>
-                      <option value="Rs.2Cr-5Cr">Rs.2 Cr - 5 Cr</option>
-                      <option value="Rs.5Cr-above">Rs.5 Cr - Above</option>
-                    </TextField>
-                    <Tooltip title="Select your preferred investment range as per your budget.">
-                      <InfoIcon
-                        sx={{ color: "#ff9800", cursor: "pointer", mt: 1 }}
-                      />
-                    </Tooltip>
-                  </Stack>
-                </Grid>
               )}
+            />
+          </Grid>
 
-              {/* Preferred State Field (changed to text input) */}
-              <Grid  xs={12} sm={6}>
-                <FormControl sx={{ minWidth: 200 }} error={!!errors.preferredState}>
-                  <InputLabel>Preferred State *</InputLabel>
-                  <Select
-                    label="Preferred State"
-                    value={watch("preferredState") || ""}
-                    {...register("preferredState"
-                    //   , {
-                    //   required: "Preferred state is required",
-                    // }
-                  )}
-                    onChange={(e) => {
-                      setValue("preferredState", e.target.value);
-                      setValue("preferredDistrict", "");
-                      setValue("preferredCity", "");
-                    }}
-                  >
-                    <MenuItem value="">Select State</MenuItem>
-                    {preferredStates.map((state) => (
-                      <MenuItem key={state} value={state}>
-                        {state}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  <Typography color="error" variant="caption">
-                    {errors.preferredState?.message}
-                  </Typography>
-                </FormControl>
-              </Grid>
-
-              {/* Preferred District Field  */}
-              <Grid  xs={12} sm={6}>
-                <FormControl sx={{ minWidth: 200 }} error={!!errors.preferredDistrict}>
-                  <InputLabel>Preferred District *</InputLabel>
-                  <Select
-                    label="Preferred District"
-                    value={watch("preferredDistrict") || ""}
-                    {...register("preferredDistrict"
-                    //   , {
-                    //   required: "Preferred district is required",
-                    // }
-                  )}
-                    onChange={(e) => {
-                      setValue("preferredDistrict", e.target.value);
-                      setValue("preferredCity", "");
-                    }}
-                    disabled={!watch("preferredState")}
-                  >
-                    <MenuItem value="">Select District</MenuItem>
-                    {preferredDistricts.map((district) => (
-                      <MenuItem key={district} value={district}>
-                        {district}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  <Typography color="error" variant="caption">
-                    {errors.preferredDistrict?.message}
-                  </Typography>
-                </FormControl>
-              </Grid>
-
-              {/* Preferred City Field (changed to text input) */}
-              <Grid  xs={12} sm={6}>
-                <FormControl sx={{ minWidth: 200 }} error={!!errors.preferredCity}>
-                  <InputLabel>Preferred City *</InputLabel>
-                  <Select
-                    label="Preferred City"
-                    value={watch("preferredCity") || ""}
-                    {...register("preferredCity"
-                    //   , {
-                    //   required: "Preferred city is required",
-                    // }
-                  )}
-                    disabled={!watch("preferredDistrict")}
-                  >
-                    <MenuItem value="">Select City</MenuItem>
-                    {preferredCities.map((city) => (
-                      <MenuItem key={city} value={city}>
-                        {city}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  <Typography color="error" variant="caption">
-                    {errors.preferredCity?.message}
-                  </Typography>
-                </FormControl>
-              </Grid>
-              {/* Property Type Field */}
-              <Grid  xs={12} sm={6} md={4}>
-                <FormControl
-                  component="fieldset"
-                  sx={{ minWidth: 200 }}
-                  // error={!!errors.propertyType}
-                >
-                  <FormLabel component="legend">Property Type *</FormLabel>
-                  <Controller
-                    name="propertyType"
-                    control={control}
-                    // rules={{ required: "Property type is required" }}
-                    render={({ field }) => (
-                      <RadioGroup
-                        row
-                        {...field}
-                        value={field.value || ""}
-                        onChange={(e) => {
-                          field.onChange(e.target.value);
-                          if (e.target.value !== "Own Property") {
-                            setValue("propertySize", "");
-                          }
-                        }}
-                        sx={{ flexWrap: "nowrap" }}
-                      >
-                        <FormControlLabel
-                          value="Own Property"
-                          control={<Radio />}
-                          label="Own Property"
-                        />
-                        <FormControlLabel
-                          value="Rental Property"
-                          control={<Radio />}
-                          label="Rental Property"
-                        />
-                      </RadioGroup>
-                    )}
-                  />
-                  {errors.propertyType && (
-                    <Typography color="error" variant="caption">
-                      {errors.propertyType.message}
-                    </Typography>
-                  )}
-                </FormControl>
-              </Grid>
-
-              {/* Property Size Field - Only show for Own Property */}
-              {watch("propertyType") === "Own Property" && (
-                <Grid  xs={12} sm={6} md={4}>
+          {/* Investment Amount - Only shown if range is selected */}
+          {selectedRange && (
+            <Grid item xs={12} md={6}>
+              <Controller
+                name="investmentAmount"
+                control={control}
+                render={({ field }) => (
                   <TextField
+                    {...field}
                     select
-                    sx={{ minWidth: 200 }}
-                    label="Property Size *"
-                    {...register("propertySize", {
-                      required: "Property size is required for own property",
-                    })}
+                    fullWidth
+                    label="Preferred Investment Amount"
+                    variant="outlined"
+                    error={!!errors.investmentAmount}
+                    helperText={errors.investmentAmount?.message || " "}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '8px',
+                      }
+                    }}
+                  >
+                    <MenuItem value="">
+                      Select preferred Investment Amount
+                    </MenuItem>
+                    <MenuItem value="Below-50,000">Below - Rs.50 K</MenuItem>
+                    <MenuItem value="Rs.50,000-2L">Rs.50 K - 2 L</MenuItem>
+                    <MenuItem value="Rs.2L-5L">Rs.2 L - 5 L</MenuItem>
+                    <MenuItem value="Rs.5L-10L">Rs.5 L - 10 L</MenuItem>
+                    <MenuItem value="Rs.10L-20L">Rs.10 L - 20 L</MenuItem>
+                    <MenuItem value="Rs.20L-30L">Rs.20 L - 30 L</MenuItem>
+                    <MenuItem value="Rs.30L-50L">Rs.30 L - 50 L</MenuItem>
+                    <MenuItem value="Rs.50L-1Cr">Rs.50 L - 1 Cr</MenuItem>
+                    <MenuItem value="Rs.1Cr-2Cr">Rs.1 Cr - 2 Cr</MenuItem>
+                    <MenuItem value="Rs.2Cr-5Cr">Rs.2 Cr - 5 Cr</MenuItem>
+                    <MenuItem value="Rs.5Cr-above">Rs.5 Cr - Above</MenuItem>
+                  </TextField>
+                )}
+              />
+            </Grid>
+          )}
+
+          {/* Preferred Location */}
+          <Grid item xs={12} md={4}>
+            <Controller
+              name="preferredState"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  fullWidth
+                  label="Preferred State"
+                  variant="outlined"
+                  error={!!errors.preferredState}
+                  helperText={errors.preferredState?.message || " "}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setValue("preferredDistrict", "");
+                    setValue("preferredCity", "");
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    }
+                  }}
+                >
+                  <MenuItem value="">Select State</MenuItem>
+                  {preferredStates.map((state) => (
+                    <MenuItem key={state} value={state}>
+                      {state}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Controller
+              name="preferredDistrict"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  fullWidth
+                  label="Preferred District"
+                  variant="outlined"
+                  disabled={!watch("preferredState")}
+                  error={!!errors.preferredDistrict}
+                  helperText={errors.preferredDistrict?.message || " "}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setValue("preferredCity", "");
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    }
+                  }}
+                >
+                  <MenuItem value="">Select District</MenuItem>
+                  {preferredDistricts.map((district) => (
+                    <MenuItem key={district} value={district}>
+                      {district}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Controller
+              name="preferredCity"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  fullWidth
+                  label="Preferred City"
+                  variant="outlined"
+                  disabled={!watch("preferredDistrict")}
+                  error={!!errors.preferredCity}
+                  helperText={errors.preferredCity?.message || " "}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    }
+                  }}
+                >
+                  <MenuItem value="">Select City</MenuItem>
+                  {preferredCities.map((city) => (
+                    <MenuItem key={city} value={city}>
+                      {city}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+          </Grid>
+
+          {/* Property Type */}
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
+              Property Type
+            </Typography>
+            <Controller
+              name="propertyType"
+              control={control}
+              render={({ field }) => (
+                <RadioGroup
+                  row
+                  {...field}
+                  value={field.value || ""}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    if (e.target.value !== "Own Property") {
+                      setValue("propertySize", "");
+                    }
+                  }}
+                  sx={{ gap: 3 }}
+                >
+                  <FormControlLabel
+                    value="Own Property"
+                    control={<Radio color="primary" />}
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <HomeWork color="primary" />
+                        <Typography>Own Property</Typography>
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel
+                    value="Rental Property"
+                    control={<Radio color="primary" />}
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <MeetingRoom color="primary" />
+                        <Typography>Rental Property</Typography>
+                      </Box>
+                    }
+                  />
+                </RadioGroup>
+              )}
+            />
+          </Grid>
+
+          {/* Property Size - Only show for Own Property */}
+          {watch("propertyType") === "Own Property" && (
+            <Grid item xs={12} md={6}>
+              <Controller
+                name="propertySize"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    select
+                    fullWidth
+                    label="Property Size"
+                    variant="outlined"
                     error={!!errors.propertySize}
-                    helperText={errors.propertySize?.message}
+                    helperText={errors.propertySize?.message || " "}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '8px',
+                      }
+                    }}
                   >
                     <MenuItem value="">Select Total Area</MenuItem>
                     <MenuItem value="Below - 100 sq ft">
@@ -1492,343 +1643,362 @@ setTimeout(() => {
                       Above 10000 sq ft
                     </MenuItem>
                   </TextField>
-                </Grid>
-              )}
-              {/* Add Preference Button */}
-              <Grid  xs={12} sm={6} md={4} mt={1} >
-            <Button size="medium"  fullWidth  variant="contained" sx={{ bgcolor: '#7ad03a', '&:hover': { bgcolor: '#6fbf2a' } }}  onClick={handleAddPreference}>
-              Add Preference
-            </Button>
-            
-          </ Grid>
- 
-
-          {/* Preferences Dialog */}
-          {/* <Dialog open={preferenceDialogOpen} onClose={() => setPreferenceDialogOpen(false)} maxWidth="md" fullWidth>
-            <DialogTitle color="orange" fontWeight="bold">Added Preferences</DialogTitle>
-            <DialogContent>
-              {preferences.length === 0 ? (
-                <Typography variant="body1" color="text.secondary">No preferences added yet.</Typography>
-              ) : (
-                <List>
-                  {preferences.map((pref, idx) => (
-                    <ListItem key={idx} divider
-                      secondaryAction={
-                        <Button size="small" variant="outlined" color="error" onClick={() => handleRemovePreference(idx)}>
-                          Remove
-                        </Button>
-                      }
-                    >
-                      <ListItemText
-                       
-                        secondary={
-                          <>
-                            <Box sx={{ fontWeight: "bold" }}>State: {pref.preferredState} - {pref.preferredDistrict} - {pref.preferredCity}</Box>
-                            <Box sx={{ fontWeight: "bold" }}>Category: {Array.isArray(pref.category) ? pref.category.map(c => `${c.main} > ${c.sub} > ${c.child}`).join(", ") : ""}</Box>
-                            <Box sx={{ fontWeight: "bold" }}>Investment: {pref.investmentRange} - {pref.investmentAmount}</Box>
-                            <Box sx={{ fontWeight: "bold" }}>Property: {pref.propertyType}{pref.propertyType === "Own Property" ? ` (${pref.propertySize})` : ""}</Box>
-                          </>
-                        }
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button color="error"  variant ="contained" onClick={() => setPreferenceDialogOpen(false)}>Close</Button>
-            </DialogActions>
-          </Dialog> */}
-  
-
-            </Grid>
-                        <Grid item xs={12}>
-  {/* <Button
-    variant="contained"
-    color="warning"
-    size="medium"
-    fullWidth
-    sx={{ 
-      bgcolor: '#ff9800', 
-      '&:hover': { bgcolor: '#f57c00' },
-      mt: 2,
-      mb: 2
-    }}
-    onClick={() => document.activeElement.blur()}
-    disabled={preferences.length === 0}
-  >
-    {preferences.length > 0 ? `View ${preferences.length} Added Preferences` : "No Preferences Added Yet"}
-  </Button> */}
-
-  {preferences.length > 0 && (
-    <TableContainer component={Paper} sx={{ mt: 2, mb: 3 }}>
-      <Table size="small" aria-label="added preferences table">
-        <TableHead>
-          <TableRow sx={{ bgcolor: 'grey.100' }}>
-            <TableCell sx={{ fontWeight: 'bold' }}>#</TableCell>
-            <TableCell sx={{ fontWeight: 'bold' }}>Categories</TableCell>
-            <TableCell sx={{ fontWeight: 'bold' }}>Investment</TableCell>
-            <TableCell sx={{ fontWeight: 'bold' }}>Location</TableCell>
-            <TableCell sx={{ fontWeight: 'bold' }}>Property</TableCell>
-            <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {preferences.map((pref, idx) => (
-            <TableRow key={idx}>
-              <TableCell>{idx + 1}</TableCell>
-              <TableCell>
-                {Array.isArray(pref.category) ? (
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    {pref.category.map((cat, i) => (
-                      <Typography key={i} variant="body2">
-                        {`${cat.main} > ${cat.sub} > ${cat.child}`}
-                      </Typography>
-                    ))}
-                  </Box>
-                ) : null}
-              </TableCell>
-              <TableCell>
-                <Typography variant="body2">
-                  <Box component="span" fontWeight="bold">Range:</Box> {pref.investmentRange}
-                </Typography>
-                <Typography variant="body2">
-                  <Box component="span" fontWeight="bold">Amount:</Box> {pref.investmentAmount}
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="body2">
-                  <Box component="span" fontWeight="bold">State:</Box> {pref.preferredState}
-                </Typography>
-                <Typography variant="body2">
-                  <Box component="span" fontWeight="bold">District:</Box> {pref.preferredDistrict}
-                </Typography>
-                <Typography variant="body2">
-                  <Box component="span" fontWeight="bold">City:</Box> {pref.preferredCity}
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="body2">
-                  <Box component="span" fontWeight="bold">Type:</Box> {pref.propertyType}
-                </Typography>
-                {pref.propertyType === "Own Property" && (
-                  <Typography variant="body2">
-                    <Box component="span" fontWeight="bold">Size:</Box> {pref.propertySize}
-                  </Typography>
                 )}
-              </TableCell>
-              <TableCell>
-                <IconButton
-                  color="error"
-                  onClick={() => handleRemovePreference(idx)}
-                  aria-label="remove preference"
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  )}
-</Grid>
-            <Divider sx={{ borderColor: "#7ad03a", mt: 5 }} />
-            <Grid container spacing={2} sx={{ display: "flex", justifyContent: "center", flexDirection  : "column" }} mt={3}>
-                {/* Terms and Conditions Checkbox */}
-                <Grid
-                  
-                  xs={12}
-                  sx={{ justifyContent: "center", display: "flex" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      control={
-                        <Checkbox {...register("terms", { required: true })} />
-                      }
-                      label={
-                        <Typography variant="body2">
-                          I agree to the{" "}
-                          <Link component={RouterLink} to="/termsandconditions">
-                            terms and conditions
-                          </Link>
-                        </Typography>
-                      }
-                    />
-                    {errors.terms && (
-                      <Typography color="error" variant="body2">
-                        You must accept the terms
-                      </Typography>
-                    )}
-                  </Box>
-                </Grid>
+              />
+            </Grid>
+          )}
+        </Grid>
 
-                {/* Submit Button */}
-                <Grid
-                  
-                  xs={12}
-                  sx={{  display: "flex", justifyContent: "center" }}
-                >
-                  <Button
-                    // fullWidth
-                    type="submit"
-                    size="small"
-                    variant="contained"
-                    sx={{
-                      width: "30%",
-                      bgcolor: "#7ad03a",
-                      color: "white",
-                      "&:hover": { bgcolor: "#7ad033" },
-                    }}
-                  >
-                    REGISTER
-                  </Button>
-                </Grid>
-                {/* Sign In Link */}
-                <Grid  xs={12} sx={{ mt: 0, textAlign: "center" }}>
-                  <Typography>
-                    Already have an account?{" "}
-                    <Box
-                      component="span"
-                      onClick={openLoginPopup}
-                      sx={{
-                        textDecoration: "none",
-                        cursor: "pointer",
-                        color: "primary.main",
-                        "&:hover": {
-                          color: "primary.dark",
-                        },
-                      }}
-                    >
-                      Sign In
-                    </Box>
-                  </Typography>
-                </Grid>
-              </Grid>
-          </form>
-        </Box>
-        {/* Login Popup Dialog */}
-        <Dialog
-          open={loginOpen}
-          onClose={closeLoginPopup}
-          maxWidth="sm"
-          fullWidth
-        >
-          <LoginPage open={loginOpen} onClose={closeLoginPopup} />
-        </Dialog>
-        {/* OTP Verification Modal */}
-        <Dialog open={otpModal.open} onClose={closeOtpModal}>
-          <DialogTitle>
-            Verify{" "}
-            {otpModal.type === "email"
-              ? "Email"
-              : otpModal.type === "mobile"
-              ? "Mobile Number"
-              : "WhatsApp Number"}
-          </DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Enter OTP"
-              type="text"
-              fullWidth
-              variant="standard"
-              value={otpModal.otp}
-              onChange={(e) => {
-                // Only allow numbers and limit length
-                const value = e.target.value.replace(/\D/g, "").slice(0, 6);
-                setOtpModal((prev) => ({ ...prev, otp: value }));
-              }}
-              disabled={otpModal.verified}
-              InputProps={{
-                endAdornment: otpModal.verified && (
-                  <InputAdornment position="end">
-                    <Typography color="success.main">Verified</Typography>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={closeOtpModal}>Cancel</Button>
-            <Button
-              onClick={verifyOtp}
-              disabled={otpModal.verified || otpModal.loading}
-              color="primary"
-              variant="contained"
-            >
-              {otpModal.loading ? (
-                <CircularProgress size={24} />
-              ) : otpModal.verified ? (
-                "Verified"
-              ) : (
-                "Verify"
-              )}
-            </Button>
-          </DialogActions>
-        </Dialog>
+        {/* Add Preference Button */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+          <Button 
+        
+            onClick={handleAddPreference}
+            sx={{
+              borderRadius: '8px',
+              backgroundColor:'#7ad03a',
+              color: '#fff',
 
-        {/* Snackbar for notifications */}
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={6000}
-          onClose={handleCloseSnackbar}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-          <Alert
-            onClose={handleCloseSnackbar}
-            severity={snackbar.severity}
-            sx={{ width: "100%" }}
+              px: 4,
+              py: 1.5,
+              fontWeight: 'bold'
+            }}
           >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
+            Add Preference
+          </Button>
+        </Box>
 
-<Snackbar
-  open={showWhatsappSnackbar}
-  autoHideDuration={6000}
-  onClose={() => setShowWhatsappSnackbar(false)}
-  anchorOrigin={{ vertical: 'top',  horizontal: 'center', }}
-  sx={{ width: '100%', maxWidth: '800px' }}
->
-  <Alert
-    onClose={() => setShowWhatsappSnackbar(false)}
-    severity="info"
-    sx={{ width: '100%', }}
-    action={
-      <>
+        {/* Preferences Table */}
+        {preferences.length > 0 && (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+              Your Investment Preferences
+            </Typography>
+            <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'hidden' }}>
+              <Table size="small" aria-label="added preferences table">
+                <TableHead>
+                  <TableRow sx={{ bgcolor: '#7ad03a' }}>
+                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>#</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Categories</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Investment</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Location</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Property</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Cancel </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {preferences.map((pref, idx) => (
+                    <TableRow key={idx} hover>
+                      <TableCell>{idx + 1}</TableCell>
+                      <TableCell>
+                        {Array.isArray(pref.category) ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                            {pref.category.map((cat, i) => (
+                              <Typography key={i} variant="body2">
+                                {`${cat.main} > ${cat.sub} > ${cat.child}`}
+                              </Typography>
+                            ))}
+                          </Box>
+                        ) : null}
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          <Box component="span" fontWeight="bold">Range:</Box> {pref.investmentRange}
+                        </Typography>
+                        <Typography variant="body2">
+                          <Box component="span" fontWeight="bold">Amount:</Box> {pref.investmentAmount}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          <Box component="span" fontWeight="bold">State:</Box> {pref.preferredState}
+                        </Typography>
+                        <Typography variant="body2">
+                          <Box component="span" fontWeight="bold">District:</Box> {pref.preferredDistrict}
+                        </Typography>
+                        <Typography variant="body2">
+                          <Box component="span" fontWeight="bold">City:</Box> {pref.preferredCity}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          <Box component="span" fontWeight="bold">Type:</Box> {pref.propertyType}
+                        </Typography>
+                        {pref.propertyType === "Own Property" && (
+                          <Typography variant="body2">
+                            <Box component="span" fontWeight="bold">Size:</Box> {pref.propertySize}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          color="error"
+                          onClick={() => handleRemovePreference(idx)}
+                          aria-label="remove preference"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        )}
+
+      {/* Terms and Submit Section */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center',
+        mt: 4,
+        p: 3,
+        
+      }}>
+        <FormControlLabel
+          control={
+            <Controller
+              name="terms"
+              control={control}
+              render={({ field }) => (
+                <Checkbox 
+                  {...field} 
+                  color="primary" 
+                  checked={field.value || false}
+                />
+              )}
+            />
+          }
+          label={
+            <Typography variant="body2">
+              I agree to the{" "}
+              <Link 
+                component={RouterLink} 
+                to="/termsandconditions" 
+                color="primary"
+                sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+              >
+                terms and conditions
+              </Link>
+            </Typography>
+          }
+          sx={{ mb: 3 }}
+        />
+        {errors.terms && (
+          <Typography color="error" variant="body2" sx={{ mb: 2 }}>
+            You must accept the terms
+          </Typography>
+        )}
+
         <Button
-          color="success"
-          size="medium"
-          onClick={() => {
-            setValue("whatsappNumber", watch("mobileNumber"));
-            setShowWhatsappSnackbar(false);
-            setWhatsappEnabled(true);
-            showSnackbar("WhatsApp number auto-filled.", "success");
+          type="submit"
+          variant="contained"
+          size="large"
+          sx={{
+            width: { xs: '100%', sm: 'auto' },
+            minWidth: '200px',
+            borderRadius: '8px',
+            py: 1.5,
+            fontWeight: 'bold',
+            fontSize: '1.1rem',
+            backgroundColor: '#7ad03a',
           }}
         >
-          Yes
+          REGISTER
+        </Button>
+
+        <Typography sx={{ mt: 2, textAlign: 'center' }}>
+          Already have an account?{" "}
+          <Box
+            component="span"
+            onClick={openLoginPopup}
+            sx={{
+              cursor: "pointer",
+              color: "primary.main",
+              fontWeight: 500,
+              '&:hover': {
+                textDecoration: 'underline'
+              }
+            }}
+          >
+            Sign In
+          </Box>
+        </Typography>
+      </Box>
+    </form>
+
+    {/* Login Popup Dialog */}
+    <Dialog
+      open={loginOpen}
+      onClose={closeLoginPopup}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: '16px'
+        }
+      }}
+    >
+      <LoginPage open={loginOpen} onClose={closeLoginPopup} />
+    </Dialog>
+
+    {/* OTP Verification Modal */}
+    <Dialog 
+      open={otpModal.open} 
+      onClose={closeOtpModal}
+      PaperProps={{
+        sx: {
+          borderRadius: '16px',
+          p: 3
+        }
+      }}
+    >
+      <DialogTitle sx={{ fontWeight: 'bold', textAlign: 'center' }}>
+        Verify{" "}
+        {otpModal.type === "email"
+          ? "Email"
+          : otpModal.type === "mobile"
+          ? "Mobile Number"
+          : "WhatsApp Number"}
+      </DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          label="Enter OTP"
+          type="text"
+          fullWidth
+          variant="outlined"
+          value={otpModal.otp}
+          onChange={(e) => {
+            const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+            setOtpModal((prev) => ({ ...prev, otp: value }));
+          }}
+          disabled={otpModal.verified}
+          InputProps={{
+            endAdornment: otpModal.verified && (
+              <InputAdornment position="end">
+                <CheckCircleIcon color="success" />
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '8px',
+            },
+            mt: 2
+          }}
+        />
+      </DialogContent>
+      <DialogActions sx={{ justifyContent: 'center', gap: 2, px: 3, pb: 3 }}>
+        <Button 
+          onClick={closeOtpModal}
+          variant="outlined"
+          sx={{ borderRadius: '8px', px: 3 }}
+        >
+          Cancel
         </Button>
         <Button
-          color="warning"
-          size="medium"
-          onClick={() => {
-            setShowWhatsappSnackbar(false);
-            setWhatsappEnabled(true);
-          }}
+          onClick={verifyOtp}
+          disabled={otpModal.verified || otpModal.loading}
+          color="primary"
+          variant="contained"
+          sx={{ borderRadius: '8px', px: 3 }}
         >
-          No
+          {otpModal.loading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : otpModal.verified ? (
+            "Verified"
+          ) : (
+            "Verify"
+          )}
         </Button>
-      </>
-    }
-  >
-    Is your WhatsApp number same as your phone number?
-  </Alert>
-</Snackbar>
-     
-      <Footer />
-    </Box>
+      </DialogActions>
+    </Dialog>
+
+    {/* Snackbar for notifications */}
+    <Snackbar
+      open={snackbar.open}
+      autoHideDuration={6000}
+      onClose={handleCloseSnackbar}
+      anchorOrigin={{ vertical: "top", horizontal: "center" }}
+    >
+      <Alert
+        onClose={handleCloseSnackbar}
+        severity={snackbar.severity}
+        sx={{ 
+          width: "100%",
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}
+      >
+        {snackbar.message}
+      </Alert>
+    </Snackbar>
+
+    {/* WhatsApp Snackbar */}
+    <Snackbar
+      open={showWhatsappSnackbar}
+      autoHideDuration={6000}
+      onClose={() => setShowWhatsappSnackbar(false)}
+      anchorOrigin={{ vertical: "center", horizontal: "center" }}
+      sx={{
+        width: '100%',
+        maxWidth: '700px',
+        mb: 12
+      }}
+    >
+      <Alert
+        onClose={() => setShowWhatsappSnackbar(false)}
+        severity="info"
+        icon={<WhatsApp fontSize="inherit" />}
+        sx={{ 
+          width: '100%',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          alignItems: 'center'
+        }}
+        action={
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              color="success"
+              variant="contained"
+              size="medium"
+              onClick={() => {
+                setValue("whatsappNumber", watch("mobileNumber"));
+                setShowWhatsappSnackbar(false);
+                setWhatsappEnabled(true);
+                showSnackbar("WhatsApp number auto-filled.", "success");
+              }}
+              sx={{ borderRadius: '8px' }}
+            >
+              Yes
+            </Button>
+            <Button
+              color="inherit"
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                setShowWhatsappSnackbar(false);
+                setWhatsappEnabled(true);
+              }}
+              sx={{ borderRadius: '8px' }}
+            >
+              No
+            </Button>
+          </Box>
+        }
+      >
+        Is your WhatsApp number same as your phone number?
+      </Alert>
+    </Snackbar>
+  </Box>
+  <Box> 
+    <RegisterationMediaHandling />
+  </Box>
+</Box>
+</>
   );
 };
 

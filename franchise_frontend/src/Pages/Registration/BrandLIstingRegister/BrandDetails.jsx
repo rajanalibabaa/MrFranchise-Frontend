@@ -11,25 +11,29 @@ import {
   List,
   ListItem,
   ListItemText,
-
   Paper,
   Box,
-  
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
   CircularProgress,
+  Snackbar,
+  Alert,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import categories from "./BrandCategories.jsx";
 import AddIcon from "@mui/icons-material/Add";
+import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
 
-const BrandDetails = ({ data = {}, errors = {}, onChange,  }) => {
+const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const formData = {
-
     companyName: "",
     brandName: "",
     brandCategories: [],
@@ -37,10 +41,8 @@ const BrandDetails = ({ data = {}, errors = {}, onChange,  }) => {
     ...data,
   };
 
-
-
   const [selectedCategory, setSelectedCategory] = useState({
-    groupId:"",
+    groupId: "",
     main: "",
     sub: "",
     child: "",
@@ -51,65 +53,111 @@ const BrandDetails = ({ data = {}, errors = {}, onChange,  }) => {
     const { name, value } = e.target;
     onChange({ [name]: value });
   };
+  const [pincodeError, setPincodeError] = useState(null);
+  const [loadingPincode, setLoadingPincode] = useState(false);
 
+  // Expansion Location Modal State
   const [openLocationModal, setOpenLocationModal] = useState(false);
+  const [locationType, setLocationType] = useState("domestic"); // 'domestic' or 'international'
   const [newLocation, setNewLocation] = useState({
+    type: "domestic",
     country: "India",
     state: "",
     district: "",
     city: "",
   });
-  const [statesData, setStatesData] = useState([]); // full data
+
+  // Domestic Location Data
+  const [statesData, setStatesData] = useState([]);
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
-  const [stateCities, setStateCities] = useState([]);
-  const [apiError, setApiError] = useState(null);
-  const [pincodeError, setPincodeError] = useState(null);
-  const [loadingPincode, setLoadingPincode] = useState(false);
+  const [cities, setCities] = useState([]);
+
+  // International Location Data
+  const [countries, setCountries] = useState([]);
+  const [internationalStates, setInternationalStates] = useState([]);
+  const [internationalCities, setInternationalCities] = useState([]);
 
   const [loading, setLoading] = useState({
     states: false,
     districts: false,
     cities: false,
+    countries: false,
+    intStates: false,
+    intCities: false,
   });
 
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedDistrict, setSelectedDistrict] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
+  const [apiError, setApiError] = useState(null);
+
   // Fetch all Indian states on component mount
   useEffect(() => {
-    const fetchStates = async () => {
+    const fetchDomesticData = async () => {
       setLoading((prev) => ({ ...prev, states: true }));
       try {
         const response = await axios.get(
           "https://raw.githubusercontent.com/prasad-gowda/india-state-district-cities/master/India-state-district-city.json"
         );
         setStatesData(response.data);
-        console.log("States Data:", response.data);
-
         setStates(
           response.data
             .map((state) => ({ id: state.iso2, name: state.name }))
             .sort((a, b) => a.name.localeCompare(b.name))
         );
-        // Set the first state as selected by default
       } catch (error) {
-        setApiError("Failed to load states. Please try again later.");
-        console.error("Error fetching states:", error);
+        setApiError(
+          "Failed to load domestic locations. Please try again later."
+        );
+        console.error("Error fetching domestic data:", error);
       } finally {
         setLoading((prev) => ({ ...prev, states: false }));
       }
     };
 
-    fetchStates();
+    const fetchInternationalData = async () => {
+      setLoading((prev) => ({ ...prev, countries: true }));
+      try {
+        // Example API for countries - you might need a different one
+        const response = await axios.get(
+          "https://restcountries.com/v3.1/all?fields=name,cca2"
+        );
+        setCountries(
+          response.data
+            .map((country) => ({
+              id: country.cca2,
+              name: country.name.common,
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name))
+        );
+      } catch (error) {
+        setApiError(
+          "Failed to load international countries. Please try again later."
+        );
+        console.error("Error fetching international data:", error);
+      } finally {
+        setLoading((prev) => ({ ...prev, countries: false }));
+      }
+    };
+
+    fetchDomesticData();
+    fetchInternationalData();
   }, []);
 
-  const handleStateChange = (e) => {
-    const stateName = e.target.value;
-    setSelectedState(stateName);
-    setSelectedDistrict("");
-    setSelectedCity("");
+  // Handle location type change (domestic/international)
+  const handleLocationTypeChange = (e) => {
+    const type = e.target.value;
+    setLocationType(type);
+    setNewLocation({
+      type,
+      country: type === "domestic" ? "India" : "",
+      state: "",
+      district: type === "domestic" ? "" : undefined,
+      city: "",
+    });
+  };
 
+  // Handle domestic state change
+  const handleDomesticStateChange = (e) => {
+    const stateName = e.target.value;
     setNewLocation((prev) => ({
       ...prev,
       state: stateName,
@@ -120,173 +168,626 @@ const BrandDetails = ({ data = {}, errors = {}, onChange,  }) => {
     const stateObj = statesData.find((s) => s.name === stateName);
     if (stateObj) {
       setDistricts(stateObj.districts.sort());
-      setStateCities(stateObj.cities);
       setCities([]);
     } else {
       setDistricts([]);
-      setStateCities([]);
       setCities([]);
     }
   };
 
-  const handleDistrictChange = (e) => {
+  // Handle domestic district change
+  const handleDomesticDistrictChange = (e) => {
     const district = e.target.value;
-    setSelectedDistrict(district);
-    setSelectedCity("");
-
     setNewLocation((prev) => ({
       ...prev,
       district,
       city: "",
     }));
 
-    const filteredCities = stateCities.filter(
-      (city) => city.district === district
-    );
-
-    const sortedCities = filteredCities.sort((a, b) =>
-      a.name.localeCompare(b.name)
-    );
-
-    setCities(sortedCities);
+    const stateObj = statesData.find((s) => s.name === newLocation.state);
+    if (stateObj) {
+      const filteredCities = stateObj.cities.filter(
+        (city) => city.district === district
+      );
+      setCities(filteredCities.sort((a, b) => a.name.localeCompare(b.name)));
+    }
   };
 
-  const handleCityChange = (e) => {
+  // Handle domestic city change
+  const handleDomesticCityChange = (e) => {
     const city = e.target.value;
-    setSelectedCity(city);
     setNewLocation((prev) => ({
       ...prev,
       city,
     }));
   };
 
-  // Handle pincode change with debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (data.pincode && data.pincode.length === 6) {
-        fetchAddressFromPincode(data.pincode);
-      }
-    }, 1000);
+  // Handle international country change
+  const handleInternationalCountryChange = async (e) => {
+    const country = e.target.value;
+    setNewLocation((prev) => ({
+      ...prev,
+      country,
+      state: "",
+      city: "",
+    }));
 
-    return () => clearTimeout(timer);
-  }, [data.pincode]);
-
-  const fetchAddressFromPincode = async (pincode) => {
-    setLoadingPincode(true);
-    setPincodeError(null);
-
+    setLoading((prev) => ({ ...prev, intStates: true }));
     try {
+      // Example API for states - you'll need to replace with a real API
       const response = await axios.get(
-        `https://api.postalpincode.in/pincode/${pincode}`
+        `https://example-api.com/states?country=${country}`
       );
-
-      if (response.data && response.data[0].Status === "Success") {
-        const postOffice = response.data[0].PostOffice[0];
-        const updates = {
-          state: postOffice.State,
-          city: postOffice.District,
-          headOfficeAddress: `${postOffice.Name}, ${postOffice.District}, ${postOffice.State}`,
-        };
-        onChange(updates);
-      } else {
-        setPincodeError("Could not find address for this pincode");
-      }
+      setInternationalStates(response.data);
     } catch (error) {
-      console.error("Error fetching pincode details:", error);
-      setPincodeError(
-        "Failed to fetch address details. Please enter manually."
-      );
+      console.error("Error fetching international states:", error);
+      setApiError("Failed to load states for selected country");
     } finally {
-      setLoadingPincode(false);
+      setLoading((prev) => ({ ...prev, intStates: false }));
     }
   };
 
+  // Handle international state change
+  const handleInternationalStateChange = async (e) => {
+    const state = e.target.value;
+    setNewLocation((prev) => ({
+      ...prev,
+      state,
+      city: "",
+    }));
+
+    setLoading((prev) => ({ ...prev, intCities: true }));
+    try {
+      // Example API for cities - you'll need to replace with a real API
+      const response = await axios.get(
+        `https://example-api.com/cities?country=${newLocation.country}&state=${state}`
+      );
+      setInternationalCities(response.data);
+    } catch (error) {
+      console.error("Error fetching international cities:", error);
+      setApiError("Failed to load cities for selected state");
+    } finally {
+      setLoading((prev) => ({ ...prev, intCities: false }));
+    }
+  };
+
+  // Handle international city change
+  const handleInternationalCityChange = (e) => {
+    const city = e.target.value;
+    setNewLocation((prev) => ({
+      ...prev,
+      city,
+    }));
+  };
+
+  // Add location to the list
   const handleAddLocation = () => {
-    console.log("Attempting to add location:", newLocation);
-
     if (
-      newLocation.state?.trim() &&
-      newLocation.district?.trim() &&
-      newLocation.city?.trim()
+      (locationType === "domestic" &&
+        newLocation.state &&
+        newLocation.district &&
+        newLocation.city) ||
+      (locationType === "international" &&
+        newLocation.country &&
+        newLocation.state &&
+        newLocation.city)
     ) {
-      const updatedLocations = Array.isArray(data.expansionLocation)
-        ? [...data.expansionLocation, { ...newLocation }]
-        : [{ ...newLocation }];
+      const locationToAdd = {
+        type: locationType,
+        country: newLocation.country,
+        state: newLocation.state,
+        ...(locationType === "domestic" && { district: newLocation.district }),
+        city: newLocation.city,
+      };
 
-      console.log("Updated locations:", updatedLocations);
+      const updatedLocations = Array.isArray(data.expansionLocation)
+        ? [...data.expansionLocation, locationToAdd]
+        : [locationToAdd];
 
       onChange({ expansionLocation: updatedLocations });
 
-      setNewLocation({ country: "India", state: "", district: "", city: "" });
+      // Reset form
+      setNewLocation({
+        type: locationType,
+        country: locationType === "domestic" ? "India" : "",
+        state: "",
+        district: locationType === "domestic" ? "" : undefined,
+        city: "",
+      });
+
       setOpenLocationModal(false);
-    } else {
-      console.warn("Missing state/district/city:", newLocation);
     }
   };
 
+  // Remove location from list
   const handleRemoveLocation = (index) => {
     const updatedLocations = [...data.expansionLocation];
     updatedLocations.splice(index, 1);
     onChange({ expansionLocation: updatedLocations });
   };
-
-const handleCategoryHover = (level, value) => {
-  if (level === "main") {
-    setSelectedCategory({ main: value, sub: "", child: "", groupId: "" });
-  } else if (level === "sub") {
-    // Find the selected main category and subcategory to get groupId
-    const mainCat = categories.find((cat) => cat.name === selectedCategory.main);
-    const subCat = mainCat?.children?.find((sub) => sub.name === value);
-    setSelectedCategory((prev) => ({
-      ...prev,
-      sub: value,
-      groupId: subCat?.groupId || "",
-      child: "",
-    }));
-  } else if (level === "child") {
-    setSelectedCategory((prev) => ({
-      ...prev,
-      child: value,
-    }));
-  }
-};
-
-const handleAddCategory = () => {
-  if (selectedCategory.child) {
-    const isDuplicate =
-      Array.isArray(data.brandCategories) &&
-      data.brandCategories.some(
-        (cat) =>
-          cat.main === selectedCategory.main &&
-          cat.sub === selectedCategory.sub &&
-          cat.child === selectedCategory.child &&
-          cat.groupId === selectedCategory.groupId
+  const handleCategoryHover = (level, value) => {
+    if (level === "main") {
+      setSelectedCategory({ main: value, sub: "", child: "", groupId: "" });
+    } else if (level === "sub") {
+      // Find the selected main category and subcategory to get groupId
+      const mainCat = categories.find(
+        (cat) => cat.name === selectedCategory.main
       );
-
-    if (!isDuplicate) {
-      const updatedCategories = [
-        ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
-        {
-          main: selectedCategory.main,
-          sub: selectedCategory.sub,
-          child: selectedCategory.child,
-          groupId: selectedCategory.groupId,
-        },
-      ];
-      onChange({ brandCategories: updatedCategories });
-      setSelectedCategory((prev) => ({ ...prev, child: "" }));
+      const subCat = mainCat?.children?.find((sub) => sub.name === value);
+      setSelectedCategory((prev) => ({
+        ...prev,
+        sub: value,
+        groupId: subCat?.groupId || "",
+        child: "",
+      }));
+    } else if (level === "child") {
+      setSelectedCategory((prev) => ({
+        ...prev,
+        child: value,
+      }));
     }
-  }
-}; 
+  };
+
+  const handleAddCategory = () => {
+    if (selectedCategory.child) {
+      const isDuplicate =
+        Array.isArray(data.brandCategories) &&
+        data.brandCategories.some(
+          (cat) =>
+            cat.main === selectedCategory.main &&
+            cat.sub === selectedCategory.sub &&
+            cat.child === selectedCategory.child &&
+            cat.groupId === selectedCategory.groupId
+        );
+
+      if (!isDuplicate) {
+        const updatedCategories = [
+          ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
+          {
+            main: selectedCategory.main,
+            sub: selectedCategory.sub,
+            child: selectedCategory.child,
+            groupId: selectedCategory.groupId,
+          },
+        ];
+        onChange({ brandCategories: updatedCategories });
+        setSelectedCategory((prev) => ({ ...prev, child: "" }));
+      }
+    }
+  };
   useEffect(() => {
     if (selectedCategory.child) {
       handleAddCategory();
     }
   }, [selectedCategory.child]);
 
+  // OTP Verification States
+  const [verificationState, setVerificationState] = useState({
+    email: {
+      verified: false,
+      otpSent: false,
+      showDialog: false,
+      loading: false,
+      error: null,
+    },
+    mobileNumber: {
+      verified: false,
+      otpSent: false,
+      showDialog: false,
+      loading: false,
+      error: null,
+    },
+  });
+
+  const [otpInput, setOtpInput] = useState("");
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  // Handle OTP verification dialog open/close
+  const handleVerificationDialog = (field, open) => {
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        showDialog: open,
+        error: null,
+      },
+    }));
+    setOtpInput("");
+  };
+
+  // Send OTP for verification
+  const handleSendOtp = async (field) => {
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        loading: true,
+        error: null,
+      },
+    }));
+
+    try {
+      // Call your OTP API endpoint
+      const response = await axios.post("/api/send-otp", {
+        [field === "email" ? "email" : "phone"]: data[field],
+        type: field,
+      });
+
+      if (response.data.success) {
+        setVerificationState((prev) => ({
+          ...prev,
+          [field]: {
+            ...prev[field],
+            otpSent: true,
+            loading: false,
+          },
+        }));
+        setSnackbar({
+          open: true,
+          message: `OTP sent successfully to your ${field}`,
+          severity: "success",
+        });
+      } else {
+        throw new Error(response.data.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.error(`Error sending OTP for ${field}:`, error);
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          loading: false,
+          error: error.response?.data?.message || error.message,
+        },
+      }));
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || "Failed to send OTP",
+        severity: "error",
+      });
+    }
+  };
+
+  // Verify the entered OTP
+  const handleVerifyOtp = async (field) => {
+    if (!otpInput || otpInput.length !== 6) {
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          error: "Please enter a valid 6-digit OTP",
+        },
+      }));
+      return;
+    }
+
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        loading: true,
+        error: null,
+      },
+    }));
+
+    try {
+      // Call your OTP verification API endpoint
+      const response = await axios.post("/api/verify-otp", {
+        [field === "email" ? "email" : "phone"]: data[field],
+        otp: otpInput,
+        type: field,
+      });
+
+      if (response.data.success) {
+        setVerificationState((prev) => ({
+          ...prev,
+          [field]: {
+            ...prev[field],
+            verified: true,
+            showDialog: false,
+            loading: false,
+          },
+        }));
+        setSnackbar({
+          open: true,
+          message: `${
+            field === "email" ? "Email" : "Mobile number"
+          } verified successfully!`,
+          severity: "success",
+        });
+      } else {
+        throw new Error(response.data.message || "OTP verification failed");
+      }
+    } catch (error) {
+      console.error(`Error verifying OTP for ${field}:`, error);
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          loading: false,
+          error: error.response?.data?.message || error.message,
+        },
+      }));
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || "OTP verification failed",
+        severity: "error",
+      });
+    }
+  };
+
+  // Resend OTP
+  const handleResendOtp = (field) => {
+    handleSendOtp(field);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
   return (
     <Box sx={{ overflowY: "auto", pr: 1, mt: 0 }}>
       {/* Brand Details Section - Now in 5 columns for desktop */}
+      <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
+        Personal Details
+      </Typography>
+
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+          gap: 2,
+          mb: 2,
+        }}
+      >
+        {/* Email with Verification */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            type="email"
+            value={data.email || ""}
+            onChange={handleChange}
+            error={!!errors.email}
+            helperText={errors.email}
+            variant="outlined"
+            size="small"
+            required
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  {verificationState.email.verified ? (
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      color="success.main"
+                    >
+                      <CheckCircleIcon fontSize="small" />
+                      <Typography variant="caption" sx={{ ml: 0.5 }}>
+                        Verified
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleVerificationDialog("email", true)}
+                      disabled={!data.email || verificationState.email.loading}
+                      startIcon={
+                        verificationState.email.loading ? (
+                          <CircularProgress size={14} />
+                        ) : (
+                          <SendIcon fontSize="small" />
+                        )
+                      }
+                    >
+                      Verify
+                    </Button>
+                  )}
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Mobile Number with Verification */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Mobile Number"
+            name="mobileNumber"
+            value={data.mobileNumber || ""}
+            onChange={handleChange}
+            error={!!errors.mobileNumber}
+            helperText={errors.mobileNumber}
+            variant="outlined"
+            size="small"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  {verificationState.mobileNumber.verified ? (
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      color="success.main"
+                    >
+                      <CheckCircleIcon fontSize="small" />
+                      <Typography variant="caption" sx={{ ml: 0.5 }}>
+                        Verified
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() =>
+                        handleVerificationDialog("mobileNumber", true)
+                      }
+                      disabled={
+                        !data.mobileNumber ||
+                        verificationState.mobileNumber.loading
+                      }
+                      startIcon={
+                        verificationState.mobileNumber.loading ? (
+                          <CircularProgress size={14} />
+                        ) : (
+                          <SendIcon fontSize="small" />
+                        )
+                      }
+                    >
+                      Verify
+                    </Button>
+                  )}
+                </InputAdornment>
+              ),
+            }}
+            required
+          />
+        </Grid>
+      </Grid>
+
+      {/* OTP Verification Dialogs */}
+      {/* Email Verification Dialog */}
+      <Dialog
+        open={verificationState.email.showDialog}
+        onClose={() => handleVerificationDialog("email", false)}
+      >
+        <DialogTitle>Verify Email</DialogTitle>
+        <DialogContent>
+          <Box sx={{ minWidth: 300, pt: 1 }}>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              We've sent a 6-digit OTP to {data.email}
+            </Typography>
+            <TextField
+              fullWidth
+              label="Enter OTP"
+              value={otpInput}
+              onChange={(e) =>
+                setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
+              variant="outlined"
+              size="small"
+              inputProps={{ maxLength: 6 }}
+              error={!!verificationState.email.error}
+              helperText={verificationState.email.error}
+            />
+            <Box
+              sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}
+            >
+              <Button
+                onClick={() => handleResendOtp("email")}
+                disabled={verificationState.email.loading}
+                sx={{ color: "#ff9800" }}
+              >
+                {verificationState.email.loading ? "Sending..." : "Resend OTP"}
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleVerifyOtp("email")}
+                disabled={
+                  otpInput.length !== 6 || verificationState.email.loading
+                }
+                startIcon={
+                  verificationState.email.loading ? (
+                    <CircularProgress size={14} />
+                  ) : null
+                }
+                sx={{ bgcolor: "green" }}
+              >
+                {verificationState.email.loading ? "Verifying..." : "Verify"}
+              </Button>
+            </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mobile Verification Dialog */}
+      <Dialog
+        open={verificationState.mobileNumber.showDialog}
+        onClose={() => handleVerificationDialog("mobileNumber", false)}
+      >
+        <DialogTitle>Verify Mobile Number</DialogTitle>
+        <DialogContent>
+          <Box sx={{ minWidth: 300, pt: 1 }}>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              We've sent a 6-digit OTP to +91 {data.mobileNumber}
+            </Typography>
+            <TextField
+              fullWidth
+              label="Enter OTP"
+              value={otpInput}
+              onChange={(e) =>
+                setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
+              variant="outlined"
+              size="small"
+              inputProps={{ maxLength: 6 }}
+              error={!!verificationState.mobileNumber.error}
+              helperText={verificationState.mobileNumber.error}
+            />
+            <Box
+              sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}
+            >
+              <Button
+                onClick={() => handleResendOtp("mobileNumber")}
+                disabled={verificationState.mobileNumber.loading}
+                sx={{ color: "#ff9800" }}
+              >
+                {verificationState.mobileNumber.loading
+                  ? "Sending..."
+                  : "Resend OTP"}
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleVerifyOtp("mobileNumber")}
+                disabled={
+                  otpInput.length !== 6 ||
+                  verificationState.mobileNumber.loading
+                }
+                startIcon={
+                  verificationState.mobileNumber.loading ? (
+                    <CircularProgress size={14} />
+                  ) : null
+                }
+                sx={{ bgcolor: "green" }}
+              >
+                {verificationState.mobileNumber.loading
+                  ? "Verifying..."
+                  : "Verify"}
+              </Button>
+            </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
 
       <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
         Brand Details
@@ -317,7 +818,6 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-
         {/* Brand Name */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -333,7 +833,70 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-
+       
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Name"
+            name="ceoName"
+            value={data.ceoName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.ceoName}
+            helperText={errors.ceoName}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Email"
+            name="ceoEmail"
+            type="email"
+            value={data.ceoEmail || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.ceoEmail}
+            helperText={errors.ceoEmail}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Mobile No"
+            name="ceoMobile"
+            value={data.ceoMobile || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+            }}
+            error={!!errors.ceoMobile}
+            helperText={errors.ceoMobile}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Manager Name"
+            name="managerName"
+            value={data.managerName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.managerName}
+            helperText={errors.managerName}
+          />
+        </Grid>
         {/* Established Year */}
         <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth error={!!errors.establishedYear}>
@@ -363,7 +926,6 @@ const handleAddCategory = () => {
             )}
           </FormControl>
         </Grid>
-
         {/* Franchise Since Year */}
         <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth error={!!errors.franchiseSinceYear}>
@@ -393,8 +955,7 @@ const handleAddCategory = () => {
             )}
           </FormControl>
         </Grid>
-
-        {/* Expansion Location - Full width */}
+        {/* Expansion Location Section */}
         <Grid item xs={12}>
           <Box>
             <Button
@@ -418,12 +979,38 @@ const handleAddCategory = () => {
             <Box sx={{ color: "error.main", fontSize: "0.875rem", mt: 1 }}>
               {errors.expansionLocation}
             </Box>
+
+            {/* Display selected locations */}
+            {data.expansionLocation?.length > 0 && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                  Selected Locations:
+                </Typography>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {data.expansionLocation.map((loc, index) => (
+                    <Chip
+                      key={index}
+                      label={
+                        loc.type === "domestic"
+                          ? `${loc.city}, ${loc.district}, ${loc.state}, ${loc.country}`
+                          : `${loc.city}, ${loc.state}, ${loc.country}`
+                      }
+                      onDelete={() => handleRemoveLocation(index)}
+                      deleteIcon={<CloseIcon />}
+                      variant="outlined"
+                    />
+                  ))}
+                </Box>
+              </Box>
+            )}
           </Box>
 
           {/* Expansion Location Modal */}
           <Dialog
             open={openLocationModal}
             onClose={() => setOpenLocationModal(false)}
+            maxWidth="sm"
+            fullWidth
           >
             <DialogTitle>Add Expansion Location</DialogTitle>
             <DialogContent>
@@ -434,64 +1021,144 @@ const handleAddCategory = () => {
                   </Typography>
                 )}
 
-                {/* Country is fixed to India */}
-                <TextField
-                  fullWidth
-                  label="Country"
-                  value="India"
-                  disabled
-                  sx={{ mb: 2 }}
-                />
-
-                <FormControl fullWidth sx={{ mb: 2 }}>
-                  <InputLabel>State</InputLabel>
-                  <Select
-                    value={selectedState}
-                    onChange={handleStateChange}
-                    label="State"
-                    disabled={loading.states}
+                {/* Location Type Selection */}
+                <FormControl component="fieldset" sx={{ mb: 3 }}>
+                  <RadioGroup
+                    row
+                    value={locationType}
+                    onChange={handleLocationTypeChange}
                   >
-                    {states.map((state) => (
-                      <MenuItem key={state.id} value={state.name}>
-                        {state.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                    <FormControlLabel
+                      value="domestic"
+                      control={<Radio />}
+                      label="Domestic (India)"
+                    />
+                    <FormControlLabel
+                      value="international"
+                      control={<Radio />}
+                      label="International"
+                    />
+                  </RadioGroup>
                 </FormControl>
-                {selectedState && (
-                  <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel>District</InputLabel>
-                    <Select
-                      value={selectedDistrict}
-                      onChange={handleDistrictChange}
-                      label="District"
-                      disabled={loading.districts}
-                    >
-                      {districts.map((district, index) => (
-                        <MenuItem key={index} value={district}>
-                          {district}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
 
-                {selectedDistrict && (
-                  <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel>City</InputLabel>
-                    <Select
-                      value={selectedCity}
-                      onChange={handleCityChange}
-                      label="City"
-                      disabled={loading.cities}
-                    >
-                      {stateCities.map((city, index) => (
-                        <MenuItem key={index} value={city.name}>
-                          {city.name} ({city.status})
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                {/* Domestic Location Form */}
+                {locationType === "domestic" ? (
+                  <>
+                    <TextField
+                      fullWidth
+                      label="Country"
+                      value="India"
+                      disabled
+                      sx={{ mb: 2 }}
+                    />
+
+                    <FormControl fullWidth sx={{ mb: 2 }}>
+                      <InputLabel>State</InputLabel>
+                      <Select
+                        value={newLocation.state}
+                        onChange={handleDomesticStateChange}
+                        label="State"
+                        disabled={loading.states}
+                      >
+                        {states.map((state) => (
+                          <MenuItem key={state.id} value={state.name}>
+                            {state.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    {newLocation.state && (
+                      <FormControl fullWidth sx={{ mb: 2 }}>
+                        <InputLabel>District</InputLabel>
+                        <Select
+                          value={newLocation.district}
+                          onChange={handleDomesticDistrictChange}
+                          label="District"
+                          disabled={loading.districts}
+                        >
+                          {districts.map((district, index) => (
+                            <MenuItem key={index} value={district}>
+                              {district}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+
+                    {newLocation.district && (
+                      <FormControl fullWidth sx={{ mb: 2 }}>
+                        <InputLabel>City</InputLabel>
+                        <Select
+                          value={newLocation.city}
+                          onChange={handleDomesticCityChange}
+                          label="City"
+                          disabled={loading.cities}
+                        >
+                          {cities.map((city, index) => (
+                            <MenuItem key={index} value={city.name}>
+                              {city.name} ({city.status})
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  </>
+                ) : (
+                  /* International Location Form */
+                  <>
+                    <FormControl fullWidth sx={{ mb: 2 }}>
+                      <InputLabel>Country</InputLabel>
+                      <Select
+                        value={newLocation.country}
+                        onChange={handleInternationalCountryChange}
+                        label="Country"
+                        disabled={loading.countries}
+                      >
+                        {countries.map((country) => (
+                          <MenuItem key={country.id} value={country.name}>
+                            {country.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    {newLocation.country && (
+                      <FormControl fullWidth sx={{ mb: 2 }}>
+                        <InputLabel>State/Province</InputLabel>
+                        <Select
+                          value={newLocation.state}
+                          onChange={handleInternationalStateChange}
+                          label="State/Province"
+                          disabled={loading.intStates}
+                        >
+                          {internationalStates.map((state, index) => (
+                            <MenuItem key={index} value={state.name}>
+                              {state.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+
+                    {newLocation.state && (
+                      <FormControl fullWidth sx={{ mb: 2 }}>
+                        <InputLabel>City</InputLabel>
+                        <Select
+                          value={newLocation.city}
+                          onChange={handleInternationalCityChange}
+                          label="City"
+                          disabled={loading.intCities}
+                        >
+                          {internationalCities.map((city, index) => (
+                            <MenuItem key={index} value={city.name}>
+                              {city.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  </>
                 )}
               </Box>
             </DialogContent>
@@ -501,7 +1168,15 @@ const handleAddCategory = () => {
               </Button>
               <Button
                 onClick={handleAddLocation}
-                disabled={!newLocation.city}
+                disabled={
+                  locationType === "domestic"
+                    ? !newLocation.city ||
+                      !newLocation.district ||
+                      !newLocation.state
+                    : !newLocation.city ||
+                      !newLocation.state ||
+                      !newLocation.country
+                }
                 variant="contained"
               >
                 Add Location
@@ -509,7 +1184,6 @@ const handleAddCategory = () => {
             </DialogActions>
           </Dialog>
         </Grid>
-
         {/* Categories Section - Full width */}
         <Grid item xs={12}>
           <Box sx={{ display: "flex", mb: 2, gap: 1 }}>
@@ -735,20 +1409,20 @@ const handleAddCategory = () => {
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="Email"
-            name="email"
-            type="email"
-            value={data.email || ""}
+            label="Secondary Email"
+            name="secondaryEmail"
+            type="secondaryEmail"
+            value={data.secondaryEmail || ""}
             onChange={handleChange}
-            error={!!errors.email}
-            helperText={errors.email}
+            error={!!errors.secondaryEmail}
+            helperText={errors.secondaryEmail}
             variant="outlined"
             size="small"
             required
           />
         </Grid>
 
-        {/* Mobile Number */}
+        {/* Mobile Number
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
@@ -760,9 +1434,8 @@ const handleAddCategory = () => {
             helperText={errors.mobileNumber}
             variant="outlined"
             size="small"
-           inputProps={{ maxLength: 10 }}
-                       placeholder="Enter 10 digit number"
-
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">+91</InputAdornment>
@@ -770,7 +1443,7 @@ const handleAddCategory = () => {
             }}
             required
           />
-        </Grid>
+        </Grid> */}
 
         {/* WhatsApp Number */}
         <Grid item xs={12} sm={6} md={2.4}>

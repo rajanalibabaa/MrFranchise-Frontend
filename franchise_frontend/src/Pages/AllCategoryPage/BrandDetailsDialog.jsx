@@ -683,7 +683,6 @@ const BrandDetailsDialog = () => {
             p: 1,
             position: "relative",
             flexDirection: { xs: "column", md: "row" },
-            gap: 3,
           }}
         >
           <Box
@@ -774,13 +773,8 @@ const BrandDetailsDialog = () => {
               </Grid>
             </Grid>
 
-           
 
 
-
-
-
-            <Box sx={{ mt: 2 }}>
               <Typography variant="subtitle1" m={1} mt={3}>
           {selectedBrand.personalDetails?.brandCategories &&
             selectedBrand.personalDetails.brandCategories.length > 0 && (
@@ -836,7 +830,6 @@ const BrandDetailsDialog = () => {
               </Box>
             )}
         </Typography>
-        </Box>
             
 
 
