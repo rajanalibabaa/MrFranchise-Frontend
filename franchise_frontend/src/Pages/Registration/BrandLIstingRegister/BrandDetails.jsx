@@ -47,9 +47,10 @@ import PublicIcon from '@mui/icons-material/Public';
 import LanguageIcon from '@mui/icons-material/Language';
 import FlagIcon from '@mui/icons-material/Flag';
 import { Editor } from "@tinymce/tinymce-react";
+import { width } from "@mui/system";
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="medium" />;
-const checkedIcon = <CheckBoxIcon fontSize="medium" />;
+// const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+// const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const formData = {
@@ -66,7 +67,6 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     sub: "",
     child: "",
   });
-  const [isDropdownOpen, setDropdownOpen] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -101,6 +101,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const [countries, setCountries] = useState([]);
   const [internationalStates, setInternationalStates] = useState([]);
   const [internationalCities, setInternationalCities] = useState([]);
+
   const [loading, setLoading] = useState({
     states: false,
     districts: false,
@@ -328,61 +329,65 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     onChange({ expansionLocation: updatedLocations });
   };
 
-  const handleCategoryHover = (level, value) => {
-    if (level === "main") {
-      setSelectedCategory({ main: value, sub: "", child: "", groupId: "" });
-    } else if (level === "sub") {
-      const mainCat = categories.find(
-        (cat) => cat.name === selectedCategory.main
+
+
+const handleMainCategoryChange = (e) => {
+  const mainCat = e.target.value;
+  setSelectedCategory({
+    main: mainCat,
+    sub: "",
+    child: "",
+    groupId: ""
+  });
+};
+
+const handleSubCategoryChange = (e) => {
+  const subCat = e.target.value;
+  const mainCatObj = categories.find(cat => cat.name === selectedCategory.main);
+  const subCatObj = mainCatObj?.children?.find(sub => sub.name === subCat);
+  
+  setSelectedCategory(prev => ({
+    ...prev,
+    sub: subCat,
+    groupId: subCatObj?.groupId || "",
+    child: ""
+  }));
+};
+
+const handleChildCategoryChange = (e) => {
+  setSelectedCategory(prev => ({
+    ...prev,
+    child: e.target.value
+  }));
+};
+
+const handleAddCategory = () => {
+  if (selectedCategory.child) {
+    const isDuplicate =
+      Array.isArray(data.brandCategories) &&
+      data.brandCategories.some(
+        (cat) =>
+          cat.main === selectedCategory.main &&
+          cat.sub === selectedCategory.sub &&
+          cat.child === selectedCategory.child
       );
-      const subCat = mainCat?.children?.find((sub) => sub.name === value);
-      setSelectedCategory((prev) => ({
-        ...prev,
-        sub: value,
-        groupId: subCat?.groupId || "",
-        child: "",
-      }));
-    } else if (level === "child") {
-      setSelectedCategory((prev) => ({
-        ...prev,
-        child: value,
-      }));
-    }
-  };
 
-  const handleAddCategory = () => {
-    if (selectedCategory.child) {
-      const isDuplicate =
-        Array.isArray(data.brandCategories) &&
-        data.brandCategories.some(
-          (cat) =>
-            cat.main === selectedCategory.main &&
-            cat.sub === selectedCategory.sub &&
-            cat.child === selectedCategory.child &&
-            cat.groupId === selectedCategory.groupId
-        );
-
-      if (!isDuplicate) {
-        const updatedCategories = [
-          ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
-          {
-            main: selectedCategory.main,
-            sub: selectedCategory.sub,
-            child: selectedCategory.child,
-            groupId: selectedCategory.groupId,
-          },
-        ];
-        onChange({ brandCategories: updatedCategories });
-        setSelectedCategory((prev) => ({ ...prev, child: "" }));
-      }
+    if (!isDuplicate) {
+      const updatedCategories = [
+        ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
+        {
+          main: selectedCategory.main,
+          sub: selectedCategory.sub,
+          child: selectedCategory.child,
+          groupId: selectedCategory.groupId
+        },
+      ];
+      onChange({ brandCategories: updatedCategories });
+      // Reset the child category selection after adding
+      setSelectedCategory(prev => ({ ...prev, child: "" }));
     }
-  };
-
-  useEffect(() => {
-    if (selectedCategory.child) {
-      handleAddCategory();
-    }
-  }, [selectedCategory.child]);
+  }
+};
 
   // OTP Verification States
   const [verificationState, setVerificationState] = useState({
@@ -555,12 +560,11 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
 
  // Add this to your existing state declarations
 const [descriptionModalOpen, setDescriptionModalOpen] = useState(false);
-const [description, setDescription] = useState(data.description || "");
+// const [description, setDescription] = useState(data.description || "");
 
 // Add this handler function
 const handleDescriptionChange = (content) => {
-  setDescription(content);
-  onChange({ description: content }); // Update the parent form data
+  onChange({ brandDescription: content }); // Update the parent form data directly
 };
 
   // Location card component
@@ -1169,7 +1173,8 @@ const handleDescriptionChange = (content) => {
     <Box sx={{ mt: 2 }}>
       <Editor
         apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
-        value={description}
+         value={data.brandDescription || ""}
+
         init={{
           height: 400,
           menubar: true,
@@ -1402,6 +1407,153 @@ const handleDescriptionChange = (content) => {
             )}
           </FormControl>
         </Grid>
+        {/* Categories Section - Three Dropdowns with Add Button */}
+<Grid item xs={12}>
+  {/* <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
+    Brand Categories
+  </Typography> */}
+  
+  <Box sx={{ 
+    display: 'grid',
+    gridTemplateColumns: { md: 'repeat(4, 1fr)', xs: '1fr' },
+    gap: 2,
+    alignItems: 'flex-end'
+  }}>
+    {/* Main Category Dropdown */}
+    <FormControl  sx={{width:200}}size="small">
+      <InputLabel>Main Category</InputLabel>
+      <Select
+        value={selectedCategory.main || ""}
+        label="Main Category"
+        onChange={(e) => {
+          const mainCat = e.target.value;
+          setSelectedCategory({
+            main: mainCat,
+            sub: "",
+            child: "",
+            groupId: ""
+          });
+        }}
+      >
+        {categories.map((category) => (
+          <MenuItem key={category.name} value={category.name}>
+            {category.name}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+    {/* Sub Category Dropdown */}
+    <FormControl  size="medium" sx={{width:200}} disabled={!selectedCategory.main}>
+      <InputLabel>Sub Category</InputLabel>
+      <Select
+        value={selectedCategory.sub || ""}
+        label="Sub Category"
+        onChange={(e) => {
+          const subCat = e.target.value;
+          const mainCatObj = categories.find(cat => cat.name === selectedCategory.main);
+          const subCatObj = mainCatObj?.children?.find(sub => sub.name === subCat);
+          
+          setSelectedCategory(prev => ({
+            ...prev,
+            sub: subCat,
+            groupId: subCatObj?.groupId || "",
+            child: ""
+          }));
+        }}
+      >
+        {selectedCategory.main && 
+          categories.find(cat => cat.name === selectedCategory.main)?.children?.map((subCategory) => (
+            <MenuItem key={subCategory.name} value={subCategory.name}>
+              {subCategory.name}
+            </MenuItem>
+          ))
+        }
+      </Select>
+    </FormControl>
+
+    {/* Child Category Dropdown */}
+    <FormControl fullWidth size="small" disabled={!selectedCategory.sub} sx={{width:200}}>
+      <InputLabel>Child Category</InputLabel>
+      <Select
+        value={selectedCategory.child || ""}
+        label="Child Category"
+        onChange={(e) => {
+          setSelectedCategory(prev => ({
+            ...prev,
+            child: e.target.value
+          }));
+        }}
+      >
+        {selectedCategory.sub && 
+          categories
+            .find(cat => cat.name === selectedCategory.main)
+            ?.children?.find(sub => sub.name === selectedCategory.sub)
+            ?.children?.map((child, index) => (
+              <MenuItem key={index} value={child}>
+                {child}
+              </MenuItem>
+            ))
+        }
+      </Select>
+    </FormControl>
+
+    {/* Add Button */}
+    <Button
+      variant="contained"
+      onClick={handleAddCategory}
+      disabled={!selectedCategory.child}
+      sx={{
+        height: 40,
+        p:2,
+        pr:6,
+        pl:6,
+        bgcolor: '#ff9800',
+        '&:hover': { bgcolor: '#fb8c00' },
+        boxShadow: 'none',
+        textTransform: 'none',
+      
+        borderRadius: 1
+      }}
+    >
+      Add 
+    </Button>
+  </Box>
+
+  {/* Selected Categories Display */}
+  {Array.isArray(data.brandCategories) && data.brandCategories.length > 0 && (
+    <Box sx={{ mt: 2 }}>
+      <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+        Selected Categories
+      </Typography>
+      <Box sx={{ 
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 1
+      }}>
+        {data.brandCategories.map((category, index) => (
+          <Chip
+            key={index}
+            label={`${category.main} > ${category.sub} > ${category.child}`}
+            onDelete={() => {
+              const updatedCategories = [...data.brandCategories];
+              updatedCategories.splice(index, 1);
+              onChange({ brandCategories: updatedCategories });
+            }}
+            color="primary"
+            variant="outlined"
+            size="large"
+            sx={{
+              '& .MuiChip-deleteIcon': {
+                color: '#1976d2'
+              }
+            }}
+          />
+        ))}
+      </Box>
+    </Box>
+  )}
+</Grid>
 {/* Enhanced Expansion Location Section */}
 <Grid item xs={12}>
   <Box>
@@ -2151,27 +2303,383 @@ const handleDescriptionChange = (content) => {
     )}
     
     {/* Preview of the description (first 100 characters) */}
-    {description && (
-      <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e3e7', borderRadius: 1 }}>
-        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-          Description Preview
-        </Typography>
-        <div dangerouslySetInnerHTML={{ 
-          __html: description.length > 100 
-            ? `${description.substring(0, 100)}...` 
-            : description 
-        }} />
-      </Box>
-    )}
+   {data.brandDescription && (
+  <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e3e7', borderRadius: 1 }}>
+    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+      Description Preview
+    </Typography>
+    <div dangerouslySetInnerHTML={{ 
+      __html: data.brandDescription.length > 100 
+        ? `${data.brandDescription.substring(0, 100)}...` 
+        : data.brandDescription 
+    }} />
+  </Box>
+)}
   </Box>
 </Grid>
 
-        
+
+
+
       </Grid>
+
+      {/* Communication Information Section */}
+      <Typography variant="h6" sx={{ mb: 3, color: "#ff9800" }}>
+        Communication Information
+      </Typography>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
+        {/* Full Name */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Full Name"
+            name="fullName"
+            value={data.fullName || ""}
+            onChange={handleChange}
+            error={!!errors.fullName}
+            helperText={errors.fullName}
+            variant="outlined"
+            size="small"
+            required
+          />
+        </Grid>
+
+        {/* Email */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Secondary Email"
+            name="secondaryEmail"
+            type="secondaryEmail"
+            value={data.secondaryEmail || ""}
+            onChange={handleChange}
+            error={!!errors.secondaryEmail}
+            helperText={errors.secondaryEmail}
+            variant="outlined"
+            size="small"
+            required
+          />
+        </Grid>
+
+        {/* WhatsApp Number */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="WhatsApp Number"
+            name="whatsappNumber"
+            value={data.whatsappNumber || ""}
+            onChange={handleChange}
+            error={!!errors.whatsappNumber}
+            helperText={errors.whatsappNumber}
+            variant="outlined"
+            size="small"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Pincode */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Pincode"
+            name="pincode"
+            value={data.pincode || ""}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+              onChange({ pincode: value });
+            }}
+            error={!!errors.pincode || !!pincodeError}
+            helperText={errors.pincode || pincodeError}
+            variant="outlined"
+            size="small"
+            required
+            InputProps={{
+              endAdornment: loadingPincode ? (
+                <InputAdornment position="end">
+                  <CircularProgress size={20} />
+                </InputAdornment>
+              ) : null,
+            }}
+          />
+        </Grid>
+
+        {/* Head Office Address */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Head Office Address"
+            name="headOfficeAddress"
+            value={data.headOfficeAddress || ""}
+            onChange={handleChange}
+            error={!!errors.headOfficeAddress}
+            helperText={errors.headOfficeAddress}
+            variant="outlined"
+            size="small"
+            required
+          />
+        </Grid>
+
+        {/* State */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.state}>
+            <InputLabel size="small">State</InputLabel>
+            <Select
+              name="state"
+              value={data.state || ""}
+              label="State"
+              onChange={handleChange}
+              variant="outlined"
+              size="small"
+              required
+            >
+              {states.map((state) => (
+                <MenuItem key={state.iso2} value={state.name}>
+                  {state.name}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.state && (
+              <Typography variant="caption" color="error">
+                {errors.state}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+
+        {/* City */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="City"
+            name="city"
+            value={data.city || ""}
+            onChange={handleChange}
+            error={!!errors.city}
+            helperText={errors.city}
+            variant="outlined"
+            size="small"
+            required
+          />
+        </Grid>
+      </Grid>
+
+      {/* Social Media Section */}
+      <Typography variant="h6" sx={{ mb: 2, mt: 4, color: "#ff9800" }}>
+        Social Media & Web Presence
+      </Typography>
+
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
+        {/* Website */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Website"
+            name="website"
+            value={data.website || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.website}
+            helperText={errors.website}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">https://</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Facebook */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Facebook"
+            name="facebook"
+            value={data.facebook || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.facebook}
+            helperText={errors.facebook}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Instagram */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Instagram"
+            name="instagram"
+            value={data.instagram || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.instagram}
+            helperText={errors.instagram}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* LinkedIn */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="LinkedIn"
+            name="linkedin"
+            value={data.linkedin || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="small"
+            error={!!errors.linkedin}
+            helperText={errors.linkedin}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Brand Description Modal */}
+<Dialog
+  open={descriptionModalOpen}
+  onClose={() => setDescriptionModalOpen(false)}
+  maxWidth="md"
+  fullWidth
+  PaperProps={{
+    sx: {
+      borderRadius: 3,
+      boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
+      overflow: 'hidden'
+    }
+  }}
+>
+  <DialogTitle sx={{ 
+    bgcolor: '#f5f7fa',
+    borderBottom: '1px solid #e0e3e7',
+    py: 2,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  }}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
+      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+        Brand Description
+      </Typography>
+    </Box>
+    <IconButton 
+      onClick={() => setDescriptionModalOpen(false)}
+      sx={{ color: '#6b778c' }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+  
+  <DialogContent sx={{ py: 3, px: 3 }}>
+    <Box sx={{ mt: 2 }}>
+     <Editor
+  apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
+  value={data.brandDescription || ""}
+  init={{
+    height: 400,
+    menubar: true,
+    plugins: [
+      "advlist autolink lists link image charmap print preview anchor",
+      "searchreplace visualblocks code fullscreen",
+      "insertdatetime media table paste help wordcount",
+    ],
+    toolbar:
+      "undo redo | formatselect | bold italic backcolor | \
+       alignleft aligncenter alignright alignjustify | \
+       bullist numlist outdent indent | removeformat | help | image",
+    images_upload_url: '/api/upload-image',
+    automatic_uploads: true,
+    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+  }}
+  onEditorChange={handleDescriptionChange}
+/>
+    </Box>
+  </DialogContent>
+  
+  <DialogActions sx={{ 
+    px: 3, 
+    py: 2,
+    borderTop: '1px solid #e0e3e7',
+    bgcolor: '#f5f7fa'
+  }}>
+    <Button 
+      onClick={() => setDescriptionModalOpen(false)}
+      variant="outlined"
+      sx={{
+        color: '#6b778c',
+        borderColor: '#e0e3e7',
+        '&:hover': {
+          borderColor: '#b0bec5'
+        },
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Cancel
+    </Button>
+    <Button
+  onClick={() => setDescriptionModalOpen(false)}
+  variant="contained"
+  sx={{
+    bgcolor: '#4caf50',
+    '&:hover': {
+      bgcolor: '#43a047'
+    },
+    textTransform: 'none',
+    fontWeight: 500,
+    borderRadius: 1
+  }}
+>
+  Save
+</Button>
+  </DialogActions>
+</Dialog>
+</Grid>
 
     
     </Box>
+
   );
+
 };
+
 
 export default BrandDetails;
