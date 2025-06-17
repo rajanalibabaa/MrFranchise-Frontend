@@ -555,13 +555,12 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
 
  // Add this to your existing state declarations
 const [descriptionModalOpen, setDescriptionModalOpen] = useState(false);
-const [description, setDescription] = useState(data.brandDescription || "");
+const [description, setDescription] = useState(data.description || "");
 
 // Add this handler function
 const handleDescriptionChange = (content) => {
   setDescription(content);
   onChange({ description: content }); // Update the parent form data
-
 };
 
   // Location card component
