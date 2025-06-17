@@ -46,6 +46,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PublicIcon from '@mui/icons-material/Public';
 import LanguageIcon from '@mui/icons-material/Language';
 import FlagIcon from '@mui/icons-material/Flag';
+import { Editor } from "@tinymce/tinymce-react";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -551,6 +552,18 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
+
+ // Add this to your existing state declarations
+const [descriptionModalOpen, setDescriptionModalOpen] = useState(false);
+const [description, setDescription] = useState(data.brandDescription || "");
+
+// Add this handler function
+const handleDescriptionChange = (content) => {
+  setDescription(content);
+  onChange({ description: content }); // Update the parent form data
+
+};
+
   // Location card component
   const LocationCard = ({ location, onRemove }) => {
     return (
@@ -604,6 +617,8 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
       </Paper>
     );
   };
+
+  
 
   return (
     <Box sx={{ overflowY: "auto", pr: 1, mt: 0 }}>
@@ -1755,6 +1770,46 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     </DialogActions>
   </Dialog>
 </Grid>
+
+<Grid item xs={12}>
+  <Box>
+    <Button
+      variant="contained"
+      startIcon={<AddIcon />}
+      onClick={() => setDescriptionModalOpen(true)}
+      sx={{
+        bgcolor: '#ff9800',
+        '&:hover': { bgcolor: '#fb8c00' },
+        boxShadow: 'none',
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Add Brand Description
+    </Button>
+    {errors.description && (
+      <Typography variant="caption" color="error" sx={{ ml: 1 }}>
+        {errors.description}
+      </Typography>
+    )}
+    
+    {/* Preview of the description (first 100 characters) */}
+    {description && (
+      <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e3e7', borderRadius: 1 }}>
+        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+          Description Preview
+        </Typography>
+        <div dangerouslySetInnerHTML={{ 
+          __html: description.length > 100 
+            ? `${description.substring(0, 100)}...` 
+            : description 
+        }} />
+      </Box>
+    )}
+  </Box>
+</Grid>
+
         {/* Categories Section - Full width */}
         <Grid item xs={12}>
           <Box sx={{ display: "flex", mb: 2, gap: 1 }}>
@@ -2194,22 +2249,112 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
           />
         </Grid>
 
-        {/* Brand Description */}
-        <Grid item xs={12}>
-          <TextField
-            fullWidth
-            label="Brand Description"
-            name="brandDescription"
-            value={data.brandDescription || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            error={!!errors.brandDescription}
-            helperText={errors.brandDescription}
-            multiline
-            rows={3}
-          />
-        </Grid>
+        {/* Brand Description Modal */}
+<Dialog
+  open={descriptionModalOpen}
+  onClose={() => setDescriptionModalOpen(false)}
+  maxWidth="md"
+  fullWidth
+  PaperProps={{
+    sx: {
+      borderRadius: 3,
+      boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
+      overflow: 'hidden'
+    }
+  }}
+>
+  <DialogTitle sx={{ 
+    bgcolor: '#f5f7fa',
+    borderBottom: '1px solid #e0e3e7',
+    py: 2,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  }}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
+      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+        Brand Description
+      </Typography>
+    </Box>
+    <IconButton 
+      onClick={() => setDescriptionModalOpen(false)}
+      sx={{ color: '#6b778c' }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+  
+  <DialogContent sx={{ py: 3, px: 3 }}>
+    <Box sx={{ mt: 2 }}>
+      <Editor
+        apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
+        value={description}
+        init={{
+          height: 400,
+          menubar: true,
+          plugins: [
+            "advlist autolink lists link image charmap print preview anchor",
+            "searchreplace visualblocks code fullscreen",
+            "insertdatetime media table paste help wordcount",
+          ],
+          toolbar:
+            "undo redo | formatselect | bold italic backcolor | \
+             alignleft aligncenter alignright alignjustify | \
+             bullist numlist outdent indent | removeformat | help | image",
+          images_upload_url: '/api/upload-image', // Add your image upload endpoint
+          automatic_uploads: true,
+          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+        }}
+        onEditorChange={handleDescriptionChange}
+      />
+    </Box>
+  </DialogContent>
+  
+  <DialogActions sx={{ 
+    px: 3, 
+    py: 2,
+    borderTop: '1px solid #e0e3e7',
+    bgcolor: '#f5f7fa'
+  }}>
+    <Button 
+      onClick={() => setDescriptionModalOpen(false)}
+      variant="outlined"
+      sx={{
+        color: '#6b778c',
+        borderColor: '#e0e3e7',
+        '&:hover': {
+          borderColor: '#b0bec5'
+        },
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Cancel
+    </Button>
+    <Button
+      onClick={() => {
+        onChange({ description });
+        setDescriptionModalOpen(false);
+      }}
+      variant="contained"
+      sx={{
+        bgcolor: '#4caf50',
+        '&:hover': {
+          bgcolor: '#43a047'
+        },
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Save Description
+    </Button>
+  </DialogActions>
+</Dialog>
+
+    
       </Grid>
     </Box>
   );
