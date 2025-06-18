@@ -1101,6 +1101,7 @@ const BrandRegisterForm = () => {
           >
             Franchise Details
           </Typography>
+          
           <Table size="small">
             <TableBody>
               {Object.entries(franchiseDetails).map(([key, value]) => (
@@ -1202,7 +1203,7 @@ const BrandRegisterForm = () => {
                 </FormControl>
               </Toolbar>
             </Stepper>
-            <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
+            {/* <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
               <Box width="30%">
                 {" "}
                 {activeStep >= 0 && renderSelectedCategories()}
@@ -1212,7 +1213,7 @@ const BrandRegisterForm = () => {
                 {activeStep >= 0 && renderExpansionLocations()}
               </Box>
               <Box width="45%"> {activeStep >= 1 && renderFicoModels()}</Box>
-            </Box>
+            </Box> */}
           </Box>
 
           <Box
