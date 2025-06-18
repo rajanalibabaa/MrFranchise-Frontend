@@ -66,7 +66,8 @@ const ResponseManager = () => {
        <Avatar
          alt="Manager Logo"
          src={img}
-         sx={{ width: 120, height: 120, borderRadius: 2 }}
+         
+         sx={{ width: 120, height: 120, borderRadius: 2, }}
          variant="rounded"
        />
      </Box>

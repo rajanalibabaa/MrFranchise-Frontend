@@ -9,7 +9,6 @@ const BrandManageProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [BrandData] = useState({});
     // const id = "6805dcbdfff4495f419cc07e";
-
     // useEffect(() => {
     //     const fetchData = async () => {
     //         try {
@@ -141,6 +140,7 @@ const BrandManageProfile = () => {
                                 <img
                                     src={img}
                                     alt="Profile"
+                                    loading='lazy'
                                     style={{ width: "140%", height: "105%", borderRadius: "50%" }}
                                 />
                                 <PersonIcon fontSize="large" />

@@ -28,7 +28,6 @@ import {
   Home as HomeIcon
 } from '@mui/icons-material';
 import { categories } from '../BrandListingForm/BrandCategories.jsx';
-import bgimg from "../../assets/images/bgimg.jpg";
 function AllCategoryViewPage() {
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);

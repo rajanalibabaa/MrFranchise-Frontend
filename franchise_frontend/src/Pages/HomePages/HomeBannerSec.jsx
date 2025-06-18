@@ -59,7 +59,7 @@ const HomeBannerSec = () => {
       sx={{
       
         minHeight: 350,
-        backgroundImage: `url(${bgimg})`,
+        backgroundImage: `url(${bgimg })`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         textAlign: "center",
@@ -171,6 +171,7 @@ const HomeBannerSec = () => {
           <Button onClick={handleOpen} sx={{ borderRadius: "50%", p: 0 }}>
             <img
               src={bgimg}
+              loading="lazy"
               alt="bot"
               style={{ width: 70, height: 80, borderRadius: "50%" }}
             />

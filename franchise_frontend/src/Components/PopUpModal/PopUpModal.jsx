@@ -8,7 +8,8 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 700,
+  width: { xs: '90%', sm: '80%', md: '60%' },
+  maxWidth: 700,
   bgcolor: 'background.paper',
   borderRadius: 2,
   boxShadow: 24,
@@ -54,7 +55,7 @@ const PopupModal = ({ open, onClose }) => {
         <Typography id="popup-description" variant="h5" sx={{color:"#7ad03a"}}>
           World's highest visited franchise website network.
         </Typography>
-        <img src={pop1} alt="popup visual" style={imageStyle} />
+        <img src={pop1} alt="popup visual" style={imageStyle} loading='lazy' />
       </Box>
     </Modal>
   );

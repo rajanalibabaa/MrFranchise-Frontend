@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import axios from "axios";
 import {
   Grid,
   Typography,
@@ -14,12 +13,15 @@ import {
   Box,
   InputLabel,
   FormControl,
+  InputAdornment
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setField, setErrors, resetForm } from "../../Redux/slices/brandRegisterSlice";
 import brandImage from "../../assets/Images/BrandRegister.jpg";
 import { categories } from "../BrandListingForm/BrandCategories";
+import axios from "axios";
+
 
 const BrandRegister = () => {
   const navigate = useNavigate();
@@ -27,7 +29,6 @@ const BrandRegister = () => {
   const formData = useSelector((state) => state.brandRegister.formData);
   const errors = useSelector((state) => state.brandRegister.errors);
 
-  // Load saved form data from localStorage on component mount
   useEffect(() => {
     const savedFormData = localStorage.getItem("brandFormData");
     if (savedFormData) {
@@ -38,7 +39,6 @@ const BrandRegister = () => {
     }
   }, [dispatch]);
 
-  // Save form data to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("brandFormData", JSON.stringify(formData));
   }, [formData]);
@@ -54,78 +54,74 @@ const BrandRegister = () => {
   };
 
   const validateForm = (data) => {
-    const validationErrors = {};
-    if (!data.firstName) validationErrors.firstName = "First name is required";
-    if (!data.phone) validationErrors.phone = "Phone number is required";
-    if (!data.email) validationErrors.email = "Email is required";
-    if (!data.brandName) validationErrors.brandName = "Brand name is required";
-    if (!data.companyName)
-      validationErrors.companyName = "Company name is required";
-    if (!data.category) validationErrors.category = "Category is required";
-    if (!data.franchiseType)
-      validationErrors.franchiseType = "Franchise type is required";
-    if (!data.agreeToTerms)
-      validationErrors.agreeToTerms = "You must agree to the terms";
-    return validationErrors;
-  };
+  const validationErrors = {};
+  if (!data.firstName) validationErrors.firstName = "First name is required";
+  if (!data.phone || !/^\d{10}$/.test(data.phone))
+    validationErrors.phone = "Valid phone number is required";
+  if (!data.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email))
+    validationErrors.email = "Valid email is required";
+  if (!data.brandName) validationErrors.brandName = "Brand name is required";
+  if (!data.companyName)
+    validationErrors.companyName = "Company name is required";
+  if (!data.category) validationErrors.category = "Category is required";
+  if (!data.franchiseType)
+    validationErrors.franchiseType = "Franchise type is required";
+  return validationErrors;
+};
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    const validationErrors = validateForm(formData);
-    dispatch(setErrors(validationErrors));
-  
-    if (Object.keys(validationErrors).length === 0) {
-      const payload = {
-        firstName: formData.firstName,
-        // lastName: formData.lastName,
-        phone: formData.phone,
-        email: formData.email,
-        brandName: formData.brandName,
-        companyName: formData.companyName,
-        category: formData.category,
-        franchiseType: formData.franchiseType,
-        agreeToTerms: formData.agreeToTerms,
-      };
-  
-      try {
-        const response = await axios.post(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brand/register/creatBrandRegister",
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const validationErrors = validateForm(formData);
+  dispatch(setErrors(validationErrors));
+
+  if (Object.keys(validationErrors).length === 0) {
+    const payload = {
+      formData: {
+        firstName: formData.firstName.trim(),
+        phone: `${formData.countryCode}${formData.phone}`.trim(),
+        email: formData.email.trim(),
+        brandName: formData.brandName.trim(),
+        companyName: formData.companyName.trim(),
+        category: formData.category.trim(),
+        franchiseType: formData.franchiseType.trim(),
+      }
+    };
+
+    console.log("Payload being sent:", payload); 
+
+    try {
+      const response = await axios.post(
+        "https://franchise-backend-wgp6.onrender.com/api/v1/brand/register/creatBrandRegister",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Response Data:", response.data);
+      dispatch(resetForm());
+      localStorage.removeItem("brandFormData");
+      navigate("/loginPage");
+    } catch (error) {
+      if (error.response) {
+        console.error("Error Response:", error.response.data);
+        alert(
+          `Error: ${error.response.data.message || "You have already registered"}`
         );
-        
-        if (response.status === 200 || response.status === 201) {
-          // Clear form and localStorage on successful submission
-          dispatch(resetForm());
-          navigate("/loginPage");
-        } else {
-          console.error("Unexpected response status:", response.status);
-          alert("Registration failed. Please try again.");
-        }
-      } catch (error) {
-        console.error("API Error:", error);
-        
-        if (error.response) {
-          console.error("Error Response:", error.response.data);
-          alert(`Error: ${error.response.data.message || "Registration failed"}`);
-        } else if (error.request) {
-          alert("No response from server. Please check your connection.");
-        } else {
-          alert("An error occurred. Please try again.");
-        }
+      } else {
+        console.error("Axios Error:", error.message);
+        alert("An error occurred. Please try again.");
       }
     }
-  };
-
+  }
+};
   return (
     <Grid container sx={{ minHeight: "100vh", overflow: "hidden" }}>
       <Grid
-        item
+        
         xs={12}
         md={6}
         sx={{
@@ -137,6 +133,7 @@ const BrandRegister = () => {
       >
         <Box
           component="img"
+          loading="lazy"
           src={brandImage}
           alt="Brand Registration Illustration"
           sx={{ maxWidth: "80%", maxHeight: "550px", objectFit: "contain" }}
@@ -144,7 +141,6 @@ const BrandRegister = () => {
       </Grid>
 
       <Grid
-        item
         xs={12}
         md={6}
         sx={{
@@ -161,7 +157,7 @@ const BrandRegister = () => {
 
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6} sx={{width: "48%"}}>
                 <TextField
                   fullWidth
                   name="firstName"
@@ -173,36 +169,46 @@ const BrandRegister = () => {
                 />
               </Grid>
 
-              {/* <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6} sx={{width: "48%"}}>
                 <TextField
-                  fullWidth
-                  name="lastName"
-                  label="Last Name"
-                  value={formData.lastName || ""}
-                  onChange={handleChange}
-                />
-              </Grid> */}
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  name="phone"
-                  label="Phone Number"
-                  value={formData.phone || ""}
-                  onChange={handleChange}
-                  error={!!errors.phone}
-                  helperText={errors.phone}
-                  inputProps={{
-                    maxLength: 10,
-                    inputMode: "numeric",
-                  }}
-                  onInput={(e) => {
-                    e.target.value = e.target.value.replace(/\D/g, "");
-                  }}
-                />
+    fullWidth
+    name="phone"
+    label="Phone Number"
+    value={formData.phone || ""}
+    onChange={handleChange}
+    error={!!errors.phone}
+    helperText={errors.phone}
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <FormControl variant="standard" sx={{ minWidth: 70 }}>
+            <Select
+              name="countryCode"
+              value={formData.countryCode || "+91"}
+              onChange={handleChange}
+              disableUnderline
+              sx={{ fontSize: '0.9rem' }}
+            >
+              <MenuItem value="+91">+91</MenuItem>
+              <MenuItem value="+1">+1</MenuItem>
+              <MenuItem value="+44">+44</MenuItem>
+              <MenuItem value="+971">+971</MenuItem>
+            </Select> 
+          </FormControl>
+        </InputAdornment>
+      ),
+    }}
+    inputProps={{
+      maxLength: 10,
+      inputMode: "numeric",
+    }}
+    onInput={(e) => {
+      e.target.value = e.target.value.replace(/\D/g, "");
+    }}
+  />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid  xs={12} sm={6} sx={{width: "48%"}}>
                 <TextField
                   fullWidth
                   name="email"
@@ -217,7 +223,7 @@ const BrandRegister = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid  xs={12} sm={6} sx={{width: "48%"}}>
                 <TextField
                   fullWidth
                   name="brandName"
@@ -229,7 +235,7 @@ const BrandRegister = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6} sx={{width: "48%"}}>
                 <TextField
                   fullWidth
                   name="companyName"
@@ -241,7 +247,7 @@ const BrandRegister = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6} sx={{width: "48%"}}>
                 <FormControl fullWidth error={!!errors.category}>
                   <InputLabel>Category</InputLabel>
                   <Select
@@ -262,7 +268,7 @@ const BrandRegister = () => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid  xs={12} sm={6}sx={{width: "48%"}}>
                 <FormControl fullWidth error={!!errors.franchiseType}>
                   <InputLabel>Franchise Type</InputLabel>
                   <Select
@@ -280,23 +286,7 @@ const BrandRegister = () => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="agreeToTerms"
-                      checked={formData.agreeToTerms || false}
-                      onChange={handleChange}
-                    />
-                  }
-                  label="I agree to the terms and conditions"
-                />
-                {errors.agreeToTerms && (
-                  <FormHelperText error>{errors.agreeToTerms}</FormHelperText>
-                )}
-              </Grid>
-
-              <Grid item xs={12}>
+              <Grid xs={12}sx={{width: "60%", marginLeft: "20%"}}>
                 <Button
                   type="submit"
                   fullWidth
@@ -307,7 +297,7 @@ const BrandRegister = () => {
                 </Button>
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid  xs={12} sx={{ marginLeft: "30%" }}>
                 <Typography textAlign="center">
                   Already have an account?{" "}
                   <Link href="/loginPage" underline="hover">

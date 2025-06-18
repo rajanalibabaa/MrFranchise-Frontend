@@ -27,7 +27,6 @@ const StyledCard = styled(Card)(({ theme }) => ({
   transition: 'transform 0.2s',
   '&:hover': {
     transform: 'scale(1.03)',
-    boxShadow: theme.shadows[6],
   },
 }));
 
@@ -253,6 +252,7 @@ const Gallery = ({ data, onChange, errors }) => {
           ) : (
             <Box
               component="img"
+              loading="lazy"
               src={selectedMedia?.preview}
               sx={{
                 width: '100%',

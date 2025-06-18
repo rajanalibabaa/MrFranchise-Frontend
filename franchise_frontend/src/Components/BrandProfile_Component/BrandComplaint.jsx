@@ -4,7 +4,6 @@ import {
   Button,
   TextField,
   Typography,
-  Rating,
   Paper,
   FormControl,
   InputLabel,

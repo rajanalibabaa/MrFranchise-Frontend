@@ -1,154 +1,146 @@
 export const validateBrandDetails = (brandDetails) => {
     const errors = {};
   
-  //   // Required fields
-  //   if (!brandDetails.companyName?.trim()) {
-  //     errors.companyName = "Company Name is required";
+    // Required fields
+    if (!brandDetails.companyName?.trim()) {
+      errors.companyName = "Company Name is required";
+    }
+  
+    if (!brandDetails.brandName?.trim()) {
+      errors.brandName = "Brand Name is required";
+    } 
+  
+  
+    // GSTIN validation
+    if (!brandDetails.gstin) {
+      errors.gstin = "GSTIN is required";
+    } else if (brandDetails.gstin.length !== 15) {
+      errors.gstin = "GSTIN must be 15 characters";
+    } else if (!/^[0-9A-Z]{15}$/.test(brandDetails.gstin)) {
+      errors.gstin = "Invalid GSTIN format";
+    }
+  //    else if (!brandDetails.gstVerified) {
+  //     errors.gstin = "GSTIN must be verified";
   //   }
   
-  //   if (!brandDetails.brandName?.trim()) {
-  //     errors.brandName = "Brand Name is required";
-  //   } 
-  
-  
-  //   // GSTIN validation
-  //   if (!brandDetails.gstin) {
-  //     errors.gstin = "GSTIN is required";
-  //   } else if (brandDetails.gstin.length !== 15) {
-  //     errors.gstin = "GSTIN must be 15 characters";
-  //   } else if (!/^[0-9A-Z]{15}$/.test(brandDetails.gstin)) {
-  //     errors.gstin = "Invalid GSTIN format";
-  //   }
-  // //    else if (!brandDetails.gstVerified) {
-  // //     errors.gstin = "GSTIN must be verified";
-  // //   }
-  
-  //   // Contact information validation
-  //   if (!brandDetails.mobileNumber) {
-  //     errors.mobileNumber = "Mobile number is required";
-  //   } else if (!/^\d{10}$/.test(brandDetails.mobileNumber)) {
-  //     errors.mobileNumber = "Invalid mobile number (10 digits required)";
-  //   } 
-  // //   else if (!brandDetails.mobileVerified) {
-  // //     errors.mobileNumber = "Mobile number must be verified";
-  // //   }
-  
-  //   if (!brandDetails.whatsappNumber) {
-  //     errors.whatsappNumber = "WhatsApp number is required";
-  //   } else if (!/^\d{10}$/.test(brandDetails.whatsappNumber)) {
-  //     errors.whatsappNumber = "Invalid WhatsApp number (10 digits required)";
-  //   } 
-  // //   else if (!brandDetails.whatsappVerified) {
-  // //     errors.whatsappNumber = "WhatsApp number must be verified";
-  // //   }
-  
-  //   if (!brandDetails.email) {
-  //     errors.email = "Email is required";
-  //   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(brandDetails.email)) {
-  //     errors.email = "Invalid email format";
-  //   } 
-  // //   else if (!brandDetails.emailVerified) {
-  // //     errors.email = "Email must be verified";
-  // //   }
-  
-  //   // Location validation
-  //   if (!brandDetails.country) {
-  //     errors.country = "Country is required";
+    // Contact information validation
+    if (!brandDetails.mobileNumber) {
+      errors.mobileNumber = "Mobile number is required";
+    } else if (!/^\d{10}$/.test(brandDetails.mobileNumber)) {
+      errors.mobileNumber = "Invalid mobile number (10 digits required)";
+    } 
+  //   else if (!brandDetails.mobileVerified) {
+  //     errors.mobileNumber = "Mobile number must be verified";
   //   }
   
-  //   if (!brandDetails.pincode) {
-  //     errors.pincode = "Pincode is required";
-  //   } else if (!/^\d+$/.test(brandDetails.pincode)) {
-  //     errors.pincode = "Pincode must contain only numbers";
+    if (!brandDetails.whatsappNumber) {
+      errors.whatsappNumber = "WhatsApp number is required";
+    } else if (!/^\d{10}$/.test(brandDetails.whatsappNumber)) {
+      errors.whatsappNumber = "Invalid WhatsApp number (10 digits required)";
+    } 
+  //   else if (!brandDetails.whatsappVerified) {
+  //     errors.whatsappNumber = "WhatsApp number must be verified";
   //   }
   
-  //   if (!brandDetails.state) {
-  //     errors.state = "State is required";
+    if (!brandDetails.email) {
+      errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(brandDetails.email)) {
+      errors.email = "Invalid email format";
+    } 
+  //   else if (!brandDetails.emailVerified) {
+  //     errors.email = "Email must be verified";
   //   }
   
-  //   if (!brandDetails.city) {
-  //     errors.city = "City is required";
-  //   }
+    // Location validation
+    if (!brandDetails.country) {
+      errors.country = "Country is required";
+    }
   
-  //   if (!brandDetails.address) {
-  //     errors.address = "Address is required";
-  //   } else if (brandDetails.address.length < 10) {
-  //     errors.address = "Address should be more detailed";
-  //   }
+    if (!brandDetails.pincode) {
+      errors.pincode = "Pincode is required";
+    } else if (!/^\d+$/.test(brandDetails.pincode)) {
+      errors.pincode = "Pincode must contain only numbers";
+    }
   
-  //   // Categories validation
-  //   if (!brandDetails.categories || brandDetails.categories.length === 0) {
-  //     errors.categories = "At least one category is required";
-  //   } else if (brandDetails.categories.length > 5) {
-  //     errors.categories = "Maximum 5 categories allowed";
-  //   }
+    if (!brandDetails.state) {
+      errors.state = "State is required";
+    }
   
-  //   // Description validation
-  //   if (!brandDetails.description) {
-  //     errors.description = "Description is required";
-  //   } else if (brandDetails.description.length < 50) {
-  //     errors.description = "Description should be at least 50 characters";
-  //   } else if (brandDetails.description.length > 1000) {
-  //     errors.description = "Description should be less than 1000 characters";
-  //   }
+    if (!brandDetails.city) {
+      errors.city = "City is required";
+    }
   
-  //   // Year validation
-  //   const currentYear = new Date().getFullYear();
-  //   if (!brandDetails.establishedYear) {
-  //     errors.establishedYear = "Established year is required";
-  //   } else if (brandDetails.establishedYear > currentYear) {
-  //     errors.establishedYear = "Year cannot be in the future";
-  //   } else if (brandDetails.establishedYear < currentYear - 100) {
-  //     errors.establishedYear = "Year seems too old";
-  //   }
+    if (!brandDetails.address) {
+      errors.address = "Address is required";
+    } else if (brandDetails.address.length < 10) {
+      errors.address = "Address should be more detailed";
+    }
   
-  //   if (brandDetails.franchiseSinceYear) {
-  //     if (brandDetails.franchiseSinceYear > currentYear) {
-  //       errors.franchiseSinceYear = "Year cannot be in the future";
-  //     } else if (brandDetails.franchiseSinceYear < brandDetails.establishedYear) {
-  //       errors.franchiseSinceYear = "Cannot be before established year";
+    // Categories validation
+    if (!brandDetails.categories || brandDetails.categories.length === 0) {
+      errors.categories = "At least one category is required";
+    } else if (brandDetails.categories.length > 5) {
+      errors.categories = "Maximum 5 categories allowed";
+    }
+  
+    // Description validation
+    if (!brandDetails.description) {
+      errors.description = "Description is required";
+    } else if (brandDetails.description.length < 50) {
+      errors.description = "Description should be at least 50 characters";
+    } else if (brandDetails.description.length > 1000) {
+      errors.description = "Description should be less than 1000 characters";
+    }
+  
+   
+    if (!brandDetails.establishedYear) {
+      errors.establishedYear = "Established year is required";
+    } 
+  
+    if (!brandDetails.franchiseSinceYear) {
+     errors.franchiseSinceYear = "Franchise since year is required";
+      }
+    
+  
+    // Social media validation
+    const hasSocialMedia =
+      brandDetails.website ||
+      brandDetails.facebook ||
+      brandDetails.instagram ||
+      brandDetails.linkedin;
+  
+    if (!hasSocialMedia) {
+      errors.website = "At least one social media link is required";
+      errors.facebook = "At least one social media link is required";
+      errors.instagram = "At least one social media link is required";
+      errors.linkedin = "At least one social media link is required";
+    } 
+  // else {
+  //     if (
+  //       brandDetails.website &&
+  //       !/^https?:\/\/.+\..+/.test(brandDetails.website)
+  //     ) {
+  //       errors.website = "Invalid website URL";
+  //     }
+  //     if (
+  //       brandDetails.facebook &&
+  //       !/^https?:\/\/(www\.)?facebook\.com\/.+/.test(brandDetails.facebook)
+  //     ) {
+  //       errors.facebook = "Invalid Facebook URL";
+  //     }
+  //     if (
+  //       brandDetails.instagram &&
+  //       !/^https?:\/\/(www\.)?instagram\.com\/.+/.test(brandDetails.instagram)
+  //     ) {
+  //       errors.instagram = "Invalid Instagram URL";
+  //     }
+  //     if (
+  //       brandDetails.linkedin &&
+  //       !/^https?:\/\/(www\.)?linkedin\.com\/.+/.test(brandDetails.linkedin)
+  //     ) {
+  //       errors.linkedin = "Invalid LinkedIn URL";
   //     }
   //   }
-  
-  //   // Social media validation
-  //   const hasSocialMedia =
-  //     brandDetails.website ||
-  //     brandDetails.facebook ||
-  //     brandDetails.instagram ||
-  //     brandDetails.linkedin;
-  
-  //   if (!hasSocialMedia) {
-  //     errors.website = "At least one social media link is required";
-  //     errors.facebook = "At least one social media link is required";
-  //     errors.instagram = "At least one social media link is required";
-  //     errors.linkedin = "At least one social media link is required";
-  //   } 
-  // // else {
-  // //     if (
-  // //       brandDetails.website &&
-  // //       !/^https?:\/\/.+\..+/.test(brandDetails.website)
-  // //     ) {
-  // //       errors.website = "Invalid website URL";
-  // //     }
-  // //     if (
-  // //       brandDetails.facebook &&
-  // //       !/^https?:\/\/(www\.)?facebook\.com\/.+/.test(brandDetails.facebook)
-  // //     ) {
-  // //       errors.facebook = "Invalid Facebook URL";
-  // //     }
-  // //     if (
-  // //       brandDetails.instagram &&
-  // //       !/^https?:\/\/(www\.)?instagram\.com\/.+/.test(brandDetails.instagram)
-  // //     ) {
-  // //       errors.instagram = "Invalid Instagram URL";
-  // //     }
-  // //     if (
-  // //       brandDetails.linkedin &&
-  // //       !/^https?:\/\/(www\.)?linkedin\.com\/.+/.test(brandDetails.linkedin)
-  // //     ) {
-  // //       errors.linkedin = "Invalid LinkedIn URL";
-  // //     }
-  // //   }
   
     return errors;
   };
@@ -206,46 +198,46 @@ export const validateBrandDetails = (brandDetails) => {
       const errors = {};
       
       // Investment Details validation
-      // if (!franchiseData.totalInvestment) {
-      //   errors.totalInvestment = "Investment range is required";
-      // }
+      if (!franchiseData.totalInvestment) {
+        errors.totalInvestment = "Investment range is required";
+      }
       
-      // // Required financial fields
-      // const financialFields = [
-      //   'franchiseFee',
-      //   'royaltyFee',
-      //   'equipmentCost',
-      //   'expectedRevenue',
-      //   'expectedProfit',
-      //   'spaceRequired',
-      //   'paybackPeriod',
-      //   'minimumCashRequired'
-      // ];
+      // Required financial fields
+      const financialFields = [
+        'franchiseFee',
+        'royaltyFee',
+        'equipmentCost',
+        'expectedRevenue',
+        'expectedProfit',
+        'spaceRequired',
+        'paybackPeriod',
+        'minimumCashRequired'
+      ];
       
-      // financialFields.forEach(field => {
-      //   if (!franchiseData[field]) {
-      //     errors[field] = `${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} is required`;
-      //   }
-      // });
+      financialFields.forEach(field => {
+        if (!franchiseData[field]) {
+          errors[field] = `${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} is required`;
+        }
+      });
     
-      // // Outlet Distribution validation
-      // if (!franchiseData.companyOwnedOutlets) {
-      //   errors.companyOwnedOutlets = "Company owned outlets count is required";
-      // }
-      // if (!franchiseData.franchiseOutlets) {
-      //   errors.franchiseOutlets = "Franchise outlets count is required";
-      // }
-      // if (!franchiseData.totalOutlets) {
-      //   errors.totalOutlets = "Total outlets count is required";
-      // }
+      // Outlet Distribution validation
+      if (!franchiseData.companyOwnedOutlets) {
+        errors.companyOwnedOutlets = "Company owned outlets count is required";
+      }
+      if (!franchiseData.franchiseOutlets) {
+        errors.franchiseOutlets = "Franchise outlets count is required";
+      }
+      if (!franchiseData.totalOutlets) {
+        errors.totalOutlets = "Total outlets count is required";
+      }
     
-      // // Expansion Plans validation
-      // if (!franchiseData.expansionFranchiseFee) {
-      //   errors.expansionFranchiseFee = "Expansion franchise fee is required";
-      // }
-      // if (!franchiseData.expansionRoyalty) {
-      //   errors.expansionRoyalty = "Expansion royalty percentage is required";
-      // }
+      // Expansion Plans validation
+      if (!franchiseData.expansionFranchiseFee) {
+        errors.expansionFranchiseFee = "Expansion franchise fee is required";
+      }
+      if (!franchiseData.expansionRoyalty) {
+        errors.expansionRoyalty = "Expansion royalty percentage is required";
+      }
     
       return errors;
     };

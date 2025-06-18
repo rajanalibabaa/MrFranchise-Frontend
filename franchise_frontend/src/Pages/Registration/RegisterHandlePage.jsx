@@ -55,6 +55,7 @@ function RegisterHandleUser() {
       >
         <Box
           component="img"
+          loading="lazy"
           src={businessLogo}
           alt="Business Logo"
           sx={{
@@ -152,6 +153,7 @@ function RegisterHandleUser() {
     <Grid item>
       <Box
         component="img"
+        loading="lazy"
         src={GoogleIcon}
         alt="Google"
         onClick={() => handleSocialLogin("google")}
@@ -171,6 +173,7 @@ function RegisterHandleUser() {
     <Grid item>
       <Box
         component="img"
+        loading="lazy"
         src={FacebookIcon}
         alt="Facebook"
         onClick={() => handleSocialLogin("facebook")}
