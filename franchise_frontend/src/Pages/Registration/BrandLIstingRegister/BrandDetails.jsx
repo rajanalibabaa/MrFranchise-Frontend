@@ -23,7 +23,15 @@ import {
   Alert,
   RadioGroup,
   Radio,
+  Chip,
+  Checkbox,
+  Autocomplete,
   FormControlLabel,
+  IconButton,
+  Divider,
+  Avatar,
+  Badge,
+  Tooltip
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -31,6 +39,18 @@ import categories from "./BrandCategories.jsx";
 import AddIcon from "@mui/icons-material/Add";
 import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
+import CloseIcon from '@mui/icons-material/Close';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import PublicIcon from '@mui/icons-material/Public';
+import LanguageIcon from '@mui/icons-material/Language';
+import FlagIcon from '@mui/icons-material/Flag';
+import { Editor } from "@tinymce/tinymce-react";
+import { width } from "@mui/system";
+
+// const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+// const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const formData = {
@@ -47,7 +67,6 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     sub: "",
     child: "",
   });
-  const [isDropdownOpen, setDropdownOpen] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,24 +75,29 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const [pincodeError, setPincodeError] = useState(null);
   const [loadingPincode, setLoadingPincode] = useState(false);
 
-  // Expansion Location Modal State
+  // Updated Expansion Location State
   const [openLocationModal, setOpenLocationModal] = useState(false);
-  const [locationType, setLocationType] = useState("domestic"); // 'domestic' or 'international'
-  const [newLocation, setNewLocation] = useState({
-    type: "domestic",
-    country: "India",
-    state: "",
-    district: "",
-    city: "",
+  const [locationType, setLocationType] = useState("domestic");
+  
+  // Domestic Location State
+  const [domesticSelections, setDomesticSelections] = useState({
+    selectedStates: [],
+    selectedDistricts: [],
+    selectedCities: []
+  });
+  
+  // International Location State
+  const [internationalSelections, setInternationalSelections] = useState({
+    selectedCountries: [],
+    selectedStates: [],
+    selectedCities: []
   });
 
-  // Domestic Location Data
+  // Location Data
   const [statesData, setStatesData] = useState([]);
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [cities, setCities] = useState([]);
-
-  // International Location Data
   const [countries, setCountries] = useState([]);
   const [internationalStates, setInternationalStates] = useState([]);
   const [internationalCities, setInternationalCities] = useState([]);
@@ -84,15 +108,13 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     cities: false,
     countries: false,
     intStates: false,
-    intCities: false,
+    intCities: false
   });
 
-  const [apiError, setApiError] = useState(null);
-
-  // Fetch all Indian states on component mount
+  // Fetch domestic data (Indian states, districts, cities)
   useEffect(() => {
     const fetchDomesticData = async () => {
-      setLoading((prev) => ({ ...prev, states: true }));
+      setLoading(prev => ({ ...prev, states: true }));
       try {
         const response = await axios.get(
           "https://raw.githubusercontent.com/prasad-gowda/india-state-district-cities/master/India-state-district-city.json"
@@ -100,203 +122,204 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
         setStatesData(response.data);
         setStates(
           response.data
-            .map((state) => ({ id: state.iso2, name: state.name }))
+            .map(state => ({ id: state.iso2, name: state.name }))
             .sort((a, b) => a.name.localeCompare(b.name))
         );
       } catch (error) {
-        setApiError(
-          "Failed to load domestic locations. Please try again later."
-        );
         console.error("Error fetching domestic data:", error);
       } finally {
-        setLoading((prev) => ({ ...prev, states: false }));
-      }
-    };
-
-    const fetchInternationalData = async () => {
-      setLoading((prev) => ({ ...prev, countries: true }));
-      try {
-        // Example API for countries - you might need a different one
-        const response = await axios.get(
-          "https://restcountries.com/v3.1/all?fields=name,cca2"
-        );
-        setCountries(
-          response.data
-            .map((country) => ({
-              id: country.cca2,
-              name: country.name.common,
-            }))
-            .sort((a, b) => a.name.localeCompare(b.name))
-        );
-      } catch (error) {
-        setApiError(
-          "Failed to load international countries. Please try again later."
-        );
-        console.error("Error fetching international data:", error);
-      } finally {
-        setLoading((prev) => ({ ...prev, countries: false }));
+        setLoading(prev => ({ ...prev, states: false }));
       }
     };
 
     fetchDomesticData();
-    fetchInternationalData();
   }, []);
 
-  // Handle location type change (domestic/international)
+  // Fetch international countries
+  useEffect(() => {
+    const fetchCountries = async () => {
+      setLoading(prev => ({ ...prev, countries: true }));
+      try {
+        const response = await axios.get(
+          "https://countriesnow.space/api/v0.1/countries"
+        );
+        const sortedCountries = response.data.data
+          .map(country => ({
+            id: country.iso2,
+            name: country.country
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+        setCountries(sortedCountries);
+      } catch (error) {
+        console.error("Error fetching countries:", error);
+      } finally {
+        setLoading(prev => ({ ...prev, countries: false }));
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
+  // Handle location type change
   const handleLocationTypeChange = (e) => {
     const type = e.target.value;
     setLocationType(type);
-    setNewLocation({
-      type,
-      country: type === "domestic" ? "India" : "",
-      state: "",
-      district: type === "domestic" ? "" : undefined,
-      city: "",
-    });
-  };
-
-  // Handle domestic state change
-  const handleDomesticStateChange = (e) => {
-    const stateName = e.target.value;
-    setNewLocation((prev) => ({
-      ...prev,
-      state: stateName,
-      district: "",
-      city: "",
-    }));
-
-    const stateObj = statesData.find((s) => s.name === stateName);
-    if (stateObj) {
-      setDistricts(stateObj.districts.sort());
-      setCities([]);
-    } else {
-      setDistricts([]);
-      setCities([]);
-    }
-  };
-
-  // Handle domestic district change
-  const handleDomesticDistrictChange = (e) => {
-    const district = e.target.value;
-    setNewLocation((prev) => ({
-      ...prev,
-      district,
-      city: "",
-    }));
-
-    const stateObj = statesData.find((s) => s.name === newLocation.state);
-    if (stateObj) {
-      const filteredCities = stateObj.cities.filter(
-        (city) => city.district === district
-      );
-      setCities(filteredCities.sort((a, b) => a.name.localeCompare(b.name)));
-    }
-  };
-
-  // Handle domestic city change
-  const handleDomesticCityChange = (e) => {
-    const city = e.target.value;
-    setNewLocation((prev) => ({
-      ...prev,
-      city,
-    }));
-  };
-
-  // Handle international country change
-  const handleInternationalCountryChange = async (e) => {
-    const country = e.target.value;
-    setNewLocation((prev) => ({
-      ...prev,
-      country,
-      state: "",
-      city: "",
-    }));
-
-    setLoading((prev) => ({ ...prev, intStates: true }));
-    try {
-      // Example API for states - you'll need to replace with a real API
-      const response = await axios.get(
-        `https://example-api.com/states?country=${country}`
-      );
-      setInternationalStates(response.data);
-    } catch (error) {
-      console.error("Error fetching international states:", error);
-      setApiError("Failed to load states for selected country");
-    } finally {
-      setLoading((prev) => ({ ...prev, intStates: false }));
-    }
-  };
-
-  // Handle international state change
-  const handleInternationalStateChange = async (e) => {
-    const state = e.target.value;
-    setNewLocation((prev) => ({
-      ...prev,
-      state,
-      city: "",
-    }));
-
-    setLoading((prev) => ({ ...prev, intCities: true }));
-    try {
-      // Example API for cities - you'll need to replace with a real API
-      const response = await axios.get(
-        `https://example-api.com/cities?country=${newLocation.country}&state=${state}`
-      );
-      setInternationalCities(response.data);
-    } catch (error) {
-      console.error("Error fetching international cities:", error);
-      setApiError("Failed to load cities for selected state");
-    } finally {
-      setLoading((prev) => ({ ...prev, intCities: false }));
-    }
-  };
-
-  // Handle international city change
-  const handleInternationalCityChange = (e) => {
-    const city = e.target.value;
-    setNewLocation((prev) => ({
-      ...prev,
-      city,
-    }));
-  };
-
-  // Add location to the list
-  const handleAddLocation = () => {
-    if (
-      (locationType === "domestic" &&
-        newLocation.state &&
-        newLocation.district &&
-        newLocation.city) ||
-      (locationType === "international" &&
-        newLocation.country &&
-        newLocation.state &&
-        newLocation.city)
-    ) {
-      const locationToAdd = {
-        type: locationType,
-        country: newLocation.country,
-        state: newLocation.state,
-        ...(locationType === "domestic" && { district: newLocation.district }),
-        city: newLocation.city,
-      };
-
-      const updatedLocations = Array.isArray(data.expansionLocation)
-        ? [...data.expansionLocation, locationToAdd]
-        : [locationToAdd];
-
-      onChange({ expansionLocation: updatedLocations });
-
-      // Reset form
-      setNewLocation({
-        type: locationType,
-        country: locationType === "domestic" ? "India" : "",
-        state: "",
-        district: locationType === "domestic" ? "" : undefined,
-        city: "",
+    // Reset selections when switching types
+    if (type === "domestic") {
+      setDomesticSelections({
+        selectedStates: [],
+        selectedDistricts: [],
+        selectedCities: []
       });
-
-      setOpenLocationModal(false);
+    } else {
+      setInternationalSelections({
+        selectedCountries: [],
+        selectedStates: [],
+        selectedCities: []
+      });
     }
+  };
+
+  // Handle domestic state selection
+  const handleDomesticStateChange = (event, values) => {
+    setDomesticSelections(prev => ({
+      ...prev,
+      selectedStates: values,
+      selectedDistricts: [],
+      selectedCities: []
+    }));
+    
+    // Reset districts and cities when states change
+    setDistricts([]);
+    setCities([]);
+  };
+
+  // Handle domestic district selection
+  const handleDomesticDistrictChange = (event, values) => {
+    setDomesticSelections(prev => ({
+      ...prev,
+      selectedDistricts: values,
+      selectedCities: []
+    }));
+    
+    // Reset cities when districts change
+    setCities([]);
+  };
+
+  // Handle domestic city selection
+  const handleDomesticCityChange = (event, values) => {
+    setDomesticSelections(prev => ({
+      ...prev,
+      selectedCities: values
+    }));
+  };
+
+  // Handle international country selection
+  const handleInternationalCountryChange = async (event, values) => {
+    setInternationalSelections(prev => ({
+      ...prev,
+      selectedCountries: values,
+      selectedStates: [],
+      selectedCities: []
+    }));
+    
+    // Reset states and cities when countries change
+    setInternationalStates([]);
+    setInternationalCities([]);
+  };
+
+  // Handle international state selection
+  const handleInternationalStateChange = (event, values) => {
+    setInternationalSelections(prev => ({
+      ...prev,
+      selectedStates: values,
+      selectedCities: []
+    }));
+    
+    // Reset cities when states change
+    setInternationalCities([]);
+  };
+
+  // Handle international city selection
+  const handleInternationalCityChange = (event, values) => {
+    setInternationalSelections(prev => ({
+      ...prev,
+      selectedCities: values
+    }));
+  };
+
+  // Add locations to the list
+  const handleAddLocations = () => {
+    if (locationType === "domestic") {
+      const newLocations = [];
+      
+      domesticSelections.selectedStates.forEach(state => {
+        const stateObj = statesData.find(s => s.name === state);
+        if (stateObj) {
+          domesticSelections.selectedDistricts.forEach(district => {
+            const filteredCities = stateObj.cities.filter(
+              city => city.district === district && 
+                     domesticSelections.selectedCities.includes(city.name)
+            );
+            
+            filteredCities.forEach(cityObj => {
+              newLocations.push({
+                type: "domestic",
+                country: "India",
+                state: state,
+                district: district,
+                city: cityObj.name
+              });
+            });
+          });
+        }
+      });
+      
+      const updatedLocations = Array.isArray(data.expansionLocation)
+        ? [...data.expansionLocation, ...newLocations]
+        : newLocations;
+      
+      onChange({ expansionLocation: updatedLocations });
+      
+    } else {
+      const newLocations = [];
+      
+      internationalSelections.selectedCountries.forEach(country => {
+        internationalSelections.selectedStates.forEach(state => {
+          internationalSelections.selectedCities.forEach(city => {
+            newLocations.push({
+              type: "international",
+              country: country,
+              state: state,
+              city: city
+            });
+          });
+        });
+      });
+      
+      const updatedLocations = Array.isArray(data.expansionLocation)
+        ? [...data.expansionLocation, ...newLocations]
+        : newLocations;
+      
+      onChange({ expansionLocation: updatedLocations });
+    }
+    
+    // Reset selections
+    if (locationType === "domestic") {
+      setDomesticSelections({
+        selectedStates: [],
+        selectedDistricts: [],
+        selectedCities: []
+      });
+    } else {
+      setInternationalSelections({
+        selectedCountries: [],
+        selectedStates: [],
+        selectedCities: []
+      });
+    }
+    
+    setOpenLocationModal(false);
   };
 
   // Remove location from list
@@ -305,61 +328,66 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     updatedLocations.splice(index, 1);
     onChange({ expansionLocation: updatedLocations });
   };
-  const handleCategoryHover = (level, value) => {
-    if (level === "main") {
-      setSelectedCategory({ main: value, sub: "", child: "", groupId: "" });
-    } else if (level === "sub") {
-      // Find the selected main category and subcategory to get groupId
-      const mainCat = categories.find(
-        (cat) => cat.name === selectedCategory.main
+
+
+
+const handleMainCategoryChange = (e) => {
+  const mainCat = e.target.value;
+  setSelectedCategory({
+    main: mainCat,
+    sub: "",
+    child: "",
+    groupId: ""
+  });
+};
+
+const handleSubCategoryChange = (e) => {
+  const subCat = e.target.value;
+  const mainCatObj = categories.find(cat => cat.name === selectedCategory.main);
+  const subCatObj = mainCatObj?.children?.find(sub => sub.name === subCat);
+  
+  setSelectedCategory(prev => ({
+    ...prev,
+    sub: subCat,
+    groupId: subCatObj?.groupId || "",
+    child: ""
+  }));
+};
+
+const handleChildCategoryChange = (e) => {
+  setSelectedCategory(prev => ({
+    ...prev,
+    child: e.target.value
+  }));
+};
+
+const handleAddCategory = () => {
+  if (selectedCategory.child) {
+    const isDuplicate =
+      Array.isArray(data.brandCategories) &&
+      data.brandCategories.some(
+        (cat) =>
+          cat.main === selectedCategory.main &&
+          cat.sub === selectedCategory.sub &&
+          cat.child === selectedCategory.child
       );
-      const subCat = mainCat?.children?.find((sub) => sub.name === value);
-      setSelectedCategory((prev) => ({
-        ...prev,
-        sub: value,
-        groupId: subCat?.groupId || "",
-        child: "",
-      }));
-    } else if (level === "child") {
-      setSelectedCategory((prev) => ({
-        ...prev,
-        child: value,
-      }));
-    }
-  };
 
-  const handleAddCategory = () => {
-    if (selectedCategory.child) {
-      const isDuplicate =
-        Array.isArray(data.brandCategories) &&
-        data.brandCategories.some(
-          (cat) =>
-            cat.main === selectedCategory.main &&
-            cat.sub === selectedCategory.sub &&
-            cat.child === selectedCategory.child &&
-            cat.groupId === selectedCategory.groupId
-        );
-
-      if (!isDuplicate) {
-        const updatedCategories = [
-          ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
-          {
-            main: selectedCategory.main,
-            sub: selectedCategory.sub,
-            child: selectedCategory.child,
-            groupId: selectedCategory.groupId,
-          },
-        ];
-        onChange({ brandCategories: updatedCategories });
-        setSelectedCategory((prev) => ({ ...prev, child: "" }));
-      }
+    if (!isDuplicate) {
+      const updatedCategories = [
+        ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
+        {
+          main: selectedCategory.main,
+          sub: selectedCategory.sub,
+          child: selectedCategory.child,
+          groupId: selectedCategory.groupId
+        },
+      ];
+      onChange({ brandCategories: updatedCategories });
+      // Reset the child category selection after adding
+      setSelectedCategory(prev => ({ ...prev, child: "" }));
     }
-  };
-  useEffect(() => {
-    if (selectedCategory.child) {
-      handleAddCategory();
-    }
-  }, [selectedCategory.child]);
+  }
+};
 
   // OTP Verification States
   const [verificationState, setVerificationState] = useState({
@@ -529,9 +557,75 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
+
+ // Add this to your existing state declarations
+const [descriptionModalOpen, setDescriptionModalOpen] = useState(false);
+// const [description, setDescription] = useState(data.description || "");
+
+// Add this handler function
+const handleDescriptionChange = (content) => {
+  onChange({ brandDescription: content }); // Update the parent form data directly
+};
+
+  // Location card component
+  const LocationCard = ({ location, onRemove }) => {
+    return (
+      <Paper 
+        elevation={2} 
+        sx={{
+          p: 1.5,
+          borderRadius: 2,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          position: 'relative',
+          borderLeft: `4px solid ${location.type === 'domestic' ? '#4caf50' : '#2196f3'}`,
+          '&:hover': {
+            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)'
+          }
+        }}
+      >
+        <Avatar sx={{ 
+          bgcolor: location.type === 'domestic' ? '#4caf50' : '#2196f3',
+          width: 40, 
+          height: 40 
+        }}>
+          {location.type === 'domestic' ? <LocationOnIcon /> : <PublicIcon />}
+        </Avatar>
+        
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            {location.city}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {location.type === 'domestic' 
+              ? `${location.district}, ${location.state}, ${location.country}`
+              : `${location.state}, ${location.country}`}
+          </Typography>
+        </Box>
+        
+        <IconButton 
+          size="medium" 
+          onClick={onRemove}
+          sx={{
+            color: '#757575',
+            '&:hover': {
+              color: '#f44336',
+              backgroundColor: 'rgba(244, 67, 54, 0.08)'
+            }
+          }}
+        >
+          <CloseIcon fontSize="medium" />
+        </IconButton>
+      </Paper>
+    );
+  };
+
+  
+
   return (
     <Box sx={{ overflowY: "auto", pr: 1, mt: 0 }}>
-      {/* Brand Details Section - Now in 5 columns for desktop */}
+      {/* Brand Details Section */}
       <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
         Personal Details
       </Typography>
@@ -559,7 +653,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
             error={!!errors.email}
             helperText={errors.email}
             variant="outlined"
-            size="small"
+            size="medium"
             required
             InputProps={{
               endAdornment: (
@@ -570,7 +664,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
                       alignItems="center"
                       color="success.main"
                     >
-                      <CheckCircleIcon fontSize="small" />
+                      <CheckCircleIcon fontSize="medium" />
                       <Typography variant="caption" sx={{ ml: 0.5 }}>
                         Verified
                       </Typography>
@@ -578,14 +672,14 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
                   ) : (
                     <Button
                       variant="outlined"
-                      size="small"
+                      size="medium"
                       onClick={() => handleVerificationDialog("email", true)}
                       disabled={!data.email || verificationState.email.loading}
                       startIcon={
                         verificationState.email.loading ? (
                           <CircularProgress size={14} />
                         ) : (
-                          <SendIcon fontSize="small" />
+                          <SendIcon fontSize="medium" />
                         )
                       }
                     >
@@ -609,7 +703,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
             error={!!errors.mobileNumber}
             helperText={errors.mobileNumber}
             variant="outlined"
-            size="small"
+            size="medium"
             inputProps={{ maxLength: 10 }}
             placeholder="Enter 10 digit number"
             InputProps={{
@@ -624,7 +718,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
                       alignItems="center"
                       color="success.main"
                     >
-                      <CheckCircleIcon fontSize="small" />
+                      <CheckCircleIcon fontSize="medium" />
                       <Typography variant="caption" sx={{ ml: 0.5 }}>
                         Verified
                       </Typography>
@@ -632,7 +726,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
                   ) : (
                     <Button
                       variant="outlined"
-                      size="small"
+                      size="medium"
                       onClick={() =>
                         handleVerificationDialog("mobileNumber", true)
                       }
@@ -644,7 +738,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
                         verificationState.mobileNumber.loading ? (
                           <CircularProgress size={14} />
                         ) : (
-                          <SendIcon fontSize="small" />
+                          <SendIcon fontSize="medium" />
                         )
                       }
                     >
@@ -679,7 +773,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
                 setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))
               }
               variant="outlined"
-              size="small"
+              size="medium"
               inputProps={{ maxLength: 6 }}
               error={!!verificationState.email.error}
               helperText={verificationState.email.error}
@@ -733,7 +827,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
                 setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))
               }
               variant="outlined"
-              size="small"
+              size="medium"
               inputProps={{ maxLength: 6 }}
               error={!!verificationState.mobileNumber.error}
               helperText={verificationState.mobileNumber.error}
@@ -789,594 +883,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
         </Alert>
       </Snackbar>
 
-      <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
-        Brand Details
-      </Typography>
-
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          mt: 2,
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
-          gap: 2,
-        }}
-      >
-        {/* Company Name */}
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Company Name"
-            name="companyName"
-            value={formData.companyName || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            error={!!errors.companyName}
-            helperText={errors.companyName}
-            required
-          />
-        </Grid>
-        {/* Brand Name */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Brand Name"
-            name="brandName"
-            value={formData.brandName || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            error={!!errors.brandName}
-            helperText={errors.brandName}
-            required
-          />
-        </Grid>
-       
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="CEO/MD/Owner Name"
-            name="ceoName"
-            value={data.ceoName || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            error={!!errors.ceoName}
-            helperText={errors.ceoName}
-            required
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="CEO/MD/Owner Email"
-            name="ceoEmail"
-            type="email"
-            value={data.ceoEmail || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            error={!!errors.ceoEmail}
-            helperText={errors.ceoEmail}
-            required
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="CEO/MD/Owner Mobile No"
-            name="ceoMobile"
-            value={data.ceoMobile || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            inputProps={{ maxLength: 10 }}
-            placeholder="Enter 10 digit number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">+91</InputAdornment>
-              ),
-            }}
-            error={!!errors.ceoMobile}
-            helperText={errors.ceoMobile}
-            required
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Manager Name"
-            name="managerName"
-            value={data.managerName || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            error={!!errors.managerName}
-            helperText={errors.managerName}
-          />
-        </Grid>
-        {/* Established Year */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.establishedYear}>
-            <InputLabel size="small">Established Year</InputLabel>
-            <Select
-              name="establishedYear"
-              value={data.establishedYear || ""}
-              label="Established Year"
-              onChange={handleChange}
-              variant="outlined"
-              size="small"
-              required
-            >
-              {Array.from(
-                { length: 100 },
-                (_, i) => new Date().getFullYear() - i
-              ).map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.establishedYear && (
-              <Typography variant="caption" color="error">
-                {errors.establishedYear}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
-        {/* Franchise Since Year */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.franchiseSinceYear}>
-            <InputLabel size="small">Franchise Since Year</InputLabel>
-            <Select
-              name="franchiseSinceYear"
-              value={data.franchiseSinceYear || ""}
-              label="Franchise Since Year"
-              onChange={handleChange}
-              variant="outlined"
-              size="small"
-              required
-            >
-              {Array.from(
-                { length: 100 },
-                (_, i) => new Date().getFullYear() - i
-              ).map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.franchiseSinceYear && (
-              <Typography variant="caption" color="error">
-                {errors.franchiseSinceYear}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
-        {/* Expansion Location Section */}
-        <Grid item xs={12}>
-          <Box>
-            <Button
-              variant="outlined"
-              startIcon={<AddIcon />}
-              onClick={() => setOpenLocationModal(true)}
-              sx={{
-                color: errors.expansionLocation ? "error.main" : "primary.main",
-                borderColor: errors.expansionLocation
-                  ? "error.main"
-                  : "primary.main",
-                "&:hover": {
-                  borderColor: errors.expansionLocation
-                    ? "error.main"
-                    : "primary.main",
-                },
-              }}
-            >
-              Add Expansion Location
-            </Button>
-            <Box sx={{ color: "error.main", fontSize: "0.875rem", mt: 1 }}>
-              {errors.expansionLocation}
-            </Box>
-
-            {/* Display selected locations */}
-            {data.expansionLocation?.length > 0 && (
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                  Selected Locations:
-                </Typography>
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                  {data.expansionLocation.map((loc, index) => (
-                    <Chip
-                      key={index}
-                      label={
-                        loc.type === "domestic"
-                          ? `${loc.city}, ${loc.district}, ${loc.state}, ${loc.country}`
-                          : `${loc.city}, ${loc.state}, ${loc.country}`
-                      }
-                      onDelete={() => handleRemoveLocation(index)}
-                      deleteIcon={<CloseIcon />}
-                      variant="outlined"
-                    />
-                  ))}
-                </Box>
-              </Box>
-            )}
-          </Box>
-
-          {/* Expansion Location Modal */}
-          <Dialog
-            open={openLocationModal}
-            onClose={() => setOpenLocationModal(false)}
-            maxWidth="sm"
-            fullWidth
-          >
-            <DialogTitle>Add Expansion Location</DialogTitle>
-            <DialogContent>
-              <Box sx={{ minWidth: 300, pt: 1 }}>
-                {apiError && (
-                  <Typography color="error" sx={{ mb: 2 }}>
-                    {apiError}
-                  </Typography>
-                )}
-
-                {/* Location Type Selection */}
-                <FormControl component="fieldset" sx={{ mb: 3 }}>
-                  <RadioGroup
-                    row
-                    value={locationType}
-                    onChange={handleLocationTypeChange}
-                  >
-                    <FormControlLabel
-                      value="domestic"
-                      control={<Radio />}
-                      label="Domestic (India)"
-                    />
-                    <FormControlLabel
-                      value="international"
-                      control={<Radio />}
-                      label="International"
-                    />
-                  </RadioGroup>
-                </FormControl>
-
-                {/* Domestic Location Form */}
-                {locationType === "domestic" ? (
-                  <>
-                    <TextField
-                      fullWidth
-                      label="Country"
-                      value="India"
-                      disabled
-                      sx={{ mb: 2 }}
-                    />
-
-                    <FormControl fullWidth sx={{ mb: 2 }}>
-                      <InputLabel>State</InputLabel>
-                      <Select
-                        value={newLocation.state}
-                        onChange={handleDomesticStateChange}
-                        label="State"
-                        disabled={loading.states}
-                      >
-                        {states.map((state) => (
-                          <MenuItem key={state.id} value={state.name}>
-                            {state.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    {newLocation.state && (
-                      <FormControl fullWidth sx={{ mb: 2 }}>
-                        <InputLabel>District</InputLabel>
-                        <Select
-                          value={newLocation.district}
-                          onChange={handleDomesticDistrictChange}
-                          label="District"
-                          disabled={loading.districts}
-                        >
-                          {districts.map((district, index) => (
-                            <MenuItem key={index} value={district}>
-                              {district}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
-
-                    {newLocation.district && (
-                      <FormControl fullWidth sx={{ mb: 2 }}>
-                        <InputLabel>City</InputLabel>
-                        <Select
-                          value={newLocation.city}
-                          onChange={handleDomesticCityChange}
-                          label="City"
-                          disabled={loading.cities}
-                        >
-                          {cities.map((city, index) => (
-                            <MenuItem key={index} value={city.name}>
-                              {city.name} ({city.status})
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
-                  </>
-                ) : (
-                  /* International Location Form */
-                  <>
-                    <FormControl fullWidth sx={{ mb: 2 }}>
-                      <InputLabel>Country</InputLabel>
-                      <Select
-                        value={newLocation.country}
-                        onChange={handleInternationalCountryChange}
-                        label="Country"
-                        disabled={loading.countries}
-                      >
-                        {countries.map((country) => (
-                          <MenuItem key={country.id} value={country.name}>
-                            {country.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    {newLocation.country && (
-                      <FormControl fullWidth sx={{ mb: 2 }}>
-                        <InputLabel>State/Province</InputLabel>
-                        <Select
-                          value={newLocation.state}
-                          onChange={handleInternationalStateChange}
-                          label="State/Province"
-                          disabled={loading.intStates}
-                        >
-                          {internationalStates.map((state, index) => (
-                            <MenuItem key={index} value={state.name}>
-                              {state.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
-
-                    {newLocation.state && (
-                      <FormControl fullWidth sx={{ mb: 2 }}>
-                        <InputLabel>City</InputLabel>
-                        <Select
-                          value={newLocation.city}
-                          onChange={handleInternationalCityChange}
-                          label="City"
-                          disabled={loading.intCities}
-                        >
-                          {internationalCities.map((city, index) => (
-                            <MenuItem key={index} value={city.name}>
-                              {city.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
-                  </>
-                )}
-              </Box>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setOpenLocationModal(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleAddLocation}
-                disabled={
-                  locationType === "domestic"
-                    ? !newLocation.city ||
-                      !newLocation.district ||
-                      !newLocation.state
-                    : !newLocation.city ||
-                      !newLocation.state ||
-                      !newLocation.country
-                }
-                variant="contained"
-              >
-                Add Location
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Grid>
-        {/* Categories Section - Full width */}
-        <Grid item xs={12}>
-          <Box sx={{ display: "flex", mb: 2, gap: 1 }}>
-            <Box sx={{ position: "relative", flexGrow: 1 }}>
-              <TextField
-                label="Select Category"
-                value={
-                  selectedCategory.child
-                    ? `${selectedCategory.main} > ${selectedCategory.sub} > ${selectedCategory.child}`
-                    : ""
-                }
-                onFocus={() => setDropdownOpen(true)}
-                onChange={() => {}}
-                fullWidth
-                size="small"
-                error={!!errors.brandCategories}
-                helperText={
-                  errors.brandCategories || "Select at least one category"
-                }
-              />
-              {isDropdownOpen && (
-                <Paper
-                  sx={{
-                    position: "absolute",
-                    zIndex: 2,
-                    mt: 1,
-                    width: "100%",
-                    display: "flex",
-                    boxShadow: 3,
-                    minHeight: 300,
-                  }}
-                  onMouseLeave={() => setDropdownOpen(false)}
-                >
-                  {/* Parent Categories */}
-                  <Box sx={{ flex: 1, borderRight: "1px solid #eee" }}>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ p: 1, fontWeight: "bold", bgcolor: "grey.100" }}
-                    >
-                      Main Categories
-                    </Typography>
-                    <List sx={{ maxHeight: 300, overflow: "auto" }}>
-                      {categories.map((category) => (
-                        <ListItem
-                          key={category.name}
-                          button
-                          selected={selectedCategory.main === category.name}
-                          onMouseEnter={() =>
-                            handleCategoryHover("main", category.name)
-                          }
-                          dense
-                        >
-                          <ListItemText
-                            primary={category.name}
-                            primaryTypographyProps={{
-                              fontWeight:
-                                selectedCategory.main === category.name
-                                  ? "bold"
-                                  : "normal",
-                              color:
-                                selectedCategory.main === category.name
-                                  ? "primary.main"
-                                  : "text.primary",
-                            }}
-                          />
-                          {category.children &&
-                            category.children.length > 0 && (
-                              <ChevronRightIcon
-                                fontSize="small"
-                                color="action"
-                              />
-                            )}
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Box>
-
-                  {/* Subcategories */}
-                  {selectedCategory.main && (
-                    <Box
-                      sx={{
-                        flex: 1,
-                        borderRight: "1px solid #eee",
-                        bgcolor: "background.paper",
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          p: 1,
-                          fontWeight: "bold",
-                          bgcolor: "grey.100",
-                        }}
-                      >
-                        Subcategories
-                      </Typography>
-                      <List sx={{ maxHeight: 300, overflow: "auto" }}>
-                        {categories
-                          .find((cat) => cat.name === selectedCategory.main)
-                          ?.children?.map((subCategory) => (
-                            <ListItem
-                              key={subCategory.name}
-                              button
-                              selected={
-                                selectedCategory.sub === subCategory.name
-                              }
-                              onMouseEnter={() =>
-                                handleCategoryHover("sub", subCategory.name)
-                              }
-                              dense
-                            >
-                              <ListItemText
-                                primary={subCategory.name}
-                                primaryTypographyProps={{
-                                  fontWeight:
-                                    selectedCategory.sub === subCategory.name
-                                      ? "bold"
-                                      : "normal",
-                                  color:
-                                    selectedCategory.sub === subCategory.name
-                                      ? "primary.main"
-                                      : "text.primary",
-                                }}
-                              />
-                              {subCategory.children &&
-                                subCategory.children.length > 0 && (
-                                  <ChevronRightIcon
-                                    fontSize="small"
-                                    color="action"
-                                  />
-                                )}
-                            </ListItem>
-                          ))}
-                      </List>
-                    </Box>
-                  )}
-
-                  {/* Child Categories */}
-                  {selectedCategory.sub && (
-                    <Box sx={{ flex: 1, bgcolor: "background.paper" }}>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          p: 1,
-                          fontWeight: "bold",
-                          bgcolor: "grey.100",
-                        }}
-                      >
-                        Items
-                      </Typography>
-                      <List sx={{ maxHeight: 300, overflow: "auto" }}>
-                        {categories
-                          .find((cat) => cat.name === selectedCategory.main)
-                          ?.children?.find(
-                            (sub) => sub.name === selectedCategory.sub
-                          )
-                          ?.children?.map((child, index) => (
-                            <ListItem
-                              key={index}
-                              button
-                              selected={selectedCategory.child === child}
-                              onClick={() =>
-                                handleCategoryHover("child", child)
-                              }
-                              dense
-                            >
-                              <ListItemText
-                                primary={child}
-                                primaryTypographyProps={{
-                                  color:
-                                    selectedCategory.child === child
-                                      ? "primary.main"
-                                      : "text.primary",
-                                  fontWeight:
-                                    selectedCategory.child === child
-                                      ? "bold"
-                                      : "normal",
-                                }}
-                              />
-                            </ListItem>
-                          ))}
-                      </List>
-                    </Box>
-                  )}
-                </Paper>
-              )}
-            </Box>
-          </Box>
-        </Grid>
-      </Grid>
-
-      {/* Communication Information Section - 5 columns */}
-
+  {/* Communication Information Section */}
       <Typography variant="h6" sx={{ mb: 3, color: "#ff9800" }}>
         Communication Information
       </Typography>
@@ -1385,7 +892,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
         spacing={2}
         sx={{
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           gap: 2,
         }}
       >
@@ -1400,7 +907,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
             error={!!errors.fullName}
             helperText={errors.fullName}
             variant="outlined"
-            size="small"
+            size="medium"
             required
           />
         </Grid>
@@ -1417,33 +924,10 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
             error={!!errors.secondaryEmail}
             helperText={errors.secondaryEmail}
             variant="outlined"
-            size="small"
+            size="medium"
             required
           />
         </Grid>
-
-        {/* Mobile Number
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Mobile Number"
-            name="mobileNumber"
-            value={data.mobileNumber || ""}
-            onChange={handleChange}
-            error={!!errors.mobileNumber}
-            helperText={errors.mobileNumber}
-            variant="outlined"
-            size="small"
-            inputProps={{ maxLength: 10 }}
-            placeholder="Enter 10 digit number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">+91</InputAdornment>
-              ),
-            }}
-            required
-          />
-        </Grid> */}
 
         {/* WhatsApp Number */}
         <Grid item xs={12} sm={6} md={2.4}>
@@ -1456,7 +940,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
             error={!!errors.whatsappNumber}
             helperText={errors.whatsappNumber}
             variant="outlined"
-            size="small"
+            size="medium"
             inputProps={{ maxLength: 10 }}
             placeholder="Enter 10 digit number"
             InputProps={{
@@ -1464,6 +948,22 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
                 <InputAdornment position="start">+91</InputAdornment>
               ),
             }}
+          />
+        </Grid>
+
+{/* Head Office Address */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Head Office Address"
+            name="headOfficeAddress"
+            value={data.headOfficeAddress || ""}
+            onChange={handleChange}
+            error={!!errors.headOfficeAddress}
+            helperText={errors.headOfficeAddress}
+            variant="outlined"
+            size="medium"
+            required
           />
         </Grid>
 
@@ -1481,7 +981,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
             error={!!errors.pincode || !!pincodeError}
             helperText={errors.pincode || pincodeError}
             variant="outlined"
-            size="small"
+            size="medium"
             required
             InputProps={{
               endAdornment: loadingPincode ? (
@@ -1493,33 +993,19 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
           />
         </Grid>
 
-        {/* Head Office Address - Full width on mobile, 5th column on desktop */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Head Office Address"
-            name="headOfficeAddress"
-            value={data.headOfficeAddress || ""}
-            onChange={handleChange}
-            error={!!errors.headOfficeAddress}
-            helperText={errors.headOfficeAddress}
-            variant="outlined"
-            size="small"
-            required
-          />
-        </Grid>
+        
 
         {/* State */}
         <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth error={!!errors.state}>
-            <InputLabel size="small">State</InputLabel>
+            <InputLabel size="medium">State</InputLabel>
             <Select
               name="state"
               value={data.state || ""}
               label="State"
               onChange={handleChange}
               variant="outlined"
-              size="small"
+              size="medium"
               required
             >
               {states.map((state) => (
@@ -1547,14 +1033,1456 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
             error={!!errors.city}
             helperText={errors.city}
             variant="outlined"
-            size="small"
+            size="medium"
             required
           />
         </Grid>
       </Grid>
 
-      {/* Social Media Section - 5 columns */}
+      {/* Social Media Section */}
+      <Typography variant="h6" sx={{ mb: 2, mt: 4, color: "#ff9800" }}>
+        Social Media & Web Presence
+      </Typography>
 
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
+        {/* Website */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Website"
+            name="website"
+            value={data.website || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.website}
+            helperText={errors.website}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">https://</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Facebook */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Facebook"
+            name="facebook"
+            value={data.facebook || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.facebook}
+            helperText={errors.facebook}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Instagram */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Instagram"
+            name="instagram"
+            value={data.instagram || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.instagram}
+            helperText={errors.instagram}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* LinkedIn */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="LinkedIn"
+            name="linkedin"
+            value={data.linkedin || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.linkedin}
+            helperText={errors.linkedin}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Brand Description Modal */}
+<Dialog
+  open={descriptionModalOpen}
+  onClose={() => setDescriptionModalOpen(false)}
+  maxWidth="md"
+  fullWidth
+  PaperProps={{
+    sx: {
+      borderRadius: 3,
+      boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
+      overflow: 'hidden'
+    }
+  }}
+>
+  <DialogTitle sx={{ 
+    bgcolor: '#f5f7fa',
+    borderBottom: '1px solid #e0e3e7',
+    py: 2,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  }}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
+      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+        Brand Description
+      </Typography>
+    </Box>
+    <IconButton 
+      onClick={() => setDescriptionModalOpen(false)}
+      sx={{ color: '#6b778c' }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+  
+  <DialogContent sx={{ py: 3, px: 3 }}>
+    <Box sx={{ mt: 2 }}>
+      <Editor
+        apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
+         value={data.brandDescription || ""}
+
+        init={{
+          height: 400,
+          menubar: true,
+          plugins: [
+            "advlist autolink lists link image charmap print preview anchor",
+            "searchreplace visualblocks code fullscreen",
+            "insertdatetime media table paste help wordcount",
+          ],
+          toolbar:
+            "undo redo | formatselect | bold italic backcolor | \
+             alignleft aligncenter alignright alignjustify | \
+             bullist numlist outdent indent | removeformat | help | image",
+          images_upload_url: '/api/upload-image', // Add your image upload endpoint
+          automatic_uploads: true,
+          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+        }}
+        onEditorChange={handleDescriptionChange}
+      />
+    </Box>
+  </DialogContent>
+  
+  <DialogActions sx={{ 
+    px: 3, 
+    py: 2,
+    borderTop: '1px solid #e0e3e7',
+    bgcolor: '#f5f7fa'
+  }}>
+    <Button 
+      onClick={() => setDescriptionModalOpen(false)}
+      variant="outlined"
+      sx={{
+        color: '#6b778c',
+        borderColor: '#e0e3e7',
+        '&:hover': {
+          borderColor: '#b0bec5'
+        },
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Cancel
+    </Button>
+    <Button
+      onClick={() => {
+        onChange({ description });
+        setDescriptionModalOpen(false);
+      }}
+      variant="contained"
+      sx={{
+        bgcolor: '#4caf50',
+        '&:hover': {
+          bgcolor: '#43a047'
+        },
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Save Description
+    </Button>
+  </DialogActions>
+</Dialog>
+
+    
+      </Grid>
+      <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
+        Brand Details
+      </Typography>
+
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
+        {/* Company Name */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Company Name"
+            name="companyName"
+            value={formData.companyName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.companyName}
+            helperText={errors.companyName}
+            required
+          />
+        </Grid>
+        {/* Brand Name */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Brand Name"
+            name="brandName"
+            value={formData.brandName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.brandName}
+            helperText={errors.brandName}
+            required
+          />
+        </Grid>
+       
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Name"
+            name="ceoName"
+            value={data.ceoName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.ceoName}
+            helperText={errors.ceoName}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Email"
+            name="ceoEmail"
+            type="email"
+            value={data.ceoEmail || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.ceoEmail}
+            helperText={errors.ceoEmail}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Mobile No"
+            name="ceoMobile"
+            value={data.ceoMobile || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+            }}
+            error={!!errors.ceoMobile}
+            helperText={errors.ceoMobile}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Manager Name"
+            name="managerName"
+            value={data.managerName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.managerName}
+            helperText={errors.managerName}
+          />
+        </Grid>
+        {/* Established Year */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.establishedYear}>
+            <InputLabel size="medium">Established Year</InputLabel>
+            <Select
+              name="establishedYear"
+              value={data.establishedYear || ""}
+              label="Established Year"
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              required
+            >
+              {Array.from(
+                { length: 100 },
+                (_, i) => new Date().getFullYear() - i
+              ).map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.establishedYear && (
+              <Typography variant="caption" color="error">
+                {errors.establishedYear}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+        {/* Franchise Since Year */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.franchiseSinceYear}>
+            <InputLabel size="medium">Franchise Since Year</InputLabel>
+            <Select
+              name="franchiseSinceYear"
+              value={data.franchiseSinceYear || ""}
+              label="Franchise Since Year"
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              required
+            >
+              {Array.from(
+                { length: 100 },
+                (_, i) => new Date().getFullYear() - i
+              ).map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.franchiseSinceYear && (
+              <Typography variant="caption" color="error">
+                {errors.franchiseSinceYear}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+        {/* Categories Section - Three Dropdowns with Add Button */}
+<Grid item xs={12}>
+  {/* <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
+    Brand Categories
+  </Typography> */}
+  
+  <Box sx={{ 
+    display: 'grid',
+    gridTemplateColumns: { md: 'repeat(4, 1fr)', xs: '1fr' },
+    gap: 2,
+    alignItems: 'flex-end'
+  }}>
+    {/* Main Category Dropdown */}
+    <FormControl  sx={{width:200}}size="medium">
+      <InputLabel>Main Category</InputLabel>
+      <Select
+        value={selectedCategory.main || ""}
+        label="Main Category"
+        onChange={(e) => {
+          const mainCat = e.target.value;
+          setSelectedCategory({
+            main: mainCat,
+            sub: "",
+            child: "",
+            groupId: ""
+          });
+        }}
+      >
+        {categories.map((category) => (
+          <MenuItem key={category.name} value={category.name}>
+            {category.name}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+    {/* Sub Category Dropdown */}
+    <FormControl  size="medium" sx={{width:200}} disabled={!selectedCategory.main}>
+      <InputLabel>Sub Category</InputLabel>
+      <Select
+        value={selectedCategory.sub || ""}
+        label="Sub Category"
+        onChange={(e) => {
+          const subCat = e.target.value;
+          const mainCatObj = categories.find(cat => cat.name === selectedCategory.main);
+          const subCatObj = mainCatObj?.children?.find(sub => sub.name === subCat);
+          
+          setSelectedCategory(prev => ({
+            ...prev,
+            sub: subCat,
+            groupId: subCatObj?.groupId || "",
+            child: ""
+          }));
+        }}
+      >
+        {selectedCategory.main && 
+          categories.find(cat => cat.name === selectedCategory.main)?.children?.map((subCategory) => (
+            <MenuItem key={subCategory.name} value={subCategory.name}>
+              {subCategory.name}
+            </MenuItem>
+          ))
+        }
+      </Select>
+    </FormControl>
+
+    {/* Child Category Dropdown */}
+    <FormControl fullWidth size="medium" disabled={!selectedCategory.sub} sx={{width:200}}>
+      <InputLabel>Child Category</InputLabel>
+      <Select
+        value={selectedCategory.child || ""}
+        label="Child Category"
+        onChange={(e) => {
+          setSelectedCategory(prev => ({
+            ...prev,
+            child: e.target.value
+          }));
+        }}
+      >
+        {selectedCategory.sub && 
+          categories
+            .find(cat => cat.name === selectedCategory.main)
+            ?.children?.find(sub => sub.name === selectedCategory.sub)
+            ?.children?.map((child, index) => (
+              <MenuItem key={index} value={child}>
+                {child}
+              </MenuItem>
+            ))
+        }
+      </Select>
+    </FormControl>
+
+    {/* Add Button */}
+    <Button
+      variant="contained"
+      onClick={handleAddCategory}
+      disabled={!selectedCategory.child}
+      sx={{
+        height: 40,
+        p:3,
+        pr:6,
+        pl:6,
+        bgcolor: '#ff9800',
+        '&:hover': { bgcolor: '#fb8c00' },
+        boxShadow: 'none',
+        textTransform: 'none',
+      
+        borderRadius: 1
+      }}
+    >
+      Add 
+    </Button>
+  </Box>
+
+  {/* Selected Categories Display */}
+  {Array.isArray(data.brandCategories) && data.brandCategories.length > 0 && (
+    <Box sx={{ mt: 2 }}>
+      <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+        Selected Categories
+      </Typography>
+      <Box sx={{ 
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 1
+      }}>
+        {data.brandCategories.map((category, index) => (
+          <Chip
+            key={index}
+            label={`${category.main} > ${category.sub} > ${category.child}`}
+            onDelete={() => {
+              const updatedCategories = [...data.brandCategories];
+              updatedCategories.splice(index, 1);
+              onChange({ brandCategories: updatedCategories });
+            }}
+            color="primary"
+            variant="outlined"
+            size="large"
+            sx={{
+              '& .MuiChip-deleteIcon': {
+                color: '#1976d2'
+              }
+            }}
+          />
+        ))}
+      </Box>
+    </Box>
+  )}
+</Grid>
+
+
+
+
+      </Grid>
+      <Grid display={'flex'} gap={5} mt={2} mb={2}>
+        {/* Enhanced Expansion Location Section */}
+<Grid item xs={12}>
+  <Box>
+    <Button
+      variant="contained"
+      size="large"
+      startIcon={<AddIcon />}
+      onClick={() => setOpenLocationModal(true)}
+      sx={{
+        bgcolor: '#ff9800',
+        '&:hover': { bgcolor: '#fb8c00' },
+        boxShadow: 'none',
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Add Expansion Locations
+    </Button>
+    {errors.expansionLocation && (
+      <Typography variant="caption" color="error" sx={{ ml: 1 }}>
+        {errors.expansionLocation}
+      </Typography>
+    )}
+
+    {/* Selected Locations Preview */}
+    {data.expansionLocation?.length > 0 && (
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+          Selected Expansion Locations ({data.expansionLocation.length})
+        </Typography>
+        
+        {/* Location Chips */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexWrap: 'wrap',
+          gap: 1,
+          mb: 2,
+          p: 1.5,
+          border: '1px solid #e0e3e7',
+          borderRadius: 1,
+          minHeight: 60,
+          bgcolor: '#f9fafc'
+        }}>
+          {data.expansionLocation.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              No locations selected yet
+            </Typography>
+          ) : (
+            data.expansionLocation.map((loc, index) => (
+              <Chip
+                key={index}
+                label={
+                  loc.type === 'domestic' 
+                    ? `${loc.city}, ${loc.state}`
+                    : `${loc.city}, ${loc.country}`
+                }
+                onDelete={() => handleRemoveLocation(index)}
+                color={loc.type === 'domestic' ? 'primary' : 'secondary'}
+                variant="outlined"
+                size="medium"
+                avatar={
+                  <Avatar sx={{ 
+                    bgcolor: loc.type === 'domestic' ? '#e3f2fd' : '#f3e5f5',
+                    width: 24, 
+                    height: 24 
+                  }}>
+                    {loc.type === 'domestic' ? 
+                      <LocationOnIcon fontSize="medium" color="primary" /> : 
+                      <PublicIcon fontSize="medium" color="secondary" />
+                    }
+                  </Avatar>
+                }
+                sx={{
+                  '& .MuiChip-deleteIcon': {
+                    color: loc.type === 'domestic' ? '#1976d2' : '#9c27b0'
+                  }
+                }}
+              />
+            ))
+          )}
+        </Box>
+      </Box>
+    )}
+  </Box>
+
+  {/* Expansion Location Modal */}
+  <Dialog
+    open={openLocationModal}
+    onClose={() => setOpenLocationModal(false)}
+    maxWidth="md"
+    fullWidth
+    PaperProps={{
+      sx: {
+        borderRadius: 3,
+        boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
+        overflow: 'hidden'
+      }
+    }}
+  >
+    <DialogTitle sx={{ 
+      bgcolor: '#f5f7fa',
+      borderBottom: '1px solid #e0e3e7',
+      py: 2,
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    }}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Add Expansion Locations
+        </Typography>
+      </Box>
+      <IconButton 
+        onClick={() => setOpenLocationModal(false)}
+        sx={{ color: '#6b778c' }}
+      >
+        <CloseIcon />
+      </IconButton>
+    </DialogTitle>
+    
+    <DialogContent sx={{ py: 3, px: 3 }}>
+      <Box>
+        {/* Location Type Toggle */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center',
+          mb: 3
+        }}>
+          <Paper 
+            elevation={0}
+            sx={{
+              display: 'flex',
+              borderRadius: 2,
+              border: '1px solid #e0e3e7',
+              overflow: 'hidden'
+            }}
+          >
+            <Button
+              variant={locationType === "domestic" ? "contained" : "text"}
+              onClick={() => handleLocationTypeChange({ target: { value: "domestic" }})}
+              sx={{
+                px: 3,
+                py: 1,
+                borderRadius: 0,
+                textTransform: 'none',
+                fontWeight: 500,
+                bgcolor: locationType === "domestic" ? '#4caf50' : 'transparent',
+                color: locationType === "domestic" ? '#fff' : '#6b778c',
+                '&:hover': {
+                  bgcolor: locationType === "domestic" ? '#43a047' : 'rgba(0, 0, 0, 0.04)'
+                }
+              }}
+              startIcon={<LocationOnIcon />}
+            >
+              Domestic (India)
+            </Button>
+            
+            <Divider orientation="vertical" flexItem />
+            
+            <Button
+              variant={locationType === "international" ? "contained" : "text"}
+              onClick={() => handleLocationTypeChange({ target: { value: "international" }})}
+              sx={{
+                px: 3,
+                py: 1,
+                borderRadius: 0,
+                textTransform: 'none',
+                fontWeight: 500,
+                bgcolor: locationType === "international" ? '#2196f3' : 'transparent',
+                color: locationType === "international" ? '#fff' : '#6b778c',
+                '&:hover': {
+                  bgcolor: locationType === "international" ? '#1976d2' : 'rgba(0, 0, 0, 0.04)'
+                }
+              }}
+              startIcon={<PublicIcon />}
+            >
+              International
+            </Button>
+          </Paper>
+        </Box>
+
+        {/* Current Selections Preview */}
+        {(locationType === "domestic" 
+          ? domesticSelections.selectedStates.length > 0 
+          : internationalSelections.selectedCountries.length > 0) && (
+          <Box sx={{ 
+            mb: 3,
+            p: 2,
+            border: '1px dashed #e0e3e7',
+            borderRadius: 1,
+            bgcolor: '#f9fafc'
+          }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+              Current Selection
+            </Typography>
+            
+            {locationType === "domestic" ? (
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {domesticSelections.selectedStates.length > 0 && (
+                  <Chip 
+                    label={`${domesticSelections.selectedStates.length} States`}
+                    color="primary"
+                    size="medium"
+                    variant="outlined"
+                  />
+                )}
+                {domesticSelections.selectedDistricts.length > 0 && (
+                  <Chip 
+                    label={`${domesticSelections.selectedDistricts.length} Districts`}
+                    color="primary"
+                    size="medium"
+                    variant="outlined"
+                  />
+                )}
+                {domesticSelections.selectedCities.length > 0 && (
+                  <Chip 
+                    label={`${domesticSelections.selectedCities.length} Cities`}
+                    color="primary"
+                    size="medium"
+                    variant="outlined"
+                  />
+                )}
+              </Box>
+            ) : (
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {internationalSelections.selectedCountries.length > 0 && (
+                  <Chip 
+                    label={`${internationalSelections.selectedCountries.length} Countries`}
+                    color="secondary"
+                    size="medium"
+                    variant="outlined"
+                  />
+                )}
+                {internationalSelections.selectedStates.length > 0 && (
+                  <Chip 
+                    label={`${internationalSelections.selectedStates.length} States`}
+                    color="secondary"
+                    size="medium"
+                    variant="outlined"
+                  />
+                )}
+                {internationalSelections.selectedCities.length > 0 && (
+                  <Chip 
+                    label={`${internationalSelections.selectedCities.length} Cities`}
+                    color="secondary"
+                    size="medium"
+                    variant="outlined"
+                  />
+                )}
+              </Box>
+            )}
+          </Box>
+        )}
+
+        {/* Domestic Location Form */}
+        {locationType === "domestic" ? (
+          <Box sx={{ 
+            display: 'grid',
+            gridTemplateColumns: { md: 'repeat(3, 1fr)', xs: '1fr' },
+            gap: 3,
+            p: 3,
+            border: '1px solid #e0e3e7',
+            borderRadius: 2,
+            bgcolor: '#f9fafc'
+          }}>
+            {/* States Column */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                States ({states.length})
+              </Typography>
+              <Box sx={{ 
+                height: 300,
+                overflowY: 'auto',
+                p: 1,
+                border: '1px solid #e0e3e7',
+                borderRadius: 1,
+                bgcolor: 'background.paper'
+              }}>
+                <List dense>
+                  {states.map((state) => (
+                    <ListItem key={state.id} disablePadding>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={domesticSelections.selectedStates.includes(state.name)}
+                            onChange={(e) => {
+                              const isChecked = e.target.checked;
+                              setDomesticSelections(prev => ({
+                                ...prev,
+                                selectedStates: isChecked 
+                                  ? [...prev.selectedStates, state.name]
+                                  : prev.selectedStates.filter(s => s !== state.name),
+                                selectedDistricts: [],
+                                selectedCities: []
+                              }));
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label={
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <LocationOnIcon fontSize="medium" color="primary" sx={{ mr: 1 }} />
+                            {state.name}
+                          </Box>
+                        }
+                        sx={{
+                          width: '100%',
+                          m: 0,
+                          '& .MuiFormControlLabel-label': {
+                            flexGrow: 1
+                          }
+                        }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </Box>
+            </Box>
+
+            {/* Districts Column */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                Districts (
+                {domesticSelections.selectedStates.length > 0 
+                  ? domesticSelections.selectedStates.flatMap(state => {
+                      const stateObj = statesData.find(s => s.name === state);
+                      return stateObj ? stateObj.districts : [];
+                    }).length
+                  : 0}
+                )
+              </Typography>
+              {domesticSelections.selectedStates.length > 0 ? (
+                <Box sx={{ 
+                  height: 300,
+                  overflowY: 'auto',
+                  p: 1,
+                  border: '1px solid #e0e3e7',
+                  borderRadius: 1,
+                  bgcolor: 'background.paper'
+                }}>
+                  <List dense>
+                    {domesticSelections.selectedStates.flatMap(state => {
+                      const stateObj = statesData.find(s => s.name === state);
+                      return stateObj ? stateObj.districts : [];
+                    }).map(district => (
+                      <ListItem key={district} disablePadding>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={domesticSelections.selectedDistricts.includes(district)}
+                              onChange={(e) => {
+                                const isChecked = e.target.checked;
+                                setDomesticSelections(prev => ({
+                                  ...prev,
+                                  selectedDistricts: isChecked 
+                                    ? [...prev.selectedDistricts, district]
+                                    : prev.selectedDistricts.filter(d => d !== district),
+                                  selectedCities: []
+                                }));
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label={district}
+                          sx={{
+                            width: '100%',
+                            m: 0
+                          }}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              ) : (
+                <Box sx={{ 
+                  height: 300,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px dashed #e0e3e7',
+                  borderRadius: 1,
+                  bgcolor: 'background.paper'
+                }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Select states to see districts
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+
+            {/* Cities Column */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                Cities (
+                {domesticSelections.selectedDistricts.length > 0 
+                  ? domesticSelections.selectedStates.flatMap(state => {
+                      const stateObj = statesData.find(s => s.name === state);
+                      if (!stateObj) return [];
+                      
+                      return domesticSelections.selectedDistricts.flatMap(district => {
+                        return stateObj.cities
+                          .filter(city => city.district === district)
+                          .map(city => city.name);
+                      });
+                    }).length
+                  : 0}
+                )
+              </Typography>
+              {domesticSelections.selectedDistricts.length > 0 ? (
+                <Box sx={{ 
+                  height: 300,
+                  overflowY: 'auto',
+                  p: 1,
+                  border: '1px solid #e0e3e7',
+                  borderRadius: 1,
+                  bgcolor: 'background.paper'
+                }}>
+                  <List dense>
+                    {domesticSelections.selectedStates.flatMap(state => {
+                      const stateObj = statesData.find(s => s.name === state);
+                      if (!stateObj) return [];
+                      
+                      return domesticSelections.selectedDistricts.flatMap(district => {
+                        return stateObj.cities
+                          .filter(city => city.district === district)
+                          .map(city => city.name);
+                      });
+                    }).map(city => (
+                      <ListItem key={city} disablePadding>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={domesticSelections.selectedCities.includes(city)}
+                              onChange={(e) => {
+                                const isChecked = e.target.checked;
+                                setDomesticSelections(prev => ({
+                                  ...prev,
+                                  selectedCities: isChecked 
+                                    ? [...prev.selectedCities, city]
+                                    : prev.selectedCities.filter(c => c !== city)
+                                }));
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label={city}
+                          sx={{
+                            width: '100%',
+                            m: 0
+                          }}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              ) : (
+                <Box sx={{ 
+                  height: 300,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px dashed #e0e3e7',
+                  borderRadius: 1,
+                  bgcolor: 'background.paper'
+                }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {domesticSelections.selectedStates.length > 0
+                      ? 'Select districts to see cities'
+                      : 'Select states and districts first'}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          </Box>
+        ) : (
+          /* International Location Form */
+          <Box sx={{ 
+            display: 'grid',
+            gridTemplateColumns: { md: 'repeat(3, 1fr)', xs: '1fr' },
+            gap: 3,
+            p: 3,
+            border: '1px solid #e0e3e7',
+            borderRadius: 2,
+            bgcolor: '#f9fafc'
+          }}>
+            {/* Countries Column */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                Countries ({countries.length})
+              </Typography>
+              <Box sx={{ 
+                height: 300,
+                overflowY: 'auto',
+                p: 1,
+                border: '1px solid #e0e3e7',
+                borderRadius: 1,
+                bgcolor: 'background.paper'
+              }}>
+                <List dense>
+                  {countries.map(country => (
+                    <ListItem key={country.id} disablePadding>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={internationalSelections.selectedCountries.includes(country.name)}
+                            onChange={(e) => {
+                              const isChecked = e.target.checked;
+                              setInternationalSelections(prev => ({
+                                ...prev,
+                                selectedCountries: isChecked 
+                                  ? [...prev.selectedCountries, country.name]
+                                  : prev.selectedCountries.filter(c => c !== country.name),
+                                selectedStates: [],
+                                selectedCities: []
+                              }));
+                            }}
+                            color="secondary"
+                          />
+                        }
+                        label={
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <PublicIcon fontSize="medium" color="secondary" sx={{ mr: 1 }} />
+                            {country.name}
+                          </Box>
+                        }
+                        sx={{
+                          width: '100%',
+                          m: 0,
+                          '& .MuiFormControlLabel-label': {
+                            flexGrow: 1
+                          }
+                        }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </Box>
+            </Box>
+
+            {/* States Column */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                States/Provinces (
+                {internationalSelections.selectedCountries.length > 0 
+                  ? internationalStates.length
+                  : 0}
+                )
+              </Typography>
+              {internationalSelections.selectedCountries.length > 0 ? (
+                <Box sx={{ 
+                  height: 300,
+                  overflowY: 'auto',
+                  p: 1,
+                  border: '1px solid #e0e3e7',
+                  borderRadius: 1,
+                  bgcolor: 'background.paper'
+                }}>
+                  <List dense>
+                    {internationalStates.map(state => (
+                      <ListItem key={state.id} disablePadding>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={internationalSelections.selectedStates.includes(state.name)}
+                              onChange={(e) => {
+                                const isChecked = e.target.checked;
+                                setInternationalSelections(prev => ({
+                                  ...prev,
+                                  selectedStates: isChecked 
+                                    ? [...prev.selectedStates, state.name]
+                                    : prev.selectedStates.filter(s => s !== state.name),
+                                  selectedCities: []
+                                }));
+                              }}
+                              color="secondary"
+                            />
+                          }
+                          label={state.name}
+                          sx={{
+                            width: '100%',
+                            m: 0
+                          }}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              ) : (
+                <Box sx={{ 
+                  height: 300,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px dashed #e0e3e7',
+                  borderRadius: 1,
+                  bgcolor: 'background.paper'
+                }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Select countries to see states
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+
+            {/* Cities Column */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                Cities (
+                {internationalSelections.selectedStates.length > 0 
+                  ? internationalCities.length
+                  : 0}
+                )
+              </Typography>
+              {internationalSelections.selectedStates.length > 0 ? (
+                <Box sx={{ 
+                  height: 300,
+                  overflowY: 'auto',
+                  p: 1,
+                  border: '1px solid #e0e3e7',
+                  borderRadius: 1,
+                  bgcolor: 'background.paper'
+                }}>
+                  <List dense>
+                    {internationalCities.map(city => (
+                      <ListItem key={city} disablePadding>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={internationalSelections.selectedCities.includes(city)}
+                              onChange={(e) => {
+                                const isChecked = e.target.checked;
+                                setInternationalSelections(prev => ({
+                                  ...prev,
+                                  selectedCities: isChecked 
+                                    ? [...prev.selectedCities, city]
+                                    : prev.selectedCities.filter(c => c !== city)
+                                }));
+                              }}
+                              color="secondary"
+                            />
+                          }
+                          label={city}
+                          sx={{
+                            width: '100%',
+                            m: 0
+                          }}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              ) : (
+                <Box sx={{ 
+                  height: 300,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px dashed #e0e3e7',
+                  borderRadius: 1,
+                  bgcolor: 'background.paper'
+                }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {internationalSelections.selectedCountries.length > 0
+                      ? 'Select states to see cities'
+                      : 'Select countries and states first'}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          </Box>
+        )}
+      </Box>
+    </DialogContent>
+    
+    <DialogActions sx={{ 
+      px: 3, 
+      py: 2,
+      borderTop: '1px solid #e0e3e7',
+      bgcolor: '#f5f7fa'
+    }}>
+      <Button 
+        onClick={() => setOpenLocationModal(false)}
+        variant="outlined"
+        sx={{
+          color: '#6b778c',
+          borderColor: '#e0e3e7',
+          '&:hover': {
+            borderColor: '#b0bec5'
+          },
+          textTransform: 'none',
+          fontWeight: 500,
+          borderRadius: 1
+        }}
+      >
+        Cancel
+      </Button>
+      <Button
+        onClick={handleAddLocations}
+        disabled={
+          locationType === "domestic"
+            ? domesticSelections.selectedCities.length === 0
+            : internationalSelections.selectedCities.length === 0
+        }
+        variant="contained"
+        sx={{
+          bgcolor: '#4caf50',
+          '&:hover': {
+            bgcolor: '#43a047'
+          },
+          '&:disabled': {
+            bgcolor: '#e8f5e9',
+            color: '#a5d6a7'
+          },
+          textTransform: 'none',
+          fontWeight: 500,
+          borderRadius: 1
+        }}
+      >
+        Add Selected Locations
+      </Button>
+    </DialogActions>
+  </Dialog>
+</Grid>
+
+<Grid item xs={12}>
+  <Box>
+    <Button
+      variant="contained"
+      size="large"
+      startIcon={<AddIcon />}
+      onClick={() => setDescriptionModalOpen(true)}
+      sx={{
+        bgcolor: '#ff9800',
+        '&:hover': { bgcolor: '#fb8c00' },
+        boxShadow: 'none',
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Add Brand Description
+    </Button>
+    {errors.description && (
+      <Typography variant="caption" color="error" sx={{ ml: 1 }}>
+        {errors.description}
+      </Typography>
+    )}
+    
+    {/* Preview of the description (first 100 characters) */}
+   {data.brandDescription && (
+  <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e3e7', borderRadius: 1 }}>
+    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+      Description Preview
+    </Typography>
+    <div dangerouslySetInnerHTML={{ 
+      __html: data.brandDescription.length > 100 
+        ? `${data.brandDescription.substring(0, 100)}...` 
+        : data.brandDescription 
+    }} />
+  </Box>
+)}
+  </Box>
+</Grid>
+
+      </Grid>
+
+      {/* Communication Information Section */}
+      <Typography variant="h6" sx={{ mb: 3, color: "#ff9800" }}>
+        Communication Information
+      </Typography>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 5,
+        }}
+      >
+        {/* Full Name */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Full Name"
+            name="fullName"
+            value={data.fullName || ""}
+            onChange={handleChange}
+            error={!!errors.fullName}
+            helperText={errors.fullName}
+            variant="outlined"
+            size="medium "
+            required
+          />
+        </Grid>
+
+        {/* Email */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Secondary Email"
+            name="secondaryEmail"
+            type="secondaryEmail"
+            value={data.secondaryEmail || ""}
+            onChange={handleChange}
+            error={!!errors.secondaryEmail}
+            helperText={errors.secondaryEmail}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
+
+        {/* WhatsApp Number */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="WhatsApp Number"
+            name="whatsappNumber"
+            value={data.whatsappNumber || ""}
+            onChange={handleChange}
+            error={!!errors.whatsappNumber}
+            helperText={errors.whatsappNumber}
+            variant="outlined"
+            size="medium"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Pincode */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Pincode"
+            name="pincode"
+            value={data.pincode || ""}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+              onChange({ pincode: value });
+            }}
+            error={!!errors.pincode || !!pincodeError}
+            helperText={errors.pincode || pincodeError}
+            variant="outlined"
+            size="medium"
+            required
+            InputProps={{
+              endAdornment: loadingPincode ? (
+                <InputAdornment position="end">
+                  <CircularProgress size={20} />
+                </InputAdornment>
+              ) : null,
+            }}
+          />
+        </Grid>
+
+        {/* Head Office Address */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Head Office Address"
+            name="headOfficeAddress"
+            value={data.headOfficeAddress || ""}
+            onChange={handleChange}
+            error={!!errors.headOfficeAddress}
+            helperText={errors.headOfficeAddress}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
+
+        {/* State */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.state}>
+            <InputLabel size="small">State</InputLabel>
+            <Select
+              name="state"
+              value={data.state || ""}
+              label="State"
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              required
+            >
+              {states.map((state) => (
+                <MenuItem key={state.iso2} value={state.name}>
+                  {state.name}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.state && (
+              <Typography variant="caption" color="error">
+                {errors.state}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+
+        {/* City */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="City"
+            name="city"
+            value={data.city || ""}
+            onChange={handleChange}
+            error={!!errors.city}
+            helperText={errors.city}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
+      </Grid>
+
+      {/* Social Media Section */}
       <Typography variant="h6" sx={{ mb: 2, mt: 4, color: "#ff9800" }}>
         Social Media & Web Presence
       </Typography>
@@ -1648,23 +2576,115 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
           />
         </Grid>
 
-        {/* Brand Description - Full width */}
-        <Grid item xs={12}>
-          <TextField
-            fullWidth
-            label="Brand Description"
-            name="brandDescription"
-            value={data.brandDescription || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            error={!!errors.brandDescription}
-            helperText={errors.brandDescription}
-          />
-        </Grid>
-      </Grid>
+        {/* Brand Description Modal */}
+<Dialog
+  open={descriptionModalOpen}
+  onClose={() => setDescriptionModalOpen(false)}
+  maxWidth="md"
+  fullWidth
+  PaperProps={{
+    sx: {
+      borderRadius: 3,
+      boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
+      overflow: 'hidden'
+    }
+  }}
+>
+  <DialogTitle sx={{ 
+    bgcolor: '#f5f7fa',
+    borderBottom: '1px solid #e0e3e7',
+    py: 2,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  }}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
+      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+        Brand Description
+      </Typography>
     </Box>
+    <IconButton 
+      onClick={() => setDescriptionModalOpen(false)}
+      sx={{ color: '#6b778c' }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+  
+  <DialogContent sx={{ py: 3, px: 3 }}>
+    <Box sx={{ mt: 2 }}>
+     <Editor
+  apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
+  value={data.brandDescription || ""}
+  init={{
+    height: 400,
+    menubar: true,
+    plugins: [
+      "advlist autolink lists link image charmap print preview anchor",
+      "searchreplace visualblocks code fullscreen",
+      "insertdatetime media table paste help wordcount",
+    ],
+    toolbar:
+      "undo redo | formatselect | bold italic backcolor | \
+       alignleft aligncenter alignright alignjustify | \
+       bullist numlist outdent indent | removeformat | help | image",
+    images_upload_url: '/api/upload-image',
+    automatic_uploads: true,
+    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+  }}
+  onEditorChange={handleDescriptionChange}
+/>
+    </Box>
+  </DialogContent>
+  
+  <DialogActions sx={{ 
+    px: 3, 
+    py: 2,
+    borderTop: '1px solid #e0e3e7',
+    bgcolor: '#f5f7fa'
+  }}>
+    <Button 
+      onClick={() => setDescriptionModalOpen(false)}
+      variant="outlined"
+      sx={{
+        color: '#6b778c',
+        borderColor: '#e0e3e7',
+        '&:hover': {
+          borderColor: '#b0bec5'
+        },
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Cancel
+    </Button>
+    <Button
+  onClick={() => setDescriptionModalOpen(false)}
+  variant="contained"
+  sx={{
+    bgcolor: '#4caf50',
+    '&:hover': {
+      bgcolor: '#43a047'
+    },
+    textTransform: 'none',
+    fontWeight: 500,
+    borderRadius: 1
+  }}
+>
+  Save
+</Button>
+  </DialogActions>
+</Dialog>
+</Grid>
+
+    
+    </Box>
+
   );
+
 };
+
 
 export default BrandDetails;

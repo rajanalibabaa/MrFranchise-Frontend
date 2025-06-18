@@ -19,7 +19,7 @@ import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice.jsx";
 const dynamicComponents = {
   TopBrandThreevdocards: React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")
-  ), //first video section
+  ), //first video section0
   TopCafeBrandsFranchise: React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
   ), //3rd video section
