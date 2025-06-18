@@ -109,41 +109,7 @@ const ManageProfile = () => {
     }
   }, [selectedState, statesWithCities]);
 
-  return (
-    <div>
-      <h2>Select Indian State and City</h2>
 
-      <label>
-        State:
-        <select
-          value={selectedState}
-          onChange={(e) => setSelectedState(e.target.value)}
-        >
-          <option value="">-- Select State --</option>
-          {states.map((state) => (
-            <option key={state} value={state}>
-              {state}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      {cities.length > 0 && (
-        <label>
-          City:
-          <select>
-            <option value="">-- Select City --</option>
-            {cities.map((city) => (
-              <option key={city} value={city}>
-                {city}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-    </div>
-  );
-};
   useEffect(() => {
     const fetchData = async () => {
       if (!investorUUID || !AccessToken) {

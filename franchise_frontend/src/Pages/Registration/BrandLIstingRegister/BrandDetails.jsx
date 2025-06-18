@@ -624,10 +624,10 @@ const handleDescriptionChange = (content) => {
   
 
   return (
-    <Box sx={{ overflowY: "auto", pr: 1, mt: 0 }}>
+    <Box sx={{ overflowY: "auto", ml: 15, pr: 1, mt: 0 }}>
       {/* Brand Details Section */}
       <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
-        Personal Details
+       Login Credentials Details
       </Typography>
 
       <Grid
@@ -636,7 +636,7 @@ const handleDescriptionChange = (content) => {
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(1, 0.7fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}
@@ -751,7 +751,31 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
+  
+        {/* WhatsApp Number */}
+              <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="WhatsApp Number"
+            name="whatsappNumber"
+            value={data.whatsappNumber || ""}
+            onChange={handleChange}
+            error={!!errors.whatsappNumber}
+            helperText={errors.whatsappNumber}
+            variant="outlined"
+            size="medium"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
       </Grid>
+
 
       {/* OTP Verification Dialogs */}
       {/* Email Verification Dialog */}
@@ -882,20 +906,120 @@ const handleDescriptionChange = (content) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-
-  {/* Communication Information Section */}
-      <Typography variant="h6" sx={{ mb: 3, color: "#ff9800" }}>
-        Communication Information
+      <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
+        Brand Details
       </Typography>
+
       <Grid
         container
         spacing={2}
         sx={{
+          mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(1, 0.7fr)", xs: "1fr" },
           gap: 2,
         }}
       >
+    
+        {/* Brand Name */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Brand Name"
+            name="brandName"
+            value={formData.brandName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.brandName}
+            helperText={errors.brandName}
+            required
+          />
+        </Grid>
+            {/* Company Name */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Company Name"
+            name="companyName"
+            value={formData.companyName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.companyName}
+            helperText={errors.companyName}
+            required
+          />
+        </Grid>
+       
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Name"
+            name="ceoName"
+            value={data.ceoName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.ceoName}
+            helperText={errors.ceoName}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Email"
+            name="ceoEmail"
+            type="email"
+            value={data.ceoEmail || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.ceoEmail}
+            helperText={errors.ceoEmail}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Mobile No"
+            name="ceoMobile"
+            value={data.ceoMobile || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+            }}
+            error={!!errors.ceoMobile}
+            helperText={errors.ceoMobile}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Manager Name"
+            name="managerName"
+            value={data.managerName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.managerName}
+            helperText={errors.managerName}
+          />
+        </Grid>
+
+         <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
+        Communication Information
+      </Typography>
+ 
         {/* Full Name */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -929,27 +1053,7 @@ const handleDescriptionChange = (content) => {
           />
         </Grid>
 
-        {/* WhatsApp Number */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="WhatsApp Number"
-            name="whatsappNumber"
-            value={data.whatsappNumber || ""}
-            onChange={handleChange}
-            error={!!errors.whatsappNumber}
-            helperText={errors.whatsappNumber}
-            variant="outlined"
-            size="medium"
-            inputProps={{ maxLength: 10 }}
-            placeholder="Enter 10 digit number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">+91</InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
+      
 
 {/* Head Office Address */}
         <Grid item xs={12} sm={6} md={2.4}>
@@ -966,6 +1070,16 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
+
+             <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
 
         {/* Pincode */}
         <Grid item xs={12} sm={6} md={2.4}>
@@ -1037,19 +1151,21 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
-      </Grid>
 
-      {/* Social Media Section */}
-      <Typography variant="h6" sx={{ mb: 2, mt: 4, color: "#ff9800" }}>
+        </Grid>
+
+   {/* Social Media Section */}
+      <Typography variant="h6" sx={{ mb: 1, mt: 1, color: "#ff9800" }}>
         Social Media & Web Presence
       </Typography>
 
-      <Grid
+
+         <Grid
         container
         spacing={2}
         sx={{
           display: "grid",
-          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
           gap: 2,
         }}
       >
@@ -1113,6 +1229,8 @@ const handleDescriptionChange = (content) => {
           />
         </Grid>
 
+      
+
         {/* LinkedIn */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -1133,222 +1251,9 @@ const handleDescriptionChange = (content) => {
           />
         </Grid>
 
-        {/* Brand Description Modal */}
-<Dialog
-  open={descriptionModalOpen}
-  onClose={() => setDescriptionModalOpen(false)}
-  maxWidth="md"
-  fullWidth
-  PaperProps={{
-    sx: {
-      borderRadius: 3,
-      boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
-      overflow: 'hidden'
-    }
-  }}
->
-  <DialogTitle sx={{ 
-    bgcolor: '#f5f7fa',
-    borderBottom: '1px solid #e0e3e7',
-    py: 2,
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  }}>
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
-      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-        Brand Description
-      </Typography>
-    </Box>
-    <IconButton 
-      onClick={() => setDescriptionModalOpen(false)}
-      sx={{ color: '#6b778c' }}
-    >
-      <CloseIcon />
-    </IconButton>
-  </DialogTitle>
-  
-  <DialogContent sx={{ py: 3, px: 3 }}>
-    <Box sx={{ mt: 2 }}>
-      <Editor
-        apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
-        value={description}
-        init={{
-          height: 400,
-          menubar: true,
-          plugins: [
-            "advlist autolink lists link image charmap print preview anchor",
-            "searchreplace visualblocks code fullscreen",
-            "insertdatetime media table paste help wordcount",
-          ],
-          toolbar:
-            "undo redo | formatselect | bold italic backcolor | \
-             alignleft aligncenter alignright alignjustify | \
-             bullist numlist outdent indent | removeformat | help | image",
-          images_upload_url: '/api/upload-image', // Add your image upload endpoint
-          automatic_uploads: true,
-          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-        }}
-        onEditorChange={handleDescriptionChange}
-      />
-    </Box>
-  </DialogContent>
-  
-  <DialogActions sx={{ 
-    px: 3, 
-    py: 2,
-    borderTop: '1px solid #e0e3e7',
-    bgcolor: '#f5f7fa'
-  }}>
-    <Button 
-      onClick={() => setDescriptionModalOpen(false)}
-      variant="outlined"
-      sx={{
-        color: '#6b778c',
-        borderColor: '#e0e3e7',
-        '&:hover': {
-          borderColor: '#b0bec5'
-        },
-        textTransform: 'none',
-        fontWeight: 500,
-        borderRadius: 1
-      }}
-    >
-      Cancel
-    </Button>
-    <Button
-      onClick={() => {
-        onChange({ description });
-        setDescriptionModalOpen(false);
-      }}
-      variant="contained"
-      sx={{
-        bgcolor: '#4caf50',
-        '&:hover': {
-          bgcolor: '#43a047'
-        },
-        textTransform: 'none',
-        fontWeight: 500,
-        borderRadius: 1
-      }}
-    >
-      Save Description
-    </Button>
-  </DialogActions>
-</Dialog>
+    </Grid>
 
-    
-      </Grid>
-      <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
-        Brand Details
-      </Typography>
-
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          mt: 2,
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
-          gap: 2,
-        }}
-      >
-        {/* Company Name */}
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Company Name"
-            name="companyName"
-            value={formData.companyName || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            error={!!errors.companyName}
-            helperText={errors.companyName}
-            required
-          />
-        </Grid>
-        {/* Brand Name */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Brand Name"
-            name="brandName"
-            value={formData.brandName || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            error={!!errors.brandName}
-            helperText={errors.brandName}
-            required
-          />
-        </Grid>
-       
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="CEO/MD/Owner Name"
-            name="ceoName"
-            value={data.ceoName || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            error={!!errors.ceoName}
-            helperText={errors.ceoName}
-            required
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="CEO/MD/Owner Email"
-            name="ceoEmail"
-            type="email"
-            value={data.ceoEmail || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            error={!!errors.ceoEmail}
-            helperText={errors.ceoEmail}
-            required
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="CEO/MD/Owner Mobile No"
-            name="ceoMobile"
-            value={data.ceoMobile || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            inputProps={{ maxLength: 10 }}
-            placeholder="Enter 10 digit number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">+91</InputAdornment>
-              ),
-            }}
-            error={!!errors.ceoMobile}
-            helperText={errors.ceoMobile}
-            required
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Manager Name"
-            name="managerName"
-            value={data.managerName || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            error={!!errors.managerName}
-            helperText={errors.managerName}
-          />
-        </Grid>
-        {/* Established Year */}
+        {/* Established Year
         <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth error={!!errors.establishedYear}>
             <InputLabel size="medium">Established Year</InputLabel>
@@ -1378,7 +1283,7 @@ const handleDescriptionChange = (content) => {
           </FormControl>
         </Grid>
         {/* Franchise Since Year */}
-        <Grid item xs={12} sm={6} md={2.4}>
+        {/* <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth error={!!errors.franchiseSinceYear}>
             <InputLabel size="medium">Franchise Since Year</InputLabel>
             <Select
@@ -1405,7 +1310,7 @@ const handleDescriptionChange = (content) => {
               </Typography>
             )}
           </FormControl>
-        </Grid>
+        </Grid> */} 
 {/* Enhanced Expansion Location Section */}
 <Grid item xs={12}>
   <Box>
@@ -2320,6 +2225,128 @@ const handleDescriptionChange = (content) => {
   )}
 </Grid>
       </Grid>
+  {/* Communication Information Section */}
+     
+   
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
+       
+        {/* Brand Description Modal */}
+<Dialog
+  open={descriptionModalOpen}
+  onClose={() => setDescriptionModalOpen(false)}
+  maxWidth="md"
+  fullWidth
+  PaperProps={{
+    sx: {
+      borderRadius: 3,
+      boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
+      overflow: 'hidden'
+    }
+  }}
+>
+  <DialogTitle sx={{ 
+    bgcolor: '#f5f7fa',
+    borderBottom: '1px solid #e0e3e7',
+    py: 2,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  }}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
+      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+        Brand Description
+      </Typography>
+    </Box>
+    <IconButton 
+      onClick={() => setDescriptionModalOpen(false)}
+      sx={{ color: '#6b778c' }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+  
+  <DialogContent sx={{ py: 3, px: 3 }}>
+    <Box sx={{ mt: 2 }}>
+      <Editor
+        apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
+        value={data.brandDescription || ""}
+        init={{
+          height: 400,
+          menubar: true,
+          plugins: [
+            "advlist autolink lists link image charmap print preview anchor",
+            "searchreplace visualblocks code fullscreen",
+            "insertdatetime media table paste help wordcount",
+          ],
+          toolbar:
+            "undo redo | formatselect | bold italic backcolor | \
+             alignleft aligncenter alignright alignjustify | \
+             bullist numlist outdent indent | removeformat | help | image",
+          images_upload_url: '/api/upload-image', // Add your image upload endpoint
+          automatic_uploads: true,
+          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+        }}
+        onEditorChange={handleDescriptionChange}
+      />
+    </Box>
+  </DialogContent>
+  
+  <DialogActions sx={{ 
+    px: 3, 
+    py: 2,
+    borderTop: '1px solid #e0e3e7',
+    bgcolor: '#f5f7fa'
+  }}>
+    <Button 
+      onClick={() => setDescriptionModalOpen(false)}
+      variant="outlined"
+      sx={{
+        color: '#6b778c',
+        borderColor: '#e0e3e7',
+        '&:hover': {
+          borderColor: '#b0bec5'
+        },
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Cancel
+    </Button>
+    <Button
+      onClick={() => {
+        onChange({ description });
+        setDescriptionModalOpen(false);
+      }}
+      variant="contained"
+      sx={{
+        bgcolor: '#4caf50',
+        '&:hover': {
+          bgcolor: '#43a047'
+        },
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Save Description
+    </Button>
+  </DialogActions>
+</Dialog>
+
+    
+      </Grid>
+    
+     
 
     
     </Box>
