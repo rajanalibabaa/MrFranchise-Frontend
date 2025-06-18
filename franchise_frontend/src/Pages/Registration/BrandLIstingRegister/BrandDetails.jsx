@@ -1420,7 +1420,7 @@ const handleDescriptionChange = (content) => {
     alignItems: 'flex-end'
   }}>
     {/* Main Category Dropdown */}
-    <FormControl  sx={{width:200}}size="small">
+    <FormControl  sx={{width:200}}size="medium">
       <InputLabel>Main Category</InputLabel>
       <Select
         value={selectedCategory.main || ""}
@@ -1473,7 +1473,7 @@ const handleDescriptionChange = (content) => {
     </FormControl>
 
     {/* Child Category Dropdown */}
-    <FormControl fullWidth size="small" disabled={!selectedCategory.sub} sx={{width:200}}>
+    <FormControl fullWidth size="medium" disabled={!selectedCategory.sub} sx={{width:200}}>
       <InputLabel>Child Category</InputLabel>
       <Select
         value={selectedCategory.child || ""}
@@ -1505,7 +1505,7 @@ const handleDescriptionChange = (content) => {
       disabled={!selectedCategory.child}
       sx={{
         height: 40,
-        p:2,
+        p:3,
         pr:6,
         pl:6,
         bgcolor: '#ff9800',
@@ -1554,11 +1554,18 @@ const handleDescriptionChange = (content) => {
     </Box>
   )}
 </Grid>
-{/* Enhanced Expansion Location Section */}
+
+
+
+
+      </Grid>
+      <Grid display={'flex'} gap={5} mt={2} mb={2}>
+        {/* Enhanced Expansion Location Section */}
 <Grid item xs={12}>
   <Box>
     <Button
       variant="contained"
+      size="large"
       startIcon={<AddIcon />}
       onClick={() => setOpenLocationModal(true)}
       sx={{
@@ -2283,6 +2290,7 @@ const handleDescriptionChange = (content) => {
   <Box>
     <Button
       variant="contained"
+      size="large"
       startIcon={<AddIcon />}
       onClick={() => setDescriptionModalOpen(true)}
       sx={{
@@ -2318,9 +2326,6 @@ const handleDescriptionChange = (content) => {
   </Box>
 </Grid>
 
-
-
-
       </Grid>
 
       {/* Communication Information Section */}
@@ -2332,8 +2337,8 @@ const handleDescriptionChange = (content) => {
         spacing={2}
         sx={{
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
-          gap: 2,
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 5,
         }}
       >
         {/* Full Name */}
@@ -2347,7 +2352,7 @@ const handleDescriptionChange = (content) => {
             error={!!errors.fullName}
             helperText={errors.fullName}
             variant="outlined"
-            size="small"
+            size="medium "
             required
           />
         </Grid>
@@ -2364,7 +2369,7 @@ const handleDescriptionChange = (content) => {
             error={!!errors.secondaryEmail}
             helperText={errors.secondaryEmail}
             variant="outlined"
-            size="small"
+            size="medium"
             required
           />
         </Grid>
@@ -2380,7 +2385,7 @@ const handleDescriptionChange = (content) => {
             error={!!errors.whatsappNumber}
             helperText={errors.whatsappNumber}
             variant="outlined"
-            size="small"
+            size="medium"
             inputProps={{ maxLength: 10 }}
             placeholder="Enter 10 digit number"
             InputProps={{
@@ -2405,7 +2410,7 @@ const handleDescriptionChange = (content) => {
             error={!!errors.pincode || !!pincodeError}
             helperText={errors.pincode || pincodeError}
             variant="outlined"
-            size="small"
+            size="medium"
             required
             InputProps={{
               endAdornment: loadingPincode ? (
@@ -2428,7 +2433,7 @@ const handleDescriptionChange = (content) => {
             error={!!errors.headOfficeAddress}
             helperText={errors.headOfficeAddress}
             variant="outlined"
-            size="small"
+            size="medium"
             required
           />
         </Grid>
@@ -2443,7 +2448,7 @@ const handleDescriptionChange = (content) => {
               label="State"
               onChange={handleChange}
               variant="outlined"
-              size="small"
+              size="medium"
               required
             >
               {states.map((state) => (
@@ -2471,7 +2476,7 @@ const handleDescriptionChange = (content) => {
             error={!!errors.city}
             helperText={errors.city}
             variant="outlined"
-            size="small"
+            size="medium"
             required
           />
         </Grid>
