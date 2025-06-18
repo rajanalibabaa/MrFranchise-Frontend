@@ -220,7 +220,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         {/* Franchise Details Section */}
         <Grid item xs={12}>
           
-            <Typography variant="h6" sx={{ mb: 3, color: "#ff9800" }}>
+            <Typography variant="h6" fontWeight={ 700} sx={{ mb: 3, color: "#ff9800" }}>
               Franchise Details
             </Typography>
 
@@ -232,15 +232,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             )}
 
             {/* 5-column grid layout */}
-            <Grid
-              container
-              spacing={2}
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
-                gap: 5,
-              }}
-            >
+            <Grid >
               {/* Column 1 - Investment Range */}
               <Grid item>
                 <FormControl fullWidth error={!!errors["fico[0].investmentRange"]} required>
@@ -570,35 +562,17 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     height: '1px' // thin line
   }} 
 />
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
-          gap: 2,
-          mt: 3,
-        }}
-      >
-        {/* Franchise Network Section */}
-        <Grid item xs={12}>
-          
-            <Typography variant="h6"  color="#ff9800" sx={{ mb: 2, fontWeight: "bold" }}>
+      <Typography variant="h6" fontWeight={ 700}  color="#ff9800" sx={{ mb: 2, fontWeight: "bold" }}>
               Franchise Network
             </Typography>
+        {/* Franchise Network Section */}
+        <Grid item xs={12} display={'Grid'} gridTemplateColumns={'repeat(4, 1fr)'} gap={1}>
+          
+           
 
-            <Grid
-              container
-              spacing={2}
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-                gap: 2,
-              }}
-            >
-              <Grid item>
+          <Grid item>
                 <TextField
-                  fullWidth
+                  // fullWidth
                   label="Company Owned Outlets"
                   name="companyOwnedOutlets"
                   value={data.companyOwnedOutlets || ""}
@@ -613,7 +587,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
               <Grid item>
                 <TextField
-                  fullWidth
+                  // fullWidth
                   label="Franchise Outlets"
                   name="franchiseOutlets"
                   value={data.franchiseOutlets || ""}
@@ -628,7 +602,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
               <Grid item>
                 <TextField
-                  fullWidth
+                  // fullWidth
                   label="Total Outlets"
                   name="totalOutlets"
                   value={data.totalOutlets || ""}
@@ -643,7 +617,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
 <Grid item>
       <TextField
-        fullWidth
+        // fullWidth
         label="Current Outlets Located At"
         name="currentOutletsLocatedAt"
         value={data.currentOutletsLocatedAt || ""}
@@ -655,7 +629,13 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         // minRows={2}
       />
     </Grid>
-               <Grid item>
+            
+    
+               
+              
+            </Grid>
+         <Grid mt={5}mb={5}display={'Grid'} gridTemplateColumns={'repeat(2, 1fr)'} >
+             <Grid >
                 <FormControl component="fieldset" fullWidth error={!!errors.internationalExpansion} required>
                   <FormLabel component="legend" >Are You Looking For Internation Expansion</FormLabel>
                   <Box sx={{ display: "flex", gap: 2 }}>
@@ -704,30 +684,19 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   )}
                 </FormControl>
               </Grid>
-              
-            </Grid>
-    
-        </Grid>
-
-        {/* Support and Training Section */}
-        <Grid item xs={12}>
-          
-            <Typography variant="h6"  color="#ff9800" sx={{ mb: 2, fontWeight: "bold" }}>
+         </Grid>
+ 
+<Typography variant="h6"  color="#ff9800" sx={{ mb: 2, fontWeight: "bold" }}>
               Support and Training
             </Typography>
-
-            <Grid
-              container
-              spacing={2}
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-                gap: 2,
-              }}
-            >
+        {/* Support and Training Section */}
+        <Grid display={'Grid'} gridTemplateColumns={'repeat(4, 1fr)'} gap={1} item xs={12}>
+          
+            
+         
               <Grid item>
                 <TextField
-                  fullWidth
+                select
                   label="Requirement Support"
                   name="requirementSupport"
                   value={data.requirementSupport || ""}
@@ -735,12 +704,16 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   error={!!errors.requirementSupport}
                   helperText={errors.requirementSupport}
                   required
-                />
+                  sx={{ minWidth:"31vh" }}
+                >
+                  <MenuItem value="Yes">Yes</MenuItem>
+                  <MenuItem value="No">No</MenuItem>
+                </TextField>
               </Grid>
 
               <Grid item>
                 <TextField
-                  fullWidth
+                select
                   label="Staff Training"
                   name="staffTraining"
                   value={data.staffTraining || ""}
@@ -748,11 +721,15 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   error={!!errors.staffTraining}
                   helperText={errors.staffTraining}
                   required
-                />
+                  sx={{ minWidth:"31vh" }}
+                >
+                  <MenuItem value="Yes">Yes</MenuItem>
+                  <MenuItem value="No">No</MenuItem>
+                </TextField>
               </Grid>
               <Grid item>
                 <TextField
-                  fullWidth
+                select
                   label="Staff Recruitment"
                   name="staffRecruitment"
                   value={data.staffRecruitment || ""}
@@ -760,11 +737,15 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   error={!!errors.staffRecruitment}
                   helperText={errors.staffRecruitment}
                   required
-                />
+                  sx={{ minWidth:"31vh" }}
+                >
+                  <MenuItem value="Yes">Yes</MenuItem>
+                  <MenuItem value="No">No</MenuItem>
+                </TextField>
               </Grid>
 
               <Grid item>
-                <FormControl fullWidth error={!!errors.agreementPeriod} required>
+                <FormControl sx ={{ minWidth:"31vh" }}  error={!!errors.agreementPeriod} required>
                   <InputLabel>Agreement Period</InputLabel>
                   <Select
                     value={data.agreementPeriod || ""}
@@ -784,9 +765,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 </FormControl>
               </Grid>
             </Grid>
-        </Grid>
         
-      </Grid>
       <Divider 
   sx={{ 
     my: 2, // vertical margin

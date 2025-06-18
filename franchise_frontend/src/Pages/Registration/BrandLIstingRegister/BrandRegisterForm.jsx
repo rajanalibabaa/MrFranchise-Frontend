@@ -1242,9 +1242,9 @@ const BrandRegisterForm = () => {
               onClick={handleBack}
               sx={{
                 mr: 2,
-                color: "white",
-                backgroundColor: "black",
-                "&:hover": { backgroundColor: "#e0e0e0" },
+                color: "black",
+                backgroundColor: "#f5f5f5",
+                "&:hover": { backgroundColor: "#f0f0f0" },
               }}
             >
               Back

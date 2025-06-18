@@ -634,7 +634,7 @@ const handleDescriptionChange = (content) => {
         container
         spacing={2}
         sx={{
-          mt: 2,
+          mt: 3,
           display: "grid",
           gridTemplateColumns: { md: "repeat(1, 0.7fr)", xs: "1fr" },
           gap: 2,
@@ -1164,6 +1164,7 @@ const handleDescriptionChange = (content) => {
         container
         spacing={2}
         sx={{
+          mt: 3,
           display: "grid",
           gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
           gap: 2,
