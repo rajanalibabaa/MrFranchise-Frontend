@@ -2239,7 +2239,7 @@ const handleDescriptionChange = (content) => {
 
     {/* Child Category Dropdown */}
     <FormControl fullWidth size="small" disabled={!selectedCategory.sub} sx={{width:200}}>
-      <InputLabel>Child Category</InputLabel>
+      <InputLabel>Child Category    </InputLabel>
       <Select
         value={selectedCategory.child || ""}
         label="Child Category"
