@@ -332,7 +332,7 @@ function BrandViewPage() {
           <strong>Name:</strong> Fiery Pot Foods Team
         </Typography>
         <Typography>
-          <strong>Phone:</strong> +91 98765 43210
+          <strong>Phone:</strong> +91 98765 43210 
         </Typography>
         <Typography>
           <strong>Email:</strong> contact@fierypotfoods.com

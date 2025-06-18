@@ -1,80 +1,503 @@
-import React from 'react'
-import { Box, Typography, Avatar, Link } from "@mui/material";
-import img from "../../assets/images/brandLogo.jpg"; // Adjust the path as necessaryv
+import React, { useState } from 'react';
+import {
+  Box, Typography, Paper, Button, FormControl, InputLabel,
+  Select, MenuItem, TextField, Rating, Avatar, Divider,
+  IconButton, Chip, Badge, useMediaQuery, useTheme, Snackbar, Alert
+} from "@mui/material";
+import {
+  Star, StarBorder, Email, Feedback, 
+  Report, CheckCircle, Menu, ArrowBack
+} from '@mui/icons-material';
+import { alpha } from '@mui/material/styles';
 
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { styled } from '@mui/material/styles';
 
-const ResponseManager = () => {
+// Color Palette
+const colors = {
+  pistachio: '#93C572',
+  lightOrange: '#FFB347',
+  white: '#FFFFFF',
+  black: '#2C2C2C',
+  lightGray: '#F5F5F5',
+  darkGray: '#555555'
+};
+
+// Styled Components
+const DashboardContainer = styled(Box)(({ theme }) => ({
+  minHeight: '100vh',
+  backgroundColor: colors.lightGray,
+  [theme.breakpoints.up('md')]: {
+    padding: theme.spacing(4)
+  }
+}));
+
+const DashboardCard = styled(Paper)(({ theme }) => ({
+  borderRadius: '16px',
+  overflow: 'hidden',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+  backgroundColor: colors.white,
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-4px)',
+    boxShadow: '0 12px 28px rgba(0,0,0,0.12)'
+  }
+}));
+
+const PrimaryButton = styled(Button)(({ theme }) => ({
+  backgroundColor: colors.pistachio,
+  color: colors.white,
+  fontWeight: 600,
+  padding: '10px 24px',
+  borderRadius: '12px',
+  '&:hover': {
+    backgroundColor: '#7DA95D',
+    boxShadow: '0 4px 12px rgba(147, 197, 114, 0.3)'
+  }
+}));
+
+const SecondaryButton = styled(Button)(({ theme }) => ({
+  backgroundColor: colors.lightOrange,
+  color: colors.white,
+  fontWeight: 600,
+  padding: '10px 24px',
+  borderRadius: '12px',
+  '&:hover': {
+    backgroundColor: '#E69F42',
+    boxShadow: '0 4px 12px rgba(255, 179, 71, 0.3)'
+  }
+}));
+
+const SectionHeader = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(3),
+  backgroundColor: colors.pistachio,
+  color: colors.white
+}));
+
+// Rating Component
+const CustomRating = ({ value, onChange }) => (
+  <Rating
+    value={value}
+    precision={0.5}
+    onChange={onChange}
+    icon={<Star fontSize="inherit" style={{ color: colors.lightOrange }} />}
+    emptyIcon={<StarBorder fontSize="inherit" style={{ color: colors.darkGray }} />}
+    size="large"
+  />
+);
+
+// Feedback Form Component
+const FeedbackForm = ({ showSnackbar }) => {
+  const [rating, setRating] = useState(3);
+  const [category, setCategory] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { investorUUID, AccessToken } = useSelector((state) => state.auth || {});
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    if (!investorUUID || !AccessToken) {
+      showSnackbar("Please login to submit feedback", "error");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `https://franchise-backend-wgp6.onrender.com/api/v1/feedback/createFeedback/${investorUUID}`,
+        { topic: category, rating, feedback },
+        { headers: { "Content-Type": "application/json", Authorization: `Bearer ${AccessToken}` } }
+      );
+      showSnackbar(response.data.message || "Feedback submitted!", "success");
+      setCategory('');
+      setFeedback('');
+      setRating(3);
+    } catch (error) {
+      showSnackbar(error.response?.data?.message || "Submission failed", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div>
-    {/* <Box>
-   <ProfilePage />
-   </Box> */}
-   <Box sx={{ p: 4, backgroundColor: "#f5f5f5", borderRadius: 3, maxWidth: 1100, mx: "auto", boxShadow: 3,marginTop: 10,marginLeft: 3 }}>
-   <Typography variant="h5" sx={{ mb: 3, fontWeight: 800, textAlign: "center" }}>
-     RESPONSE MANAGER
-     
-   </Typography>
+    <DashboardCard>
+      <SectionHeader>
+        <Avatar sx={{ bgcolor: colors.white, color: colors.pistachio, mr: 2 }}>
+          <Feedback />
+        </Avatar>
+        <Typography variant="h6" fontWeight="600">Share Your Feedback</Typography>
+      </SectionHeader>
+      
+      <Box p={3}>
+        <Box textAlign="center" mb={4}>
+          <Typography variant="body1" color={colors.darkGray} mb={2}>
+            How would you rate your experience?
+          </Typography>
+          <CustomRating value={rating} onChange={(e, newValue) => setRating(newValue)} />
+        </Box>
 
-   <Box
-     sx={{
-       display: "flex",
-       flexDirection: { xs: "column", md: "row" },
-       gap: 3,
-       alignItems: "center",
-       backgroundColor: "#fff",
-       borderRadius: 2,
-       border: "1px solid #ddd",
-       p: 3,
-     }}
-   >
-     <Box sx={{ flex: 1, textAlign: "left", flexGrow: 1,paddingRight: 20 }}>
-       <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-         Account Manager
-       </Typography>
-       <Typography><strong>Name:</strong> John Doe</Typography>
-       <Typography>
-         <strong>Mobile:</strong>{" "}
-         <Link href="tel:+917667857887" underline="hover">
-           +91 7667857887
-         </Link>
-       </Typography>
-       <Typography>
-         <strong>Email:</strong>{" "}
-         <Link href="mailto:arul03sekar@gmail.com.net" underline="hover">
-           arul03sekar@gmail.com.net
-         </Link>
-       </Typography>
-       <Typography><strong>Role:</strong> Investor</Typography>
-       <Box
-         sx={{
-           mt: 2,
-           p: 2,
-           backgroundColor: "#f0f0f0",
-           borderRadius: 2,
-           border: "1px solid #ccc",
-         }}
-       >
-         <Typography variant="body2" sx={{ width: "100%" }}>
-           <strong>Description:</strong> Lorem ipsum, dolor sit amet consectetur adipisicing elit. 
-           In nesciunt eaque libero delectus? Pariatur assumenda sit laborum nesciunt sint,
-           tempore cupiditate modi ducimus provident quis eos praesentium nihil dicta deserunt.
-         </Typography>
-       </Box>
-     </Box>
+        <form onSubmit={handleSubmit}>
+          <FormControl fullWidth sx={{ mb: 3 }}>
+            <InputLabel>Category</InputLabel>
+            <Select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              label="Category"
+              sx={{ borderRadius: '12px' }}
+              required
+            >
+              {["Service", "Platform", "Support", "Other"].map(item => (
+                <MenuItem key={item} value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-     <Box sx={{ flexShrink: 0 }}>
-       <Avatar
-         alt="Manager Logo"
-         src={img}
-         
-         sx={{ width: 120, height: 120, borderRadius: 2, }}
-         variant="rounded"
-       />
-     </Box>
-   </Box>
- </Box>
- </div>
-  )
-}
+          <TextField
+            label="Your Feedback"
+            multiline
+            rows={5}
+            fullWidth
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            sx={{ mb: 3, borderRadius: '12px' }}
+            required
+          />
 
-export default ResponseManager
+          <Box display="flex" justifyContent="flex-end">
+            <PrimaryButton 
+              type="submit" 
+              disabled={isSubmitting}
+              startIcon={<CheckCircle />}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+            </PrimaryButton>
+          </Box>
+        </form>
+      </Box>
+    </DashboardCard>
+  );
+};
+
+// Complaint Form Component
+const ComplaintForm = ({ showSnackbar }) => {
+  const [category, setCategory] = useState('');
+  const [complaint, setComplaint] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { investorUUID, AccessToken } = useSelector((state) => state.auth || {});
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    if (!investorUUID || !AccessToken) {
+      showSnackbar("Please login to submit a complaint", "error");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `https://franchise-backend-wgp6.onrender.com/api/v1/complaint/createComplaint/${investorUUID}`,
+        { topic: category, complaint },
+        { headers: { "Content-Type": "application/json", Authorization: `Bearer ${AccessToken}` } }
+      );
+      showSnackbar(response.data.message || "Complaint submitted!", "success");
+      setCategory('');
+      setComplaint('');
+    } catch (error) {
+      showSnackbar(error.response?.data?.message || "Submission failed", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <DashboardCard>
+      <SectionHeader sx={{ backgroundColor: colors.lightOrange }}>
+        <Avatar sx={{ bgcolor: colors.white, color: colors.lightOrange, mr: 2 }}>
+          <Report />
+        </Avatar>
+        <Typography variant="h6" fontWeight="600">File a Complaint</Typography>
+      </SectionHeader>
+      
+      <Box p={3}>
+        <form onSubmit={handleSubmit}>
+          <FormControl fullWidth sx={{ mb: 3 }}>
+            <InputLabel>Issue Type</InputLabel>
+            <Select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              label="Issue Type"
+              sx={{ borderRadius: '12px' }}
+              required
+            >
+              {["Technical", "Billing", "Service", "Other"].map(item => (
+                <MenuItem key={item} value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <TextField
+            label="Detailed Complaint"
+            multiline
+            rows={5}
+            fullWidth
+            value={complaint}
+            onChange={(e) => setComplaint(e.target.value)}
+            sx={{ mb: 3, borderRadius: '12px' }}
+            required
+          />
+
+          <Box display="flex" justifyContent="flex-end">
+            <SecondaryButton 
+              type="submit" 
+              disabled={isSubmitting}
+              startIcon={<Report />}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
+            </SecondaryButton>
+          </Box>
+        </form>
+      </Box>
+    </DashboardCard>
+  );
+};
+
+// Contact Us Component
+const ContactUs = () => (
+  <DashboardCard>
+    <SectionHeader>
+      <Avatar sx={{ bgcolor: colors.white, color: colors.pistachio, mr: 2 }}>
+        <Email />
+      </Avatar>
+      <Typography variant="h6" fontWeight="600">Contact Our Team</Typography>
+    </SectionHeader>
+    
+    <Box p={3} textAlign="center">
+      <Typography variant="body1" color={colors.darkGray} mb={3}>
+        Have questions? Reach out to our support team directly.
+      </Typography>
+      
+      <Chip
+        icon={<Email />}
+        label="support@mrfranchise.com"
+        component="a"
+        href="https://mail.google.com/mail/?view=cm&fs=1&to=support@mrfranchise.com&su=Support%20Request&body=Hi%20Team%2C%20I%20have%20a%20question..."
+        target="_blank"
+        rel="noopener noreferrer"
+        clickable
+        sx={{
+          p: 2,
+          fontSize: '1rem',
+          backgroundColor: colors.pistachio,
+          color: colors.white,
+          '&:hover': {
+            backgroundColor: '#7DA95D'
+          }
+        }}
+      />
+
+      <Typography variant="body2" color={colors.darkGray} mt={3}>
+        We typically respond within 24 hours.
+      </Typography>
+    </Box>
+  </DashboardCard>
+);
+
+// Main Dashboard Component
+const ResponseManagerDashboard = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [activeTab, setActiveTab] = useState('feedback');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success' // 'success', 'error', 'warning', 'info'
+  });
+
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity
+    });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const tabs = [
+    { 
+      id: 'feedback', 
+      label: 'Feedback', 
+      icon: <Feedback />, 
+      component: <FeedbackForm showSnackbar={showSnackbar} /> 
+    },
+    { 
+      id: 'complaint', 
+      label: 'Complaint', 
+      icon: <Report />, 
+      component: <ComplaintForm showSnackbar={showSnackbar} /> 
+    },
+    { 
+      id: 'contact', 
+      label: 'Contact Us', 
+      icon: <Email />, 
+      component: <ContactUs /> 
+    }
+  ];
+
+  return (
+    <>
+      <DashboardContainer>
+        {isMobile ? (
+          // Mobile View
+          <Box>
+            {mobileMenuOpen ? (
+              <Box>
+                <SectionHeader>
+                  <IconButton onClick={() => setMobileMenuOpen(false)} sx={{ color: colors.white }}>
+                    <ArrowBack />
+                  </IconButton>
+                  <Typography variant="h6" ml={2}>Menu</Typography>
+                </SectionHeader>
+                
+                <Box p={2}>
+                  {tabs.map(tab => (
+                    <Box 
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        setMobileMenuOpen(false);
+                      }}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        p: 2,
+                        mb: 1,
+                        borderRadius: '8px',
+                        backgroundColor: activeTab === tab.id ? alpha(colors.pistachio, 0.1) : 'transparent',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: alpha(colors.pistachio, 0.05)
+                        }
+                      }}
+                    >
+                      <Avatar sx={{ 
+                        bgcolor: activeTab === tab.id ? colors.pistachio : colors.lightGray,
+                        color: activeTab === tab.id ? colors.white : colors.darkGray,
+                        mr: 2,
+                        width: 36,
+                        height: 36
+                      }}>
+                        {tab.icon}
+                      </Avatar>
+                      <Typography fontWeight={activeTab === tab.id ? 600 : 400}>
+                        {tab.label}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            ) : (
+              <Box>
+                <SectionHeader>
+                  <IconButton onClick={() => setMobileMenuOpen(true)} sx={{ color: colors.white }}>
+                    <Menu />
+                  </IconButton>
+                  <Typography variant="h6" ml={2}>
+                    {tabs.find(t => t.id === activeTab)?.label}
+                  </Typography>
+                </SectionHeader>
+                
+                <Box p={2}>
+                  {tabs.find(t => t.id === activeTab)?.component}
+                </Box>
+              </Box>
+            )}
+          </Box>
+        ) : (
+          // Desktop View
+          <Box display="flex" maxWidth={1200} mx="auto">
+            {/* Sidebar */}
+            <Box width={240} mr={3}>
+              <DashboardCard>
+                <SectionHeader>
+                  <Typography variant="h6" fontWeight="600">Support Center</Typography>
+                </SectionHeader>
+                
+                <Box p={2}>
+                  {tabs.map(tab => (
+                    <Box 
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        p: 2,
+                        mb: 1,
+                        borderRadius: '8px',
+                        backgroundColor: activeTab === tab.id ? alpha(colors.pistachio, 0.1) : 'transparent',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: alpha(colors.pistachio, 0.05)
+                        }
+                      }}
+                    >
+                      <Avatar sx={{ 
+                        bgcolor: activeTab === tab.id ? colors.pistachio : colors.lightGray,
+                        color: activeTab === tab.id ? colors.white : colors.darkGray,
+                        mr: 2,
+                        width: 36,
+                        height: 36
+                      }}>
+                        {tab.icon}
+                      </Avatar>
+                      <Typography fontWeight={activeTab === tab.id ? 600 : 400}>
+                        {tab.label}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </DashboardCard>
+            </Box>
+            
+            {/* Main Content */}
+            <Box flex={1}>
+              {tabs.find(t => t.id === activeTab)?.component}
+            </Box>
+          </Box>
+        )}
+      </DashboardContainer>
+
+      {/* Global Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={2000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
+  );
+};
+
+export default ResponseManagerDashboard;

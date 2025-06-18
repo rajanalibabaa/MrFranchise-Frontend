@@ -1,213 +1,336 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import {
-  Box, TextField, Typography, Paper, Button
-} from "@mui/material";
+  Box,
+  Select,
+  MenuItem,
+  Typography,
+  Paper,
+  FormControl,
+  InputLabel,
+} from '@mui/material';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { Link } from '@mui/material';
 
-const BrandListingController = ({ brandData = {} }) => {
-  const navigate = useNavigate();
-  const [contact, setContact] = useState('');
-  const [otp, setOtp] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [error, setError] = useState('');
-  const [isOtpVerifyOpen, setIsOtpVerifyOpen] = useState(false);
-  const [correctOtp] = useState('123456'); // Replace with backend check
 
-  const isValidPhone = (value) => /^[0-9]{10,}$/.test(value);
-  const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-  const handleSendOtp = () => {
-    if (!isValidPhone(contact) && !isValidEmail(contact)) {
-      setError('Please enter a valid phone number or email address.');
-      return;
-    }
-    setError('');
-    setOtpSent(true);
-    console.log(`OTP sent to ${contact}`);
+const ProfileSection = () => {
+  const brandUUID = useSelector((state) => state.auth?.brandUUID);
+  const AccessToken = useSelector((state) => state.auth?.AccessToken);
+  const [selectedSection, setSelectedSection] = useState('');
+  const [branddata, setBranddata] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!brandUUID || !AccessToken) {
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          // `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing/${brandUUID}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingByUUID/${brandUUID}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${AccessToken}`,
+            },
+          }
+        );
+
+        // console.log("Response from API:", response.data.data);
+        if (response.data && response.data.data) {
+          const data = response.data.data;
+          // console.log("Fetched Brand Data:", data);
+          if (data.mobileNumber?.startsWith('+91')) {
+            data.mobileNumber = data.mobileNumber.replace('+91', '');
+          }
+          if (data.whatsappNumber?.startsWith('+91')) {
+            data.whatsappNumber = data.whatsappNumber.replace('+91', '');
+          }
+          setBranddata(data);
+        }
+      } catch (error) {
+        console.error("Error fetching brand data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [brandUUID, AccessToken]);
+
+  const handleChange = (event) => {
+    setSelectedSection(event.target.value);
   };
+  console.log("Brand Data:", branddata.franchiseDetails);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (otp === correctOtp) {
-      setError('');
-      setIsOtpVerifyOpen(false);
-      navigate('/brandlistingform');
-    } else {
-      setError('Invalid OTP. Please try again.');
-    }
-  };
-
-  const handleOtpModal = () => {
-    setIsOtpVerifyOpen(true);
-    setOtp('');
-    setOtpSent(false);
-    setError('');
-    setContact('');
-  };
-
-//   const renderField = (label, value) => (
-//     <Typography><strong>{label}:</strong> {value || 'N/A'}</Typography>
-//   );
-
-  return (
-    <div style={{ display: "flex", marginTop: -30 }}>
-      <Box
-        sx={{
-          p: 3,
-          backgroundColor: "#f9f9f9",
-          borderRadius: 4,
-          boxShadow: 3,
-          mx: "auto",
-          mt: 4,
-          padding: 10,
-          height: "auto",
-          width: "100%",
-        }}
-      >
-        {isOtpVerifyOpen && (
-          <div style={{
-            backgroundColor: 'white',
-            position: "fixed",
-            top: "40%",
-            right: "3%",
-            zIndex: 5,
-            padding: "20px",
-            borderRadius: "8px",
-            boxShadow: "0 0 10px rgba(0,0,0,0.2)"
-          }}>
-            <Box sx={{ width: 300, display: "flex", flexDirection: "column", gap: 2 }}>
-              <TextField
-                label="Phone or Email"
-                variant="outlined"
-                fullWidth
-                value={contact}
-                onChange={(e) => setContact(e.target.value)}
-              />
-              {otpSent && (
-                <TextField
-                  label="Enter OTP"
-                  variant="outlined"
-                  fullWidth
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                />
-              )}
-              {error && (
-                <Typography sx={{ color: 'red', fontSize: '14px' }}>
-                  {error}
-                </Typography>
-              )}
-              <Button
-                onClick={otpSent ? handleSubmit : handleSendOtp}
-                sx={{ backgroundColor: "#007bff", color: "#fff", fontWeight: 600 }}
+  // console.log("Brand Data:", branddata.franchiseDetails.map((item) => item.investmentRange));
+  const renderContent = () => {
+    switch (selectedSection) {
+      case 'personalDetails':
+        return (
+          <Paper sx={{ p: 4 }}>
+            <Typography variant="h5" gutterBottom>Personal Details</Typography>
+            <Typography>FullName: {branddata.personalDetails.fullName}</Typography>
+            <Typography>Email: {branddata.personalDetails.email}</Typography>
+            <Typography>Mobile Number: {branddata.personalDetails.mobileNumber}</Typography>
+            {/* <Typography>WhatsApp Number: {branddata.personalDetails.whatsappNumber}</Typography> */}
+            <Typography>Brand Name: {branddata.personalDetails.brandName}</Typography>
+            <Typography>Company Name: {branddata.personalDetails.companyName}</Typography>
+            <Typography>Country: {branddata.personalDetails.country}</Typography>
+            <Typography>Pincode: {branddata.personalDetails.pincode}</Typography>
+            <Typography>Head Office Address: {branddata.personalDetails.headOfficeAddress}</Typography>
+            <Typography>State: {branddata.personalDetails.state}</Typography>
+            <Typography>City: {branddata.personalDetails.city}</Typography>
+            <Typography>Established Year: {branddata.personalDetails.establishedYear}</Typography>
+            {/* <Typography>Expansion Location: {branddata.expansionLocation}</Typography> */}
+            <Typography>
+              Website:
+              <Link
+                href={branddata.personalDetails.website || "https://example.com"}
+                target="_blank"
+                rel="noopener"
+                sx={{ ml: 1 }}
               >
-                {otpSent ? 'Verify OTP' : 'Request OTP'}
-              </Button>
-            </Box>
-          </div>
-        )}
+                {branddata.personalDetails.website || "https://example.com"}
+              </Link>
+            </Typography>
 
-        <Typography
-          variant="h4"
-          sx={{ mb: 3, fontWeight: 700, textAlign: "center", color: "#333" }}
-        >
-          Brand Listing
-        </Typography>
+            <Typography>
+              Facebook:
+              <Link
+                href={branddata.personalDetails.facebook || "https://facebook.com/example"}
+                target="_blank"
+                rel="noopener"
+                sx={{ ml: 1 }}
+              >
+                {branddata.personalDetails.facebook || "https://facebook.com/example"}
+              </Link>
+            </Typography>
 
-        <Button
-          sx={{
-            backgroundColor: "#f29724",
-            color: "#fafafa",
-            ml: 120,
-            ":hover": { backgroundColor: "#fb8c00" },
-            width: "200px"
-          }}
-          onClick={handleOtpModal}
-        >
-          Edit Profile
-        </Button>
+            <Typography>
+              Instagram:
+              <Link
+                href={branddata.personalDetails.instagram || "https://instagram.com/example"}
+                target="_blank"
+                rel="noopener"
+                sx={{ ml: 1 }}
+              >
+                {branddata.personalDetails.instagram || "https://instagram.com/example"}
+              </Link>
+            </Typography>
 
-        {/* Brand Details */}
-        {/* <Box mt={3}>
-          <Typography variant="h5" fontWeight={700}>Brand Details</Typography>
-          <Paper sx={{ p: 2, mt: 2 }}>
-            {Object.entries(brandData).slice(0, 20).map(([key, value]) => (
-              renderField(key, value)
-            ))}
+            <Typography>
+              LinkedIn:
+              <Link
+                href={branddata.personalDetails.linkedin || "https://linkedin.com/company/example"}
+                target="_blank"
+                rel="noopener"
+                sx={{ ml: 1 }}
+              >
+                {branddata.personalDetails.linkedin || "https://linkedin.com/company/example"}
+              </Link>
+            </Typography>
+
           </Paper>
-        </Box> */}
+        );
+      case 'franchiseDetails':
+        return (
+          // <Paper sx={{ p: 4 }}>
+          //   <Typography variant="h5" gutterBottom>Franchise Details</Typography>
+          //   <Typography>Investment Range: {branddata.investmentRange}</Typography>
+          //   <Typography>Area Required: {branddata.areaRequired}</Typography>
+          //   <Typography>Franchise Model: {branddata.franchiseModel}</Typography>
+          //   <Typography>Franchise Type: {branddata.franchiseType}</Typography>
+          //   <Typography>Franchise Fee: {branddata.franchiseFee}</Typography>
+          //   <Typography>Royalty Fee: {branddata.royaltyFee}</Typography>
+          //   <Typography>Interior Cost: {branddata.interiorCost}</Typography>
+          //   <Typography>Exterior Cost: {branddata.exteriorCost}</Typography>
+          //   <Typography>Other Cost: {branddata.otherCost}</Typography>
+          //   <Typography>ROI: {branddata.roi}</Typography>
+          //   <Typography>Break Even: {branddata.breakEven}</Typography>
+          //   <Typography>Required Investment Capital: {branddata.requireInvestmentCapital}</Typography>
+          //   <Typography>Company Owned Outlets: {branddata.companyOwnedOutlets}</Typography>
+          //   <Typography>Franchise Outlets: {branddata.franchiseOutlets}</Typography>
+          //   <Typography>Total Outlets: {branddata.totalOutlets}</Typography>
+          //   <Typography>Requirement Support: {branddata.requirementSupport}</Typography>
+          //   <Typography>Training Provided By: {branddata.trainingProvidedBy}</Typography>
+          //   <Typography>Agreement Periods: {branddata.agreementPeriods}</Typography>
+          //   <Typography>Property Type: {branddata.propertyType}</Typography>
+          // </Paper>
+          <div>
+            <Typography variant="h5" gutterBottom>Franchise Details</Typography>
+
+            {branddata.franchiseDetails && branddata.franchiseDetails.modelsOfFranchise.length > 0 ? (
+              <div>
+                {
+                  branddata.franchiseDetails.modelsOfFranchise.map((item, index) => (
+                    <div key={index}>
+
+
+                      <Typography>investmentRange: {item.investmentRange}</Typography>
+                      <Typography>areaRequired: {item.areaRequired}</Typography>
+                      <Typography>franchiseModel: {item.franchiseModel}</Typography>
+                      <Typography>franchiseType: {item.franchiseType}</Typography>
+                      <Typography>franchiseFee: {item.franchiseFee}</Typography>
+                      <Typography>royaltyFee: {item.royaltyFee}</Typography>
+                      <Typography>interiorCost: {item.interiorCost}</Typography>
+                      <Typography>exteriorCost: {item.exteriorCost}</Typography>
+                      <Typography>otherCost: {item.otherCost}</Typography>
+                      <Typography>roi: {item.roi}</Typography>
+                      <Typography>breakEven: {item.breakEven}</Typography>
+                      <Typography>required Investment Capital: {!item.requiredInvestmentCapital ? ("N/A") : (
+                        <div>{item.requiredInvestmentCapital}</div>
+                      )}</Typography>
+                      <Typography>propertyType: {item.propertyType}</Typography>
+                    </div>
+                  ))
+                }
+              </div>
+            )
+              : (
+                <Typography color="textSecondary">No franchise details available.</Typography>
+              )}
+          </div>
+        );
+      case 'brandDetails':
+        return (
+          <Paper sx={{ p: 4 }}>
+            <Typography variant="h5" gutterBottom>Brand Details</Typography>
+
+            <Typography>PAN Card:</Typography>
+            {branddata.brandDetails.pancard?.[0] ? (
+              <img
+                src={branddata.brandDetails.pancard[0]}
+                alt="PAN Card"
+                style={{ width: '200px', marginBottom: '10px' }}
+              />
+            ) : (
+              <Typography color="textSecondary">No PAN card uploaded</Typography>
+            )}
+
+           
+            <Typography>GST Certificate:</Typography>
+            {branddata.brandDetails.gstCertificate ? (
+              <img
+                src={branddata.brandDetails.gstCertificate}
+                alt="GST Certificate"
+                style={{ width: '200px', marginBottom: '10px' }}
+              />
+            ) : (
+              <Typography color="textSecondary">No GST Certificate uploaded</Typography>
+            )}
 
         
-        <Box mt={3}>
-          <Typography variant="h5" fontWeight={700}>Brand Details</Typography>
-          <Paper sx={{ p: 2, backgroundColor: "#fff", borderRadius: 2, border: "1px solid #ddd", marginTop: 2, marginLeft: -5 }}>
-            <Typography><strong>companyname:</strong> {brandData.companyname}</Typography>
-            <Typography><strong>brandname:</strong> {brandData.brandname}</Typography>
-            <Typography><strong>gstin:</strong> {brandData.gstin}</Typography>
-            <Typography><strong>categories:</strong> {brandData.categories}</Typography>
-            <Typography><strong>ownername:</strong> {brandData.ownername}</Typography>
-            <Typography><strong>description:</strong> {brandData.description}</Typography>
-            <Typography><strong>address:</strong> {brandData.address}</Typography>
-            <Typography><strong>country:</strong> {brandData.country}</Typography>
-            <Typography><strong>pincode:</strong> {brandData.pincode}</Typography>
-            <Typography><strong>location:</strong> {brandData.location}</Typography>
-            <Typography><strong>mobilenumber:</strong> {brandData.mobilenumber}</Typography>
-            <Typography><strong>whatsappnumber:</strong> {brandData.whatsappnumber}</Typography>
-            <Typography><strong>website:</strong> {brandData.website}</Typography>
-            <Typography><strong>facebook:</strong> {brandData.facebook}</Typography>
-            <Typography><strong>instagram:</strong> {brandData.instagram}</Typography>
-            <Typography><strong>linkedin:</strong> {brandData.linkedin}</Typography>
-            <Typography><strong>establishedyear:</strong> {brandData.establishedyear}</Typography>
-            <Typography><strong>franchisesinceyear:</strong> {brandData.franchisesinceyear}</Typography>
+            <Typography>Brand Logo:</Typography>
+            {branddata.brandDetails.brandLogo ? (
+              <img
+                src={branddata.brandDetails.brandLogo}
+                alt="Brand Logo"
+                style={{ width: '150px', marginBottom: '10px' }}
+              />
+            ) : (
+              <Typography color="textSecondary">No Brand Logo uploaded</Typography>
+            )}
+
+            {/* Company Image */}
+            {/* <Typography>Company Image:</Typography>
+            {branddata.brandDetails.companyImage ? (
+              <img
+                src={branddata.brandDetails.companyImage}
+                alt="Company"
+                style={{ width: '250px', marginBottom: '10px' }}
+              />
+            ) : (
+              <Typography color="textSecondary">No Company Image uploaded</Typography>
+            )} */}
+
+            {/* Exterior Outlet */}
+            {/* <Typography>Exterior Outlet:</Typography>
+            {branddata.brandDetails.exteriorOutlet ? (
+              <img
+                src={branddata.brandDetails.exteriorOutlet}
+                alt="Exterior"
+                style={{ width: '250px', marginBottom: '10px' }}
+              />
+            ) : (
+              <Typography color="textSecondary">No Exterior Outlet image</Typography>
+            )} */}
+
+           
+            <Typography>Interior Outlet:</Typography>
+
+            {Array.isArray(branddata.brandDetails.interiorOutlet) && branddata.brandDetails.interiorOutlet.length > 0 ? (
+              branddata.brandDetails.interiorOutlet.map((imageUrl, index) => (
+                <img
+                  key={index}
+                  src={imageUrl}
+                  alt={`Interior ${index + 1}`}
+                  style={{ width: '250px', marginBottom: '10px', marginRight: '10px' }}
+                />
+              ))
+            ) : (
+              <Typography color="textSecondary">No Interior Outlet image</Typography>
+            )}
+           
+            <Typography>Franchise Promotion Video:</Typography>
+            {branddata.brandDetails.franchisePromotionVideo ? (
+              <video width="320" height="240" controls style={{ marginBottom: '10px' }}>
+                <source src={branddata.brandDetails.franchisePromotionVideo} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <Typography color="textSecondary">No Franchise Promotion Video uploaded</Typography>
+            )}
+
+            
+            <Typography>Brand Promotion Video:</Typography>
+            {branddata.brandDetails.brandPromotionVideo ? (
+              <video width="320" height="240" controls>
+                <source src={branddata.brandPromotionVideo} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <Typography color="textSecondary">No Brand Promotion Video uploaded</Typography>
+            )}
           </Paper>
+        );
+      default:
+        return (
+          <Typography color="textSecondary">
+            Please select a section from the dropdown
+          </Typography>
+        );
+    }
+  };
 
-          <Box>
-            <Typography sx={{ fontWeight: 700, marginLeft: -4 }}>
-              <h2>Expansion Plan</h2>
-            </Typography>
-            <Paper sx={{ p: 2, backgroundColor: "#fff", borderRadius: 2, border: "1px solid #ddd", marginTop: 2, marginLeft: -5 }}>
-              <Typography><strong>expansiontype:</strong> {brandData.expansiontype}</Typography>
-              <Typography><strong>selectedcounteries:</strong> {brandData.selectedcounteries}</Typography>
-              <Typography><strong>selectedstates:</strong> {brandData.selectedstates}</Typography>
-              <Typography><strong>selectedcities:</strong> {brandData.selectedcities}</Typography>
-              <Typography><strong>selectedindianstates:</strong> {brandData.selectedindianstates}</Typography>
-              <Typography><strong>selsectedindiandistricts:</strong> {brandData.selsectedindiandistricts}</Typography>
-            </Paper>
-          </Box>
-
-          <Box>
-            <Typography sx={{ fontWeight: 700, marginLeft: -4 }}>
-              <h2>Franchise Model</h2>
-            </Typography>
-            <Paper sx={{ p: 2, backgroundColor: "#fff", borderRadius: 2, border: "1px solid #ddd", marginTop: 2, marginLeft: -5 }}>
-              <Typography sx={{ textAlign: "center" }}><h2>Investment Details</h2></Typography>
-              <Typography><strong>totalinvestment:</strong> {brandData.totalinvestment}</Typography>
-              <Typography><strong>franchisefee:</strong> {brandData.franchisefee}</Typography>
-              <Typography><strong>royaltyfee:</strong> {brandData.royaltyfee}</Typography>
-              <Typography><strong>equipmentcost:</strong> {brandData.equipmentcost}</Typography>
-              <Typography><strong>expectedrevenue:</strong> {brandData.expectedrevenue}</Typography>
-              <Typography><strong>expectedprofit:</strong> {brandData.expectedprofit}</Typography>
-              <Typography><strong>spacerequired:</strong> {brandData.spacerequired}</Typography>
-              <Typography><strong>paybackperiod:</strong> {brandData.paybackperiod}</Typography>
-              <Typography><strong>minimumcashrequired:</strong> {brandData.minimumcashrequired}</Typography>
-
-              <Typography sx={{ textAlign: "center" }}><h2>Outlet Distribution</h2></Typography>
-              <Typography><strong>companyownedoutlets:</strong> {brandData.companyownedoutlets}</Typography>
-              <Typography><strong>franchiseoutlets:</strong> {brandData.franchiseoutlets}</Typography>
-              <Typography><strong>totaloutlets:</strong> {brandData.totaloutlets}</Typography>
-
-              <Typography sx={{ textAlign: "center" }}><h2>Expansion Plans</h2></Typography>
-              <Typography><strong>targetcities:</strong> {brandData.targetcities}</Typography>
-              <Typography><strong>targetstates:</strong> {brandData.targetstates}</Typography>
-              <Typography><strong>expansionfranchisefee:</strong> {brandData.expansionfranchisefee}</Typography>
-              <Typography><strong>expansionroyalty:</strong> {brandData.expansionroyalty}</Typography>
-              <Typography><strong>paymentterms:</strong> {brandData.paymentterms}</Typography>
-            </Paper>
-          </Box>
-        </Box>
+  return (
+    <Box sx={{ display: 'flex', height: '100vh' }}>
+      <Box sx={{ width: 250, p: 3, borderRight: '1px solid #ccc' }}>
+        <Typography variant="h6" gutterBottom>Choose Section</Typography>
+        <FormControl fullWidth>
+          <InputLabel id="section-label">Section</InputLabel>
+          <Select
+            labelId="section-label"
+            value={selectedSection}
+            onChange={handleChange}
+            label="Section"
+          >
+            <MenuItem value="personalDetails">Personal Details</MenuItem>
+            <MenuItem value="franchiseDetails">Franchise Details</MenuItem>
+            <MenuItem value="brandDetails">Brand Details</MenuItem>
+          </Select>
+        </FormControl>
       </Box>
-    </div>
+
+      <Box sx={{ flexGrow: 1, p: 4 }}>
+        {loading ? <Typography>Loading...</Typography> : renderContent()}
+      </Box>
+    </Box>
   );
 };
 
-export default BrandListingController;
+export default ProfileSection;

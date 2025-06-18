@@ -26,11 +26,15 @@ const BrandAddVedios = () => {
   };
 
   return (
-    
-    <Box sx={{ p: 3, textAlign: "center", marginTop: 20}}>
-      <Typography variant="h3" gutterBottom sx={{ fontWeight: 300 }}>
+    <Box>
+     <Typography variant="h6" fontWeight={600} mb={2} sx={{
+                                textAlign: "center", color: "#fafafa",
+                                backgroundColor: "#689f38", padding: "10px", borderRadius: "5px"
+                            }}>
         ADD VIDEOS
       </Typography>
+    <Box sx={{ p: 3, textAlign: "center", marginTop: 20}}>
+      
       <form onSubmit={handleSubmit}>
         {videoFiles.map((file, index) => (
           <Box key={index} sx={{ mb: 3 }}>
@@ -76,7 +80,7 @@ const BrandAddVedios = () => {
         </Button>
       </form>
     </Box>
-    
+    </Box>
   );
 };
 

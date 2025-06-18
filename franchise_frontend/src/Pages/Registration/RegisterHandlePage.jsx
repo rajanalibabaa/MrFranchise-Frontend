@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState} from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -7,29 +7,57 @@ import {
   Button,
   useTheme,
   useMediaQuery,
+  Dialog,
+  Container,
+  CircularProgress
 } from "@mui/material";
-
+import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice.jsx";
 import businessLogo from "../../assets/images/Business_logo.png";
 import FacebookIcon from "../../Assets/Images/FacebookIcon.png";
 // import LinkedInIcon from "../../Assets/Images/LinkedinIcon.png";
 // import InstagramIcon from "../../Assets/Images/InstagramIcon.png";
 // import TwitterIcon from "../../Assets/Images/TwitterIcon.png";
 import GoogleIcon from "../../Assets/Images/GoogleIcon.png";
+import LoginPage from "../../Pages/LoginPage/LoginPage"
+import Footer from "../../Components/Footers/Footer";
+import { useDispatch } from "react-redux";
 
-function RegisterHandleUser() {
+function RegisterHandleUser({boolean = true}) {
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+
+  const openLoginPopup = () => {
+    setIsSubmitting(true);
+    setLoginOpen(true);
+  };
+
+  const closeLoginPopup = () => {
+    setLoginOpen(false);
+  };
+
   const handleNavigation = (path) => {
+    setIsSubmitting(true);
     navigate(path);
   };
   const handleSocialLogin = (provider) => {
+    setIsSubmitting(true);
     window.location.href = `https://franchise-backend-wgp6.onrender.com/api/v1/auth/${provider}`;
   };
 
   return (
+    <>
+    {/* <Navbar/> */}
+    {/* {boolean && <Navbar/>} */}
     <Box
+    mt={isMobile ? 0 : 7}
       sx={{
         height: "100vh",
         overflow: "hidden",
@@ -96,23 +124,39 @@ function RegisterHandleUser() {
 
         <Button
           variant="contained"
-          onClick={() => handleNavigation("/investor-register")}
+          onClick={() => 
+          {   dispatch(showLoading())
+            handleNavigation("/investor-register")
+            setTimeout(() => {
+              dispatch(hideLoading());
+            },  2000);
+          }}
           sx={{
             mb: 2,
-            bgcolor: "#e99830",
+            bgcolor: "#7ad03a",
             "&:hover": {
-              bgcolor: "#7ad03a",
+              bgcolor: "#e99830",
             },
             width: "100%",
             maxWidth: 250,
           }}
         >
-          Investor Register
+          {isLoading && activeButton === "investor" ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Investor Registration"
+                )}
         </Button>
 
         <Button
           variant="contained"
-          onClick={() => handleNavigation("/brand-register")}
+          onClick={() =>
+           { dispatch(showLoading());
+            handleNavigation("/brandlistingform");
+            setTimeout(() => {
+              dispatch(hideLoading());
+            }, 2000);
+          }}
           sx={{
             mb: 2,
             bgcolor: "#e99830",
@@ -123,16 +167,21 @@ function RegisterHandleUser() {
             maxWidth: 250,
           }}
         >
-          Brand Register
+          {isLoading && activeButton === "brand" ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Brand Registration"
+                )}
         </Button>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
-          Don't have an account?{" "}
+          Already have an account?{" "}
           <Box
-            component="a"
-            href="/loginpage"
+            component="span"
+            onClick={openLoginPopup}
             sx={{
               textDecoration: "none",
+              cursor: "pointer",
               color: "#007bff",
               "&:hover": {
                 color: "#0056b3",
@@ -156,7 +205,13 @@ function RegisterHandleUser() {
         loading="lazy"
         src={GoogleIcon}
         alt="Google"
-        onClick={() => handleSocialLogin("google")}
+        onClick={() => 
+        { dispatch(showLoading())
+          handleSocialLogin("google")
+          setTimeout(() => {
+            dispatch(hideLoading());
+          }, 2000);
+        }}
         sx={{
           width: 32,
           height: 32,
@@ -176,7 +231,13 @@ function RegisterHandleUser() {
         loading="lazy"
         src={FacebookIcon}
         alt="Facebook"
-        onClick={() => handleSocialLogin("facebook")}
+        onClick={() => 
+        { dispatch(showLoading())
+          handleSocialLogin("facebook")
+          setTimeout(() => {
+            dispatch(hideLoading());
+          }, 2000);
+        } }
         sx={{
           width: 32,
           height: 32,
@@ -188,69 +249,18 @@ function RegisterHandleUser() {
         }}
       />
     </Grid>
-
-    {/* Instagram Icon */}
-    {/* <Grid item>
-      <Box
-        component="img"
-        src={InstagramIcon}
-        alt="Instagram"
-        onClick={() =>
-          openSocialMedia("https://www.instagram.com/accounts/login/")
-        }
-        sx={{
-          width: 32,
-          height: 32,
-          cursor: "pointer",
-          transition: "transform 0.3s ease",
-          "&:hover": {
-            transform: "scale(1.1)",
-          },
-        }}
-      />
-    </Grid> */}
-
-    {/* LinkedIn Icon */}
-    {/* <Grid item>
-      <Box
-        component="img"
-        src={LinkedInIcon}
-        alt="LinkedIn"
-        onClick={() => openSocialMedia("https://www.linkedin.com/login")}
-        sx={{
-          width: 32,
-          height: 32,
-          cursor: "pointer",
-          transition: "transform 0.3s ease",
-          "&:hover": {
-            transform: "scale(1.1)",
-          },
-        }}
-      />
-    </Grid> */}
-
-    {/* Twitter Icon */}
-    {/* <Grid item>
-      <Box
-        component="img"
-        src={TwitterIcon}
-        alt="Twitter"
-        onClick={() => openSocialMedia("https://twitter.com/login")}
-        sx={{
-          width: 32,
-          height: 32,
-          cursor: "pointer",
-          transition: "transform 0.3s ease",
-          "&:hover": {
-            transform: "scale(1.1)",
-          },
-        }}
-      />
-    </Grid> */}
   </Grid>
+  {/* Login Popup Dialog */}
+      <Dialog open={loginOpen} onClose={closeLoginPopup} maxWidth="sm" fullWidth>
+        <LoginPage open={loginOpen} onClose={closeLoginPopup} />
+      </Dialog>
 </Box>
       </Grid>
     </Box>
+    {/* <Footer/> */}
+    {boolean && <Footer/>}
+    </>
+    
   );
 }
 
