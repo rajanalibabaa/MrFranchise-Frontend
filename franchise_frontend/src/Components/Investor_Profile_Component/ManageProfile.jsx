@@ -13,7 +13,7 @@ import {
   TextField,
   Snackbar,
   IconButton,
-  MenuItem ,
+  MenuItem,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
@@ -23,12 +23,23 @@ import axios from "axios";
 import MuiAlert from "@mui/material/Alert";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-// import { categories } from "./BrandLIstingRegister/BrandCategories";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
 
-
 const ManageProfile = () => {
-  const [investorData, setInvestorData] = useState({});
+  // State management
+  const [investorData, setInvestorData] = useState({
+    firstName: "",
+    email: "",
+    mobileNumber: "",
+    whatsappNumber: "",
+    country: "",
+    occupation: "",
+    city: "",
+    pincode: "",
+    preferences: [],
+    profileImage: "",
+    investorID: ""
+  });
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({
@@ -36,114 +47,89 @@ const ManageProfile = () => {
     message: "",
     severity: "success",
   });
-
   const [otpDialogOpen, setOtpDialogOpen] = useState(false);
   const [otpStep, setOtpStep] = useState(1);
   const [contactValue, setContactValue] = useState("");
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
-  const [reguestOTP, setreguestOTP] = useState(false);
-  const [ErrorMSG, setErrorMSG] = useState("");
-
+  const [requestOTP, setRequestOTP] = useState(false);
+  const [errorMSG, setErrorMSG] = useState("");
+  const [indiaData, setIndiaData] = useState([]);
   const [fieldErrors, setFieldErrors] = useState({
+    firstName: "",
     mobileNumber: "",
     whatsappNumber: "",
+    state: "",
+    city: "",
+    address: "",
+    pincode: "",
+    occupation: "",
   });
-  const [statesWithCities, setStatesWithCities] = useState({});
-  const [states, setStates] = useState([]);
-  const [selectedState, setSelectedState] = useState("");
-  const [cities, setCities] = useState([]);
 
+  // Navigation and Redux
   const navigate = useNavigate();
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
+  // Helper functions
   const formatNumber = (num) => {
     if (!num) return "";
     return num.replace(/^(\+91)?/, "").trim();
   };
 
- useEffect(() => {
-    // Fetch city data
-    const fetchCities = async () => {
+  // Location data handling
+  const getDistrictsForState = (stateName) => {
+    const stateObj = indiaData.find((s) => s.name === stateName);
+    return stateObj?.districts || [];
+  };
+
+  const getCitiesForDistrict = (stateName, districtName) => {
+    const stateObj = indiaData.find((s) => s.name === stateName);
+    if (!stateObj) return [];
+    return (stateObj.cities || [])
+      .filter((city) => city.district === districtName)
+      .map((city) => city.name);
+  };
+
+  // State change handler
+  const handleStateChange = (prefIndex, stateName) => {
+    const newPrefs = [...(investorData.preferences || [])];
+    newPrefs[prefIndex] = {
+      ...newPrefs[prefIndex],
+      preferredState: stateName,
+      preferredDistrict: "",
+      preferredCity: ""
+    };
+    setInvestorData({ ...investorData, preferences: newPrefs });
+  };
+
+  // District change handler
+  const handleDistrictChange = (prefIndex, districtName) => {
+    const newPrefs = [...(investorData.preferences || [])];
+    newPrefs[prefIndex] = {
+      ...newPrefs[prefIndex],
+      preferredDistrict: districtName,
+      preferredCity: ""
+    };
+    setInvestorData({ ...investorData, preferences: newPrefs });
+  };
+
+  // Data fetching
+  useEffect(() => {
+    const fetchStates = async () => {
       try {
-        const response = await fetch(
-          "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/cities.json"
+        const res = await axios.get(
+          "https://raw.githubusercontent.com/prasad-gowda/india-state-district-cities/master/India-state-district-city.json"
         );
-        const citiesData = await response.json();
-
-        // Filter for Indian cities only
-        const indianCities = citiesData.filter(
-          (city) => city.country_code === "IN"
-        );
-
-        // Group by state
-        const grouped = {};
-        indianCities.forEach((city) => {
-          const state = city.state_name;
-          if (!grouped[state]) {
-            grouped[state] = [];
-          }
-          grouped[state].push(city.name);
-        });
-
-        // Sort states alphabetically
-        const sortedStates = Object.keys(grouped).sort();
-
-        setStatesWithCities(grouped);
-        setStates(sortedStates);
-      } catch (error) {
-        console.error("Failed to fetch cities:", error);
+        setIndiaData(res.data);
+      } catch (err) {
+        console.error("Error fetching location data:", err);
+        setIndiaData([]);
       }
     };
-
-    fetchCities();
+    fetchStates();
   }, []);
 
-  // Update cities when a state is selected
-  useEffect(() => {
-    if (selectedState) {
-      setCities(statesWithCities[selectedState]);
-    } else {
-      setCities([]);
-    }
-  }, [selectedState, statesWithCities]);
-
-  return (
-    <div>
-      <h2>Select Indian State and City</h2>
-
-      <label>
-        State:
-        <select
-          value={selectedState}
-          onChange={(e) => setSelectedState(e.target.value)}
-        >
-          <option value="">-- Select State --</option>
-          {states.map((state) => (
-            <option key={state} value={state}>
-              {state}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      {cities.length > 0 && (
-        <label>
-          City:
-          <select>
-            <option value="">-- Select City --</option>
-            {cities.map((city) => (
-              <option key={city} value={city}>
-                {city}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-    </div>
-  );
-};
   useEffect(() => {
     const fetchData = async () => {
       if (!investorUUID || !AccessToken) {
@@ -154,7 +140,7 @@ const ManageProfile = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -162,19 +148,18 @@ const ManageProfile = () => {
             },
           }
         );
-
+        console.log("Investor Data Response:", response.data);
         if (response.data?.data) {
           const data = response.data.data;
           const formattedData = {
             ...data,
             mobileNumber: formatNumber(data.mobileNumber),
             whatsappNumber: formatNumber(data.whatsappNumber),
+            occupation: data.occupation || "",
             preferences:
               data.preferences?.map((pref) => ({
                 ...pref,
-                category: Array.isArray(pref.category)
-                  ? pref.category
-                  : [],
+                category: Array.isArray(pref.category) ? pref.category : [],
               })) || [],
           };
           setInvestorData(formattedData);
@@ -189,6 +174,7 @@ const ManageProfile = () => {
     fetchData();
   }, [investorUUID, AccessToken]);
 
+  // OTP handling
   const handleEditToggle = () => {
     setOtpDialogOpen(true);
     setOtpStep(1);
@@ -201,11 +187,11 @@ const ManageProfile = () => {
   const handleRequestOtp = async () => {
     if (!contactValue) return;
     setErrorMSG("");
-    setreguestOTP(true);
+    setRequestOTP(true);
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otp/existingEmailOTP",
+        "http://localhost:5000/api/v1/otp/existingEmailOTP",
         { email: investorData.email },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -221,7 +207,7 @@ const ManageProfile = () => {
       console.error("OTP request error:", error);
       setErrorMSG("An error occurred while requesting OTP.");
     } finally {
-      setreguestOTP(false);
+      setRequestOTP(false);
     }
   };
 
@@ -233,11 +219,11 @@ const ManageProfile = () => {
 
     setOtpError("");
     setErrorMSG("");
-    setreguestOTP(true);
+    setRequestOTP(true);
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otp/verifyExistingEmailOTP",
+        "http://localhost:5000/api/v1/otp/verifyExistingEmailOTP",
         {
           email: investorData.email,
           verifyOTP: otp,
@@ -248,7 +234,6 @@ const ManageProfile = () => {
       if (response.data.success) {
         setEditMode(true);
         setOtpDialogOpen(false);
-        setOtpStep(2);
       } else {
         setOtpError("Failed to verify OTP. Please try again.");
       }
@@ -256,37 +241,198 @@ const ManageProfile = () => {
       console.error("OTP verification error:", error);
       setOtpError("An error occurred during OTP verification.");
     } finally {
-      setreguestOTP(false);
+      setRequestOTP(false);
     }
   };
 
+  // Validate all fields
+  const validateFields = () => {
+    const errors = {
+      firstName: "",
+      mobileNumber: "",
+      whatsappNumber: "",
+      state:"",
+      city: "",
+      address: "",
+      pincode: "",
+      occupation: "",
+    };
+    let isValid = true;
+
+    // Validate firstName
+    if (!investorData.firstName.trim()) {
+      errors.firstName = "First name is required";
+      isValid = false;
+    }
+
+    // Validate mobileNumber
+    const mobileNumber = formatNumber(investorData.mobileNumber);
+    if (!mobileNumber) {
+      errors.mobileNumber = "Mobile number is required";
+      isValid = false;
+    } else if (!/^\d{10}$/.test(mobileNumber)) {
+      errors.mobileNumber = "Mobile number must be 10 digits";
+      isValid = false;
+    }
+
+    // Validate whatsappNumber
+    const whatsappNumber = formatNumber(investorData.whatsappNumber);
+    if (!whatsappNumber) {
+      errors.whatsappNumber = "WhatsApp number is required";
+      isValid = false;
+    } else if (!/^\d{10}$/.test(whatsappNumber)) {
+      errors.whatsappNumber = "WhatsApp number must be 10 digits";
+      isValid = false;
+    }
+
+    // Validate city
+    if (!investorData.state.trim()) {
+      errors.state = "State is required";
+      isValid = false;
+    }
+    // Validate city
+    if (!investorData.city.trim()) {
+      errors.city = "City is required";
+      isValid = false;
+    }
+    // Validate address
+    if (!investorData.address.trim()) {
+      errors.address = "address is required";
+      isValid = false;
+    }
+
+    // Validate pincode
+    if (!investorData.pincode) {
+      errors.pincode = "Pincode is required";
+      isValid = false;
+    } else if (!/^\d{6}$/.test(investorData.pincode)) {
+      errors.pincode = "Pincode must be 6 digits";
+      isValid = false;
+    }
+
+    // Validate occupation
+    if (!investorData.occupation) {
+      errors.occupation = "Occupation is required";
+      isValid = false;
+    }
+
+    // Validate preferences
+    if (investorData.preferences.length === 0) {
+      setSnackbar({
+        open: true,
+        message: "At least one preference is required",
+        severity: "error",
+      });
+      isValid = false;
+    } else {
+      for (const pref of investorData.preferences) {
+        if (!pref.investmentRange) {
+          setSnackbar({
+            open: true,
+            message: "Investment range is required for all preferences",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        if (!pref.investmentAmount) {
+          setSnackbar({
+            open: true,
+            message: "Investment amount is required for all preferences",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        if (!pref.propertyType) {
+          setSnackbar({
+            open: true,
+            message: "Property type is required for all preferences",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        if (pref.propertyType === "Own Property" && !pref.propertySize) {
+          setSnackbar({
+            open: true,
+            message: "Property size is required when property type is Own Property",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        if (!pref.preferredState) {
+          setSnackbar({
+            open: true,
+            message: "Preferred state is required for all preferences",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        if (!pref.preferredDistrict) {
+          setSnackbar({
+            open: true,
+            message: "Preferred district is required for all preferences",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        if (!pref.preferredCity) {
+          setSnackbar({
+            open: true,
+            message: "Preferred city is required for all preferences",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        if (pref.category.length === 0) {
+          setSnackbar({
+            open: true,
+            message: "At least one category is required for each preference",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        for (const cat of pref.category) {
+          if (!cat.main) {
+            setSnackbar({
+              open: true,
+              message: "Main category is required for all categories",
+              severity: "error",
+            });
+            isValid = false;
+            break;
+          }
+        }
+      }
+    }
+
+    setFieldErrors(errors);
+    return isValid;
+  };
+
+  // Form handling
   const handleSave = async () => {
+    if (!validateFields()) {
+      return;
+    }
+
     const dataToUpdate = {
       ...investorData,
       mobileNumber: "+91" + formatNumber(investorData.mobileNumber),
       whatsappNumber: "+91" + formatNumber(investorData.whatsappNumber),
     };
 
-    const errors = { mobileNumber: "", whatsappNumber: "" };
-    let hasError = false;
-
-    const validatePhone = (field) => {
-      const number = formatNumber(dataToUpdate[field]);
-      if (!/^\d{10}$/.test(number)) {
-        errors[field] = "Number must be exactly 10 digits.";
-        hasError = true;
-      }
-    };
-
-    validatePhone("mobileNumber");
-    validatePhone("whatsappNumber");
-
-    setFieldErrors(errors);
-    if (hasError) return;
+    console.log("Data to update ;",dataToUpdate)
 
     try {
       await axios.patch(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/updateInvestor/${investorUUID}`,
+        `http://localhost:5000/api/v1/investor/updateInvestor/${investorUUID}`,
         dataToUpdate,
         {
           headers: {
@@ -303,10 +449,15 @@ const ManageProfile = () => {
       });
     } catch (error) {
       console.error("Error saving investor data:", error);
-      setSnackbar({ open: true, message: "Failed to update profile.", severity: "error" });
+      setSnackbar({
+        open: true,
+        message: "Failed to update profile.",
+        severity: "error",
+      });
     }
   };
 
+  // Preference handling
   const handlePreferenceChange = (index, key, value) => {
     const newPrefs = [...(investorData.preferences || [])];
     newPrefs[index] = { ...newPrefs[index], [key]: value };
@@ -362,10 +513,13 @@ const ManageProfile = () => {
     setInvestorData({ ...investorData, preferences: newPrefs });
   };
 
+  // Render helpers
   const renderField = (label, key, isReadOnly = false) => {
     const value = investorData[key];
     const isPhoneField = key === "mobileNumber" || key === "whatsappNumber";
     const isReadOnlyField = isReadOnly || key === "country" || key === "email";
+    const isOccupationField = key === "occupation";
+    const isPincodeField = key === "pincode";
 
     let displayValue = "";
     if (Array.isArray(value)) {
@@ -384,18 +538,56 @@ const ManageProfile = () => {
         {editMode && !isReadOnlyField ? (
           <Box display="flex" alignItems="center">
             {isPhoneField && <Typography sx={{ mr: 1 }}>+91</Typography>}
-            <TextField
-              fullWidth
-              variant="outlined"
-              size="small"
-              value={value || ""}
-              onChange={(e) => {
-                setInvestorData({ ...investorData, [key]: e.target.value });
-                setFieldErrors({ ...fieldErrors, [key]: "" });
-              }}
-              error={!!fieldErrors[key]}
-              helperText={fieldErrors[key]}
-            />
+            {isOccupationField ? (
+              <TextField
+                select
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={value || ""}
+                onChange={(e) => {
+                  setInvestorData({ ...investorData, [key]: e.target.value });
+                  setFieldErrors({ ...fieldErrors, [key]: "" });
+                }}
+                error={!!fieldErrors[key]}
+                helperText={fieldErrors[key]}
+                required
+              >
+                <MenuItem value="Investor">Investor</MenuItem>
+                <MenuItem value="Brand">Brand</MenuItem>
+              </TextField>
+            ) : isPincodeField ? (
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={value || ""}
+                onChange={(e) => {
+                  const input = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  setInvestorData({ ...investorData, [key]: input });
+                  setFieldErrors({ ...fieldErrors, [key]: "" });
+                }}
+                error={!!fieldErrors[key]}
+                helperText={fieldErrors[key]}
+                inputProps={{ maxLength: 6 }}
+                required
+              />
+            ) : (
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={value || ""}
+                onChange={(e) => {
+                  setInvestorData({ ...investorData, [key]: e.target.value });
+                  setFieldErrors({ ...fieldErrors, [key]: "" });
+                }}
+                error={!!fieldErrors[key]}
+                helperText={fieldErrors[key]}
+                required={!isPhoneField} // Phone fields have their own validation
+                inputProps={isPhoneField ? { maxLength: 10 } : {}}
+              />
+            )}
           </Box>
         ) : (
           <Typography
@@ -486,6 +678,11 @@ const ManageProfile = () => {
           {renderField("Mobile Number", "mobileNumber")}
           {renderField("Whatsapp Number", "whatsappNumber")}
           {renderField("Country", "country", true)}
+          {renderField("State", "state")}
+          {renderField("City", "city")}
+          {renderField("Address", "address")}
+          {renderField("Pincode", "pincode")}
+          {renderField("Occupation", "occupation")}
 
           <Box mt={4}>
             <Typography variant="h6" fontWeight={600} mb={2}>
@@ -512,6 +709,7 @@ const ManageProfile = () => {
                       size="small"
                       color="error"
                       onClick={() => removePreference(prefIndex)}
+                      disabled={investorData.preferences.length <= 1}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -519,53 +717,63 @@ const ManageProfile = () => {
                 </Box>
 
                 <Box display="flex" flexDirection="column" gap={1}>
+                  {/* Investment Range */}
                   <TextField
                     size="small"
                     label="Investment Range"
                     value={pref.investmentRange || ""}
                     onChange={(e) =>
-                      handlePreferenceChange(prefIndex, "investmentRange", e.target.value)
+                      handlePreferenceChange(
+                        prefIndex,
+                        "investmentRange",
+                        e.target.value
+                      )
                     }
                     disabled={!editMode}
                     select
-                    SelectProps={{
-                      native: true,
-                    }}
+                    required
+                    error={editMode && !pref.investmentRange}
+                    helperText={editMode && !pref.investmentRange ? "This field is required" : ""}
                   >
-                    {/* <option value="">Select Preferred Investment Range</option> */}
-                    <option value="having amount">Having Investment Amount Ready</option>
-                    <option value="take loan">Planning to take a Loan</option>
-                    <option value="need loan">Need Loan Assistance</option>
+                    <MenuItem value="">Select Investment Range</MenuItem>
+                    <MenuItem value="having amount">Having Investment Amount Ready</MenuItem>
+                    <MenuItem value="take loan">Planning to take a Loan</MenuItem>
+                    <MenuItem value="need loan">Need Loan Assistance</MenuItem>
                   </TextField>
+
+                  {/* Investment Amount */}
                   <TextField
                     size="small"
                     label="Investment Amount"
                     value={pref.investmentAmount || ""}
                     onChange={(e) =>
-                      handlePreferenceChange(prefIndex, "investmentAmount", e.target.value)
+                      handlePreferenceChange(
+                        prefIndex,
+                        "investmentAmount",
+                        e.target.value
+                      )
                     }
                     disabled={!editMode}
-                     select
-                    SelectProps={{
-                      native: true,
-                    }}
+                    select
+                    required
+                    error={editMode && !pref.investmentAmount}
+                    helperText={editMode && !pref.investmentAmount ? "This field is required" : ""}
                   >
-                    {/* <option value="">
-                        Select preferred Investment Amount
-                      </option> */}
-                      <option value="Below-50,000">Below - Rs.50 K</option>
-                      <option value="Rs.50,000-2L">Rs.50 K - 2 L</option>
-                      <option value="Rs.2L-5L">Rs.2 L - 5 L</option>
-                      <option value="Rs.5L-10L">Rs.5 L - 10 L</option>
-                      <option value="Rs.10L-20L">Rs.10 L - 20 L</option>
-                      <option value="Rs.20L-30L">Rs.20 L - 30 L</option>
-                      <option value="Rs.30L-50L">Rs.30 L - 50 L</option>
-                      <option value="Rs.50L-1Cr">Rs.50 L - 1 Cr</option>
-                      <option value="Rs.1Cr-2Cr">Rs.1 Cr - 2 Cr</option>
-                      <option value="Rs.2Cr-5Cr">Rs.2 Cr - 5 Cr</option>
-                      <option value="Rs.5Cr-above">Rs.5 Cr - Above</option>
+                    <MenuItem value="">Select Investment Amount</MenuItem>
+                    <MenuItem value="Below-50,000">Below - Rs.50 K</MenuItem>
+                    <MenuItem value="Rs.50,000-2L">Rs.50 K - 2 L</MenuItem>
+                    <MenuItem value="Rs.2L-5L">Rs.2 L - 5 L</MenuItem>
+                    <MenuItem value="Rs.5L-10L">Rs.5 L - 10 L</MenuItem>
+                    <MenuItem value="Rs.10L-20L">Rs.10 L - 20 L</MenuItem>
+                    <MenuItem value="Rs.20L-30L">Rs.20 L - 30 L</MenuItem>
+                    <MenuItem value="Rs.30L-50L">Rs.30 L - 50 L</MenuItem>
+                    <MenuItem value="Rs.50L-1Cr">Rs.50 L - 1 Cr</MenuItem>
+                    <MenuItem value="Rs.1Cr-2Cr">Rs.1 Cr - 2 Cr</MenuItem>
+                    <MenuItem value="Rs.2Cr-5Cr">Rs.2 Cr - 5 Cr</MenuItem>
+                    <MenuItem value="Rs.5Cr-above">Rs.5 Cr - Above</MenuItem>
                   </TextField>
 
+                  {/* Property Type */}
                   <TextField
                     size="small"
                     label="Property Type"
@@ -573,206 +781,282 @@ const ManageProfile = () => {
                     onChange={(e) => {
                       const newValue = e.target.value;
                       const newPrefs = [...(investorData.preferences || [])];
-                      
-                      // Update propertyType
                       newPrefs[prefIndex] = {
                         ...newPrefs[prefIndex],
-                        propertyType: newValue
+                        propertyType: newValue,
+                        propertySize: newValue === "Own Property" ? pref.propertySize : "",
                       };
-                      
-                      // Clear propertySize if not "Own Property"
-                      if (newValue !== "Own Property") {
-                        newPrefs[prefIndex] = {
-                          ...newPrefs[prefIndex],
-                          propertySize: ""
-                        };
-                      }
-                      
                       setInvestorData({ ...investorData, preferences: newPrefs });
                     }}
                     disabled={!editMode}
                     select
                     fullWidth
+                    required
+                    error={editMode && !pref.propertyType}
+                    helperText={editMode && !pref.propertyType ? "This field is required" : ""}
                   >
-                    {/* <MenuItem value="">Select Property Type</MenuItem> */}
+                    <MenuItem value="">Select Property Type</MenuItem>
                     <MenuItem value="Own Property">Own Property</MenuItem>
                     <MenuItem value="Rental Property">Rental Property</MenuItem>
                   </TextField>
 
-                  <TextField
-                    size="small"
-                    label="Property Size"
-                    value={pref.propertySize || ""}
-                    onChange={(e) =>
-                      handlePreferenceChange(prefIndex, "propertySize", e.target.value)
-                    }
-                    disabled={!editMode || pref.propertyType !== "Own Property"}
-                    select
-                    fullWidth
-                  >
-                    <MenuItem value="">Select Total Area</MenuItem>
-                    <MenuItem value="Below - 100 sq ft">Below - 100 sq ft</MenuItem>
-                    <MenuItem value="100 sq ft - 200 sq ft">100 sq ft - 200 sq ft</MenuItem>
-                    <MenuItem value="200 sq ft - 500 sq ft">200 sq ft - 500 sq ft</MenuItem>
-                    <MenuItem value="500 sq ft - 1000 sq ft">500 sq ft - 1000 sq ft</MenuItem>
-                    <MenuItem value="1000 sq ft - 1500 sq ft">1000 sq ft - 1500 sq ft</MenuItem>
-                    <MenuItem value="1500 sq ft - 2000 sq ft">1500 sq ft - 2000 sq ft</MenuItem>
-                    <MenuItem value="2000 sq ft - 3000 sq ft">2000 sq ft - 3000 sq ft</MenuItem>
-                    <MenuItem value="3000 sq ft - 5000 sq ft">3000 sq ft - 5000 sq ft</MenuItem>
-                    <MenuItem value="5000 sq ft - 7000 sq ft">5000 sq ft - 7000 sq ft</MenuItem>
-                    <MenuItem value="7000 sq ft - 10000 sq ft">7000 sq ft - 10000 sq ft</MenuItem>
-                    <MenuItem value="Above 10000 sq ft">Above 10000 sq ft</MenuItem>
-                  </TextField>
-                  
+                  {/* Property Size */}
+                  {pref.propertyType === "Own Property" && (
+                    <TextField
+                      size="small"
+                      label="Property Size"
+                      value={pref.propertySize || ""}
+                      onChange={(e) =>
+                        handlePreferenceChange(
+                          prefIndex,
+                          "propertySize",
+                          e.target.value
+                        )
+                      }
+                      disabled={!editMode}
+                      select
+                      fullWidth
+                      required
+                      error={editMode && !pref.propertySize}
+                      helperText={editMode && !pref.propertySize ? "This field is required" : ""}
+                    >
+                      <MenuItem value="">Select Total Area</MenuItem>
+                      <MenuItem value="Below - 100 sq ft">Below - 100 sq ft</MenuItem>
+                      <MenuItem value="100 sq ft - 200 sq ft">100 sq ft - 200 sq ft</MenuItem>
+                      <MenuItem value="200 sq ft - 500 sq ft">200 sq ft - 500 sq ft</MenuItem>
+                      <MenuItem value="500 sq ft - 1000 sq ft">500 sq ft - 1000 sq ft</MenuItem>
+                      <MenuItem value="1000 sq ft - 1500 sq ft">1000 sq ft - 1500 sq ft</MenuItem>
+                      <MenuItem value="1500 sq ft - 2000 sq ft">1500 sq ft - 2000 sq ft</MenuItem>
+                      <MenuItem value="2000 sq ft - 3000 sq ft">2000 sq ft - 3000 sq ft</MenuItem>
+                      <MenuItem value="3000 sq ft - 5000 sq ft">3000 sq ft - 5000 sq ft</MenuItem>
+                      <MenuItem value="5000 sq ft - 7000 sq ft">5000 sq ft - 7000 sq ft</MenuItem>
+                      <MenuItem value="7000 sq ft - 10000 sq ft">7000 sq ft - 10000 sq ft</MenuItem>
+                      <MenuItem value="Above 10000 sq ft">Above 10000 sq ft</MenuItem>
+                    </TextField>
+                  )}
+
+                  {/* Location Selection */}
                   <TextField
                     size="small"
                     label="Preferred State"
                     value={pref.preferredState || ""}
-                    onChange={(e) =>
-                      handlePreferenceChange(prefIndex, "preferredState", e.target.value)
-                    }
-                    disabled={!editMode}
-                  />
+                    onChange={(e) => handleStateChange(prefIndex, e.target.value)}
+                    disabled={!editMode || indiaData.length === 0}
+                    select
+                    fullWidth
+                    required
+                    error={editMode && !pref.preferredState}
+                    helperText={editMode && !pref.preferredState ? "This field is required" : ""}
+                  >
+                    <MenuItem value="">Select State</MenuItem>
+                    {indiaData.map((state) => (
+                      <MenuItem key={state.name} value={state.name}>
+                        {state.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+
                   <TextField
                     size="small"
                     label="Preferred District"
                     value={pref.preferredDistrict || ""}
-                    onChange={(e) =>
-                      handlePreferenceChange(prefIndex, "preferredDistrict", e.target.value)
-                    }
-                    disabled={!editMode}
-                  />
+                    onChange={(e) => handleDistrictChange(prefIndex, e.target.value)}
+                    disabled={!editMode || !pref.preferredState}
+                    select
+                    fullWidth
+                    required
+                    error={editMode && !pref.preferredDistrict}
+                    helperText={editMode && !pref.preferredDistrict ? "This field is required" : ""}
+                  >
+                    <MenuItem value="">Select District</MenuItem>
+                    {pref.preferredState &&
+                      getDistrictsForState(pref.preferredState).map((district) => (
+                        <MenuItem key={district} value={district}>
+                          {district}
+                        </MenuItem>
+                      ))}
+                  </TextField>
+
                   <TextField
                     size="small"
                     label="Preferred City"
                     value={pref.preferredCity || ""}
                     onChange={(e) =>
-                      handlePreferenceChange(prefIndex, "preferredCity", e.target.value)
+                      handlePreferenceChange(
+                        prefIndex,
+                        "preferredCity",
+                        e.target.value
+                      )
                     }
-                    disabled={!editMode}
-                  />
+                    disabled={!editMode || !pref.preferredDistrict}
+                    select
+                    fullWidth
+                    required
+                    error={editMode && !pref.preferredCity}
+                    helperText={editMode && !pref.preferredCity ? "This field is required" : ""}
+                  >
+                    <MenuItem value="">Select City</MenuItem>
+                    {pref.preferredState &&
+                      pref.preferredDistrict &&
+                      getCitiesForDistrict(
+                        pref.preferredState,
+                        pref.preferredDistrict
+                      ).map((city) => (
+                        <MenuItem key={city} value={city}>
+                          {city}
+                        </MenuItem>
+                      ))}
+                  </TextField>
 
+                  {/* Category Selection */}
                   <Box mt={1}>
                     <Typography fontWeight={600} mb={1}>
                       Category
                     </Typography>
 
-{pref.category?.map((cat, catIndex) => {
-  // Find the selected main category object
-  const mainCategory = categories.find((c) => c.name === cat.main);
+                    {pref.category?.map((cat, catIndex) => {
+                      const mainCategory = categories.find(
+                        (c) => c.name === cat.main
+                      );
+                      const subCategory = mainCategory?.children?.find(
+                        (sub) => sub.name === cat.sub
+                      );
 
-  // Find the selected sub category object inside mainCategory
-  const subCategory = mainCategory?.children?.find((sub) => sub.name === cat.sub);
+                      return (
+                        <Box
+                          key={catIndex}
+                          display="flex"
+                          gap={1}
+                          alignItems="center"
+                          mb={1}
+                        >
+                          {editMode ? (
+                            <>
+                              <TextField
+                                size="small"
+                                placeholder="Main"
+                                value={cat.main || ""}
+                                onChange={(e) =>
+                                  handleCategoryChange(
+                                    prefIndex,
+                                    catIndex,
+                                    "main",
+                                    e.target.value
+                                  )
+                                }
+                                sx={{ flex: 1 }}
+                                select
+                                required
+                                error={editMode && !cat.main}
+                                helperText={editMode && !cat.main ? "Required" : ""}
+                              >
+                                <MenuItem value="">Select Main</MenuItem>
+                                {categories.map((mainCat) => (
+                                  <MenuItem key={mainCat.name} value={mainCat.name}>
+                                    {mainCat.name}
+                                  </MenuItem>
+                                ))}
+                              </TextField>
 
-  return (
-    <Box key={catIndex} display="flex" gap={1} alignItems="center" mb={1}>
-      {editMode ? (
-        <>
-          {/* MAIN Category */}
-          <TextField
-            size="small"
-            placeholder="Main"
-            value={cat.main || ""}
-            onChange={(e) =>
-              handleCategoryChange(prefIndex, catIndex, "main", e.target.value)
-            }
-            sx={{ flex: 1 }}
-            select
-            SelectProps={{ native: true }}
-          >
-            <option value="">Select Main</option>
-            {categories.map((mainCat) => (
-              <option key={mainCat.name} value={mainCat.name}>
-                {mainCat.name}
-              </option>
-            ))}
-          </TextField>
+                              <TextField
+                                size="small"
+                                placeholder="Sub"
+                                value={cat.sub || ""}
+                                onChange={(e) =>
+                                  handleCategoryChange(
+                                    prefIndex,
+                                    catIndex,
+                                    "sub",
+                                    e.target.value
+                                  )
+                                }
+                                sx={{ flex: 1 }}
+                                select
+                                disabled={!cat.main}
+                              >
+                                <MenuItem value="">Select Sub</MenuItem>
+                                {mainCategory?.children?.map((subCat) => (
+                                  <MenuItem key={subCat.name} value={subCat.name}>
+                                    {subCat.name}
+                                  </MenuItem>
+                                ))}
+                              </TextField>
 
-          {/* SUB Category */}
-          <TextField
-            size="small"
-            placeholder="Sub"
-            value={cat.sub || ""}
-            onChange={(e) =>
-              handleCategoryChange(prefIndex, catIndex, "sub", e.target.value)
-            }
-            sx={{ flex: 1 }}
-            select
-            SelectProps={{ native: true }}
-            disabled={!mainCategory}
-          >
-            <option value="">Select Sub</option>
-            {mainCategory?.children?.map((subCat) => (
-              <option key={subCat.name} value={subCat.name}>
-                {subCat.name}
-              </option>
-            ))}
-          </TextField>
+                              <TextField
+                                size="small"
+                                placeholder="Child"
+                                value={cat.child || ""}
+                                onChange={(e) =>
+                                  handleCategoryChange(
+                                    prefIndex,
+                                    catIndex,
+                                    "child",
+                                    e.target.value
+                                  )
+                                }
+                                sx={{ flex: 1 }}
+                                select
+                                disabled={!cat.sub}
+                              >
+                                <MenuItem value="">Select Child</MenuItem>
+                                {subCategory?.children?.map((child, idx) => (
+                                  <MenuItem key={idx} value={child}>
+                                    {child}
+                                  </MenuItem>
+                                ))}
+                              </TextField>
 
-          {/* CHILD Category */}
-          <TextField
-            size="small"
-            placeholder="Child"
-            value={cat.child || ""}
-            onChange={(e) =>
-              handleCategoryChange(prefIndex, catIndex, "child", e.target.value)
-            }
-            sx={{ flex: 1 }}
-            select
-            SelectProps={{ native: true }}
-            disabled={!subCategory}
-          >
-            <option value="">Select Child</option>
-            {subCategory?.children?.map((child, idx) => (
-              <option key={idx} value={child}>
-                {child}
-              </option>
-            ))}
-          </TextField>
+                              {pref.category.length > 1 && (
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={() =>
+                                    removeCategory(prefIndex, catIndex)
+                                  }
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <Typography
+                                sx={{
+                                  flex: 1,
+                                  bgcolor: "#e0e0e0",
+                                  p: 1,
+                                  borderRadius: 1,
+                                }}
+                              >
+                                {cat.main || "N/A"}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  flex: 1,
+                                  bgcolor: "#e0e0e0",
+                                  p: 1,
+                                  borderRadius: 1,
+                                }}
+                              >
+                                {cat.sub || "N/A"}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  flex: 1,
+                                  bgcolor: "#e0e0e0",
+                                  p: 1,
+                                  borderRadius: 1,
+                                }}
+                              >
+                                {cat.child || "N/A"}
+                              </Typography>
+                            </>
+                          )}
+                        </Box>
+                      );
+                    })}
 
-          {/* Remove Button */}
-          {pref.category.length > 1 && (
-            <IconButton
-              size="small"
-              color="error"
-              onClick={() => removeCategory(prefIndex, catIndex)}
-            >
-              <DeleteIcon />
-            </IconButton>
-          )}
-        </>
-      ) : (
-        <>
-          <Typography sx={{ flex: 1, bgcolor: "#e0e0e0", p: 1, borderRadius: 1 }}>
-            {cat.main || "N/A"}
-          </Typography>
-          <Typography sx={{ flex: 1, bgcolor: "#e0e0e0", p: 1, borderRadius: 1 }}>
-            {cat.sub || "N/A"}
-          </Typography>
-          <Typography sx={{ flex: 1, bgcolor: "#e0e0e0", p: 1, borderRadius: 1 }}>
-            {cat.child || "N/A"}
-          </Typography>
-        </>
-      )}
-    </Box>
-  );
-})}
-
-{/* Add Category Button */}
-{/* {editMode && (
-  <Button
-    size="small"
-    variant="outlined"
-    startIcon={<AddIcon />}
-    onClick={() => addCategory(prefIndex)}
-    sx={{ mt: 1 }}
-  >
-    Add Category
-  </Button>
-)} */}
-
-
-                    {editMode && (
+                    {/* {editMode && (
                       <Button
                         size="small"
                         variant="outlined"
@@ -782,7 +1066,7 @@ const ManageProfile = () => {
                       >
                         Add Category
                       </Button>
-                    )}
+                    )} */}
                   </Box>
                 </Box>
               </Paper>
@@ -802,6 +1086,7 @@ const ManageProfile = () => {
         </Paper>
       </Box>
 
+      {/* OTP Verification Dialog */}
       <Dialog open={otpDialogOpen} onClose={() => setOtpDialogOpen(false)}>
         <DialogTitle>OTP Verification</DialogTitle>
         <DialogContent>
@@ -810,9 +1095,9 @@ const ManageProfile = () => {
               <Typography>
                 Please request OTP to verify your email to enable editing.
               </Typography>
-              {ErrorMSG && (
+              {errorMSG && (
                 <Typography color="error" mt={1}>
-                  {ErrorMSG}
+                  {errorMSG}
                 </Typography>
               )}
             </>
@@ -841,33 +1126,34 @@ const ManageProfile = () => {
           {otpStep === 1 && (
             <Button
               onClick={handleRequestOtp}
-              disabled={reguestOTP}
+              disabled={requestOTP}
               variant="contained"
             >
-              {reguestOTP ? "Requesting..." : "Request OTP"}
+              {requestOTP ? "Requesting..." : "Request OTP"}
             </Button>
           )}
           {otpStep === 2 && (
             <>
               <Button
                 onClick={() => setOtpStep(1)}
-                disabled={reguestOTP}
+                disabled={requestOTP}
                 variant="outlined"
               >
                 Back
               </Button>
               <Button
                 onClick={handleOtpVerify}
-                disabled={reguestOTP}
+                disabled={requestOTP}
                 variant="contained"
               >
-                {reguestOTP ? "Verifying..." : "Verify OTP"}
+                {requestOTP ? "Verifying..." : "Verify OTP"}
               </Button>
             </>
           )}
         </DialogActions>
       </Dialog>
 
+      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
