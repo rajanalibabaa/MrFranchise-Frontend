@@ -605,7 +605,7 @@ const handleDescriptionChange = (content) => {
         </Box>
         
         <IconButton 
-          size="small" 
+          size="medium" 
           onClick={onRemove}
           sx={{
             color: '#757575',
@@ -615,7 +615,7 @@ const handleDescriptionChange = (content) => {
             }
           }}
         >
-          <CloseIcon fontSize="small" />
+          <CloseIcon fontSize="medium" />
         </IconButton>
       </Paper>
     );
@@ -653,7 +653,7 @@ const handleDescriptionChange = (content) => {
             error={!!errors.email}
             helperText={errors.email}
             variant="outlined"
-            size="small"
+            size="medium"
             required
             InputProps={{
               endAdornment: (
@@ -664,7 +664,7 @@ const handleDescriptionChange = (content) => {
                       alignItems="center"
                       color="success.main"
                     >
-                      <CheckCircleIcon fontSize="small" />
+                      <CheckCircleIcon fontSize="medium" />
                       <Typography variant="caption" sx={{ ml: 0.5 }}>
                         Verified
                       </Typography>
@@ -672,14 +672,14 @@ const handleDescriptionChange = (content) => {
                   ) : (
                     <Button
                       variant="outlined"
-                      size="small"
+                      size="medium"
                       onClick={() => handleVerificationDialog("email", true)}
                       disabled={!data.email || verificationState.email.loading}
                       startIcon={
                         verificationState.email.loading ? (
                           <CircularProgress size={14} />
                         ) : (
-                          <SendIcon fontSize="small" />
+                          <SendIcon fontSize="medium" />
                         )
                       }
                     >
@@ -703,7 +703,7 @@ const handleDescriptionChange = (content) => {
             error={!!errors.mobileNumber}
             helperText={errors.mobileNumber}
             variant="outlined"
-            size="small"
+            size="medium"
             inputProps={{ maxLength: 10 }}
             placeholder="Enter 10 digit number"
             InputProps={{
@@ -718,7 +718,7 @@ const handleDescriptionChange = (content) => {
                       alignItems="center"
                       color="success.main"
                     >
-                      <CheckCircleIcon fontSize="small" />
+                      <CheckCircleIcon fontSize="medium" />
                       <Typography variant="caption" sx={{ ml: 0.5 }}>
                         Verified
                       </Typography>
@@ -726,7 +726,7 @@ const handleDescriptionChange = (content) => {
                   ) : (
                     <Button
                       variant="outlined"
-                      size="small"
+                      size="medium"
                       onClick={() =>
                         handleVerificationDialog("mobileNumber", true)
                       }
@@ -738,7 +738,7 @@ const handleDescriptionChange = (content) => {
                         verificationState.mobileNumber.loading ? (
                           <CircularProgress size={14} />
                         ) : (
-                          <SendIcon fontSize="small" />
+                          <SendIcon fontSize="medium" />
                         )
                       }
                     >
@@ -773,7 +773,7 @@ const handleDescriptionChange = (content) => {
                 setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))
               }
               variant="outlined"
-              size="small"
+              size="medium"
               inputProps={{ maxLength: 6 }}
               error={!!verificationState.email.error}
               helperText={verificationState.email.error}
@@ -827,7 +827,7 @@ const handleDescriptionChange = (content) => {
                 setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))
               }
               variant="outlined"
-              size="small"
+              size="medium"
               inputProps={{ maxLength: 6 }}
               error={!!verificationState.mobileNumber.error}
               helperText={verificationState.mobileNumber.error}
@@ -883,6 +883,363 @@ const handleDescriptionChange = (content) => {
         </Alert>
       </Snackbar>
 
+  {/* Communication Information Section */}
+      <Typography variant="h6" sx={{ mb: 3, color: "#ff9800" }}>
+        Communication Information
+      </Typography>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
+        {/* Full Name */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Full Name"
+            name="fullName"
+            value={data.fullName || ""}
+            onChange={handleChange}
+            error={!!errors.fullName}
+            helperText={errors.fullName}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
+
+        {/* Email */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Secondary Email"
+            name="secondaryEmail"
+            type="secondaryEmail"
+            value={data.secondaryEmail || ""}
+            onChange={handleChange}
+            error={!!errors.secondaryEmail}
+            helperText={errors.secondaryEmail}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
+
+        {/* WhatsApp Number */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="WhatsApp Number"
+            name="whatsappNumber"
+            value={data.whatsappNumber || ""}
+            onChange={handleChange}
+            error={!!errors.whatsappNumber}
+            helperText={errors.whatsappNumber}
+            variant="outlined"
+            size="medium"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+{/* Head Office Address */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Head Office Address"
+            name="headOfficeAddress"
+            value={data.headOfficeAddress || ""}
+            onChange={handleChange}
+            error={!!errors.headOfficeAddress}
+            helperText={errors.headOfficeAddress}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
+
+        {/* Pincode */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Pincode"
+            name="pincode"
+            value={data.pincode || ""}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+              onChange({ pincode: value });
+            }}
+            error={!!errors.pincode || !!pincodeError}
+            helperText={errors.pincode || pincodeError}
+            variant="outlined"
+            size="medium"
+            required
+            InputProps={{
+              endAdornment: loadingPincode ? (
+                <InputAdornment position="end">
+                  <CircularProgress size={20} />
+                </InputAdornment>
+              ) : null,
+            }}
+          />
+        </Grid>
+
+        
+
+        {/* State */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.state}>
+            <InputLabel size="medium">State</InputLabel>
+            <Select
+              name="state"
+              value={data.state || ""}
+              label="State"
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              required
+            >
+              {states.map((state) => (
+                <MenuItem key={state.iso2} value={state.name}>
+                  {state.name}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.state && (
+              <Typography variant="caption" color="error">
+                {errors.state}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+
+        {/* City */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="City"
+            name="city"
+            value={data.city || ""}
+            onChange={handleChange}
+            error={!!errors.city}
+            helperText={errors.city}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
+      </Grid>
+
+      {/* Social Media Section */}
+      <Typography variant="h6" sx={{ mb: 2, mt: 4, color: "#ff9800" }}>
+        Social Media & Web Presence
+      </Typography>
+
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
+        {/* Website */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Website"
+            name="website"
+            value={data.website || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.website}
+            helperText={errors.website}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">https://</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Facebook */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Facebook"
+            name="facebook"
+            value={data.facebook || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.facebook}
+            helperText={errors.facebook}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Instagram */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Instagram"
+            name="instagram"
+            value={data.instagram || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.instagram}
+            helperText={errors.instagram}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* LinkedIn */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="LinkedIn"
+            name="linkedin"
+            value={data.linkedin || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.linkedin}
+            helperText={errors.linkedin}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Brand Description Modal */}
+<Dialog
+  open={descriptionModalOpen}
+  onClose={() => setDescriptionModalOpen(false)}
+  maxWidth="md"
+  fullWidth
+  PaperProps={{
+    sx: {
+      borderRadius: 3,
+      boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
+      overflow: 'hidden'
+    }
+  }}
+>
+  <DialogTitle sx={{ 
+    bgcolor: '#f5f7fa',
+    borderBottom: '1px solid #e0e3e7',
+    py: 2,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  }}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
+      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+        Brand Description
+      </Typography>
+    </Box>
+    <IconButton 
+      onClick={() => setDescriptionModalOpen(false)}
+      sx={{ color: '#6b778c' }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+  
+  <DialogContent sx={{ py: 3, px: 3 }}>
+    <Box sx={{ mt: 2 }}>
+      <Editor
+        apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
+        value={description}
+        init={{
+          height: 400,
+          menubar: true,
+          plugins: [
+            "advlist autolink lists link image charmap print preview anchor",
+            "searchreplace visualblocks code fullscreen",
+            "insertdatetime media table paste help wordcount",
+          ],
+          toolbar:
+            "undo redo | formatselect | bold italic backcolor | \
+             alignleft aligncenter alignright alignjustify | \
+             bullist numlist outdent indent | removeformat | help | image",
+          images_upload_url: '/api/upload-image', // Add your image upload endpoint
+          automatic_uploads: true,
+          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+        }}
+        onEditorChange={handleDescriptionChange}
+      />
+    </Box>
+  </DialogContent>
+  
+  <DialogActions sx={{ 
+    px: 3, 
+    py: 2,
+    borderTop: '1px solid #e0e3e7',
+    bgcolor: '#f5f7fa'
+  }}>
+    <Button 
+      onClick={() => setDescriptionModalOpen(false)}
+      variant="outlined"
+      sx={{
+        color: '#6b778c',
+        borderColor: '#e0e3e7',
+        '&:hover': {
+          borderColor: '#b0bec5'
+        },
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Cancel
+    </Button>
+    <Button
+      onClick={() => {
+        onChange({ description });
+        setDescriptionModalOpen(false);
+      }}
+      variant="contained"
+      sx={{
+        bgcolor: '#4caf50',
+        '&:hover': {
+          bgcolor: '#43a047'
+        },
+        textTransform: 'none',
+        fontWeight: 500,
+        borderRadius: 1
+      }}
+    >
+      Save Description
+    </Button>
+  </DialogActions>
+</Dialog>
+
+    
+      </Grid>
       <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
         Brand Details
       </Typography>
@@ -893,7 +1250,7 @@ const handleDescriptionChange = (content) => {
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           gap: 2,
         }}
       >
@@ -906,7 +1263,7 @@ const handleDescriptionChange = (content) => {
             value={formData.companyName || ""}
             onChange={handleChange}
             variant="outlined"
-            size="small"
+            size="medium"
             error={!!errors.companyName}
             helperText={errors.companyName}
             required
@@ -921,7 +1278,7 @@ const handleDescriptionChange = (content) => {
             value={formData.brandName || ""}
             onChange={handleChange}
             variant="outlined"
-            size="small"
+            size="medium"
             error={!!errors.brandName}
             helperText={errors.brandName}
             required
@@ -936,7 +1293,7 @@ const handleDescriptionChange = (content) => {
             value={data.ceoName || ""}
             onChange={handleChange}
             variant="outlined"
-            size="small"
+            size="medium"
             error={!!errors.ceoName}
             helperText={errors.ceoName}
             required
@@ -951,7 +1308,7 @@ const handleDescriptionChange = (content) => {
             value={data.ceoEmail || ""}
             onChange={handleChange}
             variant="outlined"
-            size="small"
+            size="medium"
             error={!!errors.ceoEmail}
             helperText={errors.ceoEmail}
             required
@@ -965,7 +1322,7 @@ const handleDescriptionChange = (content) => {
             value={data.ceoMobile || ""}
             onChange={handleChange}
             variant="outlined"
-            size="small"
+            size="medium"
             inputProps={{ maxLength: 10 }}
             placeholder="Enter 10 digit number"
             InputProps={{
@@ -986,7 +1343,7 @@ const handleDescriptionChange = (content) => {
             value={data.managerName || ""}
             onChange={handleChange}
             variant="outlined"
-            size="small"
+            size="medium"
             error={!!errors.managerName}
             helperText={errors.managerName}
           />
@@ -994,14 +1351,14 @@ const handleDescriptionChange = (content) => {
         {/* Established Year */}
         <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth error={!!errors.establishedYear}>
-            <InputLabel size="small">Established Year</InputLabel>
+            <InputLabel size="medium">Established Year</InputLabel>
             <Select
               name="establishedYear"
               value={data.establishedYear || ""}
               label="Established Year"
               onChange={handleChange}
               variant="outlined"
-              size="small"
+              size="medium"
               required
             >
               {Array.from(
@@ -1023,14 +1380,14 @@ const handleDescriptionChange = (content) => {
         {/* Franchise Since Year */}
         <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth error={!!errors.franchiseSinceYear}>
-            <InputLabel size="small">Franchise Since Year</InputLabel>
+            <InputLabel size="medium">Franchise Since Year</InputLabel>
             <Select
               name="franchiseSinceYear"
               value={data.franchiseSinceYear || ""}
               label="Franchise Since Year"
               onChange={handleChange}
               variant="outlined"
-              size="small"
+              size="medium"
               required
             >
               {Array.from(
@@ -1108,7 +1465,7 @@ const handleDescriptionChange = (content) => {
                 onDelete={() => handleRemoveLocation(index)}
                 color={loc.type === 'domestic' ? 'primary' : 'secondary'}
                 variant="outlined"
-                size="small"
+                size="medium"
                 avatar={
                   <Avatar sx={{ 
                     bgcolor: loc.type === 'domestic' ? '#e3f2fd' : '#f3e5f5',
@@ -1116,8 +1473,8 @@ const handleDescriptionChange = (content) => {
                     height: 24 
                   }}>
                     {loc.type === 'domestic' ? 
-                      <LocationOnIcon fontSize="small" color="primary" /> : 
-                      <PublicIcon fontSize="small" color="secondary" />
+                      <LocationOnIcon fontSize="medium" color="primary" /> : 
+                      <PublicIcon fontSize="medium" color="secondary" />
                     }
                   </Avatar>
                 }
@@ -1252,7 +1609,7 @@ const handleDescriptionChange = (content) => {
                   <Chip 
                     label={`${domesticSelections.selectedStates.length} States`}
                     color="primary"
-                    size="small"
+                    size="medium"
                     variant="outlined"
                   />
                 )}
@@ -1260,7 +1617,7 @@ const handleDescriptionChange = (content) => {
                   <Chip 
                     label={`${domesticSelections.selectedDistricts.length} Districts`}
                     color="primary"
-                    size="small"
+                    size="medium"
                     variant="outlined"
                   />
                 )}
@@ -1268,7 +1625,7 @@ const handleDescriptionChange = (content) => {
                   <Chip 
                     label={`${domesticSelections.selectedCities.length} Cities`}
                     color="primary"
-                    size="small"
+                    size="medium"
                     variant="outlined"
                   />
                 )}
@@ -1279,7 +1636,7 @@ const handleDescriptionChange = (content) => {
                   <Chip 
                     label={`${internationalSelections.selectedCountries.length} Countries`}
                     color="secondary"
-                    size="small"
+                    size="medium"
                     variant="outlined"
                   />
                 )}
@@ -1287,7 +1644,7 @@ const handleDescriptionChange = (content) => {
                   <Chip 
                     label={`${internationalSelections.selectedStates.length} States`}
                     color="secondary"
-                    size="small"
+                    size="medium"
                     variant="outlined"
                   />
                 )}
@@ -1295,7 +1652,7 @@ const handleDescriptionChange = (content) => {
                   <Chip 
                     label={`${internationalSelections.selectedCities.length} Cities`}
                     color="secondary"
-                    size="small"
+                    size="medium"
                     variant="outlined"
                   />
                 )}
@@ -1351,7 +1708,7 @@ const handleDescriptionChange = (content) => {
                         }
                         label={
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <LocationOnIcon fontSize="small" color="primary" sx={{ mr: 1 }} />
+                            <LocationOnIcon fontSize="medium" color="primary" sx={{ mr: 1 }} />
                             {state.name}
                           </Box>
                         }
@@ -1571,7 +1928,7 @@ const handleDescriptionChange = (content) => {
                         }
                         label={
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <PublicIcon fontSize="small" color="secondary" sx={{ mr: 1 }} />
+                            <PublicIcon fontSize="medium" color="secondary" sx={{ mr: 1 }} />
                             {country.name}
                           </Box>
                         }
@@ -1964,358 +2321,7 @@ const handleDescriptionChange = (content) => {
 </Grid>
       </Grid>
 
-      {/* Communication Information Section */}
-      <Typography variant="h6" sx={{ mb: 3, color: "#ff9800" }}>
-        Communication Information
-      </Typography>
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
-          gap: 2,
-        }}
-      >
-        {/* Full Name */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Full Name"
-            name="fullName"
-            value={data.fullName || ""}
-            onChange={handleChange}
-            error={!!errors.fullName}
-            helperText={errors.fullName}
-            variant="outlined"
-            size="small"
-            required
-          />
-        </Grid>
-
-        {/* Email */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Secondary Email"
-            name="secondaryEmail"
-            type="secondaryEmail"
-            value={data.secondaryEmail || ""}
-            onChange={handleChange}
-            error={!!errors.secondaryEmail}
-            helperText={errors.secondaryEmail}
-            variant="outlined"
-            size="small"
-            required
-          />
-        </Grid>
-
-        {/* WhatsApp Number */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="WhatsApp Number"
-            name="whatsappNumber"
-            value={data.whatsappNumber || ""}
-            onChange={handleChange}
-            error={!!errors.whatsappNumber}
-            helperText={errors.whatsappNumber}
-            variant="outlined"
-            size="small"
-            inputProps={{ maxLength: 10 }}
-            placeholder="Enter 10 digit number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">+91</InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-
-        {/* Pincode */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Pincode"
-            name="pincode"
-            value={data.pincode || ""}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, "").slice(0, 6);
-              onChange({ pincode: value });
-            }}
-            error={!!errors.pincode || !!pincodeError}
-            helperText={errors.pincode || pincodeError}
-            variant="outlined"
-            size="small"
-            required
-            InputProps={{
-              endAdornment: loadingPincode ? (
-                <InputAdornment position="end">
-                  <CircularProgress size={20} />
-                </InputAdornment>
-              ) : null,
-            }}
-          />
-        </Grid>
-
-        {/* Head Office Address */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Head Office Address"
-            name="headOfficeAddress"
-            value={data.headOfficeAddress || ""}
-            onChange={handleChange}
-            error={!!errors.headOfficeAddress}
-            helperText={errors.headOfficeAddress}
-            variant="outlined"
-            size="small"
-            required
-          />
-        </Grid>
-
-        {/* State */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.state}>
-            <InputLabel size="small">State</InputLabel>
-            <Select
-              name="state"
-              value={data.state || ""}
-              label="State"
-              onChange={handleChange}
-              variant="outlined"
-              size="small"
-              required
-            >
-              {states.map((state) => (
-                <MenuItem key={state.iso2} value={state.name}>
-                  {state.name}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.state && (
-              <Typography variant="caption" color="error">
-                {errors.state}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
-
-        {/* City */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="City"
-            name="city"
-            value={data.city || ""}
-            onChange={handleChange}
-            error={!!errors.city}
-            helperText={errors.city}
-            variant="outlined"
-            size="small"
-            required
-          />
-        </Grid>
-      </Grid>
-
-      {/* Social Media Section */}
-      <Typography variant="h6" sx={{ mb: 2, mt: 4, color: "#ff9800" }}>
-        Social Media & Web Presence
-      </Typography>
-
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
-          gap: 2,
-        }}
-      >
-        {/* Website */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Website"
-            name="website"
-            value={data.website || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            error={!!errors.website}
-            helperText={errors.website}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">https://</InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-
-        {/* Facebook */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Facebook"
-            name="facebook"
-            value={data.facebook || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            error={!!errors.facebook}
-            helperText={errors.facebook}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">@</InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-
-        {/* Instagram */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Instagram"
-            name="instagram"
-            value={data.instagram || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            error={!!errors.instagram}
-            helperText={errors.instagram}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">@</InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-
-        {/* LinkedIn */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="LinkedIn"
-            name="linkedin"
-            value={data.linkedin || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            error={!!errors.linkedin}
-            helperText={errors.linkedin}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">@</InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-
-        {/* Brand Description Modal */}
-<Dialog
-  open={descriptionModalOpen}
-  onClose={() => setDescriptionModalOpen(false)}
-  maxWidth="md"
-  fullWidth
-  PaperProps={{
-    sx: {
-      borderRadius: 3,
-      boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
-      overflow: 'hidden'
-    }
-  }}
->
-  <DialogTitle sx={{ 
-    bgcolor: '#f5f7fa',
-    borderBottom: '1px solid #e0e3e7',
-    py: 2,
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  }}>
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
-      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-        Brand Description
-      </Typography>
-    </Box>
-    <IconButton 
-      onClick={() => setDescriptionModalOpen(false)}
-      sx={{ color: '#6b778c' }}
-    >
-      <CloseIcon />
-    </IconButton>
-  </DialogTitle>
-  
-  <DialogContent sx={{ py: 3, px: 3 }}>
-    <Box sx={{ mt: 2 }}>
-     <Editor
-  apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
-  value={data.brandDescription || ""}
-  init={{
-    height: 400,
-    menubar: true,
-    plugins: [
-      "advlist autolink lists link image charmap print preview anchor",
-      "searchreplace visualblocks code fullscreen",
-      "insertdatetime media table paste help wordcount",
-    ],
-    toolbar:
-      "undo redo | formatselect | bold italic backcolor | \
-       alignleft aligncenter alignright alignjustify | \
-       bullist numlist outdent indent | removeformat | help | image",
-    images_upload_url: '/api/upload-image',
-    automatic_uploads: true,
-    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-  }}
-  onEditorChange={handleDescriptionChange}
-/>
-    </Box>
-  </DialogContent>
-  
-  <DialogActions sx={{ 
-    px: 3, 
-    py: 2,
-    borderTop: '1px solid #e0e3e7',
-    bgcolor: '#f5f7fa'
-  }}>
-    <Button 
-      onClick={() => setDescriptionModalOpen(false)}
-      variant="outlined"
-      sx={{
-        color: '#6b778c',
-        borderColor: '#e0e3e7',
-        '&:hover': {
-          borderColor: '#b0bec5'
-        },
-        textTransform: 'none',
-        fontWeight: 500,
-        borderRadius: 1
-      }}
-    >
-      Cancel
-    </Button>
-    <Button
-  onClick={() => setDescriptionModalOpen(false)}
-  variant="contained"
-  sx={{
-    bgcolor: '#4caf50',
-    '&:hover': {
-      bgcolor: '#43a047'
-    },
-    textTransform: 'none',
-    fontWeight: 500,
-    borderRadius: 1
-  }}
->
-  Save
-</Button>
-  </DialogActions>
-</Dialog>
-
     
-      </Grid>
     </Box>
   );
 };
