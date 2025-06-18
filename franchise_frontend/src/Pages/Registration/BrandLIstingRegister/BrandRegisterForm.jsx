@@ -1220,12 +1220,13 @@ const BrandRegisterForm = () => {
               flexGrow: 1,
               border: "1px solid #e0e0e0",
               borderRadius: 2,
-              mb: 0,
+    
               pl: 1,
               overflow: "auto",
             }}
+            maxHeight={"calc(100vh - 200px)"}
           >
-            <Box sx={{ p: 2 }}>{getStepContent(activeStep)}</Box>
+            <Box sx={{ p: 2 }} >{getStepContent(activeStep)}</Box>
           </Box>
 
           <Box
@@ -1241,9 +1242,9 @@ const BrandRegisterForm = () => {
               onClick={handleBack}
               sx={{
                 mr: 2,
-                color: "white",
-                backgroundColor: "black",
-                "&:hover": { backgroundColor: "#e0e0e0" },
+                color: "black",
+                backgroundColor: "#f5f5f5",
+                "&:hover": { backgroundColor: "#f0f0f0" },
               }}
             >
               Back

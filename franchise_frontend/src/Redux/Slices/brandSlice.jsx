@@ -96,7 +96,7 @@ export const fetchBrands = createAsyncThunk(
         response = await Likeshow();
       }
 
-    console.log("arvindApi",response.data.data)
+    console.log("arvindApi",response)
 
       return response.data.data;
     } catch (err) {

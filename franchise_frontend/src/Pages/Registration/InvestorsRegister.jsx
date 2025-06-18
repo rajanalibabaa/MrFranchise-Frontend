@@ -158,8 +158,9 @@ const [selectedChild, setSelectedChild] = useState('');
         console.error("Error fetching location data:", err);
         setIndiaData([]);
         setPreferredStates([]);
-      } finally {
       }
+      //  finally {
+      // }
     };
     fetchStates();
   }, []);
@@ -286,7 +287,7 @@ alert('Add Multiple preferences to get more offers from us!','info')
   },2000)
   };
 
-  // Remove preference handler
+  // Remove preference h                andler
   const handleRemovePreference = (idx) => {
     setPreferences(preferences.filter((_, i) => i !== idx));
   };
@@ -296,7 +297,7 @@ alert('Add Multiple preferences to get more offers from us!','info')
 
   // OTP related states
   const [otpModal, setOtpModal] = useState({
-    open: false,
+    open: false, 
     type: null, // 'email', 'mobile', or 'whatsapp'
     otp: "",
     loading: false,
@@ -373,94 +374,6 @@ alert('Add Multiple preferences to get more offers from us!','info')
       verified: false,
     });
   };
-
-  // const sendOtp = async (type) => {
-  //   let endpoint = "";
-  //   let payload = {};
-  //   let fieldName = "";
-
-  //   if (type === "email") {
-  //     fieldName = "email";
-  //     endpoint =
-  //       "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-email";
-  //     payload = { email: watch("email"), type: "email" };
-  //   } else if (type === "mobile") {
-  //     fieldName = "mobileNumber";
-  //     endpoint =
-  //       "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-mobile";
-  //     payload = {
-  //       mobile: `${phonePrefix}${watch("mobileNumber")}`,
-  //       type: "mobile",
-  //     };
-  //   } else if (type === "whatsapp") {
-  //     fieldName = "whatsappNumber";
-  //     endpoint =
-  //       "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-whatsapp";
-  //     payload = {
-  //       mobile: `${phonePrefix}${watch("whatsappNumber")}`,
-  //       type: "whatsapp",
-  //     };
-  //   }
-
-  //   const selectedCountry=useWatch({
-  //     control,
-  //     name:"country",
-  //     defaultValue:"IN"
-  //   })
-
-  //   // Validate the field first
-  //   const isValid = await trigger(fieldName);
-  //   if (!isValid) {
-  //     showSnackbar(`Please enter a valid ${type} address`, "error");
-  //     return;
-  //   }
-
-  //   setOtpStates((prev) => ({
-  //     ...prev,
-  //     [type]: {
-  //       ...prev[type],
-  //       loading: true,
-  //       error: false,
-  //     },
-  //   }));
-
-  //   try {
-  //     const response = await axios.post(endpoint, payload, {
-  //       headers: { "Content-Type": "application/json" },
-  //     });
-
-  //     if (response.status === 200 && response.data.message) {
-  //       showSnackbar(`OTP sent to your ${type} successfully!`, "success");
-  //       setOtpStates((prev) => ({
-  //         ...prev,
-  //         [type]: {
-  //           ...prev[type],
-  //           sent: true,
-  //           loading: false,
-  //           token: response.data.token,
-  //         },
-  //       }));
-  //       openOtpModal(type);
-  //     } else {
-  //       throw new Error(response.data.message || `Failed to send ${type} OTP`);
-  //     }
-  //   } catch (error) {
-  //     console.error(`Error sending ${type} OTP:`, error);
-  //     showSnackbar(
-  //       error.response?.data?.message ||
-  //         `Failed to send ${type} OTP. Please try again.`,
-  //       "error"
-  //     );
-  //     setOtpStates((prev) => ({
-  //       ...prev,
-  //       [type]: {
-  //         ...prev[type],
-  //         loading: false,
-  //         error: true,
-  //       },
-  //     }));
-  //   }
-  // };
 
   const verifyOtp = async () => {
     const { type, otp } = otpModal;

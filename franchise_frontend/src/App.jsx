@@ -92,9 +92,9 @@ function App() {
   return (
     <>
    <GlobalLoader/>
-        <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 1100 }}>
+        {/* <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 1100 }}>
         <Navbar />
-      </Box>
+      </Box> */}
         <Routes>
           <Route path="/" element={<HomeBannerSec />} />
           {/* <Route path="/brandview" element={<BrandViewPage />} /> */}
