@@ -49,11 +49,10 @@ const ManageProfile = () => {
     mobileNumber: "",
     whatsappNumber: "",
   });
-   const [states, setStates] = useState([]);
-  const [districts, setDistricts] = useState([]);
+  const [statesWithCities, setStatesWithCities] = useState({});
+  const [states, setStates] = useState([]);
+  const [selectedState, setSelectedState] = useState("");
   const [cities, setCities] = useState([]);
-  const [allCities, setAllCities] = useState([]);
-  const [loadingLocations, setLoadingLocations] = useState(false);
 
   const navigate = useNavigate();
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
@@ -64,43 +63,87 @@ const ManageProfile = () => {
     return num.replace(/^(\+91)?/, "").trim();
   };
 
-  useEffect(() => {
-    const fetchLocations = async () => {
+ useEffect(() => {
+    // Fetch city data
+    const fetchCities = async () => {
       try {
-        setLoadingLocations(true);
-        const response = await axios.get(
+        const response = await fetch(
           "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/cities.json"
         );
+        const citiesData = await response.json();
 
-        const indianCities = response.data.filter(
+        // Filter for Indian cities only
+        const indianCities = citiesData.filter(
           (city) => city.country_code === "IN"
         );
 
-        // Extract unique states
-        const uniqueStatesMap = new Map();
+        // Group by state
+        const grouped = {};
         indianCities.forEach((city) => {
-          if (!uniqueStatesMap.has(city.state_id)) {
-            uniqueStatesMap.set(city.state_id, {
-              id: city.state_id,
-              name: city.state_name,
-              state_code: city.state_code,
-            });
+          const state = city.state_name;
+          if (!grouped[state]) {
+            grouped[state] = [];
           }
+          grouped[state].push(city.name);
         });
-        setStates(Array.from(uniqueStatesMap.values()));
-        setAllCities(indianCities); // Cache full Indian cities data
+
+        // Sort states alphabetically
+        const sortedStates = Object.keys(grouped).sort();
+
+        setStatesWithCities(grouped);
+        setStates(sortedStates);
       } catch (error) {
-        console.error("Error fetching location data:", error);
-      } finally {
-        setLoadingLocations(false);
+        console.error("Failed to fetch cities:", error);
       }
     };
 
-    fetchLocations();
+    fetchCities();
   }, []);
 
-  console.log("allcities :", allCities)
-  console.log("states :", states)
+  // Update cities when a state is selected
+  useEffect(() => {
+    if (selectedState) {
+      setCities(statesWithCities[selectedState]);
+    } else {
+      setCities([]);
+    }
+  }, [selectedState, statesWithCities]);
+
+  return (
+    <div>
+      <h2>Select Indian State and City</h2>
+
+      <label>
+        State:
+        <select
+          value={selectedState}
+          onChange={(e) => setSelectedState(e.target.value)}
+        >
+          <option value="">-- Select State --</option>
+          {states.map((state) => (
+            <option key={state} value={state}>
+              {state}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      {cities.length > 0 && (
+        <label>
+          City:
+          <select>
+            <option value="">-- Select City --</option>
+            {cities.map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+    </div>
+  );
+};
   useEffect(() => {
     const fetchData = async () => {
       if (!investorUUID || !AccessToken) {
