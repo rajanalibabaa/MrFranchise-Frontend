@@ -200,7 +200,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     { label: "Above ₹5 Crores", value: "Rs.5Cr-above" },
   ];
 
-  const propertyTypes = ["Owned Property", "Rented Property"];
+  // const propertyTypes = ["Owned Property", "Rented Property"];
   const internationalExpansion = ["Yes", "No"];
   const aidFinancing = ["Yes", "No"];
   const statergicPlan = ["Yes", "No"];
@@ -208,8 +208,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   const finacialOperating = ["Yes", "No"];
   const marketingSales = ["Yes", "No"];
   const agreementFranchise = ["Yes", "No"];
-
-  const agreementPeriods = [
+ const supportOption = ["Yes", "No"];
+ 
+ const agreementPeriods = [
     "1 Year",
     "3 Years",
     "5 Years",
@@ -976,64 +977,174 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         Support and Training
       </Typography>
       {/* Support and Training Section */}
-      <Grid
+      {/* <Grid
         display={"Grid"}
         gridTemplateColumns={"repeat(4, 1fr)"}
         gap={1}
         item
         xs={12}
+      > */}
+        <Grid item xs={12}>
+  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+    
+    <Box sx={{ minWidth: 250 }}>
+      <FormLabel component="legend" required sx={{ fontWeight: 500 }}>
+        Staff Recruitment
+      </FormLabel>
+    </Box>
+
+    <FormControl
+      component="fieldset"
+      error={!!errors.staffRecruitment}
+      sx={{ flexDirection: 'row' }}
+    >
+      <RadioGroup
+        row
+        name="staffRecruitment"
+        value={data.staffRecruitment}
+        onChange={(e) =>
+          handleChange({
+            target: { name: 'staffRecruitment', value: e.target.value },
+          })
+        }
       >
-        <Grid item>
-          <TextField
-            select
-            label="Requirement Support"
-            name="requirementSupport"
-            value={data.requirementSupport || ""}
-            onChange={handleChange}
-            error={!!errors.requirementSupport}
-            helperText={errors.requirementSupport}
-            required
-            sx={{ minWidth: "31vh" }}
-          >
-            <MenuItem value="Yes">Yes</MenuItem>
-            <MenuItem value="No">No</MenuItem>
-          </TextField>
-        </Grid>
+        {supportOption.map((type) => (
+          <FormControlLabel
+            key={type}
+            value={type}
+            control={<Radio />}
+            label={type}
+          />
+        ))}
+      </RadioGroup>
+      {errors.staffRecruitment && (
+        <FormHelperText>{errors.staffRecruitment}</FormHelperText>
+      )}
+    </FormControl>
+  </Box>
+</Grid>
+       <Grid item xs={12}>
+  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+    
+    <Box sx={{ minWidth: 250 }}>
+      <FormLabel component="legend" required sx={{ fontWeight: 500 }}>
+        Staff Training
+      </FormLabel>
+    </Box>
 
-        <Grid item>
-          <TextField
-            select
-            label="Staff Training"
-            name="staffTraining"
-            value={data.staffTraining || ""}
-            onChange={handleChange}
-            error={!!errors.staffTraining}
-            helperText={errors.staffTraining}
-            required
-            sx={{ minWidth: "31vh" }}
-          >
-            <MenuItem value="Yes">Yes</MenuItem>
-            <MenuItem value="No">No</MenuItem>
-          </TextField>
-        </Grid>
-        <Grid item>
-          <TextField
-            select
-            label="Staff Recruitment"
-            name="staffRecruitment"
-            value={data.staffRecruitment || ""}
-            onChange={handleChange}
-            error={!!errors.staffRecruitment}
-            helperText={errors.staffRecruitment}
-            required
-            sx={{ minWidth: "31vh" }}
-          >
-            <MenuItem value="Yes">Yes</MenuItem>
-            <MenuItem value="No">No</MenuItem>
-          </TextField>
-        </Grid>
+    <FormControl
+      component="fieldset"
+      error={!!errors.staffTraining}
+      sx={{ flexDirection: 'row' }}
+    >
+      <RadioGroup
+        row
+        name="staffTraining"
+        value={data.staffTraining}
+        onChange={(e) =>
+          handleChange({
+            target: { name: 'staffTraining', value: e.target.value },
+          })
+        }
+      >
+        {supportOption.map((type) => (
+          <FormControlLabel
+            key={type}
+            value={type}
+            control={<Radio />}
+            label={type}
+          />
+        ))}
+      </RadioGroup>
+      {errors.staffTraining && (
+        <FormHelperText>{errors.staffTraining}</FormHelperText>
+      )}
+    </FormControl>
+  </Box>
+</Grid>
+        <Grid item xs={12}>
+  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+    
+    <Box sx={{ minWidth: 250 }}>
+      <FormLabel component="legend" required sx={{ fontWeight: 500 }}>
+        Operational Training
+      </FormLabel>
+    </Box>
 
-        <Grid item>
+    <FormControl
+      component="fieldset"
+      error={!!errors.operationalTraining}
+      sx={{ flexDirection: 'row' }}
+    >
+      <RadioGroup
+        row
+        name="operationalTraining"
+        value={data.operationalTraining}
+        onChange={(e) =>
+          handleChange({
+            target: { name: 'operationalTraining', value: e.target.value },
+          })
+        }
+      >
+        {supportOption.map((type) => (
+          <FormControlLabel
+            key={type}
+            value={type}
+            control={<Radio />}
+            label={type}
+          />
+        ))}
+      </RadioGroup>
+      {errors.operationalTraining && (
+        <FormHelperText>{errors.operationalTraining}</FormHelperText>
+      )}
+    </FormControl>
+  </Box>
+</Grid>
+
+       
+     <Grid item xs={12}>
+  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2}}>
+    
+    <Box sx={{ minWidth: 250 }}>
+      <FormLabel component="legend" required sx={{ fontWeight: 500 }}>
+        Advertisement & Marketing Support
+      </FormLabel>
+    </Box>
+
+    <FormControl
+      component="fieldset"
+      error={!!errors.advertisementMarketingSupport}
+      sx={{ flexDirection: 'row' }}
+    >
+      <RadioGroup
+        row
+        name="advertisementMarketingSupport"
+        value={data.advertisementMarketingSupport}
+        onChange={(e) =>
+          handleChange({
+            target: { name: 'advertisementMarketingSupport', value: e.target.value },
+          })
+        }
+      >
+        {supportOption.map((type) => (
+          <FormControlLabel
+            key={type}
+            value={type}
+            control={<Radio />}
+            label={type}
+          />
+        ))}
+      </RadioGroup>
+      {errors.advertisementMarketingSupport && (
+        <FormHelperText>{errors.advertisementMarketingSupport}</FormHelperText>
+      )}
+    </FormControl>
+  </Box>
+</Grid>
+
+
+        {/* <Grid item>
           <FormControl
             sx={{ minWidth: "31vh" }}
             error={!!errors.agreementPeriod}
@@ -1056,8 +1167,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               <FormHelperText error>{errors.agreementPeriod}</FormHelperText>
             )}
           </FormControl>
-        </Grid>
-      </Grid>
+        </Grid> */}
+      {/* </Grid> */}
 
       <Divider
         sx={{

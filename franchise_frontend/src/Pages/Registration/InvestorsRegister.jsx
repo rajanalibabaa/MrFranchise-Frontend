@@ -42,6 +42,7 @@ import { categories } from "./BrandLIstingRegister/BrandCategories";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import Footer from "../../Components/Footers/Footer";
 import { DeleteIcon } from "lucide-react";
+import {EditIcon} from "lucide-react";
 import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 import RegisterationMediaHandling from "./RegisterationMediaHandling";
@@ -287,12 +288,37 @@ alert('Add Multiple preferences to get more offers from us!','info')
   },2000)
   };
 
-  // Remove preference h                andler
+  // Remove preference handler
   const handleRemovePreference = (idx) => {
     setPreferences(preferences.filter((_, i) => i !== idx));
   };
 
-  // Submit handler
+  const handleEditPreference = (idx) => {
+    const pref = preferences[idx];
+   if (pref.category && pref.category.length > 0) {
+    const selectedCat = pref.category[0];
+
+    // Assuming you're using state for these dropdowns
+    setSelectedMainCategory(selectedCat.main || '');
+    setSelectedSubCategory(selectedCat.sub || '');
+    setSelectedChild(selectedCat.child || '');
+
+    // And setting form value for category array
+    setSelectedCategories(pref.category);
+    setValue("category", pref.category);
+  }
+
+  setValue("investmentRange", pref.investmentRange || "");
+  setValue("investmentAmount", pref.investmentAmount || "");
+  setValue("preferredState", pref.preferredState || "");
+  setValue("preferredDistrict", pref.preferredDistrict || "");
+  setValue("preferredCity", pref.preferredCity || "");
+  setValue("propertyType", pref.propertyType || "");
+  setValue("propertySize", pref.propertySize || "");
+
+    setPreferences(preferences.filter((_, i) => i !== idx));
+  }
+  
  
 
   // OTP related states
@@ -520,8 +546,8 @@ useEffect(() => {
     try {
       dispatch(showLoading());
       const response = await axios.post(
-        "http://localhost:5000/api/v1/investor/createInvestor",
-        // "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
+        // "http://localhost:5000/api/v1/investor/createInvestor",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -1355,6 +1381,7 @@ useEffect(() => {
                     fullWidth
                     label="Preferred Investment Amount"
                     variant="outlined"
+                    value={field.value || ''}
                     error={!!errors.investmentAmount}
                     helperText={errors.investmentAmount?.message || " "}
                     sx={{
@@ -1441,6 +1468,7 @@ useEffect(() => {
                   fullWidth
                   label="Preferred District"
                   variant="outlined"
+                  value={field.value || ''}
                   disabled={!watch("preferredState")}
                   error={!!errors.preferredDistrict}
                   helperText={errors.preferredDistrict?.message || " "}
@@ -1476,6 +1504,7 @@ useEffect(() => {
                   fullWidth
                   label="Preferred City"
                   variant="outlined"
+                  value={field.value || ''}
                   disabled={!watch("preferredDistrict")}
                   error={!!errors.preferredCity}
                   helperText={errors.preferredCity?.message || " "}
@@ -1510,6 +1539,7 @@ useEffect(() => {
                   fullWidth
                   label="Preferred Investment Readiness"
                   variant="outlined"
+                  value={field.value || ""}
                   error={!!errors.investmentRange}
                   helperText={errors.investmentRange?.message || " "}
                   sx={{
@@ -1670,78 +1700,112 @@ useEffect(() => {
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               Your Investment Preferences
             </Typography>
-            <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'hidden' }}>
+            <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'auto' }}>
               <Table size="small" aria-label="added preferences table">
                 <TableHead>
                   <TableRow sx={{ bgcolor: '#7ad03a' }}>
                     <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>#</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Categories</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Investment</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Location</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Property</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Cancel </TableCell>
-                  </TableRow>
-                </TableHead>
+<TableCell sx={{  color: 'primary.contrastText' }}>Industry</TableCell>
+<TableCell sx={{  color: 'primary.contrastText' }}>Main Category</TableCell>
+<TableCell sx={{ color: 'primary.contrastText' }}>Sub Category</TableCell>
+            <TableCell sx={{ color: 'primary.contrastText' }}>Investment Range</TableCell>
+            <TableCell sx={{ color: 'primary.contrastText' }}>Preferred State</TableCell>
+            <TableCell sx={{  color: 'primary.contrastText' }}>Preferred District</TableCell>
+            <TableCell sx={{  color: 'primary.contrastText' }}>Preferred City</TableCell>
+                        <TableCell sx={{  color: 'primary.contrastText' }}>Investment Amount</TableCell>
+
+            <TableCell sx={{  color: 'primary.contrastText' }}>Property Type</TableCell>
+            <TableCell sx={{ color: 'primary.contrastText' }}>Property Size</TableCell>
+            <TableCell sx={{  color: 'primary.contrastText' }}>Actions</TableCell>
+          </TableRow>
+        </TableHead>
                 <TableBody>
-                  {preferences.map((pref, idx) => (
-                    <TableRow key={idx} hover>
-                      <TableCell>{idx + 1}</TableCell>
+          {preferences.map((pref, idx) => (
+            <TableRow key={idx} hover>
+              <TableCell>{idx + 1}</TableCell>
+              <TableCell>
+                {pref.category.map((cat, i) => (
+                  <Typography key={i}>{cat.main}</Typography>
+                ))}
+              </TableCell>
+              <TableCell>
+                {pref.category.map((cat, i) => (
+                  <Typography key={i}>{cat.sub}</Typography>
+                ))}
+              </TableCell>
+              <TableCell>
+                {pref.category.map((cat, i) => (
+                  <Typography key={i}>{cat.child}</Typography>
+                ))}
+              </TableCell>
                       <TableCell>
-                        {Array.isArray(pref.category) ? (
-                          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                            {pref.category.map((cat, i) => (
-                              <Typography key={i} variant="body2">
-                                {`${cat.main} > ${cat.sub} > ${cat.child}`}
-                              </Typography>
-                            ))}
-                          </Box>
-                        ) : null}
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          <Box component="span" fontWeight="bold">Range:</Box> {pref.investmentRange}
-                        </Typography>
-                        <Typography variant="body2">
-                          <Box component="span" fontWeight="bold">Amount:</Box> {pref.investmentAmount}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          <Box component="span" fontWeight="bold">State:</Box> {pref.preferredState}
-                        </Typography>
-                        <Typography variant="body2">
-                          <Box component="span" fontWeight="bold">District:</Box> {pref.preferredDistrict}
-                        </Typography>
-                        <Typography variant="body2">
-                          <Box component="span" fontWeight="bold">City:</Box> {pref.preferredCity}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          <Box component="span" fontWeight="bold">Type:</Box> {pref.propertyType}
-                        </Typography>
-                        {pref.propertyType === "Own Property" && (
-                          <Typography variant="body2">
-                            <Box component="span" fontWeight="bold">Size:</Box> {pref.propertySize}
-                          </Typography>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <IconButton
-                          color="error"
-                          onClick={() => handleRemovePreference(idx)}
-                          aria-label="remove preference"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        )}
+                {/* <Typography variant="subtitle2" fontWeight="bold">Range:</Typography> */}
+                <Typography>{pref.investmentAmount}</Typography>
+              </TableCell>
+              
+              
+              {/* Location */}
+              <TableCell>
+                {/* <Typography variant="subtitle2" fontWeight="bold">State:</Typography> */}
+                <Typography>{pref.preferredState}</Typography>
+              </TableCell>
+              
+              <TableCell>
+                {/* <Typography variant="subtitle2" fontWeight="bold">District:</Typography> */}
+                <Typography>{pref.preferredDistrict}</Typography>
+              </TableCell>
+              
+              <TableCell>
+                {/* <Typography variant="subtitle2" fontWeight="bold">City:</Typography> */}
+                <Typography>{pref.preferredCity}</Typography>
+              </TableCell>
+              
+              {/* Investment Amount */}
+              <TableCell>
+                {/* <Typography variant="subtitle2" fontWeight="bold">Amount:</Typography> */}
+                <Typography>{pref.investmentRange}</Typography>
+              </TableCell>
+              {/* Property */}
+              <TableCell>
+                {/* <Typography variant="subtitle2" fontWeight="bold">Type:</Typography> */}
+                <Typography>{pref.propertyType}</Typography>
+              </TableCell>
+              
+              <TableCell>
+                {/* <Typography variant="subtitle2" fontWeight="bold">Size:</Typography> */}
+                <Typography>
+                  {pref.propertyType === 'Own Property' 
+                    ? pref.propertySize 
+                    : 'N/A'}
+                </Typography>
+              </TableCell>
+
+              {/* Actions */}
+              <TableCell>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <IconButton
+                    color="primary"
+                    onClick={() => handleEditPreference(idx)}
+                    aria-label="edit preference"
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleRemovePreference(idx)}
+                    aria-label="remove preference"
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  </Box>
+)}
 
       {/* Terms and Submit Section */}
       <Box sx={{ 
