@@ -697,8 +697,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               <Grid item>
                 <TextField
                 select
-                  label="Requirement Support"
-                  name="requirementSupport"
+                  label="Recruitment Support"
+                  name="Recruitment Support"
                   value={data.requirementSupport || ""}
                   onChange={handleChange}
                   error={!!errors.requirementSupport}
