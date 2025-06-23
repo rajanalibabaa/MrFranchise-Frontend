@@ -65,7 +65,8 @@ const InvestorDashboard = () => {
     },
     [theme.breakpoints.down('md')]: {
       width: 240,
-    }
+    },
+    marginTop: '2rem'
   }));
 
   // Styled nav items with hover effects
@@ -138,7 +139,7 @@ const InvestorDashboard = () => {
           {/* <UserProfileSection /> */}
 
           {/* Navigation */}
-          <Box sx={{ p: 2, flexGrow: 1 }}>
+          <Box sx={{ p: 2, flexGrow: 1}}>
             <List>
               <NavItem 
                 button 

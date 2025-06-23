@@ -27,9 +27,11 @@ import MuiAlert from "@mui/material/Alert";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
+import { TbPhotoEdit } from "react-icons/tb";
 
 const ManageProfile = () => {
   // State management
+  const [originalData, setOriginalData] = useState("");
   const [investorData, setInvestorData] = useState({
     firstName: "",
     email: "",
@@ -72,7 +74,7 @@ const ManageProfile = () => {
   const [avatarPreview, setAvatarPreview] = useState("");
   const [imagesizeError, setImagesizeError] = useState("");
   const [isImageRemoved, setIsImageRemoved] = useState(false);
-   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   // Navigation and Redux
   const navigate = useNavigate();
@@ -198,6 +200,7 @@ const ManageProfile = () => {
               })) || [],
           };
           setInvestorData(formattedData);
+          setOriginalData(formattedData);
           setAvatarPreview(data.profileImage || "");
         }
       } catch (error) {
@@ -452,26 +455,79 @@ const ManageProfile = () => {
     return isValid;
   };
 
+  // Get only changed fields
+  const getChangedFields = () => {
+    const changes = {};
+    
+    // Basic fields
+    const fieldsToCheck = [
+      'firstName', 'mobileNumber', 'whatsappNumber', 'state', 
+      'city', 'address', 'pincode', 'occupation'
+    ];
+    
+    fieldsToCheck.forEach(field => {
+      if (investorData[field] !== originalData[field]) {
+        changes[field] = investorData[field];
+      }
+    });
+    
+    // Handle phone numbers
+    if (formatNumber(investorData.mobileNumber) !== formatNumber(originalData.mobileNumber)) {
+      changes.mobileNumber = "+91" + formatNumber(investorData.mobileNumber);
+    }
+    
+    if (formatNumber(investorData.whatsappNumber) !== formatNumber(originalData.whatsappNumber)) {
+      changes.whatsappNumber = "+91" + formatNumber(investorData.whatsappNumber);
+    }
+    
+    // Handle preferences if changed
+    if (JSON.stringify(investorData.preferences) !== JSON.stringify(originalData.preferences)) {
+      changes.preferences = investorData.preferences;
+    }
+    
+    // Handle profile image changes
+    if (avatarFile) {
+      changes.profileImage = avatarFile;
+    } else if (isImageRemoved) {
+      changes.removeProfileImage = true;
+    }
+    
+    return changes;
+  };
+
   // Form handling
   const handleSave = async () => {
     if (!validateFields()) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("firstName", investorData.firstName);
-    formData.append("mobileNumber", "+91" + formatNumber(investorData.mobileNumber));
-    formData.append("whatsappNumber", "+91" + formatNumber(investorData.whatsappNumber));
-    formData.append("state", investorData.state);
-    formData.append("city", investorData.city);
-    formData.append("address", investorData.address);
-    formData.append("pincode", investorData.pincode);
-    formData.append("occupation", investorData.occupation);
-    formData.append("preferences", JSON.stringify(investorData.preferences));
+    const changedFields = getChangedFields();
     
-    if (avatarFile) {
-      formData.append("profileImage", avatarFile);
-    } else if (isImageRemoved) {
+    // If nothing changed, just exit edit mode
+    if (Object.keys(changedFields).length === 0 && !avatarFile && !isImageRemoved) {
+      setEditMode(false);
+      setSnackbar({
+        open: true,
+        message: "No changes detected",
+        severity: "info",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    
+    // Append only changed fields
+    Object.entries(changedFields).forEach(([key, value]) => {
+      if (key === 'profileImage') {
+        formData.append(key, value);
+      } else if (key === 'preferences') {
+        formData.append(key, JSON.stringify(value));
+      } else if (key !== 'removeProfileImage') {
+        formData.append(key, value);
+      }
+    });
+    
+    if (changedFields.removeProfileImage) {
       formData.append("removeProfileImage", "true");
     }
 
@@ -487,15 +543,18 @@ const ManageProfile = () => {
         }
       );
 
-      if (response.data.success) {
+      if (response.data.success ) {
         const updatedData = response.data.data;
-        setInvestorData({
-          ...investorData,
+        const newOriginalData = {
+          ...originalData,
           ...updatedData,
           mobileNumber: formatNumber(updatedData.mobileNumber),
           whatsappNumber: formatNumber(updatedData.whatsappNumber),
           profileImage: updatedData.profileImage || "",
-        });
+        };
+        
+        setOriginalData(newOriginalData);
+        setInvestorData(newOriginalData);
         
         if (avatarFile) {
           setAvatarPreview(URL.createObjectURL(avatarFile));
@@ -688,7 +747,7 @@ const ManageProfile = () => {
     );
   }
 
- const handleOpenSnackbar = () => {
+  const handleOpenSnackbar = () => {
     setSnackbarOpen(true);
   };
 
@@ -696,40 +755,49 @@ const ManageProfile = () => {
     setSnackbarOpen(false);
   };
 
-  const handleConfirm = async() => {
-    // Logic to remove profile
-    console.log('Profile removed');
-    console.log('Investor UUID:', investorUUID);
-    console.log('AccessToken UUID:', AccessToken);
-    const profileImage = true
-  console.log(investorData.profileImage);
-    const response = await axios.post(`http://localhost:5000/api/v1/investor/deleteInvestorProfileImage/${investorUUID}`,{profileImage}, {
-      headers:{
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${AccessToken}`,
+  const handleConfirm = async () => {
+    try {
+      setSnackbarOpen(false); // Close the confirmation dialog immediately
+      
+      const response = await axios.patch(
+        `http://localhost:5000/api/v1/investor/deleteInvestorProfileImage/${investorUUID}`,
+        { removeProfileImage: true },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          }
+        }
+      );
+
+      if (response.data.success) {
+        // Update local state to reflect the removed image
+        const updatedData = {
+          ...originalData,
+          profileImage: ""
+        };
+        setOriginalData(updatedData);
+        setInvestorData(updatedData);
+        setAvatarPreview("");
+        setAvatarFile(null);
+        setIsImageRemoved(true);
+        
+        setSnackbar({
+          open: true,
+          message: "Profile image removed successfully!",
+          severity: "success",
+        });
+      } else {
+        throw new Error(response.data.message || "Failed to remove profile image");
       }
-    })
-
-  
-
-  if (response.data.success) {
-
-      setInvestorData();
-      setAvatarPreview("");
-      setIsImageRemoved(true);
-      // setSnackbar({
-      //   open: true,
-      //   message: "Profile image removed successfully!",
-      //   severity: "success",
-      // });
-    } else {
+    } catch (error) {
+      console.error("Error removing profile image:", error);
       setSnackbar({
         open: true,
-        message: "Failed to remove profile image.",
+        message: error.message || "Failed to remove profile image",
         severity: "error",
-      }); 
-  }
-     setSnackbarOpen(false);
+      });
+    }
   };
 
   return (
@@ -748,7 +816,7 @@ const ManageProfile = () => {
       >
         Manage Profile
       </Typography>
-
+       
       <Box display="flex" justifyContent="center">
         <Paper
           elevation={4}
@@ -773,106 +841,154 @@ const ManageProfile = () => {
             </Button>
           </Box>
 
+          <Box 
+            position="relative" 
+            width="100%"
+          >
+            {editMode && (
+              <IconButton
+                onClick={() => setEditMode(false)}
+                sx={{
+                  position: 'absolute',
+                  right: -30,
+                  top: -100,
+                  color: 'text.secondary',
+                  '&:hover': {
+                    color: 'error.main',
+                    backgroundColor: 'rgba(244, 67, 54, 0.08)'
+                  }
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
+          </Box>
+
           <Box display="flex" alignItems="center" mb={3}>
             {editMode ? (
-              <Box display="flex" flexDirection="column" alignItems="flex-start">
+              <Box width="100%">
                 <Box display="flex" alignItems="center">
-                  <Box display="flex" flexDirection="column" alignItems="center" mr={2} position="relative">
-                    <label htmlFor="avatar-upload">
+                  {/* Avatar Display */}
+                  <Avatar
+                    alt="Investor Avatar"
+                    src={avatarPreview || (isImageRemoved ? "" : investorData.profileImage)}
+                    sx={{ 
+                      width: 80, 
+                      height: 80,
+                      mx: 2
+                    }}
+                  />
+
+                  {/* Action Buttons */}
+                  <Box display="flex">
+                    {/* Edit Button */}
+                    <Box mx={1}>
                       <input
-                        id="avatar-upload"
+                        id={`avatar-upload-${investorUUID}`}
                         type="file"
                         accept="image/*"
                         style={{ display: 'none' }}
                         onChange={handleAvatarChange}
                       />
-                      <Avatar
-                        alt="Investor Avatar"
-                        src={avatarPreview || (isImageRemoved ? "" : investorData.profileImage)}
-                        sx={{ 
-                          width: 80, 
-                          height: 80, 
-                          cursor: 'pointer',
-                          '&:hover': {
-                            opacity: 0.8
-                          }
-                        }}
-                      />
-                     
-                    </label>
-                    {(avatarPreview || (investorData.profileImage && !isImageRemoved)) && (
                       <IconButton
-                        size="small"
-                        color="error"
-                        onClick={handleRemoveAvatar}
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          right: 0,
-                          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        component="label"
+                        htmlFor={`avatar-upload-${investorUUID}`}
+                        size="medium"
+                        color="primary"
+                        sx={{ 
+                          backgroundColor: 'rgba(25, 118, 210, 0.08)',
                           '&:hover': {
-                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            backgroundColor: 'rgba(25, 118, 210, 0.12)',
                           }
                         }}
                       >
-                        <DeleteIcon fontSize="small" />
+                        <TbPhotoEdit />
                       </IconButton>
-                    )}
-                    <Typography variant="caption" mt={1}>
-                      Click to change photo (max 50kb)
-                    </Typography>
-                  </Box>
-                  <Typography variant="h6">{investorData.investorID}</Typography>
-                </Box>
-                {imagesizeError && (
-                  <Zoom in={!!imagesizeError}>
-                    <Box mt={1}>
-                      <MuiAlert severity="error">
-                        {imagesizeError}
-                      </MuiAlert>
                     </Box>
-                  </Zoom>
+
+                    {/* Delete Button - Only show if there's an image to delete */}
+                    {(avatarPreview || investorData.profileImage) && !isImageRemoved && (
+                      <Box mx={1}>
+                        <IconButton
+                          size="medium"
+                          color="error"
+                          onClick={handleRemoveAvatar}
+                          sx={{ 
+                            backgroundColor: 'rgba(244, 67, 54, 0.08)',
+                            '&:hover': {
+                              backgroundColor: 'rgba(244, 67, 54, 0.12)',
+                            }
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    )}
+                  </Box>
+
+                  <Typography variant="h6" ml={2}>{investorData.investorID}</Typography>
+                </Box>
+
+                {/* Instruction text */}
+                <Typography 
+                  variant="caption" 
+                  display="block"
+                  mt={1}
+                  ml={2}
+                  color="text.secondary"
+                >
+                  Click edit icon to change photo (max 50KB)
+                </Typography>
+
+                {/* Error message */}
+                {imagesizeError && (
+                  <Box mt={1} ml={2}>
+                    <MuiAlert severity="error" sx={{ width: 'fit-content' }}>
+                      {imagesizeError}
+                    </MuiAlert>
+                  </Box>
                 )}
               </Box>
             ) : (
-              <>
-               <Box sx={{ position: 'relative', display: 'inline-block', mr: 2 }}>
-  <Avatar
-    alt="Investor Avatar"
-    src={investorData.profileImage}
-    sx={{
-      width: 84,
-      height: 84,
-      backgroundColor: 'black',
-    }}
-  />
- {
-  investorData.profileImage && (
-     <CloseIcon
-    onClick={handleOpenSnackbar}
-    sx={{
-      position: 'absolute',
-      top: '4px',
-      right: '4px',
-      fontSize: 18,
-      backgroundColor: '#fff',
-      borderRadius: '50%',
-      padding: '2px',
-      cursor: 'pointer',
-      boxShadow: 1,
-      transition: 'all 0.2s ease-in-out',
-      '&:hover': {
-        backgroundColor: '#f44336',
-        color: '#fff',
-      },
-    }}
-  />
-  )
- }
-</Box>
-
-
-              </>
+              /* View Mode */
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ 
+                  position: 'relative',
+                  display: 'inline-block',
+                  mr: 2
+                }}>
+                  <Avatar
+                    alt="Investor Avatar"
+                    src={investorData.profileImage}
+                    sx={{
+                      width: 84,
+                      height: 84,
+                    }}
+                  />
+                  {investorData.profileImage && (
+                    <CloseIcon
+                      onClick={handleOpenSnackbar}
+                      sx={{
+                        position: 'absolute',
+                        top: '4px',
+                        right: '4px',
+                        fontSize: 18,
+                        backgroundColor: '#fff',
+                        borderRadius: '50%',
+                        padding: '2px',
+                        cursor: 'pointer',
+                        boxShadow: 1,
+                        transition: 'all 0.2s ease-in-out',
+                        '&:hover': {
+                          backgroundColor: '#f44336',
+                          color: '#fff',
+                        },
+                      }}
+                    />
+                  )}
+                </Box>
+                <Typography variant="h6">{investorData.investorID}</Typography>
+              </Box>
             )}
           </Box>
 
@@ -1276,7 +1392,7 @@ const ManageProfile = () => {
           </Box>
         </Paper>
       </Box>
-
+     
       {/* OTP Verification Dialog */}
       <Dialog open={otpDialogOpen} onClose={() => setOtpDialogOpen(false)}>
         <DialogTitle>OTP Verification</DialogTitle>
@@ -1347,7 +1463,8 @@ const ManageProfile = () => {
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
         <MuiAlert
@@ -1360,22 +1477,25 @@ const ManageProfile = () => {
         </MuiAlert>
       </Snackbar>
 
-      <Snackbar
+      <Dialog
         open={snackbarOpen}
         onClose={handleCloseSnackbar}
-        message="Are you sure you want to remove your profile?"
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        action={
-          <Stack direction="row" spacing={1}>
-            <Button size="small" color="error" onClick={handleConfirm}>
-              Yes
-            </Button>
-            <Button size="small" color="inherit" onClick={handleCloseSnackbar}>
-              No
-            </Button>
-          </Stack>
-        }
-      />
+      >
+        <DialogTitle>Confirm Removal</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to remove your profile image?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseSnackbar}>Cancel</Button>
+          <Button 
+            onClick={handleConfirm} 
+            color="error"
+            variant="contained"
+          >
+            Remove
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
