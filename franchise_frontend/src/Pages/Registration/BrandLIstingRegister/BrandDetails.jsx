@@ -46,6 +46,7 @@ import LanguageIcon from '@mui/icons-material/Language';
 import FlagIcon from '@mui/icons-material/Flag';
 import { Editor } from "@tinymce/tinymce-react";
 import { width } from "@mui/system";
+import { fetchPincodeDetails } from "../../../Utils/PincodeFetch.jsx";
 
 // const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 // const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -70,6 +71,34 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const [openLocationModal, setOpenLocationModal] = useState(false);
  
 
+  useEffect(()=>{
+    const fetchLocationDetails = async () => {
+      if(data.pincode && data.pincode.length === 6  ) {
+        setLoadingPincode(true);
+        setPincodeError(null);
+        try {
+          const locationDetails =await fetchPincodeDetails(data.pincode);
+          onChange({
+            state: locationDetails.state,
+            city: locationDetails.city,
+            district: locationDetails.district
+          })
+          
+        } catch (error) {
+          setPincodeError('Invalid Pincode or no data found');
+          
+        }finally{
+          setLoadingPincode(false);
+        }
+
+      }
+      
+    };
+    const timer =setTimeout(() => {
+      fetchLocationDetails();
+    }, 1000);
+    return () => clearTimeout(timer);
+  },[data.pincode]);
 
 const handleMainCategoryChange = (e) => {
   const mainCat = e.target.value;
@@ -811,7 +840,7 @@ Head Office Location      </Typography>
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
         }}>
                 {/* Pincode */}
@@ -844,7 +873,7 @@ Head Office Location      </Typography>
 
         {/* State */}
         <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.state}>
+          {/* <FormControl fullWidth error={!!errors.state}>
             <InputLabel size="medium">State</InputLabel>
             <Select
               name="state"
@@ -855,18 +884,47 @@ Head Office Location      </Typography>
               size="medium"
               required
             >
-              {/* {states.map((state) => (
+              {states.map((state) => (
                 <MenuItem key={state.iso2} value={state.name}>
                   {state.name}
                 </MenuItem>
-              ))} */}
+              ))}
             </Select>
             {errors.state && (
               <Typography variant="caption" color="error">
                 {errors.state}
               </Typography>
             )}
-          </FormControl>
+          </FormControl> */}
+          <TextField
+            fullWidth
+            label="State"
+            name="state"
+            value={data.state || ""}
+            onChange={handleChange}
+            error={!!errors.state}
+            helperText={errors.state}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
+        
+        {/* District  */}
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="District"
+            name="district"
+            value={data.district || ""}
+            onChange={handleChange}
+            error={!!errors.district}
+            helperText={errors.district}
+            variant="outlined"
+            size="medium"
+            required
+          />
         </Grid>
 
         {/* City */}
