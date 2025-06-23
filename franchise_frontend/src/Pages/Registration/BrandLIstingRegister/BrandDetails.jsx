@@ -31,7 +31,7 @@ import {
   Divider,
   Avatar,
   Badge,
-  Tooltip
+  Tooltip,
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -51,14 +51,23 @@ import { width } from "@mui/system";
 // const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
-  const formData = {
+  const [showWhatsappSnackbar, setShowWhatsappSnackbar] = useState(false);
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
+
+  // const [phoneVerifyStatus, setPhoneVerifyStatus] = useState({
+  //   mobileNumber: {
+  //     loading: false,
+  //     verified: false,
+  //   },
+  // });
+    const formData = {
     companyName: "",
     brandName: "",
     brandCategories: [],
     expansionLocation: [],
     ...data,
   };
-
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,7 +79,70 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   // Updated Expansion Location State
   const [openLocationModal, setOpenLocationModal] = useState(false);
  
+ useEffect(() => {
+    if (data.mobileNumber?.length === 10 && !whatsappEnabled && !data.whatsappNumber) {
+      setShowWhatsappSnackbar(true);
+    }
+  }, [data.mobileNumber, whatsappEnabled, data.whatsappNumber]);
 
+
+const handleMainCategoryChange = (e) => {
+  const mainCat = e.target.value;
+  setSelectedCategory({
+    main: mainCat,
+    sub: "",
+    child: "",
+    groupId: ""
+  });
+};
+
+const handleSubCategoryChange = (e) => {
+  const subCat = e.target.value;
+  const mainCatObj = categories.find(cat => cat.name === selectedCategory.main);
+  const subCatObj = mainCatObj?.children?.find(sub => sub.name === subCat);
+  
+  setSelectedCategory(prev => ({
+    ...prev,
+    sub: subCat,
+    groupId: subCatObj?.groupId || "",
+    child: ""
+  }));
+};
+
+const handleChildCategoryChange = (e) => {
+  setSelectedCategory(prev => ({
+    ...prev,
+    child: e.target.value
+  }));
+};
+
+const handleAddCategory = () => {
+  if (selectedCategory.child) {
+    const isDuplicate =
+      Array.isArray(data.brandCategories) &&
+      data.brandCategories.some(
+        (cat) =>
+          cat.main === selectedCategory.main &&
+          cat.sub === selectedCategory.sub &&
+          cat.child === selectedCategory.child
+      );
+
+    if (!isDuplicate) {
+      const updatedCategories = [
+        ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
+        {
+          main: selectedCategory.main,
+          sub: selectedCategory.sub,
+          child: selectedCategory.child,
+          groupId: selectedCategory.groupId
+        },
+      ];
+      onChange({ brandCategories: updatedCategories });
+      // Reset the child category selection after adding
+      setSelectedCategory(prev => ({ ...prev, child: "" }));
+    }
+  }
+};
 
   // OTP Verification States
   const [verificationState, setVerificationState] = useState({
@@ -96,6 +168,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     message: "",
     severity: "success",
   });
+  
 
   // Handle OTP verification dialog open/close
   const handleVerificationDialog = (field, open) => {
@@ -240,62 +313,56 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-
- // Add this to your existing state declarations
-const [descriptionModalOpen, setDescriptionModalOpen] = useState(false);
-// const [description, setDescription] = useState(data.description || "");
-
-// Add this handler function
-const handleDescriptionChange = (content) => {
-  onChange({ brandDescription: content }); // Update the parent form data directly
-};
-
   // Location card component
   const LocationCard = ({ location, onRemove }) => {
     return (
-      <Paper 
-        elevation={2} 
+      <Paper
+        elevation={2}
         sx={{
           p: 1.5,
           borderRadius: 2,
-          display: 'flex',
-          alignItems: 'center',
+          display: "flex",
+          alignItems: "center",
           gap: 2,
-          position: 'relative',
-          borderLeft: `4px solid ${location.type === 'domestic' ? '#4caf50' : '#2196f3'}`,
-          '&:hover': {
-            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)'
-          }
+          position: "relative",
+          borderLeft: `4px solid ${
+            location.type === "domestic" ? "#4caf50" : "#2196f3"
+          }`,
+          "&:hover": {
+            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+          },
         }}
       >
-        <Avatar sx={{ 
-          bgcolor: location.type === 'domestic' ? '#4caf50' : '#2196f3',
-          width: 40, 
-          height: 40 
-        }}>
-          {location.type === 'domestic' ? <LocationOnIcon /> : <PublicIcon />}
+        <Avatar
+          sx={{
+            bgcolor: location.type === "domestic" ? "#4caf50" : "#2196f3",
+            width: 40,
+            height: 40,
+          }}
+        >
+          {location.type === "domestic" ? <LocationOnIcon /> : <PublicIcon />}
         </Avatar>
-        
+
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
             {location.city}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {location.type === 'domestic' 
+            {location.type === "domestic"
               ? `${location.district}, ${location.state}, ${location.country}`
               : `${location.state}, ${location.country}`}
           </Typography>
         </Box>
-        
-        <IconButton 
-          size="medium" 
+
+        <IconButton
+          size="medium"
           onClick={onRemove}
           sx={{
-            color: '#757575',
-            '&:hover': {
-              color: '#f44336',
-              backgroundColor: 'rgba(244, 67, 54, 0.08)'
-            }
+            color: "#757575",
+            "&:hover": {
+              color: "#f44336",
+              backgroundColor: "rgba(244, 67, 54, 0.08)",
+            },
           }}
         >
           <CloseIcon fontSize="medium" />
@@ -304,13 +371,11 @@ const handleDescriptionChange = (content) => {
     );
   };
 
-  
-
   return (
-    <Box sx={{ overflowY: "auto", ml: 15, pr: 1, mt: 0 }}>
+    <Box sx={{ overflowY: "auto", ml: 10, pr: 1, mt: 0 }}>
       {/* Brand Details Section */}
-      <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
-       Login Credentials Details
+      <Typography variant="h6" fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
+       Login Credentials 
       </Typography>
 
       <Grid
@@ -319,11 +384,26 @@ const handleDescriptionChange = (content) => {
         sx={{
           mt: 3,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}
       >
+         {/* Full Name */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Full Name"
+            name="fullName"
+            value={data.fullName || ""}
+            onChange={handleChange}
+            error={!!errors.fullName}
+            helperText={errors.fullName}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
         {/* Email with Verification */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -434,9 +514,9 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
-  
+
         {/* WhatsApp Number */}
-              <Grid item xs={12} sm={6} md={2.4}>
+        <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label="WhatsApp Number"
@@ -447,6 +527,7 @@ const handleDescriptionChange = (content) => {
             helperText={errors.whatsappNumber}
             variant="outlined"
             size="medium"
+            disabled = {!whatsappEnabled}
             inputProps={{ maxLength: 10 }}
             placeholder="Enter 10 digit number"
             InputProps={{
@@ -454,11 +535,14 @@ const handleDescriptionChange = (content) => {
                 <InputAdornment position="start">+91</InputAdornment>
               ),
             }}
+            sx={{
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '8px',
+    },
+  }}
           />
         </Grid>
-
       </Grid>
-
 
       {/* OTP Verification Dialogs */}
       {/* Email Verification Dialog */}
@@ -589,7 +673,7 @@ const handleDescriptionChange = (content) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
+      <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
         Brand Details
       </Typography>
 
@@ -601,9 +685,25 @@ const handleDescriptionChange = (content) => {
           display: "grid",
           gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
           gap: 2,
+          mb: 2,
         }}
       >
     
+        {/* Company Name */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Company Name"
+            name="companyName"
+            value={formData.companyName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.companyName}
+            helperText={errors.companyName}
+            required
+          />
+        </Grid>
         {/* Brand Name */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -619,23 +719,21 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
-            {/* Company Name */}
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="Company Name"
-            name="companyName"
-            value={formData.companyName || ""}
+            label="Tagline"
+            name="Tagline"
+            value={formData.Tagline || ""}
             onChange={handleChange}
             variant="outlined"
             size="medium"
-            error={!!errors.companyName}
-            helperText={errors.companyName}
+            error={!!errors.Tagline}
+            helperText={errors.Tagline}
             required
           />
         </Grid>
-       
-        <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label="CEO/MD/Owner Name"
@@ -685,6 +783,20 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
+              </Grid>
+
+
+      <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
+Head Office Location      </Typography> 
+      <Grid  container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(2, 0.7fr)", xs: "1fr" },
+          gap: 2,
+        }}>
+      
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
@@ -698,31 +810,7 @@ const handleDescriptionChange = (content) => {
             helperText={errors.managerName}
           />
         </Grid>
-
-         {/* <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
-        Communication Information
-      </Typography> */}
- 
-        {/* Full Name */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Full Name"
-            name="fullName"
-            value={data.fullName || ""}
-            onChange={handleChange}
-            error={!!errors.fullName}
-            helperText={errors.fullName}
-            variant="outlined"
-            size="medium"
-            required
-          />
-        </Grid>
-
-       
-
-      
-
+        
 {/* Head Office Address */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -738,7 +826,16 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
+</Grid>
 
+<Grid  container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
+          gap: 2,
+        }}>
                 {/* Pincode */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -810,11 +907,21 @@ const handleDescriptionChange = (content) => {
           />
         </Grid>
 
+</Grid>
+
+<Grid  container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gap: 2,
+        }}>
  {/* Email */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="Secondary Email"
+            label="Secondary Email (Optional)"
             name="secondaryEmail"
             type="secondaryEmail"
             value={data.secondaryEmail || ""}
@@ -827,75 +934,7 @@ const handleDescriptionChange = (content) => {
           />
         </Grid>
 
-   {/* Social Media Section */}
-      {/* <Typography variant="h6" sx={{ mb: 1, mt: 1, color: "#ff9800" }}>
-        Social Media & Web Presence
-      </Typography> */}
 
-
-     
-
-        {/* Established Year
-        <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.establishedYear}>
-            <InputLabel size="medium">Established Year</InputLabel>
-            <Select
-              name="establishedYear"
-              value={data.establishedYear || ""}
-              label="Established Year"
-              onChange={handleChange}
-              variant="outlined"
-              size="medium"
-              required
-            >
-              {Array.from(
-                { length: 100 },
-                (_, i) => new Date().getFullYear() - i
-              ).map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.establishedYear && (
-              <Typography variant="caption" color="error">
-                {errors.establishedYear}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
-        {/* Franchise Since Year */}
-        {/* <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.franchiseSinceYear}>
-            <InputLabel size="medium">Franchise Since Year</InputLabel>
-            <Select
-              name="franchiseSinceYear"
-              value={data.franchiseSinceYear || ""}
-              label="Franchise Since Year"
-              onChange={handleChange}
-              variant="outlined"
-              size="medium"
-              required
-            >
-              {Array.from(
-                { length: 100 },
-                (_, i) => new Date().getFullYear() - i
-              ).map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.franchiseSinceYear && (
-              <Typography variant="caption" color="error">
-                {errors.franchiseSinceYear}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid> */} 
-
-
-  
         {/* Website */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -916,25 +955,25 @@ const handleDescriptionChange = (content) => {
           />
         </Grid>
 
-        {/* Facebook */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Facebook"
-            name="facebook"
-            value={data.facebook || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            error={!!errors.facebook}
-            helperText={errors.facebook}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">@</InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
+          {/* Facebook */}
+          <Grid item xs={12} sm={6} md={2.4}>
+            <TextField
+              fullWidth
+              label="Facebook"
+              name="facebook"
+              value={data.facebook || ""}
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              error={!!errors.facebook}
+              helperText={errors.facebook}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">@</InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
 
         {/* Instagram */}
         <Grid item xs={12} sm={6} md={2.4}>
@@ -977,194 +1016,13 @@ const handleDescriptionChange = (content) => {
             }}
           />
         </Grid>
-      </Grid>
-      {/* Categories Section - Three Dropdowns with Add Button */}
-{/* <Grid item xs={12}>
-  <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
-    Brand Categories
-  </Typography>
+   </Grid>  
+
+        
+
   
-  <Box sx={{ 
-    display: 'grid',
-    gridTemplateColumns: { md: 'repeat(4, 1fr)', xs: '1fr' },
-    gap: 2,
-    alignItems: 'flex-end'
-  }}>
-    {/* Main Category Dropdown *
-    <FormControl  sx={{width:200}}size="small">
-      <InputLabel>Main Category</InputLabel>
-      <Select
-        value={selectedCategory.main || ""}
-        label="Main Category"
-        onChange={(e) => {
-          const mainCat = e.target.value;
-          setSelectedCategory({
-            main: mainCat,
-            sub: "",
-            child: "",
-            groupId: ""
-          });
-        }}
-      >
-        {categories.map((category) => (
-          <MenuItem key={category.name} value={category.name}>
-            {category.name}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-
-    {/* Sub Category Dropdown *
-    <FormControl  size="small" sx={{width:200}} disabled={!selectedCategory.main}>
-      <InputLabel>Sub Category</InputLabel>
-      <Select
-        value={selectedCategory.sub || ""}
-        label="Sub Category"
-        onChange={(e) => {
-          const subCat = e.target.value;
-          const mainCatObj = categories.find(cat => cat.name === selectedCategory.main);
-          const subCatObj = mainCatObj?.children?.find(sub => sub.name === subCat);
-          
-          setSelectedCategory(prev => ({
-            ...prev,
-            sub: subCat,
-            groupId: subCatObj?.groupId || "",
-            child: ""
-          }));
-        }}
-      >
-        {selectedCategory.main && 
-          categories.find(cat => cat.name === selectedCategory.main)?.children?.map((subCategory) => (
-            <MenuItem key={subCategory.name} value={subCategory.name}>
-              {subCategory.name}
-            </MenuItem>
-          ))
-        }
-      </Select>
-    </FormControl>
-
-    {/* Child Category Dropdown *
-    <FormControl fullWidth size="small" disabled={!selectedCategory.sub} sx={{width:200}}>
-      <InputLabel>Child Category    </InputLabel>
-      <Select
-        value={selectedCategory.child || ""}
-        label="Child Category"
-        onChange={(e) => {
-          setSelectedCategory(prev => ({
-            ...prev,
-            child: e.target.value
-          }));
-        }}
-      >
-        {selectedCategory.sub && 
-          categories
-            .find(cat => cat.name === selectedCategory.main)
-            ?.children?.find(sub => sub.name === selectedCategory.sub)
-            ?.children?.map((child, index) => (
-              <MenuItem key={index} value={child}>
-                {child}
-              </MenuItem>
-            ))
-        }
-      </Select>
-    </FormControl>
-
-    {/* Add Button *
-    <Button
-      variant="contained"
-      onClick={handleAddCategory}
-      disabled={!selectedCategory.child}
-      sx={{
-        height: 40,
-        p:2,
-        pr:6,
-        pl:6,
-        bgcolor: '#ff9800',
-        '&:hover': { bgcolor: '#fb8c00' },
-        boxShadow: 'none',
-        textTransform: 'none',
-      
-        borderRadius: 1
-      }}
-    >
-      Add 
-    </Button>
-  </Box>
-
-  {/* Selected Categories Display *
-  {Array.isArray(data.brandCategories) && data.brandCategories.length > 0 && (
-    <Box sx={{ mt: 2 }}>
-      <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-        Selected Categories
-      </Typography>
-      <Box sx={{ 
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 1
-      }}>
-        {data.brandCategories.map((category, index) => (
-          <Chip
-            key={index}
-            label={`${category.main} > ${category.sub} > ${category.child}`}
-            onDelete={() => {
-              const updatedCategories = [...data.brandCategories];
-              updatedCategories.splice(index, 1);
-              onChange({ brandCategories: updatedCategories });
-            }}
-            color="primary"
-            variant="outlined"
-            size="small"
-            sx={{
-              '& .MuiChip-deleteIcon': {
-                color: '#1976d2'
-              }
-            }}
-          />
-        ))}
-      </Box>
-    </Box>
-  )}
-</Grid> */}
 
 
-<Grid item xs={12}>
-  <Box>
-    <Button
-      variant="contained"
-      startIcon={<AddIcon />}
-      onClick={() => setDescriptionModalOpen(true)}
-      sx={{
-        bgcolor: '#ff9800',
-        '&:hover': { bgcolor: '#fb8c00' },
-        boxShadow: 'none',
-        textTransform: 'none',
-        fontWeight: 500,
-        borderRadius: 1
-      }}
-    >
-      Add Brand Description
-    </Button>
-    {errors.description && (
-      <Typography variant="caption" color="error" sx={{ ml: 1 }}>
-        {errors.description}
-      </Typography>
-    )}
-    
-    {/* Preview of the description (first 100 characters) */}
-   {data.brandDescription && (
-  <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e3e7', borderRadius: 1 }}>
-    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-      Description Preview
-    </Typography>
-    <div dangerouslySetInnerHTML={{ 
-      __html: data.brandDescription.length > 100 
-        ? `${data.brandDescription.substring(0, 100)}...` 
-        : data.brandDescription 
-    }} />
-  </Box>
-)}
-  </Box>
-</Grid>
 
   {/* Communication Information Section */}
      
@@ -1177,119 +1035,61 @@ const handleDescriptionChange = (content) => {
           gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           gap: 2,
         }}
-      >
-       
-        {/* Brand Description Modal */}
-<Dialog
-  open={descriptionModalOpen}
-  onClose={() => setDescriptionModalOpen(false)}
-  maxWidth="md"
-  fullWidth
-  PaperProps={{
-    sx: {
-      borderRadius: 3,
-      boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
-      overflow: 'hidden'
-    }
+      ></Grid>
+
+      <Snackbar
+  open={showWhatsappSnackbar}
+  autoHideDuration={null}
+  onClose={() => setShowWhatsappSnackbar(false)}
+  anchorOrigin={{ vertical: "center", horizontal: "center" }}
+  sx={{
+    width: '100%',
+    maxWidth: '700px',
+    mb: 12
   }}
 >
-  <DialogTitle sx={{ 
-    bgcolor: '#f5f7fa',
-    borderBottom: '1px solid #e0e3e7',
-    py: 2,
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  }}>
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
-      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-        Brand Description
-      </Typography>
-    </Box>
-    <IconButton 
-      onClick={() => setDescriptionModalOpen(false)}
-      sx={{ color: '#6b778c' }}
-    >
-      <CloseIcon />
-    </IconButton>
-  </DialogTitle>
-  
-  <DialogContent sx={{ py: 3, px: 3 }}>
-    <Box sx={{ mt: 2 }}>
-      <Editor
-        apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
-        value={data.brandDescription || ""}
-        init={{
-          height: 400,
-          menubar: true,
-          plugins: [
-            "advlist autolink lists link image charmap print preview anchor",
-            "searchreplace visualblocks code fullscreen",
-            "insertdatetime media table paste help wordcount",
-          ],
-          toolbar:
-            "undo redo | formatselect | bold italic backcolor | \
-             alignleft aligncenter alignright alignjustify | \
-             bullist numlist outdent indent | removeformat | help | image",
-          images_upload_url: '/api/upload-image', // Add your image upload endpoint
-          automatic_uploads: true,
-          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-        }}
-        onEditorChange={handleDescriptionChange}
-      />
-    </Box>
-  </DialogContent>
-  
-  <DialogActions sx={{ 
-    px: 3, 
-    py: 2,
-    borderTop: '1px solid #e0e3e7',
-    bgcolor: '#f5f7fa'
-  }}>
-    <Button 
-      onClick={() => setDescriptionModalOpen(false)}
-      variant="outlined"
-      sx={{
-        color: '#6b778c',
-        borderColor: '#e0e3e7',
-        '&:hover': {
-          borderColor: '#b0bec5'
-        },
-        textTransform: 'none',
-        fontWeight: 500,
-        borderRadius: 1
-      }}
-    >
-      Cancel
-    </Button>
-    <Button
-      onClick={() => {
-        onChange({ description });
-        setDescriptionModalOpen(false);
-      }}
-      variant="contained"
-      sx={{
-        bgcolor: '#4caf50',
-        '&:hover': {
-          bgcolor: '#43a047'
-        },
-        textTransform: 'none',
-        fontWeight: 500,
-        borderRadius: 1
-      }}
-    >
-      Save Description
-    </Button>
-  </DialogActions>
-</Dialog>
-
-    
-      </Grid>
-    
-     
-
-    
+  <Alert
+    severity="info"
+    // icon={<WhatsApp fontSize="inherit" />}
+    sx={{
+      width: '100%',
+      borderRadius: '12px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      alignItems: 'center'
+    }}
+    action={
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Button
+          color="success"
+          variant="contained"
+          size="medium"
+          onClick={() => {
+            onChange({ whatsappNumber: data.mobileNumber || "" });
+                  setWhatsappEnabled(false);
+                  setShowWhatsappSnackbar(false);
+          }}
+          sx={{ borderRadius: '8px' }}
+        >
+          Yes
+        </Button>
+        <Button
+          color="inherit"
+          variant="outlined"
+          size="small"
+          onClick={() => {
+            setWhatsappEnabled(true); 
+            setShowWhatsappSnackbar(false);
+          }}
+          sx={{ borderRadius: '8px' }}
+        >
+          No
+        </Button>
+      </Box>
+    }
+  >
+    Is your WhatsApp number same as your mobile number?
+  </Alert>
+</Snackbar>
     </Box>
   );
 };

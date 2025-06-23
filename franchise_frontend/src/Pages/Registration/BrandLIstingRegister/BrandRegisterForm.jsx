@@ -50,6 +50,7 @@ import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress from "@mui/material/CircularProgress";
 import Footer from "../../../Components/Footers/Footer";
+import categories from "./BrandCategories";
 import BrandExpansionLocationDetails from "./BrandExpansionLocationDetails";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
@@ -147,6 +148,7 @@ const initialFormData = {
     franchiseSinceYear: "",
     brandCategories: [],
     brandDescription: "",
+    expansionLocation: [],
     website: "",
     facebook: "",
     instagram: "",
@@ -155,64 +157,72 @@ const initialFormData = {
     pancardNumber: "",
   },
   franchiseDetails: {
+    establishedYear: "",
+    franchiseSinceYear: "",
+    brandCategories: {
+      groupId: "",
+      main: "",
+      sub: "",
+      child: "",
+    },
+    brandDescription: "",
     fico: [],
     companyOwnedOutlets: "",
     franchiseOutlets: "",
     totalOutlets: "",
-    currentOutletsLocatedAt: [],
-    internationalExpansion: "",
     aidFinancing: "",
-    requirementSupport: "",
-    staffTraining: "",
+    recruitmentSupport: "",
     staffRecruitment: "",
-    agreementPeriod: "",
-    statergicPlan: "",
+    staffTraining: "",
+    operationalTraining: "",
+    advertisementAndMarketing: "",
+    strategicPlan: "",
     operatingProcedure: "",
-    finacialOperating: "",
+    financialOperating: "",
     marketingSales: "",
-    agreementFranchise:""
+    agreementFranchise: "",
   },
-  expansionLocationDetails: {
-    currentOutletsLocatedAt: [
-  {
-    type: "domestic",
-    location: {
-      country: "",
-      state: "",
-      district: "",
-      city: ""
-    }
-  },
-  {
-    type: "international",
-    location: {
-      country: "",
-      state: "",
-      city: ""
-    }
-  }
-],
-expansionLocations: [
-  {
-    type: "domestic",
-    location: {
-      country: '',
-      state: [],
-      district: [],
-      city: []
-    }
-  },
-  {
-    type: "international",
-    location: {
-      country: "",
-      state: [],
-      city: []
-    }
-  }
-]
+//   expansionLocationDetails: {
+//     currentOutletsLocatedAt: [
+//   {
+//     type: "domestic",
+//     location: {
+//       country: "",
+//       state: "",
+//       district: "",
+//       city: ""
+//     }
+//   },
+//   {
+//     type: "international",
+//     location: {
+//       country: "",
+//       state: "",
+//       city: ""
+//     }
+//   }
+// ],
+// expansionLocations: [
+//   {
+//     type: "domestic",
+//     location: {
+//       country: '',
+//       state: [],
+//       district: [],
+//       city: []
+//     }
+//   },
+//   {
+//     type: "international",
+//     location: {
+//       country: "",
+//       state: [],
+//       city: []
+//     }
+//   }
+// ]
 
-  },
+//   },
   uploads: {
     franchisePromotionVideo: [],
     // brandPromotionVideo: [],
@@ -379,8 +389,10 @@ const BrandRegisterForm = () => {
             companyOwnedOutlets: formData.franchiseDetails.companyOwnedOutlets,
             franchiseOutlets: formData.franchiseDetails.franchiseOutlets,
             totalOutlets: formData.franchiseDetails.totalOutlets,
-            currentOutletsLocatedAt: formData.franchiseDetails.currentOutletsLocatedAt,
-            internationalExpansion: formData.franchiseDetails.internationalExpansion,
+            currentOutletsLocatedAt:
+              formData.franchiseDetails.currentOutletsLocatedAt,
+            internationalExpansion:
+              formData.franchiseDetails.internationalExpansion,
             aidFinancing: formData.franchiseDetails.aidFinancing,
             requirementSupport: formData.franchiseDetails.requirementSupport,
             staffTraining: formData.franchiseDetails.staffTraining,
@@ -450,7 +462,7 @@ const BrandRegisterForm = () => {
         //   }
         // };
         console.log("fileFields.....:", formDataSend);
-        
+
         const response = await axios.post(
           // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
@@ -783,7 +795,6 @@ const BrandRegisterForm = () => {
       "marginOnSales",
       // "fixedReturn",
       "propertyType",
-
     ];
 
     return (
@@ -1154,6 +1165,7 @@ const BrandRegisterForm = () => {
           >
             Franchise Details
           </Typography>
+
           <Table size="small">
             <TableBody>
               {Object.entries(franchiseDetails).map(([key, value]) => (
@@ -1255,7 +1267,7 @@ const BrandRegisterForm = () => {
                 </FormControl>
               </Toolbar>
             </Stepper>
-            <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
+            {/* <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
               <Box width="30%">
                 {" "}
                 {activeStep >= 0 && renderSelectedCategories()}
@@ -1265,7 +1277,7 @@ const BrandRegisterForm = () => {
                 {activeStep >= 0 && renderExpansionLocations()}
               </Box>
               <Box width="45%"> {activeStep >= 1 && renderFicoModels()}</Box>
-            </Box>
+            </Box> */}
           </Box>
 
           <Box
@@ -1273,13 +1285,13 @@ const BrandRegisterForm = () => {
               flexGrow: 1,
               border: "1px solid #e0e0e0",
               borderRadius: 2,
-    
+
               pl: 1,
               overflow: "auto",
             }}
-            maxHeight={"calc(100vh - 200px)"}
+            // maxHeight={"calc(100vh - 200px)"}
           >
-            <Box sx={{ p: 2 }} >{getStepContent(activeStep)}</Box>
+            <Box sx={{ p: 2 }}>{getStepContent(activeStep)}</Box>
           </Box>
 
           <Box
