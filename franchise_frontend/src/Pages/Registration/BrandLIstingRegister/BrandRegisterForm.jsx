@@ -157,8 +157,7 @@ const initialFormData = {
     pancardNumber: "",
   },
   franchiseDetails: {
-    establishedYear: "",
-    franchiseSinceYear: "",
+ 
     brandCategories: {
       groupId: "",
       main: "",
@@ -167,20 +166,19 @@ const initialFormData = {
     },
     brandDescription: "",
     fico: [],
+    establishedYear: "",
+    franchiseSinceYear: "",
     companyOwnedOutlets: "",
     franchiseOutlets: "",
     totalOutlets: "",
     aidFinancing: "",
-    recruitmentSupport: "",
-    staffRecruitment: "",
-    staffTraining: "",
-    operationalTraining: "",
-    advertisementAndMarketing: "",
-    strategicPlan: "",
-    operatingProcedure: "",
-    financialOperating: "",
-    marketingSales: "",
-    agreementFranchise: "",
+    franchiseDevelopment: "",
+    consultationOrAssistance: "",
+    trainingSupport: "",
+    marketingSupport: "",
+    otherSupport: "",
+    uniqueSellingPoints: "",
+   
   },
 //   expansionLocationDetails: {
 //     currentOutletsLocatedAt: [
@@ -1225,7 +1223,7 @@ const BrandRegisterForm = () => {
           display: "flex",
           flexDirection: "column",
           height: "100vh",
-          mt: 8,
+       
         }}
       >
         <Box
@@ -1405,7 +1403,7 @@ const BrandRegisterForm = () => {
           </Alert>
         </Snackbar>
       </Box>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 };
