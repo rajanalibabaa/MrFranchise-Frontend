@@ -31,7 +31,7 @@ import {
   Divider,
   Avatar,
   Badge,
-  Tooltip
+  Tooltip,
 } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -39,15 +39,12 @@ import categories from "./BrandCategories.jsx";
 import AddIcon from "@mui/icons-material/Add";
 import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
-import CloseIcon from '@mui/icons-material/Close';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import PublicIcon from '@mui/icons-material/Public';
-import LanguageIcon from '@mui/icons-material/Language';
-import FlagIcon from '@mui/icons-material/Flag';
-import { Editor } from "@tinymce/tinymce-react";
-import { width } from "@mui/system";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import PublicIcon from "@mui/icons-material/Public";
+import LanguageIcon from "@mui/icons-material/Language";
 
 // const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 // const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -61,7 +58,6 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     ...data,
   };
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     onChange({ [name]: value });
@@ -72,19 +68,19 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   // Updated Expansion Location State
   const [openLocationModal, setOpenLocationModal] = useState(false);
   const [locationType, setLocationType] = useState("domestic");
-  
+
   // Domestic Location State
   const [domesticSelections, setDomesticSelections] = useState({
     selectedStates: [],
     selectedDistricts: [],
-    selectedCities: []
+    selectedCities: [],
   });
-  
+
   // International Location State
   const [internationalSelections, setInternationalSelections] = useState({
     selectedCountries: [],
     selectedStates: [],
-    selectedCities: []
+    selectedCities: [],
   });
 
   // Location Data
@@ -102,13 +98,13 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     cities: false,
     countries: false,
     intStates: false,
-    intCities: false
+    intCities: false,
   });
 
   // Fetch domestic data (Indian states, districts, cities)
   useEffect(() => {
     const fetchDomesticData = async () => {
-      setLoading(prev => ({ ...prev, states: true }));
+      setLoading((prev) => ({ ...prev, states: true }));
       try {
         const response = await axios.get(
           "https://raw.githubusercontent.com/prasad-gowda/india-state-district-cities/master/India-state-district-city.json"
@@ -116,13 +112,13 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
         setStatesData(response.data);
         setStates(
           response.data
-            .map(state => ({ id: state.iso2, name: state.name }))
+            .map((state) => ({ id: state.iso2, name: state.name }))
             .sort((a, b) => a.name.localeCompare(b.name))
         );
       } catch (error) {
         console.error("Error fetching domestic data:", error);
       } finally {
-        setLoading(prev => ({ ...prev, states: false }));
+        setLoading((prev) => ({ ...prev, states: false }));
       }
     };
 
@@ -132,22 +128,22 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   // Fetch international countries
   useEffect(() => {
     const fetchCountries = async () => {
-      setLoading(prev => ({ ...prev, countries: true }));
+      setLoading((prev) => ({ ...prev, countries: true }));
       try {
         const response = await axios.get(
           "https://countriesnow.space/api/v0.1/countries"
         );
         const sortedCountries = response.data.data
-          .map(country => ({
+          .map((country) => ({
             id: country.iso2,
-            name: country.country
+            name: country.country,
           }))
           .sort((a, b) => a.name.localeCompare(b.name));
         setCountries(sortedCountries);
       } catch (error) {
         console.error("Error fetching countries:", error);
       } finally {
-        setLoading(prev => ({ ...prev, countries: false }));
+        setLoading((prev) => ({ ...prev, countries: false }));
       }
     };
 
@@ -163,26 +159,26 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
       setDomesticSelections({
         selectedStates: [],
         selectedDistricts: [],
-        selectedCities: []
+        selectedCities: [],
       });
     } else {
       setInternationalSelections({
         selectedCountries: [],
         selectedStates: [],
-        selectedCities: []
+        selectedCities: [],
       });
     }
   };
 
   // Handle domestic state selection
   const handleDomesticStateChange = (event, values) => {
-    setDomesticSelections(prev => ({
+    setDomesticSelections((prev) => ({
       ...prev,
       selectedStates: values,
       selectedDistricts: [],
-      selectedCities: []
+      selectedCities: [],
     }));
-    
+
     // Reset districts and cities when states change
     setDistricts([]);
     setCities([]);
@@ -190,33 +186,33 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
 
   // Handle domestic district selection
   const handleDomesticDistrictChange = (event, values) => {
-    setDomesticSelections(prev => ({
+    setDomesticSelections((prev) => ({
       ...prev,
       selectedDistricts: values,
-      selectedCities: []
+      selectedCities: [],
     }));
-    
+
     // Reset cities when districts change
     setCities([]);
   };
 
   // Handle domestic city selection
   const handleDomesticCityChange = (event, values) => {
-    setDomesticSelections(prev => ({
+    setDomesticSelections((prev) => ({
       ...prev,
-      selectedCities: values
+      selectedCities: values,
     }));
   };
 
   // Handle international country selection
   const handleInternationalCountryChange = async (event, values) => {
-    setInternationalSelections(prev => ({
+    setInternationalSelections((prev) => ({
       ...prev,
       selectedCountries: values,
       selectedStates: [],
-      selectedCities: []
+      selectedCities: [],
     }));
-    
+
     // Reset states and cities when countries change
     setInternationalStates([]);
     setInternationalCities([]);
@@ -224,21 +220,21 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
 
   // Handle international state selection
   const handleInternationalStateChange = (event, values) => {
-    setInternationalSelections(prev => ({
+    setInternationalSelections((prev) => ({
       ...prev,
       selectedStates: values,
-      selectedCities: []
+      selectedCities: [],
     }));
-    
+
     // Reset cities when states change
     setInternationalCities([]);
   };
 
   // Handle international city selection
   const handleInternationalCityChange = (event, values) => {
-    setInternationalSelections(prev => ({
+    setInternationalSelections((prev) => ({
       ...prev,
-      selectedCities: values
+      selectedCities: values,
     }));
   };
 
@@ -246,73 +242,73 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const handleAddLocations = () => {
     if (locationType === "domestic") {
       const newLocations = [];
-      
-      domesticSelections.selectedStates.forEach(state => {
-        const stateObj = statesData.find(s => s.name === state);
+
+      domesticSelections.selectedStates.forEach((state) => {
+        const stateObj = statesData.find((s) => s.name === state);
         if (stateObj) {
-          domesticSelections.selectedDistricts.forEach(district => {
+          domesticSelections.selectedDistricts.forEach((district) => {
             const filteredCities = stateObj.cities.filter(
-              city => city.district === district && 
-                     domesticSelections.selectedCities.includes(city.name)
+              (city) =>
+                city.district === district &&
+                domesticSelections.selectedCities.includes(city.name)
             );
-            
-            filteredCities.forEach(cityObj => {
+
+            filteredCities.forEach((cityObj) => {
               newLocations.push({
                 type: "domestic",
                 country: "India",
                 state: state,
                 district: district,
-                city: cityObj.name
+                city: cityObj.name,
               });
             });
           });
         }
       });
-      
+
       const updatedLocations = Array.isArray(data.expansionLocation)
         ? [...data.expansionLocation, ...newLocations]
         : newLocations;
-      
+
       onChange({ expansionLocation: updatedLocations });
-      
     } else {
       const newLocations = [];
-      
-      internationalSelections.selectedCountries.forEach(country => {
-        internationalSelections.selectedStates.forEach(state => {
-          internationalSelections.selectedCities.forEach(city => {
+
+      internationalSelections.selectedCountries.forEach((country) => {
+        internationalSelections.selectedStates.forEach((state) => {
+          internationalSelections.selectedCities.forEach((city) => {
             newLocations.push({
               type: "international",
               country: country,
               state: state,
-              city: city
+              city: city,
             });
           });
         });
       });
-      
+
       const updatedLocations = Array.isArray(data.expansionLocation)
         ? [...data.expansionLocation, ...newLocations]
         : newLocations;
-      
+
       onChange({ expansionLocation: updatedLocations });
     }
-    
+
     // Reset selections
     if (locationType === "domestic") {
       setDomesticSelections({
         selectedStates: [],
         selectedDistricts: [],
-        selectedCities: []
+        selectedCities: [],
       });
     } else {
       setInternationalSelections({
         selectedCountries: [],
         selectedStates: [],
-        selectedCities: []
+        selectedCities: [],
       });
     }
-    
+
     setOpenLocationModal(false);
   };
 
@@ -322,8 +318,6 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     updatedLocations.splice(index, 1);
     onChange({ expansionLocation: updatedLocations });
   };
-
-
 
   // OTP Verification States
   const [verificationState, setVerificationState] = useState({
@@ -493,62 +487,56 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-
- // Add this to your existing state declarations
-const [descriptionModalOpen, setDescriptionModalOpen] = useState(false);
-// const [description, setDescription] = useState(data.description || "");
-
-// Add this handler function
-const handleDescriptionChange = (content) => {
-  onChange({ brandDescription: content }); // Update the parent form data directly
-};
-
   // Location card component
   const LocationCard = ({ location, onRemove }) => {
     return (
-      <Paper 
-        elevation={2} 
+      <Paper
+        elevation={2}
         sx={{
           p: 1.5,
           borderRadius: 2,
-          display: 'flex',
-          alignItems: 'center',
+          display: "flex",
+          alignItems: "center",
           gap: 2,
-          position: 'relative',
-          borderLeft: `4px solid ${location.type === 'domestic' ? '#4caf50' : '#2196f3'}`,
-          '&:hover': {
-            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)'
-          }
+          position: "relative",
+          borderLeft: `4px solid ${
+            location.type === "domestic" ? "#4caf50" : "#2196f3"
+          }`,
+          "&:hover": {
+            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+          },
         }}
       >
-        <Avatar sx={{ 
-          bgcolor: location.type === 'domestic' ? '#4caf50' : '#2196f3',
-          width: 40, 
-          height: 40 
-        }}>
-          {location.type === 'domestic' ? <LocationOnIcon /> : <PublicIcon />}
+        <Avatar
+          sx={{
+            bgcolor: location.type === "domestic" ? "#4caf50" : "#2196f3",
+            width: 40,
+            height: 40,
+          }}
+        >
+          {location.type === "domestic" ? <LocationOnIcon /> : <PublicIcon />}
         </Avatar>
-        
+
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
             {location.city}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {location.type === 'domestic' 
+            {location.type === "domestic"
               ? `${location.district}, ${location.state}, ${location.country}`
               : `${location.state}, ${location.country}`}
           </Typography>
         </Box>
-        
-        <IconButton 
-          size="medium" 
+
+        <IconButton
+          size="medium"
           onClick={onRemove}
           sx={{
-            color: '#757575',
-            '&:hover': {
-              color: '#f44336',
-              backgroundColor: 'rgba(244, 67, 54, 0.08)'
-            }
+            color: "#757575",
+            "&:hover": {
+              color: "#f44336",
+              backgroundColor: "rgba(244, 67, 54, 0.08)",
+            },
           }}
         >
           <CloseIcon fontSize="medium" />
@@ -557,13 +545,11 @@ const handleDescriptionChange = (content) => {
     );
   };
 
-  
-
   return (
     <Box sx={{ overflowY: "auto", ml: 15, pr: 1, mt: 0 }}>
       {/* Brand Details Section */}
       <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
-       Login Credentials Details
+        Login Credentials Details
       </Typography>
 
       <Grid
@@ -687,9 +673,9 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
-  
+
         {/* WhatsApp Number */}
-              <Grid item xs={12} sm={6} md={2.4}>
+        <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label="WhatsApp Number"
@@ -709,9 +695,7 @@ const handleDescriptionChange = (content) => {
             }}
           />
         </Grid>
-
       </Grid>
-
 
       {/* OTP Verification Dialogs */}
       {/* Email Verification Dialog */}
@@ -856,7 +840,6 @@ const handleDescriptionChange = (content) => {
           gap: 2,
         }}
       >
-    
         {/* Brand Name */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -872,7 +855,7 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
-            {/* Company Name */}
+        {/* Company Name */}
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
@@ -887,7 +870,7 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
-       
+
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
@@ -952,10 +935,10 @@ const handleDescriptionChange = (content) => {
           />
         </Grid>
 
-         <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
-        Communication Information
-      </Typography>
- 
+        <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
+          Communication Information
+        </Typography>
+
         {/* Full Name */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -989,9 +972,7 @@ const handleDescriptionChange = (content) => {
           />
         </Grid>
 
-      
-
-{/* Head Office Address */}
+        {/* Head Office Address */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
@@ -1007,1018 +988,1077 @@ const handleDescriptionChange = (content) => {
           />
         </Grid>
 
-             <Grid
-        container
-        spacing={2}
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-          gap: 2,
-        }}
-      >
-
-        {/* Pincode */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Pincode"
-            name="pincode"
-            value={data.pincode || ""}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, "").slice(0, 6);
-              onChange({ pincode: value });
-            }}
-            error={!!errors.pincode || !!pincodeError}
-            helperText={errors.pincode || pincodeError}
-            variant="outlined"
-            size="medium"
-            required
-            InputProps={{
-              endAdornment: loadingPincode ? (
-                <InputAdornment position="end">
-                  <CircularProgress size={20} />
-                </InputAdornment>
-              ) : null,
-            }}
-          />
-        </Grid>
-
-        
-
-        {/* State */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.state}>
-            <InputLabel size="medium">State</InputLabel>
-            <Select
-              name="state"
-              value={data.state || ""}
-              label="State"
-              onChange={handleChange}
+        <Grid
+          container
+          spacing={2}
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+            gap: 2,
+          }}
+        >
+          {/* Pincode */}
+          <Grid item xs={12} sm={6} md={2.4}>
+            <TextField
+              fullWidth
+              label="Pincode"
+              name="pincode"
+              value={data.pincode || ""}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                onChange({ pincode: value });
+              }}
+              error={!!errors.pincode || !!pincodeError}
+              helperText={errors.pincode || pincodeError}
               variant="outlined"
               size="medium"
               required
+              InputProps={{
+                endAdornment: loadingPincode ? (
+                  <InputAdornment position="end">
+                    <CircularProgress size={20} />
+                  </InputAdornment>
+                ) : null,
+              }}
+            />
+          </Grid>
+
+          {/* State */}
+          <Grid item xs={12} sm={6} md={2.4}>
+            <FormControl fullWidth error={!!errors.state}>
+              <InputLabel size="medium">State</InputLabel>
+              <Select
+                name="state"
+                value={data.state || ""}
+                label="State"
+                onChange={handleChange}
+                variant="outlined"
+                size="medium"
+                required
+              >
+                {states.map((state) => (
+                  <MenuItem key={state.iso2} value={state.name}>
+                    {state.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.state && (
+                <Typography variant="caption" color="error">
+                  {errors.state}
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+
+          {/* City */}
+          <Grid item xs={12} sm={6} md={2.4}>
+            <TextField
+              fullWidth
+              label="City"
+              name="city"
+              value={data.city || ""}
+              onChange={handleChange}
+              error={!!errors.city}
+              helperText={errors.city}
+              variant="outlined"
+              size="medium"
+              required
+            />
+          </Grid>
+        </Grid>
+
+        {/* Social Media Section */}
+        <Typography variant="h6" sx={{ mb: 1, mt: 1, color: "#ff9800" }}>
+          Social Media & Web Presence
+        </Typography>
+
+        <Grid
+          container
+          spacing={2}
+          sx={{
+            mt: 3,
+            display: "grid",
+            gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
+            gap: 2,
+          }}
+        >
+          {/* Website */}
+          <Grid item xs={12} sm={6} md={2.4}>
+            <TextField
+              fullWidth
+              label="Website"
+              name="website"
+              value={data.website || ""}
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              error={!!errors.website}
+              helperText={errors.website}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">https://</InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+
+          {/* Facebook */}
+          <Grid item xs={12} sm={6} md={2.4}>
+            <TextField
+              fullWidth
+              label="Facebook"
+              name="facebook"
+              value={data.facebook || ""}
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              error={!!errors.facebook}
+              helperText={errors.facebook}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">@</InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+
+          {/* Instagram */}
+          <Grid item xs={12} sm={6} md={2.4}>
+            <TextField
+              fullWidth
+              label="Instagram"
+              name="instagram"
+              value={data.instagram || ""}
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              error={!!errors.instagram}
+              helperText={errors.instagram}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">@</InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+
+          {/* LinkedIn */}
+          <Grid item xs={12} sm={6} md={2.4}>
+            <TextField
+              fullWidth
+              label="LinkedIn"
+              name="linkedin"
+              value={data.linkedin || ""}
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              error={!!errors.linkedin}
+              helperText={errors.linkedin}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">@</InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+        </Grid>
+
+        {/* Enhanced Expansion Location Section */}
+        <Grid item xs={12}>
+          <Box>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setOpenLocationModal(true)}
+              sx={{
+                bgcolor: "#ff9800",
+                "&:hover": { bgcolor: "#fb8c00" },
+                boxShadow: "none",
+                textTransform: "none",
+                fontWeight: 500,
+                borderRadius: 1,
+              }}
             >
-              {states.map((state) => (
-                <MenuItem key={state.iso2} value={state.name}>
-                  {state.name}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.state && (
-              <Typography variant="caption" color="error">
-                {errors.state}
+              Add Expansion Locations
+            </Button>
+            {errors.expansionLocation && (
+              <Typography variant="caption" color="error" sx={{ ml: 1 }}>
+                {errors.expansionLocation}
               </Typography>
             )}
-          </FormControl>
-        </Grid>
 
-        {/* City */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
+            {/* Selected Locations Preview */}
+            {data.expansionLocation?.length > 0 && (
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                  Selected Expansion Locations ({data.expansionLocation.length})
+                </Typography>
+
+                {/* Location Chips */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 1,
+                    mb: 2,
+                    p: 1.5,
+                    border: "1px solid #e0e3e7",
+                    borderRadius: 1,
+                    minHeight: 60,
+                    bgcolor: "#f9fafc",
+                  }}
+                >
+                  {data.expansionLocation.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                      No locations selected yet
+                    </Typography>
+                  ) : (
+                    data.expansionLocation.map((loc, index) => (
+                      <Chip
+                        key={index}
+                        label={
+                          loc.type === "domestic"
+                            ? `${loc.city}, ${loc.state}`
+                            : `${loc.city}, ${loc.country}`
+                        }
+                        onDelete={() => handleRemoveLocation(index)}
+                        color={
+                          loc.type === "domestic" ? "primary" : "secondary"
+                        }
+                        variant="outlined"
+                        size="medium"
+                        avatar={
+                          <Avatar
+                            sx={{
+                              bgcolor:
+                                loc.type === "domestic" ? "#e3f2fd" : "#f3e5f5",
+                              width: 24,
+                              height: 24,
+                            }}
+                          >
+                            {loc.type === "domestic" ? (
+                              <LocationOnIcon
+                                fontSize="medium"
+                                color="primary"
+                              />
+                            ) : (
+                              <PublicIcon fontSize="medium" color="secondary" />
+                            )}
+                          </Avatar>
+                        }
+                        sx={{
+                          "& .MuiChip-deleteIcon": {
+                            color:
+                              loc.type === "domestic" ? "#1976d2" : "#9c27b0",
+                          },
+                        }}
+                      />
+                    ))
+                  )}
+                </Box>
+              </Box>
+            )}
+          </Box>
+
+          {/* Expansion Location Modal */}
+          <Dialog
+            open={openLocationModal}
+            onClose={() => setOpenLocationModal(false)}
+            maxWidth="md"
             fullWidth
-            label="City"
-            name="city"
-            value={data.city || ""}
-            onChange={handleChange}
-            error={!!errors.city}
-            helperText={errors.city}
-            variant="outlined"
-            size="medium"
-            required
-          />
-        </Grid>
-
-        </Grid>
-
-   {/* Social Media Section */}
-      <Typography variant="h6" sx={{ mb: 1, mt: 1, color: "#ff9800" }}>
-        Social Media & Web Presence
-      </Typography>
-
-
-         <Grid
-        container
-        spacing={2}
-        sx={{
-          mt: 3,
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
-          gap: 2,
-        }}
-      >
-        {/* Website */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Website"
-            name="website"
-            value={data.website || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            error={!!errors.website}
-            helperText={errors.website}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">https://</InputAdornment>
-              ),
+            PaperProps={{
+              sx: {
+                borderRadius: 3,
+                boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.15)",
+                overflow: "hidden",
+              },
             }}
-          />
-        </Grid>
+          >
+            <DialogTitle
+              sx={{
+                bgcolor: "#f5f7fa",
+                borderBottom: "1px solid #e0e3e7",
+                py: 2,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  Add Expansion Locations
+                </Typography>
+              </Box>
+              <IconButton
+                onClick={() => setOpenLocationModal(false)}
+                sx={{ color: "#6b778c" }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
 
-        {/* Facebook */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Facebook"
-            name="facebook"
-            value={data.facebook || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            error={!!errors.facebook}
-            helperText={errors.facebook}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">@</InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
+            <DialogContent sx={{ py: 3, px: 3 }}>
+              <Box>
+                {/* Location Type Toggle */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    mb: 3,
+                  }}
+                >
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      display: "flex",
+                      borderRadius: 2,
+                      border: "1px solid #e0e3e7",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <Button
+                      variant={
+                        locationType === "domestic" ? "contained" : "text"
+                      }
+                      onClick={() =>
+                        handleLocationTypeChange({
+                          target: { value: "domestic" },
+                        })
+                      }
+                      sx={{
+                        px: 3,
+                        py: 1,
+                        borderRadius: 0,
+                        textTransform: "none",
+                        fontWeight: 500,
+                        bgcolor:
+                          locationType === "domestic"
+                            ? "#4caf50"
+                            : "transparent",
+                        color: locationType === "domestic" ? "#fff" : "#6b778c",
+                        "&:hover": {
+                          bgcolor:
+                            locationType === "domestic"
+                              ? "#43a047"
+                              : "rgba(0, 0, 0, 0.04)",
+                        },
+                      }}
+                      startIcon={<LocationOnIcon />}
+                    >
+                      Domestic (India)
+                    </Button>
 
-        {/* Instagram */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Instagram"
-            name="instagram"
-            value={data.instagram || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            error={!!errors.instagram}
-            helperText={errors.instagram}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">@</InputAdornment>
-              ),
-            }}
-          />
+                    <Divider orientation="vertical" flexItem />
+
+                    <Button
+                      variant={
+                        locationType === "international" ? "contained" : "text"
+                      }
+                      onClick={() =>
+                        handleLocationTypeChange({
+                          target: { value: "international" },
+                        })
+                      }
+                      sx={{
+                        px: 3,
+                        py: 1,
+                        borderRadius: 0,
+                        textTransform: "none",
+                        fontWeight: 500,
+                        bgcolor:
+                          locationType === "international"
+                            ? "#2196f3"
+                            : "transparent",
+                        color:
+                          locationType === "international" ? "#fff" : "#6b778c",
+                        "&:hover": {
+                          bgcolor:
+                            locationType === "international"
+                              ? "#1976d2"
+                              : "rgba(0, 0, 0, 0.04)",
+                        },
+                      }}
+                      startIcon={<PublicIcon />}
+                    >
+                      International
+                    </Button>
+                  </Paper>
+                </Box>
+
+                {/* Current Selections Preview */}
+                {(locationType === "domestic"
+                  ? domesticSelections.selectedStates.length > 0
+                  : internationalSelections.selectedCountries.length > 0) && (
+                  <Box
+                    sx={{
+                      mb: 3,
+                      p: 2,
+                      border: "1px dashed #e0e3e7",
+                      borderRadius: 1,
+                      bgcolor: "#f9fafc",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ mb: 1, fontWeight: 600 }}
+                    >
+                      Current Selection
+                    </Typography>
+
+                    {locationType === "domestic" ? (
+                      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                        {domesticSelections.selectedStates.length > 0 && (
+                          <Chip
+                            label={`${domesticSelections.selectedStates.length} States`}
+                            color="primary"
+                            size="medium"
+                            variant="outlined"
+                          />
+                        )}
+                        {domesticSelections.selectedDistricts.length > 0 && (
+                          <Chip
+                            label={`${domesticSelections.selectedDistricts.length} Districts`}
+                            color="primary"
+                            size="medium"
+                            variant="outlined"
+                          />
+                        )}
+                        {domesticSelections.selectedCities.length > 0 && (
+                          <Chip
+                            label={`${domesticSelections.selectedCities.length} Cities`}
+                            color="primary"
+                            size="medium"
+                            variant="outlined"
+                          />
+                        )}
+                      </Box>
+                    ) : (
+                      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                        {internationalSelections.selectedCountries.length >
+                          0 && (
+                          <Chip
+                            label={`${internationalSelections.selectedCountries.length} Countries`}
+                            color="secondary"
+                            size="medium"
+                            variant="outlined"
+                          />
+                        )}
+                        {internationalSelections.selectedStates.length > 0 && (
+                          <Chip
+                            label={`${internationalSelections.selectedStates.length} States`}
+                            color="secondary"
+                            size="medium"
+                            variant="outlined"
+                          />
+                        )}
+                        {internationalSelections.selectedCities.length > 0 && (
+                          <Chip
+                            label={`${internationalSelections.selectedCities.length} Cities`}
+                            color="secondary"
+                            size="medium"
+                            variant="outlined"
+                          />
+                        )}
+                      </Box>
+                    )}
+                  </Box>
+                )}
+
+                {/* Domestic Location Form */}
+                {locationType === "domestic" ? (
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+                      gap: 3,
+                      p: 3,
+                      border: "1px solid #e0e3e7",
+                      borderRadius: 2,
+                      bgcolor: "#f9fafc",
+                    }}
+                  >
+                    {/* States Column */}
+                    <Box>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ mb: 2, fontWeight: 600 }}
+                      >
+                        States ({states.length})
+                      </Typography>
+                      <Box
+                        sx={{
+                          height: 300,
+                          overflowY: "auto",
+                          p: 1,
+                          border: "1px solid #e0e3e7",
+                          borderRadius: 1,
+                          bgcolor: "background.paper",
+                        }}
+                      >
+                        <List dense>
+                          {states.map((state) => (
+                            <ListItem key={state.id} disablePadding>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={domesticSelections.selectedStates.includes(
+                                      state.name
+                                    )}
+                                    onChange={(e) => {
+                                      const isChecked = e.target.checked;
+                                      setDomesticSelections((prev) => ({
+                                        ...prev,
+                                        selectedStates: isChecked
+                                          ? [...prev.selectedStates, state.name]
+                                          : prev.selectedStates.filter(
+                                              (s) => s !== state.name
+                                            ),
+                                        selectedDistricts: [],
+                                        selectedCities: [],
+                                      }));
+                                    }}
+                                    color="primary"
+                                  />
+                                }
+                                label={
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <LocationOnIcon
+                                      fontSize="medium"
+                                      color="primary"
+                                      sx={{ mr: 1 }}
+                                    />
+                                    {state.name}
+                                  </Box>
+                                }
+                                sx={{
+                                  width: "100%",
+                                  m: 0,
+                                  "& .MuiFormControlLabel-label": {
+                                    flexGrow: 1,
+                                  },
+                                }}
+                              />
+                            </ListItem>
+                          ))}
+                        </List>
+                      </Box>
+                    </Box>
+
+                    {/* Districts Column */}
+                    <Box>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ mb: 2, fontWeight: 600 }}
+                      >
+                        Districts (
+                        {domesticSelections.selectedStates.length > 0
+                          ? domesticSelections.selectedStates.flatMap(
+                              (state) => {
+                                const stateObj = statesData.find(
+                                  (s) => s.name === state
+                                );
+                                return stateObj ? stateObj.districts : [];
+                              }
+                            ).length
+                          : 0}
+                        )
+                      </Typography>
+                      {domesticSelections.selectedStates.length > 0 ? (
+                        <Box
+                          sx={{
+                            height: 300,
+                            overflowY: "auto",
+                            p: 1,
+                            border: "1px solid #e0e3e7",
+                            borderRadius: 1,
+                            bgcolor: "background.paper",
+                          }}
+                        >
+                          <List dense>
+                            {domesticSelections.selectedStates
+                              .flatMap((state) => {
+                                const stateObj = statesData.find(
+                                  (s) => s.name === state
+                                );
+                                return stateObj ? stateObj.districts : [];
+                              })
+                              .map((district) => (
+                                <ListItem key={district} disablePadding>
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        checked={domesticSelections.selectedDistricts.includes(
+                                          district
+                                        )}
+                                        onChange={(e) => {
+                                          const isChecked = e.target.checked;
+                                          setDomesticSelections((prev) => ({
+                                            ...prev,
+                                            selectedDistricts: isChecked
+                                              ? [
+                                                  ...prev.selectedDistricts,
+                                                  district,
+                                                ]
+                                              : prev.selectedDistricts.filter(
+                                                  (d) => d !== district
+                                                ),
+                                            selectedCities: [],
+                                          }));
+                                        }}
+                                        color="primary"
+                                      />
+                                    }
+                                    label={district}
+                                    sx={{
+                                      width: "100%",
+                                      m: 0,
+                                    }}
+                                  />
+                                </ListItem>
+                              ))}
+                          </List>
+                        </Box>
+                      ) : (
+                        <Box
+                          sx={{
+                            height: 300,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "1px dashed #e0e3e7",
+                            borderRadius: 1,
+                            bgcolor: "background.paper",
+                          }}
+                        >
+                          <Typography variant="body2" color="text.secondary">
+                            Select states to see districts
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+
+                    {/* Cities Column */}
+                    <Box>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ mb: 2, fontWeight: 600 }}
+                      >
+                        Cities (
+                        {domesticSelections.selectedDistricts.length > 0
+                          ? domesticSelections.selectedStates.flatMap(
+                              (state) => {
+                                const stateObj = statesData.find(
+                                  (s) => s.name === state
+                                );
+                                if (!stateObj) return [];
+
+                                return domesticSelections.selectedDistricts.flatMap(
+                                  (district) => {
+                                    return stateObj.cities
+                                      .filter(
+                                        (city) => city.district === district
+                                      )
+                                      .map((city) => city.name);
+                                  }
+                                );
+                              }
+                            ).length
+                          : 0}
+                        )
+                      </Typography>
+                      {domesticSelections.selectedDistricts.length > 0 ? (
+                        <Box
+                          sx={{
+                            height: 300,
+                            overflowY: "auto",
+                            p: 1,
+                            border: "1px solid #e0e3e7",
+                            borderRadius: 1,
+                            bgcolor: "background.paper",
+                          }}
+                        >
+                          <List dense>
+                            {domesticSelections.selectedStates
+                              .flatMap((state) => {
+                                const stateObj = statesData.find(
+                                  (s) => s.name === state
+                                );
+                                if (!stateObj) return [];
+
+                                return domesticSelections.selectedDistricts.flatMap(
+                                  (district) => {
+                                    return stateObj.cities
+                                      .filter(
+                                        (city) => city.district === district
+                                      )
+                                      .map((city) => city.name);
+                                  }
+                                );
+                              })
+                              .map((city) => (
+                                <ListItem key={city} disablePadding>
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        checked={domesticSelections.selectedCities.includes(
+                                          city
+                                        )}
+                                        onChange={(e) => {
+                                          const isChecked = e.target.checked;
+                                          setDomesticSelections((prev) => ({
+                                            ...prev,
+                                            selectedCities: isChecked
+                                              ? [...prev.selectedCities, city]
+                                              : prev.selectedCities.filter(
+                                                  (c) => c !== city
+                                                ),
+                                          }));
+                                        }}
+                                        color="primary"
+                                      />
+                                    }
+                                    label={city}
+                                    sx={{
+                                      width: "100%",
+                                      m: 0,
+                                    }}
+                                  />
+                                </ListItem>
+                              ))}
+                          </List>
+                        </Box>
+                      ) : (
+                        <Box
+                          sx={{
+                            height: 300,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "1px dashed #e0e3e7",
+                            borderRadius: 1,
+                            bgcolor: "background.paper",
+                          }}
+                        >
+                          <Typography variant="body2" color="text.secondary">
+                            {domesticSelections.selectedStates.length > 0
+                              ? "Select districts to see cities"
+                              : "Select states and districts first"}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+                ) : (
+                  /* International Location Form */
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+                      gap: 3,
+                      p: 3,
+                      border: "1px solid #e0e3e7",
+                      borderRadius: 2,
+                      bgcolor: "#f9fafc",
+                    }}
+                  >
+                    {/* Countries Column */}
+                    <Box>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ mb: 2, fontWeight: 600 }}
+                      >
+                        Countries ({countries.length})
+                      </Typography>
+                      <Box
+                        sx={{
+                          height: 300,
+                          overflowY: "auto",
+                          p: 1,
+                          border: "1px solid #e0e3e7",
+                          borderRadius: 1,
+                          bgcolor: "background.paper",
+                        }}
+                      >
+                        <List dense>
+                          {countries.map((country) => (
+                            <ListItem key={country.id} disablePadding>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={internationalSelections.selectedCountries.includes(
+                                      country.name
+                                    )}
+                                    onChange={(e) => {
+                                      const isChecked = e.target.checked;
+                                      setInternationalSelections((prev) => ({
+                                        ...prev,
+                                        selectedCountries: isChecked
+                                          ? [
+                                              ...prev.selectedCountries,
+                                              country.name,
+                                            ]
+                                          : prev.selectedCountries.filter(
+                                              (c) => c !== country.name
+                                            ),
+                                        selectedStates: [],
+                                        selectedCities: [],
+                                      }));
+                                    }}
+                                    color="secondary"
+                                  />
+                                }
+                                label={
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <PublicIcon
+                                      fontSize="medium"
+                                      color="secondary"
+                                      sx={{ mr: 1 }}
+                                    />
+                                    {country.name}
+                                  </Box>
+                                }
+                                sx={{
+                                  width: "100%",
+                                  m: 0,
+                                  "& .MuiFormControlLabel-label": {
+                                    flexGrow: 1,
+                                  },
+                                }}
+                              />
+                            </ListItem>
+                          ))}
+                        </List>
+                      </Box>
+                    </Box>
+
+                    {/* States Column */}
+                    <Box>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ mb: 2, fontWeight: 600 }}
+                      >
+                        States/Provinces (
+                        {internationalSelections.selectedCountries.length > 0
+                          ? internationalStates.length
+                          : 0}
+                        )
+                      </Typography>
+                      {internationalSelections.selectedCountries.length > 0 ? (
+                        <Box
+                          sx={{
+                            height: 300,
+                            overflowY: "auto",
+                            p: 1,
+                            border: "1px solid #e0e3e7",
+                            borderRadius: 1,
+                            bgcolor: "background.paper",
+                          }}
+                        >
+                          <List dense>
+                            {internationalStates.map((state) => (
+                              <ListItem key={state.id} disablePadding>
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      checked={internationalSelections.selectedStates.includes(
+                                        state.name
+                                      )}
+                                      onChange={(e) => {
+                                        const isChecked = e.target.checked;
+                                        setInternationalSelections((prev) => ({
+                                          ...prev,
+                                          selectedStates: isChecked
+                                            ? [
+                                                ...prev.selectedStates,
+                                                state.name,
+                                              ]
+                                            : prev.selectedStates.filter(
+                                                (s) => s !== state.name
+                                              ),
+                                          selectedCities: [],
+                                        }));
+                                      }}
+                                      color="secondary"
+                                    />
+                                  }
+                                  label={state.name}
+                                  sx={{
+                                    width: "100%",
+                                    m: 0,
+                                  }}
+                                />
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Box>
+                      ) : (
+                        <Box
+                          sx={{
+                            height: 300,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "1px dashed #e0e3e7",
+                            borderRadius: 1,
+                            bgcolor: "background.paper",
+                          }}
+                        >
+                          <Typography variant="body2" color="text.secondary">
+                            Select countries to see states
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+
+                    {/* Cities Column */}
+                    <Box>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ mb: 2, fontWeight: 600 }}
+                      >
+                        Cities (
+                        {internationalSelections.selectedStates.length > 0
+                          ? internationalCities.length
+                          : 0}
+                        )
+                      </Typography>
+                      {internationalSelections.selectedStates.length > 0 ? (
+                        <Box
+                          sx={{
+                            height: 300,
+                            overflowY: "auto",
+                            p: 1,
+                            border: "1px solid #e0e3e7",
+                            borderRadius: 1,
+                            bgcolor: "background.paper",
+                          }}
+                        >
+                          <List dense>
+                            {internationalCities.map((city) => (
+                              <ListItem key={city} disablePadding>
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      checked={internationalSelections.selectedCities.includes(
+                                        city
+                                      )}
+                                      onChange={(e) => {
+                                        const isChecked = e.target.checked;
+                                        setInternationalSelections((prev) => ({
+                                          ...prev,
+                                          selectedCities: isChecked
+                                            ? [...prev.selectedCities, city]
+                                            : prev.selectedCities.filter(
+                                                (c) => c !== city
+                                              ),
+                                        }));
+                                      }}
+                                      color="secondary"
+                                    />
+                                  }
+                                  label={city}
+                                  sx={{
+                                    width: "100%",
+                                    m: 0,
+                                  }}
+                                />
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Box>
+                      ) : (
+                        <Box
+                          sx={{
+                            height: 300,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "1px dashed #e0e3e7",
+                            borderRadius: 1,
+                            bgcolor: "background.paper",
+                          }}
+                        >
+                          <Typography variant="body2" color="text.secondary">
+                            {internationalSelections.selectedCountries.length >
+                            0
+                              ? "Select states to see cities"
+                              : "Select countries and states first"}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+                )}
+              </Box>
+            </DialogContent>
+
+            <DialogActions
+              sx={{
+                px: 3,
+                py: 2,
+                borderTop: "1px solid #e0e3e7",
+                bgcolor: "#f5f7fa",
+              }}
+            >
+              <Button
+                onClick={() => setOpenLocationModal(false)}
+                variant="outlined"
+                sx={{
+                  color: "#6b778c",
+                  borderColor: "#e0e3e7",
+                  "&:hover": {
+                    borderColor: "#b0bec5",
+                  },
+                  textTransform: "none",
+                  fontWeight: 500,
+                  borderRadius: 1,
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddLocations}
+                disabled={
+                  locationType === "domestic"
+                    ? domesticSelections.selectedCities.length === 0
+                    : internationalSelections.selectedCities.length === 0
+                }
+                variant="contained"
+                sx={{
+                  bgcolor: "#4caf50",
+                  "&:hover": {
+                    bgcolor: "#43a047",
+                  },
+                  "&:disabled": {
+                    bgcolor: "#e8f5e9",
+                    color: "#a5d6a7",
+                  },
+                  textTransform: "none",
+                  fontWeight: 500,
+                  borderRadius: 1,
+                }}
+              >
+                Add Selected Locations
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Grid>
 
       
-
-        {/* LinkedIn */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="LinkedIn"
-            name="linkedin"
-            value={data.linkedin || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            error={!!errors.linkedin}
-            helperText={errors.linkedin}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">@</InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-
-    </Grid>
-
-        {/* Established Year
-        <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.establishedYear}>
-            <InputLabel size="medium">Established Year</InputLabel>
-            <Select
-              name="establishedYear"
-              value={data.establishedYear || ""}
-              label="Established Year"
-              onChange={handleChange}
-              variant="outlined"
-              size="medium"
-              required
-            >
-              {Array.from(
-                { length: 100 },
-                (_, i) => new Date().getFullYear() - i
-              ).map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.establishedYear && (
-              <Typography variant="caption" color="error">
-                {errors.establishedYear}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
-        {/* Franchise Since Year */}
-        {/* <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.franchiseSinceYear}>
-            <InputLabel size="medium">Franchise Since Year</InputLabel>
-            <Select
-              name="franchiseSinceYear"
-              value={data.franchiseSinceYear || ""}
-              label="Franchise Since Year"
-              onChange={handleChange}
-              variant="outlined"
-              size="medium"
-              required
-            >
-              {Array.from(
-                { length: 100 },
-                (_, i) => new Date().getFullYear() - i
-              ).map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.franchiseSinceYear && (
-              <Typography variant="caption" color="error">
-                {errors.franchiseSinceYear}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid> */} 
-{/* Enhanced Expansion Location Section */}
-<Grid item xs={12}>
-  <Box>
-    <Button
-      variant="contained"
-      startIcon={<AddIcon />}
-      onClick={() => setOpenLocationModal(true)}
-      sx={{
-        bgcolor: '#ff9800',
-        '&:hover': { bgcolor: '#fb8c00' },
-        boxShadow: 'none',
-        textTransform: 'none',
-        fontWeight: 500,
-        borderRadius: 1
-      }}
-    >
-      Add Expansion Locations
-    </Button>
-    {errors.expansionLocation && (
-      <Typography variant="caption" color="error" sx={{ ml: 1 }}>
-        {errors.expansionLocation}
-      </Typography>
-    )}
-
-    {/* Selected Locations Preview */}
-    {data.expansionLocation?.length > 0 && (
-      <Box sx={{ mt: 3 }}>
-        <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
-          Selected Expansion Locations ({data.expansionLocation.length})
-        </Typography>
-        
-        {/* Location Chips */}
-        <Box sx={{ 
-          display: 'flex', 
-          flexWrap: 'wrap',
-          gap: 1,
-          mb: 2,
-          p: 1.5,
-          border: '1px solid #e0e3e7',
-          borderRadius: 1,
-          minHeight: 60,
-          bgcolor: '#f9fafc'
-        }}>
-          {data.expansionLocation.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              No locations selected yet
-            </Typography>
-          ) : (
-            data.expansionLocation.map((loc, index) => (
-              <Chip
-                key={index}
-                label={
-                  loc.type === 'domestic' 
-                    ? `${loc.city}, ${loc.state}`
-                    : `${loc.city}, ${loc.country}`
-                }
-                onDelete={() => handleRemoveLocation(index)}
-                color={loc.type === 'domestic' ? 'primary' : 'secondary'}
-                variant="outlined"
-                size="medium"
-                avatar={
-                  <Avatar sx={{ 
-                    bgcolor: loc.type === 'domestic' ? '#e3f2fd' : '#f3e5f5',
-                    width: 24, 
-                    height: 24 
-                  }}>
-                    {loc.type === 'domestic' ? 
-                      <LocationOnIcon fontSize="medium" color="primary" /> : 
-                      <PublicIcon fontSize="medium" color="secondary" />
-                    }
-                  </Avatar>
-                }
-                sx={{
-                  '& .MuiChip-deleteIcon': {
-                    color: loc.type === 'domestic' ? '#1976d2' : '#9c27b0'
-                  }
-                }}
-              />
-            ))
-          )}
-        </Box>
-      </Box>
-    )}
-  </Box>
-
-  {/* Expansion Location Modal */}
-  <Dialog
-    open={openLocationModal}
-    onClose={() => setOpenLocationModal(false)}
-    maxWidth="md"
-    fullWidth
-    PaperProps={{
-      sx: {
-        borderRadius: 3,
-        boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
-        overflow: 'hidden'
-      }
-    }}
-  >
-    <DialogTitle sx={{ 
-      bgcolor: '#f5f7fa',
-      borderBottom: '1px solid #e0e3e7',
-      py: 2,
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    }}>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          Add Expansion Locations
-        </Typography>
-      </Box>
-      <IconButton 
-        onClick={() => setOpenLocationModal(false)}
-        sx={{ color: '#6b778c' }}
-      >
-        <CloseIcon />
-      </IconButton>
-    </DialogTitle>
-    
-    <DialogContent sx={{ py: 3, px: 3 }}>
-      <Box>
-        {/* Location Type Toggle */}
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center',
-          mb: 3
-        }}>
-          <Paper 
-            elevation={0}
-            sx={{
-              display: 'flex',
-              borderRadius: 2,
-              border: '1px solid #e0e3e7',
-              overflow: 'hidden'
-            }}
-          >
-            <Button
-              variant={locationType === "domestic" ? "contained" : "text"}
-              onClick={() => handleLocationTypeChange({ target: { value: "domestic" }})}
-              sx={{
-                px: 3,
-                py: 1,
-                borderRadius: 0,
-                textTransform: 'none',
-                fontWeight: 500,
-                bgcolor: locationType === "domestic" ? '#4caf50' : 'transparent',
-                color: locationType === "domestic" ? '#fff' : '#6b778c',
-                '&:hover': {
-                  bgcolor: locationType === "domestic" ? '#43a047' : 'rgba(0, 0, 0, 0.04)'
-                }
-              }}
-              startIcon={<LocationOnIcon />}
-            >
-              Domestic (India)
-            </Button>
-            
-            <Divider orientation="vertical" flexItem />
-            
-            <Button
-              variant={locationType === "international" ? "contained" : "text"}
-              onClick={() => handleLocationTypeChange({ target: { value: "international" }})}
-              sx={{
-                px: 3,
-                py: 1,
-                borderRadius: 0,
-                textTransform: 'none',
-                fontWeight: 500,
-                bgcolor: locationType === "international" ? '#2196f3' : 'transparent',
-                color: locationType === "international" ? '#fff' : '#6b778c',
-                '&:hover': {
-                  bgcolor: locationType === "international" ? '#1976d2' : 'rgba(0, 0, 0, 0.04)'
-                }
-              }}
-              startIcon={<PublicIcon />}
-            >
-              International
-            </Button>
-          </Paper>
-        </Box>
-
-        {/* Current Selections Preview */}
-        {(locationType === "domestic" 
-          ? domesticSelections.selectedStates.length > 0 
-          : internationalSelections.selectedCountries.length > 0) && (
-          <Box sx={{ 
-            mb: 3,
-            p: 2,
-            border: '1px dashed #e0e3e7',
-            borderRadius: 1,
-            bgcolor: '#f9fafc'
-          }}>
-            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-              Current Selection
-            </Typography>
-            
-            {locationType === "domestic" ? (
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                {domesticSelections.selectedStates.length > 0 && (
-                  <Chip 
-                    label={`${domesticSelections.selectedStates.length} States`}
-                    color="primary"
-                    size="medium"
-                    variant="outlined"
-                  />
-                )}
-                {domesticSelections.selectedDistricts.length > 0 && (
-                  <Chip 
-                    label={`${domesticSelections.selectedDistricts.length} Districts`}
-                    color="primary"
-                    size="medium"
-                    variant="outlined"
-                  />
-                )}
-                {domesticSelections.selectedCities.length > 0 && (
-                  <Chip 
-                    label={`${domesticSelections.selectedCities.length} Cities`}
-                    color="primary"
-                    size="medium"
-                    variant="outlined"
-                  />
-                )}
-              </Box>
-            ) : (
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                {internationalSelections.selectedCountries.length > 0 && (
-                  <Chip 
-                    label={`${internationalSelections.selectedCountries.length} Countries`}
-                    color="secondary"
-                    size="medium"
-                    variant="outlined"
-                  />
-                )}
-                {internationalSelections.selectedStates.length > 0 && (
-                  <Chip 
-                    label={`${internationalSelections.selectedStates.length} States`}
-                    color="secondary"
-                    size="medium"
-                    variant="outlined"
-                  />
-                )}
-                {internationalSelections.selectedCities.length > 0 && (
-                  <Chip 
-                    label={`${internationalSelections.selectedCities.length} Cities`}
-                    color="secondary"
-                    size="medium"
-                    variant="outlined"
-                  />
-                )}
-              </Box>
-            )}
-          </Box>
-        )}
-
-        {/* Domestic Location Form */}
-        {locationType === "domestic" ? (
-          <Box sx={{ 
-            display: 'grid',
-            gridTemplateColumns: { md: 'repeat(3, 1fr)', xs: '1fr' },
-            gap: 3,
-            p: 3,
-            border: '1px solid #e0e3e7',
-            borderRadius: 2,
-            bgcolor: '#f9fafc'
-          }}>
-            {/* States Column */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                States ({states.length})
-              </Typography>
-              <Box sx={{ 
-                height: 300,
-                overflowY: 'auto',
-                p: 1,
-                border: '1px solid #e0e3e7',
-                borderRadius: 1,
-                bgcolor: 'background.paper'
-              }}>
-                <List dense>
-                  {states.map((state) => (
-                    <ListItem key={state.id} disablePadding>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={domesticSelections.selectedStates.includes(state.name)}
-                            onChange={(e) => {
-                              const isChecked = e.target.checked;
-                              setDomesticSelections(prev => ({
-                                ...prev,
-                                selectedStates: isChecked 
-                                  ? [...prev.selectedStates, state.name]
-                                  : prev.selectedStates.filter(s => s !== state.name),
-                                selectedDistricts: [],
-                                selectedCities: []
-                              }));
-                            }}
-                            color="primary"
-                          />
-                        }
-                        label={
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <LocationOnIcon fontSize="medium" color="primary" sx={{ mr: 1 }} />
-                            {state.name}
-                          </Box>
-                        }
-                        sx={{
-                          width: '100%',
-                          m: 0,
-                          '& .MuiFormControlLabel-label': {
-                            flexGrow: 1
-                          }
-                        }}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Box>
-            </Box>
-
-            {/* Districts Column */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                Districts (
-                {domesticSelections.selectedStates.length > 0 
-                  ? domesticSelections.selectedStates.flatMap(state => {
-                      const stateObj = statesData.find(s => s.name === state);
-                      return stateObj ? stateObj.districts : [];
-                    }).length
-                  : 0}
-                )
-              </Typography>
-              {domesticSelections.selectedStates.length > 0 ? (
-                <Box sx={{ 
-                  height: 300,
-                  overflowY: 'auto',
-                  p: 1,
-                  border: '1px solid #e0e3e7',
-                  borderRadius: 1,
-                  bgcolor: 'background.paper'
-                }}>
-                  <List dense>
-                    {domesticSelections.selectedStates.flatMap(state => {
-                      const stateObj = statesData.find(s => s.name === state);
-                      return stateObj ? stateObj.districts : [];
-                    }).map(district => (
-                      <ListItem key={district} disablePadding>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={domesticSelections.selectedDistricts.includes(district)}
-                              onChange={(e) => {
-                                const isChecked = e.target.checked;
-                                setDomesticSelections(prev => ({
-                                  ...prev,
-                                  selectedDistricts: isChecked 
-                                    ? [...prev.selectedDistricts, district]
-                                    : prev.selectedDistricts.filter(d => d !== district),
-                                  selectedCities: []
-                                }));
-                              }}
-                              color="primary"
-                            />
-                          }
-                          label={district}
-                          sx={{
-                            width: '100%',
-                            m: 0
-                          }}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
-              ) : (
-                <Box sx={{ 
-                  height: 300,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px dashed #e0e3e7',
-                  borderRadius: 1,
-                  bgcolor: 'background.paper'
-                }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Select states to see districts
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-
-            {/* Cities Column */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                Cities (
-                {domesticSelections.selectedDistricts.length > 0 
-                  ? domesticSelections.selectedStates.flatMap(state => {
-                      const stateObj = statesData.find(s => s.name === state);
-                      if (!stateObj) return [];
-                      
-                      return domesticSelections.selectedDistricts.flatMap(district => {
-                        return stateObj.cities
-                          .filter(city => city.district === district)
-                          .map(city => city.name);
-                      });
-                    }).length
-                  : 0}
-                )
-              </Typography>
-              {domesticSelections.selectedDistricts.length > 0 ? (
-                <Box sx={{ 
-                  height: 300,
-                  overflowY: 'auto',
-                  p: 1,
-                  border: '1px solid #e0e3e7',
-                  borderRadius: 1,
-                  bgcolor: 'background.paper'
-                }}>
-                  <List dense>
-                    {domesticSelections.selectedStates.flatMap(state => {
-                      const stateObj = statesData.find(s => s.name === state);
-                      if (!stateObj) return [];
-                      
-                      return domesticSelections.selectedDistricts.flatMap(district => {
-                        return stateObj.cities
-                          .filter(city => city.district === district)
-                          .map(city => city.name);
-                      });
-                    }).map(city => (
-                      <ListItem key={city} disablePadding>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={domesticSelections.selectedCities.includes(city)}
-                              onChange={(e) => {
-                                const isChecked = e.target.checked;
-                                setDomesticSelections(prev => ({
-                                  ...prev,
-                                  selectedCities: isChecked 
-                                    ? [...prev.selectedCities, city]
-                                    : prev.selectedCities.filter(c => c !== city)
-                                }));
-                              }}
-                              color="primary"
-                            />
-                          }
-                          label={city}
-                          sx={{
-                            width: '100%',
-                            m: 0
-                          }}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
-              ) : (
-                <Box sx={{ 
-                  height: 300,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px dashed #e0e3e7',
-                  borderRadius: 1,
-                  bgcolor: 'background.paper'
-                }}>
-                  <Typography variant="body2" color="text.secondary">
-                    {domesticSelections.selectedStates.length > 0
-                      ? 'Select districts to see cities'
-                      : 'Select states and districts first'}
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          </Box>
-        ) : (
-          /* International Location Form */
-          <Box sx={{ 
-            display: 'grid',
-            gridTemplateColumns: { md: 'repeat(3, 1fr)', xs: '1fr' },
-            gap: 3,
-            p: 3,
-            border: '1px solid #e0e3e7',
-            borderRadius: 2,
-            bgcolor: '#f9fafc'
-          }}>
-            {/* Countries Column */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                Countries ({countries.length})
-              </Typography>
-              <Box sx={{ 
-                height: 300,
-                overflowY: 'auto',
-                p: 1,
-                border: '1px solid #e0e3e7',
-                borderRadius: 1,
-                bgcolor: 'background.paper'
-              }}>
-                <List dense>
-                  {countries.map(country => (
-                    <ListItem key={country.id} disablePadding>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={internationalSelections.selectedCountries.includes(country.name)}
-                            onChange={(e) => {
-                              const isChecked = e.target.checked;
-                              setInternationalSelections(prev => ({
-                                ...prev,
-                                selectedCountries: isChecked 
-                                  ? [...prev.selectedCountries, country.name]
-                                  : prev.selectedCountries.filter(c => c !== country.name),
-                                selectedStates: [],
-                                selectedCities: []
-                              }));
-                            }}
-                            color="secondary"
-                          />
-                        }
-                        label={
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <PublicIcon fontSize="medium" color="secondary" sx={{ mr: 1 }} />
-                            {country.name}
-                          </Box>
-                        }
-                        sx={{
-                          width: '100%',
-                          m: 0,
-                          '& .MuiFormControlLabel-label': {
-                            flexGrow: 1
-                          }
-                        }}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Box>
-            </Box>
-
-            {/* States Column */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                States/Provinces (
-                {internationalSelections.selectedCountries.length > 0 
-                  ? internationalStates.length
-                  : 0}
-                )
-              </Typography>
-              {internationalSelections.selectedCountries.length > 0 ? (
-                <Box sx={{ 
-                  height: 300,
-                  overflowY: 'auto',
-                  p: 1,
-                  border: '1px solid #e0e3e7',
-                  borderRadius: 1,
-                  bgcolor: 'background.paper'
-                }}>
-                  <List dense>
-                    {internationalStates.map(state => (
-                      <ListItem key={state.id} disablePadding>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={internationalSelections.selectedStates.includes(state.name)}
-                              onChange={(e) => {
-                                const isChecked = e.target.checked;
-                                setInternationalSelections(prev => ({
-                                  ...prev,
-                                  selectedStates: isChecked 
-                                    ? [...prev.selectedStates, state.name]
-                                    : prev.selectedStates.filter(s => s !== state.name),
-                                  selectedCities: []
-                                }));
-                              }}
-                              color="secondary"
-                            />
-                          }
-                          label={state.name}
-                          sx={{
-                            width: '100%',
-                            m: 0
-                          }}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
-              ) : (
-                <Box sx={{ 
-                  height: 300,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px dashed #e0e3e7',
-                  borderRadius: 1,
-                  bgcolor: 'background.paper'
-                }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Select countries to see states
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-
-            {/* Cities Column */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                Cities (
-                {internationalSelections.selectedStates.length > 0 
-                  ? internationalCities.length
-                  : 0}
-                )
-              </Typography>
-              {internationalSelections.selectedStates.length > 0 ? (
-                <Box sx={{ 
-                  height: 300,
-                  overflowY: 'auto',
-                  p: 1,
-                  border: '1px solid #e0e3e7',
-                  borderRadius: 1,
-                  bgcolor: 'background.paper'
-                }}>
-                  <List dense>
-                    {internationalCities.map(city => (
-                      <ListItem key={city} disablePadding>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={internationalSelections.selectedCities.includes(city)}
-                              onChange={(e) => {
-                                const isChecked = e.target.checked;
-                                setInternationalSelections(prev => ({
-                                  ...prev,
-                                  selectedCities: isChecked 
-                                    ? [...prev.selectedCities, city]
-                                    : prev.selectedCities.filter(c => c !== city)
-                                }));
-                              }}
-                              color="secondary"
-                            />
-                          }
-                          label={city}
-                          sx={{
-                            width: '100%',
-                            m: 0
-                          }}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
-              ) : (
-                <Box sx={{ 
-                  height: 300,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px dashed #e0e3e7',
-                  borderRadius: 1,
-                  bgcolor: 'background.paper'
-                }}>
-                  <Typography variant="body2" color="text.secondary">
-                    {internationalSelections.selectedCountries.length > 0
-                      ? 'Select states to see cities'
-                      : 'Select countries and states first'}
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          </Box>
-        )}
-      </Box>
-    </DialogContent>
-    
-    <DialogActions sx={{ 
-      px: 3, 
-      py: 2,
-      borderTop: '1px solid #e0e3e7',
-      bgcolor: '#f5f7fa'
-    }}>
-      <Button 
-        onClick={() => setOpenLocationModal(false)}
-        variant="outlined"
-        sx={{
-          color: '#6b778c',
-          borderColor: '#e0e3e7',
-          '&:hover': {
-            borderColor: '#b0bec5'
-          },
-          textTransform: 'none',
-          fontWeight: 500,
-          borderRadius: 1
-        }}
-      >
-        Cancel
-      </Button>
-      <Button
-        onClick={handleAddLocations}
-        disabled={
-          locationType === "domestic"
-            ? domesticSelections.selectedCities.length === 0
-            : internationalSelections.selectedCities.length === 0
-        }
-        variant="contained"
-        sx={{
-          bgcolor: '#4caf50',
-          '&:hover': {
-            bgcolor: '#43a047'
-          },
-          '&:disabled': {
-            bgcolor: '#e8f5e9',
-            color: '#a5d6a7'
-          },
-          textTransform: 'none',
-          fontWeight: 500,
-          borderRadius: 1
-        }}
-      >
-        Add Selected Locations
-      </Button>
-    </DialogActions>
-  </Dialog>
-</Grid>
-
-<Grid item xs={12}>
-  <Box>
-    <Button
-      variant="contained"
-      startIcon={<AddIcon />}
-      onClick={() => setDescriptionModalOpen(true)}
-      sx={{
-        bgcolor: '#ff9800',
-        '&:hover': { bgcolor: '#fb8c00' },
-        boxShadow: 'none',
-        textTransform: 'none',
-        fontWeight: 500,
-        borderRadius: 1
-      }}
-    >
-      Add Brand Description
-    </Button>
-    {errors.description && (
-      <Typography variant="caption" color="error" sx={{ ml: 1 }}>
-        {errors.description}
-      </Typography>
-    )}
-    
-    {/* Preview of the description (first 100 characters) */}
-   {data.brandDescription && (
-  <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e3e7', borderRadius: 1 }}>
-    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-      Description Preview
-    </Typography>
-    <div dangerouslySetInnerHTML={{ 
-      __html: data.brandDescription.length > 100 
-        ? `${data.brandDescription.substring(0, 100)}...` 
-        : data.brandDescription 
-    }} />
-  </Box>
-)}
-  </Box>
-</Grid>
-
-
-
-
       </Grid>
-  {/* Communication Information Section */}
-     
-   
+      {/* Communication Information Section */}
+
       <Grid
         container
         spacing={2}
@@ -2027,119 +2067,7 @@ const handleDescriptionChange = (content) => {
           gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           gap: 2,
         }}
-      >
-       
-        {/* Brand Description Modal */}
-<Dialog
-  open={descriptionModalOpen}
-  onClose={() => setDescriptionModalOpen(false)}
-  maxWidth="md"
-  fullWidth
-  PaperProps={{
-    sx: {
-      borderRadius: 3,
-      boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
-      overflow: 'hidden'
-    }
-  }}
->
-  <DialogTitle sx={{ 
-    bgcolor: '#f5f7fa',
-    borderBottom: '1px solid #e0e3e7',
-    py: 2,
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  }}>
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <LanguageIcon color="primary" sx={{ mr: 1.5 }} />
-      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-        Brand Description
-      </Typography>
-    </Box>
-    <IconButton 
-      onClick={() => setDescriptionModalOpen(false)}
-      sx={{ color: '#6b778c' }}
-    >
-      <CloseIcon />
-    </IconButton>
-  </DialogTitle>
-  
-  <DialogContent sx={{ py: 3, px: 3 }}>
-    <Box sx={{ mt: 2 }}>
-      <Editor
-        apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
-        value={data.brandDescription || ""}
-        init={{
-          height: 400,
-          menubar: true,
-          plugins: [
-            "advlist autolink lists link image charmap print preview anchor",
-            "searchreplace visualblocks code fullscreen",
-            "insertdatetime media table paste help wordcount",
-          ],
-          toolbar:
-            "undo redo | formatselect | bold italic backcolor | \
-             alignleft aligncenter alignright alignjustify | \
-             bullist numlist outdent indent | removeformat | help | image",
-          images_upload_url: '/api/upload-image', // Add your image upload endpoint
-          automatic_uploads: true,
-          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-        }}
-        onEditorChange={handleDescriptionChange}
-      />
-    </Box>
-  </DialogContent>
-  
-  <DialogActions sx={{ 
-    px: 3, 
-    py: 2,
-    borderTop: '1px solid #e0e3e7',
-    bgcolor: '#f5f7fa'
-  }}>
-    <Button 
-      onClick={() => setDescriptionModalOpen(false)}
-      variant="outlined"
-      sx={{
-        color: '#6b778c',
-        borderColor: '#e0e3e7',
-        '&:hover': {
-          borderColor: '#b0bec5'
-        },
-        textTransform: 'none',
-        fontWeight: 500,
-        borderRadius: 1
-      }}
-    >
-      Cancel
-    </Button>
-    <Button
-      onClick={() => {
-        onChange({ description });
-        setDescriptionModalOpen(false);
-      }}
-      variant="contained"
-      sx={{
-        bgcolor: '#4caf50',
-        '&:hover': {
-          bgcolor: '#43a047'
-        },
-        textTransform: 'none',
-        fontWeight: 500,
-        borderRadius: 1
-      }}
-    >
-      Save Description
-    </Button>
-  </DialogActions>
-</Dialog>
-
-    
-      </Grid>
-    
-     
-
-    
+      ></Grid>
     </Box>
   );
 };
