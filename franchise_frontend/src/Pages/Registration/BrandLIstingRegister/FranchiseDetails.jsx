@@ -197,11 +197,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   ];
 
   const aidFinancing = ["Yes", "No"];
-  const statergicPlan = ["Yes", "No"];
-  const operatingProcedure = ["Yes", "No"];
-  const finacialOperating = ["Yes", "No"];
-  const marketingSales = ["Yes", "No"];
-  const agreementFranchise = ["Yes", "No"];
+
 
   const agreementPeriods = [
     "1 Year",
@@ -300,10 +296,10 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       >
         <Grid item xs={12} sm={4}>
           <FormControl fullWidth size="medium">
-            <InputLabel>Main Category</InputLabel>
+            <InputLabel>Industries</InputLabel>
             <Select
               value={selectedCategory.main || ""}
-              label="Main Category"
+              label="Industries"
               onChange={handleMainCategoryChange}
               error={!!errors.mainCategory}
             >
@@ -325,10 +321,10 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             size="medium"
             disabled={!selectedCategory.main}
           >
-            <InputLabel>Sub Category</InputLabel>
+            <InputLabel>Main Category</InputLabel>
             <Select
               value={selectedCategory.sub || ""}
-              label="Sub Category"
+              label="Main Category"
               onChange={handleSubCategoryChange}
               error={!!errors.subCategory}
             >
@@ -349,10 +345,10 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
         <Grid item xs={12} sm={4}>
           <FormControl fullWidth size="medium" disabled={!selectedCategory.sub}>
-            <InputLabel>Child Category</InputLabel>
+            <InputLabel>Sub Category</InputLabel>
             <Select
               value={selectedCategory.child || ""}
-              label="Child Category"
+              label="Sub Category"
               onChange={handleChildCategoryChange}
               error={!!errors.childCategory}
             >

@@ -64,6 +64,7 @@ function BrandExpansionLocationDetails({ data = {}, errors = {}, onChange }) {
 
   const [isInternationalExpansion, setIsInternationalExpansion] = useState(null);
   const [error, setError] = useState(null);
+  console.log("BrandExpansionLocationDetails data:",error);
 
   // Initialize form data structure
   const [formData, setFormData] = useState({
@@ -660,7 +661,7 @@ function BrandExpansionLocationDetails({ data = {}, errors = {}, onChange }) {
                           <Checkbox
                             checked={selections.cities.includes(city)}
                             onChange={(e) => {
-                              const isChecked = e.target.checked;
+                              const isChecked = e.target.checked;f=
                               setSelections(prev => ({
                                 ...prev,
                                 cities: isChecked 
