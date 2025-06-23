@@ -1126,7 +1126,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           Support and Training
         </Typography>
 
-        <Grid gap={1} item xs={12}>
+        <Grid gap={1} item xs={12} >
           {/* Financial Operating Procedure */}
           <Grid item>
             <FormControl
@@ -1154,7 +1154,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   Do you provide aid in financing?
                 </FormLabel>
               </Box>
-              <RadioGroup row sx={{ display: "flex", gap: 2 }}>
+              <RadioGroup row sx={{ display: "flex",  gap: 2 }}>
                 {aidFinancing.map((type) => (
                   <FormControlLabel
                     key={type}
@@ -1207,7 +1207,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                       : "text.primary",
                   }}
                 >
-                  Would you like consultation for franchise development?
+                  Would you like consultation for <br />franchise  development?
                 </FormLabel>
               </Box>
               <RadioGroup row sx={{ display: "flex", gap: 2 }}>
@@ -1265,8 +1265,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                       : "text.primary",
                   }}
                 >
-                  Would you like consultation or assistance for franchise
-                  marketing recruitment?
+                  Would you like consultation or <br />assistance for franchise
+                  marketing<br /> recruitment?
                 </FormLabel>
               </Box>
               <RadioGroup row sx={{ display: "flex", gap: 2 }}>
@@ -1319,7 +1319,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 <FormLabel
                   component="legend"
                   sx={{
-                    minWidth: "200px",
+                    minWidth: "320px",
                     fontWeight: "bold",
                   }}
                 >
@@ -1373,7 +1373,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             >
               <FormLabel
                 sx={{
-                  minWidth: "300px",
+                  minWidth: "320px",
                   fontWeight: "bold",
                 }}
               >
@@ -1410,7 +1410,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             >
               <FormLabel
                 sx={{
-                  minWidth: "300px",
+                  minWidth: "320px",
                   fontWeight: "bold",
                 }}
               >
@@ -1446,7 +1446,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             >
               <FormLabel
                 sx={{
-                  minWidth: "300px",
+                  minWidth: "320px",
                   fontWeight: "bold",
                 }}
               >

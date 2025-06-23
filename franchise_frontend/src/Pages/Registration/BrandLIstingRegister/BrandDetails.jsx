@@ -713,13 +713,21 @@ const handleAddCategory = () => {
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(2, 0.7fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}
       >
     
-        {/* Company Name */}
+       <Grid  container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(2, 0.7fr)", xs: "1fr" },
+          gap: 2,
+          mb: 2,
+        }}> {/* Company Name */}
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
@@ -748,20 +756,17 @@ const handleAddCategory = () => {
             helperText={errors.brandName}
             required
           />
-        </Grid>
-        </Grid>
-
+        </Grid></Grid>
         <Grid container
         spacing={2}
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(2, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(1, 0.9fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
-        }} >
-
-          <Grid item xs={12} sm={6} md={2.4}>
+        }}>
+<Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label="Tagline"
@@ -775,6 +780,8 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
+        </Grid>
+        
         </Grid>
         <Grid container
         spacing={2}

@@ -1406,7 +1406,7 @@ const BrandRegisterForm = () => {
                 Next
               </Button>
             )}
-          </Box>             
+          </Box>
         </Box>
 
         {/* Preview Dialog */}

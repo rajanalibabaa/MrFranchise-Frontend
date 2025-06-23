@@ -193,7 +193,7 @@ const Uploads = ({
     
       <ScrollableContent>
   {/* Header Section */}
-  <Box sx={{
+  {/* <Box sx={{
     backgroundColor: '#fff8e1',
     p: 1,
     borderRadius: 2,
@@ -216,7 +216,7 @@ const Uploads = ({
     }}>
       Please upload all required documents to complete your brand registration.
     </Alert>
-  </Box>
+  </Box> */}
 
   {/* Main Grid Container */}
   <Grid container spacing={4} display={'flex'} flexDirection={'column'}>   
@@ -240,11 +240,11 @@ const Uploads = ({
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Brand Logo
           </Typography>
-          <Chip label="Required" size="small" sx={{ 
+          {/* <Chip label="Required" size="small" sx={{ 
             ml: 1, 
             backgroundColor: '#ffebee', 
             color: '#d32f2f' 
-          }} />
+          }} /> */}
         </Box>
         
         <FileUploadCard sx={{ 
@@ -996,6 +996,205 @@ const Uploads = ({
             </FileUploadCard>
           </Grid>
         </Grid>
+        {/* Awards & Recognitions Section */}
+<Grid item xs={12}>
+  <Box sx={{
+    display: 'flex',
+    alignItems: 'center',
+    mb: 3,
+    gap: 1
+  }}>
+    <Avatar sx={{ 
+      bgcolor: '#ff9800', 
+      width: 32, 
+      height: 32,
+      fontSize: '1rem'
+    }}>
+      5
+    </Avatar>
+    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+      Awards & Recognitions
+    </Typography>
+  </Box>
+  
+  <Grid container spacing={3} display={'flex'} flexDirection={'column'}>
+    {/* Text Input for Awards */}
+    <Grid item xs={12} md={6}>
+      <TextField
+        label="Awards & Recognitions (Text)"
+        fullWidth
+        multiline
+        rows={4}
+        value={safeData.awardsText || ""}
+        onChange={(e) => safeOnChange({ awardsText: e.target.value })}
+        placeholder="List any awards or recognitions your brand has received"
+        variant="outlined"
+        sx={{ mb: 2 }}
+      />
+    </Grid>
+    
+    {/* File Upload for Awards */}
+    <Grid item xs={12} md={6}>
+      <FileUploadCard sx={{ 
+        backgroundColor: '#fafafa',
+        border: '2px dashed #e0e0e0',
+        p: 2,
+        textAlign: 'center',
+        height: '100%'
+      }}>
+        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+          Awards & Recognitions Documents (Optional)
+        </Typography>
+        <Button
+          component="label"
+          variant="outlined"
+          startIcon={<DescriptionIcon />}
+          size="small"
+          sx={{ mb: 1 }}
+        >
+          Upload Documents
+          <VisuallyHiddenInput
+            type="file"
+            accept=".pdf,.doc,.docx,image/jpeg,image/png"
+            multiple
+            onChange={handleFileChange("awardsDocuments", {
+              maxFiles: 5,
+              allowedTypes: ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "image/jpeg", "image/png"],
+              maxSize: 1 * 1024 * 1024,
+            })}
+          />
+        </Button>
+        <Typography variant="caption" color="textSecondary" display="block">
+          PDF, DOC, JPG, PNG (Max 1MB each)
+        </Typography>
+        
+        {safeData.awardsDocuments?.length > 0 && (
+          <Box sx={{ mt: 2 }}>
+            <List dense>
+              {safeData.awardsDocuments.map((file, index) => (
+                <ListItem 
+                  key={index}
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      onClick={() => handleRemoveFile("awardsDocuments", index)}
+                      size="small"
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  }
+                  sx={{
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: 1,
+                    mt: 0.5
+                  }}
+                >
+                  <ListItemAvatar>
+                    <Avatar sx={{ 
+                      bgcolor: file.type.includes('image') ? '#e3f2fd' : '#fff8e1',
+                    }}>
+                      {file.type.includes('image') ? (
+                        <PhotoCameraIcon color="primary" />
+                      ) : (
+                        <PictureAsPdfIcon color="secondary" />
+                      )}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={file.name}
+                    primaryTypographyProps={{ variant: 'caption' }}
+                    secondary={`${(file.size / 1024 / 1024).toFixed(2)} MB`}
+                    secondaryTypographyProps={{ variant: 'caption' }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        )}
+      </FileUploadCard>
+    </Grid>
+  </Grid>
+</Grid>
+
+{/* Business Plan Section */}
+<Grid item xs={12}>
+  <Box sx={{
+    display: 'flex',
+    alignItems: 'center',
+    mb: 3,
+    gap: 1
+  }}>
+    <Avatar sx={{ 
+      bgcolor: '#ff9800', 
+      width: 32, 
+      height: 32,
+      fontSize: '1rem'
+    }}>
+      6
+    </Avatar>
+    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+      Business Plan (Optional)
+    </Typography>
+  </Box>
+  
+  <FileUploadCard sx={{ 
+    backgroundColor: '#fafafa',
+    border: '2px dashed #e0e0e0',
+    p: 2,
+    textAlign: 'center'
+  }}>
+    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+      Upload Business Plan Document (Optional)
+    </Typography>
+    <Button
+      component="label"
+      variant="outlined"
+      startIcon={<DescriptionIcon />}
+      size="small"
+      sx={{ mb: 1 }}
+    >
+      Upload Business Plan
+      <VisuallyHiddenInput
+        type="file"
+        accept=".pdf,.doc,.docx"
+        onChange={handleFileChange("businessPlan", {
+          maxFiles: 1,
+          allowedTypes: ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+          maxSize: 1 * 1024 * 1024,
+        })}
+      />
+    </Button>
+    <Typography variant="caption" color="textSecondary" display="block">
+      PDF, DOC, DOCX (Max 1MB)
+    </Typography>
+    
+    {safeData.businessPlan?.length > 0 && (
+      <Box sx={{ 
+        mt: 2,
+        p: 1,
+        backgroundColor: '#e8f5e9',
+        borderRadius: 1
+      }}>
+        {safeData.businessPlan.map((file, index) => (
+          <Chip
+            key={index}
+            label={file.name}
+            onDelete={() => handleRemoveFile("businessPlan", index)}
+            deleteIcon={<DeleteIcon />}
+            sx={{ m: 0.5 }}
+            color="success"
+            variant="outlined"
+            icon={
+              file.type.includes('pdf') ? 
+                <PictureAsPdfIcon color="error" /> : 
+                <DescriptionIcon color="primary" />
+            }
+          />
+        ))}
+      </Box>
+    )}
+  </FileUploadCard>
+</Grid>
     </Grid>
   </Grid>
 </ScrollableContent>
