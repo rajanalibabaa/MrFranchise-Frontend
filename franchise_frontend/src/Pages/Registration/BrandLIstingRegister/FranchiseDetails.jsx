@@ -289,7 +289,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         sx={{
           mt: 3,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}
@@ -474,7 +474,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             sx={{
               mt: 3,
               display: "grid",
-              gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
+              gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
               gap: 2,
               mb: 2,
             }}
@@ -893,17 +893,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       name="roi"
       value={currentFicoModel.roi || ""}
       onChange={handleFicoChange}
-     MenuProps={{
-    PaperProps: {
-      sx: {
-        display: "grid",
-        gridTemplateColumns: "repeat(10, 1fr)", // 10 columns in one row
-        gap: 1,
-        p: 1,
-        maxWidth: 500,
-      },
-    },
-  }}
+    
+  
 >
   {Array.from({ length: 99 }, (_, i) => (
 
@@ -943,21 +934,40 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             required
           />
         </Grid>
+        
 
-        {/* Column 15 - Margin On Sales */}
+
         <Grid item>
-          <TextField
-            fullWidth
-            size="medium"
-            label="Margin On Sales"
-            name="marginOnSales"
-            value={currentFicoModel.marginOnSales}
-            onChange={handleFicoChange}
-            error={!!errors.marginOnSales}
-            helperText={errors.marginOnSales}
-            required
-          />
-        </Grid>
+  <FormControl fullWidth size="medium" required error={!!errors.marginOnSales}>
+    <InputLabel>marginOnSales (%)</InputLabel>
+    <Select
+      label="Margin ON Sales (%)"
+      name="marginOnSales"
+      value={currentFicoModel.marginOnSales || ""}
+      onChange={handleFicoChange}
+  
+>
+  {Array.from({ length: 99 }, (_, i) => (
+
+     <MenuItem
+      key={i + 1}
+      value={`${i + 1}%`}
+      sx={{
+        minWidth: 0,
+        padding: "6px 4px",
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      {i + 1}
+    </MenuItem>
+  
+  ))}
+</Select>
+    {errors.marginOnSales && <FormHelperText error>{errors.marginOnSales}</FormHelperText>}
+  </FormControl>
+</Grid>
+        
       </Grid>
 
       {/* Add Button */}
@@ -1112,12 +1122,13 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       <Divider
         sx={{
           my: 2,
+          mt: 4,
           backgroundColor: "rgba(0, 0, 0, 0.08)",
           height: "1px",
         }}
       />
 
-      <Divider />
+    
 
       {/* Support and Training Section */}
 
@@ -1138,7 +1149,6 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 4,
                 p: 1,
               }}
             >
@@ -1373,7 +1383,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             >
               <FormLabel
                 sx={{
-                  minWidth: "320px",
+                  minWidth: "700px",
                   fontWeight: "bold",
                 }}
               >

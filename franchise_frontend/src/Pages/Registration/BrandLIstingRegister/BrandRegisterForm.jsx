@@ -1273,7 +1273,7 @@ const BrandRegisterForm = () => {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            p: 2,
+            p: 1,
           }}
         >
           <Box>
@@ -1290,7 +1290,7 @@ const BrandRegisterForm = () => {
                 </Step>
               ))}
               <Toolbar sx={{ justifyContent: "flex-end" }}>
-                <FormControl size="small" sx={{ minWidth: 120 }}>
+                <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
                   <Select
                     value={formData.brandDetails.country}
                     onChange={handleCountryChange}
