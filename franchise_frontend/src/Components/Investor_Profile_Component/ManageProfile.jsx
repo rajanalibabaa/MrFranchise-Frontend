@@ -169,6 +169,7 @@ const ManageProfile = () => {
   }, []);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   // Update cities when a state is selected
   useEffect(() => {
     if (selectedState) {
@@ -181,6 +182,8 @@ const ManageProfile = () => {
 
 =======
 >>>>>>> 8ec3857192b9512d089b43f0ab94aec4bc3e5f9f
+=======
+>>>>>>> dc11bd3fd70267e84c791139fc1e6b49551ce8d2
   useEffect(() => {
     const fetchData = async () => {
       if (!investorUUID || !AccessToken) {
