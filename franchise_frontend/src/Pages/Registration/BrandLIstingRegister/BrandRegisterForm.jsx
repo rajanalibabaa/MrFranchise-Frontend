@@ -51,11 +51,12 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress from "@mui/material/CircularProgress";
 import Footer from "../../../Components/Footers/Footer";
 import categories from "./BrandCategories";
+import BrandExpansionLocationDetails from "./BrandExpansionLocationDetails";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
 const FORM_STEP_KEY = "brandRegistrationActiveStep";
 
-const steps = ["Brand Details", "Franchise Details", "Uploads"];
+const steps = ["Brand Details", "Franchise Details", "Expansion Locations", "Uploads"];
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -143,6 +144,10 @@ const initialFormData = {
     state: "",
     city: "",
     pincode: "",
+    establishedYear: "",
+    franchiseSinceYear: "",
+    brandCategories: [],
+    brandDescription: "",
     expansionLocation: [],
     website: "",
     facebook: "",
@@ -177,6 +182,47 @@ const initialFormData = {
     marketingSales: "",
     agreementFranchise: "",
   },
+//   expansionLocationDetails: {
+//     currentOutletsLocatedAt: [
+//   {
+//     type: "domestic",
+//     location: {
+//       country: "",
+//       state: "",
+//       district: "",
+//       city: ""
+//     }
+//   },
+//   {
+//     type: "international",
+//     location: {
+//       country: "",
+//       state: "",
+//       city: ""
+//     }
+//   }
+// ],
+// expansionLocations: [
+//   {
+//     type: "domestic",
+//     location: {
+//       country: '',
+//       state: [],
+//       district: [],
+//       city: []
+//     }
+//   },
+//   {
+//     type: "international",
+//     location: {
+//       country: "",
+//       state: [],
+//       city: []
+//     }
+//   }
+// ]
+
+//   },
   uploads: {
     franchisePromotionVideo: [],
     // brandPromotionVideo: [],
@@ -539,6 +585,9 @@ const BrandRegisterForm = () => {
   const handlePreviewClose = () => {
     setOpenPreview(false);
   };
+  const handleLocationChange = (newData) => {
+  setFormData(prev => ({ ...prev, ...newData }));
+};
 
   const handleCancel = () => {
     // Show confirmation dialog
@@ -596,7 +645,16 @@ const BrandRegisterForm = () => {
             onChange={handleFranchiseDetailsChange}
           />
         );
-      case 2:
+        case 2:
+          return(
+<BrandExpansionLocationDetails
+            data={formData.expansionLocationDetails}
+            errors={validationErrors.fraexpansionLocationDetailsnchiseDetails}
+            onChange={handleLocationChange}
+            // onChange={handleExpansionLocationDetails}
+          />
+          )
+      case 3:
         return (
           <Uploads
             data={formData.uploads}
