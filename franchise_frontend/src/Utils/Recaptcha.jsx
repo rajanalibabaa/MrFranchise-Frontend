@@ -1,43 +1,55 @@
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 
-const CaptchaForm = () => {
-  const recaptchaRef = useRef();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const CaptchaOnly = () => {
+  const [captchaValue, setCaptchaValue] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(null); // 'success', 'error'
 
-    const token = await recaptchaRef.current.executeAsync();
-    recaptchaRef.current.reset();
+  const handleVerify = async () => {
+    if (!captchaValue) {
+      setStatus('error');
+      return;
+    }
 
-    const response = await fetch('http://localhost:5000/api/v1/verify-captcha', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ token }),
-    });
+    setLoading(true);
+    setStatus(null);
 
-    const data = await response.json();
+    try {
+      const response = await fetch('http://localhost:5000/api/v1/verify-captcha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: captchaValue }),
+      });
 
-    if (data.success) {
-      alert('CAPTCHA verified ✅');
-    } else {
-      alert('CAPTCHA failed ❌');
+      const data = await response.json();
+
+      if (data.success) {
+        setStatus('success');
+      } else {
+        setStatus('error');
+      }
+    } catch (err) {
+      console.error('Verification failed:', err);
+      setStatus('error');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input type="text" placeholder="Name" required />
-      <ReCAPTCHA
-        ref={recaptchaRef}
-        sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY} // or your actual site key directly
-        size="invisible"
-      />
-      <button type="submit">Submit</button>
-    </form>
+     
+      
+
+       <ReCAPTCHA
+        sitekey="6LcGO2orAAAAABdB_akGeQApxKmRjEftNknXZS9N"
+        onChange={(value) => setCaptchaValue(value)}
+        style={{ marginBottom: '20px' }}
+      /> 
+
+     
   );
 };
 
-export default CaptchaForm;
+export default CaptchaOnly;

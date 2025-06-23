@@ -413,7 +413,7 @@ const handleAddCategory = () => {
         sx={{
           mt: 3,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}
@@ -702,6 +702,7 @@ const handleAddCategory = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
       <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
         Brand Details
       </Typography>
@@ -712,7 +713,7 @@ const handleAddCategory = () => {
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}
@@ -748,7 +749,19 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
+        </Grid>
+
+        <Grid container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(2, 0.7fr)", xs: "1fr" },
+          gap: 2,
+          mb: 2,
+        }} >
+
+          <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label="Tagline"
@@ -762,7 +775,17 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+        </Grid>
+        <Grid container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gap: 2,
+          mb: 2,
+        }}>
+            <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label="CEO/MD/Owner Name"
@@ -812,7 +835,10 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-              </Grid>
+        </Grid>
+
+        
+              
 
 
       <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
@@ -826,19 +852,7 @@ Head Office Location      </Typography>
           gap: 2,
         }}>
       
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Manager Name"
-            name="managerName"
-            value={data.managerName || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            error={!!errors.managerName}
-            helperText={errors.managerName}
-          />
-        </Grid>
+        
         
 {/* Head Office Address */}
         <Grid item xs={12} sm={6} md={2.4}>
@@ -862,7 +876,7 @@ Head Office Location      </Typography>
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
           gap: 2,
         }}>
                 {/* Pincode */}

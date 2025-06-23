@@ -37,10 +37,8 @@ import {
   IconButton,
 } from "@mui/material";
 import { FavoriteBorderOutlined, Person, PersonOutlined, WhatsApp,Email, Phone, Home, LocationCity, Work, HomeWork, MeetingRoom } from "@mui/icons-material";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-import Footer from "../../Components/Footers/Footer";
 import { DeleteIcon } from "lucide-react";
 import {EditIcon} from "lucide-react";
 import { useDispatch } from "react-redux";
@@ -1850,7 +1848,7 @@ useEffect(() => {
             You must accept the terms
           </Typography>
         )}
-
+{/* <CaptchaForm /> */}
         <Button
           type="submit"
           variant="contained"

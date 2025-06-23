@@ -226,7 +226,7 @@ function RegisterHandleUser({boolean = true}) {
     </Grid>
 
     {/* Facebook Icon */}
-    <Grid item>
+    {/* <Grid item>
       <Box
         component="img"
         loading="lazy"
@@ -249,7 +249,7 @@ function RegisterHandleUser({boolean = true}) {
           },
         }}
       />
-    </Grid>
+    </Grid> */}
   </Grid>
   {/* Login Popup Dialog */}
       <Dialog open={loginOpen} onClose={closeLoginPopup} maxWidth="sm" fullWidth>
