@@ -52,13 +52,23 @@ import { fetchPincodeDetails } from "../../../Utils/PincodeFetch.jsx";
 // const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
-  const formData = {
+  const [showWhatsappSnackbar, setShowWhatsappSnackbar] = useState(false);
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
+
+  // const [phoneVerifyStatus, setPhoneVerifyStatus] = useState({
+  //   mobileNumber: {
+  //     loading: false,
+  //     verified: false,
+  //   },
+  // });
+    const formData = {
     companyName: "",
     brandName: "",
     brandCategories: [],
     expansionLocation: [],
     ...data,
   };
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,6 +80,11 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   // Updated Expansion Location State
   const [openLocationModal, setOpenLocationModal] = useState(false);
  
+ useEffect(() => {
+    if (data.mobileNumber?.length === 10 && !whatsappEnabled && !data.whatsappNumber) {
+      setShowWhatsappSnackbar(true);
+    }
+  }, [data.mobileNumber, whatsappEnabled, data.whatsappNumber]);
 
   useEffect(()=>{
     const fetchLocationDetails = async () => {
@@ -182,6 +197,7 @@ const handleAddCategory = () => {
     message: "",
     severity: "success",
   });
+  
 
   // Handle OTP verification dialog open/close
   const handleVerificationDialog = (field, open) => {
@@ -540,6 +556,7 @@ const handleAddCategory = () => {
             helperText={errors.whatsappNumber}
             variant="outlined"
             size="medium"
+            disabled = {!whatsappEnabled}
             inputProps={{ maxLength: 10 }}
             placeholder="Enter 10 digit number"
             InputProps={{
@@ -547,6 +564,11 @@ const handleAddCategory = () => {
                 <InputAdornment position="start">+91</InputAdornment>
               ),
             }}
+            sx={{
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '8px',
+    },
+  }}
           />
         </Grid>
       </Grid>
@@ -1072,6 +1094,60 @@ Head Office Location      </Typography>
           gap: 2,
         }}
       ></Grid>
+
+      <Snackbar
+  open={showWhatsappSnackbar}
+  autoHideDuration={null}
+  onClose={() => setShowWhatsappSnackbar(false)}
+  anchorOrigin={{ vertical: "center", horizontal: "center" }}
+  sx={{
+    width: '100%',
+    maxWidth: '700px',
+    mb: 12
+  }}
+>
+  <Alert
+    severity="info"
+    // icon={<WhatsApp fontSize="inherit" />}
+    sx={{
+      width: '100%',
+      borderRadius: '12px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      alignItems: 'center'
+    }}
+    action={
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Button
+          color="success"
+          variant="contained"
+          size="medium"
+          onClick={() => {
+            onChange({ whatsappNumber: data.mobileNumber || "" });
+                  setWhatsappEnabled(false);
+                  setShowWhatsappSnackbar(false);
+          }}
+          sx={{ borderRadius: '8px' }}
+        >
+          Yes
+        </Button>
+        <Button
+          color="inherit"
+          variant="outlined"
+          size="small"
+          onClick={() => {
+            setWhatsappEnabled(true); 
+            setShowWhatsappSnackbar(false);
+          }}
+          sx={{ borderRadius: '8px' }}
+        >
+          No
+        </Button>
+      </Box>
+    }
+  >
+    Is your WhatsApp number same as your mobile number?
+  </Alert>
+</Snackbar>
     </Box>
   );
 };
