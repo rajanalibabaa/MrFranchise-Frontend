@@ -172,47 +172,47 @@ const initialFormData = {
     marketingSales: "",
     agreementFranchise:""
   },
-  expansionLocationDetails: {
-    currentOutletsLocatedAt: [
-  {
-    type: "domestic",
-    location: {
-      country: "",
-      state: "",
-      district: "",
-      city: ""
-    }
-  },
-  {
-    type: "international",
-    location: {
-      country: "",
-      state: "",
-      city: ""
-    }
-  }
-],
-expansionLocations: [
-  {
-    type: "domestic",
-    location: {
-      country: '',
-      state: [],
-      district: [],
-      city: []
-    }
-  },
-  {
-    type: "international",
-    location: {
-      country: "",
-      state: [],
-      city: []
-    }
-  }
-]
+//   expansionLocationDetails: {
+//     currentOutletsLocatedAt: [
+//   {
+//     type: "domestic",
+//     location: {
+//       country: "",
+//       state: "",
+//       district: "",
+//       city: ""
+//     }
+//   },
+//   {
+//     type: "international",
+//     location: {
+//       country: "",
+//       state: "",
+//       city: ""
+//     }
+//   }
+// ],
+// expansionLocations: [
+//   {
+//     type: "domestic",
+//     location: {
+//       country: '',
+//       state: [],
+//       district: [],
+//       city: []
+//     }
+//   },
+//   {
+//     type: "international",
+//     location: {
+//       country: "",
+//       state: [],
+//       city: []
+//     }
+//   }
+// ]
 
-  },
+//   },
   uploads: {
     franchisePromotionVideo: [],
     // brandPromotionVideo: [],

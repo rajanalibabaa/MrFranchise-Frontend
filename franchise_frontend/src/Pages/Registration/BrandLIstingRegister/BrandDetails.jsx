@@ -371,10 +371,10 @@ const handleDescriptionChange = (content) => {
   
 
   return (
-    <Box sx={{ overflowY: "auto", ml: 15, pr: 1, mt: 0 }}>
+    <Box sx={{ overflowY: "auto", ml: 10, pr: 1, mt: 0 }}>
       {/* Brand Details Section */}
-      <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
-       Login Credentials Details
+      <Typography variant="h6" fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
+       Login Credentials 
       </Typography>
 
       <Grid
@@ -383,11 +383,26 @@ const handleDescriptionChange = (content) => {
         sx={{
           mt: 3,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}
       >
+         {/* Full Name */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Full Name"
+            name="fullName"
+            value={data.fullName || ""}
+            onChange={handleChange}
+            error={!!errors.fullName}
+            helperText={errors.fullName}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
         {/* Email with Verification */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -653,7 +668,7 @@ const handleDescriptionChange = (content) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
+      <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
         Brand Details
       </Typography>
 
@@ -665,9 +680,25 @@ const handleDescriptionChange = (content) => {
           display: "grid",
           gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
           gap: 2,
+          mb: 2,
         }}
       >
     
+        {/* Company Name */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Company Name"
+            name="companyName"
+            value={formData.companyName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.companyName}
+            helperText={errors.companyName}
+            required
+          />
+        </Grid>
         {/* Brand Name */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -683,23 +714,21 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
-            {/* Company Name */}
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="Company Name"
-            name="companyName"
-            value={formData.companyName || ""}
+            label="Tagline"
+            name="Tagline"
+            value={formData.Tagline || ""}
             onChange={handleChange}
             variant="outlined"
             size="medium"
-            error={!!errors.companyName}
-            helperText={errors.companyName}
+            error={!!errors.Tagline}
+            helperText={errors.Tagline}
             required
           />
         </Grid>
-       
-        <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label="CEO/MD/Owner Name"
@@ -749,6 +778,20 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
+              </Grid>
+
+
+      <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
+Head Office Location      </Typography> 
+      <Grid  container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(2, 0.7fr)", xs: "1fr" },
+          gap: 2,
+        }}>
+      
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
@@ -762,31 +805,7 @@ const handleDescriptionChange = (content) => {
             helperText={errors.managerName}
           />
         </Grid>
-
-         {/* <Typography variant="h6" sx={{ mb: 1, color: "#ff9800" }}>
-        Communication Information
-      </Typography> */}
- 
-        {/* Full Name */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Full Name"
-            name="fullName"
-            value={data.fullName || ""}
-            onChange={handleChange}
-            error={!!errors.fullName}
-            helperText={errors.fullName}
-            variant="outlined"
-            size="medium"
-            required
-          />
-        </Grid>
-
-       
-
-      
-
+        
 {/* Head Office Address */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -802,7 +821,16 @@ const handleDescriptionChange = (content) => {
             required
           />
         </Grid>
+</Grid>
 
+<Grid  container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
+          gap: 2,
+        }}>
                 {/* Pincode */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -874,11 +902,21 @@ const handleDescriptionChange = (content) => {
           />
         </Grid>
 
+</Grid>
+
+<Grid  container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gap: 2,
+        }}>
  {/* Email */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="Secondary Email"
+            label="Secondary Email (Optional)"
             name="secondaryEmail"
             type="secondaryEmail"
             value={data.secondaryEmail || ""}
@@ -891,75 +929,7 @@ const handleDescriptionChange = (content) => {
           />
         </Grid>
 
-   {/* Social Media Section */}
-      {/* <Typography variant="h6" sx={{ mb: 1, mt: 1, color: "#ff9800" }}>
-        Social Media & Web Presence
-      </Typography> */}
 
-
-     
-
-        {/* Established Year
-        <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.establishedYear}>
-            <InputLabel size="medium">Established Year</InputLabel>
-            <Select
-              name="establishedYear"
-              value={data.establishedYear || ""}
-              label="Established Year"
-              onChange={handleChange}
-              variant="outlined"
-              size="medium"
-              required
-            >
-              {Array.from(
-                { length: 100 },
-                (_, i) => new Date().getFullYear() - i
-              ).map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.establishedYear && (
-              <Typography variant="caption" color="error">
-                {errors.establishedYear}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
-        {/* Franchise Since Year */}
-        {/* <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.franchiseSinceYear}>
-            <InputLabel size="medium">Franchise Since Year</InputLabel>
-            <Select
-              name="franchiseSinceYear"
-              value={data.franchiseSinceYear || ""}
-              label="Franchise Since Year"
-              onChange={handleChange}
-              variant="outlined"
-              size="medium"
-              required
-            >
-              {Array.from(
-                { length: 100 },
-                (_, i) => new Date().getFullYear() - i
-              ).map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.franchiseSinceYear && (
-              <Typography variant="caption" color="error">
-                {errors.franchiseSinceYear}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid> */} 
-
-
-  
         {/* Website */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -1041,194 +1011,13 @@ const handleDescriptionChange = (content) => {
             }}
           />
         </Grid>
-      </Grid>
-      {/* Categories Section - Three Dropdowns with Add Button */}
-{/* <Grid item xs={12}>
-  <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
-    Brand Categories
-  </Typography>
+   </Grid>  
+
+        
+
   
-  <Box sx={{ 
-    display: 'grid',
-    gridTemplateColumns: { md: 'repeat(4, 1fr)', xs: '1fr' },
-    gap: 2,
-    alignItems: 'flex-end'
-  }}>
-    {/* Main Category Dropdown *
-    <FormControl  sx={{width:200}}size="small">
-      <InputLabel>Main Category</InputLabel>
-      <Select
-        value={selectedCategory.main || ""}
-        label="Main Category"
-        onChange={(e) => {
-          const mainCat = e.target.value;
-          setSelectedCategory({
-            main: mainCat,
-            sub: "",
-            child: "",
-            groupId: ""
-          });
-        }}
-      >
-        {categories.map((category) => (
-          <MenuItem key={category.name} value={category.name}>
-            {category.name}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-
-    {/* Sub Category Dropdown *
-    <FormControl  size="small" sx={{width:200}} disabled={!selectedCategory.main}>
-      <InputLabel>Sub Category</InputLabel>
-      <Select
-        value={selectedCategory.sub || ""}
-        label="Sub Category"
-        onChange={(e) => {
-          const subCat = e.target.value;
-          const mainCatObj = categories.find(cat => cat.name === selectedCategory.main);
-          const subCatObj = mainCatObj?.children?.find(sub => sub.name === subCat);
-          
-          setSelectedCategory(prev => ({
-            ...prev,
-            sub: subCat,
-            groupId: subCatObj?.groupId || "",
-            child: ""
-          }));
-        }}
-      >
-        {selectedCategory.main && 
-          categories.find(cat => cat.name === selectedCategory.main)?.children?.map((subCategory) => (
-            <MenuItem key={subCategory.name} value={subCategory.name}>
-              {subCategory.name}
-            </MenuItem>
-          ))
-        }
-      </Select>
-    </FormControl>
-
-    {/* Child Category Dropdown *
-    <FormControl fullWidth size="small" disabled={!selectedCategory.sub} sx={{width:200}}>
-      <InputLabel>Child Category    </InputLabel>
-      <Select
-        value={selectedCategory.child || ""}
-        label="Child Category"
-        onChange={(e) => {
-          setSelectedCategory(prev => ({
-            ...prev,
-            child: e.target.value
-          }));
-        }}
-      >
-        {selectedCategory.sub && 
-          categories
-            .find(cat => cat.name === selectedCategory.main)
-            ?.children?.find(sub => sub.name === selectedCategory.sub)
-            ?.children?.map((child, index) => (
-              <MenuItem key={index} value={child}>
-                {child}
-              </MenuItem>
-            ))
-        }
-      </Select>
-    </FormControl>
-
-    {/* Add Button *
-    <Button
-      variant="contained"
-      onClick={handleAddCategory}
-      disabled={!selectedCategory.child}
-      sx={{
-        height: 40,
-        p:2,
-        pr:6,
-        pl:6,
-        bgcolor: '#ff9800',
-        '&:hover': { bgcolor: '#fb8c00' },
-        boxShadow: 'none',
-        textTransform: 'none',
-      
-        borderRadius: 1
-      }}
-    >
-      Add 
-    </Button>
-  </Box>
-
-  {/* Selected Categories Display *
-  {Array.isArray(data.brandCategories) && data.brandCategories.length > 0 && (
-    <Box sx={{ mt: 2 }}>
-      <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-        Selected Categories
-      </Typography>
-      <Box sx={{ 
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 1
-      }}>
-        {data.brandCategories.map((category, index) => (
-          <Chip
-            key={index}
-            label={`${category.main} > ${category.sub} > ${category.child}`}
-            onDelete={() => {
-              const updatedCategories = [...data.brandCategories];
-              updatedCategories.splice(index, 1);
-              onChange({ brandCategories: updatedCategories });
-            }}
-            color="primary"
-            variant="outlined"
-            size="small"
-            sx={{
-              '& .MuiChip-deleteIcon': {
-                color: '#1976d2'
-              }
-            }}
-          />
-        ))}
-      </Box>
-    </Box>
-  )}
-</Grid> */}
 
 
-<Grid item xs={12}>
-  <Box>
-    <Button
-      variant="contained"
-      startIcon={<AddIcon />}
-      onClick={() => setDescriptionModalOpen(true)}
-      sx={{
-        bgcolor: '#ff9800',
-        '&:hover': { bgcolor: '#fb8c00' },
-        boxShadow: 'none',
-        textTransform: 'none',
-        fontWeight: 500,
-        borderRadius: 1
-      }}
-    >
-      Add Brand Description
-    </Button>
-    {errors.description && (
-      <Typography variant="caption" color="error" sx={{ ml: 1 }}>
-        {errors.description}
-      </Typography>
-    )}
-    
-    {/* Preview of the description (first 100 characters) */}
-   {data.brandDescription && (
-  <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e3e7', borderRadius: 1 }}>
-    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-      Description Preview
-    </Typography>
-    <div dangerouslySetInnerHTML={{ 
-      __html: data.brandDescription.length > 100 
-        ? `${data.brandDescription.substring(0, 100)}...` 
-        : data.brandDescription 
-    }} />
-  </Box>
-)}
-  </Box>
-</Grid>
 
   {/* Communication Information Section */}
      
