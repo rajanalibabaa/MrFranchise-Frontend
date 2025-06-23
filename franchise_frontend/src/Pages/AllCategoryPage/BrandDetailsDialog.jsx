@@ -293,6 +293,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
           sx: {
             borderRadius: "12px",
             overflow: "hidden",
+            
           },
         }}
       >
@@ -592,13 +593,19 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
         maxWidth="lg"
         fullWidth
         scroll="paper"
-        sx={{
-          "& .MuiDialog-paper": {
-            borderRadius: 3,
-            overflow: "hidden",
-            background: "linear-gradient(145deg, #f5f7fa 0%, #ffffff 100%)",
-          },
-        }}
+        BackdropProps={{
+    style: {
+      backgroundColor: "rgba(32, 31, 31, 0.45)",
+    },
+  }}
+  sx={{
+    "& .MuiDialog-paper": {
+      borderRadius: 3,
+      overflow: "hidden",
+      background: "linear-gradient(145deg, #f5f7fa 0%, #ffffff 100%)",
+      boxShadow:"none"
+    },
+  }}
       >
         <DialogTitle
           sx={{
