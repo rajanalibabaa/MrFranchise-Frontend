@@ -1,4 +1,4 @@
-import React, { useEffect,useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -16,6 +16,7 @@ import {
   TextField,
   MenuItem,
   CircularProgress,
+  Modal
 } from "@mui/material";
 import {
   Close,
@@ -26,6 +27,9 @@ import {
   StarBorder,
   Business as BusinessIcon,
 } from "@mui/icons-material";
+import CloseIcon from '@mui/icons-material/Close';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import OverviewTab from "./OverviewTab";
 import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
@@ -33,13 +37,18 @@ import { closeBrandDialog } from "../../Redux/Slices/brandSlice.jsx";
 import axios from "axios";
 
 const BrandDetailsDialog = () => {
-  const [tabIndex, setTabIndex] = useState(0);  
+  const [tabIndex, setTabIndex] = useState(0);
   const [openGallery, setOpenGallery] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const { openDialog, selectedBrand } = useSelector((state) => state.brands);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+
   const [formData, setFormData] = useState({
     fullName: "",
     investorEmail: "",
@@ -54,46 +63,43 @@ const BrandDetailsDialog = () => {
 
   const dispatch = useDispatch();
 
-      const [userData, setUserData] = useState(null);
-      
-     const investorUUID = localStorage.getItem("investorUUID");
-     const AccessToken = localStorage.getItem("accessToken");
-  
-    useEffect(() => {
-      const fetchInvestorDetails = async () => {
+  const [userData, setUserData] = useState(null);
 
-        
-        
-        if (!investorUUID || !AccessToken) return;
-        try {
-          const response = await axios.get(
-            `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${AccessToken}`,
-              },
-            }
-          );
-  
-          console.log("Investor details response:", response.data.data);
-          setUserData(response.data.data);
-          const investor = response.data?.data;
-          if (investor) {
-            setFormData((prev) => ({
-              ...prev,
-              fullName: investor.firstName || "",
-              investorEmail: investor.email || "",
-              mobileNumber: investor.mobileNumber || "",
-            }));
+  const investorUUID = localStorage.getItem("investorUUID");
+  const AccessToken = localStorage.getItem("accessToken");
+
+  useEffect(() => {
+    const fetchInvestorDetails = async () => {
+      if (!investorUUID || !AccessToken) return;
+      try {
+        const response = await axios.get(
+          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${AccessToken}`,
+            },
           }
-        } catch (error) {
-          console.error("Failed to fetch investor details:", error);
+        );
+
+        console.log("Investor details response:", response.data.data);
+        setUserData(response.data.data);
+        const investor = response.data?.data;
+        if (investor) {
+          setFormData((prev) => ({
+            ...prev,
+            fullName: investor.firstName || "",
+            investorEmail: investor.email || "",
+            mobileNumber: investor.mobileNumber || "",
+          }));
         }
-      };
-  
-      fetchInvestorDetails();
-    }, [investorUUID, AccessToken]);
+      } catch (error) {
+        console.error("Failed to fetch investor details:", error);
+      }
+    };
+
+    fetchInvestorDetails();
+  }, [investorUUID, AccessToken]);
 
   const franchiseModels = [
     ...new Set(
@@ -150,9 +156,11 @@ const BrandDetailsDialog = () => {
         brandId: selectedBrand?.uuid,
         brandName: selectedBrand?.personalDetails?.brandName || "",
         brandEmail: selectedBrand.personalDetails?.email || "",
-        brandLogo:Array.isArray(selectedBrand.brandDetails?.brandLogo)?selectedBrand.brandDetails.brandLogo[0] || "" : selectedBrand.brandDetails?.brandLogo || ""}; 
+        brandLogo: Array.isArray(selectedBrand.brandDetails?.brandLogo)
+          ? selectedBrand.brandDetails.brandLogo[0] || ""
+          : selectedBrand.brandDetails?.brandLogo || "",
+      };
 
-      
       console.log("payload", payload);
       const token = localStorage.getItem("accessToken");
       const investorUUID = localStorage.getItem("investorUUID");
@@ -161,30 +169,30 @@ const BrandDetailsDialog = () => {
 
       console.log(id, token);
 
-       // Check for missing id
-    if (!id) {
-      alert("User not logged in or missing ID. Please login again.");
-      setIsSubmitting(false);
-      return;
-    }
+      // Check for missing id
+      if (!id) {
+        alert("User not logged in or missing ID. Please login again.");
+        setIsSubmitting(false);
+        return;
+      }
 
-    // Check for missing required fields
-    if (
-      !payload.fullName ||
-      !payload.investorEmail ||
-      !payload.mobileNumber ||
-      !payload.location ||
-      !payload.investmentRange ||
-      !payload.planToInvest ||
-      !payload.readyToInvest
-    ) {
-      alert("Please fill all required fields.");
-      setIsSubmitting(false);
-      return;
-    }
+      // Check for missing required fields
+      if (
+        !payload.fullName ||
+        !payload.investorEmail ||
+        !payload.mobileNumber ||
+        !payload.location ||
+        !payload.investmentRange ||
+        !payload.planToInvest ||
+        !payload.readyToInvest
+      ) {
+        alert("Please fill all required fields.");
+        setIsSubmitting(false);
+        return;
+      }
 
-    // Debug logs
-    console.log("Submitting with id:", id, "payload:", payload);
+      // Debug logs
+      console.log("Submitting with id:", id, "payload:", payload);
 
       const response = await axios.post(
         `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication/${id}`,
@@ -196,8 +204,8 @@ const BrandDetailsDialog = () => {
           },
         }
       );
-      
-      console.log("status code",response.data )
+
+      console.log("status code", response.data);
 
       if (response.data) {
         setSubmitSuccess(true);
@@ -210,18 +218,17 @@ const BrandDetailsDialog = () => {
           // planToInvest: "",
           // readyToInvest: "",
 
-        fullName: "",
-        location: "",
-        investmentRange: "",
-        planToInvest: "",
-        readyToInvest: "",
-        investorEmail: "",
-        mobileNumber: "",
+          fullName: "",
+          location: "",
+          investmentRange: "",
+          planToInvest: "",
+          readyToInvest: "",
+          investorEmail: "",
+          mobileNumber: "",
         });
-   
       }
     } catch (error) {
-      // console.log("Submission error:", error?.response?.data || error.message);
+      console.log("Submission error:", error?.response?.data || error.message);
       alert("❌Failed to submit application.");
     } finally {
       setIsSubmitting(false);
@@ -239,13 +246,13 @@ const BrandDetailsDialog = () => {
       // planToInvest: "",
       // readyToInvest: "",
 
-        fullName: "",
-        location: "",
-        investmentRange: "",
-        planToInvest: "",
-        readyToInvest: "",
-        investorEmail: "",
-        mobileNumber: "",
+      fullName: "",
+      location: "",
+      investmentRange: "",
+      planToInvest: "",
+      readyToInvest: "",
+      investorEmail: "",
+      mobileNumber: "",
     });
     setSubmitSuccess(false);
   };
@@ -361,7 +368,6 @@ const BrandDetailsDialog = () => {
                     gridTemplateColumns: "repeat(5, 1fr)",
                   }}
                 >
-                  
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
@@ -395,7 +401,9 @@ const BrandDetailsDialog = () => {
                       fullWidth
                       label="Mobile Number"
                       name="mobileNumber"
-                      value={formData.mobileNumber || userData?.mobileNumber || ""}
+                      value={
+                        formData.mobileNumber || userData?.mobileNumber || ""
+                      }
                       onChange={handleChange}
                       required
                       variant="outlined"
@@ -404,33 +412,35 @@ const BrandDetailsDialog = () => {
                       InputProps={{ readOnly: false }}
                     />
                   </Grid>
-                  
-                  
+
                   <Grid item xs={12} md={6}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="Location"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    required
-                    variant="outlined"
-                    size="small"
-                    sx={{ mb: 2 }}
-                  >
-                    {(selectedBrand.personalDetails?.expansionLocation || []).length > 0 ? (
-                      selectedBrand.personalDetails.expansionLocation.map((loc, i) => (
-                        <MenuItem key={i} value={loc.city}>
-                          {loc.city}
-                        </MenuItem>
-                      ))
-                    ) : (
-                      <MenuItem value="">Not specified</MenuItem>
-                    )}
-                  </TextField>
-                </Grid>
-                
+                    <TextField
+                      select
+                      fullWidth
+                      label="Location"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleChange}
+                      required
+                      variant="outlined"
+                      size="small"
+                      sx={{ mb: 2 }}
+                    >
+                      {(selectedBrand.personalDetails?.expansionLocation || [])
+                        .length > 0 ? (
+                        selectedBrand.personalDetails.expansionLocation.map(
+                          (loc, i) => (
+                            <MenuItem key={i} value={loc.city}>
+                              {loc.city}
+                            </MenuItem>
+                          )
+                        )
+                      ) : (
+                        <MenuItem value="">Not specified</MenuItem>
+                      )}
+                    </TextField>
+                  </Grid>
+
                   {/* <Grid item xs={12} md={4}>
                     <TextField
                       select
@@ -570,7 +580,6 @@ const BrandDetailsDialog = () => {
                     </motion.div>
                   </Grid>
                 </Grid>
-                
               </form>
             )}
           </DialogContent>
@@ -672,58 +681,9 @@ const BrandDetailsDialog = () => {
           </Box>
         </DialogTitle>
 
-        <Typography variant="subtitle1" m={1}>
-          {selectedBrand.personalDetails?.brandCategories &&
-            selectedBrand.personalDetails.brandCategories.length > 0 && (
-              <Box>
-                {selectedBrand.personalDetails.brandCategories.map(
-                  (category, index) => (
-                    <Box
-                      key={index}
-                      display={"flex"}
-                      justifyContent={"space-around"}
-                      gap={1}
-                    >
-                      <Typography variant="body2" m={1}>
-                       <label style={{ fontWeight: "bold" }}>Category:{" "}</label> 
-                        <label >
-                          {category.child}
-                        </label>
-                      </Typography>
-                      <Typography variant="body2" m={1}
-                      >
-                      <label style={{ fontWeight: "bold" }}>Investment :</label>  
-                        <label >
-                          {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
-                            (model) => model.investmentRange
-                          )}
-                        </label>
-                      </Typography>
-                      <Typography variant="body2" m={1} >
-                      <label style={{ fontWeight: "bold" }}>Area:</label>  
-                        <label >
-                          {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
-                            (model) => model.areaRequired
-                          )}
-                        </label>
-                      </Typography>
-                      {selectedBrand.personalDetails?.expansionLocation?.length > 0 && (
-            <Typography  variant="body2" m={1}>
-                      <label style={{ fontWeight: "bold" }}>Expansions:</label>  
-              <label >
-                {selectedBrand.personalDetails.expansionLocation.map(
-                  (location) => `${location.city}`
-                )}
-              </label>
-            </Typography>
-          )}
-                    </Box>
-                  )
-                )}
-              </Box>
-            )}
-          
-        </Typography>
+      
+
+
 
         <DialogContent
           dividers
@@ -742,86 +702,288 @@ const BrandDetailsDialog = () => {
               maxHeight: "70vh",
             }}
           >
-            <Grid
-              display={"flex"}
-              flexDirection={"row"}
-              justifyContent={"space-between"}
+
+
+ <Grid container spacing={2}>
+  <Grid item xs={12} md={12}>
+    <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={1}>
+      {/* Video Section - Left Side (Fixed Size) */}
+      <Box sx={{ 
+        width: { xs: '100%', md: '70%' },
+        height: 430, // Fixed height
+        borderRadius: 2,
+        overflow: 'hidden',
+        backgroundColor: '#f5f5f5'
+      }}>
+        {allVideos.length > 0 ? (
+          allVideos.map((videoUrl, index) => (
+            <Box
+              key={index}
+              sx={{
+                width: '100%',
+                height: '100%',
+                cursor: 'pointer'
+              }}
             >
+              <video
+                controls
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              >
+                <source src={videoUrl} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </Box>
+          ))
+        ) : (
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '100%' 
+          }}>
+            <Typography>No videos available</Typography>
+          </Box>
+        )}
+      </Box>
 
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={12}>
-                  <Paper elevation={1} sx={{ p: 1.5, borderRadius: 2 }}>
-                    <Tabs
-                      value={tabIndex}
-                      onChange={(e, newValue) => setTabIndex(newValue)}
-                      centered
-                      sx={{ mb: 1 }}
-                    >
-                      <Tab label="Video" />
-                      <Tab label="Images" />
-                    </Tabs>
+      {/* Images Section - Right Side (Scrollable) */}
+      <Box sx={{ 
+        width: { xs: '100%', md: '40%' },
+        maxHeight: 430,
+        overflowY: 'auto',
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 2,
+        pr: 1 // Add some padding for scrollbar
+      }}>
+        {allImages.map((imageUrl, index) => (
+          <Box
+            key={index}
+            sx={{
+              width: { xs: '100%', sm: '48%' },
+              height: 200,
+              borderRadius: 2,
+              overflow: 'hidden',
+              backgroundColor: '#f5f5f5',
+              cursor: 'pointer',
+              flexShrink: 0
+            }}
+            onClick={() => {
+              setCurrentImageIndex(index);
+              setImageModalOpen(true);
+            }}
+          >
+            <img
+              src={imageUrl}
+              alt={`Gallery ${index}`}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  </Grid>
+</Grid>
 
-                    {tabIndex === 0 ? (
-                      <Box display="flex" gap={2}>
-                        {allVideos.map((videoUrl, index) => (
-                          <Box
-                            key={index}
-                            sx={{
-                              width: { xs: "100%", sm: "48%", md: "78%" },
-                              maxHeight:350,
-                              borderRadius: 2,
-                              overflow: "hidden",
-                              backgroundColor: "#f5f5f5",
-                              cursor: "pointer",
-                            }}
-                            onClick={() => handleMediaClick(videoUrl)}
-                          >
-                            <video
-                              controls
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "contain",
-                              }}
-                            >
-                              <source src={videoUrl} type="video/mp4" />
-                              Your browser does not support the video tag.
-                            </video>
-                          </Box>
-                        ))}
+{/* Full-screen Image Modal */}
+<Dialog
+  open={imageModalOpen}
+  onClose={() => setImageModalOpen(false)}
+  maxWidth="lg"
+  fullWidth
+  sx={{
+    '& .MuiDialog-paper': {
+      backgroundColor: 'rgba(0,0,0,0.9)',
+      overflow: 'hidden'
+    }
+  }}
+>
+  <DialogTitle sx={{ 
+    display: 'flex', 
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    color: 'white'
+  }}>
+    <Typography>
+      Image {currentImageIndex + 1} of {allImages.length}
+    </Typography>
+    <IconButton onClick={() => setImageModalOpen(false)} color="inherit">
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+  
+  <DialogContent sx={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '70vh'
+  }}>
+    <Box sx={{
+      position: 'relative',
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center'
+    }}>
+      <IconButton
+        sx={{ 
+          position: 'absolute', 
+          left: 16,
+          color: 'white',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          '&:hover': {
+            backgroundColor: 'rgba(0,0,0,0.7)'
+          }
+        }}
+        onClick={() => setCurrentImageIndex(prev => 
+          prev === 0 ? allImages.length - 1 : prev - 1
+        )}
+      >
+        <ArrowBackIcon fontSize="large" />
+      </IconButton>
+      
+      <img
+        src={allImages[currentImageIndex]}
+        alt={`Gallery ${currentImageIndex}`}
+        style={{
+          maxWidth: '100%',
+          maxHeight: '100%',
+          objectFit: 'contain',
+          margin: '0 auto'
+        }}
+      />
+      
+      <IconButton
+        sx={{ 
+          position: 'absolute', 
+          right: 16,
+          color: 'white',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          '&:hover': {
+            backgroundColor: 'rgba(0,0,0,0.7)'
+          }
+        }}
+        onClick={() => setCurrentImageIndex(prev => 
+          prev === allImages.length - 1 ? 0 : prev + 1
+        )}
+      >
+        <ArrowForwardIcon fontSize="large" />
+      </IconButton>
+    </Box>
+  </DialogContent>
+  
+  <DialogActions sx={{
+    justifyContent: 'center',
+    pb: 3
+  }}>
+    <Box sx={{
+      display: 'flex',
+      gap: 1,
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      maxWidth: '100%',
+      overflowX: 'auto',
+      px: 2,
+      py: 1
+    }}>
+      {allImages.map((img, index) => (
+        <Box
+          key={index}
+          onClick={() => setCurrentImageIndex(index)}
+          sx={{
+            width: 60,
+            height: 60,
+            borderRadius: 1,
+            overflow: 'hidden',
+            cursor: 'pointer',
+            border: currentImageIndex === index ? '2px solid #1976d2' : '1px solid #555',
+            opacity: currentImageIndex === index ? 1 : 0.7,
+            flexShrink: 0
+          }}
+        >
+          <img
+            src={img}
+            alt={`Thumbnail ${index}`}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+        </Box>
+      ))}
+    </Box>
+  </DialogActions>
+</Dialog>
+
+
+
+              <Typography variant="subtitle1" m={1} mt={3}>
+          {selectedBrand.personalDetails?.brandCategories &&
+            selectedBrand.personalDetails.brandCategories.length > 0 && (
+              <Box>
+                {selectedBrand.personalDetails.brandCategories.map(
+                  (category, index) => (
+                    <Box key={index}>
+                      <Box display={"flex"} gap={30}>
+                        <Typography variant="body2" m={1}>
+                          <label style={{ fontWeight: "bold" }}>
+                            Category:{"  "}
+                          </label>
+                          <label>{category.child}</label>
+                        </Typography>
+                        <Typography variant="body2" m={1}>
+                          <label style={{ fontWeight: "bold" }}>
+                            Investment :{" "}
+                          </label>
+                          <label>
+                            {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
+                              (model) => model.investmentRange
+                            )}
+                          </label>
+                        </Typography>
+                        <Typography variant="body2" m={1}>
+                          <label style={{ fontWeight: "bold" }}>Area: </label>
+                          <label>
+                            {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
+                              (model) => model.areaRequired
+                            )}{" "}
+                            sq.ft
+                          </label>
+                        </Typography>
                       </Box>
-                    ) : (
-                      <Box display="flex" flexWrap="wrap" gap={2}>
-                        {allImages.map((imageUrl, index) => (
-                          <Box
-                            key={index}
-                            sx={{
-                              width: { xs: "100%", sm: "30%", md: "23%" },
-                              maxHeight: 200,
-                              borderRadius: 2,
-                              overflow: "hidden",
-                              backgroundColor: "#f5f5f5",
-                              cursor: "pointer",
-                            }}
-                            onClick={() => handleMediaClick(imageUrl)}
-                          >
-                            <img
-                              src={imageUrl}
-                              alt={`Gallery ${index}`}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                              }}
-                            />
-                          </Box>
-                        ))}
-                      </Box>
-                    )}
-                  </Paper>
-                </Grid>
-              </Grid>
-            </Grid>
+                      <Box></Box>
+
+                      {selectedBrand.personalDetails?.expansionLocation
+                        ?.length > 0 && (
+                        <Typography variant="body2" m={1}>
+                          <label style={{ fontWeight: "bold" }}>
+                            Expansions:
+                          </label>
+                          <label>
+                            {selectedBrand.personalDetails.expansionLocation.map(
+                              (location) => `  ${location.city},  `
+                            )}
+                          </label>
+                        </Typography>
+                      )}
+                    </Box>
+                  )
+                )}
+              </Box>
+            )}
+        </Typography>
+            
+
+
             <Box sx={{ minHeight: "300px" }}>
               <OverviewTab
                 brand={selectedBrand}
@@ -829,7 +991,9 @@ const BrandDetailsDialog = () => {
               />
             </Box>
           </Box>
+          
         </DialogContent>
+        
         <DialogActions
           sx={{
             p: 2,
@@ -856,7 +1020,7 @@ const BrandDetailsDialog = () => {
           >
             Share
           </Button>
-             <Button
+          <Button
             variant="outlined"
             disabled={!userData}
             sx={{
@@ -872,7 +1036,7 @@ const BrandDetailsDialog = () => {
             onClick={() => {
               setFormData((prev) => ({
                 ...prev,
-                fullName: userData?.firstName || "",  
+                fullName: userData?.firstName || "",
                 investorEmail: userData?.email || "",
                 mobileNumber: userData?.mobileNumber || "",
               }));
@@ -883,7 +1047,7 @@ const BrandDetailsDialog = () => {
             {userData ? "Apply for Franchise" : "Loading..."}
           </Button>
         </DialogActions>
- 
+
         <Dialog
           open={openGallery}
           onClose={() => setOpenGallery(false)}

@@ -7,9 +7,11 @@ import {
   Button,
   useTheme,
   useMediaQuery,
-  Dialog
+  Dialog,
+  Container,
+  CircularProgress
 } from "@mui/material";
-
+import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice.jsx";
 import businessLogo from "../../assets/images/Business_logo.png";
 import FacebookIcon from "../../Assets/Images/FacebookIcon.png";
 // import LinkedInIcon from "../../Assets/Images/LinkedinIcon.png";
@@ -18,20 +20,22 @@ import FacebookIcon from "../../Assets/Images/FacebookIcon.png";
 import GoogleIcon from "../../Assets/Images/GoogleIcon.png";
 import LoginPage from "../../Pages/LoginPage/LoginPage"
 import Footer from "../../Components/Footers/Footer";
-import Navbar from "../../Components/Navbar/NavBar";
+import { useDispatch } from "react-redux";
 
 function RegisterHandleUser({boolean = true}) {
 
-  console.log("boolean",boolean)
-  
-  
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [loginOpen, setLoginOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
 
   const openLoginPopup = () => {
+    setIsSubmitting(true);
     setLoginOpen(true);
   };
 
@@ -40,9 +44,11 @@ function RegisterHandleUser({boolean = true}) {
   };
 
   const handleNavigation = (path) => {
+    setIsSubmitting(true);
     navigate(path);
   };
   const handleSocialLogin = (provider) => {
+    setIsSubmitting(true);
     window.location.href = `https://franchise-backend-wgp6.onrender.com/api/v1/auth/${provider}`;
   };
 
@@ -118,7 +124,13 @@ function RegisterHandleUser({boolean = true}) {
 
         <Button
           variant="contained"
-          onClick={() => handleNavigation("/investor-register")}
+          onClick={() => 
+          {   dispatch(showLoading())
+            handleNavigation("/investor-register")
+            setTimeout(() => {
+              dispatch(hideLoading());
+            },  2000);
+          }}
           sx={{
             mb: 2,
             bgcolor: "#7ad03a",
@@ -129,12 +141,22 @@ function RegisterHandleUser({boolean = true}) {
             maxWidth: 250,
           }}
         >
-          Investor Register
+          {isLoading && activeButton === "investor" ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Investor Registration"
+                )}
         </Button>
 
         <Button
           variant="contained"
-          onClick={() => handleNavigation("/brandlistingform")}
+          onClick={() =>
+           { dispatch(showLoading());
+            handleNavigation("/brandlistingform");
+            setTimeout(() => {
+              dispatch(hideLoading());
+            }, 2000);
+          }}
           sx={{
             mb: 2,
             bgcolor: "#e99830",
@@ -145,7 +167,11 @@ function RegisterHandleUser({boolean = true}) {
             maxWidth: 250,
           }}
         >
-          Brand Register
+          {isLoading && activeButton === "brand" ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Brand Registration"
+                )}
         </Button>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
@@ -179,7 +205,13 @@ function RegisterHandleUser({boolean = true}) {
         loading="lazy"
         src={GoogleIcon}
         alt="Google"
-        onClick={() => handleSocialLogin("google")}
+        onClick={() => 
+        { dispatch(showLoading())
+          handleSocialLogin("google")
+          setTimeout(() => {
+            dispatch(hideLoading());
+          }, 2000);
+        }}
         sx={{
           width: 32,
           height: 32,
@@ -199,7 +231,13 @@ function RegisterHandleUser({boolean = true}) {
         loading="lazy"
         src={FacebookIcon}
         alt="Facebook"
-        onClick={() => handleSocialLogin("facebook")}
+        onClick={() => 
+        { dispatch(showLoading())
+          handleSocialLogin("facebook")
+          setTimeout(() => {
+            dispatch(hideLoading());
+          }, 2000);
+        } }
         sx={{
           width: 32,
           height: 32,

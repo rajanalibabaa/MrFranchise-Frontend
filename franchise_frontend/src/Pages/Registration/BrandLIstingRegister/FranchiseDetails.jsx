@@ -17,6 +17,7 @@ import {
   Paper,
   Button,
   FormHelperText,
+  Divider
 } from "@mui/material";
 
 const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
@@ -29,17 +30,20 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     royaltyFee: "",
     royaltyFeeUnit: "%",
     interiorCost: "",
-    exteriorCost: "",
+    stockCost: "",
     otherCost: "",
     roi: "",
+    payBackPeriod: "",
     breakEven: "",
-    requireInvestmentCapital: "",
+    requireWorkingCapital: "",
     marginOnSales: "",
-    fixedReturn: "",
+    // fixedReturn: "",
     propertyType: "",
+    // StatergicPlan:"",
+
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e) => { 
     const { name, value } = e.target;
 
     if (name === "companyOwnedOutlets" || name === "franchiseOutlets") {
@@ -61,14 +65,32 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       onChange({ [name]: value });
     }
   };
-
+  
   const handleFicoChange = (e) => {
-    const { name, value } = e.target;
-    setFicoModel((prev) => ({
+  const { name, value } = e.target;
+
+  setFicoModel((prev) => {
+    const updated = {
       ...prev,
       [name]: value,
-    }));
-  };
+    };
+
+    // If ROI is being changed, calculate Payback Period
+    if (name === "roi") {
+      const roi = parseFloat(value);
+      if (!isNaN(roi) && roi > 0) {
+        const totalMonths = (100 / roi) * 12;
+        const years = Math.floor(totalMonths / 12);
+        const months = Math.round(totalMonths % 12);
+        updated.payBackPeriod = `${years} year${years !== 1 ? "s" : ""} ${months} month${months !== 1 ? "s" : ""}`;
+      } else {
+        updated.payBackPeriod = "";
+      }
+    }
+
+    return updated;
+  });
+};
 
   const handleRoyaltyFeeUnitChange = (e) => {
     const { value } = e.target;
@@ -87,11 +109,13 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       !ficoModel.franchiseFee ||
       !ficoModel.royaltyFee ||
       !ficoModel.interiorCost ||
-      !ficoModel.exteriorCost ||
+      !ficoModel.stockCost ||
       !ficoModel.otherCost ||
       !ficoModel.roi ||
+      !ficoModel.payBackPeriod ||
       !ficoModel.breakEven ||
-      !ficoModel.requireInvestmentCapital ||
+      !ficoModel.requireWorkingCapital ||
+      !ficoModel.marginOnSales ||
       !ficoModel.propertyType
     ) {
       alert("Please fill in all required fields for the FICO model");
@@ -118,22 +142,22 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       royaltyFee: "",
       royaltyFeeUnit: "%",
       interiorCost: "",
-      exteriorCost: "",
+      stockCost: "",
       otherCost: "",
       roi: "",
+      payBackPeriod: "",
       breakEven: "",
-      requireInvestmentCapital: "",
+      requireWorkingCapital: "",
       marginOnSales: "",
-      fixedReturn: "",
+      // fixedReturn: "",
       propertyType: "",
     });
   };
 
   const royaltyFeeUnits = [
     { value: "%", label: "%" },
-    { value: "K", label: "Thousand" },
+    { value: "K", label: "Thousands" },
     { value: "L", label: "Lakhs" },
-    { value: "Cr", label: "Crore" },
   ];
 
   const franchiseTypes = [
@@ -143,9 +167,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     "Area Franchise",
     "District Franchise",
     "State Franchise",
-    'Area Delaership',
-    'State Delaership',
-    'City Delaership'
+    // 'Area Delaership',
+    // 'State Delaership',
+    // 'City Delaership'
   ];
 
   const franchiseModels = [
@@ -153,9 +177,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     "FOCO (Franchise Owned Company Operated)",
     "FICO (Franchise Invested Company Operated)",
     "COCO (Company Owned Company Operated)",
-    "C&F (Clearing & Forwarding)",
-    "DEALERSHIP",
-    "DISTRIBUTORSHIP",
+    // "C&F (Clearing & Forwarding)",
+    // "DEALERSHIP",
+    // "DISTRIBUTORSHIP",
   ];
 
   const investmentRanges = [
@@ -173,6 +197,14 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   ];
 
   const propertyTypes = ["Owned Property", "Rented Property"];
+  const internationalExpansion = ["Yes", "No"];
+  const aidFinancing = ["Yes", "No"];
+  const statergicPlan = ["Yes", "No"];
+  const operatingProcedure = ["Yes", "No"];
+  const finacialOperating = ["Yes", "No"];
+  const marketingSales = ["Yes", "No"];
+  const agreementFranchise= ["Yes", "No"];
+  
 
   const staffRequirement = [
     "Franchise",
@@ -203,7 +235,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         {/* Franchise Details Section */}
         <Grid item xs={12}>
           
-            <Typography variant="h6" sx={{ mb: 3, color: "#ff9800" }}>
+            <Typography variant="h6" fontWeight={ 700} sx={{ mb: 3, color: "#ff9800" }}>
               Franchise Details
             </Typography>
 
@@ -215,15 +247,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             )}
 
             {/* 5-column grid layout */}
-            <Grid
-              container
-              spacing={2}
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
-                gap: 2,
-              }}
-            >
+            <Grid >
               {/* Column 1 - Investment Range */}
               <Grid item>
                 <FormControl fullWidth error={!!errors["fico[0].investmentRange"]} required>
@@ -271,7 +295,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                     value={ficoModel.franchiseModel}
                     onChange={handleFicoChange}
                     name="franchiseModel"
-                    label="Franchise Model*"
+                    label="Franchise Model"
                   >
                     {franchiseModels.map((model) => (
                       <MenuItem key={model} value={model}>
@@ -384,12 +408,12 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               <Grid item>
                 <TextField
                   fullWidth
-                  label="Exterior Cost (₹)"
-                  name="exteriorCost"
-                  value={ficoModel.exteriorCost}
+                  label="Stock Investment (₹)"
+                  name="stockCost"
+                  value={ficoModel.stockCost}
                   onChange={handleFicoChange}
-                  error={!!errors["fico[0].exteriorCost"]}
-                  helperText={errors["fico[0].exteriorCost"]}
+                  error={!!errors["fico[0].stockCost"]}
+                  helperText={errors["fico[0].stockCost"]}
                   InputProps={{
                     startAdornment: <InputAdornment position="start">₹</InputAdornment>,
                   }}
@@ -401,7 +425,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               <Grid item>
                 <TextField
                   fullWidth
-                  label="Other Cost (₹)*"
+                  label="Additional Cost (₹)"
                   name="otherCost"
                   value={ficoModel.otherCost}
                   onChange={handleFicoChange}
@@ -418,14 +442,31 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               <Grid item>
                 <TextField
                   fullWidth
-                  label="ROI (months)"
+                  label="ROI (%)"
                   name="roi"
                   value={ficoModel.roi}
                   onChange={handleFicoChange}
                   error={!!errors["fico[0].roi"]}
                   helperText={errors["fico[0].roi"]}
+                  // InputProps={{
+                  //   endAdornment: <InputAdornment position="end">months</InputAdornment>,
+                  // }}
+                  required
+                />
+              </Grid>
+
+              <Grid item>
+                <TextField
+                  fullWidth
+                  label="PayBack Period"
+                  name="payBackPeriod"
+                  value={ficoModel.payBackPeriod}
+                  onChange={handleFicoChange}
+                  error={!!errors["fico[0].payBackPeriod"]}
+                  helperText={errors["fico[0].payBackPeriod"]}
                   InputProps={{
-                    endAdornment: <InputAdornment position="end">months</InputAdornment>,
+                    readOnly: true,
+                    // endAdornment: <InputAdornment position="end">months</InputAdornment>,
                   }}
                   required
                 />
@@ -441,9 +482,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   onChange={handleFicoChange}
                   error={!!errors["fico[0].breakEven"]}
                   helperText={errors["fico[0].breakEven"]}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">months</InputAdornment>,
-                  }}
+                  // InputProps={{
+                  //   endAdornment: <InputAdornment position="end">months</InputAdornment>,
+                  // }}
                   required
                 />
               </Grid>
@@ -452,12 +493,12 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               <Grid item>
                 <TextField
                   fullWidth
-                  label="Required Investment Capital"
-                  name="requireInvestmentCapital"
-                  value={ficoModel.requireInvestmentCapital}
+                  label="Required Working Capital"
+                  name="requireWorkingCapital"
+                  value={ficoModel.requireWorkingCapital}
                   onChange={handleFicoChange}
-                  error={!!errors["fico[0].requireInvestmentCapital"]}
-                  helperText={errors["fico[0].requireInvestmentCapital"]}
+                  error={!!errors["fico[0].requireWorkingCapital"]}
+                  helperText={errors["fico[0].requireWorkingCapital"]}
                   required
                 />
               </Grid>
@@ -473,7 +514,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   required
                 />
               </Grid>
-              <Grid item>
+              {/* <Grid item>
                 <TextField
                   fullWidth
                   label="Fixed Return"
@@ -484,13 +525,13 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   helperText={errors["fico[0].fixedReturn"]}
                   required
                 />
-              </Grid>
+              </Grid> */}
 
               {/* Third Row - Column 3 - Property Type */}
               <Grid item>
                 <FormControl component="fieldset" fullWidth error={!!errors["fico[0].propertyType"]} required>
                   <FormLabel component="legend" >Property Type</FormLabel>
-                  <Box sx={{ display: "flex", gap: 2 }}>
+                  <Box sx={{ display: "flex", flexDirection: "row" }}>
                     {propertyTypes.map((type) => (
                       <FormControlLabel
                         key={type}
@@ -512,56 +553,47 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 </FormControl>
               </Grid>
 
+
               {/* Add FICO Model Button - spans remaining columns */}
               <Grid item sx={{ gridColumn: { md: "3 / span 1", xs: "1" } }}>
                 <Button
                   variant="contained"
                   onClick={handleAddFicoModel}
                   fullWidth
-                  sx={{ height: "50%", mt: 2 ,backgroundColor: "#ff9800", color: "#fff", "&:hover": { backgroundColor: "#f57c00" } }}
+                  size="large"
+                  sx={{ height: "70%" ,backgroundColor: "#ff9800", color: "#fff", "&:hover": { backgroundColor: "#f57c00" } }}
                 >
-                  Add FICO Model
+                  Add Your Model
                 </Button>
               </Grid>
             </Grid>
          
         </Grid>
       </Grid>
-
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
-          gap: 2,
-          mt: 3,
-        }}
-      >
-        {/* Franchise Network Section */}
-        <Grid item xs={12}>
-          
-            <Typography variant="h6"  color="#ff9800" sx={{ mb: 2, fontWeight: "bold" }}>
+<Divider 
+  sx={{ 
+    my: 2, // vertical margin
+    backgroundColor: 'rgba(0, 0, 0, 0.08)', // light gray color
+    height: '1px' // thin line
+  }} 
+/>
+      <Typography variant="h6" fontWeight={ 700}  color="#ff9800" sx={{ mb: 2, fontWeight: "bold" }}>
               Franchise Network
             </Typography>
+        {/* Franchise Network Section */}
+        <Grid item xs={12} display={'Grid'} gridTemplateColumns={'repeat(4, 1fr)'} gap={1}>
+          
+           
 
-            <Grid
-              container
-              spacing={2}
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-                gap: 2,
-              }}
-            >
-              <Grid item>
+          <Grid item>
                 <TextField
-                  fullWidth
+                  // fullWidth
                   label="Company Owned Outlets"
                   name="companyOwnedOutlets"
                   value={data.companyOwnedOutlets || ""}
                   onChange={handleChange}
-                  type="number"
+                  placeholder="0"
+                  inputProps={{ min: 0 }}
                   error={!!errors.companyOwnedOutlets}
                   helperText={errors.companyOwnedOutlets}
                   required
@@ -570,12 +602,13 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
               <Grid item>
                 <TextField
-                  fullWidth
+                  // fullWidth
                   label="Franchise Outlets"
                   name="franchiseOutlets"
                   value={data.franchiseOutlets || ""}
                   onChange={handleChange}
-                  type="number"
+                  placeholder="0"
+                  inputProps={{min: 0}}
                   error={!!errors.franchiseOutlets}
                   helperText={errors.franchiseOutlets}
                   required
@@ -584,7 +617,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
               <Grid item>
                 <TextField
-                  fullWidth
+                  // fullWidth
                   label="Total Outlets"
                   name="totalOutlets"
                   value={data.totalOutlets || ""}
@@ -596,91 +629,138 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   required
                 />
               </Grid>
-            </Grid>
+
+<Grid item>
+      <TextField
+        // fullWidth
+        label="Current Outlets Located At"
+        name="currentOutletsLocatedAt"
+        value={data.currentOutletsLocatedAt || ""}
+        onChange={handleChange}
+        error={!!errors.currentOutletsLocatedAt}
+        helperText={errors.currentOutletsLocatedAt}
+        required
+        // multiline
+        // minRows={2}
+      />
+    </Grid>
+            
     
-        </Grid>
-
-        {/* Support and Training Section */}
-        <Grid item xs={12}>
-          
-            <Typography variant="h6"  color="#ff9800" sx={{ mb: 2, fontWeight: "bold" }}>
-              Support and Training
-            </Typography>
-
-            <Grid
-              container
-              spacing={2}
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-                gap: 2,
-              }}
-            >
-              <Grid item>
-                <FormControl fullWidth error={!!errors.staffRequirement} required>
-                  <InputLabel>Staff Requirement</InputLabel>
-                  <Select
-                    value={data.staffRequirement || ""}
-                    onChange={handleChange}
-                    name="staffRequirement"
-                    label="Staff Requirement"
-                    >
-                      {staffRequirement.map((requirement) => (
-                        <MenuItem key={requirement} value={requirement}>
-                          {requirement}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {errors.staffRequirement && (
-                    <FormHelperText error>{errors.staffRequirement}</FormHelperText>
+               
+              
+            </Grid>
+         <Grid mt={5}mb={5}display={'Grid'} gridTemplateColumns={'repeat(2, 1fr)'} >
+             <Grid >
+                <FormControl component="fieldset" fullWidth error={!!errors.internationalExpansion} required>
+                  <FormLabel component="legend" >Are You Looking For Internation Expansion</FormLabel>
+                  <Box sx={{ display: "flex", gap: 2 }}>
+                    {internationalExpansion.map((type) => (
+                      <FormControlLabel
+                        key={type}
+                        value={type}
+                        control={<Radio />}
+                        label={type}
+                        checked={data.internationalExpansion === type}
+                        onChange={() =>
+                          handleChange({
+                            target: { name: "internationalExpansion", value: type },
+                          })
+                        }
+                      />
+                    ))}
+                  </Box>
+                  {errors.internationalExpansion && (
+                    <FormHelperText error>{errors.internationalExpansion}</FormHelperText>
                   )}
                 </FormControl>
               </Grid>
 
               <Grid item>
-                <FormControl fullWidth error={!!errors.staffTraining} required>
-                  <InputLabel>Staff Training</InputLabel>
-                  <Select
+                <FormControl component="fieldset" fullWidth error={!!errors.aidFinancing} required>
+                  <FormLabel component="legend" >Do You Provide Aid In Financing</FormLabel>
+                  <Box sx={{ display: "flex", gap: 2 }}>
+                    {aidFinancing.map((type) => (
+                      <FormControlLabel
+                        key={type}
+                        value={type}
+                        control={<Radio />}
+                        label={type}
+                        checked={data.aidFinancing === type}
+                        onChange={() =>
+                          handleChange({
+                            target: { name:"aidFinancing", value: type },
+                          })
+                        }
+                      />
+                    ))}
+                  </Box>
+                  {errors.aidFinancing && (
+                    <FormHelperText error>{errors.aidFinancing}</FormHelperText>
+                  )}
+                </FormControl>
+              </Grid>
+         </Grid>
+ 
+<Typography variant="h6"  color="#ff9800" sx={{ mb: 2, fontWeight: "bold" }}>
+              Support and Training
+            </Typography>
+        {/* Support and Training Section */}
+        <Grid display={'Grid'} gridTemplateColumns={'repeat(4, 1fr)'} gap={1} item xs={12}>
+          
+            
+         
+              <Grid item>
+                <TextField
+                select
+                  label="Requirement Support"
+                  name="requirementSupport"
+                  value={data.requirementSupport || ""}
+                  onChange={handleChange}
+                  error={!!errors.requirementSupport}
+                  helperText={errors.requirementSupport}
+                  required
+                  sx={{ minWidth:"31vh" }}
+                >
+                  <MenuItem value="Yes">Yes</MenuItem>
+                  <MenuItem value="No">No</MenuItem>
+                </TextField>
+              </Grid>
+
+              <Grid item>
+                <TextField
+                select
+                  label="Staff Training"
+                  name="staffTraining"
                   value={data.staffTraining || ""}
                   onChange={handleChange}
-                  name="staffTraining"
-                  label="Staff Training"
-                  >
-                    {staffTraining.map((training) => (
-                      <MenuItem key={training} value={training}>
-                        {training}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                {errors.staffTraining && (
-                  <FormHelperText error>{errors.staffTraining}</FormHelperText>
-                )}
+                  error={!!errors.staffTraining}
+                  helperText={errors.staffTraining}
+                  required
+                  sx={{ minWidth:"31vh" }}
+                >
+                  <MenuItem value="Yes">Yes</MenuItem>
+                  <MenuItem value="No">No</MenuItem>
+                </TextField>
               </Grid>
-
               <Grid item>
-                <FormControl fullWidth error={errors.support} required>
-                  <InputLabel>Support</InputLabel>
-                  <Select
-                  value={data.support}
+                <TextField
+                select
+                  label="Staff Recruitment"
+                  name="staffRecruitment"
+                  value={data.staffRecruitment || ""}
                   onChange={handleChange}
-                  name="support"
-                  label="Support"
-                  >
-                    {support.map((support) => (
-                      <MenuItem key={support} value={support}>
-                        {support}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                {errors.support && (
-                  <FormHelperText error>{errors.support}</FormHelperText>
-                )}
+                  error={!!errors.staffRecruitment}
+                  helperText={errors.staffRecruitment}
+                  required
+                  sx={{ minWidth:"31vh" }}
+                >
+                  <MenuItem value="Yes">Yes</MenuItem>
+                  <MenuItem value="No">No</MenuItem>
+                </TextField>
               </Grid>
 
               <Grid item>
-                <FormControl fullWidth error={!!errors.agreementPeriod} required>
+                <FormControl sx ={{ minWidth:"31vh" }}  error={!!errors.agreementPeriod} required>
                   <InputLabel>Agreement Period</InputLabel>
                   <Select
                     value={data.agreementPeriod || ""}
@@ -700,8 +780,162 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 </FormControl>
               </Grid>
             </Grid>
+        
+      <Divider 
+  sx={{ 
+    my: 2, // vertical margin
+    backgroundColor: 'rgba(0, 0, 0, 0.08)', // light gray color
+    height: '1px' // thin line
+  }} 
+/>
+      <Grid item xs={12}>
+          
+            <Typography variant="h6"  color="#ff9800" sx={{ mb: 2, fontWeight: "bold" }}>
+              Business Model
+            </Typography>
+
+            <Grid
+              container
+              spacing={2}
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+                gap: 2,
+              }}
+            >
+               <Grid item>
+                <FormControl component="fieldset" fullWidth error={!!errors.statergicPlan} required>
+                  <FormLabel component="legend" >Do you have a Strategic Business plan? to drive your business</FormLabel>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    {statergicPlan.map((type) => (
+                      <FormControlLabel
+                        key={type}
+                        value={type}
+                        control={<Radio />}
+                        label={type}
+                        checked={data.statergicPlan === type}
+                        onChange={() =>
+                          handleChange({
+                            target: { name: "statergicPlan", value: type },
+                          })
+                        }
+                      />
+                    ))}
+                  </Box>
+                  {errors.statergicPlan && (
+                    <FormHelperText error>{errors.statergicPlan}</FormHelperText>
+                  )}
+                </FormControl>
+                
+              </Grid>
+               <Grid item>
+                <FormControl component="fieldset" fullWidth error={!!errors.operatingProcedure} required>
+                  <FormLabel component="legend" >Do you have a Standard Operating procedure for your franchise business?</FormLabel>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    {operatingProcedure.map((type) => (
+                      <FormControlLabel
+                        key={type}
+                        value={type}
+                        control={<Radio />}
+                        label={type}
+                        checked={data.operatingProcedure === type}
+                        onChange={() =>
+                          handleChange({
+                            target: { name: "operatingProcedure", value: type },
+                          })
+                        }
+                      />
+                    ))}
+                  </Box>
+                  {errors.operatingProcedure && (
+                    <FormHelperText error>{errors.operatingProcedure}</FormHelperText>
+                  )}
+                </FormControl>
+                
+              </Grid>
+               <Grid item>
+  <FormControl component="fieldset" fullWidth error={!!errors.finacialOperating} required>
+    <FormLabel component="legend">
+      Do you have a Financial Operating procedure for your franchise business?
+    </FormLabel>
+    <Box sx={{ display: "flex", flexDirection: "column" }}>
+      {finacialOperating.map((type) => (
+        <FormControlLabel
+          key={type}
+          value={type}
+          control={<Radio />}
+          label={type}
+          checked={data.finacialOperating === type}
+          onChange={() =>
+            handleChange({
+              target: { name: "finacialOperating", value: type },
+            })
+          }
+        />
+      ))}
+    </Box>
+    {errors.finacialOperating && (
+      <FormHelperText error>{errors.finacialOperating}</FormHelperText>
+    )}
+  </FormControl>
+</Grid>
+               <Grid item>
+                <FormControl component="fieldset" fullWidth error={!!errors.marketingSales} required>
+                  <FormLabel component="legend" >Do you have a Marketing and Sales plan to expand across India?</FormLabel>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    {marketingSales.map((type) => (
+                      <FormControlLabel
+                        key={type}
+                        value={type}
+                        control={<Radio />}
+                        label={type}
+                        checked={data.marketingSales === type}
+                        onChange={() =>
+                          handleChange
+                          ({
+                            target: { name: "marketingSales", value: type },
+                          })
+                        }
+                      />
+                    ))}
+                  </Box>
+                  {errors.marketingSales && (
+                    <FormHelperText error>{errors.marketingSales}</FormHelperText>
+                  )}
+                </FormControl>
+                
+              </Grid>
+               <Grid item>
+                <FormControl component="fieldset" fullWidth error={!!errors.agreementFranchise} required>
+                  <FormLabel component="legend" >Do you have a customized franchise agreement?</FormLabel>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    {agreementFranchise.map((type) => (
+                      <FormControlLabel
+                        key={type}
+                        value={type}
+                        control={<Radio />}
+                        label={type}
+                        checked={data.agreementFranchise === type}
+                        onChange={() =>
+                          handleChange({
+                            target: { name: "agreementFranchise", value: type },
+                          })
+                        }
+                      />
+                    ))}
+                  </Box>
+                  {errors.agreementFranchise && (
+                    <FormHelperText error>{errors.agreementFranchise}</FormHelperText>
+                  )}
+                </FormControl>
+                
+              </Grid>
+
+              
+            </Grid>
+    
         </Grid>
-      </Grid>
+      
     </Box>
   );
 };

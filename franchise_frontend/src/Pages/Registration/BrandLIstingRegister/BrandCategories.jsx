@@ -332,6 +332,7 @@ export const categories = [
     name: "Food & Beverages",
     children: [
       {
+        groupId:"A",
         name: "Food Franchises",
         children: [
           "QSR(Quick Service Restaurants)",
@@ -348,6 +349,7 @@ export const categories = [
         ],
       },
       {
+        groupId:"B",
         name: "Beverage Franchises",
         children: ["Coffee & Tea Cafes",
            "Juice & Smoothie Bars",
@@ -361,7 +363,8 @@ export const categories = [
            "Sports / Energy Beverages",
           ],
       },
-      {
+      {  
+        groupId:"C",
         name: "Dessert & Bakery",
         children: [
           "Bakeries & Patisseries",
@@ -376,6 +379,7 @@ export const categories = [
         ],
       },
       {
+        groupId:"D",
         name: "Cloud Kitchens & Delivery",
         children: [
           "Multi-Brand Cloud Kitchens",
@@ -389,7 +393,8 @@ export const categories = [
           "Global Cuisine Cloud Concepts",
         ],
       },
-      {
+      {  
+        groupId:"E",
         name: "Food Trucks & Kiosks Franchises",
         children: [
           "Street Food Vans",
@@ -404,6 +409,7 @@ export const categories = [
         ],
       },
       {
+        groupId:"F",
         name: "Food Equipment & Machinery Franchises",
         children: [
           "Commercial Kitchen Equipment",
@@ -420,6 +426,7 @@ export const categories = [
         ],
       },
       {
+        groupId:"G",
         name: "Catering & Institutional Food ",
         children: [
           "Corporate & Institutional Catering",
@@ -434,6 +441,7 @@ export const categories = [
         ],
       },
       {
+        groupId:"H",
         name: "Organic, vegan & Health Foods",
         children: [
           "Vegan & Plant-Based Cafes",
@@ -450,6 +458,7 @@ export const categories = [
         ],
       },
       {
+        groupId:"I",
         name: "Regional & Ethnic Cuisine",
         children: [
           "South Indian",
@@ -466,6 +475,7 @@ export const categories = [
         ],
       },
       {
+        groupId:"J",
         name: "F & B Franchise Stores",
         children: [
           "Grocery & Provisional Stores",

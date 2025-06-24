@@ -24,11 +24,13 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../Components/Footers/Footer";
-import Navbar from "../../Components/Navbar/NavBar";
+import { useDispatch } from "react-redux";
+import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 
 
 const InvestorDashboard = () => {
   const navigate = useNavigate();
+  const dispatch =useDispatch();
   const theme = useTheme();
   const location = useLocation();
 
@@ -155,9 +157,18 @@ const InvestorDashboard = () => {
               
               <NavItem 
                 button 
-                component={RouterLink} 
-                to="/investordashboard/manageProfile"
-                className={location.pathname === '/investordashboard/manageProfile' ? 'active' : ''}
+                // component={RouterLink} 
+                onClick={()=>{
+                  dispatch(showLoading());
+                
+                navigate("/investordashboard/manageProfile" );
+                 setTimeout(() => {
+                  dispatch(hideLoading());
+                 } , 5000);
+                }}
+
+                className={location.pathname ===  '/investordashboard/manageProfile' ? 'active' : ''}
+                 
               >
                 <ListItemIcon sx={{ minWidth: 40, color: colors.darkText }}>
                   <ProfileIcon />
@@ -196,9 +207,9 @@ const InvestorDashboard = () => {
                   primaryTypographyProps={{ color: colors.darkText }}
                 />
               </NavItem>
-              <NavItem 
+              {/* <NavItem 
                 button 
-                onClick={() => { /* handle logout */ }}
+                onClick={() => { /* handle logout 
                 sx={{
                   '&:hover': {
                     backgroundColor: colors.lightOrange + '20',
@@ -218,7 +229,7 @@ const InvestorDashboard = () => {
                   primary="Logout" 
                   primaryTypographyProps={{ color: colors.darkText }}
                 />
-              </NavItem>
+              </NavItem> */}
 
               {/* <NavItem 
                 button 

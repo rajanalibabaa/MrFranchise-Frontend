@@ -13,12 +13,13 @@ import FilterDropdowns from "../../Components/Navbar/FilterDropdownsData";
 import { useDispatch } from "react-redux";
 import Footer from "../../Components/Footers/Footer.jsx";
 import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice.jsx";
-import { AnimatePresence } from "framer-motion";
+
+
 // Dynamic Components - Import all your video sections
 const dynamicComponents = {
   TopBrandThreevdocards: React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")
-  ), //first video section
+  ), //first video section0
   TopCafeBrandsFranchise: React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
   ), //3rd video section
@@ -44,6 +45,9 @@ const dynamicComponents = {
     import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
   ), //last video section
 };
+
+
+
 
 // Configuration object for the entire page
 const pageConfig = {
@@ -155,13 +159,13 @@ const pageConfig = {
 const bannerTexts = [
   {
     title: {
-      text: "1000+ Food Brands. One Platform. Endless Possibilities",
+      text: "1000+ Food Brands One Platform Endless Possibilities",
       gradient:
         "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
-      text: "Discover a universe of F&B franchise opportunities - from quick service restaurants to gourmet cafes - all under on powerful portal.",
+          text: "Discover A Universe Of F&B Franchise Opportunities From Quick Service Restaurants To Gourmet Cafes All Under On Powerful Portal",
       highlight: {
         text: "F&B franchise opportunities",
         color: "#ff9800",
@@ -171,12 +175,12 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "Turn Your Investment into a Tasteful Venture",
+      text: "Turn Your Investment Into A Tasteful Venture",
       gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
-      text: "Explore curated restaurant and cafe franchises with proven models designed for ROI, stability, and low opertational hassle.",
+      text: "Explore Curated Restaurant And Cafe Franchises With Proven Models Designed For ROI Stability And Low Opertational Hassle",
       highlight: {
         text: "proven models",
         color: "#ff9800",
@@ -186,16 +190,17 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "India's #1 F&B Franchise Marketplace – Your Food Business Starts Here",
+      text: "India's #1 F&B Franchise Marketplace Your Food Business Starts Here",
      gradient:
         "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
-      text: "From startup food kiosks to international food chains, we have everything you need to start your food franchise journey.",
+      text: "From Startup Food kiosks To International Food Chains We Have Everything You Need To Start Your Food Franchise Journey",
       highlight: {
         text: "food franchise journey",
         color: "#ff9800",
+        lineHeight: "1.5",
         fontWeight: "bold"
       }
     }
@@ -204,7 +209,7 @@ const bannerTexts = [
     title: {
       text: "Serve Success Hot - Choose the Right F&B Franchise Today",
        gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
       text: "Invest in hot-selling food concepts with hight demand, fast scalability, and support from trusted brands.",
@@ -220,7 +225,7 @@ const bannerTexts = [
       text: "From Local Taste to Global Plates - Start Your Food Business Now",
        gradient:
         "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
       text: "Franchise options available in street food, bakeries, ice cream parlors, multicusine restaurants, and more.",
@@ -235,7 +240,7 @@ const bannerTexts = [
     title: {
       text: "Low Investment . High Appetite for Growth",
      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
       text: "Start from just ₹5 Lakhs with multiple profitable options in cafes, cloud kitchens, and food trucks.",
@@ -248,10 +253,10 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "Franchise a Restaurant. Own a Café. Lead a Cloud Kitchen",
+      text: "Franchise a Restaurant. Own a Cafe Lead a Cloud Kitchen",
        gradient:
         "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
       text: "Find franchise businesses across every food format to suit your budget, location, and business dream.",
@@ -266,7 +271,7 @@ const bannerTexts = [
     title: {
       text: "F&B Franchise Made Easy with MrFranchise.in",
       gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
       text: "Step-by-step guidance, brand comparisons, and expert consultation to help you confidently invest.",
@@ -282,7 +287,7 @@ const bannerTexts = [
       text: "No Experience? No Problem! Proven Food Franchise Models Await You",
       gradient:
         "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
       text: "Get full training, support, marketing tools, and setup assistance with our zero-hassle franchise options.",
@@ -295,9 +300,9 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "Your Food Franchise Future Starts at foodandbeverage.mrfranchise.in",
+      text: "Your Food Franchise Future Starts At foodandbeverage MrFranchise.in",
       gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" }
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
       text: "The one-stop portal for serious F&B investors looking to explore, compare, and close franchise deals.",
@@ -311,14 +316,13 @@ const bannerTexts = [
 ];
 
 const HomeBannerSec = () => {
+  const theme = useTheme();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
-  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  // const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const controls = useAnimation();
   const dispatch = useDispatch();
-
   useEffect(() => {
     const navEntries = performance.getEntriesByType("navigation");
     const isReload = navEntries[0]?.type === "reload";
@@ -338,7 +342,7 @@ const HomeBannerSec = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setBannerIndex((prev) => (prev + 1) % bannerTexts.length);
-    }, 10000);
+    }, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -399,8 +403,7 @@ const HomeBannerSec = () => {
     );
   };
   const currentText = bannerTexts[bannerIndex];
-  const { text, highlight } = currentText.subtitle;
-  const parts = text.split(highlight.text);
+  // const { text, highlight } = currentText.subtitle;
   return (
     <>
  
@@ -412,8 +415,8 @@ const HomeBannerSec = () => {
 
       {/* Hero Banner */}
       <Box
-        mt={10}
-        maxWidth={"xl"}
+        mt={9}
+        // maxWidth={"xl"}
         sx={{
           background: `linear-gradient(${pageConfig.heroBanner.overlayColor}), url(${pageConfig.heroBanner.backgroundImage})`,
           backgroundSize: "cover",
@@ -424,7 +427,7 @@ const HomeBannerSec = () => {
           position: "relative",
           overflow: "hidden",
           color: "white",
-          minHeight: isMobile ? "80vh" : "10vh",
+          minHeight: isMobile ? "80vh" : "40vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -451,17 +454,17 @@ const HomeBannerSec = () => {
           },
         }}
       >
+        
         <Container
-          maxWidth="lg"
+          // maxWidth="lg"
           sx={{
             position: "relative",
             zIndex: 2,
-            textAlign: isMobile ? "center" : "left",
+            textAlign: isMobile ? "center" : "center",
             
           }}
         >
-          <AnimatePresence mode="wait">
-          <motion.div
+            <motion.div
            key={bannerIndex}
     initial={{ opacity: 0, x: 80 }}
       animate={{ opacity: 1, x: 0 }}
@@ -470,58 +473,45 @@ const HomeBannerSec = () => {
   >
             {/* <motion.div variants={pageConfig.animations.item}> */}
               <Typography
-                component="div"
-                sx={{
-                  fontWeight: 200,
-                  textAlign: "center",
-                  color: "white",
-                  mb: 1,
-                  lineHeight: 1.2,
-                  fontSize: isMobile
-                    ? currentText.title.fontSize.mobile
-                    : isTablet
-                    ? currentText.fontSize.tablet
-                    : currentText.title.fontSize.desktop,
-                }}
+                component="text"
+                mb={3}
+                // maxWidth={isMobile ? "100%" : "100%"}
+                // sx={{
+                //   fontWeight: 200,
+                //   textAlign: "center",
+                //   color: "white",
+                //   mb: 1,
+                //   lineHeight: 1,
+                //   fontSize: isMobile ? "2rem" : "3rem",
+                // }}
               >
                 <Box
                   sx={{
-                    background: "white",
+                    background: "linear-gradient(45deg,#ff9800,white,rgb(155, 249, 33))",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     textShadow: "none",
                     display: "inline",
+                    fontSize: isMobile ? "2rem" : "2.2rem",
                     fontWeight: 900,
                     px: 1,
                   }}
                 >
                   {currentText.title.text}
                 </Box>
-                <Box
-                  component="span"
-                  sx={{
-                    background: currentText.title.gradient,
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    display: "inline",
-                    fontWeight: 800,
-                    px: 1,
-                  }}
-                >
-                  <br />
-                  Food & Beverage
-                </Box>
+               
               </Typography>
             </motion.div>
 
             <motion.div variants={pageConfig.animations.item}>
               <Typography
                 variant={isMobile ? "h6" : "subtitle2"}
+                mt={3}
                 sx={{
                   textAlign: "center",
                   color: "rgba(255,255,255,0.9)",
                   fontWeight: 300,
-                  mb: 1,
+                  mb: 3,
                   maxWidth: "800px",
                   mx: "auto",
                   lineHeight: 1,
@@ -555,20 +545,9 @@ const HomeBannerSec = () => {
                 }
               </Typography>
             </motion.div>
-             </AnimatePresence> 
-             {/* </motion.div> */}
-
-            <motion.div
-              variants={pageConfig.animations.item}
-              style={{
-                marginTop: "2rem",
-                width: isMobile ? "100%" : "85%",
-                marginLeft: "auto",
-                marginRight: "auto",
-              }}
-            >
+      
+          
               <FilterDropdowns />
-            </motion.div>
          
          
         </Container>

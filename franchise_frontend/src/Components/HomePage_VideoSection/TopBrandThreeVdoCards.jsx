@@ -39,7 +39,7 @@ function TopBrandVdoCards() {
   const timeoutRef = useRef(null);
   const videoRefs = useRef([]);
   const [showLogin, setShowLogin] = useState(false);
-  
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -111,7 +111,6 @@ function TopBrandVdoCards() {
     });
   }, [brands]);
 
-
   useEffect(() => {
     startAutoSlide();
     return () => clearTimeout(timeoutRef.current);
@@ -152,7 +151,12 @@ function TopBrandVdoCards() {
 
   if (brandsLoading && brands.length === 0) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight={200}
+      >
         <CircularProgress />
       </Box>
     );
@@ -199,7 +203,7 @@ function TopBrandVdoCards() {
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-    >
+    > 
       {/* Header and navigation buttons */}
       <Box
         sx={{
@@ -230,7 +234,7 @@ function TopBrandVdoCards() {
           Premium Franchise Brands
         </Typography>
 
-        {!isMobile && (
+        {/* {!isMobile && (
           <Box sx={{ display: "flex", gap: 1 }}>
             <Button
               variant="outlined"
@@ -274,7 +278,7 @@ function TopBrandVdoCards() {
               Next Brand
             </Button>
           </Box>
-        )}
+        )} */}
       </Box>
 
       {/* Brands slider */}
@@ -330,6 +334,98 @@ function TopBrandVdoCards() {
                   }}
                   onClick={() => togglePlayPause(0)}
                 >
+                  {!isMobile && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 16,
+                        left: 16,
+                        zIndex: 2,
+                      }}
+                    >
+                      <Button
+                        variant="outlined"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePrev();
+                        }}
+                        startIcon={<ChevronLeft />}
+                        sx={{
+                          textTransform: "none",
+                          color:
+                            theme.palette.mode === "dark" ? "#fff" : "#fff",
+                          borderColor:
+                            theme.palette.mode === "dark"
+                              ? "#43ea5e"
+                              : "#43ea5e",
+                          "&:hover": {
+                            borderColor:
+                              theme.palette.mode === "dark"
+                                ? "#ff9800"
+                                : "#e65100",
+                            backgroundColor:
+                              theme.palette.mode === "dark"
+                                ? "rgba(255, 167, 38, 0.08)"
+                                : "rgba(245, 124, 0, 0.08)",
+                          },
+                        }}
+                      >
+                        Previous
+                      </Button>
+                    </Box>
+                  )}
+
+                  {!isMobile && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 16,
+                        right: 16,
+                        zIndex: 2,
+                      }}
+                    >
+                      <Button
+                        variant="outlined"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleNext();
+                        }}
+                        endIcon={<ChevronRight />}
+                        sx={{
+                          textTransform: "none",
+                          // background:
+                          //   theme.palette.mode === "dark"
+                          //     ? "linear-gradient(45deg, #ffb74d, #ff9800)"
+                          //     : "linear-gradient(45deg, #f57c00, #ff9800)",
+                          // "&:hover": {
+                          //   background:
+                          //     theme.palette.mode === "dark"
+                          //       ? "linear-gradient(45deg, #ff9800, #ffb74d)"
+                          //       : "linear-gradient(45deg, #ff9800, #f57c00)",
+                          // },
+                          color:
+                            theme.palette.mode === "dark" ? "#fff" : "#fff",
+                          borderColor:
+                            theme.palette.mode === "dark"
+                              ? "#ffb74d"
+                              : "#f57c00",
+                          "&:hover": {
+                            borderColor:
+                              theme.palette.mode === "dark"
+                                ? "#43ea5e"
+                                : "#43ea5e",
+                            backgroundColor:
+                              theme.palette.mode === "dark"
+                                ? "rgba(67, 234, 94, 0.15)" // light green for dark mode
+                                : "rgba(67, 234, 94, 0.10)",
+                          },
+                        }}
+                      >
+                        Next Brand
+                      </Button>
+                    </Box>
+                  )}
+
                   <video
                     ref={(el) => (videoRefs.current[0] = el)}
                     loading="lazy"
@@ -367,13 +463,14 @@ function TopBrandVdoCards() {
                   <Stack
                     direction={{ xs: "column", sm: "row" }}
                     alignItems={{ xs: "flex-start", sm: "center" }}
-                    spacing={2}
+                    ml={{xs:3}}
+                    spacing={1}
                     sx={{ flex: 1, minWidth: 0 }}
                   >
                     {/* Avatar and brand name */}
                     <Stack
                       direction="row"
-                      spacing={2}
+                      spacing={1}
                       alignItems="center"
                       sx={{ minWidth: 0, flex: 1 }}
                     >
@@ -422,13 +519,18 @@ function TopBrandVdoCards() {
                       </Box>
                     </Stack>
 
+               <Stack
+                    direction={{ xs: "row" }}
+                    alignItems={{ xs: "flex-start", sm: "center" }}
+                    spacing={5}
+                    sx={{ flex: 1, minWidth: 0 }}
+                  >
+
                     {/* Key facts */}
                     <Stack
-                      marginTop={0}
-                      direction="row"
-                      spacing={2}
-                      flexWrap="wrap"
-                      justifyContent={{ xs: "flex-start", sm: "center" }}
+                      direction="column"
+                      spacing={1}
+                     
                     >
                       <Fact
                         label="Investment"
@@ -500,6 +602,7 @@ function TopBrandVdoCards() {
                         </IconButton>
                       </Tooltip>
                     </Stack>
+                    </Stack>
                   </Stack>
                 </CardContent>
               </Card>
@@ -557,7 +660,7 @@ function TopBrandVdoCards() {
             display: "flex",
             flexDirection: "column",
             gap: isMobile ? 3 : isTablet ? 3 : 4,
-            minWidth: isMobile ? "100%" : "30%",
+            minWidth: isMobile ? "100%" : "32%",
           }}
         >
           {nextBrands.map((brand, i) => (
@@ -678,10 +781,13 @@ function TopBrandVdoCards() {
                             variant="h6"
                             color="#7ad03a"
                             fontWeight="bold"
-                            noWrap
+                            noWrap={false}
                             sx={{
                               flex: 1,
                               minWidth: 0,
+                              whiteSpace: "normal", // allow wrapping
+                              wordBreak: "break-word", // break long words if needed
+                              overflowWrap: "break-word", // wraps at word boundaries
                             }}
                           >
                             {brand.personalDetails?.brandName || brand.title}
@@ -835,10 +941,10 @@ function TopBrandVdoCards() {
           ))}
         </Box>
       </Box>
-      
+
       {/* Brand Details Dialog */}
       <BrandDetailsDialog />
-      
+
       {/* Login Dialog */}
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
