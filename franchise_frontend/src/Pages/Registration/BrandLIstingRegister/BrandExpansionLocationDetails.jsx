@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Grid, Box, Typography, RadioGroup, FormControlLabel, Radio, Button, Checkbox, 
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Table, TableBody, TableCell, TableContainer,  TableRow, Paper,
   Divider, FormGroup, Backdrop, CircularProgress, IconButton, Snackbar, Alert
 } from '@mui/material';
 import axios from 'axios';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { X } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
 // Cache for API responses
@@ -64,6 +64,7 @@ function BrandExpansionLocationDetails({ data = {}, errors = {}, onChange }) {
 
   const [isInternationalExpansion, setIsInternationalExpansion] = useState(null);
   const [error, setError] = useState(null);
+  console.log("BrandExpansionLocationDetails data:",error);
 
   // Initialize form data structure
   const [formData, setFormData] = useState({
@@ -660,7 +661,7 @@ function BrandExpansionLocationDetails({ data = {}, errors = {}, onChange }) {
                           <Checkbox
                             checked={selections.cities.includes(city)}
                             onChange={(e) => {
-                              const isChecked = e.target.checked;
+                              const isChecked = e.target.checked;f=
                               setSelections(prev => ({
                                 ...prev,
                                 cities: isChecked 
@@ -807,7 +808,8 @@ function BrandExpansionLocationDetails({ data = {}, errors = {}, onChange }) {
                               onClick={() => removeLocationItems(type, locationType, field, index)}
                               sx={{ ml: 1 }}
                             >
-                              <DeleteIcon fontSize="small" />
+                              <X size={16} />
+
                             </IconButton>
                           </Box>
                         ) : (

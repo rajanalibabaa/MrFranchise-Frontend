@@ -157,8 +157,7 @@ const initialFormData = {
     pancardNumber: "",
   },
   franchiseDetails: {
-    establishedYear: "",
-    franchiseSinceYear: "",
+ 
     brandCategories: {
       groupId: "",
       main: "",
@@ -167,20 +166,19 @@ const initialFormData = {
     },
     brandDescription: "",
     fico: [],
+    establishedYear: "",
+    franchiseSinceYear: "",
     companyOwnedOutlets: "",
     franchiseOutlets: "",
     totalOutlets: "",
     aidFinancing: "",
-    recruitmentSupport: "",
-    staffRecruitment: "",
-    staffTraining: "",
-    operationalTraining: "",
-    advertisementAndMarketing: "",
-    strategicPlan: "",
-    operatingProcedure: "",
-    financialOperating: "",
-    marketingSales: "",
-    agreementFranchise: "",
+    franchiseDevelopment: "",
+    consultationOrAssistance: "",
+    trainingSupport: "",
+    marketingSupport: "",
+    otherSupport: "",
+    uniqueSellingPoints: "",
+   
   },
 //   expansionLocationDetails: {
 //     currentOutletsLocatedAt: [
@@ -286,6 +284,41 @@ const BrandRegisterForm = () => {
     return errors;
   };
 
+  const validateExpansionLocationDetails = (data) => {
+    const errors = {};
+    // if (!data.currentOutletsLocatedAt || data.currentOutletsLocatedAt.length === 0) {
+    //   errors.currentOutletsLocatedAt = "Current outlets located at is required";
+    // }
+    // if (!data.expansionLocations || data.expansionLocations.length === 0) { 
+    //   errors.expansionLocations = "Expansion locations are required";
+    // } else {
+    //   data.expansionLocations.forEach((location, index) => {
+    //     if (!location.type) {
+    //       errors[`expansionLocations.${index}.type`] = "Location type is required";
+    //     }
+
+    //     if (!location.location || !location.location.country) {
+    //       errors[`expansionLocations.${index}.location.country`] =
+    //         "Country is required";
+    //     }
+    //     if (!location.location || !location.location.state) {
+    //       errors[`expansionLocations.${index}.location.state`] =
+
+    //         "State is required";
+    //     }
+    //     if (!location.location || !location.location.city) {
+    //       errors[`expansionLocations.${index}.location.city`] =
+    //         "City is required";
+    //     } 
+    //     if (!location.location || !location.location.district) {
+    //       errors[`expansionLocations.${index}.location.district`] =
+    //         "District is required";
+    //     }
+    //   });
+    // }
+    return errors;
+  };
+
   const validateStep = useCallback(
     (step) => {
       const errors = {};
@@ -305,19 +338,25 @@ const BrandRegisterForm = () => {
           isValid = Object.keys(errors.franchiseDetails).length === 0;
           break;
         case 2:
+          errors.expansionLocationDetails =  validateExpansionLocationDetails(
+            formData.expansionLocationDetails || {}
+          );
+          isValid = Object.keys(errors.expansionLocationDetails).length === 0;
+          break;
+        case 3:
           errors.uploads = validateUploadsDetails(formData.uploads || {});
           isValid = Object.keys(errors.uploads).length === 0;
           break;
         default:
           break;
-      }
+      } 
 
       setValidationErrors(errors);
 
       if (!isValid) {
         setSnackbar({
           open: true,
-          message: "Please fill all required fields correctly",
+          message: "Please fill all required field correctly",
           severity: "error",
         });
       }
@@ -1225,7 +1264,7 @@ const BrandRegisterForm = () => {
           display: "flex",
           flexDirection: "column",
           height: "100vh",
-          mt: 8,
+       
         }}
       >
         <Box
@@ -1234,7 +1273,7 @@ const BrandRegisterForm = () => {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            p: 2,
+            p: 1,
           }}
         >
           <Box>
@@ -1251,7 +1290,7 @@ const BrandRegisterForm = () => {
                 </Step>
               ))}
               <Toolbar sx={{ justifyContent: "flex-end" }}>
-                <FormControl size="small" sx={{ minWidth: 120 }}>
+                <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
                   <Select
                     value={formData.brandDetails.country}
                     onChange={handleCountryChange}
@@ -1405,7 +1444,7 @@ const BrandRegisterForm = () => {
           </Alert>
         </Snackbar>
       </Box>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 };

@@ -46,18 +46,29 @@ import LanguageIcon from '@mui/icons-material/Language';
 import FlagIcon from '@mui/icons-material/Flag';
 import { Editor } from "@tinymce/tinymce-react";
 import { width } from "@mui/system";
+import { fetchPincodeDetails } from "../../../Utils/PincodeFetch.jsx";
 
 // const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 // const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
-  const formData = {
+  const [showWhatsappSnackbar, setShowWhatsappSnackbar] = useState(false);
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
+
+  // const [phoneVerifyStatus, setPhoneVerifyStatus] = useState({
+  //   mobileNumber: {
+  //     loading: false,
+  //     verified: false,
+  //   },
+  // });
+    const formData = {
     companyName: "",
     brandName: "",
     brandCategories: [],
     expansionLocation: [],
     ...data,
   };
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -69,7 +80,40 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   // Updated Expansion Location State
   const [openLocationModal, setOpenLocationModal] = useState(false);
  
+ useEffect(() => {
+    if (data.mobileNumber?.length === 10 && !whatsappEnabled && !data.whatsappNumber) {
+      setShowWhatsappSnackbar(true);
+    }
+  }, [data.mobileNumber, whatsappEnabled, data.whatsappNumber]);
 
+  useEffect(()=>{
+    const fetchLocationDetails = async () => {
+      if(data.pincode && data.pincode.length === 6  ) {
+        setLoadingPincode(true);
+        setPincodeError(null);
+        try {
+          const locationDetails =await fetchPincodeDetails(data.pincode);
+          onChange({
+            state: locationDetails.state,
+            city: locationDetails.city,
+            district: locationDetails.district
+          })
+          
+        } catch (error) {
+          setPincodeError('Invalid Pincode or no data found');
+          
+        }finally{
+          setLoadingPincode(false);
+        }
+
+      }
+      
+    };
+    const timer =setTimeout(() => {
+      fetchLocationDetails();
+    }, 1000);
+    return () => clearTimeout(timer);
+  },[data.pincode]);
 
 const handleMainCategoryChange = (e) => {
   const mainCat = e.target.value;
@@ -153,6 +197,7 @@ const handleAddCategory = () => {
     message: "",
     severity: "success",
   });
+  
 
   // Handle OTP verification dialog open/close
   const handleVerificationDialog = (field, open) => {
@@ -368,7 +413,7 @@ const handleAddCategory = () => {
         sx={{
           mt: 3,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}
@@ -511,6 +556,7 @@ const handleAddCategory = () => {
             helperText={errors.whatsappNumber}
             variant="outlined"
             size="medium"
+            disabled = {!whatsappEnabled}
             inputProps={{ maxLength: 10 }}
             placeholder="Enter 10 digit number"
             InputProps={{
@@ -518,6 +564,11 @@ const handleAddCategory = () => {
                 <InputAdornment position="start">+91</InputAdornment>
               ),
             }}
+            sx={{
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '8px',
+    },
+  }}
           />
         </Grid>
       </Grid>
@@ -651,23 +702,22 @@ const handleAddCategory = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
       <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
         Brand Details
       </Typography>
 
-      <Grid
-        container
+     
+    
+       <Grid  container
         spacing={2}
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
-        }}
-      >
-    
-        {/* Company Name */}
+        }}> {/* Company Name */}
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
@@ -697,7 +747,16 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
+        <Grid container
+        spacing={2}
+        sx={{
+        
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(1, 1fr)", xs: "1fr" },
+          gap: 2,
+          mb: 2,
+        }}>
+
           <TextField
             fullWidth
             label="Tagline"
@@ -710,8 +769,20 @@ const handleAddCategory = () => {
             helperText={errors.Tagline}
             required
           />
+
         </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+        
+        </Grid>
+        <Grid container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gap: 2,
+          mb: 2,
+        }}>
+            <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label="CEO/MD/Owner Name"
@@ -761,7 +832,10 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-              </Grid>
+        </Grid>
+
+        
+              
 
 
       <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
@@ -775,19 +849,7 @@ Head Office Location      </Typography>
           gap: 2,
         }}>
       
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Manager Name"
-            name="managerName"
-            value={data.managerName || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            error={!!errors.managerName}
-            helperText={errors.managerName}
-          />
-        </Grid>
+        
         
 {/* Head Office Address */}
         <Grid item xs={12} sm={6} md={2.4}>
@@ -811,7 +873,7 @@ Head Office Location      </Typography>
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
           gap: 2,
         }}>
                 {/* Pincode */}
@@ -844,7 +906,7 @@ Head Office Location      </Typography>
 
         {/* State */}
         <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.state}>
+          {/* <FormControl fullWidth error={!!errors.state}>
             <InputLabel size="medium">State</InputLabel>
             <Select
               name="state"
@@ -855,18 +917,47 @@ Head Office Location      </Typography>
               size="medium"
               required
             >
-              {/* {states.map((state) => (
+              {states.map((state) => (
                 <MenuItem key={state.iso2} value={state.name}>
                   {state.name}
                 </MenuItem>
-              ))} */}
+              ))}
             </Select>
             {errors.state && (
               <Typography variant="caption" color="error">
                 {errors.state}
               </Typography>
             )}
-          </FormControl>
+          </FormControl> */}
+          <TextField
+            fullWidth
+            label="State"
+            name="state"
+            value={data.state || ""}
+            onChange={handleChange}
+            error={!!errors.state}
+            helperText={errors.state}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
+        
+        {/* District  */}
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="District"
+            name="district"
+            value={data.district || ""}
+            onChange={handleChange}
+            error={!!errors.district}
+            helperText={errors.district}
+            variant="outlined"
+            size="medium"
+            required
+          />
         </Grid>
 
         {/* City */}
@@ -1014,6 +1105,60 @@ Head Office Location      </Typography>
           gap: 2,
         }}
       ></Grid>
+
+      <Snackbar
+  open={showWhatsappSnackbar}
+  autoHideDuration={null}
+  onClose={() => setShowWhatsappSnackbar(false)}
+  anchorOrigin={{ vertical: "center", horizontal: "center" }}
+  sx={{
+    width: '100%',
+    maxWidth: '700px',
+    mb: 12
+  }}
+>
+  <Alert
+    severity="info"
+    // icon={<WhatsApp fontSize="inherit" />}
+    sx={{
+      width: '100%',
+      borderRadius: '12px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      alignItems: 'center'
+    }}
+    action={
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Button
+          color="success"
+          variant="contained"
+          size="medium"
+          onClick={() => {
+            onChange({ whatsappNumber: data.mobileNumber || "" });
+                  setWhatsappEnabled(false);
+                  setShowWhatsappSnackbar(false);
+          }}
+          sx={{ borderRadius: '8px' }}
+        >
+          Yes
+        </Button>
+        <Button
+          color="inherit"
+          variant="outlined"
+          size="small"
+          onClick={() => {
+            setWhatsappEnabled(true); 
+            setShowWhatsappSnackbar(false);
+          }}
+          sx={{ borderRadius: '8px' }}
+        >
+          No
+        </Button>
+      </Box>
+    }
+  >
+    Is your WhatsApp number same as your mobile number?
+  </Alert>
+</Snackbar>
     </Box>
   );
 };
