@@ -13,6 +13,7 @@ import FilterDropdowns from "../../Components/Navbar/FilterDropdownsData";
 import { useDispatch } from "react-redux";
 import Footer from "../../Components/Footers/Footer.jsx";
 import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice.jsx";
+import Navbar from "../../Components/Navbar/NavBar.jsx";
 
 
 // Dynamic Components - Import all your video sections
@@ -406,7 +407,7 @@ const HomeBannerSec = () => {
   // const { text, highlight } = currentText.subtitle;
   return (
     <>
- 
+ <Navbar/>
       {
         !localStorage.getItem("accessToken") && (
           <PopupModal open={isPopupOpen} onClose={handlePopupClose} />
@@ -415,7 +416,7 @@ const HomeBannerSec = () => {
 
       {/* Hero Banner */}
       <Box
-        mt={9}
+        mt={0}
         // maxWidth={"xl"}
         sx={{
           background: `linear-gradient(${pageConfig.heroBanner.overlayColor}), url(${pageConfig.heroBanner.backgroundImage})`,

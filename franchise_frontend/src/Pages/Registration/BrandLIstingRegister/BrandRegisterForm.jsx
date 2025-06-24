@@ -50,11 +50,13 @@ import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress from "@mui/material/CircularProgress";
 import Footer from "../../../Components/Footers/Footer";
+import categories from "./BrandCategories";
+import BrandExpansionLocationDetails from "./BrandExpansionLocationDetails";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
 const FORM_STEP_KEY = "brandRegistrationActiveStep";
 
-const steps = ["Brand Details", "Franchise Details", "Uploads"];
+const steps = ["Brand Details", "Franchise Details", "Expansion Locations", "Uploads"];
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -155,23 +157,70 @@ const initialFormData = {
     pancardNumber: "",
   },
   franchiseDetails: {
+ 
+    brandCategories: {
+      groupId: "",
+      main: "",
+      sub: "",
+      child: "",
+    },
+    brandDescription: "",
     fico: [],
+    establishedYear: "",
+    franchiseSinceYear: "",
     companyOwnedOutlets: "",
     franchiseOutlets: "",
     totalOutlets: "",
-    currentOutletsLocatedAt: [],
-    internationalExpansion: "",
     aidFinancing: "",
-    requirementSupport: "",
-    staffTraining: "",
-    staffRecruitment: "",
-    agreementPeriod: "",
-    statergicPlan: "",
-    operatingProcedure: "",
-    finacialOperating: "",
-    marketingSales: "",
-    agreementFranchise:""
+    franchiseDevelopment: "",
+    consultationOrAssistance: "",
+    trainingSupport: "",
+    marketingSupport: "",
+    otherSupport: "",
+    uniqueSellingPoints: "",
+   
   },
+//   expansionLocationDetails: {
+//     currentOutletsLocatedAt: [
+//   {
+//     type: "domestic",
+//     location: {
+//       country: "",
+//       state: "",
+//       district: "",
+//       city: ""
+//     }
+//   },
+//   {
+//     type: "international",
+//     location: {
+//       country: "",
+//       state: "",
+//       city: ""
+//     }
+//   }
+// ],
+// expansionLocations: [
+//   {
+//     type: "domestic",
+//     location: {
+//       country: '',
+//       state: [],
+//       district: [],
+//       city: []
+//     }
+//   },
+//   {
+//     type: "international",
+//     location: {
+//       country: "",
+//       state: [],
+//       city: []
+//     }
+//   }
+// ]
+
+//   },
   uploads: {
     franchisePromotionVideo: [],
     // brandPromotionVideo: [],
@@ -235,6 +284,41 @@ const BrandRegisterForm = () => {
     return errors;
   };
 
+  const validateExpansionLocationDetails = (data) => {
+    const errors = {};
+    // if (!data.currentOutletsLocatedAt || data.currentOutletsLocatedAt.length === 0) {
+    //   errors.currentOutletsLocatedAt = "Current outlets located at is required";
+    // }
+    // if (!data.expansionLocations || data.expansionLocations.length === 0) { 
+    //   errors.expansionLocations = "Expansion locations are required";
+    // } else {
+    //   data.expansionLocations.forEach((location, index) => {
+    //     if (!location.type) {
+    //       errors[`expansionLocations.${index}.type`] = "Location type is required";
+    //     }
+
+    //     if (!location.location || !location.location.country) {
+    //       errors[`expansionLocations.${index}.location.country`] =
+    //         "Country is required";
+    //     }
+    //     if (!location.location || !location.location.state) {
+    //       errors[`expansionLocations.${index}.location.state`] =
+
+    //         "State is required";
+    //     }
+    //     if (!location.location || !location.location.city) {
+    //       errors[`expansionLocations.${index}.location.city`] =
+    //         "City is required";
+    //     } 
+    //     if (!location.location || !location.location.district) {
+    //       errors[`expansionLocations.${index}.location.district`] =
+    //         "District is required";
+    //     }
+    //   });
+    // }
+    return errors;
+  };
+
   const validateStep = useCallback(
     (step) => {
       const errors = {};
@@ -254,19 +338,25 @@ const BrandRegisterForm = () => {
           isValid = Object.keys(errors.franchiseDetails).length === 0;
           break;
         case 2:
+          errors.expansionLocationDetails =  validateExpansionLocationDetails(
+            formData.expansionLocationDetails || {}
+          );
+          isValid = Object.keys(errors.expansionLocationDetails).length === 0;
+          break;
+        case 3:
           errors.uploads = validateUploadsDetails(formData.uploads || {});
           isValid = Object.keys(errors.uploads).length === 0;
           break;
         default:
           break;
-      }
+      } 
 
       setValidationErrors(errors);
 
       if (!isValid) {
         setSnackbar({
           open: true,
-          message: "Please fill all required fields correctly",
+          message: "Please fill all required field correctly",
           severity: "error",
         });
       }
@@ -338,8 +428,10 @@ const BrandRegisterForm = () => {
             companyOwnedOutlets: formData.franchiseDetails.companyOwnedOutlets,
             franchiseOutlets: formData.franchiseDetails.franchiseOutlets,
             totalOutlets: formData.franchiseDetails.totalOutlets,
-            currentOutletsLocatedAt: formData.franchiseDetails.currentOutletsLocatedAt,
-            internationalExpansion: formData.franchiseDetails.internationalExpansion,
+            currentOutletsLocatedAt:
+              formData.franchiseDetails.currentOutletsLocatedAt,
+            internationalExpansion:
+              formData.franchiseDetails.internationalExpansion,
             aidFinancing: formData.franchiseDetails.aidFinancing,
             requirementSupport: formData.franchiseDetails.requirementSupport,
             staffTraining: formData.franchiseDetails.staffTraining,
@@ -409,7 +501,7 @@ const BrandRegisterForm = () => {
         //   }
         // };
         console.log("fileFields.....:", formDataSend);
-        
+
         const response = await axios.post(
           // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
@@ -532,6 +624,9 @@ const BrandRegisterForm = () => {
   const handlePreviewClose = () => {
     setOpenPreview(false);
   };
+  const handleLocationChange = (newData) => {
+  setFormData(prev => ({ ...prev, ...newData }));
+};
 
   const handleCancel = () => {
     // Show confirmation dialog
@@ -589,7 +684,16 @@ const BrandRegisterForm = () => {
             onChange={handleFranchiseDetailsChange}
           />
         );
-      case 2:
+        case 2:
+          return(
+<BrandExpansionLocationDetails
+            data={formData.expansionLocationDetails}
+            errors={validationErrors.fraexpansionLocationDetailsnchiseDetails}
+            onChange={handleLocationChange}
+            // onChange={handleExpansionLocationDetails}
+          />
+          )
+      case 3:
         return (
           <Uploads
             data={formData.uploads}
@@ -730,7 +834,6 @@ const BrandRegisterForm = () => {
       "marginOnSales",
       // "fixedReturn",
       "propertyType",
-
     ];
 
     return (
@@ -1101,6 +1204,7 @@ const BrandRegisterForm = () => {
           >
             Franchise Details
           </Typography>
+
           <Table size="small">
             <TableBody>
               {Object.entries(franchiseDetails).map(([key, value]) => (
@@ -1160,7 +1264,7 @@ const BrandRegisterForm = () => {
           display: "flex",
           flexDirection: "column",
           height: "100vh",
-          mt: 8,
+       
         }}
       >
         <Box
@@ -1169,7 +1273,7 @@ const BrandRegisterForm = () => {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            p: 2,
+            p: 1,
           }}
         >
           <Box>
@@ -1186,7 +1290,7 @@ const BrandRegisterForm = () => {
                 </Step>
               ))}
               <Toolbar sx={{ justifyContent: "flex-end" }}>
-                <FormControl size="small" sx={{ minWidth: 120 }}>
+                <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
                   <Select
                     value={formData.brandDetails.country}
                     onChange={handleCountryChange}
@@ -1202,7 +1306,7 @@ const BrandRegisterForm = () => {
                 </FormControl>
               </Toolbar>
             </Stepper>
-            <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
+            {/* <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
               <Box width="30%">
                 {" "}
                 {activeStep >= 0 && renderSelectedCategories()}
@@ -1212,7 +1316,7 @@ const BrandRegisterForm = () => {
                 {activeStep >= 0 && renderExpansionLocations()}
               </Box>
               <Box width="45%"> {activeStep >= 1 && renderFicoModels()}</Box>
-            </Box>
+            </Box> */}
           </Box>
 
           <Box
@@ -1220,10 +1324,11 @@ const BrandRegisterForm = () => {
               flexGrow: 1,
               border: "1px solid #e0e0e0",
               borderRadius: 2,
-              mb: 0,
+
               pl: 1,
               overflow: "auto",
             }}
+            // maxHeight={"calc(100vh - 200px)"}
           >
             <Box sx={{ p: 2 }}>{getStepContent(activeStep)}</Box>
           </Box>
@@ -1339,7 +1444,7 @@ const BrandRegisterForm = () => {
           </Alert>
         </Snackbar>
       </Box>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 };

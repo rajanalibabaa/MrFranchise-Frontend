@@ -37,11 +37,10 @@ import {
   IconButton,
 } from "@mui/material";
 import { FavoriteBorderOutlined, Person, PersonOutlined, WhatsApp,Email, Phone, Home, LocationCity, Work, HomeWork, MeetingRoom } from "@mui/icons-material";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-import Footer from "../../Components/Footers/Footer";
 import { DeleteIcon } from "lucide-react";
+import {EditIcon} from "lucide-react";
 import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 import RegisterationMediaHandling from "./RegisterationMediaHandling";
@@ -158,8 +157,9 @@ const [selectedChild, setSelectedChild] = useState('');
         console.error("Error fetching location data:", err);
         setIndiaData([]);
         setPreferredStates([]);
-      } finally {
       }
+      //  finally {
+      // }
     };
     fetchStates();
   }, []);
@@ -257,15 +257,19 @@ const [selectedChild, setSelectedChild] = useState('');
       return;
     }
     setPreferences([...preferences, pref]);
-    setValue("preferredState", "");
-    setValue("preferredDistrict", "");
-    setValue("preferredCity", "");
-    setValue("propertyType", "");
-    setValue("propertySize", "");
     setValue("investmentRange", "");
-    setValue("investmentAmount", "");
+  setValue("investmentAmount", "");
+  setValue("preferredState", "");
+  setValue("preferredDistrict", "");
+  setValue("preferredCity", "");
+  setValue("propertyType", "");
+  setValue("propertySize", "");
     setSelectedCategories([]);
     setValue("category", []);
+    setSelectedCategories([]);
+  setSelectedMainCategory('');
+  setSelectedSubCategory('');
+  setSelectedChild('');
     clearErrors([
       "preferredState",
       "preferredDistrict",
@@ -287,12 +291,37 @@ alert('Add Multiple preferences to get more offers from us!','info')
     setPreferences(preferences.filter((_, i) => i !== idx));
   };
 
-  // Submit handler
+  const handleEditPreference = (idx) => {
+    const pref = preferences[idx];
+   if (pref.category && pref.category.length > 0) {
+    const selectedCat = pref.category[0];
+
+    // Assuming you're using state for these dropdowns
+    setSelectedMainCategory(selectedCat.main || '');
+    setSelectedSubCategory(selectedCat.sub || '');
+    setSelectedChild(selectedCat.child || '');
+
+    // And setting form value for category array
+    setSelectedCategories(pref.category);
+    setValue("category", pref.category);
+  }
+
+  setValue("investmentRange", pref.investmentRange || "");
+  setValue("investmentAmount", pref.investmentAmount || "");
+  setValue("preferredState", pref.preferredState || "");
+  setValue("preferredDistrict", pref.preferredDistrict || "");
+  setValue("preferredCity", pref.preferredCity || "");
+  setValue("propertyType", pref.propertyType || "");
+  setValue("propertySize", pref.propertySize || "");
+
+    setPreferences(preferences.filter((_, i) => i !== idx));
+  }
+  
  
 
   // OTP related states
   const [otpModal, setOtpModal] = useState({
-    open: false,
+    open: false, 
     type: null, // 'email', 'mobile', or 'whatsapp'
     otp: "",
     loading: false,
@@ -369,94 +398,6 @@ alert('Add Multiple preferences to get more offers from us!','info')
       verified: false,
     });
   };
-
-  // const sendOtp = async (type) => {
-  //   let endpoint = "";
-  //   let payload = {};
-  //   let fieldName = "";
-
-  //   if (type === "email") {
-  //     fieldName = "email";
-  //     endpoint =
-  //       "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-email";
-  //     payload = { email: watch("email"), type: "email" };
-  //   } else if (type === "mobile") {
-  //     fieldName = "mobileNumber";
-  //     endpoint =
-  //       "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-mobile";
-  //     payload = {
-  //       mobile: `${phonePrefix}${watch("mobileNumber")}`,
-  //       type: "mobile",
-  //     };
-  //   } else if (type === "whatsapp") {
-  //     fieldName = "whatsappNumber";
-  //     endpoint =
-  //       "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-whatsapp";
-  //     payload = {
-  //       mobile: `${phonePrefix}${watch("whatsappNumber")}`,
-  //       type: "whatsapp",
-  //     };
-  //   }
-
-  //   const selectedCountry=useWatch({
-  //     control,
-  //     name:"country",
-  //     defaultValue:"IN"
-  //   })
-
-  //   // Validate the field first
-  //   const isValid = await trigger(fieldName);
-  //   if (!isValid) {
-  //     showSnackbar(`Please enter a valid ${type} address`, "error");
-  //     return;
-  //   }
-
-  //   setOtpStates((prev) => ({
-  //     ...prev,
-  //     [type]: {
-  //       ...prev[type],
-  //       loading: true,
-  //       error: false,
-  //     },
-  //   }));
-
-  //   try {
-  //     const response = await axios.post(endpoint, payload, {
-  //       headers: { "Content-Type": "application/json" },
-  //     });
-
-  //     if (response.status === 200 && response.data.message) {
-  //       showSnackbar(`OTP sent to your ${type} successfully!`, "success");
-  //       setOtpStates((prev) => ({
-  //         ...prev,
-  //         [type]: {
-  //           ...prev[type],
-  //           sent: true,
-  //           loading: false,
-  //           token: response.data.token,
-  //         },
-  //       }));
-  //       openOtpModal(type);
-  //     } else {
-  //       throw new Error(response.data.message || `Failed to send ${type} OTP`);
-  //     }
-  //   } catch (error) {
-  //     console.error(`Error sending ${type} OTP:`, error);
-  //     showSnackbar(
-  //       error.response?.data?.message ||
-  //         `Failed to send ${type} OTP. Please try again.`,
-  //       "error"
-  //     );
-  //     setOtpStates((prev) => ({
-  //       ...prev,
-  //       [type]: {
-  //         ...prev[type],
-  //         loading: false,
-  //         error: true,
-  //       },
-  //     }));
-  //   }
-  // };
 
   const verifyOtp = async () => {
     const { type, otp } = otpModal;
@@ -603,8 +544,8 @@ useEffect(() => {
     try {
       dispatch(showLoading());
       const response = await axios.post(
-        "http://localhost:5000/api/v1/investor/createInvestor",
-        // "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
+        // "http://localhost:5000/api/v1/investor/createInvestor",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -842,10 +783,10 @@ useEffect(() => {
       borderColor: "divider"
     }}
   >
-    <Box sx={{ textAlign: "center", mb: 4 }}>
+    {/* <Box sx={{ textAlign: "center", mb: 4 }}>
      
       
-    </Box>
+    </Box> */}
 
   
 
@@ -898,6 +839,15 @@ useEffect(() => {
           </Grid>
 
           {/* Email */}
+         <Grid
+                       container
+                       spacing={2}
+                       sx={{
+                         display: "grid",
+                         gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+                         gap: 5,
+                       }}
+                     >
           <Grid item xs={12} md={6}>
             <Controller
               name="email"
@@ -1020,7 +970,7 @@ useEffect(() => {
                 />
               )}
             />
-          </Grid>
+          </Grid></Grid>
 
           {/* Address */}
           <Grid item xs={12}>
@@ -1054,6 +1004,16 @@ useEffect(() => {
             />
           </Grid>
 
+
+<Grid
+              container
+              spacing={2}
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+                gap: 2,
+              }}
+            >
           {/* Pincode */}
           <Grid item xs={12} md={4}>
             <Controller
@@ -1134,7 +1094,7 @@ useEffect(() => {
                 />
               )}
             />
-          </Grid>
+          </Grid></Grid>
 
           {/* Occupation */}
           <Grid item xs={12}>
@@ -1226,7 +1186,15 @@ useEffect(() => {
             Investment Categories
           </Typography>
           
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 2 }}>
+         <Grid
+                       container
+                       spacing={2}
+                       sx={{
+                         display: "grid",
+                         gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+                         gap: 2,
+                       }}
+                     >
             {/* Main Category Dropdown */}
             <FormControl fullWidth sx={{ minWidth: 120 }}>
               <InputLabel>Industry</InputLabel>
@@ -1275,12 +1243,37 @@ useEffect(() => {
             {/* Child Item Dropdown */}
             <FormControl fullWidth sx={{ minWidth: 120 }} disabled={!selectedSubCategory}>
               <InputLabel>Sub Category</InputLabel>
-              <Select
-                value={selectedChild || ''}
-                onChange={(e) => setSelectedChild(e.target.value)}
-                label="Sub Category"
-                sx={{ borderRadius: '8px' }}
-              >
+             <Select
+        value={selectedChild || ''}
+        onChange={(e) => {
+          const selected = e.target.value;
+          setSelectedChild(selected);
+
+          if (selectedMainCategory && selectedSubCategory && selected) {
+            const newCategory = {
+              main: selectedMainCategory,
+              sub: selectedSubCategory,
+              child: selected
+            };
+
+            setSelectedCategories(prev => {
+              const exists = prev.some(c =>
+                c.main === newCategory.main &&
+                c.sub === newCategory.sub &&
+                c.child === newCategory.child
+              );
+              return exists ? prev : [...prev, newCategory];
+            });
+
+            // Reset selections
+            // setSelectedMainCategory('');
+            // setSelectedSubCategory('');
+            // setSelectedChild('');
+          }
+        }}
+        label="Sub Category"
+        sx={{ borderRadius: '8px' }}
+      >
                 <MenuItem value="">Select Sub Category</MenuItem>
                 {selectedMainCategory && selectedSubCategory && 
                   categories.find(c => c.name === selectedMainCategory)
@@ -1295,7 +1288,7 @@ useEffect(() => {
             </FormControl>
 
             {/* Add Category Button */}
-            <Button
+            {/* <Button
               variant="contained"
               
               disabled={!selectedChild}
@@ -1330,11 +1323,11 @@ useEffect(() => {
               }}
             >
               Add Category
-            </Button>
-          </Box>
+            </Button> */}
+          </Grid>
 
           {/* Display Selected Categories */}
-          {selectedCategories.length > 0 && (
+          {/* {selectedCategories.length > 0 && (
             <Box sx={{ 
               mt: 2, 
               display: 'flex', 
@@ -1363,43 +1356,18 @@ useEffect(() => {
                 />
               ))}
             </Box>
-          )}
+          )} */}
         </Box>
 
-        {/* Investment Range */}
+       
         <Grid spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Controller
-              name="investmentRange"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  fullWidth
-                  label="Preferred Investment Range"
-                  variant="outlined"
-                  error={!!errors.investmentRange}
-                  helperText={errors.investmentRange?.message || " "}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                    }
-                  }}
-                >
-                  <MenuItem value="">Select Preferred Investment Range</MenuItem>
-                  <MenuItem value="having amount">
-                    Having Investment Amount Ready
-                  </MenuItem>
-                  <MenuItem value="take loan">Planning to take a Loan</MenuItem>
-                  <MenuItem value="need loan">Need Loan Assistance</MenuItem>
-                </TextField>
-              )}
-            />
-          </Grid>
+          
 
           {/* Investment Amount - Only shown if range is selected */}
-          {selectedRange && (
+          {/* {selectedRange && ( */}
+         <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 500, mb: 1 }}>
+            Investment Range
+          </Typography>
             <Grid item xs={12} md={6}>
               <Controller
                 name="investmentAmount"
@@ -1411,6 +1379,7 @@ useEffect(() => {
                     fullWidth
                     label="Preferred Investment Amount"
                     variant="outlined"
+                    value={field.value || ''}
                     error={!!errors.investmentAmount}
                     helperText={errors.investmentAmount?.message || " "}
                     sx={{
@@ -1437,8 +1406,19 @@ useEffect(() => {
                 )}
               />
             </Grid>
-          )}
-
+          {/* )} */}
+          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 500, mb: 1 }}>
+            Preferred Location
+          </Typography>
+ <Grid
+                       container
+                       spacing={2}
+                       sx={{
+                         display: "grid",
+                         gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+                         gap: 2,
+                       }}
+                     >
           {/* Preferred Location */}
           <Grid item xs={12} md={4}>
             <Controller
@@ -1486,6 +1466,7 @@ useEffect(() => {
                   fullWidth
                   label="Preferred District"
                   variant="outlined"
+                  value={field.value || ''}
                   disabled={!watch("preferredState")}
                   error={!!errors.preferredDistrict}
                   helperText={errors.preferredDistrict?.message || " "}
@@ -1521,6 +1502,7 @@ useEffect(() => {
                   fullWidth
                   label="Preferred City"
                   variant="outlined"
+                  value={field.value || ''}
                   disabled={!watch("preferredDistrict")}
                   error={!!errors.preferredCity}
                   helperText={errors.preferredCity?.message || " "}
@@ -1540,8 +1522,50 @@ useEffect(() => {
               )}
             />
           </Grid>
-
+          </Grid>
+          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 500, mb: 1 }}>
+            Preferred Readiness
+          </Typography>
+<Grid item xs={12} md={6}>
+            <Controller
+              name="investmentRange"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  fullWidth
+                  label="Preferred Investment Readiness"
+                  variant="outlined"
+                  value={field.value || ""}
+                  error={!!errors.investmentRange}
+                  helperText={errors.investmentRange?.message || " "}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    }
+                  }}
+                >
+                  <MenuItem value="">Select Preferred Readiness</MenuItem>
+                  <MenuItem value="having amount">
+                    Having Investment Amount Ready
+                  </MenuItem>
+                  <MenuItem value="take loan">Planning to take a Loan</MenuItem>
+                  <MenuItem value="need loan">Need Loan Assistance</MenuItem>
+                </TextField>
+              )}
+            />
+          </Grid>
           {/* Property Type */}
+          <Grid
+                       container
+                       spacing={2}
+                       sx={{
+                         display: "grid",
+                         gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
+                         gap: 2,
+                       }}
+                     >
           <Grid item xs={12}>
             <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
               Property Type
@@ -1647,7 +1671,7 @@ useEffect(() => {
               />
             </Grid>
           )}
-        </Grid>
+        </Grid></Grid>
 
         {/* Add Preference Button */}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
@@ -1674,78 +1698,112 @@ useEffect(() => {
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               Your Investment Preferences
             </Typography>
-            <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'hidden' }}>
+            <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'auto' }}>
               <Table size="small" aria-label="added preferences table">
                 <TableHead>
                   <TableRow sx={{ bgcolor: '#7ad03a' }}>
                     <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>#</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Categories</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Investment</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Location</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Property</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>Cancel </TableCell>
-                  </TableRow>
-                </TableHead>
+<TableCell sx={{  color: 'primary.contrastText' }}>Industry</TableCell>
+<TableCell sx={{  color: 'primary.contrastText' }}>Main Category</TableCell>
+<TableCell sx={{ color: 'primary.contrastText' }}>Sub Category</TableCell>
+            <TableCell sx={{ color: 'primary.contrastText' }}>Investment Range</TableCell>
+            <TableCell sx={{ color: 'primary.contrastText' }}>Preferred State</TableCell>
+            <TableCell sx={{  color: 'primary.contrastText' }}>Preferred District</TableCell>
+            <TableCell sx={{  color: 'primary.contrastText' }}>Preferred City</TableCell>
+                        <TableCell sx={{  color: 'primary.contrastText' }}>Investment Amount</TableCell>
+
+            <TableCell sx={{  color: 'primary.contrastText' }}>Property Type</TableCell>
+            <TableCell sx={{ color: 'primary.contrastText' }}>Property Size</TableCell>
+            <TableCell sx={{  color: 'primary.contrastText' }}>Actions</TableCell>
+          </TableRow>
+        </TableHead>
                 <TableBody>
-                  {preferences.map((pref, idx) => (
-                    <TableRow key={idx} hover>
-                      <TableCell>{idx + 1}</TableCell>
+          {preferences.map((pref, idx) => (
+            <TableRow key={idx} hover>
+              <TableCell>{idx + 1}</TableCell>
+              <TableCell>
+                {pref.category.map((cat, i) => (
+                  <Typography key={i}>{cat.main}</Typography>
+                ))}
+              </TableCell>
+              <TableCell>
+                {pref.category.map((cat, i) => (
+                  <Typography key={i}>{cat.sub}</Typography>
+                ))}
+              </TableCell>
+              <TableCell>
+                {pref.category.map((cat, i) => (
+                  <Typography key={i}>{cat.child}</Typography>
+                ))}
+              </TableCell>
                       <TableCell>
-                        {Array.isArray(pref.category) ? (
-                          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                            {pref.category.map((cat, i) => (
-                              <Typography key={i} variant="body2">
-                                {`${cat.main} > ${cat.sub} > ${cat.child}`}
-                              </Typography>
-                            ))}
-                          </Box>
-                        ) : null}
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          <Box component="span" fontWeight="bold">Range:</Box> {pref.investmentRange}
-                        </Typography>
-                        <Typography variant="body2">
-                          <Box component="span" fontWeight="bold">Amount:</Box> {pref.investmentAmount}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          <Box component="span" fontWeight="bold">State:</Box> {pref.preferredState}
-                        </Typography>
-                        <Typography variant="body2">
-                          <Box component="span" fontWeight="bold">District:</Box> {pref.preferredDistrict}
-                        </Typography>
-                        <Typography variant="body2">
-                          <Box component="span" fontWeight="bold">City:</Box> {pref.preferredCity}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          <Box component="span" fontWeight="bold">Type:</Box> {pref.propertyType}
-                        </Typography>
-                        {pref.propertyType === "Own Property" && (
-                          <Typography variant="body2">
-                            <Box component="span" fontWeight="bold">Size:</Box> {pref.propertySize}
-                          </Typography>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <IconButton
-                          color="error"
-                          onClick={() => handleRemovePreference(idx)}
-                          aria-label="remove preference"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        )}
+                {/* <Typography variant="subtitle2" fontWeight="bold">Range:</Typography> */}
+                <Typography>{pref.investmentAmount}</Typography>
+              </TableCell>
+              
+              
+              {/* Location */}
+              <TableCell>
+                {/* <Typography variant="subtitle2" fontWeight="bold">State:</Typography> */}
+                <Typography>{pref.preferredState}</Typography>
+              </TableCell>
+              
+              <TableCell>
+                {/* <Typography variant="subtitle2" fontWeight="bold">District:</Typography> */}
+                <Typography>{pref.preferredDistrict}</Typography>
+              </TableCell>
+              
+              <TableCell>
+                {/* <Typography variant="subtitle2" fontWeight="bold">City:</Typography> */}
+                <Typography>{pref.preferredCity}</Typography>
+              </TableCell>
+              
+              {/* Investment Amount */}
+              <TableCell>
+                {/* <Typography variant="subtitle2" fontWeight="bold">Amount:</Typography> */}
+                <Typography>{pref.investmentRange}</Typography>
+              </TableCell>
+              {/* Property */}
+              <TableCell>
+                {/* <Typography variant="subtitle2" fontWeight="bold">Type:</Typography> */}
+                <Typography>{pref.propertyType}</Typography>
+              </TableCell>
+              
+              <TableCell>
+                {/* <Typography variant="subtitle2" fontWeight="bold">Size:</Typography> */}
+                <Typography>
+                  {pref.propertyType === 'Own Property' 
+                    ? pref.propertySize 
+                    : 'N/A'}
+                </Typography>
+              </TableCell>
+
+              {/* Actions */}
+              <TableCell>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <IconButton
+                    color="primary"
+                    onClick={() => handleEditPreference(idx)}
+                    aria-label="edit preference"
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleRemovePreference(idx)}
+                    aria-label="remove preference"
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  </Box>
+)}
 
       {/* Terms and Submit Section */}
       <Box sx={{ 
@@ -1790,7 +1848,7 @@ useEffect(() => {
             You must accept the terms
           </Typography>
         )}
-
+{/* <CaptchaForm /> */}
         <Button
           type="submit"
           variant="contained"

@@ -21,6 +21,7 @@ import GoogleIcon from "../../Assets/Images/GoogleIcon.png";
 import LoginPage from "../../Pages/LoginPage/LoginPage"
 import Footer from "../../Components/Footers/Footer";
 import { useDispatch } from "react-redux";
+// import { showLoading , hideLoading} from "../../Redux/Slices/loadingSlice";
 
 function RegisterHandleUser({boolean = true}) {
 
@@ -225,7 +226,7 @@ function RegisterHandleUser({boolean = true}) {
     </Grid>
 
     {/* Facebook Icon */}
-    <Grid item>
+    {/* <Grid item>
       <Box
         component="img"
         loading="lazy"
@@ -248,7 +249,7 @@ function RegisterHandleUser({boolean = true}) {
           },
         }}
       />
-    </Grid>
+    </Grid> */}
   </Grid>
   {/* Login Popup Dialog */}
       <Dialog open={loginOpen} onClose={closeLoginPopup} maxWidth="sm" fullWidth>
