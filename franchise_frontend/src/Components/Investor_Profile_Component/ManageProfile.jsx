@@ -99,7 +99,7 @@ const ManageProfile = () => {
       }
       setImagesizeError('');
       setAvatarFile(file);
-      setIsImageRemoved(false);
+      setIsImageRemoved(false);<div className=""></div>
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result);
@@ -168,8 +168,7 @@ const ManageProfile = () => {
     fetchStates();
   }, []);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
   // Update cities when a state is selected
   useEffect(() => {
     if (selectedState) {
@@ -179,11 +178,6 @@ const ManageProfile = () => {
     }
   }, [selectedState, statesWithCities]);
 
-
-=======
->>>>>>> 8ec3857192b9512d089b43f0ab94aec4bc3e5f9f
-=======
->>>>>>> dc11bd3fd70267e84c791139fc1e6b49551ce8d2
   useEffect(() => {
     const fetchData = async () => {
       if (!investorUUID || !AccessToken) {
