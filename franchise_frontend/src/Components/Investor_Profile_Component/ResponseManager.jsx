@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import {
   Box, Typography, Paper, Button, FormControl, InputLabel,
-  Select, MenuItem, TextField, Rating, Avatar, Divider,
-  IconButton, Chip, Badge, useMediaQuery, useTheme, Snackbar, Alert
+  Select, MenuItem, TextField, Rating, Avatar,
+  IconButton, Chip, useMediaQuery, useTheme, Snackbar, Alert
 } from "@mui/material";
 import {
   Star, StarBorder, Email, Feedback, 
-  Report, CheckCircle, Menu, ArrowBack
+  Report, CheckCircle
 } from '@mui/icons-material';
 import { alpha } from '@mui/material/styles';
-
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { styled } from '@mui/material/styles';
@@ -29,19 +28,19 @@ const DashboardContainer = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
   backgroundColor: colors.lightGray,
   [theme.breakpoints.up('md')]: {
-    padding: theme.spacing(4)
+    padding: theme.spacing(2)
   }
 }));
 
 const DashboardCard = styled(Paper)(({ theme }) => ({
-  borderRadius: '16px',
+  borderRadius: '12px',
   overflow: 'hidden',
-  boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
   backgroundColor: colors.white,
   transition: 'transform 0.3s ease, box-shadow 0.3s ease',
   '&:hover': {
-    transform: 'translateY(-4px)',
-    boxShadow: '0 12px 28px rgba(0,0,0,0.12)'
+    transform: 'translateY(-2px)',
+    boxShadow: '0 6px 16px rgba(0,0,0,0.12)'
   }
 }));
 
@@ -49,11 +48,12 @@ const PrimaryButton = styled(Button)(({ theme }) => ({
   backgroundColor: colors.pistachio,
   color: colors.white,
   fontWeight: 600,
-  padding: '10px 24px',
-  borderRadius: '12px',
+  padding: '8px 16px',
+  borderRadius: '8px',
+  fontSize: '0.875rem',
   '&:hover': {
     backgroundColor: '#7DA95D',
-    boxShadow: '0 4px 12px rgba(147, 197, 114, 0.3)'
+    boxShadow: '0 2px 8px rgba(147, 197, 114, 0.3)'
   }
 }));
 
@@ -61,18 +61,18 @@ const SecondaryButton = styled(Button)(({ theme }) => ({
   backgroundColor: colors.lightOrange,
   color: colors.white,
   fontWeight: 600,
-  padding: '10px 24px',
-  borderRadius: '12px',
+  borderRadius: '8px',
+  fontSize: '0.875rem',
   '&:hover': {
     backgroundColor: '#E69F42',
-    boxShadow: '0 4px 12px rgba(255, 179, 71, 0.3)'
+    boxShadow: '0 2px 8px rgba(255, 179, 71, 0.3)'
   }
 }));
 
 const SectionHeader = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  padding: theme.spacing(3),
+  padding: theme.spacing(2),
   backgroundColor: colors.pistachio,
   color: colors.white
 }));
@@ -85,12 +85,11 @@ const CustomRating = ({ value, onChange }) => (
     onChange={onChange}
     icon={<Star fontSize="inherit" style={{ color: colors.lightOrange }} />}
     emptyIcon={<StarBorder fontSize="inherit" style={{ color: colors.darkGray }} />}
-    size="large"
   />
 );
 
 // Feedback Form Component
-const FeedbackForm = ({ showSnackbar }) => {
+const FeedbackForm = ({ showSnackbar, isMobile }) => {
   const [rating, setRating] = useState(3);
   const [category, setCategory] = useState('');
   const [feedback, setFeedback] = useState('');
@@ -127,32 +126,32 @@ const FeedbackForm = ({ showSnackbar }) => {
   return (
     <DashboardCard>
       <SectionHeader>
-        <Avatar sx={{ bgcolor: colors.white, color: colors.pistachio, mr: 2 }}>
-          <Feedback />
+        <Avatar sx={{ bgcolor: colors.white, color: colors.pistachio, mr: 1, width: 32, height: 32 }}>
+          <Feedback fontSize="small" />
         </Avatar>
-        <Typography variant="h6" fontWeight="600">Share Your Feedback</Typography>
+        <Typography variant={isMobile ? "body2" : "subtitle1"} fontWeight="600">Share Your Feedback</Typography>
       </SectionHeader>
       
-      <Box p={3}>
-        <Box textAlign="center" mb={4}>
-          <Typography variant="body1" color={colors.darkGray} mb={2}>
+      <Box p={2}>
+        <Box textAlign="center" mb={2}>
+          <Typography variant={isMobile ? "caption" : "body2"} color={colors.darkGray} mb={1}>
             How would you rate your experience?
           </Typography>
           <CustomRating value={rating} onChange={(e, newValue) => setRating(newValue)} />
         </Box>
 
         <form onSubmit={handleSubmit}>
-          <FormControl fullWidth sx={{ mb: 3 }}>
-            <InputLabel>Category</InputLabel>
+          <FormControl fullWidth sx={{ mb: 2 }} size="small">
+            <InputLabel sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>Category</InputLabel>
             <Select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               label="Category"
-              sx={{ borderRadius: '12px' }}
               required
+              sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}
             >
               {["Service", "Platform", "Support", "Other"].map(item => (
-                <MenuItem key={item} value={item}>{item}</MenuItem>
+                <MenuItem key={item} value={item} sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>{item}</MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -160,11 +159,13 @@ const FeedbackForm = ({ showSnackbar }) => {
           <TextField
             label="Your Feedback"
             multiline
-            rows={5}
+            rows={4}
             fullWidth
+            size="small"
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
-            sx={{ mb: 3, borderRadius: '12px' }}
+            sx={{ mb: 2, '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.875rem' } }}
+            InputLabelProps={{ style: { fontSize: isMobile ? '0.75rem' : '0.875rem' } }}
             required
           />
 
@@ -172,7 +173,8 @@ const FeedbackForm = ({ showSnackbar }) => {
             <PrimaryButton 
               type="submit" 
               disabled={isSubmitting}
-              startIcon={<CheckCircle />}
+              startIcon={<CheckCircle fontSize="small" />}
+              sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}
             >
               {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
             </PrimaryButton>
@@ -184,7 +186,7 @@ const FeedbackForm = ({ showSnackbar }) => {
 };
 
 // Complaint Form Component
-const ComplaintForm = ({ showSnackbar }) => {
+const ComplaintForm = ({ showSnackbar, isMobile }) => {
   const [category, setCategory] = useState('');
   const [complaint, setComplaint] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -219,25 +221,25 @@ const ComplaintForm = ({ showSnackbar }) => {
   return (
     <DashboardCard>
       <SectionHeader sx={{ backgroundColor: colors.lightOrange }}>
-        <Avatar sx={{ bgcolor: colors.white, color: colors.lightOrange, mr: 2 }}>
-          <Report />
+        <Avatar sx={{ bgcolor: colors.white, color: colors.lightOrange, mr: 1, width: 32, height: 32 }}>
+          <Report fontSize="small" />
         </Avatar>
-        <Typography variant="h6" fontWeight="600">File a Complaint</Typography>
+        <Typography variant={isMobile ? "body2" : "subtitle1"} fontWeight="600">File a Complaint</Typography>
       </SectionHeader>
       
-      <Box p={3}>
+      <Box p={2}>
         <form onSubmit={handleSubmit}>
-          <FormControl fullWidth sx={{ mb: 3 }}>
-            <InputLabel>Issue Type</InputLabel>
+          <FormControl fullWidth sx={{ mb: 2 }} size="small">
+            <InputLabel sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>Issue Type</InputLabel>
             <Select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               label="Issue Type"
-              sx={{ borderRadius: '12px' }}
               required
+              sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}
             >
               {["Technical", "Billing", "Service", "Other"].map(item => (
-                <MenuItem key={item} value={item}>{item}</MenuItem>
+                <MenuItem key={item} value={item} sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>{item}</MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -245,11 +247,13 @@ const ComplaintForm = ({ showSnackbar }) => {
           <TextField
             label="Detailed Complaint"
             multiline
-            rows={5}
+            rows={4}
             fullWidth
+            size="small"
             value={complaint}
             onChange={(e) => setComplaint(e.target.value)}
-            sx={{ mb: 3, borderRadius: '12px' }}
+            sx={{ mb: 2, '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.875rem' } }}
+            InputLabelProps={{ style: { fontSize: isMobile ? '0.75rem' : '0.875rem' } }}
             required
           />
 
@@ -257,7 +261,8 @@ const ComplaintForm = ({ showSnackbar }) => {
             <SecondaryButton 
               type="submit" 
               disabled={isSubmitting}
-              startIcon={<Report />}
+              startIcon={<Report fontSize="small" />}
+              sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}
             >
               {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
             </SecondaryButton>
@@ -269,22 +274,22 @@ const ComplaintForm = ({ showSnackbar }) => {
 };
 
 // Contact Us Component
-const ContactUs = () => (
+const ContactUs = ({ isMobile }) => (
   <DashboardCard>
     <SectionHeader>
-      <Avatar sx={{ bgcolor: colors.white, color: colors.pistachio, mr: 2 }}>
-        <Email />
+      <Avatar sx={{ bgcolor: colors.white, color: colors.pistachio, mr: 1, width: 32, height: 32 }}>
+        <Email fontSize="small" />
       </Avatar>
-      <Typography variant="h6" fontWeight="600">Contact Our Team</Typography>
+      <Typography variant={isMobile ? "body2" : "subtitle1"} fontWeight="600">Contact Our Team</Typography>
     </SectionHeader>
     
-    <Box p={3} textAlign="center">
-      <Typography variant="body1" color={colors.darkGray} mb={3}>
+    <Box p={2} textAlign="center">
+      <Typography variant={isMobile ? "caption" : "body2"} color={colors.darkGray} mb={2}>
         Have questions? Reach out to our support team directly.
       </Typography>
       
       <Chip
-        icon={<Email />}
+        icon={<Email fontSize="small" />}
         label="support@mrfranchise.com"
         component="a"
         href="https://mail.google.com/mail/?view=cm&fs=1&to=support@mrfranchise.com&su=Support%20Request&body=Hi%20Team%2C%20I%20have%20a%20question..."
@@ -292,8 +297,8 @@ const ContactUs = () => (
         rel="noopener noreferrer"
         clickable
         sx={{
-          p: 2,
-          fontSize: '1rem',
+          p: 1,
+          fontSize: isMobile ? '0.75rem' : '0.875rem',
           backgroundColor: colors.pistachio,
           color: colors.white,
           '&:hover': {
@@ -302,7 +307,7 @@ const ContactUs = () => (
         }}
       />
 
-      <Typography variant="body2" color={colors.darkGray} mt={3}>
+      <Typography variant="caption" color={colors.darkGray} mt={1} display="block" fontSize={isMobile ? '0.65rem' : '0.75rem'}>
         We typically respond within 24 hours.
       </Typography>
     </Box>
@@ -314,11 +319,10 @@ const ResponseManagerDashboard = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [activeTab, setActiveTab] = useState('feedback');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
-    severity: 'success' // 'success', 'error', 'warning', 'info'
+    severity: 'success'
   });
 
   const showSnackbar = (message, severity = 'success') => {
@@ -340,20 +344,20 @@ const ResponseManagerDashboard = () => {
     { 
       id: 'feedback', 
       label: 'Feedback', 
-      icon: <Feedback />, 
-      component: <FeedbackForm showSnackbar={showSnackbar} /> 
+      icon: <Feedback fontSize="small" />, 
+      component: <FeedbackForm showSnackbar={showSnackbar} isMobile={isMobile} /> 
     },
     { 
       id: 'complaint', 
       label: 'Complaint', 
-      icon: <Report />, 
-      component: <ComplaintForm showSnackbar={showSnackbar} /> 
+      icon: <Report fontSize="small" />, 
+      component: <ComplaintForm showSnackbar={showSnackbar} isMobile={isMobile} /> 
     },
     { 
       id: 'contact', 
       label: 'Contact Us', 
-      icon: <Email />, 
-      component: <ContactUs /> 
+      icon: <Email fontSize="small" />, 
+      component: <ContactUs isMobile={isMobile} /> 
     }
   ];
 
@@ -361,82 +365,93 @@ const ResponseManagerDashboard = () => {
     <>
       <DashboardContainer>
         {isMobile ? (
-          // Mobile View
-          <Box>
-            {mobileMenuOpen ? (
-              <Box>
-                <SectionHeader>
-                  <IconButton onClick={() => setMobileMenuOpen(false)} sx={{ color: colors.white }}>
-                    <ArrowBack />
-                  </IconButton>
-                  <Typography variant="h6" ml={2}>Menu</Typography>
-                </SectionHeader>
+          <Box sx={{p:1,borderRadius:'88px'}}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                textAlign: 'center',
+                backgroundColor: colors.pistachio,
+                color: colors.white,
+                p: 1,
+                fontSize: '0.75rem',
+                letterSpacing: 0.5,
                 
-                <Box p={2}>
-                  {tabs.map(tab => (
-                    <Box 
-                      key={tab.id}
-                      onClick={() => {
-                        setActiveTab(tab.id);
-                        setMobileMenuOpen(false);
-                      }}
+              }}
+            >
+              Support Center
+            </Typography>
+
+            {/* Compact Mobile Tab Bar */}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              p={0.5}
+              bgcolor={colors.white}
+              // boxShadow={2}
+              sx={{
+                borderBottom: `1px solid ${alpha(colors.darkGray, 0.2)}`,
+                position: 'sticky',
+                top: 0,
+                zIndex: 10
+              }}
+            >
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+
+                return (
+                  <Button
+                    key={tab.id}
+                    fullWidth
+                    onClick={() => setActiveTab(tab.id)}
+                    disableRipple
+                    sx={{
+                      mx: 0.25,
+                      py: 0.5,
+                      borderRadius: '6px',
+                      backgroundColor: isActive ? '#5C8542' : 'transparent',
+                      color: isActive ? colors.white : colors.darkGray,
+                      boxShadow: isActive ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
+                      transition: 'all 0.2s ease-in-out',
+                      minWidth: 0
+                    }}
+                    startIcon={React.cloneElement(tab.icon, {
+                      sx: {
+                        fontSize: '8px',
+                        color: isActive ? colors.white : colors.darkGray
+                      }
+                    })}
+                  >
+                    <Typography
                       sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        p: 2,
-                        mb: 1,
-                        borderRadius: '8px',
-                        backgroundColor: activeTab === tab.id ? alpha(colors.pistachio, 0.1) : 'transparent',
-                        cursor: 'pointer',
-                        '&:hover': {
-                          backgroundColor: alpha(colors.pistachio, 0.05)
-                        }
+                        fontSize: '0.5rem',
+                        fontWeight: 500,
+                        textTransform: 'none'
                       }}
                     >
-                      <Avatar sx={{ 
-                        bgcolor: activeTab === tab.id ? colors.pistachio : colors.lightGray,
-                        color: activeTab === tab.id ? colors.white : colors.darkGray,
-                        mr: 2,
-                        width: 36,
-                        height: 36
-                      }}>
-                        {tab.icon}
-                      </Avatar>
-                      <Typography fontWeight={activeTab === tab.id ? 600 : 400}>
-                        {tab.label}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
-            ) : (
-              <Box>
-                <SectionHeader>
-                  <IconButton onClick={() => setMobileMenuOpen(true)} sx={{ color: colors.white }}>
-                    <Menu />
-                  </IconButton>
-                  <Typography variant="h6" ml={2}>
-                    {tabs.find(t => t.id === activeTab)?.label}
-                  </Typography>
-                </SectionHeader>
-                
-                <Box p={2}>
-                  {tabs.find(t => t.id === activeTab)?.component}
-                </Box>
-              </Box>
-            )}
+                      {tab.label}
+                    </Typography>
+                  </Button>
+                );
+              })}
+            </Box>
+
+            {/* Active Tab Content */}
+            <Box p={1}>
+              {tabs.find((t) => t.id === activeTab)?.component}
+            </Box>
           </Box>
         ) : (
           // Desktop View
-          <Box display="flex" maxWidth={1200} mx="auto">
+          <Box display="flex" maxWidth={1000} mx="auto">
             {/* Sidebar */}
-            <Box width={240} mr={3}>
+            <Box width={200} mr={2}>
               <DashboardCard>
                 <SectionHeader>
-                  <Typography variant="h6" fontWeight="600">Support Center</Typography>
+                  <Typography variant="subtitle1" fontWeight="600">Support Center</Typography>
                 </SectionHeader>
                 
-                <Box p={2}>
+                <Box p={1}>
                   {tabs.map(tab => (
                     <Box 
                       key={tab.id}
@@ -444,26 +459,26 @@ const ResponseManagerDashboard = () => {
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
-                        p: 2,
-                        mb: 1,
-                        borderRadius: '8px',
-                        backgroundColor: activeTab === tab.id ? alpha(colors.pistachio, 0.1) : 'transparent',
+                        p: 1.5,
+                        mb: 0.5,
+                        borderRadius: '6px',
+                        backgroundColor: activeTab === tab.id ? alpha(colors.pistachio, 0.4) : 'transparent',
                         cursor: 'pointer',
                         '&:hover': {
-                          backgroundColor: alpha(colors.pistachio, 0.05)
+                          backgroundColor: activeTab === tab.id ? alpha(colors.pistachio, 0.5) : alpha(colors.pistachio, 0.1)
                         }
                       }}
                     >
                       <Avatar sx={{ 
-                        bgcolor: activeTab === tab.id ? colors.pistachio : colors.lightGray,
+                        bgcolor: activeTab === tab.id ? alpha(colors.pistachio, 0.8) : colors.lightGray,
                         color: activeTab === tab.id ? colors.white : colors.darkGray,
-                        mr: 2,
-                        width: 36,
-                        height: 36
+                        mr: 1.5,
+                        width: 30,
+                        height: 30
                       }}>
                         {tab.icon}
                       </Avatar>
-                      <Typography fontWeight={activeTab === tab.id ? 600 : 400}>
+                      <Typography variant="body2" fontWeight={activeTab === tab.id ? 700 : 400}>
                         {tab.label}
                       </Typography>
                     </Box>
@@ -493,7 +508,9 @@ const ResponseManagerDashboard = () => {
           variant="filled"
           sx={{ width: '100%' }}
         >
-          {snackbar.message}
+          <Typography variant="body2" sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>
+            {snackbar.message}
+          </Typography>
         </Alert>
       </Snackbar>
     </>

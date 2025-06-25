@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
+  TextField, 
   Snackbar,
   IconButton,
   MenuItem,
@@ -31,7 +31,7 @@ import { TbPhotoEdit } from "react-icons/tb";
 
 const ManageProfile = () => {
   // State management
-  const [originalData, setOriginalData] = useState("");
+  const [originalData, setOriginalData] = useState(null);
   const [investorData, setInvestorData] = useState({
     firstName: "",
     email: "",
@@ -39,7 +39,9 @@ const ManageProfile = () => {
     whatsappNumber: "",
     country: "",
     occupation: "",
+    state: "",
     city: "",
+    address: "",
     pincode: "",
     preferences: [],
     profileImage: "",
@@ -75,6 +77,7 @@ const ManageProfile = () => {
   const [imagesizeError, setImagesizeError] = useState("");
   const [isImageRemoved, setIsImageRemoved] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Navigation and Redux
   const navigate = useNavigate();
@@ -82,10 +85,10 @@ const ManageProfile = () => {
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
   // Helper functions
-  const formatNumber = (num) => {
+  const formatNumber = useCallback((num) => {
     if (!num) return "";
     return num.replace(/^(\+91)?/, "").trim();
-  };
+  }, []);
 
   // Handle avatar file change
   const handleAvatarChange = (e) => {
@@ -97,9 +100,15 @@ const ManageProfile = () => {
         setImagesizeError("Oops! Upload failed — please use an image under 50KB.");
         return;
       }
+      
+      if (!file.type.match('image.*')) {
+        setImagesizeError("Please upload an image file (JPEG, PNG, etc.)");
+        return;
+      }
+      
       setImagesizeError('');
       setAvatarFile(file);
-      setIsImageRemoved(false);<div className=""></div>
+      setIsImageRemoved(false);
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result);
@@ -116,18 +125,20 @@ const ManageProfile = () => {
   };
 
   // Location data handling
-  const getDistrictsForState = (stateName) => {
+  const getDistrictsForState = useCallback((stateName) => {
+    if (!stateName) return [];
     const stateObj = indiaData.find((s) => s.name === stateName);
     return stateObj?.districts || [];
-  };
+  }, [indiaData]);
 
-  const getCitiesForDistrict = (stateName, districtName) => {
+  const getCitiesForDistrict = useCallback((stateName, districtName) => {
+    if (!stateName || !districtName) return [];
     const stateObj = indiaData.find((s) => s.name === stateName);
     if (!stateObj) return [];
     return (stateObj.cities || [])
       .filter((city) => city.district === districtName)
       .map((city) => city.name);
-  };
+  }, [indiaData]);
 
   // State change handler
   const handleStateChange = (prefIndex, stateName) => {
@@ -163,25 +174,21 @@ const ManageProfile = () => {
       } catch (err) {
         console.error("Error fetching location data:", err);
         setIndiaData([]);
+        setSnackbar({
+          open: true,
+          message: "Failed to load location data. Some features may not work properly.",
+          severity: "warning",
+        });
       }
     };
     fetchStates();
   }, []);
 
-
-  // Update cities when a state is selected
-  useEffect(() => {
-    if (selectedState) {
-      setCities(statesWithCities[selectedState]);
-    } else {
-      setCities([]);
-    }
-  }, [selectedState, statesWithCities]);
-
   useEffect(() => {
     const fetchData = async () => {
       if (!investorUUID || !AccessToken) {
         setLoading(false);
+        navigate("/loginpage");
         return;
       }
 
@@ -196,6 +203,7 @@ const ManageProfile = () => {
             },
           }
         );
+        
         if (response.data?.data) {
           const data = response.data.data;
           const formattedData = {
@@ -212,16 +220,26 @@ const ManageProfile = () => {
           setInvestorData(formattedData);
           setOriginalData(formattedData);
           setAvatarPreview(data.profileImage || "");
+        } else {
+          throw new Error("No data received from server");
         }
       } catch (error) {
         console.error("Error fetching investor data:", error);
+        setSnackbar({
+          open: true,
+          message: "Failed to load profile data. Please try again later.",
+          severity: "error",
+        });
+        if (error.response?.status === 401) {
+          navigate("/loginpage");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [investorUUID, AccessToken]);
+  }, [investorUUID, AccessToken, navigate, formatNumber]);
 
   // OTP handling
   const handleEditToggle = () => {
@@ -247,6 +265,11 @@ const ManageProfile = () => {
 
       if (response.data.success) {
         setOtpStep(2);
+        setSnackbar({
+          open: true,
+          message: "OTP sent successfully!",
+          severity: "success",
+        });
       } else {
         setErrorMSG(
           response.data.message || "Failed to send OTP. Please try again."
@@ -254,7 +277,10 @@ const ManageProfile = () => {
       }
     } catch (error) {
       console.error("OTP request error:", error);
-      setErrorMSG("An error occurred while requesting OTP.");
+      setErrorMSG(
+        error.response?.data?.message || 
+        "An error occurred while requesting OTP. Please try again later."
+      );
     } finally {
       setRequestOTP(false);
     }
@@ -263,6 +289,11 @@ const ManageProfile = () => {
   const handleOtpVerify = async () => {
     if (!otp) {
       setOtpError("Please enter the OTP");
+      return;
+    }
+
+    if (!/^\d{6}$/.test(otp)) {
+      setOtpError("OTP must be 6 digits");
       return;
     }
 
@@ -283,24 +314,32 @@ const ManageProfile = () => {
       if (response.data.success) {
         setEditMode(true);
         setOtpDialogOpen(false);
+        setSnackbar({
+          open: true,
+          message: "OTP verified successfully! You can now edit your profile.",
+          severity: "success",
+        });
       } else {
-        setOtpError("Failed to verify OTP. Please try again.");
+        setOtpError(response.data.message || "Invalid OTP. Please try again.");
       }
     } catch (error) {
       console.error("OTP verification error:", error);
-      setOtpError("An error occurred during OTP verification.");
+      setOtpError(
+        error.response?.data?.message || 
+        "An error occurred during OTP verification. Please try again."
+      );
     } finally {
       setRequestOTP(false);
     }
   };
 
   // Validate all fields
-  const validateFields = () => {
+  const validateFields = useCallback(() => {
     const errors = {
       firstName: "",
       mobileNumber: "",
       whatsappNumber: "",
-      state:"",
+      state: "",
       city: "",
       address: "",
       pincode: "",
@@ -309,8 +348,11 @@ const ManageProfile = () => {
     let isValid = true;
 
     // Validate firstName
-    if (!investorData.firstName.trim()) {
+    if (!investorData.firstName?.trim()) {
       errors.firstName = "First name is required";
+      isValid = false;
+    } else if (investorData.firstName.trim().length < 2) {
+      errors.firstName = "First name must be at least 2 characters";
       isValid = false;
     }
 
@@ -334,19 +376,24 @@ const ManageProfile = () => {
       isValid = false;
     }
 
-    // Validate city
-    if (!investorData.state.trim()) {
+    // Validate state
+    if (!investorData.state?.trim()) {
       errors.state = "State is required";
       isValid = false;
     }
+
     // Validate city
-    if (!investorData.city.trim()) {
+    if (!investorData.city?.trim()) {
       errors.city = "City is required";
       isValid = false;
     }
+
     // Validate address
-    if (!investorData.address.trim()) {
-      errors.address = "address is required";
+    if (!investorData.address?.trim()) {
+      errors.address = "Address is required";
+      isValid = false;
+    } else if (investorData.address.trim().length < 10) {
+      errors.address = "Address must be at least 10 characters";
       isValid = false;
     }
 
@@ -366,7 +413,7 @@ const ManageProfile = () => {
     }
 
     // Validate preferences
-    if (investorData.preferences.length === 0) {
+    if (!investorData.preferences || investorData.preferences.length === 0) {
       setSnackbar({
         open: true,
         message: "At least one preference is required",
@@ -384,6 +431,7 @@ const ManageProfile = () => {
           isValid = false;
           break;
         }
+        
         if (!pref.investmentAmount) {
           setSnackbar({
             open: true,
@@ -393,6 +441,7 @@ const ManageProfile = () => {
           isValid = false;
           break;
         }
+        
         if (!pref.propertyType) {
           setSnackbar({
             open: true,
@@ -402,6 +451,7 @@ const ManageProfile = () => {
           isValid = false;
           break;
         }
+        
         if (pref.propertyType === "Own Property" && !pref.propertySize) {
           setSnackbar({
             open: true,
@@ -411,6 +461,7 @@ const ManageProfile = () => {
           isValid = false;
           break;
         }
+        
         if (!pref.preferredState) {
           setSnackbar({
             open: true,
@@ -420,6 +471,7 @@ const ManageProfile = () => {
           isValid = false;
           break;
         }
+        
         if (!pref.preferredDistrict) {
           setSnackbar({
             open: true,
@@ -429,6 +481,7 @@ const ManageProfile = () => {
           isValid = false;
           break;
         }
+        
         if (!pref.preferredCity) {
           setSnackbar({
             open: true,
@@ -438,7 +491,8 @@ const ManageProfile = () => {
           isValid = false;
           break;
         }
-        if (pref.category.length === 0) {
+        
+        if (!pref.category || pref.category.length === 0) {
           setSnackbar({
             open: true,
             message: "At least one category is required for each preference",
@@ -447,6 +501,7 @@ const ManageProfile = () => {
           isValid = false;
           break;
         }
+        
         for (const cat of pref.category) {
           if (!cat.main) {
             setSnackbar({
@@ -463,10 +518,12 @@ const ManageProfile = () => {
 
     setFieldErrors(errors);
     return isValid;
-  };
+  }, [investorData, formatNumber]);
 
   // Get only changed fields
-  const getChangedFields = () => {
+  const getChangedFields = useCallback(() => {
+    if (!originalData) return {};
+    
     const changes = {};
     
     // Basic fields
@@ -503,7 +560,7 @@ const ManageProfile = () => {
     }
     
     return changes;
-  };
+  }, [originalData, investorData, avatarFile, isImageRemoved, formatNumber]);
 
   // Form handling
   const handleSave = async () => {
@@ -511,6 +568,8 @@ const ManageProfile = () => {
       return;
     }
 
+    setIsSubmitting(true);
+    
     const changedFields = getChangedFields();
     
     // If nothing changed, just exit edit mode
@@ -521,6 +580,7 @@ const ManageProfile = () => {
         message: "No changes detected",
         severity: "info",
       });
+      setIsSubmitting(false);
       return;
     }
 
@@ -553,7 +613,7 @@ const ManageProfile = () => {
         }
       );
 
-      if (response.data.success ) {
+      if (response.data.success) {
         const updatedData = response.data.data;
         const newOriginalData = {
           ...originalData,
@@ -574,20 +634,25 @@ const ManageProfile = () => {
         
         setAvatarFile(null);
         setIsImageRemoved(false);
+        setEditMode(false);
+        
+        setSnackbar({
+          open: true,
+          message: "Profile successfully updated!",
+          severity: "success",
+        });
+      } else {
+        throw new Error(response.data.message || "Failed to update profile");
       }
-      setEditMode(false);
-      setSnackbar({
-        open: true,
-        message: "Profile successfully updated!",
-        severity: "success",
-      });
     } catch (error) {
       console.error("Error saving investor data:", error);
       setSnackbar({
         open: true,
-        message: "Failed to update profile.",
+        message: error.response?.data?.message || "Failed to update profile. Please try again.",
         severity: "error",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -618,11 +683,9 @@ const ManageProfile = () => {
   const removeCategory = (prefIndex, catIndex) => {
     const newPrefs = [...(investorData.preferences || [])];
     const newCategories = [...(newPrefs[prefIndex].category || [])];
-    if (newCategories.length > 1) {
-      newCategories.splice(catIndex, 1);
-      newPrefs[prefIndex].category = newCategories;
-      setInvestorData({ ...investorData, preferences: newPrefs });
-    }
+    newCategories.splice(catIndex, 1);
+    newPrefs[prefIndex].category = newCategories;
+    setInvestorData({ ...investorData, preferences: newPrefs });
   };
 
   const addPreference = () => {
@@ -643,8 +706,16 @@ const ManageProfile = () => {
 
   const removePreference = (index) => {
     const newPrefs = [...(investorData.preferences || [])];
-    newPrefs.splice(index, 1);
-    setInvestorData({ ...investorData, preferences: newPrefs });
+    if (newPrefs.length > 1) {
+      newPrefs.splice(index, 1);
+      setInvestorData({ ...investorData, preferences: newPrefs });
+    } else {
+      setSnackbar({
+        open: true,
+        message: "At least one preference is required",
+        severity: "error",
+      });
+    }
   };
 
   // Render helpers
@@ -654,6 +725,7 @@ const ManageProfile = () => {
     const isReadOnlyField = isReadOnly || key === "country" || key === "email";
     const isOccupationField = key === "occupation";
     const isPincodeField = key === "pincode";
+    const isAddressField = key === "address";
 
     let displayValue = "";
     if (Array.isArray(value)) {
@@ -689,6 +761,7 @@ const ManageProfile = () => {
               >
                 <MenuItem value="Investor">Investor</MenuItem>
                 <MenuItem value="Brand">Brand</MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
               </TextField>
             ) : isPincodeField ? (
               <TextField
@@ -705,6 +778,22 @@ const ManageProfile = () => {
                 helperText={fieldErrors[key]}
                 inputProps={{ maxLength: 6 }}
                 required
+              />
+            ) : isAddressField ? (
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={value || ""}
+                onChange={(e) => {
+                  setInvestorData({ ...investorData, [key]: e.target.value });
+                  setFieldErrors({ ...fieldErrors, [key]: "" });
+                }}
+                error={!!fieldErrors[key]}
+                helperText={fieldErrors[key]}
+                required
+                multiline
+                rows={3}
               />
             ) : (
               <TextField
@@ -726,7 +815,15 @@ const ManageProfile = () => {
         ) : (
           <Typography
             variant="body1"
-            sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}
+            sx={{ 
+              backgroundColor: "#f5f5f5", 
+              p: 1, 
+              borderRadius: 1,
+              whiteSpace: "pre-wrap",
+              minHeight: isAddressField ? "60px" : "auto",
+              display: "flex",
+              alignItems: isAddressField ? "flex-start" : "center"
+            }}
           >
             {isPhoneField ? `+91 ${displayValue}` : displayValue || "-----"}
           </Typography>
@@ -750,10 +847,18 @@ const ManageProfile = () => {
 
   if (!investorData || Object.keys(investorData).length === 0) {
     return (
-      <Typography variant="h6" align="center" mt={4}>
-        Unable to load profile. Please login again{" "}
-        <Button onClick={() => navigate("/loginpage")}>Login</Button>
-      </Typography>
+      <Box textAlign="center" mt={4}>
+        <Typography variant="h6" gutterBottom>
+          Unable to load profile. Please try again later.
+        </Typography>
+        <Button 
+          variant="contained" 
+          onClick={() => navigate("/loginpage")}
+          sx={{ mt: 2 }}
+        >
+          Back to Login
+        </Button>
+      </Box>
     );
   }
 
@@ -767,7 +872,7 @@ const ManageProfile = () => {
 
   const handleConfirm = async () => {
     try {
-      setSnackbarOpen(false); // Close the confirmation dialog immediately
+      setSnackbarOpen(false);
       
       const response = await axios.patch(
         `http://localhost:5000/api/v1/investor/deleteInvestorProfileImage/${investorUUID}`,
@@ -781,7 +886,6 @@ const ManageProfile = () => {
       );
 
       if (response.data.success) {
-        // Update local state to reflect the removed image
         const updatedData = {
           ...originalData,
           profileImage: ""
@@ -804,7 +908,7 @@ const ManageProfile = () => {
       console.error("Error removing profile image:", error);
       setSnackbar({
         open: true,
-        message: error.message || "Failed to remove profile image",
+        message: error.response?.data?.message || "Failed to remove profile image",
         severity: "error",
       });
     }
@@ -830,8 +934,41 @@ const ManageProfile = () => {
       <Box display="flex" justifyContent="center">
         <Paper
           elevation={4}
-          sx={{ padding: 4, borderRadius: 4, width: "100%", maxWidth: 700 }}
+          sx={{ 
+            padding: 4, 
+            borderRadius: 4, 
+            width: "100%", 
+            maxWidth: 700,
+            position: "relative"
+          }}
         >
+          {editMode && (
+            <IconButton
+              onClick={() => {
+                if (isSubmitting) return;
+                setEditMode(false);
+                setInvestorData(originalData);
+                setAvatarFile(null);
+                setAvatarPreview(originalData.profileImage || "");
+                setIsImageRemoved(false);
+                setImagesizeError("");
+              }}
+              sx={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                color: 'text.secondary',
+                '&:hover': {
+                  color: 'error.main',
+                  backgroundColor: 'rgba(244, 67, 54, 0.08)'
+                }
+              }}
+              disabled={isSubmitting}
+            >
+              <CloseIcon />
+            </IconButton>
+          )}
+
           <Box
             display="flex"
             justifyContent="space-between"
@@ -845,33 +982,17 @@ const ManageProfile = () => {
               variant="outlined"
               startIcon={editMode ? <SaveIcon /> : <EditIcon />}
               onClick={editMode ? handleSave : handleEditToggle}
-              sx={{ borderRadius: 3, textTransform: "none", fontWeight: 600, px: 2.5, py: 1 }}
+              sx={{ 
+                borderRadius: 3, 
+                textTransform: "none", 
+                fontWeight: 600, 
+                px: 2.5, 
+                py: 1 
+              }}
+              disabled={isSubmitting}
             >
-              {editMode ? "Save" : "Edit"}
+              {editMode ? (isSubmitting ? "Saving..." : "Save") : "Edit"}
             </Button>
-          </Box>
-
-          <Box 
-            position="relative" 
-            width="100%"
-          >
-            {editMode && (
-              <IconButton
-                onClick={() => setEditMode(false)}
-                sx={{
-                  position: 'absolute',
-                  right: -30,
-                  top: -100,
-                  color: 'text.secondary',
-                  '&:hover': {
-                    color: 'error.main',
-                    backgroundColor: 'rgba(244, 67, 54, 0.08)'
-                  }
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            )}
           </Box>
 
           <Box display="flex" alignItems="center" mb={3}>
@@ -899,6 +1020,7 @@ const ManageProfile = () => {
                         accept="image/*"
                         style={{ display: 'none' }}
                         onChange={handleAvatarChange}
+                        disabled={isSubmitting}
                       />
                       <IconButton
                         component="label"
@@ -911,6 +1033,7 @@ const ManageProfile = () => {
                             backgroundColor: 'rgba(25, 118, 210, 0.12)',
                           }
                         }}
+                        disabled={isSubmitting}
                       >
                         <TbPhotoEdit />
                       </IconButton>
@@ -929,6 +1052,7 @@ const ManageProfile = () => {
                               backgroundColor: 'rgba(244, 67, 54, 0.12)',
                             }
                           }}
+                          disabled={isSubmitting}
                         >
                           <DeleteIcon />
                         </IconButton>
@@ -1022,7 +1146,13 @@ const ManageProfile = () => {
               <Paper
                 key={pref._id || prefIndex}
                 elevation={2}
-                sx={{ p: 2, mb: 3, borderRadius: 2, backgroundColor: "#f9f9f9" }}
+                sx={{ 
+                  p: 2, 
+                  mb: 3, 
+                  borderRadius: 2, 
+                  backgroundColor: "#f9f9f9",
+                  position: "relative"
+                }}
               >
                 <Box
                   display="flex"
@@ -1038,7 +1168,7 @@ const ManageProfile = () => {
                       size="small"
                       color="error"
                       onClick={() => removePreference(prefIndex)}
-                      disabled={investorData.preferences.length <= 1}
+                      disabled={investorData.preferences.length <= 1 || isSubmitting}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -1335,17 +1465,16 @@ const ManageProfile = () => {
                                 ))}
                               </TextField>
 
-                              {pref.category.length > 1 && (
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={() =>
-                                    removeCategory(prefIndex, catIndex)
-                                  }
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              )}
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() =>
+                                  removeCategory(prefIndex, catIndex)
+                                }
+                                disabled={isSubmitting}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
                             </>
                           ) : (
                             <>
@@ -1384,6 +1513,19 @@ const ManageProfile = () => {
                         </Box>
                       );
                     })}
+
+                    {editMode && (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<AddIcon />}
+                        onClick={() => addCategory(prefIndex)}
+                        sx={{ mt: 1 }}
+                        disabled={isSubmitting}
+                      >
+                        Add Category
+                      </Button>
+                    )}
                   </Box>
                 </Box>
               </Paper>
@@ -1394,7 +1536,12 @@ const ManageProfile = () => {
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={addPreference}
-                sx={{ mt: 2, borderRadius: 2, textTransform: "none" }}
+                sx={{ 
+                  mt: 2, 
+                  borderRadius: 2, 
+                  textTransform: "none",
+                }}
+                disabled={isSubmitting}
               >
                 Add Preference
               </Button>
@@ -1404,7 +1551,11 @@ const ManageProfile = () => {
       </Box>
      
       {/* OTP Verification Dialog */}
-      <Dialog open={otpDialogOpen} onClose={() => setOtpDialogOpen(false)}>
+      <Dialog 
+        open={otpDialogOpen} 
+        onClose={() => !requestOTP && setOtpDialogOpen(false)}
+        disableEscapeKeyDown={requestOTP}
+      >
         <DialogTitle>OTP Verification</DialogTitle>
         <DialogContent>
           {otpStep === 1 && (
@@ -1435,6 +1586,8 @@ const ManageProfile = () => {
                 }}
                 error={!!otpError}
                 helperText={otpError}
+                disabled={requestOTP}
+                inputProps={{ maxLength: 6 }}
               />
             </>
           )}
@@ -1473,7 +1626,7 @@ const ManageProfile = () => {
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={3000}
+        autoHideDuration={6000}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
@@ -1482,11 +1635,13 @@ const ManageProfile = () => {
           variant="filled"
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
+          sx={{ width: '100%' }}
         >
           {snackbar.message}
         </MuiAlert>
       </Snackbar>
 
+      {/* Confirmation Dialog for Image Removal */}
       <Dialog
         open={snackbarOpen}
         onClose={handleCloseSnackbar}
@@ -1496,13 +1651,19 @@ const ManageProfile = () => {
           <Typography>Are you sure you want to remove your profile image?</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseSnackbar}>Cancel</Button>
+          <Button 
+            onClick={handleCloseSnackbar}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
           <Button 
             onClick={handleConfirm} 
             color="error"
             variant="contained"
+            disabled={isSubmitting}
           >
-            Remove
+            {isSubmitting ? "Removing..." : "Remove"}
           </Button>
         </DialogActions>
       </Dialog>
