@@ -427,65 +427,116 @@ const handleRemoveUSP = (index) => {
           gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
         }}
       >
-        {/* Established Year */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.establishedYear}>
-            <InputLabel size="medium">Year Commenced Operations</InputLabel>
-            <Select
-              name="establishedYear"
-              value={data.establishedYear || ""}
-              label="Year Commenced Operations"
-              onChange={handleChange}
-              variant="outlined"
-              size="medium"
-              required
-            >
-              {Array.from(
-                { length: 100 },
-                (_, i) => new Date().getFullYear() - i
-              ).map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.establishedYear && (
-              <Typography variant="caption" color="error">
-                {errors.establishedYear}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
+        {/* Established Year */} {/* Established Year */}
+            <Grid item xs={12} sm={6} md={2.4}>
+              <FormControl fullWidth error={!!errors.establishedYear}>
+                <InputLabel size="medium">Year Commenced Operations</InputLabel>
+                <Select
+                  name="establishedYear"
+                  value={data.establishedYear || ""}
+                  label="Year Commenced Operations"
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="medium"
+                  required
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        width: 390,
+                        maxHeight: 300,
+                        "& .MuiList-root": {
+                          display: "grid",
+                          gridTemplateColumns: "repeat(5, 1fr)", // 5 columns for a calendar-like look
+                          gap: "4px",
+                          padding: "4px",
+                        },
+                      },
+                    },
+                  }}
+                >
+                  {Array.from(
+                    { length: 100 },
+                    (_, i) => new Date().getFullYear() - i
+                  ).map((year) => (
+                    <MenuItem
+                      key={year}
+                      value={year}
+                      sx={{
+                        minWidth: 0,
+                        padding: "6px 4px",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors.establishedYear && (
+                  <Typography variant="caption" color="error">
+                    {errors.establishedYear}
+                  </Typography>
+                )}
+              </FormControl>
+            </Grid>
+ 
 
         {/* Franchise Since Year */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.franchiseSinceYear}>
-            <InputLabel size="medium">Year Commenced Franchising</InputLabel>
-            <Select
-              name="franchiseSinceYear"
-              value={data.franchiseSinceYear || ""}
-              label="Year Commenced Franchising"
-              onChange={handleChange}
-              variant="outlined"
-              size="medium"
-              required
-            >
-              {Array.from(
-                { length: 100 },
-                (_, i) => new Date().getFullYear() - i
-              ).map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.franchiseSinceYear && (
-              <Typography variant="caption" color="error">
-                {errors.franchiseSinceYear}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
+        {/* Franchise Since Year */}
+            <Grid item xs={12} sm={6} md={2.4}>
+              <FormControl fullWidth error={!!errors.franchiseSinceYear}>
+                <InputLabel size="medium">
+                  Year Commenced Franchising
+                </InputLabel>
+                <Select
+                  name="franchiseSinceYear"
+                  value={data.franchiseSinceYear || ""}
+                  label="Year Commenced Franchising"
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="medium"
+                  required
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        width: 390,
+                        maxHeight: 300,
+                        "& .MuiList-root": {
+                          display: "grid",
+                          gridTemplateColumns: "repeat(5, 1fr)", // 5 columns for a calendar-like look
+                          gap: "4px",
+                          padding: "4px",
+                        },
+                      },
+                    },
+                  }}
+                >
+                  {Array.from(
+                    { length: 100 },
+                    (_, i) => new Date().getFullYear() - i
+                  ).map((year) => (
+                    <MenuItem
+                      key={year}
+                      value={year}
+                      sx={{
+                        minWidth: 0,
+                        padding: "6px 4px",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors.franchiseSinceYear && (
+                  <Typography variant="caption" color="error">
+                    {errors.franchiseSinceYear}
+                  </Typography>
+                )}
+              </FormControl>
+            </Grid>
+ 
       </Grid>
 
       {/* Franchise Network */}
@@ -709,7 +760,8 @@ const handleRemoveUSP = (index) => {
           </FormControl>
         </Grid>
 
-        {/* Column 5 agreementPeriod */}
+         {/* Column 5 agreementPeriod */}
+ 
         <Grid item>
           <FormControl
             fullWidth
@@ -717,26 +769,54 @@ const handleRemoveUSP = (index) => {
             required
             size="medium"
           >
-            <TextField
-              label="Agreement Period"
-              type="number"
+            <InputLabel>Agreement Period (years)</InputLabel>
+            <Select
+              label="Agreement Period (years)"
               name="agreementPeriod"
-              value={currentFicoModel.agreementPeriod}
+              value={currentFicoModel.agreementPeriod || ""}
               onChange={handleFicoChange}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end" sx={{ mr: 2 }}>
-                    years
-                  </InputAdornment>
-                ),
-                inputProps: { max: 100 },
+              renderValue={(selected) => (selected ? `${selected} years` : "")}
+               endAdornment={
+                <InputAdornment position="end" sx={{ mr: 2 }}>
+                  Years
+                </InputAdornment>
+              }
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    width: 250,
+                    maxHeight: 300,
+                    "& .MuiList-root": {
+                      display: "grid",
+                      gridTemplateColumns: "repeat(5, 1fr)",
+                      gap: "4px",
+                      padding: "4px",
+                    },
+                  },
+                },
               }}
-            />
+            >
+              {Array.from({ length: 50 }, (_, i) => i + 1).map((year) => (
+                <MenuItem
+                  key={year}
+                  value={year}
+                  sx={{
+                    minWidth: 0,
+                    padding: "6px 4px",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
             {errors.agreementPeriod && (
               <FormHelperText error>{errors.agreementPeriod}</FormHelperText>
             )}
           </FormControl>
         </Grid>
+ 
 
         {/* Column 6 - Franchise Fee */}
 
@@ -1377,7 +1457,7 @@ const handleRemoveUSP = (index) => {
                     fontWeight: "bold",
                   }}
                 >
-                  Training And Support Provider:
+                  Training Support Provider:
                 </FormLabel>
               </Box>
               <FormGroup
@@ -1391,10 +1471,10 @@ const handleRemoveUSP = (index) => {
               >
                 {[
                   "Outlet Setup",
-                  "Staff training",
+                  "Staff Training",
                   "Staff Recruitment",
-                  "Operations support",
-                  "Marketing support",
+                  "Operations Support",
+                  "Marketing Support",
                 ].map((option) => (
                   <FormControlLabel
                     key={option}
