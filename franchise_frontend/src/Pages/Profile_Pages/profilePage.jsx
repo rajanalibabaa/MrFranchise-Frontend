@@ -6,20 +6,15 @@ import {
   ListItem, 
   ListItemIcon, 
   ListItemText, 
-  Divider, 
-  Avatar,
-  Typography,
   useTheme,
   styled,
-  Paper
+  Paper,
+  useMediaQuery
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
   Person as ProfileIcon,
   Email as ReachUsIcon,
-  Logout as LogoutIcon,
-  Notifications as NotificationsIcon,
-  Assessment as ReportsIcon,
   Settings as SettingsIcon
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -27,56 +22,55 @@ import Footer from "../../Components/Footers/Footer";
 import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 
-
 const InvestorDashboard = () => {
   const navigate = useNavigate();
-  const dispatch =useDispatch();
+  const dispatch = useDispatch();
   const theme = useTheme();
   const location = useLocation();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // Color palette
   const colors = {
     pistaGreen: '#93C572',
-    lightOrange: '#FFB347',
     darkGreen: '#4A7729',
     creamWhite: '#FFF9F0',
     darkText: '#2D3436'
   };
 
-  // Styled sidebar with improved glass morphism
+  // Fixed width sidebar
   const GlassSidebar = styled(Paper)(({ theme }) => ({
-    width: 280,
+    width: isMobile ? '64px' : '240px', // Fixed widths
+    flexShrink: 0, // Prevent growing
     background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%)`,
     backdropFilter: 'blur(12px)',
     boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.1)',
     borderRight: '1px solid rgba(255, 255, 255, 0.3)',
     display: "flex",
     flexDirection: "column",
-    height: "100vh",
+    height: "80vh",
     position: "sticky",
     top: 0,
-    transition: "all 0.3s ease",
     borderRadius: 0,
     borderTopRightRadius: '24px',
     borderBottomRightRadius: '24px',
     overflow: 'hidden',
-    "&:hover": {
-      boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.2)'
-    },
-    [theme.breakpoints.down('md')]: {
-      width: 240,
-    }
+    marginTop: '1rem',
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
   }));
 
-  // Styled nav items with hover effects
+  // Nav items with fixed dimensions
   const NavItem = styled(ListItem)(({ theme }) => ({
+    minHeight: '48px',
     borderRadius: '12px',
-    margin: '4px 16px',
-    padding: '12px 16px',
+    margin: '4px 8px',
+    padding: isMobile ? '12px 0' : '12px 16px',
+    justifyContent: isMobile ? 'center' : 'flex-start',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     '&:hover': {
       backgroundColor: colors.pistaGreen + '20',
-      transform: 'translateX(5px)',
       '& .MuiListItemIcon-root': {
         color: colors.darkGreen,
       },
@@ -87,7 +81,7 @@ const InvestorDashboard = () => {
     },
     '&.active': {
       backgroundColor: colors.pistaGreen + '30',
-      borderLeft: `4px solid ${colors.pistaGreen}`,
+      // borderLeft: `4px solid ${colors.pistaGreen}`,
       '& .MuiListItemIcon-root': {
         color: colors.darkGreen,
       },
@@ -98,33 +92,6 @@ const InvestorDashboard = () => {
     }
   }));
 
-  // User profile section
-  // const UserProfileSection = () => (
-  //   <Box sx={{ 
-  //     p: 1, 
-  //     textAlign: 'center',
-  //     borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
-  //     background: `linear-gradient(135deg, ${colors.pistaGreen}20 0%, ${colors.lightOrange}10 100%)`
-  //   }}>
-  //     <Avatar 
-  //       sx={{ 
-  //         width: 80, 
-  //         height: 80, 
-  //         margin: '0 auto 16px',
-  //         border: `3px solid ${colors.pistaGreen}`,
-  //         boxShadow: `0 4px 12px ${colors.pistaGreen}40`
-  //       }}
-  //       src="/path-to-user-avatar.jpg"
-  //     />
-  //     <Typography variant="h6" sx={{ fontWeight: 600, color: colors.darkText }}>
-  //       Investor Name
-  //     </Typography>
-  //     <Typography variant="body2" sx={{ color: colors.pistaGreen, fontWeight: 500 }}>
-  //       Premium Member
-  //     </Typography>
-  //   </Box>
-  // );
-
   return (
     <>
       <Box sx={{ 
@@ -133,145 +100,123 @@ const InvestorDashboard = () => {
         minHeight: "calc(100vh - 64px)",
         backgroundColor: colors.creamWhite
       }}>
-        {/* Sidebar */}
+        {/* Sidebar with fixed width */}
         <GlassSidebar elevation={3}>
-          {/* <UserProfileSection /> */}
-
-          {/* Navigation */}
-          <Box sx={{ p: 2, flexGrow: 1 }}>
-            <List>
+          <Box sx={{ p: isMobile ? 1 : 2, flexGrow: 1 }}>
+            <List sx={{ padding: 0 }}>
               <NavItem 
                 button 
                 component={RouterLink} 
                 to="/investordashboard"
                 className={location.pathname === '/investordashboard' ? 'active' : ''}
               >
-                <ListItemIcon sx={{ minWidth: 40, color: colors.darkText }}>
+                <ListItemIcon sx={{ 
+                  minWidth: 0,
+                  color: colors.darkText,
+                  justifyContent: 'center',
+                  mr: isMobile ? 0 : 2
+                }}>
                   <DashboardIcon />
                 </ListItemIcon>
-                <ListItemText 
-                  primary="Dashboard" 
-                  primaryTypographyProps={{ color: colors.darkText }}
-                />
+                {!isMobile && (
+                  <ListItemText 
+                    primary="Dashboard" 
+                    primaryTypographyProps={{ 
+                      color: colors.darkText,
+                      noWrap: true // Prevent text wrapping
+                    }}
+                  />
+                )}
               </NavItem>
               
               <NavItem 
                 button 
-                // component={RouterLink} 
-                onClick={()=>{
+                onClick={() => {
                   dispatch(showLoading());
-                
-                navigate("/investordashboard/manageProfile" );
-                 setTimeout(() => {
-                  dispatch(hideLoading());
-                 } , 5000);
+                  navigate("/investordashboard/manageProfile");
+                  setTimeout(() => {
+                    dispatch(hideLoading());
+                  }, 5000);
                 }}
-
-                className={location.pathname ===  '/investordashboard/manageProfile' ? 'active' : ''}
-                 
+                className={location.pathname === '/investordashboard/manageProfile' ? 'active' : ''}
               >
-                <ListItemIcon sx={{ minWidth: 40, color: colors.darkText }}>
+                <ListItemIcon sx={{ 
+                  minWidth: 0,
+                  color: colors.darkText,
+                  justifyContent: 'center',
+                  mr: isMobile ? 0 : 2
+                }}>
                   <ProfileIcon />
                 </ListItemIcon>
-                <ListItemText 
-                  primary="Manage Profile" 
-                  primaryTypographyProps={{ color: colors.darkText }}
-                />
+                {!isMobile && (
+                  <ListItemText 
+                    primary="Profile" 
+                    primaryTypographyProps={{ 
+                      color: colors.darkText,
+                      noWrap: true
+                    }}
+                  />
+                )}
               </NavItem>
               
               <NavItem 
                 button 
                 component={RouterLink} 
                 to="/investordashboard/respondemanager"
-                className={location.pathname === '/investordashboard/reachus' ? 'active' : ''}
+                className={location.pathname === '/investordashboard/respondemanager' ? 'active' : ''}
               >
-                <ListItemIcon sx={{ minWidth: 40, color: colors.darkText }}>
+                <ListItemIcon sx={{ 
+                  minWidth: 0,
+                  color: colors.darkText,
+                  justifyContent: 'center',
+                  mr: isMobile ? 0 : 2
+                }}>
                   <ReachUsIcon />
                 </ListItemIcon>
-                <ListItemText 
-                  primary="Reach Us" 
-                  primaryTypographyProps={{ color: colors.darkText }}
-                />
+                {!isMobile && (
+                  <ListItemText 
+                    primary="Reach Us" 
+                    primaryTypographyProps={{ 
+                      color: colors.darkText,
+                      noWrap: true
+                    }}
+                  />
+                )}
               </NavItem>
+              
               <NavItem 
                 button 
                 component={RouterLink} 
                 to="/investordashboard/settings"
                 className={location.pathname === '/investordashboard/settings' ? 'active' : ''}
               >
-                <ListItemIcon sx={{ minWidth: 40, color: colors.darkText }}>
+                <ListItemIcon sx={{ 
+                  minWidth: 0,
+                  color: colors.darkText,
+                  justifyContent: 'center',
+                  mr: isMobile ? 0 : 2
+                }}>
                   <SettingsIcon />
                 </ListItemIcon>
-                <ListItemText 
-                  primary="Settings" 
-                  primaryTypographyProps={{ color: colors.darkText }}
-                />
+                {!isMobile && (
+                  <ListItemText 
+                    primary="Settings" 
+                    primaryTypographyProps={{ 
+                      color: colors.darkText,
+                      noWrap: true
+                    }}
+                  />
+                )}
               </NavItem>
-              {/* <NavItem 
-                button 
-                onClick={() => { /* handle logout 
-                sx={{
-                  '&:hover': {
-                    backgroundColor: colors.lightOrange + '20',
-                    '& .MuiListItemIcon-root': {
-                      color: colors.lightOrange,
-                    },
-                    '& .MuiListItemText-primary': {
-                      color: colors.lightOrange,
-                    }
-                  }
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 40, color: colors.darkText }}>
-                  <LogoutIcon />
-                </ListItemIcon>
-                <ListItemText 
-                  primary="Logout" 
-                  primaryTypographyProps={{ color: colors.darkText }}
-                />
-              </NavItem> */}
-
-              {/* <NavItem 
-                button 
-                component={RouterLink} 
-                to="/investordashboard/notifications"
-                className={location.pathname === '/investordashboard/notifications' ? 'active' : ' update soon'}
-              >
-                <ListItemIcon sx={{ minWidth: 40, color: colors.darkText }}>
-                  <NotificationsIcon />
-                </ListItemIcon>
-                <ListItemText 
-                  primary="Notifications" 
-                  primaryTypographyProps={{ color: colors.darkText }}
-                />
-              </NavItem>
-
-              <NavItem 
-                button 
-                component={RouterLink} 
-                to="/investordashboard/reports"
-                className={location.pathname === '/investordashboard/reports' ? 'active' : ''}
-              >
-                <ListItemIcon sx={{ minWidth: 40, color: colors.darkText }}>
-                  <ReportsIcon />
-                </ListItemIcon>
-                <ListItemText 
-                  primary="Reports" 
-                  primaryTypographyProps={{ color: colors.darkText }}
-                />
-              </NavItem> */}
             </List>
           </Box>
-
-          {/* Bottom Section */}
-          
         </GlassSidebar>
 
         {/* Main Content */}
         <Box sx={{ 
           flexGrow: 1, 
           overflowY: "auto",
-          p: 4,
+          p: isMobile ? 2 : 4,
           background: `linear-gradient(to bottom right, ${colors.creamWhite}, #ffffff)`
         }}>
           <Box sx={{ 
@@ -280,7 +225,7 @@ const InvestorDashboard = () => {
             backgroundColor: 'white',
             borderRadius: '24px',
             boxShadow: '0 4px 24px rgba(0,0,0,0.05)',
-            p: 4,
+            p: isMobile ? 2 : 4,
             minHeight: 'calc(100vh - 128px)',
             border: '1px solid rgba(0, 0, 0, 0.05)'
           }}>

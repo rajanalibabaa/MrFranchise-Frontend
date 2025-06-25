@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -10,11 +10,14 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
+  TextField, 
   Snackbar,
   IconButton,
-  MenuItem ,
+  MenuItem,
+  Stack,
 } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
+import Zoom from '@mui/material/Zoom';
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -23,12 +26,27 @@ import axios from "axios";
 import MuiAlert from "@mui/material/Alert";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-// import { categories } from "./BrandLIstingRegister/BrandCategories";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
-
+import { TbPhotoEdit } from "react-icons/tb";
 
 const ManageProfile = () => {
-  const [investorData, setInvestorData] = useState({});
+  // State management
+  const [originalData, setOriginalData] = useState(null);
+  const [investorData, setInvestorData] = useState({
+    firstName: "",
+    email: "",
+    mobileNumber: "",
+    whatsappNumber: "",
+    country: "",
+    occupation: "",
+    state: "",
+    city: "",
+    address: "",
+    pincode: "",
+    preferences: [],
+    profileImage: "",
+    investorID: ""
+  });
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({
@@ -36,91 +54,148 @@ const ManageProfile = () => {
     message: "",
     severity: "success",
   });
-
   const [otpDialogOpen, setOtpDialogOpen] = useState(false);
   const [otpStep, setOtpStep] = useState(1);
   const [contactValue, setContactValue] = useState("");
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
-  const [reguestOTP, setreguestOTP] = useState(false);
-  const [ErrorMSG, setErrorMSG] = useState("");
-
+  const [requestOTP, setRequestOTP] = useState(false);
+  const [errorMSG, setErrorMSG] = useState("");
+  const [indiaData, setIndiaData] = useState([]);
   const [fieldErrors, setFieldErrors] = useState({
+    firstName: "",
     mobileNumber: "",
     whatsappNumber: "",
+    state: "",
+    city: "",
+    address: "",
+    pincode: "",
+    occupation: "",
   });
-  const [statesWithCities, setStatesWithCities] = useState({});
-  const [states, setStates] = useState([]);
-  const [selectedState, setSelectedState] = useState("");
-  const [cities, setCities] = useState([]);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [imagesizeError, setImagesizeError] = useState("");
+  const [isImageRemoved, setIsImageRemoved] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Navigation and Redux
   const navigate = useNavigate();
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
-  const formatNumber = (num) => {
+  // Helper functions
+  const formatNumber = useCallback((num) => {
     if (!num) return "";
     return num.replace(/^(\+91)?/, "").trim();
-  };
-
- useEffect(() => {
-    // Fetch city data
-    const fetchCities = async () => {
-      try {
-        const response = await fetch(
-          "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/cities.json"
-        );
-        const citiesData = await response.json();
-
-        // Filter for Indian cities only
-        const indianCities = citiesData.filter(
-          (city) => city.country_code === "IN"
-        );
-
-        // Group by state
-        const grouped = {};
-        indianCities.forEach((city) => {
-          const state = city.state_name;
-          if (!grouped[state]) {
-            grouped[state] = [];
-          }
-          grouped[state].push(city.name);
-        });
-
-        // Sort states alphabetically
-        const sortedStates = Object.keys(grouped).sort();
-
-        setStatesWithCities(grouped);
-        setStates(sortedStates);
-      } catch (error) {
-        console.error("Failed to fetch cities:", error);
-      }
-    };
-
-    fetchCities();
   }, []);
 
-  // Update cities when a state is selected
-  useEffect(() => {
-    if (selectedState) {
-      setCities(statesWithCities[selectedState]);
-    } else {
-      setCities([]);
-    }
-  }, [selectedState, statesWithCities]);
+  // Handle avatar file change
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const maxSize = 50 * 1024; // 50KB in bytes
 
+      if (file.size > maxSize) {
+        setImagesizeError("Oops! Upload failed — please use an image under 50KB.");
+        return;
+      }
+      
+      if (!file.type.match('image.*')) {
+        setImagesizeError("Please upload an image file (JPEG, PNG, etc.)");
+        return;
+      }
+      
+      setImagesizeError('');
+      setAvatarFile(file);
+      setIsImageRemoved(false);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarFile(null);
+    setAvatarPreview("");
+    setImagesizeError("");
+    setIsImageRemoved(true);
+  };
+
+  // Location data handling
+  const getDistrictsForState = useCallback((stateName) => {
+    if (!stateName) return [];
+    const stateObj = indiaData.find((s) => s.name === stateName);
+    return stateObj?.districts || [];
+  }, [indiaData]);
+
+  const getCitiesForDistrict = useCallback((stateName, districtName) => {
+    if (!stateName || !districtName) return [];
+    const stateObj = indiaData.find((s) => s.name === stateName);
+    if (!stateObj) return [];
+    return (stateObj.cities || [])
+      .filter((city) => city.district === districtName)
+      .map((city) => city.name);
+  }, [indiaData]);
+
+  // State change handler
+  const handleStateChange = (prefIndex, stateName) => {
+    const newPrefs = [...(investorData.preferences || [])];
+    newPrefs[prefIndex] = {
+      ...newPrefs[prefIndex],
+      preferredState: stateName,
+      preferredDistrict: "",
+      preferredCity: ""
+    };
+    setInvestorData({ ...investorData, preferences: newPrefs });
+  };
+
+  // District change handler
+  const handleDistrictChange = (prefIndex, districtName) => {
+    const newPrefs = [...(investorData.preferences || [])];
+    newPrefs[prefIndex] = {
+      ...newPrefs[prefIndex],
+      preferredDistrict: districtName,
+      preferredCity: ""
+    };
+    setInvestorData({ ...investorData, preferences: newPrefs });
+  };
+
+  // Data fetching
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const res = await axios.get(
+          "https://raw.githubusercontent.com/prasad-gowda/india-state-district-cities/master/India-state-district-city.json"
+        );
+        setIndiaData(res.data);
+      } catch (err) {
+        console.error("Error fetching location data:", err);
+        setIndiaData([]);
+        setSnackbar({
+          open: true,
+          message: "Failed to load location data. Some features may not work properly.",
+          severity: "warning",
+        });
+      }
+    };
+    fetchStates();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!investorUUID || !AccessToken) {
         setLoading(false);
+        navigate("/loginpage");
         return;
       }
 
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -128,33 +203,45 @@ const ManageProfile = () => {
             },
           }
         );
-
+        
         if (response.data?.data) {
           const data = response.data.data;
           const formattedData = {
             ...data,
             mobileNumber: formatNumber(data.mobileNumber),
             whatsappNumber: formatNumber(data.whatsappNumber),
+            occupation: data.occupation || "",
             preferences:
               data.preferences?.map((pref) => ({
                 ...pref,
-                category: Array.isArray(pref.category)
-                  ? pref.category
-                  : [],
+                category: Array.isArray(pref.category) ? pref.category : [],
               })) || [],
           };
           setInvestorData(formattedData);
+          setOriginalData(formattedData);
+          setAvatarPreview(data.profileImage || "");
+        } else {
+          throw new Error("No data received from server");
         }
       } catch (error) {
         console.error("Error fetching investor data:", error);
+        setSnackbar({
+          open: true,
+          message: "Failed to load profile data. Please try again later.",
+          severity: "error",
+        });
+        if (error.response?.status === 401) {
+          navigate("/loginpage");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [investorUUID, AccessToken]);
+  }, [investorUUID, AccessToken, navigate, formatNumber]);
 
+  // OTP handling
   const handleEditToggle = () => {
     setOtpDialogOpen(true);
     setOtpStep(1);
@@ -167,17 +254,22 @@ const ManageProfile = () => {
   const handleRequestOtp = async () => {
     if (!contactValue) return;
     setErrorMSG("");
-    setreguestOTP(true);
+    setRequestOTP(true);
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otp/existingEmailOTP",
+        "http://localhost:5000/api/v1/otp/existingEmailOTP",
         { email: investorData.email },
         { headers: { "Content-Type": "application/json" } }
       );
 
       if (response.data.success) {
         setOtpStep(2);
+        setSnackbar({
+          open: true,
+          message: "OTP sent successfully!",
+          severity: "success",
+        });
       } else {
         setErrorMSG(
           response.data.message || "Failed to send OTP. Please try again."
@@ -185,9 +277,12 @@ const ManageProfile = () => {
       }
     } catch (error) {
       console.error("OTP request error:", error);
-      setErrorMSG("An error occurred while requesting OTP.");
+      setErrorMSG(
+        error.response?.data?.message || 
+        "An error occurred while requesting OTP. Please try again later."
+      );
     } finally {
-      setreguestOTP(false);
+      setRequestOTP(false);
     }
   };
 
@@ -197,13 +292,18 @@ const ManageProfile = () => {
       return;
     }
 
+    if (!/^\d{6}$/.test(otp)) {
+      setOtpError("OTP must be 6 digits");
+      return;
+    }
+
     setOtpError("");
     setErrorMSG("");
-    setreguestOTP(true);
+    setRequestOTP(true);
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otp/verifyExistingEmailOTP",
+        "http://localhost:5000/api/v1/otp/verifyExistingEmailOTP",
         {
           email: investorData.email,
           verifyOTP: otp,
@@ -214,65 +314,349 @@ const ManageProfile = () => {
       if (response.data.success) {
         setEditMode(true);
         setOtpDialogOpen(false);
-        setOtpStep(2);
+        setSnackbar({
+          open: true,
+          message: "OTP verified successfully! You can now edit your profile.",
+          severity: "success",
+        });
       } else {
-        setOtpError("Failed to verify OTP. Please try again.");
+        setOtpError(response.data.message || "Invalid OTP. Please try again.");
       }
     } catch (error) {
       console.error("OTP verification error:", error);
-      setOtpError("An error occurred during OTP verification.");
+      setOtpError(
+        error.response?.data?.message || 
+        "An error occurred during OTP verification. Please try again."
+      );
     } finally {
-      setreguestOTP(false);
+      setRequestOTP(false);
     }
   };
 
-  const handleSave = async () => {
-    const dataToUpdate = {
-      ...investorData,
-      mobileNumber: "+91" + formatNumber(investorData.mobileNumber),
-      whatsappNumber: "+91" + formatNumber(investorData.whatsappNumber),
+  // Validate all fields
+  const validateFields = useCallback(() => {
+    const errors = {
+      firstName: "",
+      mobileNumber: "",
+      whatsappNumber: "",
+      state: "",
+      city: "",
+      address: "",
+      pincode: "",
+      occupation: "",
     };
+    let isValid = true;
 
-    const errors = { mobileNumber: "", whatsappNumber: "" };
-    let hasError = false;
+    // Validate firstName
+    if (!investorData.firstName?.trim()) {
+      errors.firstName = "First name is required";
+      isValid = false;
+    } else if (investorData.firstName.trim().length < 2) {
+      errors.firstName = "First name must be at least 2 characters";
+      isValid = false;
+    }
 
-    const validatePhone = (field) => {
-      const number = formatNumber(dataToUpdate[field]);
-      if (!/^\d{10}$/.test(number)) {
-        errors[field] = "Number must be exactly 10 digits.";
-        hasError = true;
+    // Validate mobileNumber
+    const mobileNumber = formatNumber(investorData.mobileNumber);
+    if (!mobileNumber) {
+      errors.mobileNumber = "Mobile number is required";
+      isValid = false;
+    } else if (!/^\d{10}$/.test(mobileNumber)) {
+      errors.mobileNumber = "Mobile number must be 10 digits";
+      isValid = false;
+    }
+
+    // Validate whatsappNumber
+    const whatsappNumber = formatNumber(investorData.whatsappNumber);
+    if (!whatsappNumber) {
+      errors.whatsappNumber = "WhatsApp number is required";
+      isValid = false;
+    } else if (!/^\d{10}$/.test(whatsappNumber)) {
+      errors.whatsappNumber = "WhatsApp number must be 10 digits";
+      isValid = false;
+    }
+
+    // Validate state
+    if (!investorData.state?.trim()) {
+      errors.state = "State is required";
+      isValid = false;
+    }
+
+    // Validate city
+    if (!investorData.city?.trim()) {
+      errors.city = "City is required";
+      isValid = false;
+    }
+
+    // Validate address
+    if (!investorData.address?.trim()) {
+      errors.address = "Address is required";
+      isValid = false;
+    } else if (investorData.address.trim().length < 10) {
+      errors.address = "Address must be at least 10 characters";
+      isValid = false;
+    }
+
+    // Validate pincode
+    if (!investorData.pincode) {
+      errors.pincode = "Pincode is required";
+      isValid = false;
+    } else if (!/^\d{6}$/.test(investorData.pincode)) {
+      errors.pincode = "Pincode must be 6 digits";
+      isValid = false;
+    }
+
+    // Validate occupation
+    if (!investorData.occupation) {
+      errors.occupation = "Occupation is required";
+      isValid = false;
+    }
+
+    // Validate preferences
+    if (!investorData.preferences || investorData.preferences.length === 0) {
+      setSnackbar({
+        open: true,
+        message: "At least one preference is required",
+        severity: "error",
+      });
+      isValid = false;
+    } else {
+      for (const pref of investorData.preferences) {
+        if (!pref.investmentRange) {
+          setSnackbar({
+            open: true,
+            message: "Investment range is required for all preferences",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        
+        if (!pref.investmentAmount) {
+          setSnackbar({
+            open: true,
+            message: "Investment amount is required for all preferences",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        
+        if (!pref.propertyType) {
+          setSnackbar({
+            open: true,
+            message: "Property type is required for all preferences",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        
+        if (pref.propertyType === "Own Property" && !pref.propertySize) {
+          setSnackbar({
+            open: true,
+            message: "Property size is required when property type is Own Property",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        
+        if (!pref.preferredState) {
+          setSnackbar({
+            open: true,
+            message: "Preferred state is required for all preferences",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        
+        if (!pref.preferredDistrict) {
+          setSnackbar({
+            open: true,
+            message: "Preferred district is required for all preferences",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        
+        if (!pref.preferredCity) {
+          setSnackbar({
+            open: true,
+            message: "Preferred city is required for all preferences",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        
+        if (!pref.category || pref.category.length === 0) {
+          setSnackbar({
+            open: true,
+            message: "At least one category is required for each preference",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+        
+        for (const cat of pref.category) {
+          if (!cat.main) {
+            setSnackbar({
+              open: true,
+              message: "Main category is required for all categories",
+              severity: "error",
+            });
+            isValid = false;
+            break;
+          }
+        }
       }
-    };
-
-    validatePhone("mobileNumber");
-    validatePhone("whatsappNumber");
+    }
 
     setFieldErrors(errors);
-    if (hasError) return;
+    return isValid;
+  }, [investorData, formatNumber]);
+
+  // Get only changed fields
+  const getChangedFields = useCallback(() => {
+    if (!originalData) return {};
+    
+    const changes = {};
+    
+    // Basic fields
+    const fieldsToCheck = [
+      'firstName', 'mobileNumber', 'whatsappNumber', 'state', 
+      'city', 'address', 'pincode', 'occupation'
+    ];
+    
+    fieldsToCheck.forEach(field => {
+      if (investorData[field] !== originalData[field]) {
+        changes[field] = investorData[field];
+      }
+    });
+    
+    // Handle phone numbers
+    if (formatNumber(investorData.mobileNumber) !== formatNumber(originalData.mobileNumber)) {
+      changes.mobileNumber = "+91" + formatNumber(investorData.mobileNumber);
+    }
+    
+    if (formatNumber(investorData.whatsappNumber) !== formatNumber(originalData.whatsappNumber)) {
+      changes.whatsappNumber = "+91" + formatNumber(investorData.whatsappNumber);
+    }
+    
+    // Handle preferences if changed
+    if (JSON.stringify(investorData.preferences) !== JSON.stringify(originalData.preferences)) {
+      changes.preferences = investorData.preferences;
+    }
+    
+    // Handle profile image changes
+    if (avatarFile) {
+      changes.profileImage = avatarFile;
+    } else if (isImageRemoved) {
+      changes.removeProfileImage = true;
+    }
+    
+    return changes;
+  }, [originalData, investorData, avatarFile, isImageRemoved, formatNumber]);
+
+  // Form handling
+  const handleSave = async () => {
+    if (!validateFields()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    const changedFields = getChangedFields();
+    
+    // If nothing changed, just exit edit mode
+    if (Object.keys(changedFields).length === 0 && !avatarFile && !isImageRemoved) {
+      setEditMode(false);
+      setSnackbar({
+        open: true,
+        message: "No changes detected",
+        severity: "info",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    const formData = new FormData();
+    
+    // Append only changed fields
+    Object.entries(changedFields).forEach(([key, value]) => {
+      if (key === 'profileImage') {
+        formData.append(key, value);
+      } else if (key === 'preferences') {
+        formData.append(key, JSON.stringify(value));
+      } else if (key !== 'removeProfileImage') {
+        formData.append(key, value);
+      }
+    });
+    
+    if (changedFields.removeProfileImage) {
+      formData.append("removeProfileImage", "true");
+    }
 
     try {
-      await axios.patch(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/updateInvestor/${investorUUID}`,
-        dataToUpdate,
+      const response = await axios.patch(
+        `http://localhost:5000/api/v1/investor/updateInvestor/${investorUUID}`,
+        formData,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${AccessToken}`,
           },
         }
       );
-      setEditMode(false);
-      setSnackbar({
-        open: true,
-        message: "Profile successfully updated!",
-        severity: "success",
-      });
+
+      if (response.data.success) {
+        const updatedData = response.data.data;
+        const newOriginalData = {
+          ...originalData,
+          ...updatedData,
+          mobileNumber: formatNumber(updatedData.mobileNumber),
+          whatsappNumber: formatNumber(updatedData.whatsappNumber),
+          profileImage: updatedData.profileImage || "",
+        };
+        
+        setOriginalData(newOriginalData);
+        setInvestorData(newOriginalData);
+        
+        if (avatarFile) {
+          setAvatarPreview(URL.createObjectURL(avatarFile));
+        } else if (isImageRemoved) {
+          setAvatarPreview("");
+        }
+        
+        setAvatarFile(null);
+        setIsImageRemoved(false);
+        setEditMode(false);
+        
+        setSnackbar({
+          open: true,
+          message: "Profile successfully updated!",
+          severity: "success",
+        });
+      } else {
+        throw new Error(response.data.message || "Failed to update profile");
+      }
     } catch (error) {
       console.error("Error saving investor data:", error);
-      setSnackbar({ open: true, message: "Failed to update profile.", severity: "error" });
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || "Failed to update profile. Please try again.",
+        severity: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  // Preference handling
   const handlePreferenceChange = (index, key, value) => {
     const newPrefs = [...(investorData.preferences || [])];
     newPrefs[index] = { ...newPrefs[index], [key]: value };
@@ -299,11 +683,9 @@ const ManageProfile = () => {
   const removeCategory = (prefIndex, catIndex) => {
     const newPrefs = [...(investorData.preferences || [])];
     const newCategories = [...(newPrefs[prefIndex].category || [])];
-    if (newCategories.length > 1) {
-      newCategories.splice(catIndex, 1);
-      newPrefs[prefIndex].category = newCategories;
-      setInvestorData({ ...investorData, preferences: newPrefs });
-    }
+    newCategories.splice(catIndex, 1);
+    newPrefs[prefIndex].category = newCategories;
+    setInvestorData({ ...investorData, preferences: newPrefs });
   };
 
   const addPreference = () => {
@@ -324,14 +706,26 @@ const ManageProfile = () => {
 
   const removePreference = (index) => {
     const newPrefs = [...(investorData.preferences || [])];
-    newPrefs.splice(index, 1);
-    setInvestorData({ ...investorData, preferences: newPrefs });
+    if (newPrefs.length > 1) {
+      newPrefs.splice(index, 1);
+      setInvestorData({ ...investorData, preferences: newPrefs });
+    } else {
+      setSnackbar({
+        open: true,
+        message: "At least one preference is required",
+        severity: "error",
+      });
+    }
   };
 
+  // Render helpers
   const renderField = (label, key, isReadOnly = false) => {
     const value = investorData[key];
     const isPhoneField = key === "mobileNumber" || key === "whatsappNumber";
     const isReadOnlyField = isReadOnly || key === "country" || key === "email";
+    const isOccupationField = key === "occupation";
+    const isPincodeField = key === "pincode";
+    const isAddressField = key === "address";
 
     let displayValue = "";
     if (Array.isArray(value)) {
@@ -350,23 +744,86 @@ const ManageProfile = () => {
         {editMode && !isReadOnlyField ? (
           <Box display="flex" alignItems="center">
             {isPhoneField && <Typography sx={{ mr: 1 }}>+91</Typography>}
-            <TextField
-              fullWidth
-              variant="outlined"
-              size="small"
-              value={value || ""}
-              onChange={(e) => {
-                setInvestorData({ ...investorData, [key]: e.target.value });
-                setFieldErrors({ ...fieldErrors, [key]: "" });
-              }}
-              error={!!fieldErrors[key]}
-              helperText={fieldErrors[key]}
-            />
+            {isOccupationField ? (
+              <TextField
+                select
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={value || ""}
+                onChange={(e) => {
+                  setInvestorData({ ...investorData, [key]: e.target.value });
+                  setFieldErrors({ ...fieldErrors, [key]: "" });
+                }}
+                error={!!fieldErrors[key]}
+                helperText={fieldErrors[key]}
+                required
+              >
+                <MenuItem value="Investor">Investor</MenuItem>
+                <MenuItem value="Brand">Brand</MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
+              </TextField>
+            ) : isPincodeField ? (
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={value || ""}
+                onChange={(e) => {
+                  const input = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  setInvestorData({ ...investorData, [key]: input });
+                  setFieldErrors({ ...fieldErrors, [key]: "" });
+                }}
+                error={!!fieldErrors[key]}
+                helperText={fieldErrors[key]}
+                inputProps={{ maxLength: 6 }}
+                required
+              />
+            ) : isAddressField ? (
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={value || ""}
+                onChange={(e) => {
+                  setInvestorData({ ...investorData, [key]: e.target.value });
+                  setFieldErrors({ ...fieldErrors, [key]: "" });
+                }}
+                error={!!fieldErrors[key]}
+                helperText={fieldErrors[key]}
+                required
+                multiline
+                rows={3}
+              />
+            ) : (
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={value || ""}
+                onChange={(e) => {
+                  setInvestorData({ ...investorData, [key]: e.target.value });
+                  setFieldErrors({ ...fieldErrors, [key]: "" });
+                }}
+                error={!!fieldErrors[key]}
+                helperText={fieldErrors[key]}
+                required={!isPhoneField}
+                inputProps={isPhoneField ? { maxLength: 10 } : {}}
+              />
+            )}
           </Box>
         ) : (
           <Typography
             variant="body1"
-            sx={{ backgroundColor: "#f5f5f5", p: 1, borderRadius: 1 }}
+            sx={{ 
+              backgroundColor: "#f5f5f5", 
+              p: 1, 
+              borderRadius: 1,
+              whiteSpace: "pre-wrap",
+              minHeight: isAddressField ? "60px" : "auto",
+              display: "flex",
+              alignItems: isAddressField ? "flex-start" : "center"
+            }}
           >
             {isPhoneField ? `+91 ${displayValue}` : displayValue || "-----"}
           </Typography>
@@ -390,12 +847,72 @@ const ManageProfile = () => {
 
   if (!investorData || Object.keys(investorData).length === 0) {
     return (
-      <Typography variant="h6" align="center" mt={4}>
-        Unable to load profile. Please login again{" "}
-        <Button onClick={() => navigate("/loginpage")}>Login</Button>
-      </Typography>
+      <Box textAlign="center" mt={4}>
+        <Typography variant="h6" gutterBottom>
+          Unable to load profile. Please try again later.
+        </Typography>
+        <Button 
+          variant="contained" 
+          onClick={() => navigate("/loginpage")}
+          sx={{ mt: 2 }}
+        >
+          Back to Login
+        </Button>
+      </Box>
     );
   }
+
+  const handleOpenSnackbar = () => {
+    setSnackbarOpen(true);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
+
+  const handleConfirm = async () => {
+    try {
+      setSnackbarOpen(false);
+      
+      const response = await axios.patch(
+        `http://localhost:5000/api/v1/investor/deleteInvestorProfileImage/${investorUUID}`,
+        { removeProfileImage: true },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          }
+        }
+      );
+
+      if (response.data.success) {
+        const updatedData = {
+          ...originalData,
+          profileImage: ""
+        };
+        setOriginalData(updatedData);
+        setInvestorData(updatedData);
+        setAvatarPreview("");
+        setAvatarFile(null);
+        setIsImageRemoved(true);
+        
+        setSnackbar({
+          open: true,
+          message: "Profile image removed successfully!",
+          severity: "success",
+        });
+      } else {
+        throw new Error(response.data.message || "Failed to remove profile image");
+      }
+    } catch (error) {
+      console.error("Error removing profile image:", error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || "Failed to remove profile image",
+        severity: "error",
+      });
+    }
+  };
 
   return (
     <Box px={2}>
@@ -413,12 +930,45 @@ const ManageProfile = () => {
       >
         Manage Profile
       </Typography>
-
+       
       <Box display="flex" justifyContent="center">
         <Paper
           elevation={4}
-          sx={{ padding: 4, borderRadius: 4, width: "100%", maxWidth: 700 }}
+          sx={{ 
+            padding: 4, 
+            borderRadius: 4, 
+            width: "100%", 
+            maxWidth: 700,
+            position: "relative"
+          }}
         >
+          {editMode && (
+            <IconButton
+              onClick={() => {
+                if (isSubmitting) return;
+                setEditMode(false);
+                setInvestorData(originalData);
+                setAvatarFile(null);
+                setAvatarPreview(originalData.profileImage || "");
+                setIsImageRemoved(false);
+                setImagesizeError("");
+              }}
+              sx={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                color: 'text.secondary',
+                '&:hover': {
+                  color: 'error.main',
+                  backgroundColor: 'rgba(244, 67, 54, 0.08)'
+                }
+              }}
+              disabled={isSubmitting}
+            >
+              <CloseIcon />
+            </IconButton>
+          )}
+
           <Box
             display="flex"
             justifyContent="space-between"
@@ -432,19 +982,148 @@ const ManageProfile = () => {
               variant="outlined"
               startIcon={editMode ? <SaveIcon /> : <EditIcon />}
               onClick={editMode ? handleSave : handleEditToggle}
-              sx={{ borderRadius: 3, textTransform: "none", fontWeight: 600, px: 2.5, py: 1 }}
+              sx={{ 
+                borderRadius: 3, 
+                textTransform: "none", 
+                fontWeight: 600, 
+                px: 2.5, 
+                py: 1 
+              }}
+              disabled={isSubmitting}
             >
-              {editMode ? "Save" : "Edit"}
+              {editMode ? (isSubmitting ? "Saving..." : "Save") : "Edit"}
             </Button>
           </Box>
 
           <Box display="flex" alignItems="center" mb={3}>
-            <Avatar
-              alt="Investor Avatar"
-              src={investorData.profileImage}
-              sx={{ width: 64, height: 64, mr: 2 }}
-            />
-            <Typography variant="h6">{investorData.investorID}</Typography>
+            {editMode ? (
+              <Box width="100%">
+                <Box display="flex" alignItems="center">
+                  {/* Avatar Display */}
+                  <Avatar
+                    alt="Investor Avatar"
+                    src={avatarPreview || (isImageRemoved ? "" : investorData.profileImage)}
+                    sx={{ 
+                      width: 80, 
+                      height: 80,
+                      mx: 2
+                    }}
+                  />
+
+                  {/* Action Buttons */}
+                  <Box display="flex">
+                    {/* Edit Button */}
+                    <Box mx={1}>
+                      <input
+                        id={`avatar-upload-${investorUUID}`}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={handleAvatarChange}
+                        disabled={isSubmitting}
+                      />
+                      <IconButton
+                        component="label"
+                        htmlFor={`avatar-upload-${investorUUID}`}
+                        size="medium"
+                        color="primary"
+                        sx={{ 
+                          backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.12)',
+                          }
+                        }}
+                        disabled={isSubmitting}
+                      >
+                        <TbPhotoEdit />
+                      </IconButton>
+                    </Box>
+
+                    {/* Delete Button - Only show if there's an image to delete */}
+                    {(avatarPreview || investorData.profileImage) && !isImageRemoved && (
+                      <Box mx={1}>
+                        <IconButton
+                          size="medium"
+                          color="error"
+                          onClick={handleRemoveAvatar}
+                          sx={{ 
+                            backgroundColor: 'rgba(244, 67, 54, 0.08)',
+                            '&:hover': {
+                              backgroundColor: 'rgba(244, 67, 54, 0.12)',
+                            }
+                          }}
+                          disabled={isSubmitting}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    )}
+                  </Box>
+
+                  <Typography variant="h6" ml={2}>{investorData.investorID}</Typography>
+                </Box>
+
+                {/* Instruction text */}
+                <Typography 
+                  variant="caption" 
+                  display="block"
+                  mt={1}
+                  ml={2}
+                  color="text.secondary"
+                >
+                  Click edit icon to change photo (max 50KB)
+                </Typography>
+
+                {/* Error message */}
+                {imagesizeError && (
+                  <Box mt={1} ml={2}>
+                    <MuiAlert severity="error" sx={{ width: 'fit-content' }}>
+                      {imagesizeError}
+                    </MuiAlert>
+                  </Box>
+                )}
+              </Box>
+            ) : (
+              /* View Mode */
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ 
+                  position: 'relative',
+                  display: 'inline-block',
+                  mr: 2
+                }}>
+                  <Avatar
+                    alt="Investor Avatar"
+                    src={investorData.profileImage}
+                    sx={{
+                      width: 84,
+                      height: 84,
+                    }}
+                  />
+                  {investorData.profileImage && (
+                    <CloseIcon
+                      onClick={handleOpenSnackbar}
+                      sx={{
+                        position: 'absolute',
+                        top: '4px',
+                        right: '4px',
+                        fontSize: 18,
+                        backgroundColor: '#fff',
+                        borderRadius: '50%',
+                        padding: '2px',
+                        cursor: 'pointer',
+                        boxShadow: 1,
+                        transition: 'all 0.2s ease-in-out',
+                        '&:hover': {
+                          backgroundColor: '#f44336',
+                          color: '#fff',
+                        },
+                      }}
+                    />
+                  )}
+                </Box>
+                <Typography variant="h6">{investorData.investorID}</Typography>
+              </Box>
+            )}
           </Box>
 
           {renderField("First Name", "firstName")}
@@ -452,6 +1131,11 @@ const ManageProfile = () => {
           {renderField("Mobile Number", "mobileNumber")}
           {renderField("Whatsapp Number", "whatsappNumber")}
           {renderField("Country", "country", true)}
+          {renderField("State", "state")}
+          {renderField("City", "city")}
+          {renderField("Address", "address")}
+          {renderField("Pincode", "pincode")}
+          {renderField("Occupation", "occupation")}
 
           <Box mt={4}>
             <Typography variant="h6" fontWeight={600} mb={2}>
@@ -462,7 +1146,13 @@ const ManageProfile = () => {
               <Paper
                 key={pref._id || prefIndex}
                 elevation={2}
-                sx={{ p: 2, mb: 3, borderRadius: 2, backgroundColor: "#f9f9f9" }}
+                sx={{ 
+                  p: 2, 
+                  mb: 3, 
+                  borderRadius: 2, 
+                  backgroundColor: "#f9f9f9",
+                  position: "relative"
+                }}
               >
                 <Box
                   display="flex"
@@ -478,6 +1168,7 @@ const ManageProfile = () => {
                       size="small"
                       color="error"
                       onClick={() => removePreference(prefIndex)}
+                      disabled={investorData.preferences.length <= 1 || isSubmitting}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -485,53 +1176,63 @@ const ManageProfile = () => {
                 </Box>
 
                 <Box display="flex" flexDirection="column" gap={1}>
+                  {/* Investment Range */}
                   <TextField
                     size="small"
                     label="Investment Range"
                     value={pref.investmentRange || ""}
                     onChange={(e) =>
-                      handlePreferenceChange(prefIndex, "investmentRange", e.target.value)
+                      handlePreferenceChange(
+                        prefIndex,
+                        "investmentRange",
+                        e.target.value
+                      )
                     }
                     disabled={!editMode}
                     select
-                    SelectProps={{
-                      native: true,
-                    }}
+                    required
+                    error={editMode && !pref.investmentRange}
+                    helperText={editMode && !pref.investmentRange ? "This field is required" : ""}
                   >
-                    {/* <option value="">Select Preferred Investment Range</option> */}
-                    <option value="having amount">Having Investment Amount Ready</option>
-                    <option value="take loan">Planning to take a Loan</option>
-                    <option value="need loan">Need Loan Assistance</option>
+                    <MenuItem value="">Select Investment Range</MenuItem>
+                    <MenuItem value="having amount">Having Investment Amount Ready</MenuItem>
+                    <MenuItem value="take loan">Planning to take a Loan</MenuItem>
+                    <MenuItem value="need loan">Need Loan Assistance</MenuItem>
                   </TextField>
+
+                  {/* Investment Amount */}
                   <TextField
                     size="small"
                     label="Investment Amount"
                     value={pref.investmentAmount || ""}
                     onChange={(e) =>
-                      handlePreferenceChange(prefIndex, "investmentAmount", e.target.value)
+                      handlePreferenceChange(
+                        prefIndex,
+                        "investmentAmount",
+                        e.target.value
+                      )
                     }
                     disabled={!editMode}
-                     select
-                    SelectProps={{
-                      native: true,
-                    }}
+                    select
+                    required
+                    error={editMode && !pref.investmentAmount}
+                    helperText={editMode && !pref.investmentAmount ? "This field is required" : ""}
                   >
-                    {/* <option value="">
-                        Select preferred Investment Amount
-                      </option> */}
-                      <option value="Below-50,000">Below - Rs.50 K</option>
-                      <option value="Rs.50,000-2L">Rs.50 K - 2 L</option>
-                      <option value="Rs.2L-5L">Rs.2 L - 5 L</option>
-                      <option value="Rs.5L-10L">Rs.5 L - 10 L</option>
-                      <option value="Rs.10L-20L">Rs.10 L - 20 L</option>
-                      <option value="Rs.20L-30L">Rs.20 L - 30 L</option>
-                      <option value="Rs.30L-50L">Rs.30 L - 50 L</option>
-                      <option value="Rs.50L-1Cr">Rs.50 L - 1 Cr</option>
-                      <option value="Rs.1Cr-2Cr">Rs.1 Cr - 2 Cr</option>
-                      <option value="Rs.2Cr-5Cr">Rs.2 Cr - 5 Cr</option>
-                      <option value="Rs.5Cr-above">Rs.5 Cr - Above</option>
+                    <MenuItem value="">Select Investment Amount</MenuItem>
+                    <MenuItem value="Below-50,000">Below - Rs.50 K</MenuItem>
+                    <MenuItem value="Rs.50,000-2L">Rs.50 K - 2 L</MenuItem>
+                    <MenuItem value="Rs.2L-5L">Rs.2 L - 5 L</MenuItem>
+                    <MenuItem value="Rs.5L-10L">Rs.5 L - 10 L</MenuItem>
+                    <MenuItem value="Rs.10L-20L">Rs.10 L - 20 L</MenuItem>
+                    <MenuItem value="Rs.20L-30L">Rs.20 L - 30 L</MenuItem>
+                    <MenuItem value="Rs.30L-50L">Rs.30 L - 50 L</MenuItem>
+                    <MenuItem value="Rs.50L-1Cr">Rs.50 L - 1 Cr</MenuItem>
+                    <MenuItem value="Rs.1Cr-2Cr">Rs.1 Cr - 2 Cr</MenuItem>
+                    <MenuItem value="Rs.2Cr-5Cr">Rs.2 Cr - 5 Cr</MenuItem>
+                    <MenuItem value="Rs.5Cr-above">Rs.5 Cr - Above</MenuItem>
                   </TextField>
 
+                  {/* Property Type */}
                   <TextField
                     size="small"
                     label="Property Type"
@@ -539,212 +1240,288 @@ const ManageProfile = () => {
                     onChange={(e) => {
                       const newValue = e.target.value;
                       const newPrefs = [...(investorData.preferences || [])];
-                      
-                      // Update propertyType
                       newPrefs[prefIndex] = {
                         ...newPrefs[prefIndex],
-                        propertyType: newValue
+                        propertyType: newValue,
+                        propertySize: newValue === "Own Property" ? pref.propertySize : "",
                       };
-                      
-                      // Clear propertySize if not "Own Property"
-                      if (newValue !== "Own Property") {
-                        newPrefs[prefIndex] = {
-                          ...newPrefs[prefIndex],
-                          propertySize: ""
-                        };
-                      }
-                      
                       setInvestorData({ ...investorData, preferences: newPrefs });
                     }}
                     disabled={!editMode}
                     select
                     fullWidth
+                    required
+                    error={editMode && !pref.propertyType}
+                    helperText={editMode && !pref.propertyType ? "This field is required" : ""}
                   >
-                    {/* <MenuItem value="">Select Property Type</MenuItem> */}
+                    <MenuItem value="">Select Property Type</MenuItem>
                     <MenuItem value="Own Property">Own Property</MenuItem>
                     <MenuItem value="Rental Property">Rental Property</MenuItem>
                   </TextField>
 
-                  <TextField
-                    size="small"
-                    label="Property Size"
-                    value={pref.propertySize || ""}
-                    onChange={(e) =>
-                      handlePreferenceChange(prefIndex, "propertySize", e.target.value)
-                    }
-                    disabled={!editMode || pref.propertyType !== "Own Property"}
-                    select
-                    fullWidth
-                  >
-                    <MenuItem value="">Select Total Area</MenuItem>
-                    <MenuItem value="Below - 100 sq ft">Below - 100 sq ft</MenuItem>
-                    <MenuItem value="100 sq ft - 200 sq ft">100 sq ft - 200 sq ft</MenuItem>
-                    <MenuItem value="200 sq ft - 500 sq ft">200 sq ft - 500 sq ft</MenuItem>
-                    <MenuItem value="500 sq ft - 1000 sq ft">500 sq ft - 1000 sq ft</MenuItem>
-                    <MenuItem value="1000 sq ft - 1500 sq ft">1000 sq ft - 1500 sq ft</MenuItem>
-                    <MenuItem value="1500 sq ft - 2000 sq ft">1500 sq ft - 2000 sq ft</MenuItem>
-                    <MenuItem value="2000 sq ft - 3000 sq ft">2000 sq ft - 3000 sq ft</MenuItem>
-                    <MenuItem value="3000 sq ft - 5000 sq ft">3000 sq ft - 5000 sq ft</MenuItem>
-                    <MenuItem value="5000 sq ft - 7000 sq ft">5000 sq ft - 7000 sq ft</MenuItem>
-                    <MenuItem value="7000 sq ft - 10000 sq ft">7000 sq ft - 10000 sq ft</MenuItem>
-                    <MenuItem value="Above 10000 sq ft">Above 10000 sq ft</MenuItem>
-                  </TextField>
-                  
+                  {/* Property Size */}
+                  {pref.propertyType === "Own Property" && (
+                    <TextField
+                      size="small"
+                      label="Property Size"
+                      value={pref.propertySize || ""}
+                      onChange={(e) =>
+                        handlePreferenceChange(
+                          prefIndex,
+                          "propertySize",
+                          e.target.value
+                        )
+                      }
+                      disabled={!editMode}
+                      select
+                      fullWidth
+                      required
+                      error={editMode && !pref.propertySize}
+                      helperText={editMode && !pref.propertySize ? "This field is required" : ""}
+                    >
+                      <MenuItem value="">Select Total Area</MenuItem>
+                      <MenuItem value="Below - 100 sq ft">Below - 100 sq ft</MenuItem>
+                      <MenuItem value="100 sq ft - 200 sq ft">100 sq ft - 200 sq ft</MenuItem>
+                      <MenuItem value="200 sq ft - 500 sq ft">200 sq ft - 500 sq ft</MenuItem>
+                      <MenuItem value="500 sq ft - 1000 sq ft">500 sq ft - 1000 sq ft</MenuItem>
+                      <MenuItem value="1000 sq ft - 1500 sq ft">1000 sq ft - 1500 sq ft</MenuItem>
+                      <MenuItem value="1500 sq ft - 2000 sq ft">1500 sq ft - 2000 sq ft</MenuItem>
+                      <MenuItem value="2000 sq ft - 3000 sq ft">2000 sq ft - 3000 sq ft</MenuItem>
+                      <MenuItem value="3000 sq ft - 5000 sq ft">3000 sq ft - 5000 sq ft</MenuItem>
+                      <MenuItem value="5000 sq ft - 7000 sq ft">5000 sq ft - 7000 sq ft</MenuItem>
+                      <MenuItem value="7000 sq ft - 10000 sq ft">7000 sq ft - 10000 sq ft</MenuItem>
+                      <MenuItem value="Above 10000 sq ft">Above 10000 sq ft</MenuItem>
+                    </TextField>
+                  )}
+
+                  {/* Location Selection */}
                   <TextField
                     size="small"
                     label="Preferred State"
                     value={pref.preferredState || ""}
-                    onChange={(e) =>
-                      handlePreferenceChange(prefIndex, "preferredState", e.target.value)
-                    }
-                    disabled={!editMode}
-                  />
+                    onChange={(e) => handleStateChange(prefIndex, e.target.value)}
+                    disabled={!editMode || indiaData.length === 0}
+                    select
+                    fullWidth
+                    required
+                    error={editMode && !pref.preferredState}
+                    helperText={editMode && !pref.preferredState ? "This field is required" : ""}
+                  >
+                    <MenuItem value="">Select State</MenuItem>
+                    {indiaData.map((state) => (
+                      <MenuItem key={state.name} value={state.name}>
+                        {state.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+
                   <TextField
                     size="small"
                     label="Preferred District"
                     value={pref.preferredDistrict || ""}
-                    onChange={(e) =>
-                      handlePreferenceChange(prefIndex, "preferredDistrict", e.target.value)
-                    }
-                    disabled={!editMode}
-                  />
+                    onChange={(e) => handleDistrictChange(prefIndex, e.target.value)}
+                    disabled={!editMode || !pref.preferredState}
+                    select
+                    fullWidth
+                    required
+                    error={editMode && !pref.preferredDistrict}
+                    helperText={editMode && !pref.preferredDistrict ? "This field is required" : ""}
+                  >
+                    <MenuItem value="">Select District</MenuItem>
+                    {pref.preferredState &&
+                      getDistrictsForState(pref.preferredState).map((district) => (
+                        <MenuItem key={district} value={district}>
+                          {district}
+                        </MenuItem>
+                      ))}
+                  </TextField>
+
                   <TextField
                     size="small"
                     label="Preferred City"
                     value={pref.preferredCity || ""}
                     onChange={(e) =>
-                      handlePreferenceChange(prefIndex, "preferredCity", e.target.value)
+                      handlePreferenceChange(
+                        prefIndex,
+                        "preferredCity",
+                        e.target.value
+                      )
                     }
-                    disabled={!editMode}
-                  />
+                    disabled={!editMode || !pref.preferredDistrict}
+                    select
+                    fullWidth
+                    required
+                    error={editMode && !pref.preferredCity}
+                    helperText={editMode && !pref.preferredCity ? "This field is required" : ""}
+                  >
+                    <MenuItem value="">Select City</MenuItem>
+                    {pref.preferredState &&
+                      pref.preferredDistrict &&
+                      getCitiesForDistrict(
+                        pref.preferredState,
+                        pref.preferredDistrict
+                      ).map((city) => (
+                        <MenuItem key={city} value={city}>
+                          {city}
+                        </MenuItem>
+                      ))}
+                  </TextField>
 
+                  {/* Category Selection */}
                   <Box mt={1}>
                     <Typography fontWeight={600} mb={1}>
                       Category
                     </Typography>
 
-{pref.category?.map((cat, catIndex) => {
-  // Find the selected main category object
-  const mainCategory = categories.find((c) => c.name === cat.main);
+                    {pref.category?.map((cat, catIndex) => {
+                      const mainCategory = categories.find(
+                        (c) => c.name === cat.main
+                      );
+                      const subCategory = mainCategory?.children?.find(
+                        (sub) => sub.name === cat.sub
+                      );
 
-  // Find the selected sub category object inside mainCategory
-  const subCategory = mainCategory?.children?.find((sub) => sub.name === cat.sub);
+                      return (
+                        <Box
+                          key={catIndex}
+                          display="flex"
+                          gap={1}
+                          alignItems="center"
+                          mb={1}
+                        >
+                          {editMode ? (
+                            <>
+                              <TextField
+                                size="small"
+                                placeholder="Main"
+                                value={cat.main || ""}
+                                onChange={(e) =>
+                                  handleCategoryChange(
+                                    prefIndex,
+                                    catIndex,
+                                    "main",
+                                    e.target.value
+                                  )
+                                }
+                                sx={{ flex: 1 }}
+                                select
+                                required
+                                error={editMode && !cat.main}
+                                helperText={editMode && !cat.main ? "Required" : ""}
+                              >
+                                <MenuItem value="">Select Main</MenuItem>
+                                {categories.map((mainCat) => (
+                                  <MenuItem key={mainCat.name} value={mainCat.name}>
+                                    {mainCat.name}
+                                  </MenuItem>
+                                ))}
+                              </TextField>
 
-  return (
-    <Box key={catIndex} display="flex" gap={1} alignItems="center" mb={1}>
-      {editMode ? (
-        <>
-          {/* MAIN Category */}
-          <TextField
-            size="small"
-            placeholder="Main"
-            value={cat.main || ""}
-            onChange={(e) =>
-              handleCategoryChange(prefIndex, catIndex, "main", e.target.value)
-            }
-            sx={{ flex: 1 }}
-            select
-            SelectProps={{ native: true }}
-          >
-            <option value="">Select Main</option>
-            {categories.map((mainCat) => (
-              <option key={mainCat.name} value={mainCat.name}>
-                {mainCat.name}
-              </option>
-            ))}
-          </TextField>
+                              <TextField
+                                size="small"
+                                placeholder="Sub"
+                                value={cat.sub || ""}
+                                onChange={(e) =>
+                                  handleCategoryChange(
+                                    prefIndex,
+                                    catIndex,
+                                    "sub",
+                                    e.target.value
+                                  )
+                                }
+                                sx={{ flex: 1 }}
+                                select
+                                disabled={!cat.main}
+                              >
+                                <MenuItem value="">Select Sub</MenuItem>
+                                {mainCategory?.children?.map((subCat) => (
+                                  <MenuItem key={subCat.name} value={subCat.name}>
+                                    {subCat.name}
+                                  </MenuItem>
+                                ))}
+                              </TextField>
 
-          {/* SUB Category */}
-          <TextField
-            size="small"
-            placeholder="Sub"
-            value={cat.sub || ""}
-            onChange={(e) =>
-              handleCategoryChange(prefIndex, catIndex, "sub", e.target.value)
-            }
-            sx={{ flex: 1 }}
-            select
-            SelectProps={{ native: true }}
-            disabled={!mainCategory}
-          >
-            <option value="">Select Sub</option>
-            {mainCategory?.children?.map((subCat) => (
-              <option key={subCat.name} value={subCat.name}>
-                {subCat.name}
-              </option>
-            ))}
-          </TextField>
+                              <TextField
+                                size="small"
+                                placeholder="Child"
+                                value={cat.child || ""}
+                                onChange={(e) =>
+                                  handleCategoryChange(
+                                    prefIndex,
+                                    catIndex,
+                                    "child",
+                                    e.target.value
+                                  )
+                                }
+                                sx={{ flex: 1 }}
+                                select
+                                disabled={!cat.sub}
+                              >
+                                <MenuItem value="">Select Child</MenuItem>
+                                {subCategory?.children?.map((child, idx) => (
+                                  <MenuItem key={idx} value={child}>
+                                    {child}
+                                  </MenuItem>
+                                ))}
+                              </TextField>
 
-          {/* CHILD Category */}
-          <TextField
-            size="small"
-            placeholder="Child"
-            value={cat.child || ""}
-            onChange={(e) =>
-              handleCategoryChange(prefIndex, catIndex, "child", e.target.value)
-            }
-            sx={{ flex: 1 }}
-            select
-            SelectProps={{ native: true }}
-            disabled={!subCategory}
-          >
-            <option value="">Select Child</option>
-            {subCategory?.children?.map((child, idx) => (
-              <option key={idx} value={child}>
-                {child}
-              </option>
-            ))}
-          </TextField>
-
-          {/* Remove Button */}
-          {pref.category.length > 1 && (
-            <IconButton
-              size="small"
-              color="error"
-              onClick={() => removeCategory(prefIndex, catIndex)}
-            >
-              <DeleteIcon />
-            </IconButton>
-          )}
-        </>
-      ) : (
-        <>
-          <Typography sx={{ flex: 1, bgcolor: "#e0e0e0", p: 1, borderRadius: 1 }}>
-            {cat.main || "N/A"}
-          </Typography>
-          <Typography sx={{ flex: 1, bgcolor: "#e0e0e0", p: 1, borderRadius: 1 }}>
-            {cat.sub || "N/A"}
-          </Typography>
-          <Typography sx={{ flex: 1, bgcolor: "#e0e0e0", p: 1, borderRadius: 1 }}>
-            {cat.child || "N/A"}
-          </Typography>
-        </>
-      )}
-    </Box>
-  );
-})}
-
-{/* Add Category Button */}
-{/* {editMode && (
-  <Button
-    size="small"
-    variant="outlined"
-    startIcon={<AddIcon />}
-    onClick={() => addCategory(prefIndex)}
-    sx={{ mt: 1 }}
-  >
-    Add Category
-  </Button>
-)} */}
-
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() =>
+                                  removeCategory(prefIndex, catIndex)
+                                }
+                                disabled={isSubmitting}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </>
+                          ) : (
+                            <>
+                              <Typography
+                                sx={{
+                                  flex: 1,
+                                  bgcolor: "#e0e0e0",
+                                  p: 1,
+                                  borderRadius: 1,
+                                }}
+                              >
+                                {cat.main || "N/A"}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  flex: 1,
+                                  bgcolor: "#e0e0e0",
+                                  p: 1,
+                                  borderRadius: 1,
+                                }}
+                              >
+                                {cat.sub || "N/A"}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  flex: 1,
+                                  bgcolor: "#e0e0e0",
+                                  p: 1,
+                                  borderRadius: 1,
+                                }}
+                              >
+                                {cat.child || "N/A"}
+                              </Typography>
+                            </>
+                          )}
+                        </Box>
+                      );
+                    })}
 
                     {editMode && (
                       <Button
-                        size="small"
                         variant="outlined"
+                        size="small"
                         startIcon={<AddIcon />}
                         onClick={() => addCategory(prefIndex)}
                         sx={{ mt: 1 }}
+                        disabled={isSubmitting}
                       >
                         Add Category
                       </Button>
@@ -759,7 +1536,12 @@ const ManageProfile = () => {
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={addPreference}
-                sx={{ mt: 2, borderRadius: 2, textTransform: "none" }}
+                sx={{ 
+                  mt: 2, 
+                  borderRadius: 2, 
+                  textTransform: "none",
+                }}
+                disabled={isSubmitting}
               >
                 Add Preference
               </Button>
@@ -767,8 +1549,13 @@ const ManageProfile = () => {
           </Box>
         </Paper>
       </Box>
-
-      <Dialog open={otpDialogOpen} onClose={() => setOtpDialogOpen(false)}>
+     
+      {/* OTP Verification Dialog */}
+      <Dialog 
+        open={otpDialogOpen} 
+        onClose={() => !requestOTP && setOtpDialogOpen(false)}
+        disableEscapeKeyDown={requestOTP}
+      >
         <DialogTitle>OTP Verification</DialogTitle>
         <DialogContent>
           {otpStep === 1 && (
@@ -776,9 +1563,9 @@ const ManageProfile = () => {
               <Typography>
                 Please request OTP to verify your email to enable editing.
               </Typography>
-              {ErrorMSG && (
+              {errorMSG && (
                 <Typography color="error" mt={1}>
-                  {ErrorMSG}
+                  {errorMSG}
                 </Typography>
               )}
             </>
@@ -799,6 +1586,8 @@ const ManageProfile = () => {
                 }}
                 error={!!otpError}
                 helperText={otpError}
+                disabled={requestOTP}
+                inputProps={{ maxLength: 6 }}
               />
             </>
           )}
@@ -807,36 +1596,38 @@ const ManageProfile = () => {
           {otpStep === 1 && (
             <Button
               onClick={handleRequestOtp}
-              disabled={reguestOTP}
+              disabled={requestOTP}
               variant="contained"
             >
-              {reguestOTP ? "Requesting..." : "Request OTP"}
+              {requestOTP ? "Requesting..." : "Request OTP"}
             </Button>
           )}
           {otpStep === 2 && (
             <>
               <Button
                 onClick={() => setOtpStep(1)}
-                disabled={reguestOTP}
+                disabled={requestOTP}
                 variant="outlined"
               >
                 Back
               </Button>
               <Button
                 onClick={handleOtpVerify}
-                disabled={reguestOTP}
+                disabled={requestOTP}
                 variant="contained"
               >
-                {reguestOTP ? "Verifying..." : "Verify OTP"}
+                {requestOTP ? "Verifying..." : "Verify OTP"}
               </Button>
             </>
           )}
         </DialogActions>
       </Dialog>
 
+      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
         <MuiAlert
@@ -844,10 +1635,38 @@ const ManageProfile = () => {
           variant="filled"
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
+          sx={{ width: '100%' }}
         >
           {snackbar.message}
         </MuiAlert>
       </Snackbar>
+
+      {/* Confirmation Dialog for Image Removal */}
+      <Dialog
+        open={snackbarOpen}
+        onClose={handleCloseSnackbar}
+      >
+        <DialogTitle>Confirm Removal</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to remove your profile image?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={handleCloseSnackbar}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleConfirm} 
+            color="error"
+            variant="contained"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Removing..." : "Remove"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

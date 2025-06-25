@@ -35,6 +35,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import { closeBrandDialog } from "../../Redux/Slices/brandSlice.jsx";
 import axios from "axios";
+import ShareDialogActions from "./ShareDialogActions.jsx";
 
 const BrandDetailsDialog = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -67,6 +68,14 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const investorUUID = localStorage.getItem("investorUUID");
   const AccessToken = localStorage.getItem("accessToken");
+
+
+  
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleShareClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
   useEffect(() => {
     const fetchInvestorDetails = async () => {
@@ -293,6 +302,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
           sx: {
             borderRadius: "12px",
             overflow: "hidden",
+            
           },
         }}
       >
@@ -592,13 +602,19 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
         maxWidth="lg"
         fullWidth
         scroll="paper"
-        sx={{
-          "& .MuiDialog-paper": {
-            borderRadius: 3,
-            overflow: "hidden",
-            background: "linear-gradient(145deg, #f5f7fa 0%, #ffffff 100%)",
-          },
-        }}
+        BackdropProps={{
+    style: {
+      backgroundColor: "rgba(32, 31, 31, 0.45)",
+    },
+  }}
+  sx={{
+    "& .MuiDialog-paper": {
+      borderRadius: 3,
+      overflow: "hidden",
+      background: "linear-gradient(145deg, #f5f7fa 0%, #ffffff 100%)",
+      boxShadow:"none"
+    },
+  }}
       >
         <DialogTitle
           sx={{
@@ -1000,12 +1016,45 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
             bgcolor: "#f5f5f5",
             borderTop: "2px solid #4caf50",
             display: "flex",
-            justifyContent: "space-between",
+            flexBasis: "end",
+
           }}
         >
           <Button
             variant="outlined"
+            disabled={!userData}
+            sx={{
+              color: "#ff9800",
+              borderColor: "#ff9800",
+              fontWeight: 600,
+              display:"flex",
+             justifyContent:  "center", 
+    alignItems: "center",
+    flexBasis:"center",
+              px: 4,
+              py: 1.5,
+              borderRadius: "8px",
+              textTransform: "none",
+              fontSize: "1rem",
+              minWidth:"240px"
+            }}
+            onClick={() => {
+              setFormData((prev) => ({
+                ...prev,
+                fullName: userData?.firstName || "",
+                investorEmail: userData?.email || "",
+                mobileNumber: userData?.mobileNumber || "",
+              }));
+              setIsModalOpen(true);
+            }}
+          > 
+            Apply for Franchise
+            {userData ? "Apply for Franchise" : "Loading..."}
+          </Button>
+          <Button
+            variant="outlined"
             startIcon={<Share sx={{ color: "#ff9800" }} />}
+            onClick={handleShareClick}
             sx={{
               borderRadius: 2,
               px: 3,
@@ -1020,32 +1069,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
           >
             Share
           </Button>
-          <Button
-            variant="outlined"
-            disabled={!userData}
-            sx={{
-              color: "#ff9800",
-              borderColor: "#ff9800",
-              fontWeight: 600,
-              px: 4,
-              py: 1.5,
-              borderRadius: "8px",
-              textTransform: "none",
-              fontSize: "1rem",
-            }}
-            onClick={() => {
-              setFormData((prev) => ({
-                ...prev,
-                fullName: userData?.firstName || "",
-                investorEmail: userData?.email || "",
-                mobileNumber: userData?.mobileNumber || "",
-              }));
-              setIsModalOpen(true);
-            }}
-          >
-            {/* Apply for Franchise */}
-            {userData ? "Apply for Franchise" : "Loading..."}
-          </Button>
+          
         </DialogActions>
 
         <Dialog
@@ -1089,6 +1113,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
           </DialogContent>
         </Dialog>
       </Dialog>
+      <ShareDialogActions anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
     </Box>
   );
 };

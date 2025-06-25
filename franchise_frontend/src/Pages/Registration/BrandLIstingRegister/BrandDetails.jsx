@@ -39,18 +39,27 @@ import categories from "./BrandCategories.jsx";
 import AddIcon from "@mui/icons-material/Add";
 import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 
-
-import LanguageIcon from '@mui/icons-material/Language';
-import FlagIcon from '@mui/icons-material/Flag';
+import LanguageIcon from "@mui/icons-material/Language";
+import FlagIcon from "@mui/icons-material/Flag";
 import { Editor } from "@tinymce/tinymce-react";
 import { width } from "@mui/system";
+import { fetchPincodeDetails } from "../../../Utils/PincodeFetch.jsx";
 
 // const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 // const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
+  const [showWhatsappSnackbar, setShowWhatsappSnackbar] = useState(false);
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
+
+  // const [phoneVerifyStatus, setPhoneVerifyStatus] = useState({
+  //   mobileNumber: {
+  //     loading: false,
+  //     verified: false,
+  //   },
+  // });
   const formData = {
     companyName: "",
     brandName: "",
@@ -68,66 +77,101 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
 
   // Updated Expansion Location State
   const [openLocationModal, setOpenLocationModal] = useState(false);
- 
 
-
-const handleMainCategoryChange = (e) => {
-  const mainCat = e.target.value;
-  setSelectedCategory({
-    main: mainCat,
-    sub: "",
-    child: "",
-    groupId: ""
-  });
-};
-
-const handleSubCategoryChange = (e) => {
-  const subCat = e.target.value;
-  const mainCatObj = categories.find(cat => cat.name === selectedCategory.main);
-  const subCatObj = mainCatObj?.children?.find(sub => sub.name === subCat);
-  
-  setSelectedCategory(prev => ({
-    ...prev,
-    sub: subCat,
-    groupId: subCatObj?.groupId || "",
-    child: ""
-  }));
-};
-
-const handleChildCategoryChange = (e) => {
-  setSelectedCategory(prev => ({
-    ...prev,
-    child: e.target.value
-  }));
-};
-
-const handleAddCategory = () => {
-  if (selectedCategory.child) {
-    const isDuplicate =
-      Array.isArray(data.brandCategories) &&
-      data.brandCategories.some(
-        (cat) =>
-          cat.main === selectedCategory.main &&
-          cat.sub === selectedCategory.sub &&
-          cat.child === selectedCategory.child
-      );
-
-    if (!isDuplicate) {
-      const updatedCategories = [
-        ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
-        {
-          main: selectedCategory.main,
-          sub: selectedCategory.sub,
-          child: selectedCategory.child,
-          groupId: selectedCategory.groupId
-        },
-      ];
-      onChange({ brandCategories: updatedCategories });
-      // Reset the child category selection after adding
-      setSelectedCategory(prev => ({ ...prev, child: "" }));
+  useEffect(() => {
+    if (
+      data.mobileNumber?.length === 10 &&
+      !whatsappEnabled &&
+      !data.whatsappNumber
+    ) {
+      setShowWhatsappSnackbar(true);
     }
-  }
-};
+  }, [data.mobileNumber, whatsappEnabled, data.whatsappNumber]);
+
+  useEffect(() => {
+    const fetchLocationDetails = async () => {
+      if (data.pincode && data.pincode.length === 6) {
+        setLoadingPincode(true);
+        setPincodeError(null);
+        try {
+          const locationDetails = await fetchPincodeDetails(data.pincode);
+          onChange({
+            state: locationDetails.state,
+            city: locationDetails.city,
+            district: locationDetails.district,
+          });
+        } catch (error) {
+          setPincodeError("Invalid Pincode or no data found");
+        } finally {
+          setLoadingPincode(false);
+        }
+      }
+    };
+    const timer = setTimeout(() => {
+      fetchLocationDetails();
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [data.pincode]);
+
+  const handleMainCategoryChange = (e) => {
+    const mainCat = e.target.value;
+    setSelectedCategory({
+      main: mainCat,
+      sub: "",
+      child: "",
+      groupId: "",
+    });
+  };
+
+  const handleSubCategoryChange = (e) => {
+    const subCat = e.target.value;
+    const mainCatObj = categories.find(
+      (cat) => cat.name === selectedCategory.main
+    );
+    const subCatObj = mainCatObj?.children?.find((sub) => sub.name === subCat);
+
+    setSelectedCategory((prev) => ({
+      ...prev,
+      sub: subCat,
+      groupId: subCatObj?.groupId || "",
+      child: "",
+    }));
+  };
+
+  const handleChildCategoryChange = (e) => {
+    setSelectedCategory((prev) => ({
+      ...prev,
+      child: e.target.value,
+    }));
+  };
+
+  const handleAddCategory = () => {
+    if (selectedCategory.child) {
+      const isDuplicate =
+        Array.isArray(data.brandCategories) &&
+        data.brandCategories.some(
+          (cat) =>
+            cat.main === selectedCategory.main &&
+            cat.sub === selectedCategory.sub &&
+            cat.child === selectedCategory.child
+        );
+
+      if (!isDuplicate) {
+        const updatedCategories = [
+          ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
+          {
+            main: selectedCategory.main,
+            sub: selectedCategory.sub,
+            child: selectedCategory.child,
+            groupId: selectedCategory.groupId,
+          },
+        ];
+        onChange({ brandCategories: updatedCategories });
+        // Reset the child category selection after adding
+        setSelectedCategory((prev) => ({ ...prev, child: "" }));
+      }
+    }
+  };
 
   // OTP Verification States
   const [verificationState, setVerificationState] = useState({
@@ -356,10 +400,14 @@ const handleAddCategory = () => {
   };
 
   return (
-    <Box sx={{ overflowY: "auto", ml: 10, pr: 1, mt: 0 }}>
+    <Box sx={{ overflowY: "auto", ml: 25, mr: 25, mt: 0, maxWidth: "100%" }}>
       {/* Brand Details Section */}
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
-       Login Credentials 
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}
+      >
+        Login Credentials
       </Typography>
 
       <Grid
@@ -373,7 +421,7 @@ const handleAddCategory = () => {
           mb: 2,
         }}
       >
-         {/* Full Name */}
+        {/* Full Name */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
@@ -511,12 +559,18 @@ const handleAddCategory = () => {
             helperText={errors.whatsappNumber}
             variant="outlined"
             size="medium"
+            disabled={!whatsappEnabled}
             inputProps={{ maxLength: 10 }}
             placeholder="Enter 10 digit number"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">+91</InputAdornment>
               ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
+              },
             }}
           />
         </Grid>
@@ -651,24 +705,26 @@ const handleAddCategory = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
+
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}
+      >
         Brand Details
       </Typography>
-
       <Grid
         container
         spacing={2}
         sx={{
           mt: 2,
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
-          gap: 2,
+          display: "grid",  
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           mb: 2,
         }}
       >
-    
-        {/* Company Name */}
-        <Grid item xs={12} sm={6}>
+        {/* Company Name - 1 column */}
+        <Grid item xs={12}  md={1}>
           <TextField
             fullWidth
             label="Company Name"
@@ -682,8 +738,9 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-        {/* Brand Name */}
-        <Grid item xs={12} sm={6} md={2.4}>
+
+        {/* Brand Name - 1 column */}
+        <Grid item xs={12} md={1}>
           <TextField
             fullWidth
             label="Brand Name"
@@ -697,7 +754,9 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
+
+        {/* Tagline - spans 2 columns */}
+        <Grid item size={{ xs:12, md: 24 }}>
           <TextField
             fullWidth
             label="Tagline"
@@ -711,7 +770,20 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+      </Grid>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+       
+          mb: 2,
+        }}
+      >
+        {/* CEO Name */}
+        <Grid item xs={12} md={1}>
           <TextField
             fullWidth
             label="CEO/MD/Owner Name"
@@ -725,7 +797,9 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
+
+        {/* CEO Email */}
+        <Grid item xs={12} md={1}>
           <TextField
             fullWidth
             label="CEO/MD/Owner Email"
@@ -740,7 +814,9 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
+
+        {/* CEO Mobile */}
+        <Grid item xs={12} md={2}>
           <TextField
             fullWidth
             label="CEO/MD/Owner Mobile No"
@@ -761,90 +837,136 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-              </Grid>
+      </Grid>
 
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}
+      >
+        Head Office Location{" "}
+      </Typography>
 
-      <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
-Head Office Location      </Typography> 
-      <Grid  container
+      <Grid
+        container
         spacing={2}
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(2, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           gap: 2,
-        }}>
-      
+          mb: 2,
+        }}
+      >
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="Manager Name"
-            name="managerName"
-            value={data.managerName || ""}
+            label="Office Email (Optional)"
+            name="officeEmail"
+            value={data.officeEmail || ""}
             onChange={handleChange}
             variant="outlined"
             size="medium"
-            error={!!errors.managerName}
-            helperText={errors.managerName}
-          />
-        </Grid>
-        
-{/* Head Office Address */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Head Office Address"
-            name="headOfficeAddress"
-            value={data.headOfficeAddress || ""}
-            onChange={handleChange}
-            error={!!errors.headOfficeAddress}
-            helperText={errors.headOfficeAddress}
-            variant="outlined"
-            size="medium"
+            error={!!errors.officeEmail}
+            helperText={errors.officeEmail}
             required
           />
         </Grid>
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Office Mobile Number (Optional)"
+            name="officeMobile"
+            value={data.officeMobile || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            inputProps={{ maxLength: 10 }}
+            placeholder="Enter 10 digit number"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">+91</InputAdornment>
+              ),
+            }}
+            error={!!errors.officeMobile}
+            helperText={errors.officeMobile}
+            required
+          />
+        </Grid>
+      </Grid>
+   
+  <Grid
+  container
+  spacing={2}
+  sx={{
+    mt: 2,
+    display: "grid",
+    gridTemplateColumns: { md: "3fr 1fr", xs: "1fr" }, // 3:1 ratio on desktop
+    gap: 1,
+    
+  }}
+>
+  {/* Head Office Address - spans 3 columns */}
+  <Grid item size={{ xs:12, md:12.02 }} >
+    <TextField
+      fullWidth
+      label="Head Office Address"
+      name="headOfficeAddress"
+      value={data.headOfficeAddress || ""}
+      onChange={handleChange}
+      error={!!errors.headOfficeAddress}
+      helperText={errors.headOfficeAddress}
+      variant="outlined"
+      size="medium"
+      required
+    />
+  </Grid>
+
+  {/* Pincode - spans 1 column */}
+  <Grid item sx={{ ml:{ md:1 }}} >
+    <TextField
+      fullWidth
+      label="Pincode"
+      name="pincode"
+      value={data.pincode || ""}
+      onChange={(e) => {
+        const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+        onChange({ pincode: value });
+      }}
+      error={!!errors.pincode || !!pincodeError}
+      helperText={errors.pincode || pincodeError}
+      variant="outlined"
+      size="medium"
+      required
+      InputProps={{
+        endAdornment: loadingPincode ? (
+          <InputAdornment position="end">
+            <CircularProgress size={20} />
+          </InputAdornment>
+        ) : null,
+      }}
+    />
+  </Grid>
 </Grid>
 
-<Grid  container
+           <Grid
+        container
         spacing={2}
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(3, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           gap: 2,
-        }}>
-                {/* Pincode */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Pincode"
-            name="pincode"
-            value={data.pincode || ""}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, "").slice(0, 6);
-              onChange({ pincode: value });
-            }}
-            error={!!errors.pincode || !!pincodeError}
-            helperText={errors.pincode || pincodeError}
-            variant="outlined"
-            size="medium"
-            required
-            InputProps={{
-              endAdornment: loadingPincode ? (
-                <InputAdornment position="end">
-                  <CircularProgress size={20} />
-                </InputAdornment>
-              ) : null,
-            }}
-          />
-        </Grid>
+        }}
+      >
 
         
+
 
         {/* State */}
         <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth error={!!errors.state}>
+          {/* <FormControl fullWidth error={!!errors.state}>
             <InputLabel size="medium">State</InputLabel>
             <Select
               name="state"
@@ -855,18 +977,47 @@ Head Office Location      </Typography>
               size="medium"
               required
             >
-              {/* {states.map((state) => (
+              {states.map((state) => (
                 <MenuItem key={state.iso2} value={state.name}>
                   {state.name}
                 </MenuItem>
-              ))} */}
+              ))}
             </Select>
             {errors.state && (
               <Typography variant="caption" color="error">
                 {errors.state}
               </Typography>
             )}
-          </FormControl>
+          </FormControl> */}
+          <TextField
+            fullWidth
+            label="State"
+            name="state"
+            value={data.state || ""}
+            onChange={handleChange}
+            error={!!errors.state}
+            helperText={errors.state}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
+
+        {/* District  */}
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="District"
+            name="district"
+            value={data.district || ""}
+            onChange={handleChange}
+            error={!!errors.district}
+            helperText={errors.district}
+            variant="outlined"
+            size="medium"
+            required
+          />
         </Grid>
 
         {/* City */}
@@ -884,34 +1035,19 @@ Head Office Location      </Typography>
             required
           />
         </Grid>
+      </Grid>
 
-</Grid>
-
-<Grid  container
+      <Grid
+        container
         spacing={2}
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
-        }}>
- {/* Email */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Secondary Email (Optional)"
-            name="secondaryEmail"
-            type="secondaryEmail"
-            value={data.secondaryEmail || ""}
-            onChange={handleChange}
-            error={!!errors.secondaryEmail}
-            helperText={errors.secondaryEmail}
-            variant="outlined"
-            size="medium"
-            required
-          />
-        </Grid>
-
+        }}
+      >
+        {/* Email */}
 
         {/* Website */}
         <Grid item xs={12} sm={6} md={2.4}>
@@ -933,25 +1069,25 @@ Head Office Location      </Typography>
           />
         </Grid>
 
-          {/* Facebook */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="Facebook"
-              name="facebook"
-              value={data.facebook || ""}
-              onChange={handleChange}
-              variant="outlined"
-              size="medium"
-              error={!!errors.facebook}
-              helperText={errors.facebook}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">@</InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
+        {/* Facebook */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Facebook"
+            name="facebook"
+            value={data.facebook || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.facebook}
+            helperText={errors.facebook}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
 
         {/* Instagram */}
         <Grid item xs={12} sm={6} md={2.4}>
@@ -973,8 +1109,6 @@ Head Office Location      </Typography>
           />
         </Grid>
 
-      
-
         {/* LinkedIn */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
@@ -994,17 +1128,10 @@ Head Office Location      </Typography>
             }}
           />
         </Grid>
-   </Grid>  
+      </Grid>
 
-        
+      {/* Communication Information Section */}
 
-  
-
-
-
-  {/* Communication Information Section */}
-     
-   
       <Grid
         container
         spacing={2}
@@ -1014,6 +1141,60 @@ Head Office Location      </Typography>
           gap: 2,
         }}
       ></Grid>
+
+      <Snackbar
+        open={showWhatsappSnackbar}
+        autoHideDuration={null}
+        onClose={() => setShowWhatsappSnackbar(false)}
+        anchorOrigin={{ vertical: "center", horizontal: "center" }}
+        sx={{
+          width: "100%",
+          maxWidth: "700px",
+          mb: 12,
+        }}
+      >
+        <Alert
+          severity="info"
+          // icon={<WhatsApp fontSize="inherit" />}
+          sx={{
+            width: "100%",
+            borderRadius: "12px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            alignItems: "center",
+          }}
+          action={
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                color="success"
+                variant="contained"
+                size="medium"
+                onClick={() => {
+                  onChange({ whatsappNumber: data.mobileNumber || "" });
+                  setWhatsappEnabled(false);
+                  setShowWhatsappSnackbar(false);
+                }}
+                sx={{ borderRadius: "8px" }}
+              >
+                Yes
+              </Button>
+              <Button
+                color="inherit"
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  setWhatsappEnabled(true);
+                  setShowWhatsappSnackbar(false);
+                }}
+                sx={{ borderRadius: "8px" }}
+              >
+                No
+              </Button>
+            </Box>
+          }
+        >
+          Is your WhatsApp number same as your mobile number?
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

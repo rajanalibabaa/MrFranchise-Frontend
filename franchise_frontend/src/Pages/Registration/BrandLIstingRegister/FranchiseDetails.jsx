@@ -300,13 +300,13 @@ const handleRemoveUSP = (index) => {
   return (
     <Box sx={{ pr: 1, mr: { sm: 0, md: 25 }, ml: { sm: 0, md: 25 } }}>
       {/* Brand Categories Section */}
-      <Typography
+      {/* <Typography
         variant="h5"
         fontWeight={700}
         sx={{ mb: 3, color: "#4caf50" }}
       >
         Franchise Details
-      </Typography>
+      </Typography> */}
 
       <Typography
         variant="h6"
@@ -899,7 +899,6 @@ const handleRemoveUSP = (index) => {
         </Grid>
 
         {/* Column 13 - ROI */}
-
         <Grid item>
           <FormControl fullWidth size="medium" required error={!!errors.roi}>
             <InputLabel>ROI (%)</InputLabel>
@@ -908,7 +907,22 @@ const handleRemoveUSP = (index) => {
               name="roi"
               value={currentFicoModel.roi || ""}
               onChange={handleFicoChange}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    width: 390,
+                    maxHeight: 300,
+                    "& .MuiList-root": {
+                      display: "grid",
+                      gridTemplateColumns: "repeat(10, 1fr)",
+                      gap: "4px",
+                      padding: "4px",
+                    },
+                  },
+                },
+              }}
             >
+              {/* <Box > */}
               {Array.from({ length: 99 }, (_, i) => (
                 <MenuItem
                   key={i + 1}
@@ -923,6 +937,7 @@ const handleRemoveUSP = (index) => {
                   {i + 1}
                 </MenuItem>
               ))}
+              {/* </Box> */}
             </Select>
             {errors.roi && <FormHelperText error>{errors.roi}</FormHelperText>}
           </FormControl>
@@ -959,6 +974,20 @@ const handleRemoveUSP = (index) => {
               name="marginOnSales"
               value={currentFicoModel.marginOnSales || ""}
               onChange={handleFicoChange}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    width: 390,
+                    maxHeight: 300,
+                    "& .MuiList-root": {
+                      display: "grid",
+                      gridTemplateColumns: "repeat(10, 1fr)",
+                      gap: "4px",
+                      padding: "4px",
+                    },
+                  },
+                },
+              }}
             >
               {Array.from({ length: 99 }, (_, i) => (
                 <MenuItem
@@ -1146,15 +1175,7 @@ const handleRemoveUSP = (index) => {
           Support and Training
         </Typography>
 
-        <Grid
-          container
-          gap={1}
-          sx={{
-            mt: 2,
-            display: "grid",
-            gridTemplateColumns: { md: "1fr", xs: "1fr" },
-          }}
-        >
+        <Grid gap={1} item xs={12}>
           {/* Financial Operating Procedure */}
           <Grid item xs={12}>
             <FormControl

@@ -53,6 +53,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Footer from "../../../Components/Footers/Footer";
 import categories from "./BrandCategories";
 import BrandExpansionLocationDetails from "./BrandExpansionLocationDetails";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
 const FORM_STEP_KEY = "brandRegistrationActiveStep";
@@ -1256,6 +1257,9 @@ const BrandRegisterForm = () => {
       </Box>
     );
   };
+
+  const BackButton = () => {
+  const navigate = useNavigate();}
   return (
     <>
       <Box
@@ -1276,6 +1280,37 @@ const BrandRegisterForm = () => {
           }}
         >
           <Box>
+            <Button
+      onClick={() => navigate("/")}
+      sx={{
+        backgroundColor: "#7ad03a", 
+        color: "white",
+        borderRadius: "50%",
+        minWidth: "48px",
+        width: "48px",
+        height: "48px",
+        padding: 0,
+        marginRight: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+        transition: "all 0.3s ease",
+        "& svg": {
+          fontSize: "24px", 
+        },
+        "&:hover": {
+          backgroundColor: "#5db024", 
+          transform: "scale(1.05)",    
+          boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.2)"
+        },
+        "&:active": {
+          transform: "scale(0.97)"
+        }
+      }}
+    >
+      <ArrowBackIcon />
+    </Button>
             <Stepper
               activeStep={activeStep}
               alternativeLabel
@@ -1289,6 +1324,7 @@ const BrandRegisterForm = () => {
                 </Step>
               ))}
               <Toolbar sx={{ justifyContent: "flex-end" }}>
+                
                 <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
                   <Select
                     value={formData.brandDetails.country}
