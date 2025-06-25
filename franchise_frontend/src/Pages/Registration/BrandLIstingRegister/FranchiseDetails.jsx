@@ -870,7 +870,6 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 13 - ROI */}
-
         <Grid item>
           <FormControl fullWidth size="medium" required error={!!errors.roi}>
             <InputLabel>ROI (%)</InputLabel>
@@ -879,7 +878,22 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               name="roi"
               value={currentFicoModel.roi || ""}
               onChange={handleFicoChange}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    width: 390,
+                    maxHeight: 300,
+                    "& .MuiList-root": {
+                      display: "grid",
+                      gridTemplateColumns: "repeat(10, 1fr)",
+                      gap: "4px",
+                      padding: "4px",
+                    },
+                  },
+                },
+              }}
             >
+              {/* <Box > */}
               {Array.from({ length: 99 }, (_, i) => (
                 <MenuItem
                   key={i + 1}
@@ -894,6 +908,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   {i + 1}
                 </MenuItem>
               ))}
+              {/* </Box> */}
             </Select>
             {errors.roi && <FormHelperText error>{errors.roi}</FormHelperText>}
           </FormControl>
@@ -930,6 +945,20 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               name="marginOnSales"
               value={currentFicoModel.marginOnSales || ""}
               onChange={handleFicoChange}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    width: 390,
+                    maxHeight: 300,
+                    "& .MuiList-root": {
+                      display: "grid",
+                      gridTemplateColumns: "repeat(10, 1fr)",
+                      gap: "4px",
+                      padding: "4px",
+                    },
+                  },
+                },
+              }}
             >
               {Array.from({ length: 99 }, (_, i) => (
                 <MenuItem
@@ -1117,15 +1146,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           Support and Training
         </Typography>
 
-        <Grid
-          container
-          gap={1}
-          sx={{
-            mt: 2,
-            display: "grid",
-            gridTemplateColumns: { md: "1fr", xs: "1fr" },
-          }}
-        >
+        <Grid gap={1} item xs={12}>
           {/* Financial Operating Procedure */}
           <Grid item xs={12}>
             <FormControl
@@ -1269,7 +1290,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   }}
                 >
                   Would you like consultation or <br />
-                  assistance for franchise <br /> marketing recruitment?
+                  assistance for franchise marketing
+                  <br /> recruitment?
                 </FormLabel>
               </Box>
               <RadioGroup row sx={{ display: "flex", gap: 2 }}>

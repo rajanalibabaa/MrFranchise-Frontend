@@ -401,7 +401,7 @@ const handleAddCategory = () => {
   };
 
   return (
-    <Box sx={{ overflowY: "auto", ml: 32, pr: 1, mt: 0 ,maxWidth:'100%'}}>
+    <Box sx={{ overflowY: "auto", ml: 25, mr: 25,  mt: 0 ,maxWidth:'100%'}}>
       {/* Brand Details Section */}
       <Typography variant="h6"
         fontWeight={700}
@@ -415,7 +415,7 @@ const handleAddCategory = () => {
         sx={{
           mt: 3,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}
@@ -718,7 +718,7 @@ const handleAddCategory = () => {
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}> {/* Company Name */}
@@ -787,7 +787,7 @@ const handleAddCategory = () => {
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}>
@@ -875,9 +875,9 @@ const handleAddCategory = () => {
         fontWeight={700}
         sx={{ mb: 3, color: "#ff9800" }}>
 Head Office Location      </Typography> 
-     <Grid container spacing={2}>
+     <Grid container spacing={2} sx={{ mt: 2, display: "grid", gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" }, gap: 2, mb: 2 }}>
 
-          <Grid size={7.2}>
+          <Grid >
       
         
         
@@ -906,7 +906,7 @@ Head Office Location      </Typography>
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
         }}>
        
@@ -1017,7 +1017,7 @@ Head Office Location      </Typography>
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
         }}>
  {/* Email */}
