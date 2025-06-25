@@ -3,8 +3,6 @@ import {
   Box,
   Typography,
   Avatar,
-  Tabs,
-  Tab,
   Card,
   CardContent,
   CardMedia,
@@ -12,9 +10,6 @@ import {
   Button,
   IconButton,
   Chip,
-  Divider,
-  LinearProgress,
-  Badge,
   CircularProgress
 } from "@mui/material";
 import {
@@ -22,14 +17,11 @@ import {
   Visibility,
   AssignmentTurnedIn,
   Close,
-  Person,
-  ExpandMore,
-  ExpandLess,
-  Star,
-  Business,
   MonetizationOn,
-  LocationOn
+  LocationOn,
+  Business
 } from "@mui/icons-material";
+import { useMediaQuery, useTheme } from '@mui/material';
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { openBrandDialog } from "../../Redux/Slices/brandSlice.jsx";
@@ -37,14 +29,14 @@ import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog.j
 import img from "../../assets/images/brandLogo.jpg";
 
 const Dashboard = ({ selectedSection, sectionContent }) => {
+  const theme = useTheme();
+  const isSm = useMediaQuery(theme.breakpoints.up('sm'));
   const dispatch = useDispatch();
   const [tabValue, setTabValue] = useState(0);
-  // const [investorInfo, setInvestorInfo] = useState(null);
   const [viewedBrands, setViewedBrands] = useState([]);
   const [likedBrands, setLikedBrands] = useState([]);
   const [appliedBrands, setAppliedBrands] = useState([]);
   const [likedStates, setLikedStates] = useState({});
-  const [showMore, setShowMore] = useState({});
   const [removeMsg, setRemoveMsg] = useState("");
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -64,52 +56,46 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       try {
         setLoading(true);
         
-        // Parallel API calls
-        const [likedRes, viewedRes, appliedRes, userRes] = await Promise.all([
-          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/like/get-favbrands/${investorUUID}`, {
+        const endpoints = [
+          `http://localhost:5000/api/v1/like/get-favbrands/${investorUUID}`,
+          `http://localhost:5000/api/v1/view/getAllViewBrandByID/${investorUUID}`,
+          `http://localhost:5000/api/v1/instantapply/getInstaApplyById/${investorUUID}`,
+          `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`
+        ];
+
+        const requests = endpoints.map(endpoint => 
+          axios.get(endpoint, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${AccessToken}`,
-            },
-          }),
-          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/view/getAllViewBrandByID/${investorUUID}`, {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${AccessToken}`,
-            },
-          }),
-          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/getInstaApplyById/${investorUUID}`, {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${AccessToken}`,
-            },
-          }),
-          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`, {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${AccessToken}`,
-            },
+            }
           })
-        ]);
+        );
+
+        const [likedRes, viewedRes, appliedRes, userRes] = await Promise.all(requests);
 
         // Process responses
-        setLikedBrands(likedRes.data?.data || []);
-        setViewedBrands(viewedRes.data?.data || []);
-        setAppliedBrands(appliedRes.data?.data || []);
+        const likedData = likedRes.data?.data || [];
+        const viewedData = viewedRes.data?.data || [];
+        const appliedData = appliedRes.data?.data || [];
+        
+        setLikedBrands(likedData);
+        setViewedBrands(viewedData);
+        setAppliedBrands(appliedData);
         setUserData(userRes.data?.data || null);
 
         // Initialize liked states
         const initialLiked = {};
-        likedRes.data?.data?.forEach(item => {
+        likedData.forEach(item => {
           initialLiked[item.uuid] = true;
         });
         setLikedStates(initialLiked);
 
         // Update stats
         setStats({
-          totalViews: viewedRes.data?.data?.length || 0,
-          totalLikes: likedRes.data?.data?.length || 0,
-          totalApplications: appliedRes.data?.data?.length || 0
+          totalViews: viewedData.length,
+          totalLikes: likedData.length,
+          totalApplications: appliedData.length
         });
 
       } catch (error) {
@@ -122,19 +108,17 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
     fetchData();
   }, [investorUUID, AccessToken]);
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
-
   const toggleLike = async (brandId) => {
     try {
       // Optimistic update
-      setLikedStates(prev => ({ ...prev, [brandId]: !prev[brandId] }));
+      const newLikedStates = {...likedStates};
+      delete newLikedStates[brandId];
+      setLikedStates(newLikedStates);
       setLikedBrands(prev => prev.filter(item => item.uuid !== brandId));
       setStats(prev => ({ ...prev, totalLikes: prev.totalLikes - 1 }));
 
       await axios.delete(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${investorUUID}`,
+        `http://localhost:5000/api/v1/like/delete-favbrand/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -160,7 +144,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       setStats(prev => ({ ...prev, totalViews: prev.totalViews - 1 }));
 
       await axios.delete(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/view/deleteViewBrandByID/${investorUUID}`,
+        `http://localhost:5000/api/v1/view/deleteViewBrandByID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -179,45 +163,125 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
   };
 
   const renderStatCard = (icon, title, value, color) => (
-    <Card sx={{ 
-      minWidth: 120, 
-      borderRadius: 3,
-      boxShadow: `0 4px 20px -5px rgba(${color},0.2)`,
-      background: `linear-gradient(135deg, rgba(${color},0.1) 0%, rgba(${color},0.05) 100%)`
-    }}>
-      <CardContent sx={{ textAlign: 'center', p: 2 }}>
-        <Box sx={{ 
-          display: 'inline-flex',
-          p: 1.5,
-          borderRadius: '50%',
-          bgcolor: `rgba(${color},0.1)`,
-          mb: 1
-        }}>
-          {React.cloneElement(icon, { 
-            fontSize: "medium",
-            sx: { color: `rgb(${color})` }
-          })}
-        </Box>
-        <Typography variant="h6" fontWeight={600}>
-          {value}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {title}
-        </Typography>
-      </CardContent>
-    </Card>
+<Card
+  onClick={() => setTabValue(icon.type === Business ? 0 : icon.type === Favorite ? 1 : 2)}
+  sx={{
+    width: '100%',
+    maxWidth: { xs: '100%', sm: 240, md: 260 },
+    minHeight: { xs: 40, sm: 72 },
+    borderRadius: 2,
+    px: { xs: 1, sm: 1.5 },
+    py: 0,
+    display: 'flex',
+    alignItems: 'center',
+    gap: { xs: 1, sm: 1.5 },
+    bgcolor: `rgba(${color}, 0.05)`,
+    border: '1px solid',
+    borderColor: `rgba(${color}, 0.1)`,
+    transition: 'all 0.2s ease-out',
+    boxShadow: 'none',
+    cursor: 'pointer',
+    '&:hover': {
+      transform: { xs: 'none', sm: 'translateY(-2px)' },
+      boxShadow: { xs: 'none', sm: `0 4px 12px -2px rgba(${color}, 0.15)` },
+      bgcolor: { xs: `rgba(${color}, 0.05)`, sm: `rgba(${color}, 0.08)` },
+      '& .stat-icon': {
+        transform: { xs: 'none', sm: 'scale(1.05)' }
+      }
+    },
+    '@media (hover: none)': {
+      '&:active': {
+        bgcolor: `rgba(${color}, 0.1)`
+      }
+    }
+  }}
+>
+  {/* Icon */}
+  <Box
+    className="stat-icon"
+    sx={{
+      flexShrink: 0,
+      p: { sm: 1 },
+      borderRadius: '50%',
+      bgcolor: `rgba(${color}, 0.1)`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'transform 0.2s ease-out',
+      boxShadow: `inset 0 0 0 1px rgba(${color}, 0.15)`,
+      '& > svg': {
+        fontSize: { xs: '13px', sm: '15px', md: '22px' }
+      },
+      flexDirection: { xs: 'column', sm: 'row' },
+    }}
+  >
+    {React.cloneElement(icon, {
+      sx: {
+        color: `rgb(${color})`,
+        fontSize: { xs: '16px', sm: '10px', md: '22px' },
+        transition: 'color 0.2s ease-out'
+      }
+    })}
+  </Box>
+
+  {/* Text Block */}
+  <Box
+    sx={{
+      flex: 1,
+      minWidth: 0,
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: { xs: 'column', sm: 'row' },
+      alignItems: { xs: 'flex-end', sm: 'center' },
+      justifyContent: 'end',
+      gap: { xs: 0.5, sm: 1 }
+    }}
+  >
+    {isSm && (
+      <Typography
+        variant="body2"
+        noWrap
+        sx={{
+          fontWeight: 500,
+          fontSize: { xs: '0.7rem', sm: '0.8125rem' },
+          color: 'text.secondary',
+          lineHeight: 1.3
+        }}
+      >
+        {title}
+      </Typography>
+    )}
+
+    <Typography
+      variant="h6"
+      noWrap
+      sx={{
+        fontWeight: 600,
+        fontSize: { xs: '0.6rem', sm: '1rem', md: '1.125rem' },
+        lineHeight: 1.2,
+        background: `linear-gradient(75deg, rgb(${color}) 0%, rgba(${color}, 0.9) 100%)`,
+        WebkitBackgroundClip: 'text',
+        backgroundClip: 'text',
+        color: 'transparent',
+        '@media (hover: hover)': {
+          textShadow: `0 0 6px rgba(${color}, 0.2)`
+        }
+      }}
+    >
+      {value}
+    </Typography>
+  </Box>
+</Card>
   );
 
   const renderBrandCard = (item, type) => {
     const brandId = item.uuid;
     const isLiked = likedStates[brandId];
-    const shouldShowMore = showMore[brandId];
-    const brandDesc = item.personalDetails?.brandDescription || "";
     
     return (
       <Card sx={{
-        maxWidth: 200,
-        maxHeight: 400,
+        width: '100%',
+        maxWidth: 300,
         display: "flex",
         flexDirection: "column",
         borderRadius: 3,
@@ -229,17 +293,15 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
           boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
         }
       }}>
-        {/* Card Header with Image */}
         <Box sx={{ position: 'relative' }}>
           <CardMedia
             component="img"
-            height="150"
+            height="160"
             image={item.brandDetails?.brandLogo?.[0] || img}
             alt={item.personalDetails?.brandName || "Brand Image"}
             sx={{ objectFit: 'cover' }}
           />
           
-          {/* Action Buttons */}
           <Box sx={{
             position: 'absolute',
             top: 8,
@@ -275,13 +337,11 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
           </Box>
         </Box>
 
-        {/* Card Content */}
         <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
-          <Typography variant="h6" fontWeight={600} noWrap>
+          <Typography gutterBottom variant="h6" component="div" fontWeight={600} noWrap>
             {item.personalDetails?.brandName || "Unnamed Brand"}
           </Typography>
           
-          {/* Franchise Models */}
           {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (
             <Box sx={{ mt: 1, mb: 1.5, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {item.franchiseDetails.modelsOfFranchise.map((model, idx) => (
@@ -296,7 +356,6 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
             </Box>
           )}
           
-          {/* Investment Info */}
           {item.franchiseDetails?.investmentRange && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <MonetizationOn color="primary" fontSize="small" />
@@ -306,7 +365,6 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
             </Box>
           )}
           
-          {/* Location */}
           {item.personalDetails?.headOfficeAddress && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
               <LocationOn color="primary" fontSize="small" />
@@ -315,32 +373,8 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
               </Typography>
             </Box>
           )}
-          
-          {/* Description with expand/collapse */}
-          {/* {brandDesc && (
-            <>
-              <Typography variant="body2" color="text.secondary" sx={{
-                display: '-webkit-box',
-                WebkitLineClamp: shouldShowMore ? 'unset' : 3,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                mb: 1
-              }}>
-                {brandDesc}
-              </Typography>
-              <Button
-                size="small"
-                onClick={() => setShowMore(prev => ({ ...prev, [brandId]: !prev[brandId] }))}
-                endIcon={shouldShowMore ? <ExpandLess /> : <ExpandMore />}
-                sx={{ p: 0, minWidth: 0 }}
-              >
-                {shouldShowMore ? 'Show Less' : 'Show More'}
-              </Button>
-            </>
-          )} */}
         </CardContent>
 
-        {/* View Details Button */}
         <Box sx={{ p: 2, pt: 0 }}>
           <Button
             fullWidth
@@ -370,91 +404,42 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       );
     }
 
-    switch (tabValue) {
-      case 0: // Viewed Brands
-        return viewedBrands.length > 0 ? (
-          <Grid container spacing={3}>
-            {viewedBrands.map((item) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={item.uuid}>
-                {renderBrandCard(item, 'viewed')}
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            py: 10,
-            textAlign: 'center'
-          }}>
-            <Visibility color="disabled" sx={{ fontSize: 60, mb: 2 }} />
-            <Typography variant="h6" color="text.secondary">
-              No viewed brands yet
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Brands you view will appear here
-            </Typography>
-          </Box>
-        );
+    const brands = tabValue === 0 ? viewedBrands : tabValue === 1 ? likedBrands : appliedBrands;
+    const emptyState = {
+      icon: tabValue === 0 ? <Visibility color="disabled" sx={{ fontSize: 60, mb: 2 }} /> : 
+            tabValue === 1 ? <Favorite color="disabled" sx={{ fontSize: 60, mb: 2 }} /> : 
+            <AssignmentTurnedIn color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
+      title: tabValue === 0 ? "No viewed brands " : 
+             tabValue === 1 ? "No liked brands yet" : 
+             "No applications yet",
+ 
+    };
 
-      case 1: // Liked Brands
-        return likedBrands.length > 0 ? (
-          <Grid container spacing={3}>
-            {likedBrands.map((item) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={item.uuid}>
-                {renderBrandCard(item, 'liked')}
-              </Grid>
-            ))}
+    return brands.length > 0 ? (
+      <Grid container spacing={3}>
+        {brands.map((item) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={item.uuid}>
+            {renderBrandCard(item, tabValue === 0 ? 'viewed' : tabValue === 1 ? 'liked' : 'applied')}
           </Grid>
-        ) : (
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            py: 10,
-            textAlign: 'center'
-          }}>
-            <Favorite color="disabled" sx={{ fontSize: 60, mb: 2 }} />
-            <Typography variant="h6" color="text.secondary">
-              No liked brands yet
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Brands you like will appear here
-            </Typography>
-          </Box>
-        );
-
-      case 2: // Applied Brands
-        return appliedBrands.length > 0 ? (
-          <Grid container spacing={3}>
-            {appliedBrands.map((item) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={item.uuid}>
-                {renderBrandCard(item, 'applied')}
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            py: 10,
-            textAlign: 'center'
-          }}>
-            <AssignmentTurnedIn color="disabled" sx={{ fontSize: 60, mb: 2 }} />
-            <Typography variant="h6" color="text.secondary">
-              No applications yet
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Brands you apply to will appear here
-            </Typography>
-          </Box>
-        );
-
-      default:
-        return null;
-    }
+        ))}
+      </Grid>
+    ) : (
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        py: 10,
+        textAlign: 'center'
+      }}>
+        {emptyState.icon}
+        <Typography variant="h6" color="text.secondary">
+          {emptyState.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          {emptyState.description}
+        </Typography>
+      </Box>
+    );
   };
 
   return (
@@ -462,11 +447,9 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%)',
       p: { xs: 2, md: 4 }
-      
     }}>
-
       {/* Profile Section */}
-      <Card sx={{ 
+      <Box sx={{ 
         mb: 1,
         borderRadius: 3,
         boxShadow: 3,
@@ -475,98 +458,54 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       }}>
         <Box sx={{
           display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
+          // flexDirection: { xs: 'row', md: 'row' },
           alignItems: 'center',
-          p: 1,
-          background: 'linear-gradient(90deg, #ffffff 0%, #f9f9f9 100%)'
+          
+          p: 2,
+          // background: 'linear-gradient(90deg, #ffffff 0%, #f9f9f9 100%)',
+          gap:1
         }}>
           <Avatar
-            src={userData?.Avatar || img}
+            src={userData?.profileImage || img}
             alt="Profile"
             sx={{
-              width: 120,
-              height: 120,
+              width: 60,
+              height: 60,
               mr: { md: 3 },
-              mb: { xs: 2, md: 0 },
+              // mb: { xs: 2, md: 0 },
               border: '3px solid #689f38'
             }}
           />
-          <Box sx={{ flex: 1, textAlign: { xs: 'center', md: 'left' } }}>
-            <Typography variant="h5" fontWeight={600} sx={{ mb: 0.5 }}>
+          {/* <Box sx={{ flex: 1, textAlign: { xs: 'left', md: 'left' } }}> */}
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h5" fontWeight={600} >
               {userData?.firstName || 'Investor'} {userData?.lastName || ''}
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-              {userData?.email || 'No email provided'}
+            <Typography variant="body1" color="text.secondary" >
+              {/* {userData?.occupation || 'No email provided'} */}
             </Typography>
-            <Box sx={{ display: 'flex', gap: 3, justifyContent: { xs: 'center', md: 'space-evenly' } }}>
+           
+          </Box>
+
+           
+        </Box>
+      </Box>
+
+      {/* Stats Cards */}
+      <Box sx={{ display: 'flex', gap: 3, justifyContent: { xs: 'center', md: 'space-between' } ,mt:3}}>
               {renderStatCard(<Business />, 'Viewed', stats.totalViews, '76, 175, 80')}
               {renderStatCard(<Favorite />, 'Liked', stats.totalLikes, '244, 67, 54')}
               {renderStatCard(<AssignmentTurnedIn />, 'Applied', stats.totalApplications, '33, 150, 243')}
             </Box>
-          </Box>
-        </Box>
-      </Card>
 
       {/* Main Content */}
       <Card sx={{ 
         borderRadius: 3,
         boxShadow: 3,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        background: 'white',
+        mt:1
       }}>
-        {/* Tabs */}
-        <Box sx={{ 
-          borderBottom: 1, 
-          borderColor: 'divider',
-          background: '#f9f9f9'
-        }}>
-          <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
-            variant="fullWidth"
-            sx={{
-              '& .MuiTabs-indicator': {
-                height: 4,
-                backgroundColor: '#689f38'
-              }
-            }}
-          >
-            <Tab 
-              label={
-                <Badge badgeContent={stats.totalViews} color="primary" sx={{ mr: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Visibility sx={{ mr: 1 }} />
-                    <Typography>Viewed</Typography>
-                  </Box>
-                </Badge>
-              }
-              sx={{ py: 2, textTransform: 'none' }}
-            />
-            <Tab 
-              label={
-                <Badge badgeContent={stats.totalLikes} color="error" sx={{ mr: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Favorite sx={{ mr: 1 }} />
-                    <Typography>Interested</Typography>
-                  </Box>
-                </Badge>
-              }
-              sx={{ py: 2, textTransform: 'none' }}
-            />
-            <Tab 
-              label={
-                <Badge badgeContent={stats.totalApplications} color="info" sx={{ mr: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <AssignmentTurnedIn sx={{ mr: 1 }} />
-                    <Typography>Applied</Typography>
-                  </Box>
-                </Badge>
-              }
-              sx={{ py: 2, textTransform: 'none' }}
-            />
-          </Tabs>
-        </Box>
-
-        {/* Content */}
         <Box sx={{ p: 3 }}>
           {removeMsg && (
             <Box sx={{ 
