@@ -33,6 +33,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  
 } from "@mui/material";
 import { useTheme, useMediaQuery } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -175,9 +176,7 @@ const initialFormData = {
     franchiseDevelopment: "",
     consultationOrAssistance: "",
     trainingSupport: "",
-    marketingSupport: "",
-    otherSupport: "",
-    uniqueSellingPoints: "",
+    uniqueSellingPoints: [],
    
   },
 //   expansionLocationDetails: {
@@ -1264,7 +1263,7 @@ const BrandRegisterForm = () => {
           display: "flex",
           flexDirection: "column",
           height: "100vh",
-       
+         
         }}
       >
         <Box
