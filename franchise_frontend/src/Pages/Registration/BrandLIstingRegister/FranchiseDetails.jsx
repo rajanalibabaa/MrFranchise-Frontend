@@ -198,7 +198,6 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
   const aidFinancing = ["Yes", "No"];
 
-
   const agreementPeriods = [
     "1 Year",
     "3 Years",
@@ -267,13 +266,13 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   return (
     <Box sx={{ ml: 5, pr: 1, mr: 5 }}>
       {/* Brand Categories Section */}
-      <Typography
+      {/* <Typography
         variant="h5"
         fontWeight={700}
         sx={{ mb: 3, color: "#4caf50" }}
       >
         Franchise Details
-      </Typography>
+      </Typography> */}
 
       <Typography
         variant="h6"
@@ -369,161 +368,148 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
       </Grid>
 
+          <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "flex",
+          flexDirection: { md: "row", xs: "column" },
+        }}
+      ></Grid>
+
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}
+      >
+        Establishment & Franchise year Details
+      </Typography>
+
       <Grid
         container
         spacing={2}
         sx={{
           display: "grid",
-          gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
         }}
       >
+        
+        {/* Established Year  */}
         <Grid item xs={12} sm={6} md={2.4}>
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            sx={{ mb: 3, color: "#ff9800" }}
-          >
-            Establishment & Franchise year Details
-          </Typography>
+          <FormControl fullWidth error={!!errors.establishedYear}>
+            <InputLabel size="medium">Year Commenced Operations</InputLabel>
+            <Select
+              name="establishedYear"
+              value={data.establishedYear || ""}
+              label="Year Commenced Operations"
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              required
+            >
+              {Array.from(
+                { length: 100 },
+                (_, i) => new Date().getFullYear() - i
+              ).map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.establishedYear && (
+              <Typography variant="caption" color="error">
+                {errors.establishedYear}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+        {/* Franchise Since Year */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.franchiseSinceYear}>
+            <InputLabel size="medium">Year Commenced Franchising</InputLabel>
+            <Select
+              name="franchiseSinceYear"
+              value={data.franchiseSinceYear || ""}
+              label="Year Commenced Franchising"
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              required
+            >
+              {Array.from(
+                { length: 100 },
+                (_, i) => new Date().getFullYear() - i
+              ).map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.franchiseSinceYear && (
+              <Typography variant="caption" color="error">
+                {errors.franchiseSinceYear}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+      </Grid>
 
-          <Grid
-            container
-            spacing={2}
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
-              gap: 2,
-              mb: 2,
-            }}
-          >
-            {/* Established Year  */}
-            <Grid item xs={12} sm={6} md={2.4}>
-              <FormControl fullWidth error={!!errors.establishedYear}>
-                <InputLabel size="medium">Year Commenced Operations</InputLabel>
-                <Select
-                  name="establishedYear"
-                  value={data.establishedYear || ""}
-                  label="Year Commenced Operations"
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="medium"
-                  required
-                >
-                  {Array.from(
-                    { length: 100 },
-                    (_, i) => new Date().getFullYear() - i
-                  ).map((year) => (
-                    <MenuItem key={year} value={year}>
-                      {year}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.establishedYear && (
-                  <Typography variant="caption" color="error">
-                    {errors.establishedYear}
-                  </Typography>
-                )}
-              </FormControl>
-            </Grid>
-            {/* Franchise Since Year */}
-            <Grid item xs={12} sm={6} md={2.4}>
-              <FormControl fullWidth error={!!errors.franchiseSinceYear}>
-                <InputLabel size="medium">
-                  Year Commenced Franchising
-                </InputLabel>
-                <Select
-                  name="franchiseSinceYear"
-                  value={data.franchiseSinceYear || ""}
-                  label="Year Commenced Franchising"
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="medium"
-                  required
-                >
-                  {Array.from(
-                    { length: 100 },
-                    (_, i) => new Date().getFullYear() - i
-                  ).map((year) => (
-                    <MenuItem key={year} value={year}>
-                      {year}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.franchiseSinceYear && (
-                  <Typography variant="caption" color="error">
-                    {errors.franchiseSinceYear}
-                  </Typography>
-                )}
-              </FormControl>
-            </Grid>
-          </Grid>
+      <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800",mt: 2 }}>
+        Franchise Network
+      </Typography>
+
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 3,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+        }}
+      >
+        <Grid item>
+          <TextField
+            fullWidth
+            label="Company Owned Outlets"
+            name="companyOwnedOutlets"
+            value={data.companyOwnedOutlets || ""}
+            onChange={handleChange}
+            placeholder="0"
+            inputProps={{ min: 0 }}
+            error={!!errors.companyOwnedOutlets}
+            helperText={errors.companyOwnedOutlets}
+            required
+          />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={2.4}>
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            sx={{ mb: 2, color: "#ff9800" }}
-          >
-            Franchise Network
-          </Typography>
+        <Grid item>
+          <TextField
+            fullWidth
+            label="Franchise Outlets"
+            name="franchiseOutlets"
+            value={data.franchiseOutlets || ""}
+            onChange={handleChange}
+            placeholder="0"
+            inputProps={{ min: 0 }}
+            error={!!errors.franchiseOutlets}
+            helperText={errors.franchiseOutlets}
+            required
+          />
+        </Grid>
 
-          <Grid
-            container
-            spacing={2}
-            sx={{
-              mt: 3,
-              display: "grid",
-              gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-              gap: 2,
-              mb: 2,
-            }}
-          >
-            <Grid item>
-              <TextField
-                fullWidth
-                label="Company Owned Outlets"
-                name="companyOwnedOutlets"
-                value={data.companyOwnedOutlets || ""}
-                onChange={handleChange}
-                placeholder="0"
-                inputProps={{ min: 0 }}
-                error={!!errors.companyOwnedOutlets}
-                helperText={errors.companyOwnedOutlets}
-                required
-              />
-            </Grid>
-
-            <Grid item>
-              <TextField
-                fullWidth
-                label="Franchise Outlets"
-                name="franchiseOutlets"
-                value={data.franchiseOutlets || ""}
-                onChange={handleChange}
-                placeholder="0"
-                inputProps={{ min: 0 }}
-                error={!!errors.franchiseOutlets}
-                helperText={errors.franchiseOutlets}
-                required
-              />
-            </Grid>
-
-            <Grid item>
-              <TextField
-                fullWidth
-                label="Total Outlets"
-                name="totalOutlets"
-                value={data.totalOutlets || ""}
-                type="number"
-                InputProps={{ readOnly: true }}
-                variant="filled"
-                error={!!errors.totalOutlets}
-                helperText={errors.totalOutlets}
-                required
-              />
-            </Grid>
-          </Grid>
+        <Grid item>
+          <TextField
+            fullWidth
+            label="Total Outlets"
+            name="totalOutlets"
+            value={data.totalOutlets || ""}
+            type="number"
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            error={!!errors.totalOutlets}
+            helperText={errors.totalOutlets}
+            required
+          />
         </Grid>
       </Grid>
 
@@ -538,7 +524,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       <Typography
         variant="h6"
         fontWeight={700}
-        sx={{ mb: 0, color: "#ff9800" }}
+        sx={{ mt: 2, color: "#ff9800" }}
       >
         Franchise Business Models
       </Typography>
@@ -883,39 +869,33 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
         {/* Column 13 - ROI */}
 
-
-
-<Grid item>
-  <FormControl fullWidth size="medium" required error={!!errors.roi}>
-    <InputLabel>ROI (%)</InputLabel>
-    <Select
-      label="ROI (%)"
-      name="roi"
-      value={currentFicoModel.roi || ""}
-      onChange={handleFicoChange}
-    
-  
->
-  {Array.from({ length: 99 }, (_, i) => (
-
-     <MenuItem
-      key={i + 1}
-      value={`${i + 1}%`}
-      sx={{
-        minWidth: 0,
-        padding: "6px 4px",
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      {i + 1}
-    </MenuItem>
-  
-  ))}
-</Select>
-    {errors.roi && <FormHelperText error>{errors.roi}</FormHelperText>}
-  </FormControl>
-</Grid>
+        <Grid item>
+          <FormControl fullWidth size="medium" required error={!!errors.roi}>
+            <InputLabel>ROI (%)</InputLabel>
+            <Select
+              label="ROI (%)"
+              name="roi"
+              value={currentFicoModel.roi || ""}
+              onChange={handleFicoChange}
+            >
+              {Array.from({ length: 99 }, (_, i) => (
+                <MenuItem
+                  key={i + 1}
+                  value={`${i + 1}%`}
+                  sx={{
+                    minWidth: 0,
+                    padding: "6px 4px",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  {i + 1}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.roi && <FormHelperText error>{errors.roi}</FormHelperText>}
+          </FormControl>
+        </Grid>
 
         {/* Column 14 - PayBack Period */}
         <Grid item>
@@ -934,40 +914,41 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             required
           />
         </Grid>
-        
-
 
         <Grid item>
-  <FormControl fullWidth size="medium" required error={!!errors.marginOnSales}>
-    <InputLabel>marginOnSales (%)</InputLabel>
-    <Select
-      label="Margin ON Sales (%)"
-      name="marginOnSales"
-      value={currentFicoModel.marginOnSales || ""}
-      onChange={handleFicoChange}
-  
->
-  {Array.from({ length: 99 }, (_, i) => (
-
-     <MenuItem
-      key={i + 1}
-      value={`${i + 1}%`}
-      sx={{
-        minWidth: 0,
-        padding: "6px 4px",
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      {i + 1}
-    </MenuItem>
-  
-  ))}
-</Select>
-    {errors.marginOnSales && <FormHelperText error>{errors.marginOnSales}</FormHelperText>}
-  </FormControl>
-</Grid>
-        
+          <FormControl
+            fullWidth
+            size="medium"
+            required
+            error={!!errors.marginOnSales}
+          >
+            <InputLabel>marginOnSales (%)</InputLabel>
+            <Select
+              label="Margin ON Sales (%)"
+              name="marginOnSales"
+              value={currentFicoModel.marginOnSales || ""}
+              onChange={handleFicoChange}
+            >
+              {Array.from({ length: 99 }, (_, i) => (
+                <MenuItem
+                  key={i + 1}
+                  value={`${i + 1}%`}
+                  sx={{
+                    minWidth: 0,
+                    padding: "6px 4px",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  {i + 1}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.marginOnSales && (
+              <FormHelperText error>{errors.marginOnSales}</FormHelperText>
+            )}
+          </FormControl>
+        </Grid>
       </Grid>
 
       {/* Add Button */}
@@ -1128,360 +1109,363 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         }}
       />
 
-    
-
       {/* Support and Training Section */}
+    <Grid item xs={12}>
+  <Typography variant="h6" color="#ff9800" sx={{ fontWeight: "bold" }}>
+    Support and Training
+  </Typography>
 
-      <Grid item xs={12}>
-        <Typography variant="h6" color="#ff9800" sx={{ fontWeight: "bold" }}>
-          Support and Training
-        </Typography>
+  <Grid
+    container
+    gap={1}
+    sx={{
+      mt: 2,
+      display: "grid",
+      gridTemplateColumns: { md: "1fr", xs: "1fr" },
+    }}
+  >
+    {/* Financial Operating Procedure */}
+    <Grid item xs={12}>
+      <FormControl
+        component="fieldset"
+        fullWidth
+        error={!!errors.aidFinancing}
+        required
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: { md: "center" },
+          gap: 1,
+          p: 1,
+        }}
+      >
+        <Box sx={{ minWidth: { md: "300px" } }}>
+          <FormLabel
+            component="legend"
+            sx={{
+              fontWeight: "bold",
+              color: errors.aidFinancing ? "error.main" : "text.primary",
+            }}
+          >
+            Do you provide aid in financing?
+          </FormLabel>
+        </Box>
+        <RadioGroup row sx={{ display: "flex", gap: 2 }}>
+          {aidFinancing.map((type) => (
+            <FormControlLabel
+              key={type}
+              value={type}
+              control={
+                <Radio color={errors.aidFinancing ? "error" : "primary"} />
+              }
+              label={type}
+              checked={data.aidFinancing === type}
+              onChange={() =>
+                handleChange({
+                  target: { name: "aidFinancing", value: type },
+                })
+              }
+            />
+          ))}
+        </RadioGroup>
+        {errors.aidFinancing && (
+          <FormHelperText error sx={{ ml: { md: 2 }, mt: { xs: 0, md: 0 } }}>
+            {errors.aidFinancing}
+          </FormHelperText>
+        )}
+      </FormControl>
+    </Grid>
 
-        <Grid gap={1} item xs={12} >
-          {/* Financial Operating Procedure */}
-          <Grid item>
-            <FormControl
-              component="fieldset"
-              fullWidth
-              error={!!errors.aidFinancing}
-              required
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                p: 1,
-              }}
-            >
-              <Box>
-                <FormLabel
-                  component="legend"
-                  sx={{
-                    minWidth: "300px",
-                    fontWeight: "bold",
-                    color: errors.aidFinancing ? "error.main" : "text.primary",
+    <Grid item xs={12}>
+      <FormControl
+        component="fieldset"
+        fullWidth
+        error={!!errors.franchiseDevelopment}
+        required
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: { md: "center" },
+          gap: 1,
+          p: 1,
+        }}
+      >
+        <Box sx={{ minWidth: { md: "300px" } }}>
+          <FormLabel
+            component="legend"
+            sx={{
+              fontWeight: "bold",
+              color: errors.franchiseDevelopment ? "error.main" : "text.primary",
+            }}
+          >
+            Would you like consultation for  <br/>franchise development?
+          </FormLabel>
+        </Box>
+        <RadioGroup row sx={{ display: "flex", gap: 2 }}>
+          {aidFinancing.map((type) => (
+            <FormControlLabel
+              key={type}
+              value={type}
+              control={
+                <Radio
+                  color={errors.franchiseDevelopment ? "error" : "primary"}
+                />
+              }
+              label={type}
+              checked={data.franchiseDevelopment === type}
+              onChange={() =>
+                handleChange({
+                  target: { name: "franchiseDevelopment", value: type },
+                })
+              }
+            />
+          ))}
+        </RadioGroup>
+        {errors.franchiseDevelopment && (
+          <FormHelperText error sx={{ ml: { md: 2 }, mt: { xs: 0, md: 0 } }}>
+            {errors.franchiseDevelopment}
+          </FormHelperText>
+        )}
+      </FormControl>
+    </Grid>
+
+    <Grid item xs={12}>
+      <FormControl
+        component="fieldset"
+        fullWidth
+        error={!!errors.consultationOrAssistance}
+        required
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: { md: "center" },
+          gap: 1,
+          p: 1,
+        }}
+      >
+        <Box sx={{ minWidth: { md: "300px" } }}>
+          <FormLabel
+            component="legend"
+            sx={{
+              fontWeight: "bold",
+              color: errors.consultationOrAssistance ? "error.main" : "text.primary",
+            }}
+          >
+            Would you like consultation or <br/>assistance for franchise <br/> marketing recruitment?
+          </FormLabel>
+        </Box>
+        <RadioGroup row sx={{ display: "flex", gap: 2 }}>
+          {aidFinancing.map((type) => (
+            <FormControlLabel
+              key={type}
+              value={type}
+              control={
+                <Radio
+                  color={errors.consultationOrAssistance ? "error" : "primary"}
+                />
+              }
+              label={type}
+              checked={data.consultationOrAssistance === type}
+              onChange={() =>
+                handleChange({
+                  target: {
+                    name: "consultationOrAssistance",
+                    value: type,
+                  },
+                })
+              }
+            />
+          ))}
+        </RadioGroup>
+        {errors.consultationOrAssistance && (
+          <FormHelperText error sx={{ ml: { md: 2 }, mt: { xs: 0, md: 0 } }}>
+            {errors.consultationOrAssistance}
+          </FormHelperText>
+        )}
+      </FormControl>
+    </Grid>
+
+    {/* Training Support - Checkbox Group */}
+    <Grid item xs={12}>
+      <FormControl
+        component="fieldset"
+        fullWidth
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: { md: "center" },
+          gap: { xs: 1, md: 8 },
+          p: 1,
+        }}
+      >
+        <Box sx={{ minWidth: { md: "200px" } }}>
+          <FormLabel
+            component="legend"
+            sx={{
+              fontWeight: "bold",
+            }}
+          >
+            Training And Support Provider:
+          </FormLabel>
+        </Box>
+        <FormGroup
+          row
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 2,
+            flexDirection: { xs: "column", sm: "row" },
+          }}
+        >
+          {["Outlet Setup", "Staff training", "Staff Recruitment", "Operations support", "Marketing support"].map((option) => (
+            <FormControlLabel
+              key={option}
+              control={
+                <Checkbox
+                  checked={data.trainingSupport?.includes(option) || false}
+                  onChange={(e) => {
+                    const newValue = e.target.checked
+                      ? [...(data.trainingSupport || []), option]
+                      : (data.trainingSupport || []).filter(
+                          (v) => v !== option
+                        );
+                    handleChange({
+                      target: {
+                        name: "trainingSupport",
+                        value: newValue,
+                      },
+                    });
                   }}
-                >
-                  Do you provide aid in financing?
-                </FormLabel>
-              </Box>
-              <RadioGroup row sx={{ display: "flex",  gap: 2 }}>
-                {aidFinancing.map((type) => (
-                  <FormControlLabel
-                    key={type}
-                    value={type}
-                    control={
-                      <Radio
-                        color={errors.aidFinancing ? "error" : "primary"}
-                      />
-                    }
-                    label={type}
-                    checked={data.aidFinancing === type}
-                    onChange={() =>
-                      handleChange({
-                        target: { name: "aidFinancing", value: type },
-                      })
-                    }
-                  />
-                ))}
-              </RadioGroup>
-              {errors.aidFinancing && (
-                <FormHelperText error sx={{ ml: 2 }}>
-                  {errors.aidFinancing}
-                </FormHelperText>
-              )}
-            </FormControl>
-          </Grid>
+                  name="trainingSupport"
+                  color="primary"
+                />
+              }
+              label={option}
+            />
+          ))}
+        </FormGroup>
+      </FormControl>
+    </Grid>
 
-          <Grid item>
-            <FormControl
-              component="fieldset"
-              fullWidth
-              error={!!errors.franchiseDevelopment}
-              required
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 4,
-                p: 1,
-              }}
-            >
-              <Box>
-                <FormLabel
-                  component="legend"
-                  sx={{
-                    minWidth: "300px",
-                    fontWeight: "bold",
-                    color: errors.franchiseDevelopment
-                      ? "error.main"
-                      : "text.primary",
-                  }}
-                >
-                  Would you like consultation for <br />franchise  development?
-                </FormLabel>
-              </Box>
-              <RadioGroup row sx={{ display: "flex", gap: 2 }}>
-                {aidFinancing.map((type) => (
-                  <FormControlLabel
-                    key={type}
-                    value={type}
-                    control={
-                      <Radio
-                        color={
-                          errors.franchiseDevelopment ? "error" : "primary"
-                        }
-                      />
-                    }
-                    label={type}
-                    checked={data.franchiseDevelopment === type}
-                    onChange={() =>
-                      handleChange({
-                        target: { name: "franchiseDevelopment", value: type },
-                      })
-                    }
-                  />
-                ))}
-              </RadioGroup>
-              {errors.franchiseDevelopment && (
-                <FormHelperText error sx={{ ml: 2 }}>
-                  {errors.franchiseDevelopment}
-                </FormHelperText>
-              )}
-            </FormControl>
-          </Grid>
+    {/* Marketing Support - Text Input */}
+    <Grid item xs={12}>
+      <FormControl
+        fullWidth
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: { md: "center" },
+          gap: 1,
+          p: 1,
+        }}
+      >
+        <FormLabel
+          sx={{
+            minWidth: { md: "300px" },
+            fontWeight: "bold",
+          }}
+        >
+          Marketing Support:
+        </FormLabel>
+        <TextField
+          fullWidth
+          variant="outlined"
+          value={data.marketingSupport || ""}
+          onChange={(e) =>
+            handleChange({
+              target: {
+                name: "marketingSupport",
+                value: e.target.value,
+              },
+            })
+          }
+          sx={{
+              width: "63%",
+          }}
+        />
+      </FormControl>
+    </Grid>
 
-          <Grid item>
-            <FormControl
-              component="fieldset"
-              fullWidth
-              error={!!errors.consultationOrAssistance}
-              required
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 4,
-                p: 1,
-              }}
-            >
-              <Box>
-                <FormLabel
-                  component="legend"
-                  sx={{
-                    minWidth: "300px",
-                    fontWeight: "bold",
-                    color: errors.consultationOrAssistance
-                      ? "error.main"
-                      : "text.primary",
-                  }}
-                >
-                  Would you like consultation or <br />assistance for franchise
-                  marketing<br /> recruitment?
-                </FormLabel>
-              </Box>
-              <RadioGroup row sx={{ display: "flex", gap: 2 }}>
-                {aidFinancing.map((type) => (
-                  <FormControlLabel
-                    key={type}
-                    value={type}
-                    control={
-                      <Radio
-                        color={
-                          errors.consultationOrAssistance ? "error" : "primary"
-                        }
-                      />
-                    }
-                    label={type}
-                    checked={data.consultationOrAssistance === type}
-                    onChange={() =>
-                      handleChange({
-                        target: {
-                          name: "consultationOrAssistance",
-                          value: type,
-                        },
-                      })
-                    }
-                  />
-                ))}
-              </RadioGroup>
-              {errors.consultationOrAssistance && (
-                <FormHelperText error sx={{ ml: 2 }}>
-                  {errors.consultationOrAssistance}
-                </FormHelperText>
-              )}
-            </FormControl>
-          </Grid>
+    {/* Other Support Provided - Multi-line Text */}
+    <Grid item xs={12}>
+      <FormControl
+        fullWidth
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: { md: "center" },
+          gap: 1,
+          p: 1,
+        }}
+      >
+        <FormLabel
+          sx={{
+            minWidth: { md: "300px" },
+            fontWeight: "bold",
+          }}
+        >
+          Other Support Provided:
+        </FormLabel>
+        <TextField
+          fullWidth
+          variant="outlined"
+          value={data.otherSupport || ""}
+          onChange={(e) =>
+            handleChange({
+              target: { name: "otherSupport", value: e.target.value },
+            })
+          }
+          multiline
+          rows={1}
+          sx={{
+            width: "63%",
+          }}
+        />
+      </FormControl>
+    </Grid>
 
-          {/* Training Support - Checkbox Group */}
-          <Grid item>
-            <FormControl
-              component="fieldset"
-              fullWidth
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 1,
-                p: 1,
-              }}
-            >
-              <Box>
-                <FormLabel
-                  component="legend"
-                  sx={{
-                    minWidth: "320px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Training Support :
-                </FormLabel>
-              </Box>
-              <FormGroup row sx={{ display: "flex", gap: 1 }}>
-                {["Setup", "Staff", "Operations", "Marketing"].map((option) => (
-                  <FormControlLabel
-                    key={option}
-                    control={
-                      <Checkbox
-                        checked={
-                          data.trainingSupport?.includes(option) || false
-                        }
-                        onChange={(e) => {
-                          const newValue = e.target.checked
-                            ? [...(data.trainingSupport || []), option]
-                            : (data.trainingSupport || []).filter(
-                                (v) => v !== option
-                              );
-                          handleChange({
-                            target: {
-                              name: "trainingSupport",
-                              value: newValue,
-                            },
-                          });
-                        }}
-                        name="trainingSupport"
-                        color="primary"
-                      />
-                    }
-                    label={option}
-                  />
-                ))}
-              </FormGroup>
-            </FormControl>
-          </Grid>
-
-          {/* Marketing Support - Text Input */}
-          <Grid item>
-            <FormControl
-              fullWidth
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 1,
-                p: 1,
-              }}
-            >
-              <FormLabel
-                sx={{
-                  minWidth: "700px",
-                  fontWeight: "bold",
-                }}
-              >
-                Marketing Support :
-              </FormLabel>
-
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={data.marketingSupport || ""}
-                onChange={(e) =>
-                  handleChange({
-                    target: {
-                      name: "marketingSupport",
-                      value: e.target.value,
-                    },
-                  })
-                }
-              />
-            </FormControl>
-          </Grid>
-
-          {/* Other Support Provided - Multi-line Text */}
-          <Grid item>
-            <FormControl
-              fullWidth
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 1,
-                p: 1,
-              }}
-            >
-              <FormLabel
-                sx={{
-                  minWidth: "320px",
-                  fontWeight: "bold",
-                }}
-              >
-                Other Support Provided :
-              </FormLabel>
-
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={data.otherSupport || ""}
-                onChange={(e) =>
-                  handleChange({
-                    target: { name: "otherSupport", value: e.target.value },
-                  })
-                }
-                multiline
-                rows={1}
-              />
-            </FormControl>
-          </Grid>
-
-          {/* Unique Selling Points (USP) - Multi-line Text */}
-          <Grid item>
-            <FormControl
-              fullWidth
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 1,
-                p: 1,
-              }}
-            >
-              <FormLabel
-                sx={{
-                  minWidth: "320px",
-                  fontWeight: "bold",
-                }}
-              >
-                Unique Selling Points (USP) :
-              </FormLabel>
-
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={data.uniqueSellingPoints || ""}
-                onChange={(e) =>
-                  handleChange({
-                    target: {
-                      name: "uniqueSellingPoints",
-                      value: e.target.value,
-                    },
-                  })
-                }
-                multiline
-                rows={1}
-              />
-            </FormControl>
-          </Grid>
-        </Grid>
-      </Grid>
+    {/* Unique Selling Points (USP) - Multi-line Text */}
+    <Grid item xs={12}>
+      <FormControl
+        fullWidth
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: { md: "center" },
+          gap: 1,
+          p: 1,
+        }}
+      >
+        <FormLabel
+          sx={{
+            minWidth: { md: "300px" },
+            fontWeight: "bold",
+          }}
+        >
+          Unique Selling Points (USP):
+        </FormLabel>
+        <TextField
+         
+          variant="outlined"
+          value={data.uniqueSellingPoints || ""}
+          onChange={(e) =>
+            handleChange({
+              target: {
+                name: "uniqueSellingPoints",
+                value: e.target.value,
+              },
+            })
+          }
+          multiline
+          rows={1}
+          sx={{
+            width: "63%",
+          }}
+        />
+      </FormControl>
+    </Grid>
+  </Grid>
+</Grid>
 
       <Grid item xs={12}>
         <Typography

@@ -403,7 +403,9 @@ const handleAddCategory = () => {
   return (
     <Box sx={{ overflowY: "auto", ml: 32, pr: 1, mt: 0 ,maxWidth:'100%'}}>
       {/* Brand Details Section */}
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
+      <Typography variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>
        Login Credentials 
       </Typography>
 
@@ -703,7 +705,9 @@ const handleAddCategory = () => {
         </Alert>
       </Snackbar>
 
-      <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
+      <Typography variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>
         Brand Details
       </Typography>
 
@@ -867,7 +871,9 @@ const handleAddCategory = () => {
               
 
 
-      <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
+      <Typography variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>
 Head Office Location      </Typography> 
      <Grid container spacing={2}>
 
