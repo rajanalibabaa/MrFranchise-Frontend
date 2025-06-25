@@ -29,7 +29,7 @@ import {
   ListItem,
   ListItemText,
   IconButton,
-  Tooltip
+  Tooltip,
 } from "@mui/material";
 import { useState } from "react";
 import categories from "./BrandCategories";
@@ -46,9 +46,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     franchiseType: "",
     franchiseFee: "",
     royaltyFee: "",
+    stockInvestment: "",
     royaltyFeeUnit: "%",
     interiorCost: "",
-    stockCost: "",
     otherCost: "",
     roi: "",
     payBackPeriod: "",
@@ -57,6 +57,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     marginOnSales: "",
     agreementPeriod: "",
   });
+
+  console.log("auauauauauauua", currentFicoModel);
 
   const [savedFicoModels, setSavedFicoModels] = React.useState([]);
   const [currentUSP, setCurrentUSP] = useState("");
@@ -130,7 +132,6 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       !currentFicoModel.franchiseFee ||
       !currentFicoModel.royaltyFee ||
       !currentFicoModel.interiorCost ||
-      !currentFicoModel.stockCost ||
       !currentFicoModel.otherCost ||
       !currentFicoModel.roi ||
       !currentFicoModel.payBackPeriod ||
@@ -160,9 +161,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       franchiseType: "",
       franchiseFee: "",
       royaltyFee: "",
-      royaltyFeeUnit: "%",
       interiorCost: "",
-      stockCost: "",
+      stockInvestment: "",
       otherCost: "",
       roi: "",
       payBackPeriod: "",
@@ -272,32 +272,32 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     onChange({ brandDescription: content }); // Update the parent form data directly
   };
 
-// Add a new USP
-const handleAddUSP = () => {
-  const trimmedUSP = currentUSP.trim();
-  if (!trimmedUSP) return;
+  // Add a new USP
+  const handleAddUSP = () => {
+    const trimmedUSP = currentUSP.trim();
+    if (!trimmedUSP) return;
 
-  // Prevent duplicates (case-insensitive)
-  const existingUSPs = (data.uniqueSellingPoints || []).map(usp => 
-    usp.toLowerCase().trim()
-  );
-  
-  if (existingUSPs.includes(trimmedUSP.toLowerCase())) {
-    // You might want to show an error message here
-    return;
-  }
+    // Prevent duplicates (case-insensitive)
+    const existingUSPs = (data.uniqueSellingPoints || []).map((usp) =>
+      usp.toLowerCase().trim()
+    );
 
-  const updatedUSPs = [...(data.uniqueSellingPoints || []), trimmedUSP];
-  onChange({ uniqueSellingPoints: updatedUSPs });
-  setCurrentUSP("");
-};
+    if (existingUSPs.includes(trimmedUSP.toLowerCase())) {
+      // You might want to show an error message here
+      return;
+    }
 
-// Remove a USP
-const handleRemoveUSP = (index) => {
-  const updatedUSPs = [...(data.uniqueSellingPoints || [])];
-  updatedUSPs.splice(index, 1);
-  onChange({ uniqueSellingPoints: updatedUSPs });
-};
+    const updatedUSPs = [...(data.uniqueSellingPoints || []), trimmedUSP];
+    onChange({ uniqueSellingPoints: updatedUSPs });
+    setCurrentUSP("");
+  };
+
+  // Remove a USP
+  const handleRemoveUSP = (index) => {
+    const updatedUSPs = [...(data.uniqueSellingPoints || [])];
+    updatedUSPs.splice(index, 1);
+    onChange({ uniqueSellingPoints: updatedUSPs });
+  };
 
   return (
     <Box sx={{ pr: 1, mr: { sm: 0, md: 25 }, ml: { sm: 0, md: 25 } }}>
@@ -430,115 +430,110 @@ const handleRemoveUSP = (index) => {
         }}
       >
         {/* Established Year */} {/* Established Year */}
-            <Grid item xs={12} sm={6} md={2.4}>
-              <FormControl fullWidth error={!!errors.establishedYear}>
-                <InputLabel size="medium">Year Commenced Operations</InputLabel>
-                <Select
-                  name="establishedYear"
-                  value={data.establishedYear || ""}
-                  label="Year Commenced Operations"
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="medium"
-                  required
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        width: 390,
-                        maxHeight: 300,
-                        "& .MuiList-root": {
-                          display: "grid",
-                          gridTemplateColumns: "repeat(5, 1fr)", // 5 columns for a calendar-like look
-                          gap: "4px",
-                          padding: "4px",
-                        },
-                      },
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.establishedYear}>
+            <InputLabel size="medium">Year Commenced Operations</InputLabel>
+            <Select
+              name="establishedYear"
+              value={data.establishedYear || ""}
+              label="Year Commenced Operations"
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              required
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    width: 390,
+                    maxHeight: 300,
+                    "& .MuiList-root": {
+                      display: "grid",
+                      gridTemplateColumns: "repeat(5, 1fr)", // 5 columns for a calendar-like look
+                      gap: "4px",
+                      padding: "4px",
                     },
+                  },
+                },
+              }}
+            >
+              {Array.from(
+                { length: 100 },
+                (_, i) => new Date().getFullYear() - i
+              ).map((year) => (
+                <MenuItem
+                  key={year}
+                  value={year}
+                  sx={{
+                    minWidth: 0,
+                    padding: "6px 4px",
+                    display: "flex",
+                    justifyContent: "center",
                   }}
                 >
-                  {Array.from(
-                    { length: 100 },
-                    (_, i) => new Date().getFullYear() - i
-                  ).map((year) => (
-                    <MenuItem
-                      key={year}
-                      value={year}
-                      sx={{
-                        minWidth: 0,
-                        padding: "6px 4px",
-                        display: "flex",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {year}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.establishedYear && (
-                  <Typography variant="caption" color="error">
-                    {errors.establishedYear}
-                  </Typography>
-                )}
-              </FormControl>
-            </Grid>
- 
-
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.establishedYear && (
+              <Typography variant="caption" color="error">
+                {errors.establishedYear}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
         {/* Franchise Since Year */}
         {/* Franchise Since Year */}
-            <Grid item xs={12} sm={6} md={2.4}>
-              <FormControl fullWidth error={!!errors.franchiseSinceYear}>
-                <InputLabel size="medium">
-                  Year Commenced Franchising
-                </InputLabel>
-                <Select
-                  name="franchiseSinceYear"
-                  value={data.franchiseSinceYear || ""}
-                  label="Year Commenced Franchising"
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="medium"
-                  required
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        width: 390,
-                        maxHeight: 300,
-                        "& .MuiList-root": {
-                          display: "grid",
-                          gridTemplateColumns: "repeat(5, 1fr)", // 5 columns for a calendar-like look
-                          gap: "4px",
-                          padding: "4px",
-                        },
-                      },
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.franchiseSinceYear}>
+            <InputLabel size="medium">Year Commenced Franchising</InputLabel>
+            <Select
+              name="franchiseSinceYear"
+              value={data.franchiseSinceYear || ""}
+              label="Year Commenced Franchising"
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              required
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    width: 390,
+                    maxHeight: 300,
+                    "& .MuiList-root": {
+                      display: "grid",
+                      gridTemplateColumns: "repeat(5, 1fr)", // 5 columns for a calendar-like look
+                      gap: "4px",
+                      padding: "4px",
                     },
+                  },
+                },
+              }}
+            >
+              {Array.from(
+                { length: 100 },
+                (_, i) => new Date().getFullYear() - i
+              ).map((year) => (
+                <MenuItem
+                  key={year}
+                  value={year}
+                  sx={{
+                    minWidth: 0,
+                    padding: "6px 4px",
+                    display: "flex",
+                    justifyContent: "center",
                   }}
                 >
-                  {Array.from(
-                    { length: 100 },
-                    (_, i) => new Date().getFullYear() - i
-                  ).map((year) => (
-                    <MenuItem
-                      key={year}
-                      value={year}
-                      sx={{
-                        minWidth: 0,
-                        padding: "6px 4px",
-                        display: "flex",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {year}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.franchiseSinceYear && (
-                  <Typography variant="caption" color="error">
-                    {errors.franchiseSinceYear}
-                  </Typography>
-                )}
-              </FormControl>
-            </Grid>
- 
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.franchiseSinceYear && (
+              <Typography variant="caption" color="error">
+                {errors.franchiseSinceYear}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
       </Grid>
 
       {/* Franchise Network */}
@@ -762,8 +757,8 @@ const handleRemoveUSP = (index) => {
           </FormControl>
         </Grid>
 
-         {/* Column 5 agreementPeriod */}
- 
+        {/* Column 5 agreementPeriod */}
+
         <Grid item>
           <FormControl
             fullWidth
@@ -778,7 +773,7 @@ const handleRemoveUSP = (index) => {
               value={currentFicoModel.agreementPeriod || ""}
               onChange={handleFicoChange}
               renderValue={(selected) => (selected ? `${selected} years` : "")}
-               endAdornment={
+              endAdornment={
                 <InputAdornment position="end" sx={{ mr: 2 }}>
                   Years
                 </InputAdornment>
@@ -818,7 +813,6 @@ const handleRemoveUSP = (index) => {
             )}
           </FormControl>
         </Grid>
- 
 
         {/* Column 6 - Franchise Fee */}
 
@@ -1111,7 +1105,7 @@ const handleRemoveUSP = (index) => {
             padding: "8px 70px",
           }}
         >
-          Add Models
+          {data.fico?.length > 0 ? "Add more Models" : "Add Models"}
         </Button>
       </Grid>
 
@@ -1221,18 +1215,18 @@ const handleRemoveUSP = (index) => {
                       <TableCell>{model.franchiseModel}</TableCell>
                       <TableCell>{model.franchiseType}</TableCell>
                       <TableCell>{model.investmentRange}</TableCell>
-                      <TableCell>{model.areaRequired} sq.ft</TableCell>
+                      <TableCell>{model.areaRequired} </TableCell>
                       <TableCell>{model.agreementPeriod}</TableCell>
                       <TableCell>₹{model.franchiseFee}</TableCell>
                       <TableCell>₹{model.interiorCost}</TableCell>
-                      <TableCell>₹{model.stockCost}</TableCell>
+                      <TableCell>₹{model.stockInvestment}</TableCell>
                       <TableCell>₹{model.otherCost}</TableCell>
                       <TableCell>₹{model.requireWorkingCapital}</TableCell>
                       <TableCell>{model.royaltyFee}</TableCell>
                       <TableCell>{model.breakEven} months</TableCell>
-                      <TableCell>{model.roi}%</TableCell>
+                      <TableCell>{model.roi}</TableCell>
                       <TableCell>{model.payBackPeriod}</TableCell>
-                      <TableCell>{model.marginOnSales}%</TableCell>
+                      <TableCell>{model.marginOnSales}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1597,106 +1591,109 @@ const handleRemoveUSP = (index) => {
           Brand Description
         </Typography>
 
-      <Grid item xs={12}>
-  <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
-    Unique Selling Points (USP): 
-   <Tooltip
-    title={
-      <span style={{ fontSize: '0.875rem', lineHeight: 1.5 }}>
-        Highlight what makes your brand or business unique
-        Try to list 2–5 bullet points that make you stand out.
-      </span>
-    }
-    placement="right-start"
-    arrow
-    enterTouchDelay={0} // makes it responsive on mobile too
-  >
-    <IconButton
-      size="small"
-      
-      sx={{
-        // p: 0.8,
-        color: 'warning.main',
-        // backgroundColor: 'info.light',
-        '&:hover': {
-          backgroundColor: 'info.main',
-          color: 'white',
-        },
-        marginLeft: '5px',
-        // borderRadius: '50%',
-      }}
-    >
-      <InfoOutlined fontSize="medium" />
-    </IconButton>
-  </Tooltip>  </Typography>
-  
-  {/* USP Input and Add Button */}
-  <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
-    <TextField
-      fullWidth
-      variant="outlined"
-      value={currentUSP}
-      onChange={(e) => setCurrentUSP(e.target.value)}
-      placeholder="Add a unique selling point"
-      onKeyPress={(e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          handleAddUSP();
-        }
-      }}
-    />
-    <Button
-      variant="contained"
-      onClick={handleAddUSP}
-      disabled={!currentUSP.trim()}
-      sx={{
-        backgroundColor: "#4caf50",
-        color: "white",
-        "&:hover": { backgroundColor: "#388e3c" },
-        height: "56px",
-        minWidth: "100px"
-      }}
-    >
-      Add
-    </Button>
-  </Box>
-
-  {/* Display added USPs */}
-  {(data.uniqueSellingPoints?.length > 0) && (
-    <Paper sx={{ p: 2, mb: 3, border: "1px solid #e0e0e0" }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
-        Added USPs:
-      </Typography>
-      <List dense sx={{ maxHeight: 200, overflow: 'auto' }}>
-        {data.uniqueSellingPoints.map((usp, index) => (
-          <ListItem
-            key={index}
-            secondaryAction={
+        <Grid item xs={12}>
+          <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
+            Unique Selling Points (USP):
+            <Tooltip
+              title={
+                <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+                  Highlight what makes your brand or business unique Try to list
+                  2–5 bullet points that make you stand out.
+                </span>
+              }
+              placement="right-start"
+              arrow
+              enterTouchDelay={0} // makes it responsive on mobile too
+            >
               <IconButton
-                edge="end"
-                aria-label="delete"
-                onClick={() => handleRemoveUSP(index)}
                 size="small"
+                sx={{
+                  // p: 0.8,
+                  color: "warning.main",
+                  // backgroundColor: 'info.light',
+                  "&:hover": {
+                    backgroundColor: "info.main",
+                    color: "white",
+                  },
+                  marginLeft: "5px",
+                  // borderRadius: '50%',
+                }}
               >
-                <DeleteIcon fontSize="small" />
+                <InfoOutlined fontSize="medium" />
               </IconButton>
-            }
-            sx={{
-              py: 0.5,
-              borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-              "&:last-child": { borderBottom: "none" }
-            }}
-          >
-            <ListItemText 
-              primary={`${index + 1}. ${usp}`} 
-              primaryTypographyProps={{ variant: 'body2' }}
+            </Tooltip>{" "}
+          </Typography>
+
+          {/* USP Input and Add Button */}
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              value={currentUSP}
+              onChange={(e) => setCurrentUSP(e.target.value)}
+              placeholder="Add a unique selling point"
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddUSP();
+                }
+              }}
             />
-          </ListItem>
-        ))}
-      </List>
-    </Paper>
-  )}
-</Grid>
+            <Button
+              variant="contained"
+              onClick={handleAddUSP}
+              disabled={!currentUSP.trim()}
+              sx={{
+                backgroundColor: "#4caf50",
+                color: "white",
+                "&:hover": { backgroundColor: "#388e3c" },
+                height: "56px",
+                minWidth: "100px",
+              }}
+            >
+              Add
+            </Button>
+          </Box>
+
+          {/* Display added USPs */}
+          {data.uniqueSellingPoints?.length > 0 && (
+            <Paper sx={{ p: 2, mb: 3, border: "1px solid #e0e0e0" }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: "bold", mb: 1 }}
+              >
+                Added USPs:
+              </Typography>
+              <List dense sx={{ maxHeight: 200, overflow: "auto" }}>
+                {data.uniqueSellingPoints.map((usp, index) => (
+                  <ListItem
+                    key={index}
+                    secondaryAction={
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => handleRemoveUSP(index)}
+                        size="small"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    }
+                    sx={{
+                      py: 0.5,
+                      borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+                      "&:last-child": { borderBottom: "none" },
+                    }}
+                  >
+                    <ListItemText
+                      primary={`${index + 1}. ${usp}`}
+                      primaryTypographyProps={{ variant: "body2" }}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          )}
+        </Grid>
         <Box sx={{ mt: 2, mb: 4 }}>
           <Editor
             apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
