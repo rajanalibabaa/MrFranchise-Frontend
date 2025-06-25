@@ -1359,7 +1359,7 @@ const BrandRegisterForm = () => {
               flexGrow: 1,
               border: "1px solid #e0e0e0",
               borderRadius: 2,
-
+              mt:0,
               pl: 1,
               overflow: "auto",
             }}

@@ -1,6 +1,4 @@
-export default coutryCode=[
-    
-
+const coutryCode=[
 {
 "name": "Afghanistan",
 "dial_code": "+93",
@@ -1212,3 +1210,6 @@ export default coutryCode=[
 "code": "ZW"
 }
 ]
+
+
+export default coutryCode;

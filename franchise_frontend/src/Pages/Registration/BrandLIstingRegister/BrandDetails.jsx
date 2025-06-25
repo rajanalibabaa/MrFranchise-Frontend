@@ -44,8 +44,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import LanguageIcon from "@mui/icons-material/Language";
 import FlagIcon from "@mui/icons-material/Flag";
 import { Editor } from "@tinymce/tinymce-react";
-import { width } from "@mui/system";
+import { fontSize, width } from "@mui/system";
 import { fetchGlobalLocationByPostalCode,getSupportedCountries } from "../../../Utils/PincodeFetch.jsx";
+import coutryCode from "../../../Utils/AllCountryCode.jsx"
 
 // const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 // const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -372,6 +373,276 @@ useEffect(() => {
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
+  
+   // State for country codes
+  const [mobileCountryCode, setMobileCountryCode] = useState({ code: "IN", dial_code: "+91" });
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState({ code: "IN", dial_code: "+91" });
+  const [ceoCountryCode, setCeoCountryCode] = useState({ code: "IN", dial_code: "+91" });
+  const [officeCountryCode, setOfficeCountryCode] = useState({ code: "IN", dial_code: "+91" });
+
+  // Filter country codes to remove duplicates and sort
+  const uniqueCountryCodes = coutryCode.reduce((acc, current) => {
+    const x = acc.find(item => item.code === current.code);
+    if (!x) {
+      return acc.concat([current]);
+    } else {
+      return acc;
+    }
+  }, []).sort((a, b) => a.name.localeCompare(b.name));
+
+  // Handle country code change
+  const handleCountryCodeChange = (field, newValue) => {
+    if (newValue) {
+      switch (field) {
+        case 'mobile':
+          setMobileCountryCode(newValue);
+          break;
+        case 'whatsapp':
+          setWhatsappCountryCode(newValue);
+          break;
+        case 'ceo':
+          setCeoCountryCode(newValue);
+          break;
+        case 'office':
+          setOfficeCountryCode(newValue);
+          break;
+        default:
+          break;
+      }
+    }
+  };
+
+  // ... (keep all your existing state and functions)
+
+  // Update your mobile number fields to include country code selectors:
+
+  // Mobile Number Field
+  const renderMobileNumberField = () => (
+    <Grid item xs={12} sm={6} md={2.4}>
+      <TextField
+        fullWidth
+        label="Mobile Number"
+        name="mobileNumber"
+        value={data.mobileNumber || ""}
+        onChange={handleChange}
+        error={!!errors.mobileNumber}
+        helperText={errors.mobileNumber}
+        variant="outlined"
+        size="medium"
+        inputProps={{ maxLength: 15 }} // Increased to accommodate international numbers
+        placeholder="Enter mobile number"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Autocomplete
+                options={uniqueCountryCodes}
+                getOptionLabel={(option) => `${option.dial_code}`}
+                value={mobileCountryCode}
+                onChange={(event, newValue) => handleCountryCodeChange('mobile', newValue)}
+                clearIcon={null}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    sx={{ width: 70 }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} fontSize={12}>
+                  {option.dial_code} <br/>({option.code})
+                  </Box>
+                )}
+              />
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              {verificationState.mobileNumber.verified ? (
+                <Box display="flex" alignItems="center" color="success.main">
+                  <CheckCircleIcon fontSize="medium" />
+                  <Typography variant="caption" sx={{ ml: 0.5 }}>
+                    Verified
+                  </Typography>
+                </Box>
+              ) : (
+                <Button
+                  variant="outlined"
+                  size="medium"
+                  onClick={() => handleVerificationDialog("mobileNumber", true)}
+                  disabled={
+                    !data.mobileNumber ||
+                    verificationState.mobileNumber.loading
+                  }
+                  startIcon={
+                    verificationState.mobileNumber.loading ? (
+                      <CircularProgress size={14} />
+                    ) : (
+                      <SendIcon fontSize="medium" />
+                    )
+                  }
+                >
+                  Verify
+                </Button>
+              )}
+            </InputAdornment>
+          ),
+        }}
+        required
+      />
+    </Grid>
+  );
+
+  // WhatsApp Number Field
+  const renderWhatsAppNumberField = () => (
+    <Grid item xs={12} sm={6} md={2.4}>
+      <TextField
+        fullWidth
+        label="WhatsApp Number"
+        name="whatsappNumber"
+        value={data.whatsappNumber || ""}
+        onChange={handleChange}
+        error={!!errors.whatsappNumber}
+        helperText={errors.whatsappNumber}
+        variant="outlined"
+        size="medium"
+        disabled={!whatsappEnabled}
+        inputProps={{ maxLength: 15 }}
+        placeholder="Enter WhatsApp number"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Autocomplete
+                options={uniqueCountryCodes}
+                getOptionLabel={(option) => `${option.dial_code}`}
+                value={whatsappCountryCode}
+                onChange={(event, newValue) => handleCountryCodeChange('whatsapp', newValue)}
+                clearIcon={null}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    sx={{ width: 70 }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} fontSize={12}>
+                    {option.dial_code} <br/>({option.code})
+                  </Box>
+                )}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+    </Grid>
+  );
+
+  // CEO Mobile Field
+  const renderCeoMobileField = () => (
+    <Grid item xs={12} sm={6} md={2}>
+      <TextField
+        fullWidth
+        label="CEO/MD/Owner Mobile No"
+        name="ceoMobile"
+        value={data.ceoMobile || ""}
+        onChange={handleChange}
+        variant="outlined"
+        size="medium"
+        inputProps={{ maxLength: 15 }}
+        placeholder="Enter mobile number"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Autocomplete
+                options={uniqueCountryCodes}
+                getOptionLabel={(option) => `${option.dial_code}`}
+                value={ceoCountryCode}
+                onChange={(event, newValue) => handleCountryCodeChange('ceo', newValue)}
+                clearIcon={null}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    sx={{ width: 70 }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props}fontSize={12}>
+                    {option.dial_code}<br/> ({option.code})
+                  </Box>
+                )}
+              />
+            </InputAdornment>
+          ),
+        }}
+        error={!!errors.ceoMobile}
+        helperText={errors.ceoMobile}
+        required
+      />
+    </Grid>
+  );
+
+  // Office Mobile Field
+  const renderOfficeMobileField = () => (
+    <Grid item xs={12} sm={6} md={2.4}>
+      <TextField
+        fullWidth
+        label="Office Mobile Number (Optional)"
+        name="officeMobile"
+        value={data.officeMobile || ""}
+        onChange={handleChange}
+        variant="outlined"
+        size="medium"
+        inputProps={{ maxLength: 15 }}
+        placeholder="Enter mobile number"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Autocomplete
+                options={uniqueCountryCodes}
+                getOptionLabel={(option) => `${option.dial_code}`}
+                value={officeCountryCode}
+                onChange={(event, newValue) => handleCountryCodeChange('office', newValue)}
+                clearIcon={null}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    sx={{ width: 70 }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} fontSize={12}>
+                  
+                    {option.dial_code}<br/> ({option.code})
+                  </Box>
+                )}
+              />
+            </InputAdornment>
+          ),
+        }}
+        error={!!errors.officeMobile}
+        helperText={errors.officeMobile}
+      />
+    </Grid>
+  );
+
 
   // Location card component
   const LocationCard = ({ location, onRemove }) => {
@@ -432,7 +703,7 @@ useEffect(() => {
   };
 
   return (
-    <Box sx={{ overflowY: "auto", ml: 25, mr: 25, mt: 0, maxWidth: "100%" }}>
+    <Box sx={{ overflowY: "auto", mr: { sm: 0, md: 25 }, ml: { sm: 0, md: 25 }, mt: 0, maxWidth: "100%" }}>
       {/* Brand Details Section */}
       <Typography
         variant="h6"
@@ -521,90 +792,13 @@ useEffect(() => {
 
         {/* Mobile Number with Verification */}
         <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Mobile Number"
-            name="mobileNumber"
-            value={data.mobileNumber || ""}
-            onChange={handleChange}
-            error={!!errors.mobileNumber}
-            helperText={errors.mobileNumber}
-            variant="outlined"
-            size="medium"
-            inputProps={{ maxLength: 10 }}
-            placeholder="Enter 10 digit number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">+91</InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  {verificationState.mobileNumber.verified ? (
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      color="success.main"
-                    >
-                      <CheckCircleIcon fontSize="medium" />
-                      <Typography variant="caption" sx={{ ml: 0.5 }}>
-                        Verified
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <Button
-                      variant="outlined"
-                      size="medium"
-                      onClick={() =>
-                        handleVerificationDialog("mobileNumber", true)
-                      }
-                      disabled={
-                        !data.mobileNumber ||
-                        verificationState.mobileNumber.loading
-                      }
-                      startIcon={
-                        verificationState.mobileNumber.loading ? (
-                          <CircularProgress size={14} />
-                        ) : (
-                          <SendIcon fontSize="medium" />
-                        )
-                      }
-                    >
-                      Verify
-                    </Button>
-                  )}
-                </InputAdornment>
-              ),
-            }}
-            required
-          />
+           {renderMobileNumberField()}
+    
         </Grid>
 
         {/* WhatsApp Number */}
         <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="WhatsApp Number"
-            name="whatsappNumber"
-            value={data.whatsappNumber || ""}
-            onChange={handleChange}
-            error={!!errors.whatsappNumber}
-            helperText={errors.whatsappNumber}
-            variant="outlined"
-            size="medium"
-            disabled={!whatsappEnabled}
-            inputProps={{ maxLength: 10 }}
-            placeholder="Enter 10 digit number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">+91</InputAdornment>
-              ),
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-              },
-            }}
-          />
+            {renderWhatsAppNumberField()}
         </Grid>
       </Grid>
 
@@ -849,25 +1043,7 @@ useEffect(() => {
 
         {/* CEO Mobile */}
         <Grid item xs={12} md={2}>
-          <TextField
-            fullWidth
-            label="CEO/MD/Owner Mobile No"
-            name="ceoMobile"
-            value={data.ceoMobile || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            inputProps={{ maxLength: 10 }}
-            placeholder="Enter 10 digit number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">+91</InputAdornment>
-              ),
-            }}
-            error={!!errors.ceoMobile}
-            helperText={errors.ceoMobile}
-            required
-          />
+        { renderCeoMobileField()}
         </Grid>
       </Grid>
 
@@ -906,25 +1082,7 @@ useEffect(() => {
         </Grid>
 
         <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Office Mobile Number (Optional)"
-            name="officeMobile"
-            value={data.officeMobile || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            inputProps={{ maxLength: 10 }}
-            placeholder="Enter 10 digit number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">+91</InputAdornment>
-              ),
-            }}
-            error={!!errors.officeMobile}
-            helperText={errors.officeMobile}
-            required
-          />
+          {renderOfficeMobileField()}
         </Grid>
       </Grid>
    
