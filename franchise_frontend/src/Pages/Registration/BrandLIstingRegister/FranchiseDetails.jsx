@@ -198,7 +198,6 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
   const aidFinancing = ["Yes", "No"];
 
-
   const agreementPeriods = [
     "1 Year",
     "3 Years",
@@ -408,12 +407,35 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   variant="outlined"
                   size="medium"
                   required
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        width: 390,
+                        maxHeight: 300,
+                        "& .MuiList-root": {
+                          display: "grid",
+                          gridTemplateColumns: "repeat(5, 1fr)", // 5 columns for a calendar-like look
+                          gap: "4px",
+                          padding: "4px",
+                        },
+                      },
+                    },
+                  }}
                 >
                   {Array.from(
                     { length: 100 },
                     (_, i) => new Date().getFullYear() - i
                   ).map((year) => (
-                    <MenuItem key={year} value={year}>
+                    <MenuItem
+                      key={year}
+                      value={year}
+                      sx={{
+                        minWidth: 0,
+                        padding: "6px 4px",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
                       {year}
                     </MenuItem>
                   ))}
@@ -439,12 +461,35 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   variant="outlined"
                   size="medium"
                   required
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        width: 390,
+                        maxHeight: 300,
+                        "& .MuiList-root": {
+                          display: "grid",
+                          gridTemplateColumns: "repeat(5, 1fr)", // 5 columns for a calendar-like look
+                          gap: "4px",
+                          padding: "4px",
+                        },
+                      },
+                    },
+                  }}
                 >
                   {Array.from(
                     { length: 100 },
                     (_, i) => new Date().getFullYear() - i
                   ).map((year) => (
-                    <MenuItem key={year} value={year}>
+                    <MenuItem
+                      key={year}
+                      value={year}
+                      sx={{
+                        minWidth: 0,
+                        padding: "6px 4px",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
                       {year}
                     </MenuItem>
                   ))}
@@ -883,39 +928,50 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
         {/* Column 13 - ROI */}
 
-
-
-<Grid item>
-  <FormControl fullWidth size="medium" required error={!!errors.roi}>
-    <InputLabel>ROI (%)</InputLabel>
-    <Select
-      label="ROI (%)"
-      name="roi"
-      value={currentFicoModel.roi || ""}
-      onChange={handleFicoChange}
-    
-  
->
-  {Array.from({ length: 99 }, (_, i) => (
-
-     <MenuItem
-      key={i + 1}
-      value={`${i + 1}%`}
-      sx={{
-        minWidth: 0,
-        padding: "6px 4px",
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      {i + 1}
-    </MenuItem>
-  
-  ))}
-</Select>
-    {errors.roi && <FormHelperText error>{errors.roi}</FormHelperText>}
-  </FormControl>
-</Grid>
+       {/* Column 13 - ROI */}
+        <Grid item>
+          <FormControl fullWidth size="medium" required error={!!errors.roi}>
+            <InputLabel>ROI (%)</InputLabel>
+            <Select
+              label="ROI (%)"
+              name="roi"
+              value={currentFicoModel.roi || ""}
+              onChange={handleFicoChange}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    width: 390,
+                    maxHeight: 300,
+                    "& .MuiList-root": {
+                      display: "grid",
+                      gridTemplateColumns: "repeat(10, 1fr)",
+                      gap: "4px",
+                      padding: "4px",
+                    },
+                  },
+                },
+              }}
+            >
+              {/* <Box > */}
+              {Array.from({ length: 99 }, (_, i) => (
+                <MenuItem
+                  key={i + 1}
+                  value={`${i + 1}%`}
+                  sx={{
+                    minWidth: 0,
+                    padding: "6px 4px",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  {i + 1}
+                </MenuItem>
+              ))}
+              {/* </Box> */}
+            </Select>
+            {errors.roi && <FormHelperText error>{errors.roi}</FormHelperText>}
+          </FormControl> 
+          </Grid>
 
         {/* Column 14 - PayBack Period */}
         <Grid item>
@@ -934,40 +990,41 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             required
           />
         </Grid>
-        
-
 
         <Grid item>
-  <FormControl fullWidth size="medium" required error={!!errors.marginOnSales}>
-    <InputLabel>marginOnSales (%)</InputLabel>
-    <Select
-      label="Margin ON Sales (%)"
-      name="marginOnSales"
-      value={currentFicoModel.marginOnSales || ""}
-      onChange={handleFicoChange}
-  
->
-  {Array.from({ length: 99 }, (_, i) => (
-
-     <MenuItem
-      key={i + 1}
-      value={`${i + 1}%`}
-      sx={{
-        minWidth: 0,
-        padding: "6px 4px",
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      {i + 1}
-    </MenuItem>
-  
-  ))}
-</Select>
-    {errors.marginOnSales && <FormHelperText error>{errors.marginOnSales}</FormHelperText>}
-  </FormControl>
-</Grid>
-        
+          <FormControl
+            fullWidth
+            size="medium"
+            required
+            error={!!errors.marginOnSales}
+          >
+            <InputLabel>marginOnSales (%)</InputLabel>
+            <Select
+              label="Margin ON Sales (%)"
+              name="marginOnSales"
+              value={currentFicoModel.marginOnSales || ""}
+              onChange={handleFicoChange}
+            >
+              {Array.from({ length: 99 }, (_, i) => (
+                <MenuItem
+                  key={i + 1}
+                  value={`${i + 1}%`}
+                  sx={{
+                    minWidth: 0,
+                    padding: "6px 4px",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  {i + 1}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.marginOnSales && (
+              <FormHelperText error>{errors.marginOnSales}</FormHelperText>
+            )}
+          </FormControl>
+        </Grid>
       </Grid>
 
       {/* Add Button */}
@@ -1128,8 +1185,6 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         }}
       />
 
-    
-
       {/* Support and Training Section */}
 
       <Grid item xs={12}>
@@ -1137,7 +1192,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           Support and Training
         </Typography>
 
-        <Grid gap={1} item xs={12} >
+        <Grid gap={1} item xs={12}>
           {/* Financial Operating Procedure */}
           <Grid item>
             <FormControl
@@ -1164,7 +1219,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   Do you provide aid in financing?
                 </FormLabel>
               </Box>
-              <RadioGroup row sx={{ display: "flex",  gap: 2 }}>
+              <RadioGroup row sx={{ display: "flex", gap: 2 }}>
                 {aidFinancing.map((type) => (
                   <FormControlLabel
                     key={type}
@@ -1217,7 +1272,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                       : "text.primary",
                   }}
                 >
-                  Would you like consultation for <br />franchise  development?
+                  Would you like consultation for <br />
+                  franchise development?
                 </FormLabel>
               </Box>
               <RadioGroup row sx={{ display: "flex", gap: 2 }}>
@@ -1275,8 +1331,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                       : "text.primary",
                   }}
                 >
-                  Would you like consultation or <br />assistance for franchise
-                  marketing<br /> recruitment?
+                  Would you like consultation or <br />
+                  assistance for franchise marketing
+                  <br /> recruitment?
                 </FormLabel>
               </Box>
               <RadioGroup row sx={{ display: "flex", gap: 2 }}>

@@ -4,6 +4,7 @@ import axios from 'axios';
 export const fetchPincodeDetails = async (pincode) => {
   try {
     const response = await axios.get(`https://api.postalpincode.in/pincode/${pincode}`);
+    // const response = await axios.get(`https://api.postalpincode.in/pincode/${pincode}`);
     if (response.data && response.data[0].Status === 'Success') {
       const postOffice = response.data[0].PostOffice[0];
       return {
