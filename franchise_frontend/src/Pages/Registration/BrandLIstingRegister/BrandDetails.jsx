@@ -828,7 +828,29 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
+       
+        </Grid>
+
+        
+              
+
+
+      <Typography variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>
+Head Office Location      </Typography> 
+
+<Grid container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 2,
+          mb: 2,
+        }}
+        >
+<Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label='Office Email (Optional)'
@@ -865,18 +887,9 @@ const handleAddCategory = () => {
            required
          />
         </Grid>
-        </Grid>
-
-        
-              
-
-
-      <Typography variant="h6"
-        fontWeight={700}
-        sx={{ mb: 3, color: "#ff9800" }}>
-Head Office Location      </Typography> 
-     <Grid container spacing={2} sx={{ mt: 2, display: "grid", gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" }, gap: 2, mb: 2 }}>
-
+</Grid>
+     <Grid container spacing={2} sx={{ mt: 2, display: "grid", gridTemplateColumns: { md: "repeat(1, 1fr)", xs: "1fr" }, gap: 2, mb: 2 }}>
+ 
           <Grid >
       
         
