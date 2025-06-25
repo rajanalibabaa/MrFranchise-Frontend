@@ -611,7 +611,7 @@ function BrandExpansionLocationDetails({ onChange }) {
         </Button>
 
         <Drawer
-          anchor="bottom"
+          anchor="top"
           open={type === 'current' ? currentDrawerOpen.states : drawerOpen.states}
           onClose={() => toggle(false)}
           PaperProps={{ sx: { maxHeight: '60vh', p: 2 } }}
@@ -713,7 +713,7 @@ function BrandExpansionLocationDetails({ onChange }) {
         </Button>
 
         <Drawer
-          anchor="bottom"
+          anchor="top"
           open={type === 'current' ? currentDrawerOpen.districts : drawerOpen.districts}
           onClose={() => toggle(false)}
           PaperProps={{ sx: { maxHeight: '60vh', p: 2 } }}
@@ -815,7 +815,7 @@ function BrandExpansionLocationDetails({ onChange }) {
         </Button>
 
         <Drawer
-          anchor="bottom"
+          anchor="top"
           open={type === 'current' ? currentDrawerOpen.cities : drawerOpen.cities}
           onClose={() => toggle(false)}
           PaperProps={{ sx: { maxHeight: '60vh', p: 2 } }}
@@ -911,7 +911,7 @@ function BrandExpansionLocationDetails({ onChange }) {
         </Button>
 
         <Drawer
-          anchor="bottom"
+          anchor="top"
           open={type === 'current' ? currentDrawerOpen.countries : drawerOpen.countries}
           onClose={() => toggle(false)}
           PaperProps={{ sx: { maxHeight: '60vh', p: 2 } }}
@@ -1022,7 +1022,7 @@ function BrandExpansionLocationDetails({ onChange }) {
         </Button>
 
         <Drawer
-          anchor="bottom"
+          anchor="top"
           open={type === 'current' ? currentDrawerOpen.intCities : drawerOpen.intCities}
           onClose={() => toggle(false)}
           PaperProps={{ sx: { maxHeight: '60vh', p: 2 } }}
