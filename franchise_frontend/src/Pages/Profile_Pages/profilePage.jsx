@@ -27,7 +27,7 @@ const InvestorDashboard = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
   const location = useLocation();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Color palette
   const colors = {
