@@ -198,7 +198,6 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
   const aidFinancing = ["Yes", "No"];
 
-
   const agreementPeriods = [
     "1 Year",
     "3 Years",
@@ -267,13 +266,13 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   return (
     <Box sx={{ ml: 5, pr: 1, mr: 5 }}>
       {/* Brand Categories Section */}
-      <Typography
+      {/* <Typography
         variant="h5"
         fontWeight={700}
         sx={{ mb: 3, color: "#4caf50" }}
       >
         Franchise Details
-      </Typography>
+      </Typography> */}
 
       <Typography
         variant="h6"
@@ -369,15 +368,15 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
       </Grid>
 
-      <Grid
-        container
-        spacing={2}
+      <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(2,1fr)", xs: "1fr" },
+          gap: 2,
         }}
       >
-        <Grid item xs={12} sm={6} md={2.4}>
+        {/* Establishment & Franchise year Details */}
+        <Box>
           <Typography
             variant="h6"
             fontWeight={700}
@@ -391,12 +390,10 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             spacing={2}
             sx={{
               display: "grid",
-              gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
-              gap: 2,
-              mb: 2,
+              gridTemplateColumns: { md: "repeat(2, 262px)", xs: "1fr" },
             }}
           >
-            {/* Established Year  */}
+            {/* Established Year */}
             <Grid item xs={12} sm={6} md={2.4}>
               <FormControl fullWidth error={!!errors.establishedYear}>
                 <InputLabel size="medium">Year Commenced Operations</InputLabel>
@@ -425,6 +422,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 )}
               </FormControl>
             </Grid>
+
             {/* Franchise Since Year */}
             <Grid item xs={12} sm={6} md={2.4}>
               <FormControl fullWidth error={!!errors.franchiseSinceYear}>
@@ -457,14 +455,11 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               </FormControl>
             </Grid>
           </Grid>
-        </Grid>
+        </Box>
 
-        <Grid item xs={12} sm={6} md={2.4}>
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            sx={{ mb: 2, color: "#ff9800" }}
-          >
+        {/* Franchise Network */}
+        <Box>
+          <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800" }}>
             Franchise Network
           </Typography>
 
@@ -474,12 +469,10 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             sx={{
               mt: 3,
               display: "grid",
-              gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-              gap: 2,
-              mb: 2,
+              gridTemplateColumns: { md: "repeat(3, 262px)", xs: "1fr" },
             }}
           >
-            <Grid item>
+            <Grid item xs={12} sm={6} md={2.4}>
               <TextField
                 fullWidth
                 label="Company Owned Outlets"
@@ -487,6 +480,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 value={data.companyOwnedOutlets || ""}
                 onChange={handleChange}
                 placeholder="0"
+                type="number"
                 inputProps={{ min: 0 }}
                 error={!!errors.companyOwnedOutlets}
                 helperText={errors.companyOwnedOutlets}
@@ -494,7 +488,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               />
             </Grid>
 
-            <Grid item>
+            <Grid item xs={12} sm={6} md={2.4}>
               <TextField
                 fullWidth
                 label="Franchise Outlets"
@@ -502,6 +496,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 value={data.franchiseOutlets || ""}
                 onChange={handleChange}
                 placeholder="0"
+                type="number"
                 inputProps={{ min: 0 }}
                 error={!!errors.franchiseOutlets}
                 helperText={errors.franchiseOutlets}
@@ -509,7 +504,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               />
             </Grid>
 
-            <Grid item>
+            <Grid item xs={12} sm={6} md={2.4}>
               <TextField
                 fullWidth
                 label="Total Outlets"
@@ -524,21 +519,14 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               />
             </Grid>
           </Grid>
-        </Grid>
-      </Grid>
-
-      {/* Rest of the component remains the same */}
-
-      {/* Franchise Network Section */}
-
-      {/* 
-      </Grid> */}
+        </Box>
+      </Box>
 
       {/* Franchise Details Section */}
       <Typography
         variant="h6"
         fontWeight={700}
-        sx={{ mb: 0, color: "#ff9800" }}
+        sx={{ mt: 2, color: "#ff9800" }}
       >
         Franchise Business Models
       </Typography>
@@ -882,40 +870,49 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 13 - ROI */}
-
-
-
-<Grid item>
-  <FormControl fullWidth size="medium" required error={!!errors.roi}>
-    <InputLabel>ROI (%)</InputLabel>
-    <Select
-      label="ROI (%)"
-      name="roi"
-      value={currentFicoModel.roi || ""}
-      onChange={handleFicoChange}
-    
-  
->
-  {Array.from({ length: 99 }, (_, i) => (
-
-     <MenuItem
-      key={i + 1}
-      value={`${i + 1}%`}
-      sx={{
-        minWidth: 0,
-        padding: "6px 4px",
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      {i + 1}
-    </MenuItem>
-  
-  ))}
-</Select>
-    {errors.roi && <FormHelperText error>{errors.roi}</FormHelperText>}
-  </FormControl>
-</Grid>
+        <Grid item>
+          <FormControl fullWidth size="medium" required error={!!errors.roi}>
+            <InputLabel>ROI (%)</InputLabel>
+            <Select
+              label="ROI (%)"
+              name="roi"
+              value={currentFicoModel.roi || ""}
+              onChange={handleFicoChange}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    width: 390,
+                    maxHeight: 300,
+                    "& .MuiList-root": {
+                      display: "grid",
+                      gridTemplateColumns: "repeat(10, 1fr)",
+                      gap: "4px",
+                      padding: "4px",
+                    },
+                  },
+                },
+              }}
+            >
+              {/* <Box > */}
+              {Array.from({ length: 99 }, (_, i) => (
+                <MenuItem
+                  key={i + 1}
+                  value={`${i + 1}%`}
+                  sx={{
+                    minWidth: 0,
+                    padding: "6px 4px",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  {i + 1}
+                </MenuItem>
+              ))}
+              {/* </Box> */}
+            </Select>
+            {errors.roi && <FormHelperText error>{errors.roi}</FormHelperText>}
+          </FormControl>
+        </Grid>
 
         {/* Column 14 - PayBack Period */}
         <Grid item>
@@ -934,40 +931,55 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             required
           />
         </Grid>
-        
-
 
         <Grid item>
-  <FormControl fullWidth size="medium" required error={!!errors.marginOnSales}>
-    <InputLabel>marginOnSales (%)</InputLabel>
-    <Select
-      label="Margin ON Sales (%)"
-      name="marginOnSales"
-      value={currentFicoModel.marginOnSales || ""}
-      onChange={handleFicoChange}
-  
->
-  {Array.from({ length: 99 }, (_, i) => (
-
-     <MenuItem
-      key={i + 1}
-      value={`${i + 1}%`}
-      sx={{
-        minWidth: 0,
-        padding: "6px 4px",
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      {i + 1}
-    </MenuItem>
-  
-  ))}
-</Select>
-    {errors.marginOnSales && <FormHelperText error>{errors.marginOnSales}</FormHelperText>}
-  </FormControl>
-</Grid>
-        
+          <FormControl
+            fullWidth
+            size="medium"
+            required
+            error={!!errors.marginOnSales}
+          >
+            <InputLabel>marginOnSales (%)</InputLabel>
+            <Select
+              label="Margin ON Sales (%)"
+              name="marginOnSales"
+              value={currentFicoModel.marginOnSales || ""}
+              onChange={handleFicoChange}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    width: 390,
+                    maxHeight: 300,
+                    "& .MuiList-root": {
+                      display: "grid",
+                      gridTemplateColumns: "repeat(10, 1fr)",
+                      gap: "4px",
+                      padding: "4px",
+                    },
+                  },
+                },
+              }}
+            >
+              {Array.from({ length: 99 }, (_, i) => (
+                <MenuItem
+                  key={i + 1}
+                  value={`${i + 1}%`}
+                  sx={{
+                    minWidth: 0,
+                    padding: "6px 4px",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  {i + 1}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.marginOnSales && (
+              <FormHelperText error>{errors.marginOnSales}</FormHelperText>
+            )}
+          </FormControl>
+        </Grid>
       </Grid>
 
       {/* Add Button */}
@@ -1128,18 +1140,15 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         }}
       />
 
-    
-
       {/* Support and Training Section */}
-
       <Grid item xs={12}>
         <Typography variant="h6" color="#ff9800" sx={{ fontWeight: "bold" }}>
           Support and Training
         </Typography>
 
-        <Grid gap={1} item xs={12} >
+        <Grid gap={1} item xs={12}>
           {/* Financial Operating Procedure */}
-          <Grid item>
+          <Grid item xs={12}>
             <FormControl
               component="fieldset"
               fullWidth
@@ -1147,16 +1156,16 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               required
               sx={{
                 display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
+                flexDirection: { xs: "column", md: "row" },
+                alignItems: { md: "center" },
+                gap: 1,
                 p: 1,
               }}
             >
-              <Box>
+              <Box sx={{ minWidth: { md: "300px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
-                    minWidth: "300px",
                     fontWeight: "bold",
                     color: errors.aidFinancing ? "error.main" : "text.primary",
                   }}
@@ -1164,7 +1173,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   Do you provide aid in financing?
                 </FormLabel>
               </Box>
-              <RadioGroup row sx={{ display: "flex",  gap: 2 }}>
+              <RadioGroup row sx={{ display: "flex", gap: 2 }}>
                 {aidFinancing.map((type) => (
                   <FormControlLabel
                     key={type}
@@ -1185,14 +1194,17 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 ))}
               </RadioGroup>
               {errors.aidFinancing && (
-                <FormHelperText error sx={{ ml: 2 }}>
+                <FormHelperText
+                  error
+                  sx={{ ml: { md: 2 }, mt: { xs: 0, md: 0 } }}
+                >
                   {errors.aidFinancing}
                 </FormHelperText>
               )}
             </FormControl>
           </Grid>
 
-          <Grid item>
+          <Grid item xs={12}>
             <FormControl
               component="fieldset"
               fullWidth
@@ -1200,24 +1212,24 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               required
               sx={{
                 display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 4,
+                flexDirection: { xs: "column", md: "row" },
+                alignItems: { md: "center" },
+                gap: 1,
                 p: 1,
               }}
             >
-              <Box>
+              <Box sx={{ minWidth: { md: "300px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
-                    minWidth: "300px",
                     fontWeight: "bold",
                     color: errors.franchiseDevelopment
                       ? "error.main"
                       : "text.primary",
                   }}
                 >
-                  Would you like consultation for <br />franchise  development?
+                  Would you like consultation for <br />
+                  franchise development?
                 </FormLabel>
               </Box>
               <RadioGroup row sx={{ display: "flex", gap: 2 }}>
@@ -1243,14 +1255,17 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 ))}
               </RadioGroup>
               {errors.franchiseDevelopment && (
-                <FormHelperText error sx={{ ml: 2 }}>
+                <FormHelperText
+                  error
+                  sx={{ ml: { md: 2 }, mt: { xs: 0, md: 0 } }}
+                >
                   {errors.franchiseDevelopment}
                 </FormHelperText>
               )}
             </FormControl>
           </Grid>
 
-          <Grid item>
+          <Grid item xs={12}>
             <FormControl
               component="fieldset"
               fullWidth
@@ -1258,25 +1273,25 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               required
               sx={{
                 display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 4,
+                flexDirection: { xs: "column", md: "row" },
+                alignItems: { md: "center" },
+                gap: 1,
                 p: 1,
               }}
             >
-              <Box>
+              <Box sx={{ minWidth: { md: "300px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
-                    minWidth: "300px",
                     fontWeight: "bold",
                     color: errors.consultationOrAssistance
                       ? "error.main"
                       : "text.primary",
                   }}
                 >
-                  Would you like consultation or <br />assistance for franchise
-                  marketing<br /> recruitment?
+                  Would you like consultation or <br />
+                  assistance for franchise marketing
+                  <br /> recruitment?
                 </FormLabel>
               </Box>
               <RadioGroup row sx={{ display: "flex", gap: 2 }}>
@@ -1305,7 +1320,10 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 ))}
               </RadioGroup>
               {errors.consultationOrAssistance && (
-                <FormHelperText error sx={{ ml: 2 }}>
+                <FormHelperText
+                  error
+                  sx={{ ml: { md: 2 }, mt: { xs: 0, md: 0 } }}
+                >
                   {errors.consultationOrAssistance}
                 </FormHelperText>
               )}
@@ -1313,31 +1331,44 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           </Grid>
 
           {/* Training Support - Checkbox Group */}
-          <Grid item>
+          <Grid item xs={12}>
             <FormControl
               component="fieldset"
               fullWidth
               sx={{
                 display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 1,
+                flexDirection: { xs: "column", md: "row" },
+                alignItems: { md: "center" },
+                gap: { xs: 1, md: 8 },
                 p: 1,
               }}
             >
-              <Box>
+              <Box sx={{ minWidth: { md: "200px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
-                    minWidth: "320px",
                     fontWeight: "bold",
                   }}
                 >
-                  Training Support :
+                  Training And Support Provider:
                 </FormLabel>
               </Box>
-              <FormGroup row sx={{ display: "flex", gap: 1 }}>
-                {["Setup", "Staff", "Operations", "Marketing"].map((option) => (
+              <FormGroup
+                row
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 2,
+                  flexDirection: { xs: "column", sm: "row" },
+                }}
+              >
+                {[
+                  "Outlet Setup",
+                  "Staff training",
+                  "Staff Recruitment",
+                  "Operations support",
+                  "Marketing support",
+                ].map((option) => (
                   <FormControlLabel
                     key={option}
                     control={
@@ -1370,26 +1401,25 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           </Grid>
 
           {/* Marketing Support - Text Input */}
-          <Grid item>
+          <Grid item xs={12}>
             <FormControl
               fullWidth
               sx={{
                 display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
+                flexDirection: { xs: "column", md: "row" },
+                alignItems: { md: "center" },
                 gap: 1,
                 p: 1,
               }}
             >
               <FormLabel
                 sx={{
-                  minWidth: "700px",
+                  minWidth: { md: "300px" },
                   fontWeight: "bold",
                 }}
               >
-                Marketing Support :
+                Marketing Support:
               </FormLabel>
-
               <TextField
                 fullWidth
                 variant="outlined"
@@ -1402,31 +1432,33 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                     },
                   })
                 }
+                sx={{
+                  width: "63%",
+                }}
               />
             </FormControl>
           </Grid>
 
           {/* Other Support Provided - Multi-line Text */}
-          <Grid item>
+          <Grid item xs={12}>
             <FormControl
               fullWidth
               sx={{
                 display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
+                flexDirection: { xs: "column", md: "row" },
+                alignItems: { md: "center" },
                 gap: 1,
                 p: 1,
               }}
             >
               <FormLabel
                 sx={{
-                  minWidth: "320px",
+                  minWidth: { md: "300px" },
                   fontWeight: "bold",
                 }}
               >
-                Other Support Provided :
+                Other Support Provided:
               </FormLabel>
-
               <TextField
                 fullWidth
                 variant="outlined"
@@ -1438,33 +1470,34 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 }
                 multiline
                 rows={1}
+                sx={{
+                  width: "63%",
+                }}
               />
             </FormControl>
           </Grid>
 
           {/* Unique Selling Points (USP) - Multi-line Text */}
-          <Grid item>
+          <Grid item xs={12}>
             <FormControl
               fullWidth
               sx={{
                 display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
+                flexDirection: { xs: "column", md: "row" },
+                alignItems: { md: "center" },
                 gap: 1,
                 p: 1,
               }}
             >
               <FormLabel
                 sx={{
-                  minWidth: "320px",
+                  minWidth: { md: "300px" },
                   fontWeight: "bold",
                 }}
               >
-                Unique Selling Points (USP) :
+                Unique Selling Points (USP):
               </FormLabel>
-
               <TextField
-                fullWidth
                 variant="outlined"
                 value={data.uniqueSellingPoints || ""}
                 onChange={(e) =>
@@ -1477,6 +1510,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 }
                 multiline
                 rows={1}
+                sx={{
+                  width: "63%",
+                }}
               />
             </FormControl>
           </Grid>

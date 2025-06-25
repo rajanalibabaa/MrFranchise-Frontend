@@ -401,9 +401,11 @@ const handleAddCategory = () => {
   };
 
   return (
-    <Box sx={{ overflowY: "auto", ml: 10, pr: 1, mt: 0 }}>
+    <Box sx={{ overflowY: "auto", ml: 25, mr: 25,  mt: 0 ,maxWidth:'100%'}}>
       {/* Brand Details Section */}
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
+      <Typography variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>
        Login Credentials 
       </Typography>
 
@@ -413,7 +415,7 @@ const handleAddCategory = () => {
         sx={{
           mt: 3,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}
@@ -703,7 +705,9 @@ const handleAddCategory = () => {
         </Alert>
       </Snackbar>
 
-      <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
+      <Typography variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>
         Brand Details
       </Typography>
 
@@ -714,7 +718,7 @@ const handleAddCategory = () => {
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}> {/* Company Name */}
@@ -747,15 +751,7 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-        <Grid container
-        spacing={2}
-        sx={{
-        
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(1, 1fr)", xs: "1fr" },
-          gap: 2,
-          mb: 2,
-        }}>
+        <Grid >
 
           <TextField
             fullWidth
@@ -771,18 +767,7 @@ const handleAddCategory = () => {
           />
 
         </Grid>
-        
-        </Grid>
-        <Grid container
-        spacing={2}
-        sx={{
-          mt: 2,
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
-          gap: 2,
-          mb: 2,
-        }}>
-            <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label="CEO/MD/Owner Name"
@@ -796,6 +781,17 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
+        </Grid>
+        <Grid container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 2,
+          mb: 2,
+        }}>
+          
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
@@ -832,27 +828,60 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label='Office Email (Optional)'
+            name="officeEmail"
+            value={data.officeEmail || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.officeEmail}
+            helperText={errors.officeEmail}
+            required
+          />
+
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={2.4}>
+           <TextField 
+           fullWidth
+           label='Office Mobile Number (Optional)'
+           name="officeMobile"
+           value={data.officeMobile || ""}
+           onChange={handleChange}
+           variant="outlined"
+           size="medium"
+           inputProps={{ maxLength: 10 }}
+           placeholder="Enter 10 digit number"
+           InputProps={{
+             startAdornment: (
+               <InputAdornment position="start">+91</InputAdornment>
+             ),
+           }}
+           error={!!errors.officeMobile}
+           helperText={errors.officeMobile}
+           required
+         />
+        </Grid>
         </Grid>
 
         
               
 
 
-      <Typography variant="h6"  fontWeight={700} sx={{ mb: 1, color: "#ff9800" }}>
+      <Typography variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>
 Head Office Location      </Typography> 
-      <Grid  container
-        spacing={2}
-        sx={{
-          mt: 2,
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(2, 0.7fr)", xs: "1fr" },
-          gap: 2,
-        }}>
+     <Grid container spacing={2} sx={{ mt: 2, display: "grid", gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" }, gap: 2, mb: 2 }}>
+
+          <Grid >
       
         
         
 {/* Head Office Address */}
-        <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label="Head Office Address"
@@ -865,18 +894,23 @@ Head Office Location      </Typography>
             size="medium"
             required
           />
-        </Grid>
+       
+         
 </Grid>
+
+     </Grid>
+  
 
 <Grid  container
         spacing={2}
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
         }}>
-                {/* Pincode */}
+       
+
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
@@ -901,8 +935,6 @@ Head Office Location      </Typography>
             }}
           />
         </Grid>
-
-        
 
         {/* State */}
         <Grid item xs={12} sm={6} md={2.4}>
@@ -976,6 +1008,8 @@ Head Office Location      </Typography>
           />
         </Grid>
 
+        
+
 </Grid>
 
 <Grid  container
@@ -983,25 +1017,11 @@ Head Office Location      </Typography>
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
         }}>
  {/* Email */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Secondary Email (Optional)"
-            name="secondaryEmail"
-            type="secondaryEmail"
-            value={data.secondaryEmail || ""}
-            onChange={handleChange}
-            error={!!errors.secondaryEmail}
-            helperText={errors.secondaryEmail}
-            variant="outlined"
-            size="medium"
-            required
-          />
-        </Grid>
+        
 
 
         {/* Website */}
