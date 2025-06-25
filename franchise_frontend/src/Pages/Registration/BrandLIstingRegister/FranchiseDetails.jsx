@@ -25,10 +25,16 @@ import {
   TableRow,
   FormGroup,
   Checkbox,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton
 } from "@mui/material";
 import { useState } from "react";
 import categories from "./BrandCategories";
 import { Editor } from "@tinymce/tinymce-react";
+
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   const [currentFicoModel, setCurrentFicoModel] = React.useState({
@@ -51,6 +57,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   });
 
   const [savedFicoModels, setSavedFicoModels] = React.useState([]);
+  const [currentUSP, setCurrentUSP] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -263,8 +270,35 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     onChange({ brandDescription: content }); // Update the parent form data directly
   };
 
+// Add a new USP
+const handleAddUSP = () => {
+  const trimmedUSP = currentUSP.trim();
+  if (!trimmedUSP) return;
+
+  // Prevent duplicates (case-insensitive)
+  const existingUSPs = (data.uniqueSellingPoints || []).map(usp => 
+    usp.toLowerCase().trim()
+  );
+  
+  if (existingUSPs.includes(trimmedUSP.toLowerCase())) {
+    // You might want to show an error message here
+    return;
+  }
+
+  const updatedUSPs = [...(data.uniqueSellingPoints || []), trimmedUSP];
+  onChange({ uniqueSellingPoints: updatedUSPs });
+  setCurrentUSP("");
+};
+
+// Remove a USP
+const handleRemoveUSP = (index) => {
+  const updatedUSPs = [...(data.uniqueSellingPoints || [])];
+  updatedUSPs.splice(index, 1);
+  onChange({ uniqueSellingPoints: updatedUSPs });
+};
+
   return (
-    <Box sx={{ ml: 5, pr: 1, mr: 5 }}>
+    <Box sx={{ pr: 1, mr: { sm: 0, md: 25 }, ml: { sm: 0, md: 25 } }}>
       {/* Brand Categories Section */}
       {/* <Typography
         variant="h5"
@@ -288,7 +322,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         sx={{
           mt: 3,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
         }}
@@ -367,160 +401,155 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           </FormControl>
         </Grid>
       </Grid>
-
+      {/* 
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { md: "repeat(2,1fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(1,1fr)", xs: "1fr" },
           gap: 2,
         }}
+      > */}
+      {/* Establishment & Franchise year Details */}
+
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}
       >
-        {/* Establishment & Franchise year Details */}
-        <Box>
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            sx={{ mb: 3, color: "#ff9800" }}
-          >
-            Establishment & Franchise year Details
-          </Typography>
+        Establishment & Franchise year Details
+      </Typography>
 
-          <Grid
-            container
-            spacing={2}
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { md: "repeat(2, 262px)", xs: "1fr" },
-            }}
-          >
-            {/* Established Year */}
-            <Grid item xs={12} sm={6} md={2.4}>
-              <FormControl fullWidth error={!!errors.establishedYear}>
-                <InputLabel size="medium">Year Commenced Operations</InputLabel>
-                <Select
-                  name="establishedYear"
-                  value={data.establishedYear || ""}
-                  label="Year Commenced Operations"
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="medium"
-                  required
-                >
-                  {Array.from(
-                    { length: 100 },
-                    (_, i) => new Date().getFullYear() - i
-                  ).map((year) => (
-                    <MenuItem key={year} value={year}>
-                      {year}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.establishedYear && (
-                  <Typography variant="caption" color="error">
-                    {errors.establishedYear}
-                  </Typography>
-                )}
-              </FormControl>
-            </Grid>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+        }}
+      >
+        {/* Established Year */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.establishedYear}>
+            <InputLabel size="medium">Year Commenced Operations</InputLabel>
+            <Select
+              name="establishedYear"
+              value={data.establishedYear || ""}
+              label="Year Commenced Operations"
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              required
+            >
+              {Array.from(
+                { length: 100 },
+                (_, i) => new Date().getFullYear() - i
+              ).map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.establishedYear && (
+              <Typography variant="caption" color="error">
+                {errors.establishedYear}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
 
-            {/* Franchise Since Year */}
-            <Grid item xs={12} sm={6} md={2.4}>
-              <FormControl fullWidth error={!!errors.franchiseSinceYear}>
-                <InputLabel size="medium">
-                  Year Commenced Franchising
-                </InputLabel>
-                <Select
-                  name="franchiseSinceYear"
-                  value={data.franchiseSinceYear || ""}
-                  label="Year Commenced Franchising"
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="medium"
-                  required
-                >
-                  {Array.from(
-                    { length: 100 },
-                    (_, i) => new Date().getFullYear() - i
-                  ).map((year) => (
-                    <MenuItem key={year} value={year}>
-                      {year}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.franchiseSinceYear && (
-                  <Typography variant="caption" color="error">
-                    {errors.franchiseSinceYear}
-                  </Typography>
-                )}
-              </FormControl>
-            </Grid>
-          </Grid>
-        </Box>
+        {/* Franchise Since Year */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <FormControl fullWidth error={!!errors.franchiseSinceYear}>
+            <InputLabel size="medium">Year Commenced Franchising</InputLabel>
+            <Select
+              name="franchiseSinceYear"
+              value={data.franchiseSinceYear || ""}
+              label="Year Commenced Franchising"
+              onChange={handleChange}
+              variant="outlined"
+              size="medium"
+              required
+            >
+              {Array.from(
+                { length: 100 },
+                (_, i) => new Date().getFullYear() - i
+              ).map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.franchiseSinceYear && (
+              <Typography variant="caption" color="error">
+                {errors.franchiseSinceYear}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+      </Grid>
 
-        {/* Franchise Network */}
-        <Box>
-          <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800" }}>
-            Franchise Network
-          </Typography>
+      {/* Franchise Network */}
 
-          <Grid
-            container
-            spacing={2}
-            sx={{
-              mt: 3,
-              display: "grid",
-              gridTemplateColumns: { md: "repeat(3, 262px)", xs: "1fr" },
-            }}
-          >
-            <Grid item xs={12} sm={6} md={2.4}>
-              <TextField
-                fullWidth
-                label="Company Owned Outlets"
-                name="companyOwnedOutlets"
-                value={data.companyOwnedOutlets || ""}
-                onChange={handleChange}
-                placeholder="0"
-                type="number"
-                inputProps={{ min: 0 }}
-                error={!!errors.companyOwnedOutlets}
-                helperText={errors.companyOwnedOutlets}
-                required
-              />
-            </Grid>
+      <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800" }}>
+        Franchise Network
+      </Typography>
 
-            <Grid item xs={12} sm={6} md={2.4}>
-              <TextField
-                fullWidth
-                label="Franchise Outlets"
-                name="franchiseOutlets"
-                value={data.franchiseOutlets || ""}
-                onChange={handleChange}
-                placeholder="0"
-                type="number"
-                inputProps={{ min: 0 }}
-                error={!!errors.franchiseOutlets}
-                helperText={errors.franchiseOutlets}
-                required
-              />
-            </Grid>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 3,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+        }}
+      >
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Company Owned Outlets"
+            name="companyOwnedOutlets"
+            value={data.companyOwnedOutlets || ""}
+            onChange={handleChange}
+            placeholder="0"
+            type="number"
+            inputProps={{ min: 0 }}
+            error={!!errors.companyOwnedOutlets}
+            helperText={errors.companyOwnedOutlets}
+            required
+          />
+        </Grid>
 
-            <Grid item xs={12} sm={6} md={2.4}>
-              <TextField
-                fullWidth
-                label="Total Outlets"
-                name="totalOutlets"
-                value={data.totalOutlets || ""}
-                type="number"
-                InputProps={{ readOnly: true }}
-                variant="filled"
-                error={!!errors.totalOutlets}
-                helperText={errors.totalOutlets}
-                required
-              />
-            </Grid>
-          </Grid>
-        </Box>
-      </Box>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Franchise Outlets"
+            name="franchiseOutlets"
+            value={data.franchiseOutlets || ""}
+            onChange={handleChange}
+            placeholder="0"
+            type="number"
+            inputProps={{ min: 0 }}
+            error={!!errors.franchiseOutlets}
+            helperText={errors.franchiseOutlets}
+            required
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Total Outlets"
+            name="totalOutlets"
+            value={data.totalOutlets || ""}
+            type="number"
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            error={!!errors.totalOutlets}
+            helperText={errors.totalOutlets}
+            required
+          />
+        </Grid>
+      </Grid>
 
       {/* Franchise Details Section */}
       <Typography
@@ -544,7 +573,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         spacing={2}
         sx={{
           display: "grid",
-          gridTemplateColumns: { md: "repeat(5, 1fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           gap: 2,
           mb: 2,
           mt: 2,
@@ -1162,7 +1191,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 p: 1,
               }}
             >
-              <Box sx={{ minWidth: { md: "300px" } }}>
+              <Box sx={{ mr: { md: "247px" }, minWidth: { md: "300px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
@@ -1218,7 +1247,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 p: 1,
               }}
             >
-              <Box sx={{ minWidth: { md: "300px" } }}>
+              <Box sx={{ mr: { md: "106px" }, minWidth: { md: "300px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
@@ -1228,8 +1257,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                       : "text.primary",
                   }}
                 >
-                  Would you like consultation for <br />
-                  franchise development?
+                  Would you like consultation for franchise development?
                 </FormLabel>
               </Box>
               <RadioGroup row sx={{ display: "flex", gap: 2 }}>
@@ -1279,7 +1307,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 p: 1,
               }}
             >
-              <Box sx={{ minWidth: { md: "300px" } }}>
+              <Box sx={{ mr: { md: "35px" }, minWidth: { md: "300px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
@@ -1289,9 +1317,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                       : "text.primary",
                   }}
                 >
-                  Would you like consultation or <br />
-                  assistance for franchise marketing
-                  <br /> recruitment?
+                  Would you like consultation for marketing recruitment
+                  franchise?
                 </FormLabel>
               </Box>
               <RadioGroup row sx={{ display: "flex", gap: 2 }}>
@@ -1339,11 +1366,11 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 display: "flex",
                 flexDirection: { xs: "column", md: "row" },
                 alignItems: { md: "center" },
-                gap: { xs: 1, md: 8 },
+                gap: { xs: 1, md: 7 },
                 p: 1,
               }}
             >
-              <Box sx={{ minWidth: { md: "200px" } }}>
+              <Box sx={{ minWidth: { md: "250px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
@@ -1401,7 +1428,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           </Grid>
 
           {/* Marketing Support - Text Input */}
-          <Grid item xs={12}>
+          {/* <Grid item xs={12}>
             <FormControl
               fullWidth
               sx={{
@@ -1437,10 +1464,10 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 }}
               />
             </FormControl>
-          </Grid>
+          </Grid> */}
 
           {/* Other Support Provided - Multi-line Text */}
-          <Grid item xs={12}>
+          {/* <Grid item xs={12}>
             <FormControl
               fullWidth
               sx={{
@@ -1475,47 +1502,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 }}
               />
             </FormControl>
-          </Grid>
-
-          {/* Unique Selling Points (USP) - Multi-line Text */}
-          <Grid item xs={12}>
-            <FormControl
-              fullWidth
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", md: "row" },
-                alignItems: { md: "center" },
-                gap: 1,
-                p: 1,
-              }}
-            >
-              <FormLabel
-                sx={{
-                  minWidth: { md: "300px" },
-                  fontWeight: "bold",
-                }}
-              >
-                Unique Selling Points (USP):
-              </FormLabel>
-              <TextField
-                variant="outlined"
-                value={data.uniqueSellingPoints || ""}
-                onChange={(e) =>
-                  handleChange({
-                    target: {
-                      name: "uniqueSellingPoints",
-                      value: e.target.value,
-                    },
-                  })
-                }
-                multiline
-                rows={1}
-                sx={{
-                  width: "63%",
-                }}
-              />
-            </FormControl>
-          </Grid>
+          </Grid> */}
         </Grid>
       </Grid>
 
@@ -1528,6 +1515,78 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           Brand Description
         </Typography>
 
+      <Grid item xs={12}>
+  <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
+    Unique Selling Points (USP):
+  </Typography>
+  
+  {/* USP Input and Add Button */}
+  <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
+    <TextField
+      fullWidth
+      variant="outlined"
+      value={currentUSP}
+      onChange={(e) => setCurrentUSP(e.target.value)}
+      placeholder="Add a unique selling point"
+      onKeyPress={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleAddUSP();
+        }
+      }}
+    />
+    <Button
+      variant="contained"
+      onClick={handleAddUSP}
+      disabled={!currentUSP.trim()}
+      sx={{
+        backgroundColor: "#4caf50",
+        color: "white",
+        "&:hover": { backgroundColor: "#388e3c" },
+        height: "56px",
+        minWidth: "100px"
+      }}
+    >
+      Add
+    </Button>
+  </Box>
+
+  {/* Display added USPs */}
+  {(data.uniqueSellingPoints?.length > 0) && (
+    <Paper sx={{ p: 2, mb: 3, border: "1px solid #e0e0e0" }}>
+      <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
+        Added USPs:
+      </Typography>
+      <List dense sx={{ maxHeight: 200, overflow: 'auto' }}>
+        {data.uniqueSellingPoints.map((usp, index) => (
+          <ListItem
+            key={index}
+            secondaryAction={
+              <IconButton
+                edge="end"
+                aria-label="delete"
+                onClick={() => handleRemoveUSP(index)}
+                size="small"
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            }
+            sx={{
+              py: 0.5,
+              borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+              "&:last-child": { borderBottom: "none" }
+            }}
+          >
+            <ListItemText 
+              primary={`${index + 1}. ${usp}`} 
+              primaryTypographyProps={{ variant: 'body2' }}
+            />
+          </ListItem>
+        ))}
+      </List>
+    </Paper>
+  )}
+</Grid>
         <Box sx={{ mt: 2, mb: 4 }}>
           <Editor
             apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
