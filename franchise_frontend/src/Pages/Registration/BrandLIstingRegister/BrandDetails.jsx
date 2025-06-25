@@ -46,7 +46,7 @@ import LanguageIcon from '@mui/icons-material/Language';
 import FlagIcon from '@mui/icons-material/Flag';
 import { Editor } from "@tinymce/tinymce-react";
 import { width } from "@mui/system";
-import { fetchPincodeDetails } from "../../../Utils/PincodeFetch.jsx";
+import { fetchGlobalLocationByPostalCode,getSupportedCountries } from "../../../Utils/PincodeFetch.jsx";
 
 // const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 // const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -80,40 +80,72 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   // Updated Expansion Location State
   const [openLocationModal, setOpenLocationModal] = useState(false);
  
+  // Inside your BrandDetails component, add these state variables
+const [supportedCountries] = useState(getSupportedCountries());
+const [selectedCountry, setSelectedCountry] = useState('IN'); // Default to India
+const [countryInputValue, setCountryInputValue] = useState('');
+// Add this function to handle country change
+const handleCountryChange = (event, newValue) => {
+  if (newValue) {
+    setSelectedCountry(newValue.code);
+    onChange({ country: newValue.name });
+  } else {
+    setSelectedCountry('');
+    onChange({ country: '' });
+  }
+};
+
+
  useEffect(() => {
     if (data.mobileNumber?.length === 10 && !whatsappEnabled && !data.whatsappNumber) {
       setShowWhatsappSnackbar(true);
     }
   }, [data.mobileNumber, whatsappEnabled, data.whatsappNumber]);
 
-  useEffect(()=>{
-    const fetchLocationDetails = async () => {
-      if(data.pincode && data.pincode.length === 6  ) {
-        setLoadingPincode(true);
-        setPincodeError(null);
-        try {
-          const locationDetails =await fetchPincodeDetails(data.pincode);
-          onChange({
-            state: locationDetails.state,
-            city: locationDetails.city,
-            district: locationDetails.district
-          })
-          
-        } catch (error) {
-          setPincodeError('Invalid Pincode or no data found');
-          
-        }finally{
-          setLoadingPincode(false);
-        }
+  // Inside your BrandDetails component
 
-      }
+const fetchLocationDetails = async () => {
+  if (data.pincode && data.pincode.length >= 4 && selectedCountry) {
+    setLoadingPincode(true);
+    setPincodeError(null);
+    
+    try {
+      const result = await fetchGlobalLocationByPostalCode(data.pincode, selectedCountry);
       
-    };
-    const timer =setTimeout(() => {
+      if (result.status === 'success') {
+        onChange({
+          country: result.country,
+          state: result.state,
+          city: result.city,
+          district: result.district
+        });
+      } else {
+        throw new Error(result.message || 'Failed to fetch location details');
+      }
+    } catch (error) {
+      console.error('Location fetch error:', error);
+      setPincodeError(error.message);
+      // Clear the location fields if pincode is invalid
+      onChange({
+        state: '',
+        city: '',
+        district: ''
+      });
+    } finally {
+      setLoadingPincode(false);
+    }
+  }
+};
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    if (data.pincode && data.pincode.length >= 4 && selectedCountry) {
       fetchLocationDetails();
-    }, 1000);
-    return () => clearTimeout(timer);
-  },[data.pincode]);
+    }
+  }, 1000);
+  
+  return () => clearTimeout(timer);
+}, [data.pincode, selectedCountry]);
 
 const handleMainCategoryChange = (e) => {
   const mainCat = e.target.value;
@@ -840,16 +872,6 @@ const handleAddCategory = () => {
         sx={{ mb: 3, color: "#ff9800" }}>
 Head Office Location      </Typography> 
 
-<Grid container
-        spacing={2}
-        sx={{
-          mt: 2,
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
-          gap: 2,
-          mb: 2,
-        }}
-        >
 <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
@@ -887,8 +909,7 @@ Head Office Location      </Typography>
            required
          />
         </Grid>
-</Grid>
-     <Grid container spacing={2} sx={{ mt: 2, display: "grid", gridTemplateColumns: { md: "repeat(1, 1fr)", xs: "1fr" }, gap: 2, mb: 2 }}>
+     <Grid container spacing={2} sx={{ mt: 2, display: "grid", gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" }, gap: 2, mb: 2 }}>
  
           <Grid >
       
@@ -922,9 +943,84 @@ Head Office Location      </Typography>
           gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
         }}>
-       
+ <Grid item xs={12} sm={6} md={2.4}>
+  <Autocomplete
+    options={supportedCountries}
+    getOptionLabel={(option) => option.name}
+    value={supportedCountries.find(c => c.code === selectedCountry) || null}
+    onChange={(event, newValue) => {
+      if (newValue) {
+        setSelectedCountry(newValue.code);
+        onChange({ country: newValue.name });
+      } else {
+        setSelectedCountry('');
+        onChange({ country: '' });
+      }
+      // Clear pincode-related fields when country changes
+      onChange({
+        pincode: '',
+        state: '',
+        city: '',
+        district: ''
+      });
+    }}
+    inputValue={countryInputValue}
+    onInputChange={(event, newInputValue) => {
+      setCountryInputValue(newInputValue);
+    }}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        label="Country"
+        variant="outlined"
+        size="medium"
+        required
+        error={!!errors.country}
+        helperText={errors.country || "Select your country first"}
+      />
+    )}
+    renderOption={(props, option) => (
+      <Box component="li" {...props}>
+        <FlagIcon sx={{ mr: 1 }} />
+        {option.name}
+      </Box>
+    )}
+  />
+</Grid>
 
-        <Grid item xs={12} sm={6} md={2.4}>
+<Grid item xs={12} sm={6} md={2.4}>
+  <TextField
+    fullWidth
+    label={selectedCountry === 'IN' ? 'Pincode' : 'Postal Code'}
+    name="pincode"
+    value={data.pincode || ''}
+    onChange={(e) => {
+      const value = e.target.value.replace(/\D/g, '').slice(0, selectedCountry === 'IN' ? 6 : 10);
+      onChange({ pincode: value });
+    }}
+    error={!!errors.pincode || !!pincodeError}
+    helperText={errors.pincode || pincodeError || (selectedCountry === 'IN' ? '6-digit pincode' : 'Postal code')}
+    variant="outlined"
+    size="medium"
+    required
+    disabled={!selectedCountry}
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <Tooltip title={supportedCountries.find(c => c.code === selectedCountry)?.name || 'Country'}>
+            <FlagIcon color={selectedCountry ? 'primary' : 'disabled'} />
+          </Tooltip>
+        </InputAdornment>
+      ),
+      endAdornment: loadingPincode ? (
+        <InputAdornment position="end">
+          <CircularProgress size={20} />
+        </InputAdornment>
+      ) : null,
+    }}
+  />
+</Grid>
+        {/* <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label="Pincode"
@@ -947,81 +1043,61 @@ Head Office Location      </Typography>
               ) : null,
             }}
           />
-        </Grid>
+        </Grid> */}
 
-        {/* State */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          {/* <FormControl fullWidth error={!!errors.state}>
-            <InputLabel size="medium">State</InputLabel>
-            <Select
-              name="state"
-              value={data.state || ""}
-              label="State"
-              onChange={handleChange}
-              variant="outlined"
-              size="medium"
-              required
-            >
-              {states.map((state) => (
-                <MenuItem key={state.iso2} value={state.name}>
-                  {state.name}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.state && (
-              <Typography variant="caption" color="error">
-                {errors.state}
-              </Typography>
-            )}
-          </FormControl> */}
-          <TextField
-            fullWidth
-            label="State"
-            name="state"
-            value={data.state || ""}
-            onChange={handleChange}
-            error={!!errors.state}
-            helperText={errors.state}
-            variant="outlined"
-            size="medium"
-            required
-          />
-        </Grid>
-        
-        {/* District  */}
+       <Grid item xs={12} sm={6} md={2.4}>
+  <TextField
+    fullWidth
+    label="State"
+    name="state"
+    value={data.state || ""}
+    onChange={handleChange}
+    error={!!errors.state}
+    helperText={errors.state}
+    variant="outlined"
+    size="medium"
+    required
+    InputProps={{
+      readOnly: !!data.state,
+    }}
+  />
+</Grid>
 
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="District"
-            name="district"
-            value={data.district || ""}
-            onChange={handleChange}
-            error={!!errors.district}
-            helperText={errors.district}
-            variant="outlined"
-            size="medium"
-            required
-          />
-        </Grid>
+<Grid item xs={12} sm={6} md={2.4}>
+  <TextField
+    fullWidth
+    label="District"
+    name="district"
+    value={data.district || ""}
+    onChange={handleChange}
+    error={!!errors.district}
+    helperText={errors.district}
+    variant="outlined"
+    size="medium"
+    required
+    InputProps={{
+      readOnly: !!data.district,
+    }}
+  />
+</Grid>
 
-        {/* City */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="City"
-            name="city"
-            value={data.city || ""}
-            onChange={handleChange}
-            error={!!errors.city}
-            helperText={errors.city}
-            variant="outlined"
-            size="medium"
-            required
-          />
-        </Grid>
-
-        
+<Grid item xs={12} sm={6} md={2.4}>
+  <TextField
+    fullWidth
+    label="City"
+    name="city"
+    value={data.city || ""}
+    onChange={handleChange}
+    error={!!errors.city}
+    helperText={errors.city}
+    variant="outlined"
+    size="medium"
+    required
+    InputProps={{
+      readOnly: !!data.city,
+    }}
+  />
+</Grid>
 
 </Grid>
 
