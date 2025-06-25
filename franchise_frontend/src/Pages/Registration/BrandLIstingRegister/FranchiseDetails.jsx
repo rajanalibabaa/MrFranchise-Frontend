@@ -28,13 +28,15 @@ import {
   List,
   ListItem,
   ListItemText,
-  IconButton
+  IconButton,
+  Tooltip
 } from "@mui/material";
 import { useState } from "react";
 import categories from "./BrandCategories";
 import { Editor } from "@tinymce/tinymce-react";
 
 import DeleteIcon from "@mui/icons-material/Delete";
+import { Info, InfoOutlined, InfoOutlineRounded } from "@mui/icons-material";
 
 const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   const [currentFicoModel, setCurrentFicoModel] = React.useState({
@@ -1597,8 +1599,36 @@ const handleRemoveUSP = (index) => {
 
       <Grid item xs={12}>
   <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
-    Unique Selling Points (USP):
-  </Typography>
+    Unique Selling Points (USP): 
+   <Tooltip
+    title={
+      <span style={{ fontSize: '0.875rem', lineHeight: 1.5 }}>
+        Highlight what makes your brand or business unique
+        Try to list 2–5 bullet points that make you stand out.
+      </span>
+    }
+    placement="right-start"
+    arrow
+    enterTouchDelay={0} // makes it responsive on mobile too
+  >
+    <IconButton
+      size="small"
+      
+      sx={{
+        // p: 0.8,
+        color: 'warning.main',
+        // backgroundColor: 'info.light',
+        '&:hover': {
+          backgroundColor: 'info.main',
+          color: 'white',
+        },
+        marginLeft: '5px',
+        // borderRadius: '50%',
+      }}
+    >
+      <InfoOutlined fontSize="medium" />
+    </IconButton>
+  </Tooltip>  </Typography>
   
   {/* USP Input and Add Button */}
   <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
