@@ -13,6 +13,8 @@ import {
   InputLabel,
   Checkbox,
   FormControlLabel,
+  FormGroup,
+  FormLabel,
   Button,
   Typography,
   Link,
@@ -1420,108 +1422,165 @@ useEffect(() => {
                        }}
                      >
           {/* Preferred Location */}
-          <Grid item xs={12} md={4}>
-            <Controller
-              name="preferredState"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  fullWidth
-                  label="Preferred State"
-                  variant="outlined"
-                  error={!!errors.preferredState}
-                  helperText={errors.preferredState?.message || " "}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    setValue("preferredDistrict", "");
-                    setValue("preferredCity", "");
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                    }
-                  }}
-                >
-                  <MenuItem value="">Select State</MenuItem>
-                  {preferredStates.map((state) => (
-                    <MenuItem key={state} value={state}>
-                      {state}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-          </Grid>
+         <Grid container spacing={2}>
+  {/* Location Type Selection */}
+  <Grid item xs={12}>
+    <Controller
+      name="preferredLocationType"
+      control={control}
+      defaultValue="domestic"
+      render={({ field }) => (
+        <FormControl component="fieldset">
+          {/* <FormLabel component="legend">Location Type</FormLabel> */}
+          <RadioGroup row {...field}>
+            <FormControlLabel value="domestic" control={<Radio />} label="Domestic" />
+            <FormControlLabel value="international" control={<Radio />} label="International" />
+          </RadioGroup>
+        </FormControl>
+      )}
+    />
+  </Grid>
 
-          <Grid item xs={12} md={4}>
-            <Controller
-              name="preferredDistrict"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  fullWidth
-                  label="Preferred District"
-                  variant="outlined"
-                  value={field.value || ''}
-                  disabled={!watch("preferredState")}
-                  error={!!errors.preferredDistrict}
-                  helperText={errors.preferredDistrict?.message || " "}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    setValue("preferredCity", "");
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                    }
-                  }}
-                >
-                  <MenuItem value="">Select District</MenuItem>
-                  {preferredDistricts.map((district) => (
-                    <MenuItem key={district} value={district}>
-                      {district}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-          </Grid>
+  {/* Domestic Fields */}
+  {watch("preferredLocationType") === "domestic" && (
+    <>
+      <Grid item xs={12} md={4}>
+        <Controller
+          name="preferredState"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              select
+              fullWidth
+              label="Preferred State"
+              variant="outlined"
+              error={!!errors.preferredState}
+              helperText={errors.preferredState?.message || " "}
+              onChange={(e) => {
+                field.onChange(e);
+                setValue("preferredDistrict", "");
+                setValue("preferredCity", "");
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                }
+              }}
+            >
+              <MenuItem value="">Select State</MenuItem>
+              {preferredStates.map((state) => (
+                <MenuItem key={state} value={state}>
+                  {state}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
+        />
+      </Grid>
 
-          <Grid item xs={12} md={4}>
-            <Controller
-              name="preferredCity"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  fullWidth
-                  label="Preferred City"
-                  variant="outlined"
-                  value={field.value || ''}
-                  disabled={!watch("preferredDistrict")}
-                  error={!!errors.preferredCity}
-                  helperText={errors.preferredCity?.message || " "}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                    }
-                  }}
-                >
-                  <MenuItem value="">Select City</MenuItem>
-                  {preferredCities.map((city) => (
-                    <MenuItem key={city} value={city}>
-                      {city}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-          </Grid>
+      <Grid item xs={12} md={4}>
+        <Controller
+          name="preferredDistrict"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              select
+              fullWidth
+              label="Preferred District"
+              variant="outlined"
+              disabled={!watch("preferredState")}
+              error={!!errors.preferredDistrict}
+              helperText={errors.preferredDistrict?.message || " "}
+              onChange={(e) => {
+                field.onChange(e);
+                setValue("preferredCity", "");
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                }
+              }}
+            >
+              <MenuItem value="">Select District</MenuItem>
+              {preferredDistricts.map((district) => (
+                <MenuItem key={district} value={district}>
+                  {district}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={4}>
+        <Controller
+          name="preferredCity"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              select
+              fullWidth
+              label="Preferred City"
+              variant="outlined"
+              disabled={!watch("preferredDistrict")}
+              error={!!errors.preferredCity}
+              helperText={errors.preferredCity?.message || " "}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                }
+              }}
+            >
+              <MenuItem value="">Select City</MenuItem>
+              {preferredCities.map((city) => (
+                <MenuItem key={city} value={city}>
+                  {city}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
+        />
+      </Grid>
+    </>
+  )}
+
+  {/* International Field */}
+  {watch("preferredLocationType") === "international" && (
+    <Grid item xs={12} md={4}>
+      <Controller
+        name="preferredCountry"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            select
+            fullWidth
+            label="Preferred Country"
+            variant="outlined"
+            error={!!errors.preferredCountry}
+            helperText={errors.preferredCountry?.message || " "}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '8px',
+              }
+            }}
+          >
+            <MenuItem value="">Select Country</MenuItem>
+            {internationalCountries.map((country) => (
+              <MenuItem key={country} value={country}>
+                {country}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+      />
+    </Grid>
+  )}
+</Grid>
+
           </Grid>
           <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 500, mb: 1 }}>
             Preferred Readiness
