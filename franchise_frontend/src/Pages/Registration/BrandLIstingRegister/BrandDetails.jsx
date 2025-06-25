@@ -935,12 +935,12 @@ useEffect(() => {
     mt: 2,
     display: "grid",
     gridTemplateColumns: { md: "3fr 1fr", xs: "1fr" }, // 3:1 ratio on desktop
-    gap: 1,
+    gap: 1.5,
     
   }}
 >
   {/* Head Office Address - spans 3 columns */}
-  <Grid item size={{ xs:12, md:12.02 }} >
+  <Grid item size={{ xs:12, md:12.05 }} >
     <TextField
       fullWidth
       label="Head Office Address"

@@ -1258,8 +1258,7 @@ const BrandRegisterForm = () => {
     );
   };
 
-  const BackButton = () => {
-  const navigate = useNavigate();}
+
   return (
     <>
       <Box
@@ -1279,16 +1278,16 @@ const BrandRegisterForm = () => {
             p: 1,
           }}
         >
-          <Box>
+          <Box sx={{ display: "grid", gridTemplateColumns: "auto 1fr" }} mb={2} mt={2}>
             <Button
       onClick={() => navigate("/")}
       sx={{
         backgroundColor: "#7ad03a", 
         color: "white",
         borderRadius: "50%",
-        minWidth: "48px",
-        width: "48px",
-        height: "48px",
+        minWidth: "50px",
+        width: "50px",
+        height: "50px",
         padding: 0,
         marginRight: 0,
         display: "flex",
@@ -1309,7 +1308,7 @@ const BrandRegisterForm = () => {
         }
       }}
     >
-      <ArrowBackIcon />
+      <ArrowBackIcon  />
     </Button>
             <Stepper
               activeStep={activeStep}
@@ -1323,7 +1322,7 @@ const BrandRegisterForm = () => {
                   </StepLabel>
                 </Step>
               ))}
-              <Toolbar sx={{ justifyContent: "flex-end" }}>
+              {/* <Toolbar sx={{ justifyContent: "flex-end" }}>
                 
                 <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
                   <Select
@@ -1339,7 +1338,7 @@ const BrandRegisterForm = () => {
                     ))}
                   </Select>
                 </FormControl>
-              </Toolbar>
+              </Toolbar> */}
             </Stepper>
             {/* <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
               <Box width="30%">
