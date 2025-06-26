@@ -3,7 +3,7 @@ import {
   Box, Typography, RadioGroup, FormControlLabel, Radio, Button, 
   Table, TableBody, TableCell, TableContainer, TableRow, Paper,
   Divider, FormGroup, Backdrop, CircularProgress, IconButton, Snackbar, Alert,
-  TextField, Chip, List, ListItem, ListItemButton, Drawer, Checkbox, ListItemText
+  TextField, Chip, List, ListItem, ListItemButton, Drawer, Checkbox, ListItemText, Grid
 } from '@mui/material';
 import axios from 'axios';
 import { X, ChevronDown, ChevronUp, Search } from 'lucide-react';
@@ -15,39 +15,57 @@ import debounce from 'lodash.debounce';
 const apiCache = {
   domestic: null,
   countries: null,
+  states: {},
   cities: {}
 };
 
-// Virtualized list item renderer
-const VirtualizedListItem = ({ data, index, style }) => {
-  const { items, selectedItems, handleToggle, type } = data;
-  const item = items[index];
-  
-  return (
-    <ListItem style={style} key={`${type}-${item.id || item}`} disablePadding>
-      <ListItemButton
-        role={undefined}
-        onClick={() => handleToggle(item)}
-        dense
-      >
-        <Checkbox
-          edge="start"
-          checked={selectedItems.includes(item.name || item)}
-          tabIndex={-1}
-          disableRipple
-        />
-        <ListItemText primary={item.name || item} />
-      </ListItemButton>
-    </ListItem>
-  );
+const ITEMS_PER_ROW = 4;
+
+// 2. Utility function to chunk states into grid rows
+const chunkArray = (arr, size) => {
+  const result = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
 };
 
-function BrandExpansionLocationDetails({ onChange }) {
+// Virtualized list item renderer
+// 3. Grid row renderer for react-window
+const VirtualizedGridRow = ({ data, index, style }) => {
+  const { chunkedItems, selectedItems, handleToggle, type } = data;
+  const rowItems = chunkedItems[index];
+
+  return (
+    <div style={style}>
+      <Grid display={'grid'} gridTemplateColumns={`repeat(${ITEMS_PER_ROW}, 1fr)`} spacing={2} >
+        {rowItems.map((item, idx) => (
+          <Grid item xs={12 / ITEMS_PER_ROW} key={`${type}-${item.name}-${index}-${idx}`}>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleToggle(item)} dense>
+                <Checkbox
+                  edge="start"
+                  checked={selectedItems.includes(item.name)}
+                  tabIndex={-1}
+                  disableRipple
+                />
+                <ListItemText primary={item.name} />
+              </ListItemButton>
+            </ListItem>
+          </Grid>
+        ))}
+      </Grid>
+    </div>
+  );
+};
+function BrandExpansionLocationDetails() {
   const { enqueueSnackbar } = useSnackbar();
 
   // Location type state
   const [locationType, setLocationType] = useState("domestic");
   const [currentOutletLocationType, setCurrentOutletLocationType] = useState("domestic");
+  
+
   
   // Domestic selections for expansion locations
   const [domesticSelections, setDomesticSelections] = useState({
@@ -62,8 +80,10 @@ function BrandExpansionLocationDetails({ onChange }) {
   // International selections for expansion locations
   const [internationalSelections, setInternationalSelections] = useState({
     selectedCountries: [],
+    selectedStates: [],
     selectedCities: [],
     countries: [],
+    states: [],
     cities: []
   });
 
@@ -79,8 +99,10 @@ function BrandExpansionLocationDetails({ onChange }) {
   
   const [currentInternationalSelections, setCurrentInternationalSelections] = useState({
     selectedCountries: [],
+    selectedStates: [],
     selectedCities: [],
     countries: [],
+    states: [],
     cities: []
   });
 
@@ -88,13 +110,17 @@ function BrandExpansionLocationDetails({ onChange }) {
   const [statesData, setStatesData] = useState([]);
   const [states, setStates] = useState([]);
   const [countries, setCountries] = useState([]);
+  const [internationalStates, setInternationalStates] = useState({});
   const [internationalCities, setInternationalCities] = useState({});
+  const [currentInternationalStates, setCurrentInternationalStates] = useState({});
   const [currentInternationalCities, setCurrentInternationalCities] = useState({});
 
   const [loading, setLoading] = useState({
     states: false,
     countries: false,
+    intStates: false,
     intCities: false,
+    currentIntStates: false,
     currentIntCities: false,
     formSubmit: false
   });
@@ -108,6 +134,7 @@ function BrandExpansionLocationDetails({ onChange }) {
     districts: false,
     cities: false,
     countries: false,
+    intStates: false,
     intCities: false
   });
 
@@ -117,6 +144,7 @@ function BrandExpansionLocationDetails({ onChange }) {
     districts: false,
     cities: false,
     countries: false,
+    intStates: false,
     intCities: false
   });
 
@@ -126,6 +154,7 @@ function BrandExpansionLocationDetails({ onChange }) {
     districts: '',
     cities: '',
     countries: '',
+    intStates: '',
     intCities: ''
   });
 
@@ -140,6 +169,7 @@ function BrandExpansionLocationDetails({ onChange }) {
       },
       international: {
         countries: [],
+        states: [],
         cities: []
       }
     },
@@ -151,6 +181,7 @@ function BrandExpansionLocationDetails({ onChange }) {
       },
       international: {
         countries: [],
+        states: [],
         cities: []
       }
     }
@@ -273,27 +304,54 @@ function BrandExpansionLocationDetails({ onChange }) {
     }
   }, [enqueueSnackbar]);
 
-  // Debounced version of getCitiesByCountry
-  const debouncedGetCitiesByCountry = useCallback(debounce(async (countryName, callback) => {
-    if (apiCache.cities[countryName]) {
-      callback(apiCache.cities[countryName]);
+  // Fetch states for a country
+  const getStatesByCountry = useCallback(async (countryName, callback) => {
+    if (apiCache.states[countryName]) {
+      callback(apiCache.states[countryName]);
       return;
     }
 
     try {
       const response = await axios.post(
-        "https://countriesnow.space/api/v0.1/countries/cities",
+        "https://countriesnow.space/api/v0.1/countries/states",
         { country: countryName }
       );
-      const cities = response.data.data || [];
-      apiCache.cities[countryName] = cities;
-      callback(cities);
+      const states = response.data.data?.states || [];
+      apiCache.states[countryName] = states;
+      callback(states);
     } catch (error) {
-      console.error("Error fetching cities for country:", countryName, error);
-      enqueueSnackbar(`Failed to load cities for ${countryName}`, { variant: 'error' });
+      console.error("Error fetching states for country:", countryName, error);
+      enqueueSnackbar(`Failed to load states for ${countryName}`, { variant: 'error' });
       callback([]);
     }
-  }, 500), [enqueueSnackbar]);
+  }, [enqueueSnackbar]);
+
+  // Fetch cities for a country and state
+  const getCitiesByCountryAndState = useCallback(async (countryName, stateName, callback) => {
+    const cacheKey = `${countryName}-${stateName}`;
+    if (apiCache.cities[cacheKey]) {
+      callback(apiCache.cities[cacheKey]);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "https://countriesnow.space/api/v0.1/countries/state/cities",
+        { country: countryName, state: stateName }
+      );
+      const cities = response.data.data || [];
+      apiCache.cities[cacheKey] = cities;
+      callback(cities);
+    } catch (error) {
+      console.error("Error fetching cities for country and state:", countryName, stateName, error);
+      enqueueSnackbar(`Failed to load cities for ${stateName}, ${countryName}`, { variant: 'error' });
+      callback([]);
+    }
+  }, [enqueueSnackbar]);
+
+  // Debounced versions of API calls
+  const debouncedGetStatesByCountry = useCallback(debounce(getStatesByCountry, 500), [getStatesByCountry]);
+  const debouncedGetCitiesByCountryAndState = useCallback(debounce(getCitiesByCountryAndState, 500), [getCitiesByCountryAndState]);
 
   // Fetch domestic data on mount
   useEffect(() => {
@@ -305,12 +363,7 @@ function BrandExpansionLocationDetails({ onChange }) {
     fetchCountries();
   }, [fetchCountries]);
 
-  // Call onChange whenever formData changes
-  useEffect(() => {
-    if (onChange) {
-      onChange(formData);
-    }
-  }, [formData, onChange]);
+
 
   // Handle international expansion selection
   const handleInternationalExpansionChange = useCallback((value) => {
@@ -399,6 +452,7 @@ function BrandExpansionLocationDetails({ onChange }) {
             ...prev[locationKey],
             international: {
               countries: [...new Set([...prev[locationKey].international.countries, ...selections.countries])],
+              states: [...new Set([...prev[locationKey].international.states, ...selections.states])],
               cities: [...new Set([...prev[locationKey].international.cities, ...selections.cities])]
             }
           }
@@ -410,16 +464,20 @@ function BrandExpansionLocationDetails({ onChange }) {
         setCurrentInternationalSelections(prev => ({
           ...prev,
           countries: [],
+          states: [],
           cities: [],
           selectedCountries: [],
+          selectedStates: [],
           selectedCities: []
         }));
       } else {
         setInternationalSelections(prev => ({
           ...prev,
           countries: [],
+          states: [],
           cities: [],
           selectedCountries: [],
+          selectedStates: [],
           selectedCities: []
         }));
       }
@@ -438,7 +496,7 @@ function BrandExpansionLocationDetails({ onChange }) {
       const locationArray = [...newData[type][locationType][field]];
       
       // If removing a state, also remove associated districts and cities
-      if (field === 'states') {
+      if (field === 'states' && locationType === 'domestic') {
         const stateToRemove = locationArray[index];
         
         // Find all districts for this state
@@ -469,12 +527,27 @@ function BrandExpansionLocationDetails({ onChange }) {
           ));
       }
       
-      // For international, if removing a country, remove associated cities
+      // For international, if removing a country, remove associated states and cities
       if (locationType === 'international' && field === 'countries') {
         const countryToRemove = locationArray[index];
         
+        newData[type][locationType].states = newData[type][locationType].states
+          .filter((_, i) => newData[type][locationType].countries[i] !== countryToRemove);
+          
         newData[type][locationType].cities = newData[type][locationType].cities
           .filter((_, i) => newData[type][locationType].countries[i] !== countryToRemove);
+      }
+      
+      // For international, if removing a state, remove associated cities
+      if (locationType === 'international' && field === 'states') {
+        const stateToRemove = locationArray[index];
+        const countryForState = newData[type][locationType].countries[index];
+        
+        newData[type][locationType].cities = newData[type][locationType].cities
+          .filter((_, i) => !(
+            newData[type][locationType].countries[i] === countryForState &&
+            newData[type][locationType].states[i] === stateToRemove
+          ));
       }
       
       locationArray.splice(index, 1);
@@ -499,7 +572,7 @@ function BrandExpansionLocationDetails({ onChange }) {
   // Handle domestic district selection
   const handleDomesticDistrictSelection = useCallback((selectedDistricts, type) => {
     const setSelections = type === 'current' ? setCurrentDomesticSelections : setDomesticSelections;
-    const selections = type === 'current' ? currentDomesticSelections : domesticSelections;
+    // const selections = type === 'current' ? currentDomesticSelections : domesticSelections;
     
     setSelections(prev => ({
       ...prev,
@@ -507,7 +580,7 @@ function BrandExpansionLocationDetails({ onChange }) {
       selectedCities: [],
       cities: getCitiesForDistricts(prev.selectedStates, selectedDistricts)
     }));
-  }, [currentDomesticSelections, domesticSelections, getCitiesForDistricts]);
+  }, [ getCitiesForDistricts]);
 
   // Handle domestic city selection
   const handleDomesticCitySelection = useCallback((selectedCities, type) => {
@@ -543,24 +616,54 @@ function BrandExpansionLocationDetails({ onChange }) {
   // Handle international country selection
   const handleInternationalCountrySelection = useCallback(async (selectedCountries, type) => {
     const setSelections = type === 'current' ? setCurrentInternationalSelections : setInternationalSelections;
-    const setCitiesData = type === 'current' ? setCurrentInternationalCities : setInternationalCities;
+    const setStatesData = type === 'current' ? setCurrentInternationalStates : setInternationalStates;
     
     setSelections(prev => ({
       ...prev,
       selectedCountries,
+      selectedStates: [],
       selectedCities: []
     }));
 
-    // Fetch cities for newly selected countries
-    const newCitiesData = {};
+    // Fetch states for newly selected countries
+    const newStatesData = {};
     for (const country of selectedCountries) {
-      if (!apiCache.cities[country]) {
-        debouncedGetCitiesByCountry(country, (cities) => {
-          setCitiesData(prev => ({ ...prev, [country]: cities }));
+      if (!apiCache.states[country]) {
+        debouncedGetStatesByCountry(country, (states) => {
+          setStatesData(prev => ({ ...prev, [country]: states }));
         });
       }
     }
-  }, [debouncedGetCitiesByCountry]);
+  }, [debouncedGetStatesByCountry]);
+
+  // Handle international state selection
+  const handleInternationalStateSelection = useCallback(async (selectedStates, type) => {
+    const setSelections = type === 'current' ? setCurrentInternationalSelections : setInternationalSelections;
+    const setCitiesData = type === 'current' ? setCurrentInternationalCities : setInternationalCities;
+    const selections = type === 'current' ? currentInternationalSelections : internationalSelections;
+    
+    setSelections(prev => ({
+      ...prev,
+      selectedStates,
+      selectedCities: []
+    }));
+
+    // Fetch cities for newly selected states
+    const newCitiesData = {};
+    for (let i = 0; i < selections.selectedCountries.length; i++) {
+      const country = selections.selectedCountries[i];
+      const state = selectedStates[i];
+      
+      if (country && state) {
+        const cacheKey = `${country}-${state}`;
+        if (!apiCache.cities[cacheKey]) {
+          debouncedGetCitiesByCountryAndState(country, state, (cities) => {
+            setCitiesData(prev => ({ ...prev, [cacheKey]: cities }));
+          });
+        }
+      }
+    }
+  }, [currentInternationalSelections, internationalSelections, debouncedGetCitiesByCountryAndState]);
 
   // Handle international city selection
   const handleInternationalCitySelection = useCallback((selectedCities, type) => {
@@ -585,16 +688,20 @@ function BrandExpansionLocationDetails({ onChange }) {
     setSelections(prev => ({
       ...prev,
       countries: [...prev.countries, ...prev.selectedCountries],
+      states: [...prev.states, ...prev.selectedStates],
       cities: [...prev.cities, ...prev.selectedCities],
       selectedCountries: [],
+      selectedStates: [],
       selectedCities: []
     }));
   }, [currentInternationalSelections, internationalSelections, enqueueSnackbar]);
 
   // Render domestic state selection drawer
-  const renderDomesticStateDrawer = useCallback((type) => {
+const renderDomesticStateDrawer = useCallback((type) => {
     const selections = type === 'current' ? currentDomesticSelections : domesticSelections;
     const toggle = (open) => toggleDrawer(type, { states: open });
+
+const chunkedStates = chunkArray(sortedStates, ITEMS_PER_ROW);
 
     return (
       <Box sx={{ mt: 2 }}>
@@ -614,7 +721,14 @@ function BrandExpansionLocationDetails({ onChange }) {
           anchor="top"
           open={type === 'current' ? currentDrawerOpen.states : drawerOpen.states}
           onClose={() => toggle(false)}
-          PaperProps={{ sx: { maxHeight: '60vh', p: 2 } }}
+          PaperProps={{ 
+            sx: { 
+              maxHeight: '60vh', 
+              p: 2,
+              display: 'flex',
+              flexDirection: 'column'
+            } 
+          }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Select States</Typography>
@@ -633,46 +747,103 @@ function BrandExpansionLocationDetails({ onChange }) {
             }}
           />
           
-          <FixedSizeList
-            height={300}
-            width="100%"
-            itemSize={50}
-            itemCount={sortedStates.length}
-            itemData={{
-              items: sortedStates,
-              selectedItems: selections.selectedStates,
-              handleToggle: (state) => {
-                const currentSelected = type === 'current' ? 
-                  currentDomesticSelections.selectedStates : 
-                  domesticSelections.selectedStates;
-                
-                const newSelected = currentSelected.includes(state.name) ?
-                  currentSelected.filter(s => s !== state.name) :
-                  [...currentSelected, state.name];
-                
-                handleDomesticStateSelection(newSelected, type);
-              },
-              type: 'states'
-            }}
-          >
-            {VirtualizedListItem}
-          </FixedSizeList>
+          {/* Selected states chips in a responsive grid at the top of the drawer */}
+          {selections.selectedStates.length > 0 && (
+            <Box sx={{ 
+              mb: 2,
+              maxHeight: '120px',
+              overflowY: 'auto',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              p: 1
+            }}>
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                gap: 1
+              }}>
+                {selections.selectedStates.map((state, index) => (
+                  <Chip
+                    key={`drawer-selected-state-${index}`}
+                    label={state}
+                    onDelete={() => {
+                      const newSelected = selections.selectedStates.filter((_, i) => i !== index);
+                      handleDomesticStateSelection(newSelected, type);
+                    }}
+                    color="primary"
+                    variant="outlined"
+                    sx={{
+                      maxWidth: '100%',
+                      '& .MuiChip-label': {
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
+
+          <Box sx={{ flex: 1, overflow: 'hidden' }}>
+            <FixedSizeList
+              height={300}
+              width="100%"
+              itemSize={60}
+              itemCount={chunkedStates.length}
+              itemData={{
+                chunkedItems: chunkedStates,
+                selectedItems: selections.selectedStates,
+                handleToggle: (state) => {
+                  const currentSelected = type === 'current' ? 
+                    currentDomesticSelections.selectedStates : 
+                    domesticSelections.selectedStates;
+                  
+                  const newSelected = currentSelected.includes(state.name) ?
+                    currentSelected.filter(s => s !== state.name) :
+                    [...currentSelected, state.name];
+                  
+                  handleDomesticStateSelection(newSelected, type);
+                },
+                type: 'states'
+              }}
+            >
+              {VirtualizedGridRow}
+            </FixedSizeList>
+          </Box>
         </Drawer>
 
+        {/* Selected states chips below the button in a responsive grid */}
         {selections.selectedStates.length > 0 && (
-          <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {selections.selectedStates.map((state, index) => (
-              <Chip
-                key={`selected-state-${index}`}
-                label={state}
-                onDelete={() => {
-                  const newSelected = selections.selectedStates.filter((_, i) => i !== index);
-                  handleDomesticStateSelection(newSelected, type);
-                }}
-                color="primary"
-                variant="outlined"
-              />
-            ))}
+          <Box sx={{ mt: 1 }}>
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+              gap: 1
+            }}>
+              {selections.selectedStates.map((state, index) => (
+                <Chip
+                  key={`selected-state-${index}`}
+                  label={state}
+                  onDelete={() => {
+                    const newSelected = selections.selectedStates.filter((_, i) => i !== index);
+                    handleDomesticStateSelection(newSelected, type);
+                  }}
+                  color="primary"
+                  variant="outlined"
+                  sx={{
+                    width: '100%',
+                    '& .MuiChip-label': {
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }
+                  }}
+                />
+              ))}
+            </Box>
           </Box>
         )}
       </Box>
@@ -694,8 +865,9 @@ function BrandExpansionLocationDetails({ onChange }) {
 
     if (selections.selectedStates.length === 0) return null;
 
-    const districts = selections.districts
-      .filter(district => district.toLowerCase().includes(searchFilters.districts));
+   const districts = selections.districts
+  .filter(district => district.toLowerCase().includes(searchFilters.districts));
+const chunkedDistricts = chunkArray(districts.map(d => ({ name: d })), ITEMS_PER_ROW);
 
     return (
       <Box sx={{ mt: 2 }}>
@@ -734,14 +906,39 @@ function BrandExpansionLocationDetails({ onChange }) {
               startAdornment: <Search size={18} style={{ marginRight: 8 }} />
             }}
           />
+            {selections.selectedDistricts.length > 0 && (
+        <Box sx={{ mb: 2 }}>
+          <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 1,
+            flexDirection: 'row'
+          }}
+          >
+          {selections.selectedDistricts.map((state, index) => (
+            <Chip
+            key={`drawer-selected-state-${index}`}
+            label={state}
+            onDelete={() => {
+              const newSelected = selections.selectedDistricts.filter((_, i) => i !== index);
+              handleDomesticStateSelection(newSelected, type);
+            }}
+            color="primary"
+            variant="outlined"
+            />
+          ))}
+          </Box>
+        </Box>
+        )}
           
           <FixedSizeList
             height={300}
             width="100%"
             itemSize={50}
-            itemCount={districts.length}
+            itemCount={chunkedDistricts.length}
             itemData={{
-              items: districts.map(d => ({ name: d })),
+              chunkedItems: chunkedDistricts,
               selectedItems: selections.selectedDistricts,
               handleToggle: (district) => {
                 const currentSelected = type === 'current' ? 
@@ -757,7 +954,7 @@ function BrandExpansionLocationDetails({ onChange }) {
               type: 'districts'
             }}
           >
-            {VirtualizedListItem}
+            {VirtualizedGridRow}
           </FixedSizeList>
         </Drawer>
 
@@ -796,8 +993,9 @@ function BrandExpansionLocationDetails({ onChange }) {
 
     if (selections.selectedDistricts.length === 0) return null;
 
-    const cities = selections.cities
-      .filter(city => city.toLowerCase().includes(searchFilters.cities));
+   const cities = selections.cities
+  .filter(city => city.toLowerCase().includes(searchFilters.cities));
+const chunkedCities = chunkArray(cities.map(c => ({ name: c })), ITEMS_PER_ROW);
 
     return (
       <Box sx={{ mt: 2 }}>
@@ -836,14 +1034,38 @@ function BrandExpansionLocationDetails({ onChange }) {
               startAdornment: <Search size={18} style={{ marginRight: 8 }} />
             }}
           />
-          
+            {selections.selectedCities.length > 0 && (
+        <Box sx={{ mb: 2 }}>
+          <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 1,
+            flexDirection: 'row'
+          }}
+          >
+          {selections.selectedCities.map((state, index) => (
+            <Chip
+            key={`drawer-selected-state-${index}`}
+            label={state}
+            onDelete={() => {
+              const newSelected = selections.selectedCities.filter((_, i) => i !== index);
+              handleDomesticStateSelection(newSelected, type);
+            }}
+            color="primary"
+            variant="outlined"
+            />
+          ))}
+          </Box>
+        </Box>
+        )}
           <FixedSizeList
             height={300}
             width="100%"
             itemSize={50}
-            itemCount={cities.length}
+            itemCount={chunkedCities.length}
             itemData={{
-              items: cities.map(c => ({ name: c })),
+              chunkedItems: chunkedCities,
               selectedItems: selections.selectedCities,
               handleToggle: (city) => {
                 const currentSelected = type === 'current' ? 
@@ -859,7 +1081,7 @@ function BrandExpansionLocationDetails({ onChange }) {
               type: 'cities'
             }}
           >
-            {VirtualizedListItem}
+            {VirtualizedGridRow}
           </FixedSizeList>
         </Drawer>
 
@@ -895,7 +1117,7 @@ function BrandExpansionLocationDetails({ onChange }) {
   const renderInternationalCountryDrawer = useCallback((type) => {
     const selections = type === 'current' ? currentInternationalSelections : internationalSelections;
     const toggle = (open) => toggleDrawer(type, { countries: open });
-
+const chunkedCountries = chunkArray(sortedCountries, ITEMS_PER_ROW);
     return (
       <Box sx={{ mt: 2 }}>
         <Button
@@ -937,9 +1159,9 @@ function BrandExpansionLocationDetails({ onChange }) {
             height={300}
             width="100%"
             itemSize={50}
-            itemCount={sortedCountries.length}
+            itemCount={chunkedCountries.length}
             itemData={{
-              items: sortedCountries,
+              chunkedItems: chunkedCountries,
               selectedItems: selections.selectedCountries,
               handleToggle: async (country) => {
                 const currentSelected = type === 'current' ? 
@@ -955,7 +1177,7 @@ function BrandExpansionLocationDetails({ onChange }) {
               type: 'countries'
             }}
           >
-            {VirtualizedListItem}
+            {VirtualizedGridRow}
           </FixedSizeList>
         </Drawer>
 
@@ -987,24 +1209,28 @@ function BrandExpansionLocationDetails({ onChange }) {
     handleSearchChange
   ]);
 
-  // Render international city selection drawer
-  const renderInternationalCityDrawer = useCallback((type) => {
+  // Render international state selection drawer
+  const renderInternationalStateDrawer = useCallback((type) => {
     const selections = type === 'current' ? currentInternationalSelections : internationalSelections;
-    const citiesData = type === 'current' ? currentInternationalCities : internationalCities;
-    const toggle = (open) => toggleDrawer(type, { intCities: open });
+    const statesData = type === 'current' ? currentInternationalStates : internationalStates;
+    const toggle = (open) => toggleDrawer(type, { intStates: open });
 
     if (selections.selectedCountries.length === 0) return null;
 
-    // Get cities for all selected countries
-    const cities = [];
+    // Get states for all selected countries
+    const states = [];
     selections.selectedCountries.forEach(country => {
-      if (citiesData[country]) {
-        cities.push(...citiesData[country]);
+      if (statesData[country]) {
+        states.push(...statesData[country].map(state => ({
+          ...state,
+          country
+        })));
       }
     });
 
-    const filteredCities = cities
-      .filter(city => city.toLowerCase().includes(searchFilters.intCities));
+    const filteredStates = states
+      .filter(state => state.name.toLowerCase().includes(searchFilters.intStates));
+const chunkedIntStates = chunkArray(filteredStates, ITEMS_PER_ROW);
 
     return (
       <Box sx={{ mt: 2 }}>
@@ -1015,6 +1241,130 @@ function BrandExpansionLocationDetails({ onChange }) {
           endIcon={<ChevronDown />}
           sx={{ justifyContent: 'space-between' }}
           disabled={selections.selectedCountries.length === 0}
+        >
+          {selections.selectedStates.length > 0 ? 
+            `${selections.selectedStates.length} states selected` : 
+            "Select States"}
+        </Button>
+
+        <Drawer
+          anchor="top"
+          open={type === 'current' ? currentDrawerOpen.intStates : drawerOpen.intStates}
+          onClose={() => toggle(false)}
+          PaperProps={{ sx: { maxHeight: '60vh', p: 2 } }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6">Select States</Typography>
+            <Button onClick={() => toggle(false)}>Done</Button>
+          </Box>
+          
+          <TextField
+            fullWidth
+            placeholder="Search states..."
+            variant="outlined"
+            size="small"
+            sx={{ mb: 2 }}
+            onChange={(e) => handleSearchChange('intStates', e.target.value)}
+            InputProps={{
+              startAdornment: <Search size={18} style={{ marginRight: 8 }} />
+            }}
+          />
+          
+          <FixedSizeList
+            height={300}
+            width="100%"
+            itemSize={50}
+            itemCount={chunkedIntStates.length}
+            itemData={{
+              chunkedItems: chunkedIntStates,
+              selectedItems: selections.selectedStates,
+              handleToggle: async (state) => {
+                const currentSelected = type === 'current' ? 
+                  currentInternationalSelections.selectedStates : 
+                  internationalSelections.selectedStates;
+                
+                const newSelected = currentSelected.includes(state.name) ?
+                  currentSelected.filter(s => s !== state.name) :
+                  [...currentSelected, state.name];
+                
+                await handleInternationalStateSelection(newSelected, type);
+              },
+              type: 'intStates'
+            }}
+          >
+            {VirtualizedGridRow}
+          </FixedSizeList>
+        </Drawer>
+
+        {selections.selectedStates.length > 0 && (
+          <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {selections.selectedStates.map((state, index) => (
+              <Chip
+                key={`selected-state-${index}`}
+                label={state}
+                onDelete={async () => {
+                  const newSelected = selections.selectedStates.filter((_, i) => i !== index);
+                  await handleInternationalStateSelection(newSelected, type);
+                }}
+                color="secondary"
+                variant="outlined"
+              />
+            ))}
+          </Box>
+        )}
+      </Box>
+    );
+  }, [
+    currentInternationalSelections,
+    internationalSelections,
+    currentInternationalStates,
+    internationalStates,
+    currentDrawerOpen.intStates,
+    drawerOpen.intStates,
+    handleInternationalStateSelection,
+    handleSearchChange,
+    searchFilters.intStates
+  ]);
+
+  // Render international city selection drawer
+  const renderInternationalCityDrawer = useCallback((type) => {
+    const selections = type === 'current' ? currentInternationalSelections : internationalSelections;
+    const citiesData = type === 'current' ? currentInternationalCities : internationalCities;
+    const toggle = (open) => toggleDrawer(type, { intCities: open });
+
+    if (selections.selectedStates.length === 0) return null;
+
+    // Get cities for all selected states
+    const cities = [];
+    for (let i = 0; i < selections.selectedCountries.length; i++) {
+      const country = selections.selectedCountries[i];
+      const state = selections.selectedStates[i];
+      
+      if (country && state) {
+        const cacheKey = `${country}-${state}`;
+        if (citiesData[cacheKey]) {
+          cities.push(...citiesData[cacheKey].map(city => ({
+            name: city,
+            country,
+            state
+          })));
+        }
+      }
+    }
+
+    const filteredCities = cities
+      .filter(city => city.name.toLowerCase().includes(searchFilters.intCities));
+const chunkedIntCities = chunkArray(filteredCities, ITEMS_PER_ROW);
+
+    return (
+      <Box sx={{ mt: 2 }}>
+        <Button
+          variant="outlined"
+          fullWidth
+          onClick={() => toggle(true)}
+          endIcon={<ChevronDown />}
+          sx={{ justifyContent: 'space-between' }}
+          disabled={selections.selectedStates.length === 0}
         >
           {selections.selectedCities.length > 0 ? 
             `${selections.selectedCities.length} cities selected` : 
@@ -1048,26 +1398,25 @@ function BrandExpansionLocationDetails({ onChange }) {
             height={300}
             width="100%"
             itemSize={50}
-            itemCount={filteredCities.length}
+            itemCount={chunkedIntCities.length}
             itemData={{
-              items: filteredCities.map(c => ({ name: c })),
+              chunkedItems: chunkedIntCities,
               selectedItems: selections.selectedCities,
               handleToggle: (city) => {
-// ...existing code...
-                const currentSelected = type === 'current' ?
-                  currentInternationalSelections.selectedCities :
+                const currentSelected = type === 'current' ? 
+                  currentInternationalSelections.selectedCities : 
                   internationalSelections.selectedCities;
-
+                
                 const newSelected = currentSelected.includes(city.name) ?
                   currentSelected.filter(c => c !== city.name) :
                   [...currentSelected, city.name];
-
+                
                 handleInternationalCitySelection(newSelected, type);
               },
               type: 'intCities'
             }}
           >
-            {VirtualizedListItem}
+            {VirtualizedGridRow}
           </FixedSizeList>
         </Drawer>
 
@@ -1103,13 +1452,13 @@ function BrandExpansionLocationDetails({ onChange }) {
 
   // Main render
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom>
+    <Box sx={{  mr: { sm: 0, md: 25 }, ml: { sm: 0, md: 25 }, }} >
+      <Typography variant="h5" >
         Brand Expansion Location Details
       </Typography>
 
       {/* International Expansion Toggle */}
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 2 , display: 'grid',  gridTemplateColumns: '1fr 1fr' }}>
         <Typography variant="subtitle1">Is your brand expanding internationally?</Typography>
         <RadioGroup
           row
@@ -1131,7 +1480,7 @@ function BrandExpansionLocationDetails({ onChange }) {
         value={currentOutletLocationType}
         onChange={handleCurrentOutletLocationTypeChange}
       >
-        <FormControlLabel value="domestic" control={<Radio />} label="Domestic" />
+        <FormControlLabel value="domestic" control={<Radio />} label="Domestic (India)" />
         <FormControlLabel value="international" control={<Radio />} label="International" />
       </RadioGroup>
 
@@ -1185,6 +1534,7 @@ function BrandExpansionLocationDetails({ onChange }) {
       ) : (
         <>
           {renderInternationalCountryDrawer('current')}
+          {renderInternationalStateDrawer('current')}
           {renderInternationalCityDrawer('current')}
           <Button
             variant="contained"
@@ -1204,6 +1554,15 @@ function BrandExpansionLocationDetails({ onChange }) {
                   label={country}
                   onDelete={() => removeLocationItems('currentOutletLocations', 'international', 'countries', idx)}
                   color="primary"
+                  variant="outlined"
+                />
+              ))}
+              {formData.currentOutletLocations.international.states.map((state, idx) => (
+                <Chip
+                  key={`current-state-${idx}`}
+                  label={state}
+                  onDelete={() => removeLocationItems('currentOutletLocations', 'international', 'states', idx)}
+                  color="secondary"
                   variant="outlined"
                 />
               ))}
@@ -1231,7 +1590,7 @@ function BrandExpansionLocationDetails({ onChange }) {
         value={locationType}
         onChange={handleLocationTypeChange}
       >
-        <FormControlLabel value="domestic" control={<Radio />} label="Domestic" />
+        <FormControlLabel value="domestic" control={<Radio />} label="Domestic (India)" />
         <FormControlLabel value="international" control={<Radio />} label="International" />
       </RadioGroup>
 
@@ -1285,6 +1644,7 @@ function BrandExpansionLocationDetails({ onChange }) {
       ) : (
         <>
           {renderInternationalCountryDrawer('expansion')}
+          {renderInternationalStateDrawer('expansion')}
           {renderInternationalCityDrawer('expansion')}
           <Button
             variant="contained"
@@ -1304,6 +1664,15 @@ function BrandExpansionLocationDetails({ onChange }) {
                   label={country}
                   onDelete={() => removeLocationItems('expansionLocations', 'international', 'countries', idx)}
                   color="primary"
+                  variant="outlined"
+                />
+              ))}
+              {formData.expansionLocations.international.states.map((state, idx) => (
+                <Chip
+                  key={`expansion-state-${idx}`}
+                  label={state}
+                  onDelete={() => removeLocationItems('expansionLocations', 'international', 'states', idx)}
+                  color="secondary"
                   variant="outlined"
                 />
               ))}
@@ -1338,4 +1707,4 @@ function BrandExpansionLocationDetails({ onChange }) {
   );
 }
 
-export default BrandExpansionLocationDetails;                 
+export default BrandExpansionLocationDetails;
