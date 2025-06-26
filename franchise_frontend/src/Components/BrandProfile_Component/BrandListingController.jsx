@@ -12,8 +12,6 @@ import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { Link } from '@mui/material';
 
-
-
 const ProfileSection = () => {
   const brandUUID = useSelector((state) => state.auth?.brandUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
@@ -98,7 +96,6 @@ const ProfileSection = () => {
                 {branddata.personalDetails.website || "https://example.com"}
               </Link>
             </Typography>
-
             <Typography>
               Facebook:
               <Link
