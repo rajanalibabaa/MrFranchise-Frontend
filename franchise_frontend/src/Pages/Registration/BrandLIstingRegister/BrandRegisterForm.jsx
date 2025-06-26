@@ -1341,22 +1341,6 @@ const BrandRegisterForm = () => {
                   </StepLabel>
                 </Step>
               ))}
-              <Toolbar sx={{ justifyContent: "flex-end" }}>
-                <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
-                  <Select
-                    value={formData.brandDetails.country}
-                    onChange={handleCountryChange}
-                    displayEmpty
-                    inputProps={{ "aria-label": "Select country" }}
-                  >
-                    {countries.map((country) => (
-                      <MenuItem key={country.code} value={country.code}>
-                        {country.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Toolbar>
             </Stepper>
 
             <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
