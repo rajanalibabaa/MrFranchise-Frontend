@@ -180,9 +180,7 @@ const initialFormData = {
     franchiseDevelopment: "",
     consultationOrAssistance: "",
     trainingSupport: "",
-    marketingSupport: "",
-    otherSupport: "",
-    uniqueSellingPoints: "",
+    uniqueSellingPoints: [],
   },
   //   expansionLocationDetails: {
   //     currentOutletsLocatedAt: [
@@ -1262,9 +1260,8 @@ const BrandRegisterForm = () => {
     );
   };
 
-  const BackButton = () => {
-    const navigate = useNavigate();
-  };
+  
+
   return (
     <>
       <Box
@@ -1283,16 +1280,20 @@ const BrandRegisterForm = () => {
             p: 1,
           }}
         >
-          <Box>
+          <Box
+            sx={{ display: "grid", gridTemplateColumns: "auto 1fr" }}
+            mb={2}
+            mt={2}
+          >
             <Button
               onClick={() => navigate("/")}
               sx={{
                 backgroundColor: "#7ad03a",
                 color: "white",
                 borderRadius: "50%",
-                minWidth: "48px",
-                width: "48px",
-                height: "48px",
+                minWidth: "50px",
+                width: "50px",
+                height: "50px",
                 padding: 0,
                 marginRight: 0,
                 display: "flex",
@@ -1315,24 +1316,32 @@ const BrandRegisterForm = () => {
             >
               <ArrowBackIcon />
             </Button>
-            {/* Stepper --> Top data Names To  Navigate */}
+
+            {/* Stepper ==> To Navigate The Particular Page */}
             <Stepper
               activeStep={activeStep}
               alternativeLabel
               connector={<ColorlibConnector />}
             >
-              {steps.map((label,index) => (
+              {steps.map((label, index) => (
                 <Step key={label}>
                   <StepLabel
-                   StepIconComponent={ColorlibStepIcon}
-                  onClick={() => setActiveStep(index)}
-                  style={{ cursor: "pointer" }}
-                   >
+                    StepIconComponent={ColorlibStepIcon}
+                    onClick={() => setActiveStep(index)}
+                    sx={{
+                      cursor: "pointer",
+                      transition: "transform 0.3s ease, color 0.3s ease",
+                      "&:hover": {
+                        transform: "scale(1.1)",
+                        color: "primary.main", // or any custom color
+                      },
+                    }}
+                  >
                     {label}
                   </StepLabel>
                 </Step>
               ))}
-               <Toolbar sx={{ justifyContent: "flex-end" }}>
+              <Toolbar sx={{ justifyContent: "flex-end" }}>
                 <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
                   <Select
                     value={formData.brandDetails.country}
@@ -1349,7 +1358,8 @@ const BrandRegisterForm = () => {
                 </FormControl>
               </Toolbar>
             </Stepper>
-            {/* <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
+
+            <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
               <Box width="30%">
                 {" "}
                 {activeStep >= 0 && renderSelectedCategories()}
@@ -1359,7 +1369,7 @@ const BrandRegisterForm = () => {
                 {activeStep >= 0 && renderExpansionLocations()}
               </Box>
               <Box width="45%"> {activeStep >= 1 && renderFicoModels()}</Box>
-            </Box> */}
+            </Box>
           </Box>
 
           <Box
@@ -1367,7 +1377,7 @@ const BrandRegisterForm = () => {
               flexGrow: 1,
               border: "1px solid #e0e0e0",
               borderRadius: 2,
-
+              mt: 0,
               pl: 1,
               overflow: "auto",
             }}

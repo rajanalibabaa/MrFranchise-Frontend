@@ -1,44 +1,71 @@
+// Utils/PincodeFetch.jsx
 import axios from 'axios';
 
-/**
- * Fetch city, district, and state by global postal code using OpenStreetMap Nominatim API.
- * @param {string} postalCode - The postal code to look up
- * @param {string} country - Country name (optional but recommended for better accuracy)
- * @returns {Promise<{ state: string, district: string, city: string }>}
- */
-export const fetchPincodeDetails = async (postalCode, country = '') => {
+const SUPPORTED_COUNTRIES = [
+  { code: 'IN', name: 'India' },
+  { code: 'US', name: 'United States' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'AU', name: 'Australia' },
+  // Add more countries as needed
+];
+
+export const getSupportedCountries = () => {
+  return SUPPORTED_COUNTRIES;
+};
+
+export const fetchGlobalLocationByPostalCode = async (postalCode, countryCode = 'IN') => {
   try {
-    const query = country
-      ? `postalcode=${postalCode}&country=${country}`
-      : `q=${postalCode}`;
+    // For India, use PostalPincode.in API
+    if (countryCode === 'IN') {
+      const response = await axios.get(`https://api.postalpincode.in/pincode/${postalCode}`);
+      
+      if (!response.data || response.data[0].Status !== 'Success' || !response.data[0].PostOffice) {
+        throw new Error('No data found for the given pincode in India');
+      }
+      
+      const firstPostOffice = response.data[0].PostOffice[0];
+      return {
+        country: 'India',
+        state: firstPostOffice.State,
+        district: firstPostOffice.District,
+        city: firstPostOffice.Name,
+        status: 'success'
+      };
+    }
 
-    const url = `https://nominatim.openstreetmap.org/search?${query}&format=json&addressdetails=1`;
-
-    const response = await axios.get(url, {
+    // For other countries, use Nominatim
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: {
+        postalcode: postalCode,
+        countrycodes: countryCode,
+        format: 'json',
+        addressdetails: 1,
+        limit: 1
+      },
       headers: {
-        'User-Agent': 'YourAppName/1.0 (your@email.com)' // required by OSM
+        'Accept-Language': 'en',
+        'User-Agent': 'YourAppName/1.0 (your-email@example.com)'
       }
     });
 
-    const result = response.data?.[0];
-    const address = result?.address;
+    if (!response.data || response.data.length === 0) {
+      throw new Error('No data found for the given postal code');
+    }
 
-    if (!address) throw new Error('No location found for this postal code.');
-
+    const address = response.data[0].address;
     return {
-      state: address.state || '',
+      country: address.country || '',
+      state: address.state || address.region || address.county || '',
       district: address.county || address.state_district || '',
-      city:
-        address.city ||
-        address.town ||
-        address.village ||
-        address.hamlet ||
-        address.suburb ||
-        address.county ||
-        ''
+      city: address.city || address.town || address.village || address.hamlet || '',
+      status: 'success'
     };
   } catch (error) {
-    console.error('Global postal code lookup failed:', error.message || error);
-    throw new Error('Unable to fetch location details.');
+    console.error('Error fetching location:', error);
+    return {
+      status: 'error',
+      message: error.response?.data?.message || error.message || 'Failed to fetch location details'
+    };
   }
 };
