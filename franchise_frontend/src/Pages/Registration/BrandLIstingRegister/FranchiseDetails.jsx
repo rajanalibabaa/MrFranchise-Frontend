@@ -30,6 +30,7 @@ import {
   ListItemText,
   IconButton,
   Tooltip,
+  Autocomplete
 } from "@mui/material";
 import { useState } from "react";
 import categories from "./BrandCategories";
@@ -430,7 +431,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         }}
       >
         {/* Established Year */} {/* Established Year */}
-        <Grid item xs={12} sm={6} md={2.4}>
+        {/* <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth error={!!errors.establishedYear}>
             <InputLabel size="medium">Year Commenced Operations</InputLabel>
             <Select
@@ -457,7 +458,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               }}
             >
               {Array.from(
-                { length: 100 },
+                { length: 226 },
                 (_, i) => new Date().getFullYear() - i
               ).map((year) => (
                 <MenuItem
@@ -480,10 +481,153 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               </Typography>
             )}
           </FormControl>
-        </Grid>
+        </Grid> */}
+
+   <Grid item xs={12} sm={6} md={2.4}>
+  <Autocomplete
+    freeSolo
+    options={Array.from(
+      { length: 226 },
+      (_, i) => String(new Date().getFullYear() - i) // Convert years to strings
+    )}
+    value={data.establishedYear ? String(data.establishedYear) : null} // Ensure value is string
+    getOptionLabel={(option) => option} // Explicitly define getOptionLabel
+    onChange={(event, newValue) => {
+      handleChange({
+        target: {
+          name: "establishedYear",
+          value: newValue ? Number(newValue) : "" // Convert back to number if needed
+        }
+      });
+    }}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        label="Year Commenced Operations"
+        variant="outlined"
+        size="medium"
+        required
+        error={!!errors.establishedYear}
+        helperText={errors.establishedYear && (
+          <Typography variant="caption" color="error">
+            {errors.establishedYear}
+          </Typography>
+        )}
+        inputProps={{
+          ...params.inputProps,
+          type: "number",
+          min: new Date().getFullYear() - 225,
+          max: new Date().getFullYear()
+        }}
+      />
+    )}
+    PaperComponent={({ children }) => (
+      <Paper
+        sx={{
+          width: 390,
+          maxHeight: 300,
+          "& .MuiAutocomplete-listbox": {
+            display: "grid",
+            gridTemplateColumns: "repeat(5, 1fr)",
+            gap: "4px",
+            padding: "4px"
+          }
+        }}
+      >
+        {children}
+      </Paper>
+    )}
+    renderOption={(props, option) => (
+      <MenuItem
+        {...props}
+        key={option}
+        sx={{
+          minWidth: 0,
+          padding: "6px 4px",
+          display: "flex",
+          justifyContent: "center"
+        }}
+      >
+        {option}
+      </MenuItem>
+    )}
+  />
+</Grid>
+
+ <Grid item xs={12} sm={6} md={2.4}>
+  <Autocomplete
+    freeSolo
+    options={Array.from(
+      { length: 226 },
+      (_, i) => String(new Date().getFullYear() - i) // Convert years to strings
+    )}
+    value={data.franchiseSinceYear ? String(data.franchiseSinceYear) : null} // Ensure value is string
+    getOptionLabel={(option) => option} // Explicitly define getOptionLabel
+    onChange={(event, newValue) => {
+      handleChange({
+        target: {
+          name: "franchiseSinceYear",
+          value: newValue ? Number(newValue) : "" // Convert back to number if needed
+        }
+      });
+    }}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        label="Year Commenced Franchising"
+        variant="outlined"
+        size="medium"
+        required
+        error={!!errors.franchiseSinceYear}
+        helperText={errors.franchiseSinceYear && (
+          <Typography variant="caption" color="error">
+            {errors.franchiseSinceYear}
+          </Typography>
+        )}
+        inputProps={{
+          ...params.inputProps,
+          type: "number",
+          min: new Date().getFullYear() - 225,
+          max: new Date().getFullYear()
+        }}
+      />
+    )}
+    PaperComponent={({ children }) => (
+      <Paper
+        sx={{
+          width: 390,
+          maxHeight: 300,
+          "& .MuiAutocomplete-listbox": {
+            display: "grid",
+            gridTemplateColumns: "repeat(5, 1fr)",
+            gap: "4px",
+            padding: "4px"
+          }
+        }}
+      >
+        {children}
+      </Paper>
+    )}
+    renderOption={(props, option) => (
+      <MenuItem
+        {...props}
+        key={option}
+        sx={{
+          minWidth: 0,
+          padding: "6px 4px",
+          display: "flex",
+          justifyContent: "center"
+        }}
+      >
+        {option}
+      </MenuItem>
+    )}
+  />
+</Grid>
+
         {/* Franchise Since Year */}
         {/* Franchise Since Year */}
-        <Grid item xs={12} sm={6} md={2.4}>
+        {/* <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth error={!!errors.franchiseSinceYear}>
             <InputLabel size="medium">Year Commenced Franchising</InputLabel>
             <Select
@@ -510,7 +654,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               }}
             >
               {Array.from(
-                { length: 100 },
+                { length: 226 },
                 (_, i) => new Date().getFullYear() - i
               ).map((year) => (
                 <MenuItem
@@ -533,7 +677,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               </Typography>
             )}
           </FormControl>
-        </Grid>
+        </Grid> */}
       </Grid>
 
       {/* Franchise Network */}
