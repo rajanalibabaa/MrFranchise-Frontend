@@ -33,6 +33,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  
 } from "@mui/material";
 import { useTheme, useMediaQuery } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -176,9 +177,7 @@ const initialFormData = {
     franchiseDevelopment: "",
     consultationOrAssistance: "",
     trainingSupport: "",
-    marketingSupport: "",
-    otherSupport: "",
-    uniqueSellingPoints: "",
+    uniqueSellingPoints: [],
    
   },
 //   expansionLocationDetails: {
@@ -1259,8 +1258,7 @@ const BrandRegisterForm = () => {
     );
   };
 
-  const BackButton = () => {
-  const navigate = useNavigate();}
+
   return (
     <>
       <Box
@@ -1268,7 +1266,7 @@ const BrandRegisterForm = () => {
           display: "flex",
           flexDirection: "column",
           height: "100vh",
-       
+         
         }}
       >
         <Box
@@ -1280,16 +1278,16 @@ const BrandRegisterForm = () => {
             p: 1,
           }}
         >
-          <Box>
+          <Box sx={{ display: "grid", gridTemplateColumns: "auto 1fr" }} mb={2} mt={2}>
             <Button
       onClick={() => navigate("/")}
       sx={{
         backgroundColor: "#7ad03a", 
         color: "white",
         borderRadius: "50%",
-        minWidth: "48px",
-        width: "48px",
-        height: "48px",
+        minWidth: "50px",
+        width: "50px",
+        height: "50px",
         padding: 0,
         marginRight: 0,
         display: "flex",
@@ -1310,7 +1308,7 @@ const BrandRegisterForm = () => {
         }
       }}
     >
-      <ArrowBackIcon />
+      <ArrowBackIcon  />
     </Button>
             <Stepper
               activeStep={activeStep}
@@ -1324,7 +1322,7 @@ const BrandRegisterForm = () => {
                   </StepLabel>
                 </Step>
               ))}
-              <Toolbar sx={{ justifyContent: "flex-end" }}>
+              {/* <Toolbar sx={{ justifyContent: "flex-end" }}>
                 
                 <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
                   <Select
@@ -1340,7 +1338,7 @@ const BrandRegisterForm = () => {
                     ))}
                   </Select>
                 </FormControl>
-              </Toolbar>
+              </Toolbar> */}
             </Stepper>
             {/* <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
               <Box width="30%">
@@ -1360,7 +1358,7 @@ const BrandRegisterForm = () => {
               flexGrow: 1,
               border: "1px solid #e0e0e0",
               borderRadius: 2,
-
+              mt:0,
               pl: 1,
               overflow: "auto",
             }}

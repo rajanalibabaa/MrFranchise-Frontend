@@ -1203,4 +1203,3 @@ const Uploads = ({
 };
 
 export default Uploads;
-

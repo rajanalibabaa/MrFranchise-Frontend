@@ -39,14 +39,14 @@ import categories from "./BrandCategories.jsx";
 import AddIcon from "@mui/icons-material/Add";
 import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 
-
-import LanguageIcon from '@mui/icons-material/Language';
-import FlagIcon from '@mui/icons-material/Flag';
+import LanguageIcon from "@mui/icons-material/Language";
+import FlagIcon from "@mui/icons-material/Flag";
 import { Editor } from "@tinymce/tinymce-react";
-import { width } from "@mui/system";
-import { fetchPincodeDetails } from "../../../Utils/PincodeFetch.jsx";
+import { fontSize, width } from "@mui/system";
+import { fetchGlobalLocationByPostalCode,getSupportedCountries } from "../../../Utils/PincodeFetch.jsx";
+import coutryCode from "../../../Utils/AllCountryCode.jsx"
 
 // const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 // const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -61,14 +61,13 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   //     verified: false,
   //   },
   // });
-    const formData = {
+  const formData = {
     companyName: "",
     brandName: "",
     brandCategories: [],
     expansionLocation: [],
     ...data,
   };
-  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -80,98 +79,132 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   // Updated Expansion Location State
   const [openLocationModal, setOpenLocationModal] = useState(false);
  
+  // Inside your BrandDetails component, add these state variables
+const [supportedCountries] = useState(getSupportedCountries());
+const [selectedCountry, setSelectedCountry] = useState('IN'); // Default to India
+const [countryInputValue, setCountryInputValue] = useState('');
+// Add this function to handle country change
+const handleCountryChange = (event, newValue) => {
+  if (newValue) {
+    setSelectedCountry(newValue.code);
+    onChange({ country: newValue.name });
+  } else {
+    setSelectedCountry('');
+    onChange({ country: '' });
+  }
+};
+
+
  useEffect(() => {
     if (data.mobileNumber?.length === 10 && !whatsappEnabled && !data.whatsappNumber) {
       setShowWhatsappSnackbar(true);
     }
   }, [data.mobileNumber, whatsappEnabled, data.whatsappNumber]);
 
-  useEffect(()=>{
-    const fetchLocationDetails = async () => {
-      if(data.pincode && data.pincode.length === 6  ) {
-        setLoadingPincode(true);
-        setPincodeError(null);
-        try {
-          const locationDetails =await fetchPincodeDetails(data.pincode);
-          onChange({
-            state: locationDetails.state,
-            city: locationDetails.city,
-            district: locationDetails.district
-          })
-          
-        } catch (error) {
-          setPincodeError('Invalid Pincode or no data found');
-          
-        }finally{
-          setLoadingPincode(false);
-        }
+  // Inside your BrandDetails component
 
-      }
+const fetchLocationDetails = async () => {
+  if (data.pincode && data.pincode.length >= 4 && selectedCountry) {
+    setLoadingPincode(true);
+    setPincodeError(null);
+    
+    try {
+      const result = await fetchGlobalLocationByPostalCode(data.pincode, selectedCountry);
       
-    };
-    const timer =setTimeout(() => {
-      fetchLocationDetails();
-    }, 1000);
-    return () => clearTimeout(timer);
-  },[data.pincode]);
-
-const handleMainCategoryChange = (e) => {
-  const mainCat = e.target.value;
-  setSelectedCategory({
-    main: mainCat,
-    sub: "",
-    child: "",
-    groupId: ""
-  });
-};
-
-const handleSubCategoryChange = (e) => {
-  const subCat = e.target.value;
-  const mainCatObj = categories.find(cat => cat.name === selectedCategory.main);
-  const subCatObj = mainCatObj?.children?.find(sub => sub.name === subCat);
-  
-  setSelectedCategory(prev => ({
-    ...prev,
-    sub: subCat,
-    groupId: subCatObj?.groupId || "",
-    child: ""
-  }));
-};
-
-const handleChildCategoryChange = (e) => {
-  setSelectedCategory(prev => ({
-    ...prev,
-    child: e.target.value
-  }));
-};
-
-const handleAddCategory = () => {
-  if (selectedCategory.child) {
-    const isDuplicate =
-      Array.isArray(data.brandCategories) &&
-      data.brandCategories.some(
-        (cat) =>
-          cat.main === selectedCategory.main &&
-          cat.sub === selectedCategory.sub &&
-          cat.child === selectedCategory.child
-      );
-
-    if (!isDuplicate) {
-      const updatedCategories = [
-        ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
-        {
-          main: selectedCategory.main,
-          sub: selectedCategory.sub,
-          child: selectedCategory.child,
-          groupId: selectedCategory.groupId
-        },
-      ];
-      onChange({ brandCategories: updatedCategories });
-      // Reset the child category selection after adding
-      setSelectedCategory(prev => ({ ...prev, child: "" }));
+      if (result.status === 'success') {
+        onChange({
+          country: result.country,
+          state: result.state,
+          city: result.city,
+          district: result.district
+        });
+      } else {
+        throw new Error(result.message || 'Failed to fetch location details');
+      }
+    } catch (error) {
+      console.error('Location fetch error:', error);
+      setPincodeError(error.message);
+      // Clear the location fields if pincode is invalid
+      onChange({
+        state: '',
+        city: '',
+        district: ''
+      });
+    } finally {
+      setLoadingPincode(false);
     }
   }
 };
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    if (data.pincode && data.pincode.length >= 4 && selectedCountry) {
+      fetchLocationDetails();
+    }
+  }, 1000);
+  
+  return () => clearTimeout(timer);
+}, [data.pincode, selectedCountry]);
+
+  const handleMainCategoryChange = (e) => {
+    const mainCat = e.target.value;
+    setSelectedCategory({
+      main: mainCat,
+      sub: "",
+      child: "",
+      groupId: "",
+    });
+  };
+
+  const handleSubCategoryChange = (e) => {
+    const subCat = e.target.value;
+    const mainCatObj = categories.find(
+      (cat) => cat.name === selectedCategory.main
+    );
+    const subCatObj = mainCatObj?.children?.find((sub) => sub.name === subCat);
+
+    setSelectedCategory((prev) => ({
+      ...prev,
+      sub: subCat,
+      groupId: subCatObj?.groupId || "",
+      child: "",
+    }));
+  };
+
+  const handleChildCategoryChange = (e) => {
+    setSelectedCategory((prev) => ({
+      ...prev,
+      child: e.target.value,
+    }));
+  };
+
+  const handleAddCategory = () => {
+    if (selectedCategory.child) {
+      const isDuplicate =
+        Array.isArray(data.brandCategories) &&
+        data.brandCategories.some(
+          (cat) =>
+            cat.main === selectedCategory.main &&
+            cat.sub === selectedCategory.sub &&
+            cat.child === selectedCategory.child
+        );
+
+      if (!isDuplicate) {
+        const updatedCategories = [
+          ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
+          {
+            main: selectedCategory.main,
+            sub: selectedCategory.sub,
+            child: selectedCategory.child,
+            groupId: selectedCategory.groupId,
+          },
+        ];
+        onChange({ brandCategories: updatedCategories });
+        // Reset the child category selection after adding
+        setSelectedCategory((prev) => ({ ...prev, child: "" }));
+      }
+    }
+  };
 
   // OTP Verification States
   const [verificationState, setVerificationState] = useState({
@@ -197,7 +230,6 @@ const handleAddCategory = () => {
     message: "",
     severity: "success",
   });
-  
 
   // Handle OTP verification dialog open/close
   const handleVerificationDialog = (field, open) => {
@@ -341,6 +373,276 @@ const handleAddCategory = () => {
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
+  
+   // State for country codes
+  const [mobileCountryCode, setMobileCountryCode] = useState({ code: "IN", dial_code: "+91" });
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState({ code: "IN", dial_code: "+91" });
+  const [ceoCountryCode, setCeoCountryCode] = useState({ code: "IN", dial_code: "+91" });
+  const [officeCountryCode, setOfficeCountryCode] = useState({ code: "IN", dial_code: "+91" });
+
+  // Filter country codes to remove duplicates and sort
+  const uniqueCountryCodes = coutryCode.reduce((acc, current) => {
+    const x = acc.find(item => item.code === current.code);
+    if (!x) {
+      return acc.concat([current]);
+    } else {
+      return acc;
+    }
+  }, []).sort((a, b) => a.name.localeCompare(b.name));
+
+  // Handle country code change
+  const handleCountryCodeChange = (field, newValue) => {
+    if (newValue) {
+      switch (field) {
+        case 'mobile':
+          setMobileCountryCode(newValue);
+          break;
+        case 'whatsapp':
+          setWhatsappCountryCode(newValue);
+          break;
+        case 'ceo':
+          setCeoCountryCode(newValue);
+          break;
+        case 'office':
+          setOfficeCountryCode(newValue);
+          break;
+        default:
+          break;
+      }
+    }
+  };
+
+  // ... (keep all your existing state and functions)
+
+  // Update your mobile number fields to include country code selectors:
+
+  // Mobile Number Field
+  const renderMobileNumberField = () => (
+    <Grid item xs={12} sm={6} md={2.4}>
+      <TextField
+        fullWidth
+        label="Mobile Number"
+        name="mobileNumber"
+        value={data.mobileNumber || ""}
+        onChange={handleChange}
+        error={!!errors.mobileNumber}
+        helperText={errors.mobileNumber}
+        variant="outlined"
+        size="medium"
+        inputProps={{ maxLength: 15 }} // Increased to accommodate international numbers
+        placeholder="Enter mobile number"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Autocomplete
+                options={uniqueCountryCodes}
+                getOptionLabel={(option) => `${option.dial_code}`}
+                value={mobileCountryCode}
+                onChange={(event, newValue) => handleCountryCodeChange('mobile', newValue)}
+                clearIcon={null}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    sx={{ width: 70 }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} fontSize={12}>
+                  {option.dial_code} <br/>({option.code})
+                  </Box>
+                )}
+              />
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              {verificationState.mobileNumber.verified ? (
+                <Box display="flex" alignItems="center" color="success.main">
+                  <CheckCircleIcon fontSize="medium" />
+                  <Typography variant="caption" sx={{ ml: 0.5 }}>
+                    Verified
+                  </Typography>
+                </Box>
+              ) : (
+                <Button
+                  variant="outlined"
+                  size="medium"
+                  onClick={() => handleVerificationDialog("mobileNumber", true)}
+                  disabled={
+                    !data.mobileNumber ||
+                    verificationState.mobileNumber.loading
+                  }
+                  startIcon={
+                    verificationState.mobileNumber.loading ? (
+                      <CircularProgress size={14} />
+                    ) : (
+                      <SendIcon fontSize="medium" />
+                    )
+                  }
+                >
+                  Verify
+                </Button>
+              )}
+            </InputAdornment>
+          ),
+        }}
+        required
+      />
+    </Grid>
+  );
+
+  // WhatsApp Number Field
+  const renderWhatsAppNumberField = () => (
+    <Grid item xs={12} sm={6} md={2.4}>
+      <TextField
+        fullWidth
+        label="WhatsApp Number"
+        name="whatsappNumber"
+        value={data.whatsappNumber || ""}
+        onChange={handleChange}
+        error={!!errors.whatsappNumber}
+        helperText={errors.whatsappNumber}
+        variant="outlined"
+        size="medium"
+        disabled={!whatsappEnabled}
+        inputProps={{ maxLength: 15 }}
+        placeholder="Enter WhatsApp number"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Autocomplete
+                options={uniqueCountryCodes}
+                getOptionLabel={(option) => `${option.dial_code}`}
+                value={whatsappCountryCode}
+                onChange={(event, newValue) => handleCountryCodeChange('whatsapp', newValue)}
+                clearIcon={null}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    sx={{ width: 70 }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} fontSize={12}>
+                    {option.dial_code} <br/>({option.code})
+                  </Box>
+                )}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+    </Grid>
+  );
+
+  // CEO Mobile Field
+  const renderCeoMobileField = () => (
+    <Grid item xs={12} sm={6} md={2}>
+      <TextField
+        fullWidth
+        label="CEO/MD/Owner Mobile No"
+        name="ceoMobile"
+        value={data.ceoMobile || ""}
+        onChange={handleChange}
+        variant="outlined"
+        size="medium"
+        inputProps={{ maxLength: 15 }}
+        placeholder="Enter mobile number"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Autocomplete
+                options={uniqueCountryCodes}
+                getOptionLabel={(option) => `${option.dial_code}`}
+                value={ceoCountryCode}
+                onChange={(event, newValue) => handleCountryCodeChange('ceo', newValue)}
+                clearIcon={null}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    sx={{ width: 70 }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props}fontSize={12}>
+                    {option.dial_code}<br/> ({option.code})
+                  </Box>
+                )}
+              />
+            </InputAdornment>
+          ),
+        }}
+        error={!!errors.ceoMobile}
+        helperText={errors.ceoMobile}
+        required
+      />
+    </Grid>
+  );
+
+  // Office Mobile Field
+  const renderOfficeMobileField = () => (
+    <Grid item xs={12} sm={6} md={2.4}>
+      <TextField
+        fullWidth
+        label="Office Mobile Number (Optional)"
+        name="officeMobile"
+        value={data.officeMobile || ""}
+        onChange={handleChange}
+        variant="outlined"
+        size="medium"
+        inputProps={{ maxLength: 15 }}
+        placeholder="Enter mobile number"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Autocomplete
+                options={uniqueCountryCodes}
+                getOptionLabel={(option) => `${option.dial_code}`}
+                value={officeCountryCode}
+                onChange={(event, newValue) => handleCountryCodeChange('office', newValue)}
+                clearIcon={null}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    sx={{ width: 70 }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} fontSize={12}>
+                  
+                    {option.dial_code}<br/> ({option.code})
+                  </Box>
+                )}
+              />
+            </InputAdornment>
+          ),
+        }}
+        error={!!errors.officeMobile}
+        helperText={errors.officeMobile}
+      />
+    </Grid>
+  );
+
 
   // Location card component
   const LocationCard = ({ location, onRemove }) => {
@@ -401,12 +703,14 @@ const handleAddCategory = () => {
   };
 
   return (
-    <Box sx={{ overflowY: "auto", ml: 25, mr: 25,  mt: 0 ,maxWidth:'100%'}}>
+    <Box sx={{ overflowY: "auto", mr: { sm: 0, md: 25 }, ml: { sm: 0, md: 25 }, mt: 0, maxWidth: "100%" }}>
       {/* Brand Details Section */}
-      <Typography variant="h6"
+      <Typography
+        variant="h6"
         fontWeight={700}
-        sx={{ mb: 3, color: "#ff9800" }}>
-       Login Credentials 
+        sx={{ mb: 3, color: "#ff9800" }}
+      >
+        Login Credentials
       </Typography>
 
       <Grid
@@ -420,7 +724,7 @@ const handleAddCategory = () => {
           mb: 2,
         }}
       >
-         {/* Full Name */}
+        {/* Full Name */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
@@ -488,90 +792,13 @@ const handleAddCategory = () => {
 
         {/* Mobile Number with Verification */}
         <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Mobile Number"
-            name="mobileNumber"
-            value={data.mobileNumber || ""}
-            onChange={handleChange}
-            error={!!errors.mobileNumber}
-            helperText={errors.mobileNumber}
-            variant="outlined"
-            size="medium"
-            inputProps={{ maxLength: 10 }}
-            placeholder="Enter 10 digit number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">+91</InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  {verificationState.mobileNumber.verified ? (
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      color="success.main"
-                    >
-                      <CheckCircleIcon fontSize="medium" />
-                      <Typography variant="caption" sx={{ ml: 0.5 }}>
-                        Verified
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <Button
-                      variant="outlined"
-                      size="medium"
-                      onClick={() =>
-                        handleVerificationDialog("mobileNumber", true)
-                      }
-                      disabled={
-                        !data.mobileNumber ||
-                        verificationState.mobileNumber.loading
-                      }
-                      startIcon={
-                        verificationState.mobileNumber.loading ? (
-                          <CircularProgress size={14} />
-                        ) : (
-                          <SendIcon fontSize="medium" />
-                        )
-                      }
-                    >
-                      Verify
-                    </Button>
-                  )}
-                </InputAdornment>
-              ),
-            }}
-            required
-          />
+           {renderMobileNumberField()}
+    
         </Grid>
 
         {/* WhatsApp Number */}
         <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="WhatsApp Number"
-            name="whatsappNumber"
-            value={data.whatsappNumber || ""}
-            onChange={handleChange}
-            error={!!errors.whatsappNumber}
-            helperText={errors.whatsappNumber}
-            variant="outlined"
-            size="medium"
-            disabled = {!whatsappEnabled}
-            inputProps={{ maxLength: 10 }}
-            placeholder="Enter 10 digit number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">+91</InputAdornment>
-              ),
-            }}
-            sx={{
-    '& .MuiOutlinedInput-root': {
-      borderRadius: '8px',
-    },
-  }}
-          />
+            {renderWhatsAppNumberField()}
         </Grid>
       </Grid>
 
@@ -705,24 +932,25 @@ const handleAddCategory = () => {
         </Alert>
       </Snackbar>
 
-      <Typography variant="h6"
+      <Typography
+        variant="h6"
         fontWeight={700}
-        sx={{ mb: 3, color: "#ff9800" }}>
+        sx={{ mb: 3, color: "#ff9800" }}
+      >
         Brand Details
       </Typography>
-
-     
-    
-       <Grid  container
+      <Grid
+        container
         spacing={2}
         sx={{
           mt: 2,
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
-          gap: 2,
+          display: "grid",  
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           mb: 2,
-        }}> {/* Company Name */}
-        <Grid item xs={12} sm={6}>
+        }}
+      >
+        {/* Company Name - 1 column */}
+        <Grid item xs={12}  md={1}>
           <TextField
             fullWidth
             label="Company Name"
@@ -736,8 +964,9 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-        {/* Brand Name */}
-        <Grid item xs={12} sm={6} md={2.4}>
+
+        {/* Brand Name - 1 column */}
+        <Grid item xs={12} md={1}>
           <TextField
             fullWidth
             label="Brand Name"
@@ -751,8 +980,9 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-        <Grid >
 
+        {/* Tagline - spans 2 columns */}
+        <Grid item size={{ xs:12, md: 24 }}>
           <TextField
             fullWidth
             label="Tagline"
@@ -765,9 +995,21 @@ const handleAddCategory = () => {
             helperText={errors.Tagline}
             required
           />
-
         </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+      </Grid>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+       
+          mb: 2,
+        }}
+      >
+        {/* CEO Name */}
+        <Grid item xs={12} md={1}>
           <TextField
             fullWidth
             label="CEO/MD/Owner Name"
@@ -781,18 +1023,9 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-        </Grid>
-        <Grid container
-        spacing={2}
-        sx={{
-          mt: 2,
-          display: "grid",
-          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
-          gap: 2,
-          mb: 2,
-        }}>
-          
-        <Grid item xs={12} sm={6} md={2.4}>
+
+        {/* CEO Email */}
+        <Grid item xs={12} md={1}>
           <TextField
             fullWidth
             label="CEO/MD/Owner Email"
@@ -807,31 +1040,36 @@ const handleAddCategory = () => {
             required
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="CEO/MD/Owner Mobile No"
-            name="ceoMobile"
-            value={data.ceoMobile || ""}
-            onChange={handleChange}
-            variant="outlined"
-            size="medium"
-            inputProps={{ maxLength: 10 }}
-            placeholder="Enter 10 digit number"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">+91</InputAdornment>
-              ),
-            }}
-            error={!!errors.ceoMobile}
-            helperText={errors.ceoMobile}
-            required
-          />
+
+        {/* CEO Mobile */}
+        <Grid item xs={12} md={2}>
+        { renderCeoMobileField()}
         </Grid>
+      </Grid>
+
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}
+      >
+        Head Office Location{" "}
+      </Typography>
+
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 2,
+          mb: 2,
+        }}
+      >
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label='Office Email (Optional)'
+            label="Office Email (Optional)"
             name="officeEmail"
             value={data.officeEmail || ""}
             onChange={handleChange}
@@ -841,77 +1079,155 @@ const handleAddCategory = () => {
             helperText={errors.officeEmail}
             required
           />
-
         </Grid>
 
         <Grid item xs={12} sm={6} md={2.4}>
-           <TextField 
-           fullWidth
-           label='Office Mobile Number (Optional)'
-           name="officeMobile"
-           value={data.officeMobile || ""}
-           onChange={handleChange}
-           variant="outlined"
-           size="medium"
-           inputProps={{ maxLength: 10 }}
-           placeholder="Enter 10 digit number"
-           InputProps={{
-             startAdornment: (
-               <InputAdornment position="start">+91</InputAdornment>
-             ),
-           }}
-           error={!!errors.officeMobile}
-           helperText={errors.officeMobile}
-           required
-         />
+          {renderOfficeMobileField()}
         </Grid>
-        </Grid>
+      </Grid>
+   
+  <Grid
+  container
+  spacing={2}
+  sx={{
+    mt: 2,
+    display: "grid",
+    gridTemplateColumns: { md: "3fr 1fr", xs: "1fr" }, // 3:1 ratio on desktop
+    gap: 1.5,
+    
+  }}
+>
+  {/* Head Office Address - spans 3 columns */}
+  <Grid item size={{ xs:12, md:12.05 }} >
+    <TextField
+      fullWidth
+      label="Head Office Address"
+      name="headOfficeAddress"
+      value={data.headOfficeAddress || ""}
+      onChange={handleChange}
+      error={!!errors.headOfficeAddress}
+      helperText={errors.headOfficeAddress}
+      variant="outlined"
+      size="medium"
+      required
+    />
+  </Grid>
 
-        
-              
-
-
-      <Typography variant="h6"
-        fontWeight={700}
-        sx={{ mb: 3, color: "#ff9800" }}>
-Head Office Location      </Typography> 
-     <Grid container spacing={2} sx={{ mt: 2, display: "grid", gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" }, gap: 2, mb: 2 }}>
-
-          <Grid >
-      
-        
-        
-{/* Head Office Address */}
-          <TextField
-            fullWidth
-            label="Head Office Address"
-            name="headOfficeAddress"
-            value={data.headOfficeAddress || ""}
-            onChange={handleChange}
-            error={!!errors.headOfficeAddress}
-            helperText={errors.headOfficeAddress}
-            variant="outlined"
-            size="medium"
-            required
-          />
-       
-         
+<Grid item xs={12} sm={6} md={2.4}>
+  <Autocomplete
+    options={supportedCountries}
+    getOptionLabel={(option) => option.name}
+    value={supportedCountries.find(c => c.code === selectedCountry) || null}
+    onChange={(event, newValue) => {
+      if (newValue) {
+        setSelectedCountry(newValue.code);
+        onChange({ country: newValue.name });
+      } else {
+        setSelectedCountry('');
+        onChange({ country: '' });
+      }
+      // Clear pincode-related fields when country changes
+      onChange({
+        pincode: '',
+        state: '',
+        city: '',
+        district: ''
+      });
+    }}
+    inputValue={countryInputValue}
+    onInputChange={(event, newInputValue) => {
+      setCountryInputValue(newInputValue);
+    }}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        label="Country"
+        variant="outlined"
+        size="medium"
+        required
+        error={!!errors.country}
+        helperText={errors.country || "Select your country first"}
+      />
+    )}
+    renderOption={(props, option) => (
+      <Box component="li" {...props}>
+        <FlagIcon sx={{ mr: 1 }} />
+        {option.name}
+      </Box>
+    )}
+  />
+</Grid>
+  {/* Pincode - spans 1 column */}
+  {/* <Grid item sx={{ ml:{ md:1 }}} >
+    <TextField
+      fullWidth
+      label="Pincode"
+      name="pincode"
+      value={data.pincode || ""}
+      onChange={(e) => {
+        const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+        onChange({ pincode: value });
+      }}
+      error={!!errors.pincode || !!pincodeError}
+      helperText={errors.pincode || pincodeError}
+      variant="outlined"
+      size="medium"
+      required
+      InputProps={{
+        endAdornment: loadingPincode ? (
+          <InputAdornment position="end">
+            <CircularProgress size={20} />
+          </InputAdornment>
+        ) : null,
+      }}
+    />
+  </Grid> */}
 </Grid>
 
-     </Grid>
-  
-
-<Grid  container
+           <Grid
+        container
         spacing={2}
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           gap: 2,
         }}>
-       
+ 
 
-        <Grid item xs={12} sm={6} md={2.4}>
+<Grid item xs={12} sm={6} md={2.4}>
+  <TextField
+    fullWidth
+    label={selectedCountry === 'IN' ? 'Pincode' : 'Postal Code'}
+    name="pincode"
+    value={data.pincode || ''}
+    onChange={(e) => {
+      const value = e.target.value.replace(/\D/g, '').slice(0, selectedCountry === 'IN' ? 6 : 10);
+      onChange({ pincode: value });
+    }}
+    error={!!errors.pincode || !!pincodeError}
+    helperText={errors.pincode || pincodeError || (selectedCountry === 'IN' ? '6-digit pincode' : 'Postal code')}
+    variant="outlined"
+    size="medium"
+    required
+    disabled={!selectedCountry}
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <Tooltip title={supportedCountries.find(c => c.code === selectedCountry)?.name || 'Country'}>
+            <FlagIcon color={selectedCountry ? 'primary' : 'disabled'} />
+          </Tooltip>
+        </InputAdornment>
+      ),
+      endAdornment: loadingPincode ? (
+        <InputAdornment position="end">
+          <CircularProgress size={20} />
+        </InputAdornment>
+      ) : null,
+    }}
+  />
+</Grid>
+        {/* <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
             label="Pincode"
@@ -934,81 +1250,61 @@ Head Office Location      </Typography>
               ) : null,
             }}
           />
-        </Grid>
+        </Grid> */}
 
-        {/* State */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          {/* <FormControl fullWidth error={!!errors.state}>
-            <InputLabel size="medium">State</InputLabel>
-            <Select
-              name="state"
-              value={data.state || ""}
-              label="State"
-              onChange={handleChange}
-              variant="outlined"
-              size="medium"
-              required
-            >
-              {states.map((state) => (
-                <MenuItem key={state.iso2} value={state.name}>
-                  {state.name}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.state && (
-              <Typography variant="caption" color="error">
-                {errors.state}
-              </Typography>
-            )}
-          </FormControl> */}
-          <TextField
-            fullWidth
-            label="State"
-            name="state"
-            value={data.state || ""}
-            onChange={handleChange}
-            error={!!errors.state}
-            helperText={errors.state}
-            variant="outlined"
-            size="medium"
-            required
-          />
-        </Grid>
-        
-        {/* District  */}
+       <Grid item xs={12} sm={6} md={2.4}>
+  <TextField
+    fullWidth
+    label="State"
+    name="state"
+    value={data.state || ""}
+    onChange={handleChange}
+    error={!!errors.state}
+    helperText={errors.state}
+    variant="outlined"
+    size="medium"
+    required
+    InputProps={{
+      readOnly: !!data.state,
+    }}
+  />
+</Grid>
 
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="District"
-            name="district"
-            value={data.district || ""}
-            onChange={handleChange}
-            error={!!errors.district}
-            helperText={errors.district}
-            variant="outlined"
-            size="medium"
-            required
-          />
-        </Grid>
+<Grid item xs={12} sm={6} md={2.4}>
+  <TextField
+    fullWidth
+    label="District"
+    name="district"
+    value={data.district || ""}
+    onChange={handleChange}
+    error={!!errors.district}
+    helperText={errors.district}
+    variant="outlined"
+    size="medium"
+    required
+    InputProps={{
+      readOnly: !!data.district,
+    }}
+  />
+</Grid>
 
-        {/* City */}
-        <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="City"
-            name="city"
-            value={data.city || ""}
-            onChange={handleChange}
-            error={!!errors.city}
-            helperText={errors.city}
-            variant="outlined"
-            size="medium"
-            required
-          />
-        </Grid>
-
-        
+<Grid item xs={12} sm={6} md={2.4}>
+  <TextField
+    fullWidth
+    label="City"
+    name="city"
+    value={data.city || ""}
+    onChange={handleChange}
+    error={!!errors.city}
+    helperText={errors.city}
+    variant="outlined"
+    size="medium"
+    required
+    InputProps={{
+      readOnly: !!data.city,
+    }}
+  />
+</Grid>
 
 </Grid>
 
@@ -1019,16 +1315,15 @@ Head Office Location      </Typography>
           display: "grid",
           gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
           gap: 2,
-        }}>
- {/* Email */}
-        
-
+        }}
+      >
+        {/* Email */}
 
         {/* Website */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="Website"
+            label="Website "
             name="website"
             value={data.website || ""}
             onChange={handleChange}
@@ -1044,31 +1339,31 @@ Head Office Location      </Typography>
           />
         </Grid>
 
-          {/* Facebook */}
-          <Grid item xs={12} sm={6} md={2.4}>
-            <TextField
-              fullWidth
-              label="Facebook"
-              name="facebook"
-              value={data.facebook || ""}
-              onChange={handleChange}
-              variant="outlined"
-              size="medium"
-              error={!!errors.facebook}
-              helperText={errors.facebook}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">@</InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
+        {/* Facebook */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Facebook (optional)"
+            name="facebook"
+            value={data.facebook || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.facebook}
+            helperText={errors.facebook}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
 
         {/* Instagram */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="Instagram"
+            label="Instagram (optional)"
             name="instagram"
             value={data.instagram || ""}
             onChange={handleChange}
@@ -1084,13 +1379,11 @@ Head Office Location      </Typography>
           />
         </Grid>
 
-      
-
         {/* LinkedIn */}
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="LinkedIn"
+            label="LinkedIn   (optional)"
             name="linkedin"
             value={data.linkedin || ""}
             onChange={handleChange}
@@ -1105,17 +1398,10 @@ Head Office Location      </Typography>
             }}
           />
         </Grid>
-   </Grid>  
+      </Grid>
 
-        
+      {/* Communication Information Section */}
 
-  
-
-
-
-  {/* Communication Information Section */}
-     
-   
       <Grid
         container
         spacing={2}
@@ -1127,58 +1413,58 @@ Head Office Location      </Typography>
       ></Grid>
 
       <Snackbar
-  open={showWhatsappSnackbar}
-  autoHideDuration={null}
-  onClose={() => setShowWhatsappSnackbar(false)}
-  anchorOrigin={{ vertical: "center", horizontal: "center" }}
-  sx={{
-    width: '100%',
-    maxWidth: '700px',
-    mb: 12
-  }}
->
-  <Alert
-    severity="info"
-    // icon={<WhatsApp fontSize="inherit" />}
-    sx={{
-      width: '100%',
-      borderRadius: '12px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-      alignItems: 'center'
-    }}
-    action={
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        <Button
-          color="success"
-          variant="contained"
-          size="medium"
-          onClick={() => {
-            onChange({ whatsappNumber: data.mobileNumber || "" });
+        open={showWhatsappSnackbar}
+        autoHideDuration={null}
+        onClose={() => setShowWhatsappSnackbar(false)}
+        anchorOrigin={{ vertical: "center", horizontal: "center" }}
+        sx={{
+          width: "100%",
+          maxWidth: "700px",
+          mb: 12,
+        }}
+      >
+        <Alert
+          severity="info"
+          // icon={<WhatsApp fontSize="inherit" />}
+          sx={{
+            width: "100%",
+            borderRadius: "12px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            alignItems: "center",
+          }}
+          action={
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                color="success"
+                variant="contained"
+                size="medium"
+                onClick={() => {
+                  onChange({ whatsappNumber: data.mobileNumber || "" });
                   setWhatsappEnabled(false);
                   setShowWhatsappSnackbar(false);
-          }}
-          sx={{ borderRadius: '8px' }}
+                }}
+                sx={{ borderRadius: "8px" }}
+              >
+                Yes
+              </Button>
+              <Button
+                color="inherit"
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  setWhatsappEnabled(true);
+                  setShowWhatsappSnackbar(false);
+                }}
+                sx={{ borderRadius: "8px" }}
+              >
+                No
+              </Button>
+            </Box>
+          }
         >
-          Yes
-        </Button>
-        <Button
-          color="inherit"
-          variant="outlined"
-          size="small"
-          onClick={() => {
-            setWhatsappEnabled(true); 
-            setShowWhatsappSnackbar(false);
-          }}
-          sx={{ borderRadius: '8px' }}
-        >
-          No
-        </Button>
-      </Box>
-    }
-  >
-    Is your WhatsApp number same as your mobile number?
-  </Alert>
-</Snackbar>
+          Is your WhatsApp number same as your mobile number?
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
