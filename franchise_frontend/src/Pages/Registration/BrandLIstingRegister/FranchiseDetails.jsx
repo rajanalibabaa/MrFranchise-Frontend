@@ -1267,7 +1267,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 p: 1,
               }}
             >
-              <Box sx={{ mr: { md: "247px" }, minWidth: { md: "300px" } }}>
+              <Box sx={{ mr: { md: "220px" }, minWidth: { md: "300px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
@@ -1278,7 +1278,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   Do you provide aid in financing?
                 </FormLabel>
               </Box>
-              <RadioGroup row sx={{ display: "flex", gap: 2 }}>
+              <RadioGroup row sx={{ display: "flex", gap: 26 }}>
                 {aidFinancing.map((type) => (
                   <FormControlLabel
                     key={type}
@@ -1323,7 +1323,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 p: 1,
               }}
             >
-              <Box sx={{ mr: { md: "106px" }, minWidth: { md: "300px" } }}>
+              <Box sx={{ mr: { md: "77px" }, minWidth: { md: "300px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
@@ -1336,7 +1336,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   Would you like consultation for franchise development?
                 </FormLabel>
               </Box>
-              <RadioGroup row sx={{ display: "flex", gap: 2 }}>
+              <RadioGroup row sx={{ display: "flex", gap: 26 }}>
                 {aidFinancing.map((type) => (
                   <FormControlLabel
                     key={type}
@@ -1383,7 +1383,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 p: 1,
               }}
             >
-              <Box sx={{ mr: { md: "35px" }, minWidth: { md: "300px" } }}>
+              <Box sx={{ mr: { md: "6px" }, minWidth: { md: "300px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
@@ -1397,7 +1397,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   franchise?
                 </FormLabel>
               </Box>
-              <RadioGroup row sx={{ display: "flex", gap: 2 }}>
+              <RadioGroup row sx={{ display: "flex", gap: 26 }}>
                 {aidFinancing.map((type) => (
                   <FormControlLabel
                     key={type}
@@ -1433,75 +1433,83 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             </FormControl>
           </Grid>
 
-          {/* Training Support - Checkbox Group */}
-          <Grid item xs={12}>
-            <FormControl
-              component="fieldset"
-              fullWidth
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", md: "row" },
-                alignItems: { md: "center" },
-                gap: { xs: 1, md: 7 },
-                p: 1,
+        {/* Training Support - Checkbox Group */}
+<Grid item xs={12}>
+  <FormControl
+    component="fieldset"
+    fullWidth
+    sx={{
+      display: "flex",
+      flexDirection: { xs: "column", md: "row" },
+      alignItems: "center", // Add vertical alignment
+      p: 1,
+    }}
+  >
+    <Box sx={{ 
+      minWidth: { md: "210px" },
+      alignSelf: "flex-start", // Align label to top
+      pt: 1.2, // Add some top padding
+      mr:{md:6}
+    }}>
+      <FormLabel
+        component="legend"
+        sx={{
+          fontWeight: "bold",
+        }}
+      >
+        Training Support Provider:
+      </FormLabel>
+    </Box>
+    
+    <FormGroup
+      sx={{
+        display: "flex",
+        flexDirection: "row", // Force row direction
+        flexWrap: "wrap", // Allow wrapping if needed
+        // justifyContent: "space-between", // Use space-between as fallback
+        // width: "100%", // Take full width
+        
+       
+      }}
+    >
+      {[
+        "Outlet Setup",
+        "Staff Training",
+        "Staff Recruitment", 
+        "Operations Support",
+        "Marketing Support",
+      ].map((option) => (
+        <FormControlLabel
+          key={option}
+          control={
+            <Checkbox
+              checked={data.trainingSupport?.includes(option) || false}
+              onChange={(e) => {
+                const newValue = e.target.checked
+                  ? [...(data.trainingSupport || []), option]
+                  : (data.trainingSupport || []).filter(v => v !== option);
+                handleChange({
+                  target: { name: "trainingSupport", value: newValue },
+                });
               }}
-            >
-              <Box sx={{ minWidth: { md: "250px" } }}>
-                <FormLabel
-                  component="legend"
-                  sx={{
-                    fontWeight: "bold",
-                  }}
-                >
-                  Training Support Provider:
-                </FormLabel>
-              </Box>
-              <FormGroup
-                row
-                sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 2,
-                  flexDirection: { xs: "column", sm: "row" },
-                }}
-              >
-                {[
-                  "Outlet Setup",
-                  "Staff Training",
-                  "Staff Recruitment",
-                  "Operations Support",
-                  "Marketing Support",
-                ].map((option) => (
-                  <FormControlLabel
-                    key={option}
-                    control={
-                      <Checkbox
-                        checked={
-                          data.trainingSupport?.includes(option) || false
-                        }
-                        onChange={(e) => {
-                          const newValue = e.target.checked
-                            ? [...(data.trainingSupport || []), option]
-                            : (data.trainingSupport || []).filter(
-                                (v) => v !== option
-                              );
-                          handleChange({
-                            target: {
-                              name: "trainingSupport",
-                              value: newValue,
-                            },
-                          });
-                        }}
-                        name="trainingSupport"
-                        color="primary"
-                      />
-                    }
-                    label={option}
-                  />
-                ))}
-              </FormGroup>
-            </FormControl>
-          </Grid>
+              name="trainingSupport"
+              color="primary"
+            />
+          }
+          label={
+            <Typography variant="body2" sx={{ width: "145px" }}>
+              {option}
+            </Typography>
+          }
+          sx={{
+            
+            minWidth: "260px", // Set minimum width for each item
+          }}
+        />
+      ))}
+    </FormGroup>
+  </FormControl>
+</Grid>
 
           {/* Marketing Support - Text Input */}
           {/* <Grid item xs={12}>

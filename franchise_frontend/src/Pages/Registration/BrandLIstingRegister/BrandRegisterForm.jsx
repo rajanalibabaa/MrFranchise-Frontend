@@ -138,7 +138,6 @@ const initialFormData = {
     managerName: "",
     companyName: "",
     email: "",
-    secondaryEmail: "",
     mobileNumber: "",
     country: "IN",
     whatsappNumber: "",
@@ -146,11 +145,6 @@ const initialFormData = {
     state: "",
     city: "",
     pincode: "",
-    establishedYear: "",
-    franchiseSinceYear: "",
-    brandCategories: [],
-    brandDescription: "",
-    expansionLocation: [],
     website: "",
     facebook: "",
     instagram: "",
@@ -159,7 +153,6 @@ const initialFormData = {
     pancardNumber: "",
   },
   franchiseDetails: {
- 
     brandCategories: {
       groupId: "",
       main: "",
