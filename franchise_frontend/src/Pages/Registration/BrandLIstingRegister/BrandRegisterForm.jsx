@@ -52,12 +52,17 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Footer from "../../../Components/Footers/Footer";
 import categories from "./BrandCategories";
 import BrandExpansionLocationDetails from "./BrandExpansionLocationDetails";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
 const FORM_STEP_KEY = "brandRegistrationActiveStep";
 
-const steps = ["Brand Details", "Franchise Details", "Expansion Locations", "Uploads"];
+const steps = [
+  "Brand Details",
+  "Franchise Details",
+  "Expansion Locations",
+  "Uploads",
+];
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -158,7 +163,6 @@ const initialFormData = {
     pancardNumber: "",
   },
   franchiseDetails: {
- 
     brandCategories: {
       groupId: "",
       main: "",
@@ -179,49 +183,48 @@ const initialFormData = {
     marketingSupport: "",
     otherSupport: "",
     uniqueSellingPoints: "",
-   
   },
-//   expansionLocationDetails: {
-//     currentOutletsLocatedAt: [
-//   {
-//     type: "domestic",
-//     location: {
-//       country: "",
-//       state: "",
-//       district: "",
-//       city: ""
-//     }
-//   },
-//   {
-//     type: "international",
-//     location: {
-//       country: "",
-//       state: "",
-//       city: ""
-//     }
-//   }
-// ],
-// expansionLocations: [
-//   {
-//     type: "domestic",
-//     location: {
-//       country: '',
-//       state: [],
-//       district: [],
-//       city: []
-//     }
-//   },
-//   {
-//     type: "international",
-//     location: {
-//       country: "",
-//       state: [],
-//       city: []
-//     }
-//   }
-// ]
+  //   expansionLocationDetails: {
+  //     currentOutletsLocatedAt: [
+  //   {
+  //     type: "domestic",
+  //     location: {
+  //       country: "",
+  //       state: "",
+  //       district: "",
+  //       city: ""
+  //     }
+  //   },
+  //   {
+  //     type: "international",
+  //     location: {
+  //       country: "",
+  //       state: "",
+  //       city: ""
+  //     }
+  //   }
+  // ],
+  // expansionLocations: [
+  //   {
+  //     type: "domestic",
+  //     location: {
+  //       country: '',
+  //       state: [],
+  //       district: [],
+  //       city: []
+  //     }
+  //   },
+  //   {
+  //     type: "international",
+  //     location: {
+  //       country: "",
+  //       state: [],
+  //       city: []
+  //     }
+  //   }
+  // ]
 
-//   },
+  //   },
   uploads: {
     franchisePromotionVideo: [],
     // brandPromotionVideo: [],
@@ -290,7 +293,7 @@ const BrandRegisterForm = () => {
     // if (!data.currentOutletsLocatedAt || data.currentOutletsLocatedAt.length === 0) {
     //   errors.currentOutletsLocatedAt = "Current outlets located at is required";
     // }
-    // if (!data.expansionLocations || data.expansionLocations.length === 0) { 
+    // if (!data.expansionLocations || data.expansionLocations.length === 0) {
     //   errors.expansionLocations = "Expansion locations are required";
     // } else {
     //   data.expansionLocations.forEach((location, index) => {
@@ -310,7 +313,7 @@ const BrandRegisterForm = () => {
     //     if (!location.location || !location.location.city) {
     //       errors[`expansionLocations.${index}.location.city`] =
     //         "City is required";
-    //     } 
+    //     }
     //     if (!location.location || !location.location.district) {
     //       errors[`expansionLocations.${index}.location.district`] =
     //         "District is required";
@@ -339,7 +342,7 @@ const BrandRegisterForm = () => {
           isValid = Object.keys(errors.franchiseDetails).length === 0;
           break;
         case 2:
-          errors.expansionLocationDetails =  validateExpansionLocationDetails(
+          errors.expansionLocationDetails = validateExpansionLocationDetails(
             formData.expansionLocationDetails || {}
           );
           isValid = Object.keys(errors.expansionLocationDetails).length === 0;
@@ -350,7 +353,7 @@ const BrandRegisterForm = () => {
           break;
         default:
           break;
-      } 
+      }
 
       setValidationErrors(errors);
 
@@ -626,8 +629,8 @@ const BrandRegisterForm = () => {
     setOpenPreview(false);
   };
   const handleLocationChange = (newData) => {
-  setFormData(prev => ({ ...prev, ...newData }));
-};
+    setFormData((prev) => ({ ...prev, ...newData }));
+  };
 
   const handleCancel = () => {
     // Show confirmation dialog
@@ -685,15 +688,15 @@ const BrandRegisterForm = () => {
             onChange={handleFranchiseDetailsChange}
           />
         );
-        case 2:
-          return(
-<BrandExpansionLocationDetails
+      case 2:
+        return (
+          <BrandExpansionLocationDetails
             data={formData.expansionLocationDetails}
             errors={validationErrors.fraexpansionLocationDetailsnchiseDetails}
             onChange={handleLocationChange}
             // onChange={handleExpansionLocationDetails}
           />
-          )
+        );
       case 3:
         return (
           <Uploads
@@ -1260,7 +1263,8 @@ const BrandRegisterForm = () => {
   };
 
   const BackButton = () => {
-  const navigate = useNavigate();}
+    const navigate = useNavigate();
+  };
   return (
     <>
       <Box
@@ -1268,7 +1272,6 @@ const BrandRegisterForm = () => {
           display: "flex",
           flexDirection: "column",
           height: "100vh",
-       
         }}
       >
         <Box
@@ -1282,50 +1285,54 @@ const BrandRegisterForm = () => {
         >
           <Box>
             <Button
-      onClick={() => navigate("/")}
-      sx={{
-        backgroundColor: "#7ad03a", 
-        color: "white",
-        borderRadius: "50%",
-        minWidth: "48px",
-        width: "48px",
-        height: "48px",
-        padding: 0,
-        marginRight: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-        transition: "all 0.3s ease",
-        "& svg": {
-          fontSize: "24px", 
-        },
-        "&:hover": {
-          backgroundColor: "#5db024", 
-          transform: "scale(1.05)",    
-          boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.2)"
-        },
-        "&:active": {
-          transform: "scale(0.97)"
-        }
-      }}
-    >
-      <ArrowBackIcon />
-    </Button>
+              onClick={() => navigate("/")}
+              sx={{
+                backgroundColor: "#7ad03a",
+                color: "white",
+                borderRadius: "50%",
+                minWidth: "48px",
+                width: "48px",
+                height: "48px",
+                padding: 0,
+                marginRight: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                transition: "all 0.3s ease",
+                "& svg": {
+                  fontSize: "24px",
+                },
+                "&:hover": {
+                  backgroundColor: "#5db024",
+                  transform: "scale(1.05)",
+                  boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.2)",
+                },
+                "&:active": {
+                  transform: "scale(0.97)",
+                },
+              }}
+            >
+              <ArrowBackIcon />
+            </Button>
+            {/* Stepper --> Top data Names To  Navigate */}
             <Stepper
               activeStep={activeStep}
               alternativeLabel
               connector={<ColorlibConnector />}
             >
-              {steps.map((label) => (
+              {steps.map((label,index) => (
                 <Step key={label}>
-                  <StepLabel StepIconComponent={ColorlibStepIcon}>
+                  <StepLabel
+                   StepIconComponent={ColorlibStepIcon}
+                  onClick={() => setActiveStep(index)}
+                  style={{ cursor: "pointer" }}
+                   >
                     {label}
                   </StepLabel>
                 </Step>
               ))}
-              <Toolbar sx={{ justifyContent: "flex-end" }}>
-                
+               <Toolbar sx={{ justifyContent: "flex-end" }}>
                 <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
                   <Select
                     value={formData.brandDetails.country}

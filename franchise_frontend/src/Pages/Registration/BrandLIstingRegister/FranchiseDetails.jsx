@@ -501,7 +501,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               </FormControl>
             </Grid>
           </Grid>
-        </Box>
+        </Box> 
 
         {/* Franchise Network */}
         <Box>
@@ -569,6 +569,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       </Box>
 
       {/* Franchise Details Section */}
+
       <Typography
         variant="h6"
         fontWeight={700}
@@ -578,6 +579,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       </Typography>
 
       {/* Show general FICO error if exists */}
+
       {errors.fico && typeof errors.fico === "string" && (
         <Typography color="error" sx={{ mb: 2 }}>
           {errors.fico}
@@ -597,6 +599,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         }}
       >
         {/* Column 1 - Franchise Model */}
+
         <Grid item>
           <FormControl
             fullWidth
@@ -624,6 +627,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 2 - Franchise Type */}
+
         <Grid item>
           <FormControl
             fullWidth
@@ -651,6 +655,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 3 - Investment Range */}
+
         <Grid item>
           <FormControl
             fullWidth
@@ -678,6 +683,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 4 - Area Required */}
+
         <Grid item>
           <FormControl
             fullWidth
@@ -727,6 +733,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 5 agreementPeriod */}
+
         <Grid item>
           <FormControl
             fullWidth
@@ -734,21 +741,43 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             required
             size="medium"
           >
-            <TextField
-              label="Agreement Period"
-              type="number"
+            <InputLabel>Agreement Period (years)</InputLabel>
+            <Select
+              label="Agreement Period (years)"
               name="agreementPeriod"
-              value={currentFicoModel.agreementPeriod}
+              value={currentFicoModel.agreementPeriod || ""}
               onChange={handleFicoChange}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end" sx={{ mr: 2 }}>
-                    years
-                  </InputAdornment>
-                ),
-                inputProps: { max: 100 },
+              renderValue={(selected) => (selected ? `${selected} years` : "")}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    width: 250,
+                    maxHeight: 300,
+                    "& .MuiList-root": {
+                      display: "grid",
+                      gridTemplateColumns: "repeat(5, 1fr)",
+                      gap: "4px",
+                      padding: "4px",
+                    },
+                  },
+                },
               }}
-            />
+            >
+              {Array.from({ length: 50 }, (_, i) => i + 1).map((year) => (
+                <MenuItem
+                  key={year}
+                  value={year}
+                  sx={{
+                    minWidth: 0,
+                    padding: "6px 4px",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
             {errors.agreementPeriod && (
               <FormHelperText error>{errors.agreementPeriod}</FormHelperText>
             )}
@@ -775,6 +804,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 7 - Interior Cost */}
+
         <Grid item>
           <TextField
             fullWidth
@@ -793,6 +823,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 8 - Stock Investment */}
+
         <Grid item>
           <TextField
             fullWidth
@@ -811,6 +842,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 9 - Other Cost */}
+
         <Grid item>
           <TextField
             fullWidth
@@ -829,6 +861,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 10 - Required Investment Capital */}
+
         <Grid item>
           <TextField
             fullWidth
@@ -847,6 +880,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 11 - Royalty Fee */}
+
         <Grid item>
           <TextField
             fullWidth
@@ -915,13 +949,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           </FormControl>
         </Grid>
 
-        {/* Column 13 - ROI */}
+         {/* Column 13 - ROI */}
 
-
-       {/* Column 13 - ROI */}
-
-
-        <Grid item>
+         <Grid item>
           <FormControl fullWidth size="medium" required error={!!errors.roi}>
             <InputLabel>ROI (%)</InputLabel>
             <Select
@@ -929,6 +959,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               name="roi"
               value={currentFicoModel.roi || ""}
               onChange={handleFicoChange}
+              renderValue={(selected) => (selected ? `${selected} %` : "")}
               MenuProps={{
                 PaperProps: {
                   sx: {
@@ -948,7 +979,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               {Array.from({ length: 99 }, (_, i) => (
                 <MenuItem
                   key={i + 1}
-                  value={`${i + 1}%`}
+                  value={`${i + 1}`}
                   sx={{
                     minWidth: 0,
                     padding: "6px 4px",
@@ -996,6 +1027,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               name="marginOnSales"
               value={currentFicoModel.marginOnSales || ""}
               onChange={handleFicoChange}
+              renderValue={(selected) => (selected ? `${selected} %` : "")}
               MenuProps={{
                 PaperProps: {
                   sx: {
@@ -1014,7 +1046,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               {Array.from({ length: 99 }, (_, i) => (
                 <MenuItem
                   key={i + 1}
-                  value={`${i + 1}%`}
+                  value={`${i + 1}`}
                   sx={{
                     minWidth: 0,
                     padding: "6px 4px",
@@ -1613,4 +1645,4 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   );
 };
 
-export default FranchiseDetails;
+ export default FranchiseDetails;
