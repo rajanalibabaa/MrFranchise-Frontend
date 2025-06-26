@@ -1099,7 +1099,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           onClick={handleAddFicoModel}
           size="large"
           sx={{
-            backgroundColor: "#4caf50",
+            backgroundColor: '#7ad03a',
             color: "#fff",
             "&:hover": { backgroundColor: "#388e3c" },
             padding: "8px 70px",
@@ -1644,7 +1644,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               onClick={handleAddUSP}
               disabled={!currentUSP.trim()}
               sx={{
-                backgroundColor: "#4caf50",
+                backgroundColor: '#7ad03a',
                 color: "white",
                 "&:hover": { backgroundColor: "#388e3c" },
                 height: "56px",
@@ -1675,7 +1675,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                         onClick={() => handleRemoveUSP(index)}
                         size="small"
                       >
-                        <DeleteIcon fontSize="small" />
+                        <DeleteIcon fontSize="small" color="error" />
                       </IconButton>
                     }
                     sx={{

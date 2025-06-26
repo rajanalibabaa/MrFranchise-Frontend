@@ -732,7 +732,7 @@ const chunkedStates = chunkArray(sortedStates, ITEMS_PER_ROW);
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Select States</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
+            <Button onClick={() => toggle(false)} variant="contained" sx={{backgroundColor: '#7ad03a'}}>Done</Button>
           </Box>
           
           <TextField
@@ -892,7 +892,7 @@ const chunkedDistricts = chunkArray(districts.map(d => ({ name: d })), ITEMS_PER
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Select Districts</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
+            <Button onClick={() => toggle(false)} variant="contained" sx={{backgroundColor: '#7ad03a'}}>Done</Button>
           </Box>
           
           <TextField
@@ -1020,7 +1020,7 @@ const chunkedCities = chunkArray(cities.map(c => ({ name: c })), ITEMS_PER_ROW);
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Select Cities</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
+            <Button onClick={() => toggle(false)} variant="contained" sx={{backgroundColor: '#7ad03a'}}>Done</Button>
           </Box>
           
           <TextField
@@ -1140,7 +1140,7 @@ const chunkedCountries = chunkArray(sortedCountries, ITEMS_PER_ROW);
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Select Countries</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
+            <Button onClick={() => toggle(false)} variant="contained" sx={{backgroundColor: '#7ad03a'}}>Done</Button>
           </Box>
           
           <TextField
@@ -1255,7 +1255,7 @@ const chunkedIntStates = chunkArray(filteredStates, ITEMS_PER_ROW);
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Select States</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
+            <Button onClick={() => toggle(false)} variant="contained" sx={{backgroundColor: '#7ad03a'}}>Done</Button>
           </Box>
           
           <TextField
@@ -1379,7 +1379,7 @@ const chunkedIntCities = chunkArray(filteredCities, ITEMS_PER_ROW);
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Select Cities</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
+            <Button onClick={() => toggle(false)} variant="contained" sx={{backgroundColor: '#7ad03a'}}>Done</Button>
           </Box>
           
           <TextField
@@ -1453,14 +1453,23 @@ const chunkedIntCities = chunkArray(filteredCities, ITEMS_PER_ROW);
   // Main render
   return (
     <Box sx={{  mr: { sm: 0, md: 25 }, ml: { sm: 0, md: 25 }, }} >
-      <Typography variant="h5" >
-        Brand Expansion Location Details
+      <Typography  variant="h6"
+        fontWeight={700}
+        sx={{ mb: 1, color: "#ff9800" }} >
+        Expansion Location
       </Typography>
 
       {/* International Expansion Toggle */}
-      <Box sx={{ mb: 2 , display: 'grid',  gridTemplateColumns: '1fr 1fr' }}>
-        <Typography variant="subtitle1">Is your brand expanding internationally?</Typography>
+      <Box sx={{  display: 'grid',  gridTemplateColumns: '1fr 1.3fr' }}>
+        <Typography sx={{
+          mt: 1.3,
+                    fontWeight: "bold",
+                  }}>Is Your Brand Expanding Internationally ?</Typography>
         <RadioGroup
+          sx={{
+          
+            gap: 10
+          }}
           row
           value={isInternationalExpansion === null ? '' : isInternationalExpansion}
           onChange={e => handleInternationalExpansionChange(e.target.value === 'true')}
@@ -1472,11 +1481,15 @@ const chunkedIntCities = chunkArray(filteredCities, ITEMS_PER_ROW);
 
       {/* Current Outlet Locations */}
       <Divider sx={{ my: 2 }} />
-      <Typography variant="h6" gutterBottom>
+      <Typography  variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>
         Current Outlet Locations
       </Typography>
       <RadioGroup
         row
+        sx={{
+          gap: 10}}
         value={currentOutletLocationType}
         onChange={handleCurrentOutletLocationTypeChange}
       >
@@ -1491,7 +1504,7 @@ const chunkedIntCities = chunkArray(filteredCities, ITEMS_PER_ROW);
           {renderDomesticCityDrawer('current')}
           <Button
             variant="contained"
-            sx={{ mt: 2 }}
+            sx={{ mt: 2,backgroundColor: '#7ad03a' }}
             onClick={() => addDomesticLocation('current')}
             disabled={loading.formSubmit}
           >
@@ -1538,7 +1551,7 @@ const chunkedIntCities = chunkArray(filteredCities, ITEMS_PER_ROW);
           {renderInternationalCityDrawer('current')}
           <Button
             variant="contained"
-            sx={{ mt: 2 }}
+            sx={{ mt: 2,backgroundColor: '#7ad03a' }}
             onClick={() => addInternationalLocation('current')}
             disabled={loading.formSubmit}
           >
@@ -1582,11 +1595,16 @@ const chunkedIntCities = chunkArray(filteredCities, ITEMS_PER_ROW);
 
       {/* Expansion Locations */}
       <Divider sx={{ my: 2 }} />
-      <Typography variant="h6" gutterBottom>
+      <Typography  variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>
         Expansion Locations
       </Typography>
       <RadioGroup
         row
+        sx={{
+          gap: 10
+        }}
         value={locationType}
         onChange={handleLocationTypeChange}
       >
@@ -1601,7 +1619,7 @@ const chunkedIntCities = chunkArray(filteredCities, ITEMS_PER_ROW);
           {renderDomesticCityDrawer('expansion')}
           <Button
             variant="contained"
-            sx={{ mt: 2 }}
+            sx={{ mt: 2 ,backgroundColor: '#7ad03a'}}
             onClick={() => addDomesticLocation('expansion')}
             disabled={loading.formSubmit}
           >
@@ -1648,7 +1666,7 @@ const chunkedIntCities = chunkArray(filteredCities, ITEMS_PER_ROW);
           {renderInternationalCityDrawer('expansion')}
           <Button
             variant="contained"
-            sx={{ mt: 2 }}
+            sx={{ mt: 2 ,backgroundColor: '#7ad03a' }}
             onClick={() => addInternationalLocation('expansion')}
             disabled={loading.formSubmit}
           >
