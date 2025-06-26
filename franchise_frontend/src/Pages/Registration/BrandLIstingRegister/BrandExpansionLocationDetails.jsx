@@ -15,6 +15,7 @@ import debounce from 'lodash.debounce';
 const apiCache = {
   domestic: null,
   countries: null,
+  states: {},
   cities: {}
 };
 
@@ -24,7 +25,7 @@ const VirtualizedListItem = ({ data, index, style }) => {
   const item = items[index];
   
   return (
-    <ListItem style={style} key={`${type}-${item.id || item}`} disablePadding>
+    <ListItem style={style} key={`${type}-${item.id || item}`} disablePadding >
       <ListItemButton
         role={undefined}
         onClick={() => handleToggle(item)}
@@ -42,12 +43,14 @@ const VirtualizedListItem = ({ data, index, style }) => {
   );
 };
 
-function BrandExpansionLocationDetails({ onChange }) {
+function BrandExpansionLocationDetails() {
   const { enqueueSnackbar } = useSnackbar();
 
   // Location type state
   const [locationType, setLocationType] = useState("domestic");
   const [currentOutletLocationType, setCurrentOutletLocationType] = useState("domestic");
+  
+
   
   // Domestic selections for expansion locations
   const [domesticSelections, setDomesticSelections] = useState({
@@ -62,8 +65,10 @@ function BrandExpansionLocationDetails({ onChange }) {
   // International selections for expansion locations
   const [internationalSelections, setInternationalSelections] = useState({
     selectedCountries: [],
+    selectedStates: [],
     selectedCities: [],
     countries: [],
+    states: [],
     cities: []
   });
 
@@ -79,8 +84,10 @@ function BrandExpansionLocationDetails({ onChange }) {
   
   const [currentInternationalSelections, setCurrentInternationalSelections] = useState({
     selectedCountries: [],
+    selectedStates: [],
     selectedCities: [],
     countries: [],
+    states: [],
     cities: []
   });
 
@@ -88,13 +95,17 @@ function BrandExpansionLocationDetails({ onChange }) {
   const [statesData, setStatesData] = useState([]);
   const [states, setStates] = useState([]);
   const [countries, setCountries] = useState([]);
+  const [internationalStates, setInternationalStates] = useState({});
   const [internationalCities, setInternationalCities] = useState({});
+  const [currentInternationalStates, setCurrentInternationalStates] = useState({});
   const [currentInternationalCities, setCurrentInternationalCities] = useState({});
 
   const [loading, setLoading] = useState({
     states: false,
     countries: false,
+    intStates: false,
     intCities: false,
+    currentIntStates: false,
     currentIntCities: false,
     formSubmit: false
   });
@@ -108,6 +119,7 @@ function BrandExpansionLocationDetails({ onChange }) {
     districts: false,
     cities: false,
     countries: false,
+    intStates: false,
     intCities: false
   });
 
@@ -117,6 +129,7 @@ function BrandExpansionLocationDetails({ onChange }) {
     districts: false,
     cities: false,
     countries: false,
+    intStates: false,
     intCities: false
   });
 
@@ -126,6 +139,7 @@ function BrandExpansionLocationDetails({ onChange }) {
     districts: '',
     cities: '',
     countries: '',
+    intStates: '',
     intCities: ''
   });
 
@@ -140,6 +154,7 @@ function BrandExpansionLocationDetails({ onChange }) {
       },
       international: {
         countries: [],
+        states: [],
         cities: []
       }
     },
@@ -151,6 +166,7 @@ function BrandExpansionLocationDetails({ onChange }) {
       },
       international: {
         countries: [],
+        states: [],
         cities: []
       }
     }
@@ -273,27 +289,54 @@ function BrandExpansionLocationDetails({ onChange }) {
     }
   }, [enqueueSnackbar]);
 
-  // Debounced version of getCitiesByCountry
-  const debouncedGetCitiesByCountry = useCallback(debounce(async (countryName, callback) => {
-    if (apiCache.cities[countryName]) {
-      callback(apiCache.cities[countryName]);
+  // Fetch states for a country
+  const getStatesByCountry = useCallback(async (countryName, callback) => {
+    if (apiCache.states[countryName]) {
+      callback(apiCache.states[countryName]);
       return;
     }
 
     try {
       const response = await axios.post(
-        "https://countriesnow.space/api/v0.1/countries/cities",
+        "https://countriesnow.space/api/v0.1/countries/states",
         { country: countryName }
       );
-      const cities = response.data.data || [];
-      apiCache.cities[countryName] = cities;
-      callback(cities);
+      const states = response.data.data?.states || [];
+      apiCache.states[countryName] = states;
+      callback(states);
     } catch (error) {
-      console.error("Error fetching cities for country:", countryName, error);
-      enqueueSnackbar(`Failed to load cities for ${countryName}`, { variant: 'error' });
+      console.error("Error fetching states for country:", countryName, error);
+      enqueueSnackbar(`Failed to load states for ${countryName}`, { variant: 'error' });
       callback([]);
     }
-  }, 500), [enqueueSnackbar]);
+  }, [enqueueSnackbar]);
+
+  // Fetch cities for a country and state
+  const getCitiesByCountryAndState = useCallback(async (countryName, stateName, callback) => {
+    const cacheKey = `${countryName}-${stateName}`;
+    if (apiCache.cities[cacheKey]) {
+      callback(apiCache.cities[cacheKey]);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "https://countriesnow.space/api/v0.1/countries/state/cities",
+        { country: countryName, state: stateName }
+      );
+      const cities = response.data.data || [];
+      apiCache.cities[cacheKey] = cities;
+      callback(cities);
+    } catch (error) {
+      console.error("Error fetching cities for country and state:", countryName, stateName, error);
+      enqueueSnackbar(`Failed to load cities for ${stateName}, ${countryName}`, { variant: 'error' });
+      callback([]);
+    }
+  }, [enqueueSnackbar]);
+
+  // Debounced versions of API calls
+  const debouncedGetStatesByCountry = useCallback(debounce(getStatesByCountry, 500), [getStatesByCountry]);
+  const debouncedGetCitiesByCountryAndState = useCallback(debounce(getCitiesByCountryAndState, 500), [getCitiesByCountryAndState]);
 
   // Fetch domestic data on mount
   useEffect(() => {
@@ -305,12 +348,7 @@ function BrandExpansionLocationDetails({ onChange }) {
     fetchCountries();
   }, [fetchCountries]);
 
-  // Call onChange whenever formData changes
-  useEffect(() => {
-    if (onChange) {
-      onChange(formData);
-    }
-  }, [formData, onChange]);
+
 
   // Handle international expansion selection
   const handleInternationalExpansionChange = useCallback((value) => {
@@ -399,6 +437,7 @@ function BrandExpansionLocationDetails({ onChange }) {
             ...prev[locationKey],
             international: {
               countries: [...new Set([...prev[locationKey].international.countries, ...selections.countries])],
+              states: [...new Set([...prev[locationKey].international.states, ...selections.states])],
               cities: [...new Set([...prev[locationKey].international.cities, ...selections.cities])]
             }
           }
@@ -410,16 +449,20 @@ function BrandExpansionLocationDetails({ onChange }) {
         setCurrentInternationalSelections(prev => ({
           ...prev,
           countries: [],
+          states: [],
           cities: [],
           selectedCountries: [],
+          selectedStates: [],
           selectedCities: []
         }));
       } else {
         setInternationalSelections(prev => ({
           ...prev,
           countries: [],
+          states: [],
           cities: [],
           selectedCountries: [],
+          selectedStates: [],
           selectedCities: []
         }));
       }
@@ -438,7 +481,7 @@ function BrandExpansionLocationDetails({ onChange }) {
       const locationArray = [...newData[type][locationType][field]];
       
       // If removing a state, also remove associated districts and cities
-      if (field === 'states') {
+      if (field === 'states' && locationType === 'domestic') {
         const stateToRemove = locationArray[index];
         
         // Find all districts for this state
@@ -469,12 +512,27 @@ function BrandExpansionLocationDetails({ onChange }) {
           ));
       }
       
-      // For international, if removing a country, remove associated cities
+      // For international, if removing a country, remove associated states and cities
       if (locationType === 'international' && field === 'countries') {
         const countryToRemove = locationArray[index];
         
+        newData[type][locationType].states = newData[type][locationType].states
+          .filter((_, i) => newData[type][locationType].countries[i] !== countryToRemove);
+          
         newData[type][locationType].cities = newData[type][locationType].cities
           .filter((_, i) => newData[type][locationType].countries[i] !== countryToRemove);
+      }
+      
+      // For international, if removing a state, remove associated cities
+      if (locationType === 'international' && field === 'states') {
+        const stateToRemove = locationArray[index];
+        const countryForState = newData[type][locationType].countries[index];
+        
+        newData[type][locationType].cities = newData[type][locationType].cities
+          .filter((_, i) => !(
+            newData[type][locationType].countries[i] === countryForState &&
+            newData[type][locationType].states[i] === stateToRemove
+          ));
       }
       
       locationArray.splice(index, 1);
@@ -499,7 +557,7 @@ function BrandExpansionLocationDetails({ onChange }) {
   // Handle domestic district selection
   const handleDomesticDistrictSelection = useCallback((selectedDistricts, type) => {
     const setSelections = type === 'current' ? setCurrentDomesticSelections : setDomesticSelections;
-    const selections = type === 'current' ? currentDomesticSelections : domesticSelections;
+    // const selections = type === 'current' ? currentDomesticSelections : domesticSelections;
     
     setSelections(prev => ({
       ...prev,
@@ -507,7 +565,7 @@ function BrandExpansionLocationDetails({ onChange }) {
       selectedCities: [],
       cities: getCitiesForDistricts(prev.selectedStates, selectedDistricts)
     }));
-  }, [currentDomesticSelections, domesticSelections, getCitiesForDistricts]);
+  }, [ getCitiesForDistricts]);
 
   // Handle domestic city selection
   const handleDomesticCitySelection = useCallback((selectedCities, type) => {
@@ -543,24 +601,54 @@ function BrandExpansionLocationDetails({ onChange }) {
   // Handle international country selection
   const handleInternationalCountrySelection = useCallback(async (selectedCountries, type) => {
     const setSelections = type === 'current' ? setCurrentInternationalSelections : setInternationalSelections;
-    const setCitiesData = type === 'current' ? setCurrentInternationalCities : setInternationalCities;
+    const setStatesData = type === 'current' ? setCurrentInternationalStates : setInternationalStates;
     
     setSelections(prev => ({
       ...prev,
       selectedCountries,
+      selectedStates: [],
       selectedCities: []
     }));
 
-    // Fetch cities for newly selected countries
-    const newCitiesData = {};
+    // Fetch states for newly selected countries
+    const newStatesData = {};
     for (const country of selectedCountries) {
-      if (!apiCache.cities[country]) {
-        debouncedGetCitiesByCountry(country, (cities) => {
-          setCitiesData(prev => ({ ...prev, [country]: cities }));
+      if (!apiCache.states[country]) {
+        debouncedGetStatesByCountry(country, (states) => {
+          setStatesData(prev => ({ ...prev, [country]: states }));
         });
       }
     }
-  }, [debouncedGetCitiesByCountry]);
+  }, [debouncedGetStatesByCountry]);
+
+  // Handle international state selection
+  const handleInternationalStateSelection = useCallback(async (selectedStates, type) => {
+    const setSelections = type === 'current' ? setCurrentInternationalSelections : setInternationalSelections;
+    const setCitiesData = type === 'current' ? setCurrentInternationalCities : setInternationalCities;
+    const selections = type === 'current' ? currentInternationalSelections : internationalSelections;
+    
+    setSelections(prev => ({
+      ...prev,
+      selectedStates,
+      selectedCities: []
+    }));
+
+    // Fetch cities for newly selected states
+    const newCitiesData = {};
+    for (let i = 0; i < selections.selectedCountries.length; i++) {
+      const country = selections.selectedCountries[i];
+      const state = selectedStates[i];
+      
+      if (country && state) {
+        const cacheKey = `${country}-${state}`;
+        if (!apiCache.cities[cacheKey]) {
+          debouncedGetCitiesByCountryAndState(country, state, (cities) => {
+            setCitiesData(prev => ({ ...prev, [cacheKey]: cities }));
+          });
+        }
+      }
+    }
+  }, [currentInternationalSelections, internationalSelections, debouncedGetCitiesByCountryAndState]);
 
   // Handle international city selection
   const handleInternationalCitySelection = useCallback((selectedCities, type) => {
@@ -585,14 +673,16 @@ function BrandExpansionLocationDetails({ onChange }) {
     setSelections(prev => ({
       ...prev,
       countries: [...prev.countries, ...prev.selectedCountries],
+      states: [...prev.states, ...prev.selectedStates],
       cities: [...prev.cities, ...prev.selectedCities],
       selectedCountries: [],
+      selectedStates: [],
       selectedCities: []
     }));
   }, [currentInternationalSelections, internationalSelections, enqueueSnackbar]);
 
   // Render domestic state selection drawer
-  const renderDomesticStateDrawer = useCallback((type) => {
+const renderDomesticStateDrawer = useCallback((type) => {
     const selections = type === 'current' ? currentDomesticSelections : domesticSelections;
     const toggle = (open) => toggleDrawer(type, { states: open });
 
@@ -614,7 +704,14 @@ function BrandExpansionLocationDetails({ onChange }) {
           anchor="top"
           open={type === 'current' ? currentDrawerOpen.states : drawerOpen.states}
           onClose={() => toggle(false)}
-          PaperProps={{ sx: { maxHeight: '60vh', p: 2 } }}
+          PaperProps={{ 
+            sx: { 
+              maxHeight: '60vh', 
+              p: 2,
+              display: 'flex',
+              flexDirection: 'column'
+            } 
+          }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Select States</Typography>
@@ -633,46 +730,103 @@ function BrandExpansionLocationDetails({ onChange }) {
             }}
           />
           
-          <FixedSizeList
-            height={300}
-            width="100%"
-            itemSize={50}
-            itemCount={sortedStates.length}
-            itemData={{
-              items: sortedStates,
-              selectedItems: selections.selectedStates,
-              handleToggle: (state) => {
-                const currentSelected = type === 'current' ? 
-                  currentDomesticSelections.selectedStates : 
-                  domesticSelections.selectedStates;
-                
-                const newSelected = currentSelected.includes(state.name) ?
-                  currentSelected.filter(s => s !== state.name) :
-                  [...currentSelected, state.name];
-                
-                handleDomesticStateSelection(newSelected, type);
-              },
-              type: 'states'
-            }}
-          >
-            {VirtualizedListItem}
-          </FixedSizeList>
+          {/* Selected states chips in a responsive grid at the top of the drawer */}
+          {selections.selectedStates.length > 0 && (
+            <Box sx={{ 
+              mb: 2,
+              maxHeight: '120px',
+              overflowY: 'auto',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              p: 1
+            }}>
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                gap: 1
+              }}>
+                {selections.selectedStates.map((state, index) => (
+                  <Chip
+                    key={`drawer-selected-state-${index}`}
+                    label={state}
+                    onDelete={() => {
+                      const newSelected = selections.selectedStates.filter((_, i) => i !== index);
+                      handleDomesticStateSelection(newSelected, type);
+                    }}
+                    color="primary"
+                    variant="outlined"
+                    sx={{
+                      maxWidth: '100%',
+                      '& .MuiChip-label': {
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
+
+          <Box sx={{ flex: 1, overflow: 'hidden' }}>
+            <FixedSizeList
+              height={300}
+              width="100%"
+              itemSize={50}
+              itemCount={sortedStates.length}
+              itemData={{
+                items: sortedStates,
+                selectedItems: selections.selectedStates,
+                handleToggle: (state) => {
+                  const currentSelected = type === 'current' ? 
+                    currentDomesticSelections.selectedStates : 
+                    domesticSelections.selectedStates;
+                  
+                  const newSelected = currentSelected.includes(state.name) ?
+                    currentSelected.filter(s => s !== state.name) :
+                    [...currentSelected, state.name];
+                  
+                  handleDomesticStateSelection(newSelected, type);
+                },
+                type: 'states'
+              }}
+            >
+              {VirtualizedListItem}
+            </FixedSizeList>
+          </Box>
         </Drawer>
 
+        {/* Selected states chips below the button in a responsive grid */}
         {selections.selectedStates.length > 0 && (
-          <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {selections.selectedStates.map((state, index) => (
-              <Chip
-                key={`selected-state-${index}`}
-                label={state}
-                onDelete={() => {
-                  const newSelected = selections.selectedStates.filter((_, i) => i !== index);
-                  handleDomesticStateSelection(newSelected, type);
-                }}
-                color="primary"
-                variant="outlined"
-              />
-            ))}
+          <Box sx={{ mt: 1 }}>
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+              gap: 1
+            }}>
+              {selections.selectedStates.map((state, index) => (
+                <Chip
+                  key={`selected-state-${index}`}
+                  label={state}
+                  onDelete={() => {
+                    const newSelected = selections.selectedStates.filter((_, i) => i !== index);
+                    handleDomesticStateSelection(newSelected, type);
+                  }}
+                  color="primary"
+                  variant="outlined"
+                  sx={{
+                    width: '100%',
+                    '& .MuiChip-label': {
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }
+                  }}
+                />
+              ))}
+            </Box>
           </Box>
         )}
       </Box>
@@ -686,83 +840,160 @@ function BrandExpansionLocationDetails({ onChange }) {
     handleDomesticStateSelection,
     handleSearchChange
   ]);
+// Updated renderDomesticDistrictDrawer function
+const renderDomesticDistrictDrawer = useCallback((type) => {
+  const selections = type === 'current' ? currentDomesticSelections : domesticSelections;
+  const toggle = (open) => toggleDrawer(type, { districts: open });
 
-  // Render domestic district selection drawer
-  const renderDomesticDistrictDrawer = useCallback((type) => {
-    const selections = type === 'current' ? currentDomesticSelections : domesticSelections;
-    const toggle = (open) => toggleDrawer(type, { districts: open });
+  if (selections.selectedStates.length === 0) return null;
 
-    if (selections.selectedStates.length === 0) return null;
+  // Group districts by state with selection info
+  const districtsByState = {};
+  selections.selectedStates.forEach(stateName => {
+    const state = statesData.find(s => s.name === stateName);
+    if (state) {
+      districtsByState[stateName] = {
+        districts: state.districts
+          .filter(district => district.toLowerCase().includes(searchFilters.districts)),
+        selected: selections.selectedDistricts.filter(district => 
+          state.districts.includes(district)
+        )
+      };
+    }
+  });
 
-    const districts = selections.districts
-      .filter(district => district.toLowerCase().includes(searchFilters.districts));
+  return (
+    <Box sx={{ mt: 2 }}>
+      <Button
+        variant="outlined"
+        fullWidth
+        onClick={() => toggle(true)}
+        endIcon={<ChevronDown />}
+        sx={{ justifyContent: 'space-between' }}
+        disabled={selections.selectedStates.length === 0}
+      >
+        {selections.selectedDistricts.length > 0 ? 
+          `${selections.selectedDistricts.length} districts selected` : 
+          "Select Districts"}
+      </Button>
 
-    return (
-      <Box sx={{ mt: 2 }}>
-        <Button
-          variant="outlined"
+      <Drawer
+        anchor="top"
+        open={type === 'current' ? currentDrawerOpen.districts : drawerOpen.districts}
+        onClose={() => toggle(false)}
+        PaperProps={{ 
+          sx: { 
+            maxHeight: '60vh', 
+            p: 2,
+            display: 'flex',
+            flexDirection: 'column'
+          } 
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6">Select Districts</Typography>
+          <Button onClick={() => toggle(false)}>Done</Button>
+        </Box>
+        
+        <TextField
           fullWidth
-          onClick={() => toggle(true)}
-          endIcon={<ChevronDown />}
-          sx={{ justifyContent: 'space-between' }}
-          disabled={selections.selectedStates.length === 0}
-        >
-          {selections.selectedDistricts.length > 0 ? 
-            `${selections.selectedDistricts.length} districts selected` : 
-            "Select Districts"}
-        </Button>
+          placeholder="Search districts..."
+          variant="outlined"
+          size="small"
+          sx={{ mb: 2 }}
+          onChange={(e) => handleSearchChange('districts', e.target.value)}
+          InputProps={{
+            startAdornment: <Search size={18} style={{ marginRight: 8 }} />
+          }}
+        />
 
-        <Drawer
-          anchor="top"
-          open={type === 'current' ? currentDrawerOpen.districts : drawerOpen.districts}
-          onClose={() => toggle(false)}
-          PaperProps={{ sx: { maxHeight: '60vh', p: 2 } }}
-        >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">Select Districts</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
-          </Box>
-          
-          <TextField
-            fullWidth
-            placeholder="Search districts..."
-            variant="outlined"
-            size="small"
-            sx={{ mb: 2 }}
-            onChange={(e) => handleSearchChange('districts', e.target.value)}
-            InputProps={{
-              startAdornment: <Search size={18} style={{ marginRight: 8 }} />
-            }}
-          />
-          
-          <FixedSizeList
-            height={300}
-            width="100%"
-            itemSize={50}
-            itemCount={districts.length}
-            itemData={{
-              items: districts.map(d => ({ name: d })),
-              selectedItems: selections.selectedDistricts,
-              handleToggle: (district) => {
-                const currentSelected = type === 'current' ? 
-                  currentDomesticSelections.selectedDistricts : 
-                  domesticSelections.selectedDistricts;
-                
-                const newSelected = currentSelected.includes(district.name) ?
-                  currentSelected.filter(d => d !== district.name) :
-                  [...currentSelected, district.name];
-                
-                handleDomesticDistrictSelection(newSelected, type);
-              },
-              type: 'districts'
-            }}
-          >
-            {VirtualizedListItem}
-          </FixedSizeList>
-        </Drawer>
-
+        {/* Selected districts chips */}
         {selections.selectedDistricts.length > 0 && (
-          <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          <Box sx={{ 
+            mb: 2,
+            maxHeight: '120px',
+            overflowY: 'auto',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 1,
+            p: 1
+          }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>Selected Districts:</Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {selections.selectedDistricts.map((district, index) => (
+                <Chip
+                  key={`drawer-selected-district-${index}`}
+                  label={district}
+                  onDelete={() => {
+                    const newSelected = selections.selectedDistricts.filter((_, i) => i !== index);
+                    handleDomesticDistrictSelection(newSelected, type);
+                  }}
+                  color="primary"
+                  variant="outlined"
+                />
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* Districts grouped by state */}
+        <Box sx={{ flex: 1, overflow: 'auto' }}>
+          {Object.entries(districtsByState).map(([stateName, { districts, selected }]) => (
+            <Box key={`state-${stateName}`} sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                {stateName}
+              </Typography>
+              
+              <Box sx={{ 
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: 1
+              }}>
+                {districts.map((district) => {
+                  const isSelected = selected.includes(district);
+                  return (
+                    <Button
+                      key={`district-${district}`}
+                      variant={isSelected ? 'contained' : 'outlined'}
+                      color={isSelected ? 'primary' : 'inherit'}
+                      onClick={() => {
+                        const currentSelected = type === 'current' ? 
+                          currentDomesticSelections.selectedDistricts : 
+                          domesticSelections.selectedDistricts;
+                        
+                        const newSelected = isSelected ?
+                          currentSelected.filter(d => d !== district) :
+                          [...currentSelected, district];
+                        
+                        handleDomesticDistrictSelection(newSelected, type);
+                      }}
+                      sx={{
+                        justifyContent: 'flex-start',
+                        textTransform: 'none',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                    >
+                      {district}
+                    </Button>
+                  );
+                })}
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      </Drawer>
+
+      {/* Selected districts outside drawer */}
+      {selections.selectedDistricts.length > 0 && (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>Selected Districts:</Typography>
+          <Box sx={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gap: 1
+          }}>
             {selections.selectedDistricts.map((district, index) => (
               <Chip
                 key={`selected-district-${index}`}
@@ -773,98 +1004,196 @@ function BrandExpansionLocationDetails({ onChange }) {
                 }}
                 color="secondary"
                 variant="outlined"
+                sx={{
+                  '& .MuiChip-label': {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }
+                }}
               />
             ))}
           </Box>
-        )}
-      </Box>
-    );
-  }, [
-    currentDomesticSelections,
-    domesticSelections,
-    currentDrawerOpen.districts,
-    drawerOpen.districts,
-    handleDomesticDistrictSelection,
-    handleSearchChange,
-    searchFilters.districts
-  ]);
+        </Box>
+      )}
+    </Box>
+  );
+}, [
+  currentDomesticSelections,
+  domesticSelections,
+  currentDrawerOpen.districts,
+  drawerOpen.districts,
+  handleDomesticDistrictSelection,
+  handleSearchChange,
+  searchFilters.districts,
+  statesData
+]);
 
-  // Render domestic city selection drawer
-  const renderDomesticCityDrawer = useCallback((type) => {
-    const selections = type === 'current' ? currentDomesticSelections : domesticSelections;
-    const toggle = (open) => toggleDrawer(type, { cities: open });
+// Updated renderDomesticCityDrawer function
+const renderDomesticCityDrawer = useCallback((type) => {
+  const selections = type === 'current' ? currentDomesticSelections : domesticSelections;
+  const toggle = (open) => toggleDrawer(type, { cities: open });
 
-    if (selections.selectedDistricts.length === 0) return null;
+  if (selections.selectedDistricts.length === 0) return null;
 
-    const cities = selections.cities
-      .filter(city => city.toLowerCase().includes(searchFilters.cities));
+  // Group cities by district and state
+  const citiesByDistrict = {};
+  selections.selectedStates.forEach(stateName => {
+    const state = statesData.find(s => s.name === stateName);
+    if (!state) return;
 
-    return (
-      <Box sx={{ mt: 2 }}>
-        <Button
-          variant="outlined"
+    selections.selectedDistricts.forEach(districtName => {
+      const districtCities = state.cities
+        .filter(city => 
+          city.district === districtName && 
+          city.name.toLowerCase().includes(searchFilters.cities)
+        )
+        .map(city => city.name);
+
+      if (districtCities.length > 0) {
+        const key = `${stateName} - ${districtName}`;
+        citiesByDistrict[key] = {
+          cities: districtCities,
+          selected: selections.selectedCities.filter(city => 
+            districtCities.includes(city)
+          )
+        };
+      }
+    });
+  });
+
+  return (
+    <Box sx={{ mt: 2 }}>
+      <Button
+        variant="outlined"
+        fullWidth
+        onClick={() => toggle(true)}
+        endIcon={<ChevronDown />}
+        sx={{ justifyContent: 'space-between' }}
+        disabled={selections.selectedDistricts.length === 0}
+      >
+        {selections.selectedCities.length > 0 ? 
+          `${selections.selectedCities.length} cities selected` : 
+          "Select Cities"}
+      </Button>
+
+      <Drawer
+        anchor="top"
+        open={type === 'current' ? currentDrawerOpen.cities : drawerOpen.cities}
+        onClose={() => toggle(false)}
+        PaperProps={{ 
+          sx: { 
+            maxHeight: '60vh', 
+            p: 2,
+            display: 'flex',
+            flexDirection: 'column'
+          } 
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6">Select Cities</Typography>
+          <Button onClick={() => toggle(false)}>Done</Button>
+        </Box>
+        
+        <TextField
           fullWidth
-          onClick={() => toggle(true)}
-          endIcon={<ChevronDown />}
-          sx={{ justifyContent: 'space-between' }}
-          disabled={selections.selectedDistricts.length === 0}
-        >
-          {selections.selectedCities.length > 0 ? 
-            `${selections.selectedCities.length} cities selected` : 
-            "Select Cities"}
-        </Button>
+          placeholder="Search cities..."
+          variant="outlined"
+          size="small"
+          sx={{ mb: 2 }}
+          onChange={(e) => handleSearchChange('cities', e.target.value)}
+          InputProps={{
+            startAdornment: <Search size={18} style={{ marginRight: 8 }} />
+          }}
+        />
 
-        <Drawer
-          anchor="top"
-          open={type === 'current' ? currentDrawerOpen.cities : drawerOpen.cities}
-          onClose={() => toggle(false)}
-          PaperProps={{ sx: { maxHeight: '60vh', p: 2 } }}
-        >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">Select Cities</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
-          </Box>
-          
-          <TextField
-            fullWidth
-            placeholder="Search cities..."
-            variant="outlined"
-            size="small"
-            sx={{ mb: 2 }}
-            onChange={(e) => handleSearchChange('cities', e.target.value)}
-            InputProps={{
-              startAdornment: <Search size={18} style={{ marginRight: 8 }} />
-            }}
-          />
-          
-          <FixedSizeList
-            height={300}
-            width="100%"
-            itemSize={50}
-            itemCount={cities.length}
-            itemData={{
-              items: cities.map(c => ({ name: c })),
-              selectedItems: selections.selectedCities,
-              handleToggle: (city) => {
-                const currentSelected = type === 'current' ? 
-                  currentDomesticSelections.selectedCities : 
-                  domesticSelections.selectedCities;
-                
-                const newSelected = currentSelected.includes(city.name) ?
-                  currentSelected.filter(c => c !== city.name) :
-                  [...currentSelected, city.name];
-                
-                handleDomesticCitySelection(newSelected, type);
-              },
-              type: 'cities'
-            }}
-          >
-            {VirtualizedListItem}
-          </FixedSizeList>
-        </Drawer>
-
+        {/* Selected cities chips */}
         {selections.selectedCities.length > 0 && (
-          <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          <Box sx={{ 
+            mb: 2,
+            maxHeight: '120px',
+            overflowY: 'auto',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 1,
+            p: 1
+          }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>Selected Cities:</Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {selections.selectedCities.map((city, index) => (
+                <Chip
+                  key={`drawer-selected-city-${index}`}
+                  label={city}
+                  onDelete={() => {
+                    const newSelected = selections.selectedCities.filter((_, i) => i !== index);
+                    handleDomesticCitySelection(newSelected, type);
+                  }}
+                  color="primary"
+                  variant="outlined"
+                />
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* Cities grouped by district */}
+        <Box sx={{ flex: 1, overflow: 'auto' }}>
+          {Object.entries(citiesByDistrict).map(([districtKey, { cities, selected }]) => (
+            <Box key={`district-${districtKey}`} sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                {districtKey}
+              </Typography>
+              
+              <Box sx={{ 
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: 1
+              }}>
+                {cities.map((city) => {
+                  const isSelected = selected.includes(city);
+                  return (
+                    <Button
+                      key={`city-${city}`}
+                      variant={isSelected ? 'contained' : 'outlined'}
+                      color={isSelected ? 'primary' : 'inherit'}
+                      onClick={() => {
+                        const currentSelected = type === 'current' ? 
+                          currentDomesticSelections.selectedCities : 
+                          domesticSelections.selectedCities;
+                        
+                        const newSelected = isSelected ?
+                          currentSelected.filter(c => c !== city) :
+                          [...currentSelected, city];
+                        
+                        handleDomesticCitySelection(newSelected, type);
+                      }}
+                      sx={{
+                        justifyContent: 'flex-start',
+                        textTransform: 'none',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                    >
+                      {city}
+                    </Button>
+                  );
+                })}
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      </Drawer>
+
+      {/* Selected cities outside drawer */}
+      {selections.selectedCities.length > 0 && (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>Selected Cities:</Typography>
+          <Box sx={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gap: 1
+          }}>
             {selections.selectedCities.map((city, index) => (
               <Chip
                 key={`selected-city-${index}`}
@@ -875,22 +1204,30 @@ function BrandExpansionLocationDetails({ onChange }) {
                 }}
                 color="success"
                 variant="outlined"
+                sx={{
+                  '& .MuiChip-label': {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }
+                }}
               />
             ))}
           </Box>
-        )}
-      </Box>
-    );
-  }, [
-    currentDomesticSelections,
-    domesticSelections,
-    currentDrawerOpen.cities,
-    drawerOpen.cities,
-    handleDomesticCitySelection,
-    handleSearchChange,
-    searchFilters.cities
-  ]);
-
+        </Box>
+      )}
+    </Box>
+  );
+}, [
+  currentDomesticSelections,
+  domesticSelections,
+  currentDrawerOpen.cities,
+  drawerOpen.cities,
+  handleDomesticCitySelection,
+  handleSearchChange,
+  searchFilters.cities,
+  statesData
+]);
   // Render international country selection drawer
   const renderInternationalCountryDrawer = useCallback((type) => {
     const selections = type === 'current' ? currentInternationalSelections : internationalSelections;
@@ -987,24 +1324,27 @@ function BrandExpansionLocationDetails({ onChange }) {
     handleSearchChange
   ]);
 
-  // Render international city selection drawer
-  const renderInternationalCityDrawer = useCallback((type) => {
+  // Render international state selection drawer
+  const renderInternationalStateDrawer = useCallback((type) => {
     const selections = type === 'current' ? currentInternationalSelections : internationalSelections;
-    const citiesData = type === 'current' ? currentInternationalCities : internationalCities;
-    const toggle = (open) => toggleDrawer(type, { intCities: open });
+    const statesData = type === 'current' ? currentInternationalStates : internationalStates;
+    const toggle = (open) => toggleDrawer(type, { intStates: open });
 
     if (selections.selectedCountries.length === 0) return null;
 
-    // Get cities for all selected countries
-    const cities = [];
+    // Get states for all selected countries
+    const states = [];
     selections.selectedCountries.forEach(country => {
-      if (citiesData[country]) {
-        cities.push(...citiesData[country]);
+      if (statesData[country]) {
+        states.push(...statesData[country].map(state => ({
+          ...state,
+          country
+        })));
       }
     });
 
-    const filteredCities = cities
-      .filter(city => city.toLowerCase().includes(searchFilters.intCities));
+    const filteredStates = states
+      .filter(state => state.name.toLowerCase().includes(searchFilters.intStates));
 
     return (
       <Box sx={{ mt: 2 }}>
@@ -1015,6 +1355,129 @@ function BrandExpansionLocationDetails({ onChange }) {
           endIcon={<ChevronDown />}
           sx={{ justifyContent: 'space-between' }}
           disabled={selections.selectedCountries.length === 0}
+        >
+          {selections.selectedStates.length > 0 ? 
+            `${selections.selectedStates.length} states selected` : 
+            "Select States"}
+        </Button>
+
+        <Drawer
+          anchor="top"
+          open={type === 'current' ? currentDrawerOpen.intStates : drawerOpen.intStates}
+          onClose={() => toggle(false)}
+          PaperProps={{ sx: { maxHeight: '60vh', p: 2 } }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6">Select States</Typography>
+            <Button onClick={() => toggle(false)}>Done</Button>
+          </Box>
+          
+          <TextField
+            fullWidth
+            placeholder="Search states..."
+            variant="outlined"
+            size="small"
+            sx={{ mb: 2 }}
+            onChange={(e) => handleSearchChange('intStates', e.target.value)}
+            InputProps={{
+              startAdornment: <Search size={18} style={{ marginRight: 8 }} />
+            }}
+          />
+          
+          <FixedSizeList
+            height={300}
+            width="100%"
+            itemSize={50}
+            itemCount={filteredStates.length}
+            itemData={{
+              items: filteredStates,
+              selectedItems: selections.selectedStates,
+              handleToggle: async (state) => {
+                const currentSelected = type === 'current' ? 
+                  currentInternationalSelections.selectedStates : 
+                  internationalSelections.selectedStates;
+                
+                const newSelected = currentSelected.includes(state.name) ?
+                  currentSelected.filter(s => s !== state.name) :
+                  [...currentSelected, state.name];
+                
+                await handleInternationalStateSelection(newSelected, type);
+              },
+              type: 'intStates'
+            }}
+          >
+            {VirtualizedListItem}
+          </FixedSizeList>
+        </Drawer>
+
+        {selections.selectedStates.length > 0 && (
+          <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {selections.selectedStates.map((state, index) => (
+              <Chip
+                key={`selected-state-${index}`}
+                label={state}
+                onDelete={async () => {
+                  const newSelected = selections.selectedStates.filter((_, i) => i !== index);
+                  await handleInternationalStateSelection(newSelected, type);
+                }}
+                color="secondary"
+                variant="outlined"
+              />
+            ))}
+          </Box>
+        )}
+      </Box>
+    );
+  }, [
+    currentInternationalSelections,
+    internationalSelections,
+    currentInternationalStates,
+    internationalStates,
+    currentDrawerOpen.intStates,
+    drawerOpen.intStates,
+    handleInternationalStateSelection,
+    handleSearchChange,
+    searchFilters.intStates
+  ]);
+
+  // Render international city selection drawer
+  const renderInternationalCityDrawer = useCallback((type) => {
+    const selections = type === 'current' ? currentInternationalSelections : internationalSelections;
+    const citiesData = type === 'current' ? currentInternationalCities : internationalCities;
+    const toggle = (open) => toggleDrawer(type, { intCities: open });
+
+    if (selections.selectedStates.length === 0) return null;
+
+    // Get cities for all selected states
+    const cities = [];
+    for (let i = 0; i < selections.selectedCountries.length; i++) {
+      const country = selections.selectedCountries[i];
+      const state = selections.selectedStates[i];
+      
+      if (country && state) {
+        const cacheKey = `${country}-${state}`;
+        if (citiesData[cacheKey]) {
+          cities.push(...citiesData[cacheKey].map(city => ({
+            name: city,
+            country,
+            state
+          })));
+        }
+      }
+    }
+
+    const filteredCities = cities
+      .filter(city => city.name.toLowerCase().includes(searchFilters.intCities));
+
+    return (
+      <Box sx={{ mt: 2 }}>
+        <Button
+          variant="outlined"
+          fullWidth
+          onClick={() => toggle(true)}
+          endIcon={<ChevronDown />}
+          sx={{ justifyContent: 'space-between' }}
+          disabled={selections.selectedStates.length === 0}
         >
           {selections.selectedCities.length > 0 ? 
             `${selections.selectedCities.length} cities selected` : 
@@ -1050,18 +1513,17 @@ function BrandExpansionLocationDetails({ onChange }) {
             itemSize={50}
             itemCount={filteredCities.length}
             itemData={{
-              items: filteredCities.map(c => ({ name: c })),
+              items: filteredCities,
               selectedItems: selections.selectedCities,
               handleToggle: (city) => {
-// ...existing code...
-                const currentSelected = type === 'current' ?
-                  currentInternationalSelections.selectedCities :
+                const currentSelected = type === 'current' ? 
+                  currentInternationalSelections.selectedCities : 
                   internationalSelections.selectedCities;
-
+                
                 const newSelected = currentSelected.includes(city.name) ?
                   currentSelected.filter(c => c !== city.name) :
                   [...currentSelected, city.name];
-
+                
                 handleInternationalCitySelection(newSelected, type);
               },
               type: 'intCities'
@@ -1185,6 +1647,7 @@ function BrandExpansionLocationDetails({ onChange }) {
       ) : (
         <>
           {renderInternationalCountryDrawer('current')}
+          {renderInternationalStateDrawer('current')}
           {renderInternationalCityDrawer('current')}
           <Button
             variant="contained"
@@ -1204,6 +1667,15 @@ function BrandExpansionLocationDetails({ onChange }) {
                   label={country}
                   onDelete={() => removeLocationItems('currentOutletLocations', 'international', 'countries', idx)}
                   color="primary"
+                  variant="outlined"
+                />
+              ))}
+              {formData.currentOutletLocations.international.states.map((state, idx) => (
+                <Chip
+                  key={`current-state-${idx}`}
+                  label={state}
+                  onDelete={() => removeLocationItems('currentOutletLocations', 'international', 'states', idx)}
+                  color="secondary"
                   variant="outlined"
                 />
               ))}
@@ -1285,6 +1757,7 @@ function BrandExpansionLocationDetails({ onChange }) {
       ) : (
         <>
           {renderInternationalCountryDrawer('expansion')}
+          {renderInternationalStateDrawer('expansion')}
           {renderInternationalCityDrawer('expansion')}
           <Button
             variant="contained"
@@ -1304,6 +1777,15 @@ function BrandExpansionLocationDetails({ onChange }) {
                   label={country}
                   onDelete={() => removeLocationItems('expansionLocations', 'international', 'countries', idx)}
                   color="primary"
+                  variant="outlined"
+                />
+              ))}
+              {formData.expansionLocations.international.states.map((state, idx) => (
+                <Chip
+                  key={`expansion-state-${idx}`}
+                  label={state}
+                  onDelete={() => removeLocationItems('expansionLocations', 'international', 'states', idx)}
+                  color="secondary"
                   variant="outlined"
                 />
               ))}
@@ -1338,4 +1820,4 @@ function BrandExpansionLocationDetails({ onChange }) {
   );
 }
 
-export default BrandExpansionLocationDetails;                 
+export default BrandExpansionLocationDetails;
