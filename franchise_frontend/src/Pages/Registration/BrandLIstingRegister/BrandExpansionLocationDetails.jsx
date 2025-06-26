@@ -3,7 +3,7 @@ import {
   Box, Typography, RadioGroup, FormControlLabel, Radio, Button, 
   Table, TableBody, TableCell, TableContainer, TableRow, Paper,
   Divider, FormGroup, Backdrop, CircularProgress, IconButton, Snackbar, Alert,
-  TextField, Chip, List, ListItem, ListItemButton, Drawer, Checkbox, ListItemText
+  TextField, Chip, List, ListItem, ListItemButton, Drawer, Checkbox, ListItemText, Grid
 } from '@mui/material';
 import axios from 'axios';
 import { X, ChevronDown, ChevronUp, Search } from 'lucide-react';
@@ -19,30 +19,45 @@ const apiCache = {
   cities: {}
 };
 
-// Virtualized list item renderer
-const VirtualizedListItem = ({ data, index, style }) => {
-  const { items, selectedItems, handleToggle, type } = data;
-  const item = items[index];
-  
-  return (
-    <ListItem style={style} key={`${type}-${item.id || item}`} disablePadding >
-      <ListItemButton
-        role={undefined}
-        onClick={() => handleToggle(item)}
-        dense
-      >
-        <Checkbox
-          edge="start"
-          checked={selectedItems.includes(item.name || item)}
-          tabIndex={-1}
-          disableRipple
-        />
-        <ListItemText primary={item.name || item} />
-      </ListItemButton>
-    </ListItem>
-  );
+const ITEMS_PER_ROW = 4;
+
+// 2. Utility function to chunk states into grid rows
+const chunkArray = (arr, size) => {
+  const result = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
 };
 
+// Virtualized list item renderer
+// 3. Grid row renderer for react-window
+const VirtualizedGridRow = ({ data, index, style }) => {
+  const { chunkedItems, selectedItems, handleToggle, type } = data;
+  const rowItems = chunkedItems[index];
+
+  return (
+    <div style={style}>
+      <Grid display={'grid'} gridTemplateColumns={`repeat(${ITEMS_PER_ROW}, 1fr)`} spacing={2} >
+        {rowItems.map((item, idx) => (
+          <Grid item xs={12 / ITEMS_PER_ROW} key={`${type}-${item.name}-${index}-${idx}`}>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => handleToggle(item)} dense>
+                <Checkbox
+                  edge="start"
+                  checked={selectedItems.includes(item.name)}
+                  tabIndex={-1}
+                  disableRipple
+                />
+                <ListItemText primary={item.name} />
+              </ListItemButton>
+            </ListItem>
+          </Grid>
+        ))}
+      </Grid>
+    </div>
+  );
+};
 function BrandExpansionLocationDetails() {
   const { enqueueSnackbar } = useSnackbar();
 
@@ -686,6 +701,8 @@ const renderDomesticStateDrawer = useCallback((type) => {
     const selections = type === 'current' ? currentDomesticSelections : domesticSelections;
     const toggle = (open) => toggleDrawer(type, { states: open });
 
+const chunkedStates = chunkArray(sortedStates, ITEMS_PER_ROW);
+
     return (
       <Box sx={{ mt: 2 }}>
         <Button
@@ -774,10 +791,10 @@ const renderDomesticStateDrawer = useCallback((type) => {
             <FixedSizeList
               height={300}
               width="100%"
-              itemSize={50}
-              itemCount={sortedStates.length}
+              itemSize={60}
+              itemCount={chunkedStates.length}
               itemData={{
-                items: sortedStates,
+                chunkedItems: chunkedStates,
                 selectedItems: selections.selectedStates,
                 handleToggle: (state) => {
                   const currentSelected = type === 'current' ? 
@@ -793,7 +810,7 @@ const renderDomesticStateDrawer = useCallback((type) => {
                 type: 'states'
               }}
             >
-              {VirtualizedListItem}
+              {VirtualizedGridRow}
             </FixedSizeList>
           </Box>
         </Drawer>
@@ -848,8 +865,9 @@ const renderDomesticStateDrawer = useCallback((type) => {
 
     if (selections.selectedStates.length === 0) return null;
 
-    const districts = selections.districts
-      .filter(district => district.toLowerCase().includes(searchFilters.districts));
+   const districts = selections.districts
+  .filter(district => district.toLowerCase().includes(searchFilters.districts));
+const chunkedDistricts = chunkArray(districts.map(d => ({ name: d })), ITEMS_PER_ROW);
 
     return (
       <Box sx={{ mt: 2 }}>
@@ -918,9 +936,9 @@ const renderDomesticStateDrawer = useCallback((type) => {
             height={300}
             width="100%"
             itemSize={50}
-            itemCount={districts.length}
+            itemCount={chunkedDistricts.length}
             itemData={{
-              items: districts.map(d => ({ name: d })),
+              chunkedItems: chunkedDistricts,
               selectedItems: selections.selectedDistricts,
               handleToggle: (district) => {
                 const currentSelected = type === 'current' ? 
@@ -936,7 +954,7 @@ const renderDomesticStateDrawer = useCallback((type) => {
               type: 'districts'
             }}
           >
-            {VirtualizedListItem}
+            {VirtualizedGridRow}
           </FixedSizeList>
         </Drawer>
 
@@ -975,8 +993,9 @@ const renderDomesticStateDrawer = useCallback((type) => {
 
     if (selections.selectedDistricts.length === 0) return null;
 
-    const cities = selections.cities
-      .filter(city => city.toLowerCase().includes(searchFilters.cities));
+   const cities = selections.cities
+  .filter(city => city.toLowerCase().includes(searchFilters.cities));
+const chunkedCities = chunkArray(cities.map(c => ({ name: c })), ITEMS_PER_ROW);
 
     return (
       <Box sx={{ mt: 2 }}>
@@ -1044,9 +1063,9 @@ const renderDomesticStateDrawer = useCallback((type) => {
             height={300}
             width="100%"
             itemSize={50}
-            itemCount={cities.length}
+            itemCount={chunkedCities.length}
             itemData={{
-              items: cities.map(c => ({ name: c })),
+              chunkedItems: chunkedCities,
               selectedItems: selections.selectedCities,
               handleToggle: (city) => {
                 const currentSelected = type === 'current' ? 
@@ -1062,7 +1081,7 @@ const renderDomesticStateDrawer = useCallback((type) => {
               type: 'cities'
             }}
           >
-            {VirtualizedListItem}
+            {VirtualizedGridRow}
           </FixedSizeList>
         </Drawer>
 
@@ -1098,7 +1117,7 @@ const renderDomesticStateDrawer = useCallback((type) => {
   const renderInternationalCountryDrawer = useCallback((type) => {
     const selections = type === 'current' ? currentInternationalSelections : internationalSelections;
     const toggle = (open) => toggleDrawer(type, { countries: open });
-
+const chunkedCountries = chunkArray(sortedCountries, ITEMS_PER_ROW);
     return (
       <Box sx={{ mt: 2 }}>
         <Button
@@ -1140,9 +1159,9 @@ const renderDomesticStateDrawer = useCallback((type) => {
             height={300}
             width="100%"
             itemSize={50}
-            itemCount={sortedCountries.length}
+            itemCount={chunkedCountries.length}
             itemData={{
-              items: sortedCountries,
+              chunkedItems: chunkedCountries,
               selectedItems: selections.selectedCountries,
               handleToggle: async (country) => {
                 const currentSelected = type === 'current' ? 
@@ -1158,7 +1177,7 @@ const renderDomesticStateDrawer = useCallback((type) => {
               type: 'countries'
             }}
           >
-            {VirtualizedListItem}
+            {VirtualizedGridRow}
           </FixedSizeList>
         </Drawer>
 
@@ -1211,6 +1230,7 @@ const renderDomesticStateDrawer = useCallback((type) => {
 
     const filteredStates = states
       .filter(state => state.name.toLowerCase().includes(searchFilters.intStates));
+const chunkedIntStates = chunkArray(filteredStates, ITEMS_PER_ROW);
 
     return (
       <Box sx={{ mt: 2 }}>
@@ -1254,9 +1274,9 @@ const renderDomesticStateDrawer = useCallback((type) => {
             height={300}
             width="100%"
             itemSize={50}
-            itemCount={filteredStates.length}
+            itemCount={chunkedIntStates.length}
             itemData={{
-              items: filteredStates,
+              chunkedItems: chunkedIntStates,
               selectedItems: selections.selectedStates,
               handleToggle: async (state) => {
                 const currentSelected = type === 'current' ? 
@@ -1272,7 +1292,7 @@ const renderDomesticStateDrawer = useCallback((type) => {
               type: 'intStates'
             }}
           >
-            {VirtualizedListItem}
+            {VirtualizedGridRow}
           </FixedSizeList>
         </Drawer>
 
@@ -1334,6 +1354,7 @@ const renderDomesticStateDrawer = useCallback((type) => {
 
     const filteredCities = cities
       .filter(city => city.name.toLowerCase().includes(searchFilters.intCities));
+const chunkedIntCities = chunkArray(filteredCities, ITEMS_PER_ROW);
 
     return (
       <Box sx={{ mt: 2 }}>
@@ -1377,9 +1398,9 @@ const renderDomesticStateDrawer = useCallback((type) => {
             height={300}
             width="100%"
             itemSize={50}
-            itemCount={filteredCities.length}
+            itemCount={chunkedIntCities.length}
             itemData={{
-              items: filteredCities,
+              chunkedItems: chunkedIntCities,
               selectedItems: selections.selectedCities,
               handleToggle: (city) => {
                 const currentSelected = type === 'current' ? 
@@ -1395,7 +1416,7 @@ const renderDomesticStateDrawer = useCallback((type) => {
               type: 'intCities'
             }}
           >
-            {VirtualizedListItem}
+            {VirtualizedGridRow}
           </FixedSizeList>
         </Drawer>
 
@@ -1431,13 +1452,13 @@ const renderDomesticStateDrawer = useCallback((type) => {
 
   // Main render
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom>
+    <Box sx={{  mr: { sm: 0, md: 25 }, ml: { sm: 0, md: 25 }, }} >
+      <Typography variant="h5" >
         Brand Expansion Location Details
       </Typography>
 
       {/* International Expansion Toggle */}
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 2 , display: 'grid',  gridTemplateColumns: '1fr 1fr' }}>
         <Typography variant="subtitle1">Is your brand expanding internationally?</Typography>
         <RadioGroup
           row
@@ -1459,7 +1480,7 @@ const renderDomesticStateDrawer = useCallback((type) => {
         value={currentOutletLocationType}
         onChange={handleCurrentOutletLocationTypeChange}
       >
-        <FormControlLabel value="domestic" control={<Radio />} label="Domestic" />
+        <FormControlLabel value="domestic" control={<Radio />} label="Domestic (India)" />
         <FormControlLabel value="international" control={<Radio />} label="International" />
       </RadioGroup>
 
@@ -1569,7 +1590,7 @@ const renderDomesticStateDrawer = useCallback((type) => {
         value={locationType}
         onChange={handleLocationTypeChange}
       >
-        <FormControlLabel value="domestic" control={<Radio />} label="Domestic" />
+        <FormControlLabel value="domestic" control={<Radio />} label="Domestic (India)" />
         <FormControlLabel value="international" control={<Radio />} label="International" />
       </RadioGroup>
 
