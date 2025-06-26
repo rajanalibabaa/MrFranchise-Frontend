@@ -48,6 +48,7 @@ import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 import RegisterationMediaHandling from "./RegisterationMediaHandling";
 import { InfoOutlined } from "@mui/icons-material";
+import FlagIcon from '@mui/icons-material/Flag';
 const phoneCodes = {
   India: "+91",
   USA: "+1",
@@ -75,7 +76,7 @@ const InvestorRegister = () => {
   } = useForm({
     defaultValues: {
       category: [],
-      country: "India",
+      country: "",
       preferredState: "",
       preferredCity: "",
       preferredDistrict: "",
@@ -87,6 +88,7 @@ const InvestorRegister = () => {
   const [phonePrefix, setPhonePrefix] = useState("");
 const [selectedCountry, setSelectedCountry] = useState("");
   const dropdownRef = useRef(null);
+  const [countries, setCountries] = useState([]);
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [showWhatsappSnackbar, setShowWhatsappSnackbar] = useState(false);
   const [isCategoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
@@ -105,7 +107,8 @@ const [selectedCountry, setSelectedCountry] = useState("");
 const [intlCountries, setIntlCountries] = useState([]);
   const [intlStates, setIntlStates] = useState([]);
   const [intlCities, setIntlCities] = useState([]);
-
+const [loadingPincode, setLoadingPincode] = useState(false);
+const [pincodeError, setPincodeError] = useState('');
  const preferredStateValue = watch("preferredState");
   const preferredDistrictValue = watch("preferredDistrict");
 const preferredLocationType = watch("preferredLocationType");
@@ -124,7 +127,7 @@ const [selectedChild, setSelectedChild] = useState('');
     whatsappNumber: "",
     address: "",
     pincode: "",
-    country: "India",
+    country: "",
     state: "",
     city: "",
     categories: [],
@@ -696,46 +699,74 @@ useEffect(() => {
 }, [preferences]);
 
 
-  useEffect(() => {
-    if (selectedCountry && phoneCodes[selectedCountry]) {
-      setPhonePrefix(phoneCodes[selectedCountry]);
-    } else {
-      setPhonePrefix("");
-    }
-  }, [selectedCountry]);
+ useEffect(() => {
+  fetch("https://countriesnow.space/api/v0.1/countries")
+    .then(res => res.json())
+    .then(data => {
+      if (data.data) setCountries(data.data.map(c => ({ name: c.country, code: c.iso2 })));
+    });
+}, []);
 
   const pincode = watch("pincode");
 
-  useEffect(() => {
-    const fetchLocationDetails = async () => {
-      if (selectedCountry === "India" && pincode && pincode.length === 6) {
-        try {
-          const response = await axios.get(
-            `https://api.postalpincode.in/pincode/${pincode}`
-          );
-          const data = response.data[0];
-          if (data.Status === "Success") {
-            const locationDetails = data.PostOffice[0];
-            setValue("state", locationDetails.State || "");
-            setValue(
-              "city",
-              locationDetails.Block || locationDetails.Name || ""
-            );
-            setValue("district", locationDetails.District || "");
+ useEffect(() => {
+  const pincode = watch("pincode");
+  const country = watch("country");
+  if (!pincode || !country) return;
+
+  const selectedCountryObj = countries.find(c => c.name === country);
+  const countryCode = selectedCountryObj?.code || "IN";
+  setPincodeError('');
+  setLoadingPincode(false);
+
+  if ((countryCode === "IN" && pincode.length === 6) || (countryCode !== "IN" && pincode.length >= 3)) {
+    setLoadingPincode(true);
+
+    const fetchLocation = async () => {
+      try {
+        if (countryCode === "IN") {
+          // India Post API
+          const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+          const data = await res.json();
+          if (data[0]?.Status === "Success" && data[0]?.PostOffice?.length) {
+            const po = data[0].PostOffice[0];
+            setValue("state", po.State || "");
+            setValue("city", po.District || po.Block || "");
+            setPincodeError('');
           } else {
             setValue("state", "");
             setValue("city", "");
-            setValue("district", "");
-            showSnackbar("Invalid Pincode", "error");
+            setPincodeError("Invalid Indian pincode");
           }
-        } catch (error) {
-          console.error("Error fetching location details:", error);
-          showSnackbar("Error fetching location details", "error");
+        } else {
+          // Zippopotam.us for international
+          const code = countryCode.toLowerCase();
+          const res = await fetch(`https://api.zippopotam.us/${code}/${pincode}`);
+          if (!res.ok) throw new Error("Not found");
+          const data = await res.json();
+          setValue("state", data.places?.[0]?.state || "");
+          setValue("city", data.places?.[0]?.["place name"] || "");
+          setPincodeError('');
         }
+      } catch (err) {
+        setValue("state", "");
+        setValue("city", "");
+        setPincodeError("Postal code not found for selected country");
+      } finally {
+        setLoadingPincode(false);
       }
     };
-    fetchLocationDetails();
-  }, [selectedCountry, pincode, setValue]);
+
+    fetchLocation();
+  } else {
+    setValue("state", "");
+    setValue("city", "");
+    if (countryCode === "IN" && pincode.length > 0 && pincode.length < 6) {
+      setPincodeError("Enter 6-digit pincode");
+    }
+  }
+  // eslint-disable-next-line
+}, [watch("pincode"), watch("country")]);
 
   // Render functions
   // const renderSelectField = (
@@ -801,7 +832,7 @@ useEffect(() => {
         }}
       >
         <Select
-          value={watch("country") || "India"}
+          value={watch("country") || ""}
           onChange={(e) => {
             setValue("country", e.target.value);
             setSelectedCountry(e.target.value);
@@ -815,10 +846,11 @@ useEffect(() => {
             }
           }}
         >
-          {countries.map((country) => (
-            <MenuItem key={country.code} value={country.name}>
-              {country.name}
-            </MenuItem>
+           <MenuItem value="">Select Country</MenuItem>
+    {countries.map((country) => (
+      <MenuItem key={country.code} value={country.name}>
+        {country.name}
+      </MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -909,7 +941,7 @@ useEffect(() => {
                        sx={{
                          display: "grid",
                          gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-                         gap: 5,
+                         gap: 2,
                        }}
                      >
           <Grid item xs={12} md={6}>
@@ -1035,9 +1067,18 @@ useEffect(() => {
               )}
             />
           </Grid></Grid>
-
+<Grid
+              container
+              spacing={2}
+              sx={{
+                display: "flex",
+                // gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
+                gap: 2,
+                alignItems:"flex-start"
+              }}
+            >
           {/* Address */}
-          <Grid item xs={12}>
+          <Grid size={8} md={8}>
             <Controller
               name="address"
               control={control}
@@ -1048,7 +1089,8 @@ useEffect(() => {
                   fullWidth
                   variant="outlined"
                   multiline
-                  rows={2}
+                  minRows={2}
+                  // maxRows={3}
                   error={!!errors.address}
                   helperText={errors.address?.message || " "}
                   InputProps={{
@@ -1061,14 +1103,50 @@ useEffect(() => {
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '8px',
-                    }
+                    },
+                  
+                    resize: 'vertical',
                   }}
                 />
               )}
             />
           </Grid>
 
-
+           <Grid size={4} mt={1}>
+    <Controller
+      name="country"
+      control={control}
+      render={({ field }) => (
+        <FormControl fullWidth  variant="outlined">
+          <InputLabel id="country-label">Country</InputLabel>
+          <Select
+            {...field}
+            labelId="country-label"
+            label="Country"
+            value={field.value || ""}
+            onChange={e => {
+              field.onChange(e.target.value);
+              setSelectedCountry(e.target.value);
+              setValue("state", "");
+              setValue("city", "");
+              setValue("pincode", "");
+            }}
+            sx={{
+              borderRadius: '8px',
+              backgroundColor: "background.paper"
+            }}
+          >
+            <MenuItem value="">Select Country</MenuItem>
+            {countries.map((country) => (
+              <MenuItem key={country.code} value={country.name}>
+                {country.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      )}
+    />
+  </Grid></Grid>
 <Grid
               container
               spacing={2}
@@ -1081,31 +1159,59 @@ useEffect(() => {
           {/* Pincode */}
           <Grid item xs={12} md={4}>
             <Controller
-              name="pincode"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Pincode"
-                  fullWidth
-                  variant="outlined"
-                  error={!!errors.pincode}
-                  helperText={errors.pincode?.message || " "}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationCity color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                    }
-                  }}
-                />
-              )}
-            />
+    name="pincode"
+    control={control}
+    render={({ field }) => {
+      // Get country code from dropdown value
+      const selectedCountryObj = countries.find(c => c.name === watch("country"));
+      const selectedCountryCode = selectedCountryObj?.code || "IN";
+      return (
+        <TextField
+          {...field}
+          label={selectedCountryCode === 'IN' ? 'Pincode' : 'Postal Code'}
+          fullWidth
+          variant="outlined"
+          required
+          error={!!errors.pincode || !!pincodeError}
+          helperText={
+            errors.pincode?.message ||
+            pincodeError ||
+            (selectedCountryCode === 'IN' ? '' : '')
+          }
+          inputProps={{
+            maxLength: selectedCountryCode === 'IN' ? 6 : 10,
+            inputMode: "numeric",
+            pattern: "[0-9]*",
+          }}
+          onChange={e => {
+            const value = e.target.value.replace(/\D/g, '').slice(0, selectedCountryCode === 'IN' ? 6 : 10);
+            field.onChange(value);
+            setPincodeError('');
+          }}
+          disabled={!selectedCountryCode}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Tooltip title={selectedCountryObj?.name || 'Country'}>
+                  <FlagIcon  />
+                </Tooltip>
+              </InputAdornment>
+            ),
+            endAdornment: loadingPincode ? (
+              <InputAdornment position="end">
+                <CircularProgress size={20} />
+              </InputAdornment>
+            ) : null,
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '8px',
+            }
+          }}
+        />
+      );
+    }}
+  />
           </Grid>
 
           {/* State */}
@@ -1172,6 +1278,7 @@ useEffect(() => {
                   label="Occupation"
                   fullWidth
                   variant="outlined"
+                  value={field.value || ""}
                   error={!!errors.occupation}
                   helperText={errors.occupation?.message || " "}
                   InputProps={{
