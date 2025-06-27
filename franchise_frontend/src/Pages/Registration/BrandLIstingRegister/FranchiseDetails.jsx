@@ -1435,7 +1435,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   Do you provide aid in financing?
                 </FormLabel>
               </Box>
-              <RadioGroup row sx={{ display: "flex", gap: 26 }}>
+              <RadioGroup row sx={{ display: "flex", ml:5, gap: 15 }}>
                 {aidFinancing.map((type) => (
                   <FormControlLabel
                     key={type}
@@ -1493,7 +1493,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   Would you like consultation for franchise development?
                 </FormLabel>
               </Box>
-              <RadioGroup row sx={{ display: "flex", gap: 26 }}>
+              <RadioGroup row sx={{ display: "flex", ml: 5, gap: 15 }}>
                 {aidFinancing.map((type) => (
                   <FormControlLabel
                     key={type}
@@ -1554,7 +1554,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   franchise?
                 </FormLabel>
               </Box>
-              <RadioGroup row sx={{ display: "flex", gap: 26 }}>
+              <RadioGroup row sx={{ display: "flex", ml: 5, gap: 15 }}>
                 {aidFinancing.map((type) => (
                   <FormControlLabel
                     key={type}
@@ -1619,10 +1619,10 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     </Box>
     
     <FormGroup
-      sx={{
+      sx={{ ml: { md: 5 },
         display: "flex",
         flexDirection: "row", // Force row direction
-        flexWrap: "wrap", // Allow wrapping if needed
+        // flexWrap: "wrap", // Allow wrapping if needed
         // justifyContent: "space-between", // Use space-between as fallback
         // width: "100%", // Take full width
         
@@ -1659,8 +1659,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             </Typography>
           }
           sx={{
-            
-            minWidth: "260px", // Set minimum width for each item
+            minWidth: "60px", // Set minimum width for each item
           }}
         />
       ))}
