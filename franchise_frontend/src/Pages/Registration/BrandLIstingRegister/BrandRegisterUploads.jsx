@@ -17,7 +17,8 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  Tooltip,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
@@ -28,6 +29,7 @@ import VideoCameraBackIcon from "@mui/icons-material/VideoCameraBack";
 import MovieIcon from "@mui/icons-material/Movie";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import { InfoOutline } from "@mui/icons-material";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -198,23 +200,47 @@ const Uploads = ({
 
         {/* Brand Logo Section */}
       <Grid item xs={12} md={6}>
-  <Box display="flex" flexDirection="column" gap={2}>
+  <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center"}} >
     {/* Header Row */}
+    <Box display="flex" flexDirection="column" gap={2}>
     <Box display="flex" alignItems="center" gap={2}>
       <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>1</Avatar>
-      <Typography variant="h6" sx={{ fontWeight: 600 }}>Brand Logo</Typography>
+      <Typography variant="h6" color="#ff9800" sx={{ fontWeight: "bold" }}>Brand Logo
+         <Tooltip title={
+                          <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+        Drag & drop your logo here or click to browse  <br />       Accepted formats: JPG, PNG (Max 10MB)
+
+                          </span>
+                        }
+                        placement="right-start"
+                        arrow
+                        enterTouchDelay={0} // makes it responsive on mobile too
+                      >
+                        <IconButton
+                          size="small"
+                          sx={{
+                            // p: 0.8,
+                            color: "warning.main",
+                            // backgroundColor: 'info.light',
+                            "&:hover": {
+                              backgroundColor: "success.light",
+                              color: "white",
+                            },
+                            marginLeft: "5px",
+                            // borderRadius: '50%',
+                          }}
+                        >
+                          <InfoOutline fontSize="medium" />
+                        </IconButton>
+                      </Tooltip>{" "}
+      </Typography>
     </Box>
 
-    {/* Description Row */}
-    <Box>
-      <Typography variant="caption" color="textSecondary">
-        Drag & drop your logo here or click to browse
-      </Typography>
-      <Typography variant="caption" color="textSecondary">
-        Accepted formats: JPG, PNG (Max 10MB)
-      </Typography>
-    </Box>
+  
 
+   
+</Box>
+<Box>
     {/* Upload & Preview Section */}
     <Box display="flex" flexDirection="row" alignItems="center" gap={2}>
       {/* Upload Button */}
@@ -224,6 +250,7 @@ const Uploads = ({
         startIcon={<CloudUploadIcon />}
         sx={{
           backgroundColor: '#ff9800',
+          alignItems: 'center',
           '&:hover': { backgroundColor: '#fb8c00' }
         }}
       >
@@ -282,7 +309,7 @@ const Uploads = ({
         </Stack>
       )}
     </Box>
-
+</Box>
     {/* Error Message */}
     {errors.brandLogo && (
       <Alert severity="error">
@@ -297,18 +324,35 @@ const Uploads = ({
         <Grid item xs={12} md={6}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
             <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>2</Avatar>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>Promotion Videos</Typography>
-            <Typography variant="body2" color="textSecondary" gutterBottom>
-                Drag & drop your videos here or click to browse
-              </Typography>
-              <Typography variant="caption" color="textSecondary">
-                Accepted formats: MP4, MOV (Max 40MB)
-              </Typography>
-          </Box>
-          
-         
-            
-            <Box >
+            <Typography variant="h6" color="#ff9800" sx={{ fontWeight: "bold" }}>Promotion Videos 
+                 <Tooltip title={
+                          <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+        Drag & drop your videos here or click to browse  <br />      Accepted formats: MP4, MOV (Max 40MB)
+                          </span>
+                        }
+                        placement="right-start"
+                        arrow
+                        enterTouchDelay={0} // makes it responsive on mobile too
+                      >
+                        <IconButton
+                          size="small"
+                          sx={{
+                            // p: 0.8,
+                            color: "warning.main",
+                            // backgroundColor: 'info.light',
+                            "&:hover": {
+                              backgroundColor: "success.light",
+                              color: "white",
+                            },
+                            marginLeft: "5px",
+                            // borderRadius: '50%',
+                          }}
+                        >
+                          <InfoOutline fontSize="medium" />
+                        </IconButton>
+                      </Tooltip>{" "}
+            </Typography>
+               <Box >
               <Button
                 component="label"
                 variant="contained"
@@ -385,24 +429,54 @@ const Uploads = ({
               {errors.franchisePromotionVideo}
             </Alert>
           )}
+          </Box>
+          
+       
+            
+        
         </Grid>
 
         {/* Tax Documents Section */}
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
             <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>3</Avatar>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>Tax Documents</Typography>
+            <Typography variant="h6" color="#ff9800" sx={{ fontWeight: "bold" }}>Company Credentials
+              
+            </Typography>
           </Box>
           
-          <Grid container spacing={3}>
+          <Grid display={"flex"} flexDirection={"column"}  spacing={3}>
             {/* PAN Card */}
-            <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Drag & drop your PAN card here or click to browse
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    Accepted formats: PDF, JPG, PNG (Max 1MB)
-                  </Typography>
+            <Grid display={"flex"} xs={12} md={6}>
+              <Typography variant="body1" >PAN Details
+<Tooltip title={
+                          <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+                           Drag & drop your PAN card here or click to browse
+ <br />       Accepted formats: PDF, JPG, PNG (Max 1MB)
+                          </span>
+                        }
+                        placement="right-start"
+                        arrow
+                        enterTouchDelay={0} // makes it responsive on mobile too
+                      >
+                        <IconButton
+                          size="small"
+                          sx={{
+                            // p: 0.8,
+                            color: "warning.main",
+                            // backgroundColor: 'info.light',
+                            "&:hover": {
+                              backgroundColor: "success.light",
+                              color: "white",
+                            },
+                            marginLeft: "5px",
+                            // borderRadius: '50%',
+                          }}
+                        >
+                          <InfoOutline fontSize="medium" />
+                        </IconButton>
+                      </Tooltip>{" "}
+              </Typography>
               <TextField
                 label="PAN Number *"
                 fullWidth
@@ -421,7 +495,7 @@ const Uploads = ({
               
           
                 
-                <Box sx={{ mt: 'auto' }}>
+                <Box >
                   <Button
                     component="label"
                     variant="contained"
@@ -502,14 +576,37 @@ const Uploads = ({
             </Grid>
             
             {/* GST Certificate */}
-            <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Drag & drop your GST certificate here or click to browse
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    Accepted formats: PDF, JPG, PNG (Max 1MB)
-                  </Typography>
+            <Grid  display={"flex"} xs={12} md={6}>
+             
 
+ <Typography variant="body1" >GST Details
+<Tooltip title={
+                          <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+Drag & drop your GST certificate here or click to browse <br />        Accepted formats: PDF, JPG, PNG (Max 1MB)
+                          </span>
+                        }
+                        placement="right-start"
+                        arrow
+                        enterTouchDelay={0} // makes it responsive on mobile too
+                      >
+                        <IconButton
+                          size="small"
+                          sx={{
+                            // p: 0.8,
+                            color: "warning.main",
+                            // backgroundColor: 'info.light',
+                            "&:hover": {
+                              backgroundColor: "success.light",
+                              color: "white",
+                            },
+                            marginLeft: "5px",
+                            // borderRadius: '50%',
+                          }}
+                        >
+                          <InfoOutline fontSize="medium" />
+                        </IconButton>
+                      </Tooltip>{" "}
+              </Typography>
               <TextField
                 label="GST Number *"
                 fullWidth
@@ -614,29 +711,52 @@ const Uploads = ({
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
             <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>4</Avatar>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>Outlet Images</Typography>
+            <Typography variant="h6" color="#ff9800" sx={{ fontWeight: "bold" }}>Outlet Images </Typography>
           </Box>
           
-          <Grid container spacing={3}>
+          <Grid  spacing={3}>
             {/* Exterior Images */}
-            <Grid item xs={12} md={6}>
-               <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Exterior Outlet Images (3 required)
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    JPG, PNG (Max 3MB)
-                  </Typography>
+            <Grid display={"flex"} xs={12} md={6}>
+               
+                <Typography variant="body1" >Outlet Images
+<Tooltip title={
+                          <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+                           Exterior Outlet Images (3 required)
+ <br />       JPG, PNG (Max 3MB)
+                          </span>
+                        }
+                        placement="right-start"
+                        arrow
+                        enterTouchDelay={0} // makes it responsive on mobile too
+                      >
+                        <IconButton
+                          size="small"
+                          sx={{
+                            // p: 0.8,
+                            color: "warning.main",
+                            // backgroundColor: 'info.light',
+                            "&:hover": {
+                              backgroundColor: "success.light",
+                              color: "white",
+                            },
+                            marginLeft: "5px",
+                            // borderRadius: '50%',
+                          }}
+                        >
+                          <InfoOutline fontSize="medium" />
+                        </IconButton>
+                      </Tooltip>{" "}
+              </Typography>
                 
-                
-                <Box sx={{ mt: 'auto' }}>
+                <Box display={"flex"} >
                   <Button
                     component="label"
                     variant="contained"
                     startIcon={<PhotoCameraIcon />}
                     sx={{ 
+                      height: 40,
                       mt: 2,
                       backgroundColor: '#ff9800',
-                      width: '100%',
                       '&:hover': { backgroundColor: '#fb8c00' }
                     }}
                   >
@@ -729,24 +849,46 @@ const Uploads = ({
             </Grid>
             
             {/* Interior Images */}
-            <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Interior Outlet Images (3 required)
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    JPG, PNG (Max 3MB)
-                  </Typography>
-               
+            <Grid display={"flex"} xs={12} md={6}>
+                 <Typography variant="body1" >Outlet Images
+<Tooltip title={
+                          <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+                           Exterior Outlet Images (3 required)
+ <br />       JPG, PNG (Max 3MB)
+                          </span>
+                        }
+                        placement="right-start"
+                        arrow
+                        enterTouchDelay={0} // makes it responsive on mobile too
+                      >
+                        <IconButton
+                          size="small"
+                          sx={{
+                            // p: 0.8,
+                            color: "warning.main",
+                            // backgroundColor: 'info.light',
+                            "&:hover": {
+                              backgroundColor: "success.light",
+                              color: "white",
+                            },
+                            marginLeft: "5px",
+                            // borderRadius: '50%',
+                          }}
+                        >
+                          <InfoOutline fontSize="medium" />
+                        </IconButton>
+                      </Tooltip>{" "}
+              </Typography>
                 
-                <Box sx={{ mt: 'auto' }}>
+                <Box display={"flex"}>
                   <Button
                     component="label"
                     variant="contained"
                     startIcon={<PhotoCameraIcon />}
                     sx={{ 
+                      height: 40,
                       mt: 2,
                       backgroundColor: '#ff9800',
-                      width: '100%',
                       '&:hover': { backgroundColor: '#fb8c00' }
                     }}
                   >
@@ -844,7 +986,34 @@ const Uploads = ({
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
             <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>5</Avatar>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>Awards & Recognitions</Typography>
+            <Typography variant="h6" color="#ff9800" sx={{ fontWeight: "bold" }}>Awards & Recognitions
+<Tooltip title={
+                          <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+Add Yours or any awards or recognitions your brand has received
+                          </span>
+                        }
+                        placement="right-start"
+                        arrow
+                        enterTouchDelay={0} // makes it responsive on mobile too
+                      >
+                        <IconButton
+                          size="small"
+                          sx={{
+                            // p: 0.8,
+                            color: "warning.main",
+                            // backgroundColor: 'info.light',
+                            "&:hover": {
+                              backgroundColor: "success.light",
+                              color: "white",
+                            },
+                            marginLeft: "5px",
+                            // borderRadius: '50%',
+                          }}
+                        >
+                          <InfoOutline fontSize="medium" />
+                        </IconButton>
+                      </Tooltip>{" "}
+            </Typography>
           </Box>
           
           <Grid container spacing={3}>
@@ -899,7 +1068,6 @@ const Uploads = ({
                 variant="contained"
                 color="primary"
                 fullWidth
-                sx={{ height: '100%' }}
                 disabled={
                   !safeData.awardsText ||
                   !safeData.awardsDocuments ||
@@ -953,16 +1121,40 @@ const Uploads = ({
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
             <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>6</Avatar>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>Business Plan (Optional)</Typography>
+            <Typography variant="h6" color="#ff9800" sx={{ fontWeight: "bold" }}>Business Plan (Optional)
+<Tooltip title={
+                          <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+                                               Upload Business Plan Document (Optional)
+
+ <br />        PDF, DOC, DOCX (Max 1MB)
+                          </span>
+                        }
+                        placement="right-start"
+                        arrow
+                        enterTouchDelay={0} // makes it responsive on mobile too
+                      >
+                        <IconButton
+                          size="small"
+                          sx={{
+                            // p: 0.8,
+                            color: "warning.main",
+                            // backgroundColor: 'info.light',
+                            "&:hover": {
+                              backgroundColor: "success.light",
+                              color: "white",
+                            },
+                            marginLeft: "5px",
+                            // borderRadius: '50%',
+                          }}
+                        >
+                          <InfoOutline fontSize="medium" />
+                        </IconButton>
+                      </Tooltip>{" "}
+            </Typography>
           </Box>
           
           <Grid container spacing={3}>
-             <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Upload Business Plan Document (Optional)
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    PDF, DOC, DOCX (Max 1MB)
-                  </Typography>
+            
             <Grid item xs={12} md={6}>
                
                 
