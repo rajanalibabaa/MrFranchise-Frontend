@@ -50,20 +50,9 @@ import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 import RegisterationMediaHandling from "./RegisterationMediaHandling";
 import { InfoOutlined } from "@mui/icons-material";
 import FlagIcon from '@mui/icons-material/Flag';
-const phoneCodes = {
-  India: "+91",
-  USA: "+1",
-  UK: "+44",
-  Canada: "+1",
-  Australia: "+61",
-};
-const countries = [
-  { code: "IN", name: "India" },
-  { code: "US", name: "USA" },
-  { code: "GB", name: "UK" },
-  { code: "CA", name: "Canada" },
-  { code: "AU", name: "Australia" },
-];
+import Navbar from "../../Components/Navbar/NavBar";
+import Footer from "../../Components/Footers/Footer";
+
 
 const InvestorRegister = () => {
   const {
@@ -87,6 +76,7 @@ const InvestorRegister = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [phonePrefix, setPhonePrefix] = useState("");
+const [countryCodes, setCountryCodes] = useState([]);
 const [selectedCountry, setSelectedCountry] = useState("");
   const dropdownRef = useRef(null);
   const [countries, setCountries] = useState([]);
@@ -152,6 +142,29 @@ const [selectedChild, setSelectedChild] = useState('');
     setLoginOpen(false);
   };
 
+//  country codes
+useEffect(() => {
+  fetch("https://countriesnow.space/api/v0.1/countries/codes")
+    .then(res => res.json())
+    .then(data => {
+      if (data.data) setCountryCodes(data.data);
+    });
+}, []);
+
+//
+useEffect(() => {
+  const country = watch("country");
+  if (!country) {
+    setPhonePrefix("");
+    return;
+  }
+  const found = countryCodes.find(
+    c => c.name === country || c.iso2 === country || c.iso3 === country
+  );
+  setPhonePrefix(found ? found.dial_code : "");
+}, [watch("country"), countryCodes]);
+
+
  useEffect(() => {
     const fetchStates = async () => {
       try {
@@ -168,7 +181,7 @@ const [selectedChild, setSelectedChild] = useState('');
     fetchStates();
   }, []);
 
-  // Domestic: update districts/cities
+  // Domestic
   useEffect(() => {
     if (preferredLocationType === "domestic" && preferredStateValue && indiaData.length > 0) {
       const stateObj = indiaData.find((s) => s.name === preferredStateValue);
@@ -208,7 +221,7 @@ const [selectedChild, setSelectedChild] = useState('');
     }
   }, [preferredStateValue, preferredDistrictValue, indiaData, preferredLocationType]);
 
-  // International: fetch countries
+  // International
   useEffect(() => {
     if (preferredLocationType === "international") {
       fetch("https://countriesnow.space/api/v0.1/countries/positions")
@@ -811,13 +824,23 @@ useEffect(() => {
 
   return (
     <>
+    <Box 
+    sx={{ 
+    position: "fixed", 
+    top: 0, 
+    left: 0, 
+    width: "100%", 
+    zIndex: 1000 
+  }}>
+      <Navbar />
+    </Box>
      <Typography
         variant="h3"
         gutterBottom
         fontWeight="bold"
         sx={{ 
           color: "#7ad03a", 
-          // mb: 2,
+          mb: -2,
           mt: 10,
           textAlign: 'center',
           textDecoration: 'underline',
@@ -980,7 +1003,7 @@ useEffect(() => {
                       <InputAdornment position="start">
                         <Phone color="action" />
                         <Typography variant="body1" sx={{ ml: 1 }}>
-                          {phonePrefix}
+                           {phonePrefix}
                         </Typography>
                       </InputAdornment>
                     ),
@@ -1024,7 +1047,7 @@ useEffect(() => {
                       <InputAdornment position="start">
                         <Phone color="action" />
                         <Typography variant="body1" sx={{ ml: 1 }}>
-                          {phonePrefix}
+                     {phonePrefix}
                         </Typography>
                       </InputAdornment>
                     ),
@@ -2305,6 +2328,9 @@ useEffect(() => {
   <Box> 
     <RegisterationMediaHandling />
   </Box>
+</Box>
+<Box>
+  <Footer/>
 </Box>
 </>
   );
