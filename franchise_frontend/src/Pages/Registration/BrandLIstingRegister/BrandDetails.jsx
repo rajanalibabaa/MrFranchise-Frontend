@@ -45,8 +45,11 @@ import LanguageIcon from "@mui/icons-material/Language";
 import FlagIcon from "@mui/icons-material/Flag";
 import { Editor } from "@tinymce/tinymce-react";
 import { fontSize, width } from "@mui/system";
-import { fetchGlobalLocationByPostalCode,getSupportedCountries } from "../../../Utils/PincodeFetch.jsx";
-import coutryCode from "../../../Utils/AllCountryCode.jsx"
+import {
+  fetchGlobalLocationByPostalCode,
+  getSupportedCountries,
+} from "../../../Utils/PincodeFetch.jsx";
+import coutryCode from "../../../Utils/AllCountryCode.jsx";
 
 // const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 // const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -76,75 +79,79 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const [pincodeError, setPincodeError] = useState(null);
   const [loadingPincode, setLoadingPincode] = useState(false);
 
-  // Updated Expansion Location State
-  const [openLocationModal, setOpenLocationModal] = useState(false);
- 
   // Inside your BrandDetails component, add these state variables
-const [supportedCountries] = useState(getSupportedCountries());
-const [selectedCountry, setSelectedCountry] = useState('IN'); // Default to India
-const [countryInputValue, setCountryInputValue] = useState('');
-// Add this function to handle country change
-const handleCountryChange = (event, newValue) => {
-  if (newValue) {
-    setSelectedCountry(newValue.code);
-    onChange({ country: newValue.name });
-  } else {
-    setSelectedCountry('');
-    onChange({ country: '' });
-  }
-};
+  const [supportedCountries] = useState(getSupportedCountries());
+  const [selectedCountry, setSelectedCountry] = useState("IN"); // Default to India
+  const [countryInputValue, setCountryInputValue] = useState("");
 
+  // Add this function to handle country change
+  const handleCountryChange = (event, newValue) => {
+    if (newValue) {
+      setSelectedCountry(newValue.code);
+      onChange({ country: newValue.name });
+    } else {
+      setSelectedCountry("");
+      onChange({ country: "" });
+    }
+  };
 
- useEffect(() => {
-    if (data.mobileNumber?.length === 10 && !whatsappEnabled && !data.whatsappNumber) {
+  useEffect(() => {
+    if (
+      data.mobileNumber?.length === 10 &&
+      !whatsappEnabled &&
+      !data.whatsappNumber
+    ) {
       setShowWhatsappSnackbar(true);
     }
   }, [data.mobileNumber, whatsappEnabled, data.whatsappNumber]);
 
   // Inside your BrandDetails component
 
-const fetchLocationDetails = async () => {
-  if (data.pincode && data.pincode.length >= 4 && selectedCountry) {
-    setLoadingPincode(true);
-    setPincodeError(null);
-    
-    try {
-      const result = await fetchGlobalLocationByPostalCode(data.pincode, selectedCountry);
-      
-      if (result.status === 'success') {
-        onChange({
-          country: result.country,
-          state: result.state,
-          city: result.city,
-          district: result.district
-        });
-      } else {
-        throw new Error(result.message || 'Failed to fetch location details');
-      }
-    } catch (error) {
-      console.error('Location fetch error:', error);
-      setPincodeError(error.message);
-      // Clear the location fields if pincode is invalid
-      onChange({
-        state: '',
-        city: '',
-        district: ''
-      });
-    } finally {
-      setLoadingPincode(false);
-    }
-  }
-};
-
-useEffect(() => {
-  const timer = setTimeout(() => {
+  const fetchLocationDetails = async () => {
     if (data.pincode && data.pincode.length >= 4 && selectedCountry) {
-      fetchLocationDetails();
+      setLoadingPincode(true);
+      setPincodeError(null);
+
+      try {
+        const result = await fetchGlobalLocationByPostalCode(
+          data.pincode,
+          selectedCountry
+        );
+
+        if (result.status === "success") {
+          onChange({
+            country: result.country,
+            state: result.state,
+            city: result.city,
+            district: result.district,
+          });
+        } else {
+          throw new Error(result.message || "Failed to fetch location details");
+        }
+      } catch (error) {
+        console.error("Location fetch error:", error);
+        setPincodeError(error.message);
+        // Clear the location fields if pincode is invalid
+        onChange({
+          state: "",
+          city: "",
+          district: "",
+        });
+      } finally {
+        setLoadingPincode(false);
+      }
     }
-  }, 1000);
-  
-  return () => clearTimeout(timer);
-}, [data.pincode, selectedCountry]);
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (data.pincode && data.pincode.length >= 4 && selectedCountry) {
+        fetchLocationDetails();
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [data.pincode, selectedCountry]);
 
   const handleMainCategoryChange = (e) => {
     const mainCat = e.target.value;
@@ -204,6 +211,127 @@ useEffect(() => {
         setSelectedCategory((prev) => ({ ...prev, child: "" }));
       }
     }
+  };
+
+  // State for country codes
+  const [mobileCountryCode, setMobileCountryCode] = useState({
+    code: "IN",
+    dial_code: "+91",
+  });
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState({
+    code: "IN",
+    dial_code: "+91",
+  });
+  const [ceoCountryCode, setCeoCountryCode] = useState({
+    code: "IN",
+    dial_code: "+91",
+  });
+  const [officeCountryCode, setOfficeCountryCode] = useState({
+    code: "IN",
+    dial_code: "+91",
+  });
+
+  // Filter country codes to remove duplicates and sort
+  const uniqueCountryCodes = coutryCode
+    .reduce((acc, current) => {
+      const x = acc.find((item) => item.code === current.code);
+      if (!x) {
+        return acc.concat([current]);
+      } else {
+        return acc;
+      }
+    }, [])
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Handle country code change
+  const handleCountryCodeChange = (field, newValue) => {
+    if (newValue) {
+      switch (field) {
+        case "mobile":
+          setMobileCountryCode(newValue);
+          // Update the full mobile number with new dial code
+          if (data.mobileNumber) {
+            const numberWithoutCode = data.mobileNumber.replace(/^\+?\d+/, "");
+            onChange({
+              mobileNumber: newValue.dial_code + numberWithoutCode,
+            });
+          }
+          break;
+        case "whatsapp":
+          setWhatsappCountryCode(newValue);
+          // Update the full whatsapp number with new dial code
+          if (data.whatsappNumber) {
+            const numberWithoutCode = data.whatsappNumber.replace(
+              /^\+?\d+/,
+              ""
+            );
+            onChange({
+              whatsappNumber: newValue.dial_code + numberWithoutCode,
+            });
+          }
+          break;
+        case "ceo":
+          setCeoCountryCode(newValue);
+          // Update the full ceo mobile number with new dial code
+          if (data.ceoMobile) {
+            const numberWithoutCode = data.ceoMobile.replace(/^\+?\d+/, "");
+            onChange({
+              ceoMobile: newValue.dial_code + numberWithoutCode,
+            });
+          }
+          break;
+        case "office":
+          setOfficeCountryCode(newValue);
+          // Update the full office mobile number with new dial code
+          if (data.officeMobile) {
+            const numberWithoutCode = data.officeMobile.replace(/^\+?\d+/, "");
+            onChange({
+              officeMobile: newValue.dial_code + numberWithoutCode,
+            });
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  };
+
+  // Handle mobile number change - ensure it includes the country code
+  const handleMobileNumberChange = (e) => {
+    const { name, value } = e.target;
+    // Remove any non-digit characters
+    const digitsOnly = value.replace(/\D/g, "");
+
+    // For mobileNumber field, we'll prepend the country code
+    if (name === "mobileNumber") {
+      onChange({
+        [name]: mobileCountryCode.dial_code + digitsOnly,
+      });
+    }
+    // For whatsappNumber field
+    else if (name === "whatsappNumber") {
+      onChange({
+        [name]: whatsappCountryCode.dial_code + digitsOnly,
+      });
+    }
+    // For ceoMobile field
+    else if (name === "ceoMobile") {
+      onChange({
+        [name]: ceoCountryCode.dial_code + digitsOnly,
+      });
+    }
+    // For officeMobile field
+    else if (name === "officeMobile") {
+      onChange({
+        [name]: officeCountryCode.dial_code + digitsOnly,
+      });
+    }
+  };
+
+  const getDisplayNumber = (fullNumber, countryCode) => {
+    if (!fullNumber) return "";
+    // Remove the country code if it exists at the start
+    return fullNumber.replace(new RegExp(`^\\${countryCode.dial_code}`), "");
   };
 
   // OTP Verification States
@@ -373,44 +501,6 @@ useEffect(() => {
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
-  
-   // State for country codes
-  const [mobileCountryCode, setMobileCountryCode] = useState({ code: "IN", dial_code: "+91" });
-  const [whatsappCountryCode, setWhatsappCountryCode] = useState({ code: "IN", dial_code: "+91" });
-  const [ceoCountryCode, setCeoCountryCode] = useState({ code: "IN", dial_code: "+91" });
-  const [officeCountryCode, setOfficeCountryCode] = useState({ code: "IN", dial_code: "+91" });
-
-  // Filter country codes to remove duplicates and sort
-  const uniqueCountryCodes = coutryCode.reduce((acc, current) => {
-    const x = acc.find(item => item.code === current.code);
-    if (!x) {
-      return acc.concat([current]);
-    } else {
-      return acc;
-    }
-  }, []).sort((a, b) => a.name.localeCompare(b.name));
-
-  // Handle country code change
-  const handleCountryCodeChange = (field, newValue) => {
-    if (newValue) {
-      switch (field) {
-        case 'mobile':
-          setMobileCountryCode(newValue);
-          break;
-        case 'whatsapp':
-          setWhatsappCountryCode(newValue);
-          break;
-        case 'ceo':
-          setCeoCountryCode(newValue);
-          break;
-        case 'office':
-          setOfficeCountryCode(newValue);
-          break;
-        default:
-          break;
-      }
-    }
-  };
 
   // ... (keep all your existing state and functions)
 
@@ -423,13 +513,13 @@ useEffect(() => {
         fullWidth
         label="Mobile Number"
         name="mobileNumber"
-        value={data.mobileNumber || ""}
-        onChange={handleChange}
+        value={getDisplayNumber(data.mobileNumber, mobileCountryCode)}
+        onChange={handleMobileNumberChange}
         error={!!errors.mobileNumber}
         helperText={errors.mobileNumber}
         variant="outlined"
         size="medium"
-        inputProps={{ maxLength: 15 }} // Increased to accommodate international numbers
+        inputProps={{ maxLength: 15 }}
         placeholder="Enter mobile number"
         InputProps={{
           startAdornment: (
@@ -438,7 +528,9 @@ useEffect(() => {
                 options={uniqueCountryCodes}
                 getOptionLabel={(option) => `${option.dial_code}`}
                 value={mobileCountryCode}
-                onChange={(event, newValue) => handleCountryCodeChange('mobile', newValue)}
+                onChange={(event, newValue) =>
+                  handleCountryCodeChange("mobile", newValue)
+                }
                 clearIcon={null}
                 renderInput={(params) => (
                   <TextField
@@ -453,7 +545,7 @@ useEffect(() => {
                 )}
                 renderOption={(props, option) => (
                   <Box component="li" {...props} fontSize={12}>
-                  {option.dial_code} <br/>({option.code})
+                    {option.dial_code} <br />({option.code})
                   </Box>
                 )}
               />
@@ -474,8 +566,7 @@ useEffect(() => {
                   size="medium"
                   onClick={() => handleVerificationDialog("mobileNumber", true)}
                   disabled={
-                    !data.mobileNumber ||
-                    verificationState.mobileNumber.loading
+                    !data.mobileNumber || verificationState.mobileNumber.loading
                   }
                   startIcon={
                     verificationState.mobileNumber.loading ? (
@@ -495,21 +586,18 @@ useEffect(() => {
       />
     </Grid>
   );
-
-  // WhatsApp Number Field
   const renderWhatsAppNumberField = () => (
     <Grid item xs={12} sm={6} md={2.4}>
       <TextField
         fullWidth
         label="WhatsApp Number"
         name="whatsappNumber"
-        value={data.whatsappNumber || ""}
-        onChange={handleChange}
+        value={getDisplayNumber(data.whatsappNumber, whatsappCountryCode)}
+        onChange={handleMobileNumberChange}
         error={!!errors.whatsappNumber}
         helperText={errors.whatsappNumber}
         variant="outlined"
         size="medium"
-        disabled={!whatsappEnabled}
         inputProps={{ maxLength: 15 }}
         placeholder="Enter WhatsApp number"
         InputProps={{
@@ -519,8 +607,14 @@ useEffect(() => {
                 options={uniqueCountryCodes}
                 getOptionLabel={(option) => `${option.dial_code}`}
                 value={whatsappCountryCode}
-                onChange={(event, newValue) => handleCountryCodeChange('whatsapp', newValue)}
+                onChange={(event, newValue) =>
+                  handleCountryCodeChange("whatsapp", newValue)
+                }
+                isOptionEqualToValue={(option, value) =>
+                  option.dial_code === value.dial_code
+                }
                 clearIcon={null}
+                sx={{ width: 100 }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -533,8 +627,8 @@ useEffect(() => {
                   />
                 )}
                 renderOption={(props, option) => (
-                  <Box component="li" {...props} fontSize={12}>
-                    {option.dial_code} <br/>({option.code})
+                  <Box component="li" {...props}>
+                    {option.dial_code} ({option.code})
                   </Box>
                 )}
               />
@@ -552,8 +646,8 @@ useEffect(() => {
         fullWidth
         label="CEO/MD/Owner Mobile No"
         name="ceoMobile"
-        value={data.ceoMobile || ""}
-        onChange={handleChange}
+        value={getDisplayNumber(data.ceoMobile, ceoCountryCode)}
+        onChange={handleMobileNumberChange}
         variant="outlined"
         size="medium"
         inputProps={{ maxLength: 15 }}
@@ -565,7 +659,9 @@ useEffect(() => {
                 options={uniqueCountryCodes}
                 getOptionLabel={(option) => `${option.dial_code}`}
                 value={ceoCountryCode}
-                onChange={(event, newValue) => handleCountryCodeChange('ceo', newValue)}
+                onChange={(event, newValue) =>
+                  handleCountryCodeChange("ceo", newValue)
+                }
                 clearIcon={null}
                 renderInput={(params) => (
                   <TextField
@@ -579,8 +675,9 @@ useEffect(() => {
                   />
                 )}
                 renderOption={(props, option) => (
-                  <Box component="li" {...props}fontSize={12}>
-                    {option.dial_code}<br/> ({option.code})
+                  <Box component="li" {...props} fontSize={12}>
+                    {option.dial_code}
+                    <br /> ({option.code})
                   </Box>
                 )}
               />
@@ -601,8 +698,8 @@ useEffect(() => {
         fullWidth
         label="Office Mobile Number (Optional)"
         name="officeMobile"
-        value={data.officeMobile || ""}
-        onChange={handleChange}
+        value={getDisplayNumber(data.officeMobile, officeCountryCode)}
+        onChange={handleMobileNumberChange}
         variant="outlined"
         size="medium"
         inputProps={{ maxLength: 15 }}
@@ -614,7 +711,9 @@ useEffect(() => {
                 options={uniqueCountryCodes}
                 getOptionLabel={(option) => `${option.dial_code}`}
                 value={officeCountryCode}
-                onChange={(event, newValue) => handleCountryCodeChange('office', newValue)}
+                onChange={(event, newValue) =>
+                  handleCountryCodeChange("office", newValue)
+                }
                 clearIcon={null}
                 renderInput={(params) => (
                   <TextField
@@ -629,8 +728,8 @@ useEffect(() => {
                 )}
                 renderOption={(props, option) => (
                   <Box component="li" {...props} fontSize={12}>
-                  
-                    {option.dial_code}<br/> ({option.code})
+                    {option.dial_code}
+                    <br /> ({option.code})
                   </Box>
                 )}
               />
@@ -642,7 +741,6 @@ useEffect(() => {
       />
     </Grid>
   );
-
 
   // Location card component
   const LocationCard = ({ location, onRemove }) => {
@@ -703,7 +801,15 @@ useEffect(() => {
   };
 
   return (
-    <Box sx={{ overflowY: "auto", mr: { sm: 0, md: 25 }, ml: { sm: 0, md: 25 }, mt: 0, maxWidth: "100%" }}>
+    <Box
+      sx={{
+        overflowY: "auto",
+        mr: { sm: 0, md: 25 },
+        ml: { sm: 0, md: 25 },
+        mt: 0,
+        maxWidth: "100%",
+      }}
+    >
       {/* Brand Details Section */}
       <Typography
         variant="h6"
@@ -792,13 +898,12 @@ useEffect(() => {
 
         {/* Mobile Number with Verification */}
         <Grid item xs={12} sm={6} md={2.4}>
-           {renderMobileNumberField()}
-    
+          {renderMobileNumberField()}
         </Grid>
 
         {/* WhatsApp Number */}
         <Grid item xs={12} sm={6} md={2.4}>
-            {renderWhatsAppNumberField()}
+          {renderWhatsAppNumberField()}
         </Grid>
       </Grid>
 
@@ -944,13 +1049,13 @@ useEffect(() => {
         spacing={2}
         sx={{
           mt: 2,
-          display: "grid",  
+          display: "grid",
           gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           mb: 2,
         }}
       >
         {/* Company Name - 1 column */}
-        <Grid item xs={12}  md={1}>
+        <Grid item xs={12} md={1}>
           <TextField
             fullWidth
             label="Company Name"
@@ -982,7 +1087,7 @@ useEffect(() => {
         </Grid>
 
         {/* Tagline - spans 2 columns */}
-        <Grid item size={{ xs:12, md: 24 }}>
+        <Grid item size={{ xs: 12, md: 24 }}>
           <TextField
             fullWidth
             label="Tagline"
@@ -1004,7 +1109,7 @@ useEffect(() => {
           mt: 2,
           display: "grid",
           gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
-       
+
           mb: 2,
         }}
       >
@@ -1043,7 +1148,7 @@ useEffect(() => {
 
         {/* CEO Mobile */}
         <Grid item xs={12} md={2}>
-        { renderCeoMobileField()}
+          {renderCeoMobileField()}
         </Grid>
       </Grid>
 
@@ -1085,80 +1190,81 @@ useEffect(() => {
           {renderOfficeMobileField()}
         </Grid>
       </Grid>
-   
-  <Grid
-  container
-  spacing={2}
-  sx={{
-    mt: 2,
-    display: "grid",
-    gridTemplateColumns: { md: "3fr 1fr", xs: "1fr" }, // 3:1 ratio on desktop
-    gap: 1.5,
-    
-  }}
->
-  {/* Head Office Address - spans 3 columns */}
-  <Grid item size={{ xs:12, md:12.05 }} >
-    <TextField
-      fullWidth
-      label="Head Office Address"
-      name="headOfficeAddress"
-      value={data.headOfficeAddress || ""}
-      onChange={handleChange}
-      error={!!errors.headOfficeAddress}
-      helperText={errors.headOfficeAddress}
-      variant="outlined"
-      size="medium"
-      required
-    />
-  </Grid>
 
-<Grid item xs={12} sm={6} md={2.4}>
-  <Autocomplete
-    options={supportedCountries}
-    getOptionLabel={(option) => option.name}
-    value={supportedCountries.find(c => c.code === selectedCountry) || null}
-    onChange={(event, newValue) => {
-      if (newValue) {
-        setSelectedCountry(newValue.code);
-        onChange({ country: newValue.name });
-      } else {
-        setSelectedCountry('');
-        onChange({ country: '' });
-      }
-      // Clear pincode-related fields when country changes
-      onChange({
-        pincode: '',
-        state: '',
-        city: '',
-        district: ''
-      });
-    }}
-    inputValue={countryInputValue}
-    onInputChange={(event, newInputValue) => {
-      setCountryInputValue(newInputValue);
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="Country"
-        variant="outlined"
-        size="medium"
-        required
-        error={!!errors.country}
-        helperText={errors.country || "Select your country first"}
-      />
-    )}
-    renderOption={(props, option) => (
-      <Box component="li" {...props}>
-        <FlagIcon sx={{ mr: 1 }} />
-        {option.name}
-      </Box>
-    )}
-  />
-</Grid>
-  {/* Pincode - spans 1 column */}
-  {/* <Grid item sx={{ ml:{ md:1 }}} >
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "3fr 1fr", xs: "1fr" }, // 3:1 ratio on desktop
+          gap: 1.5,
+        }}
+      >
+        {/* Head Office Address - spans 3 columns */}
+        <Grid item size={{ xs: 12, md: 12.05 }}>
+          <TextField
+            fullWidth
+            label="Head Office Address"
+            name="headOfficeAddress"
+            value={data.headOfficeAddress || ""}
+            onChange={handleChange}
+            error={!!errors.headOfficeAddress}
+            helperText={errors.headOfficeAddress}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Autocomplete
+            options={supportedCountries}
+            getOptionLabel={(option) => option.name}
+            value={
+              supportedCountries.find((c) => c.code === selectedCountry) || null
+            }
+            onChange={(event, newValue) => {
+              if (newValue) {
+                setSelectedCountry(newValue.code);
+                onChange({ country: newValue.name });
+              } else {
+                setSelectedCountry("");
+                onChange({ country: "" });
+              }
+              // Clear pincode-related fields when country changes
+              onChange({
+                pincode: "",
+                state: "",
+                city: "",
+                district: "",
+              });
+            }}
+            inputValue={countryInputValue}
+            onInputChange={(event, newInputValue) => {
+              setCountryInputValue(newInputValue);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Country"
+                variant="outlined"
+                size="medium"
+                required
+                error={!!errors.country}
+                helperText={errors.country || "Select your country first"}
+              />
+            )}
+            renderOption={(props, option) => (
+              <Box component="li" {...props}>
+                <FlagIcon sx={{ mr: 1 }} />
+                {option.name}
+              </Box>
+            )}
+          />
+        </Grid>
+        {/* Pincode - spans 1 column */}
+        {/* <Grid item sx={{ ml:{ md:1 }}} >
     <TextField
       fullWidth
       label="Pincode"
@@ -1182,9 +1288,9 @@ useEffect(() => {
       }}
     />
   </Grid> */}
-</Grid>
+      </Grid>
 
-           <Grid
+      <Grid
         container
         spacing={2}
         sx={{
@@ -1192,41 +1298,53 @@ useEffect(() => {
           display: "grid",
           gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
           gap: 2,
-        }}>
- 
-
-<Grid item xs={12} sm={6} md={2.4}>
-  <TextField
-    fullWidth
-    label={selectedCountry === 'IN' ? 'Pincode' : 'Postal Code'}
-    name="pincode"
-    value={data.pincode || ''}
-    onChange={(e) => {
-      const value = e.target.value.replace(/\D/g, '').slice(0, selectedCountry === 'IN' ? 6 : 10);
-      onChange({ pincode: value });
-    }}
-    error={!!errors.pincode || !!pincodeError}
-    helperText={errors.pincode || pincodeError || (selectedCountry === 'IN' ? '6-digit pincode' : 'Postal code')}
-    variant="outlined"
-    size="medium"
-    required
-    disabled={!selectedCountry}
-    InputProps={{
-      startAdornment: (
-        <InputAdornment position="start">
-          <Tooltip title={supportedCountries.find(c => c.code === selectedCountry)?.name || 'Country'}>
-            <FlagIcon color={selectedCountry ? 'primary' : 'disabled'} />
-          </Tooltip>
-        </InputAdornment>
-      ),
-      endAdornment: loadingPincode ? (
-        <InputAdornment position="end">
-          <CircularProgress size={20} />
-        </InputAdornment>
-      ) : null,
-    }}
-  />
-</Grid>
+        }}
+      >
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label={selectedCountry === "IN" ? "Pincode" : "Postal Code"}
+            name="pincode"
+            value={data.pincode || ""}
+            onChange={(e) => {
+              const value = e.target.value
+                .replace(/\D/g, "")
+                .slice(0, selectedCountry === "IN" ? 6 : 10);
+              onChange({ pincode: value });
+            }}
+            error={!!errors.pincode || !!pincodeError}
+            helperText={
+              errors.pincode ||
+              pincodeError ||
+              (selectedCountry === "IN" ? "6-digit pincode" : "Postal code")
+            }
+            variant="outlined"
+            size="medium"
+            required
+            disabled={!selectedCountry}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Tooltip
+                    title={
+                      supportedCountries.find((c) => c.code === selectedCountry)
+                        ?.name || "Country"
+                    }
+                  >
+                    <FlagIcon
+                      color={selectedCountry ? "primary" : "disabled"}
+                    />
+                  </Tooltip>
+                </InputAdornment>
+              ),
+              endAdornment: loadingPincode ? (
+                <InputAdornment position="end">
+                  <CircularProgress size={20} />
+                </InputAdornment>
+              ) : null,
+            }}
+          />
+        </Grid>
         {/* <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
@@ -1252,63 +1370,63 @@ useEffect(() => {
           />
         </Grid> */}
 
-       <Grid item xs={12} sm={6} md={2.4}>
-  <TextField
-    fullWidth
-    label="State"
-    name="state"
-    value={data.state || ""}
-    onChange={handleChange}
-    error={!!errors.state}
-    helperText={errors.state}
-    variant="outlined"
-    size="medium"
-    required
-    InputProps={{
-      readOnly: !!data.state,
-    }}
-  />
-</Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="State"
+            name="state"
+            value={data.state || ""}
+            onChange={handleChange}
+            error={!!errors.state}
+            helperText={errors.state}
+            variant="outlined"
+            size="medium"
+            required
+            InputProps={{
+              readOnly: !!data.state,
+            }}
+          />
+        </Grid>
 
-<Grid item xs={12} sm={6} md={2.4}>
-  <TextField
-    fullWidth
-    label="District"
-    name="district"
-    value={data.district || ""}
-    onChange={handleChange}
-    error={!!errors.district}
-    helperText={errors.district}
-    variant="outlined"
-    size="medium"
-    required
-    InputProps={{
-      readOnly: !!data.district,
-    }}
-  />
-</Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="District"
+            name="district"
+            value={data.district || ""}
+            onChange={handleChange}
+            error={!!errors.district}
+            helperText={errors.district}
+            variant="outlined"
+            size="medium"
+            required
+            InputProps={{
+              readOnly: !!data.district,
+            }}
+          />
+        </Grid>
 
-<Grid item xs={12} sm={6} md={2.4}>
-  <TextField
-    fullWidth
-    label="City"
-    name="city"
-    value={data.city || ""}
-    onChange={handleChange}
-    error={!!errors.city}
-    helperText={errors.city}
-    variant="outlined"
-    size="medium"
-    required
-    InputProps={{
-      readOnly: !!data.city,
-    }}
-  />
-</Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="City"
+            name="city"
+            value={data.city || ""}
+            onChange={handleChange}
+            error={!!errors.city}
+            helperText={errors.city}
+            variant="outlined"
+            size="medium"
+            required
+            InputProps={{
+              readOnly: !!data.city,
+            }}
+          />
+        </Grid>
+      </Grid>
 
-</Grid>
-
-<Grid  container
+      <Grid
+        container
         spacing={2}
         sx={{
           mt: 2,

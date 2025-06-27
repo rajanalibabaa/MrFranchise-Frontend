@@ -626,7 +626,7 @@ useEffect(() => {
 
 // Update localStorage when preferences change
 useEffect(() => {
-  const currentData = JSON.parse(localStorage.getItem(FORM_DATA_KEY) || {});
+  const currentData = JSON.parse(localStorage.getItem(FORM_DATA_KEY) || '{}');
   localStorage.setItem(FORM_DATA_KEY, JSON.stringify({
     ...currentData,
     preferences
