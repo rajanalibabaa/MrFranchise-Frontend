@@ -46,7 +46,7 @@ const apiCache = {
   cities: {},
 };
 
-const ITEMS_PER_ROW = 4;
+const ITEMS_PER_ROW = 5;
 
 // Utility function to chunk states into grid rows
 const chunkArray = (arr, size) => {
@@ -665,92 +665,98 @@ function BrandExpansionLocationDetails() {
     },
     []
   );
-const handleDomesticStateSelection = useCallback(
-  (selectedStates, type) => {
-    const setSelections =
-      type === "current"
-        ? setCurrentDomesticSelections
-        : setDomesticSelections;
+  const handleDomesticStateSelection = useCallback(
+    (selectedStates, type) => {
+      const setSelections =
+        type === "current"
+          ? setCurrentDomesticSelections
+          : setDomesticSelections;
 
-    setSelections((prev) => ({
-      ...prev,
-      selectedStates,
-      selectedDistricts: [], // Changed from {} to []
-      selectedCities: [],    // Changed from {} to []
-      districts: getDistrictsForStates(selectedStates),
-    }));
-  },
-  [getDistrictsForStates]
-);
-
-const handleDomesticDistrictSelection = useCallback((stateName, districtName, isSelected, type) => {
-  const setSelections = type === 'current' 
-    ? setCurrentDomesticSelections 
-    : setDomesticSelections;
-
-  setSelections(prev => {
-    if (isSelected) {
-      return {
+      setSelections((prev) => ({
         ...prev,
-        selectedDistricts: [
-          ...prev.selectedDistricts,
-          { state: stateName, district: districtName }
-        ],
-        selectedCities: prev.selectedCities.filter(
-          city => !(city.state === stateName && city.district === districtName)
-        )
-      };
-    } else {
-      return {
-        ...prev,
-        selectedDistricts: prev.selectedDistricts.filter(
-          d => !(d.state === stateName && d.district === districtName)
-        ),
-        selectedCities: prev.selectedCities.filter(
-          city => !(city.state === stateName && city.district === districtName)
-        )
-      };
-    }
-  });
-}, []);
+        selectedStates,
+        selectedDistricts: [], // Changed from {} to []
+        selectedCities: [], // Changed from {} to []
+        districts: getDistrictsForStates(selectedStates),
+      }));
+    },
+    [getDistrictsForStates]
+  );
 
-const handleDomesticCitySelection = useCallback(
-  (stateName, districtName, cityName, isSelected, type) => {
-    const setSelections =
-      type === "current"
-        ? setCurrentDomesticSelections
-        : setDomesticSelections;
+  const handleDomesticDistrictSelection = useCallback(
+    (stateName, districtName, isSelected, type) => {
+      const setSelections =
+        type === "current"
+          ? setCurrentDomesticSelections
+          : setDomesticSelections;
 
-    setSelections(prev => {
-      const newSelectedCities = [...prev.selectedCities];
-      const cityObj = {
-        state: stateName,
-        district: districtName,
-        city: cityName,
-      };
-
-      if (isSelected) {
-        newSelectedCities.push(cityObj);
-      } else {
-        const index = newSelectedCities.findIndex(
-          c =>
-            c.state === stateName &&
-            c.district === districtName &&
-            c.city === cityName
-        );
-        if (index !== -1) {
-          newSelectedCities.splice(index, 1);
+      setSelections((prev) => {
+        if (isSelected) {
+          return {
+            ...prev,
+            selectedDistricts: [
+              ...prev.selectedDistricts,
+              { state: stateName, district: districtName },
+            ],
+            selectedCities: prev.selectedCities.filter(
+              (city) =>
+                !(city.state === stateName && city.district === districtName)
+            ),
+          };
+        } else {
+          return {
+            ...prev,
+            selectedDistricts: prev.selectedDistricts.filter(
+              (d) => !(d.state === stateName && d.district === districtName)
+            ),
+            selectedCities: prev.selectedCities.filter(
+              (city) =>
+                !(city.state === stateName && city.district === districtName)
+            ),
+          };
         }
-      }
+      });
+    },
+    []
+  );
 
-      return {
-        ...prev,
-        selectedCities: newSelectedCities,
-      };
-    });
-  },
-  []
-);
+  const handleDomesticCitySelection = useCallback(
+    (stateName, districtName, cityName, isSelected, type) => {
+      const setSelections =
+        type === "current"
+          ? setCurrentDomesticSelections
+          : setDomesticSelections;
+
+      setSelections((prev) => {
+        const newSelectedCities = [...prev.selectedCities];
+        const cityObj = {
+          state: stateName,
+          district: districtName,
+          city: cityName,
+        };
+
+        if (isSelected) {
+          newSelectedCities.push(cityObj);
+        } else {
+          const index = newSelectedCities.findIndex(
+            (c) =>
+              c.state === stateName &&
+              c.district === districtName &&
+              c.city === cityName
+          );
+          if (index !== -1) {
+            newSelectedCities.splice(index, 1);
+          }
+        }
+
+        return {
+          ...prev,
+          selectedCities: newSelectedCities,
+        };
+      });
+    },
+    []
+  );
 
   const addDomesticLocation = useCallback(
     (type) => {
@@ -959,151 +965,88 @@ const handleDomesticCitySelection = useCallback(
     []
   );
 
-  // Render domestic state selection drawer
-  const renderDomesticStateDrawer = useCallback(
-    (type) => {
-      const selections =
-        type === "current" ? currentDomesticSelections : domesticSelections;
-      const toggle = (open) => toggleDrawer(type, { states: open });
+const renderDomesticStateDrawer = useCallback(
+  (type) => {
+    const selections =
+      type === "current" ? currentDomesticSelections : domesticSelections;
+    const toggle = (open) => toggleDrawer(type, { states: open });
 
-      const chunkedStates = chunkArray(sortedStates, ITEMS_PER_ROW);
+    return (
+      <Box sx={{ mt: 2 }}>
+        <Button
+          variant="outlined"
+          fullWidth
+          onClick={() => toggle(true)}
+          endIcon={<ChevronDown />}
+          sx={{ justifyContent: "space-between" }}
+        >
+          {selections.selectedStates.length > 0
+            ? `${selections.selectedStates.length} states selected`
+            : "Select States"}
+        </Button>
 
-      return (
-        <Box sx={{ mt: 2 }}>
-          <Button
-            variant="outlined"
-            fullWidth
-            onClick={() => toggle(true)}
-            endIcon={<ChevronDown />}
-            sx={{ justifyContent: "space-between" }}
-          >
-            {selections.selectedStates.length > 0
-              ? `${selections.selectedStates.length} states selected`
-              : "Select States"}
-          </Button>
-
-          <Drawer
-            anchor="top"
-            open={
-              type === "current" ? currentDrawerOpen.states : drawerOpen.states
-            }
-            onClose={() => toggle(false)}
-            PaperProps={{
-              sx: {
-                maxHeight: "90vh",
-                p: 2,
-                display: "flex",
-                flexDirection: "column",
-              },
+        <Drawer
+          anchor="top"
+          open={
+            type === "current" ? currentDrawerOpen.states : drawerOpen.states
+          }
+          onClose={() => toggle(false)}
+          PaperProps={{
+            sx: {
+              width: "98%",
+              height: "100vh",
+              maxHeight: "none",
+              borderRadius: 0,
+              p: 2,
+              display: "flex",
+              flexDirection: "column",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
             }}
           >
+            <Typography variant="h6">Select States</Typography>
+            <Button onClick={() => toggle(false)}>Done</Button>
+          </Box>
+
+          <TextField
+            fullWidth
+            placeholder="Search states..."
+            variant="outlined"
+            size="small"
+            sx={{ mb: 2 }}
+            onChange={(e) => handleSearchChange("states", e.target.value)}
+            InputProps={{
+              startAdornment: <Search size={18} style={{ marginRight: 8 }} />,
+            }}
+          />
+
+          {/* Selected states chips */}
+          {selections.selectedStates.length > 0 && (
             <Box
               sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
                 mb: 2,
+                maxHeight: "120px",
+                overflowY: "auto",
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 1,
+                p: 1,
               }}
             >
-              <Typography variant="h6">Select States</Typography>
-              <Button onClick={() => toggle(false)}>Done</Button>
-            </Box>
-
-            <TextField
-              fullWidth
-              placeholder="Search states..."
-              variant="outlined"
-              size="small"
-              sx={{ mb: 2 }}
-              onChange={(e) => handleSearchChange("states", e.target.value)}
-              InputProps={{
-                startAdornment: <Search size={18} style={{ marginRight: 8 }} />,
-              }}
-            />
-
-            {/* Selected states chips in a responsive grid at the top of the drawer */}
-            {selections.selectedStates.length > 0 && (
-              <Box
-                sx={{
-                  mb: 2,
-                  maxHeight: "120px",
-                  overflowY: "auto",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 1,
-                  p: 1,
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fill, minmax(150px, 1fr))",
-                    gap: 1,
-                  }}
-                >
-                  {selections.selectedStates.map((state, index) => (
-                    <Chip
-                      key={`drawer-selected-state-${index}`}
-                      label={state}
-                      onDelete={() => {
-                        const newSelected = selections.selectedStates.filter(
-                          (_, i) => i !== index
-                        );
-                        handleDomesticStateSelection(newSelected, type);
-                      }}
-                      color="primary"
-                      variant="outlined"
-                      sx={{
-                        maxWidth: "100%",
-                        "& .MuiChip-label": {
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        },
-                      }}
-                    />
-                  ))}
-                </Box>
-              </Box>
-            )}
-
-            <Box sx={{ flex: 1, overflow: "hidden" }}>
-              <FixedSizeList
-                height={300}
-                width="100%"
-                itemSize={60}
-                itemCount={chunkedStates.length}
-                itemData={{
-                  chunkedItems: chunkedStates,
-                  selectedItems: selections.selectedStates,
-                  handleToggle: (state) => {
-                    const currentSelected =
-                      type === "current"
-                        ? currentDomesticSelections.selectedStates
-                        : domesticSelections.selectedStates;
-
-                    const newSelected = currentSelected.includes(state.name)
-                      ? currentSelected.filter((s) => s !== state.name)
-                      : [...currentSelected, state.name];
-
-                    handleDomesticStateSelection(newSelected, type);
-                  },
-                  type: "states",
-                }}
-              >
-                {VirtualizedGridRow}
-              </FixedSizeList>
-            </Box>
-          </Drawer>
-
-          {/* Selected states chips below the button in a responsive grid */}
-          {selections.selectedStates.length > 0 && (
-            <Box sx={{ mt: 1 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                Selected States:
+              </Typography>
               <Box
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
                   gap: 1,
                 }}
               >
@@ -1119,34 +1062,91 @@ const handleDomesticCitySelection = useCallback(
                     }}
                     color="primary"
                     variant="outlined"
-                    sx={{
-                      width: "100%",
-                      "& .MuiChip-label": {
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      },
-                    }}
                   />
                 ))}
               </Box>
             </Box>
           )}
-        </Box>
-      );
-    },
-    [
-      sortedStates,
-      currentDomesticSelections,
-      domesticSelections,
-      currentDrawerOpen.states,
-      drawerOpen.states,
-      handleDomesticStateSelection,
-      handleSearchChange,
-    ]
-  );
 
-const renderDomesticDistrictDrawer = useCallback(
+          <Box sx={{ flex: 1, overflow: "auto" ,mt:1 }}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(5, 1fr)",
+                gap: 1,
+              }}
+            >
+              {sortedStates.map((state) => {
+                const isSelected = selections.selectedStates.includes(state.name);
+                return (
+                  <Box key={`state-${state.name}`}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isSelected}
+                          onChange={() => {
+                            const newSelected = isSelected
+                              ? selections.selectedStates.filter(
+                                  (s) => s !== state.name
+                                )
+                              : [...selections.selectedStates, state.name];
+                            handleDomesticStateSelection(newSelected, type);
+                          }}
+                        />
+                      }
+                      label={state.name}
+                    />
+                  </Box>
+                );
+              })}
+            </Box>
+          </Box>
+        </Drawer>
+
+        {/* Selected states outside drawer */}
+        {selections.selectedStates.length > 0 && (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Selected States:
+            </Typography>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                gap: 1,
+              }}
+            >
+              {selections.selectedStates.map((state, index) => (
+                <Chip
+                  key={`selected-state-${index}`}
+                  label={state}
+                  onDelete={() => {
+                    const newSelected = selections.selectedStates.filter(
+                      (_, i) => i !== index
+                    );
+                    handleDomesticStateSelection(newSelected, type);
+                  }}
+                  color="primary"
+                  variant="outlined"
+                />
+              ))}
+            </Box>
+          </Box>
+        )}
+      </Box>
+    );
+  },
+  [
+    sortedStates,
+    currentDomesticSelections,
+    domesticSelections,
+    currentDrawerOpen.states,
+    drawerOpen.states,
+    handleDomesticStateSelection,
+    handleSearchChange,
+  ]
+);
+  const renderDomesticDistrictDrawer = useCallback(
   (type) => {
     const selections =
       type === "current" ? currentDomesticSelections : domesticSelections;
@@ -1188,7 +1188,10 @@ const renderDomesticDistrictDrawer = useCallback(
           onClose={() => toggle(false)}
           PaperProps={{
             sx: {
-              maxHeight: "80vh",
+              width: "98%",
+              height: "100vh",
+              maxHeight: "none",
+              borderRadius: 0,
               p: 2,
               display: "flex",
               flexDirection: "column",
@@ -1235,30 +1238,38 @@ const renderDomesticDistrictDrawer = useCallback(
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
                 Selected Districts:
               </Typography>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-                  gap: 1,
-                }}
-              >
-                {selections.selectedDistricts.map((district, index) => (
-                  <Chip
-                    key={`selected-district-${index}`}
-                    label={`${district.state} - ${district.district}`}
-                    onDelete={() =>
-                      handleDomesticDistrictSelection(
-                        district.state,
-                        district.district,
-                        false,
-                        type
-                      )
-                    }
-                    color="primary"
-                    variant="outlined"
-                  />
-                ))}
-              </Box>
+              {Object.entries(districtsByState).map(([state, districts]) => (
+                <Box key={`selected-districts-${state}`} sx={{ mb: 1 }}>
+                  <Typography variant="caption" sx={{ fontWeight: "bold" }}>
+                    {state}
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 1,
+                      mt: 1,
+                    }}
+                  >
+                    {districts.map((district, index) => (
+                      <Chip
+                        key={`selected-district-${state}-${district}-${index}`}
+                        label={district}
+                        onDelete={() =>
+                          handleDomesticDistrictSelection(
+                            state,
+                            district,
+                            false,
+                            type
+                          )
+                        }
+                        color="primary"
+                        variant="outlined"
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              ))}
             </Box>
           )}
 
@@ -1273,42 +1284,48 @@ const renderDomesticDistrictDrawer = useCallback(
                 )
                 .sort((a, b) => a.localeCompare(b));
 
-              const chunkedDistricts = chunkArray(
-                districts.map((d) => ({ name: d })),
-                ITEMS_PER_ROW
-              );
+              if (districts.length === 0) return null;
+
+              const selectedDistrictsForState = selections.selectedDistricts
+                .filter((d) => d.state === stateName)
+                .map((d) => d.district);
 
               return (
-                <Box key={`districts-section-${stateName}`} sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                <Box key={`districts-section-${stateName}`} sx={{ mb: 4 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1, color: "orange" }}>
                     {stateName}
                   </Typography>
-                  <FixedSizeList
-                    height={Math.min(300, districts.length * 50)}
-                    width="100%"
-                    itemSize={50}
-                    itemCount={chunkedDistricts.length}
-                    itemData={{
-                      chunkedItems: chunkedDistricts,
-                      selectedItems: selections.selectedDistricts
-                        .filter((d) => d.state === stateName)
-                        .map((d) => d.district),
-                      handleToggle: (district) => {
-                        const isSelected = selections.selectedDistricts.some(
-                          (d) => d.state === stateName && d.district === district.name
-                        );
-                        handleDomesticDistrictSelection(
-                          stateName,
-                          district.name,
-                          !isSelected,
-                          type
-                        );
-                      },
-                      type: "districts",
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(5, 1fr)",
+                      gap: 1,
                     }}
                   >
-                    {VirtualizedGridRow}
-                  </FixedSizeList>
+                    {districts.map((district) => {
+                      const isSelected = selectedDistrictsForState.includes(district);
+                      return (
+                        <Box key={`district-${stateName}-${district}`}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={isSelected}
+                                onChange={() =>
+                                  handleDomesticDistrictSelection(
+                                    stateName,
+                                    district,
+                                    !isSelected,
+                                    type
+                                  )
+                                }
+                              />
+                            }
+                            label={district}
+                          />
+                        </Box>
+                      );
+                    })}
+                  </Box>
                 </Box>
               );
             })}
@@ -1321,10 +1338,10 @@ const renderDomesticDistrictDrawer = useCallback(
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Selected Districts:
             </Typography>
-            {Object.entries(districtsByState).map(([stateName, districts]) => (
-              <Box key={`selected-districts-${stateName}`} sx={{ mb: 2 }}>
+            {Object.entries(districtsByState).map(([state, districts]) => (
+              <Box key={`selected-districts-${state}`} sx={{ mb: 2 }}>
                 <Typography variant="caption" sx={{ fontWeight: "bold" }}>
-                  {stateName}
+                  {state}
                 </Typography>
                 <Box
                   sx={{
@@ -1336,11 +1353,11 @@ const renderDomesticDistrictDrawer = useCallback(
                 >
                   {districts.map((district, index) => (
                     <Chip
-                      key={`selected-district-${stateName}-${district}-${index}`}
+                      key={`selected-district-${state}-${district}-${index}`}
                       label={district}
                       onDelete={() =>
                         handleDomesticDistrictSelection(
-                          stateName,
+                          state,
                           district,
                           false,
                           type
@@ -1420,7 +1437,10 @@ const renderDomesticCityDrawer = useCallback(
           onClose={() => toggle(false)}
           PaperProps={{
             sx: {
-              maxHeight: "80vh",
+              width: "98%",
+              height: "100vh",
+              maxHeight: "none",
+              borderRadius: 0,
               p: 2,
               display: "flex",
               flexDirection: "column",
@@ -1467,31 +1487,42 @@ const renderDomesticCityDrawer = useCallback(
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
                 Selected Cities:
               </Typography>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                  gap: 1,
-                }}
-              >
-                {selections.selectedCities.map((city, index) => (
-                  <Chip
-                    key={`selected-city-${index}`}
-                    label={`${city.state} - ${city.district} - ${city.city}`}
-                    onDelete={() =>
-                      handleDomesticCitySelection(
-                        city.state,
-                        city.district,
-                        city.city,
-                        false,
-                        type
-                      )
-                    }
-                    color="primary"
-                    variant="outlined"
-                  />
-                ))}
-              </Box>
+              {Object.entries(citiesByDistrict).map(([districtKey, cities]) => {
+                const [state, district] = districtKey.split("-");
+                return (
+                  <Box key={`selected-cities-${districtKey}`} sx={{ mb: 1 }}>
+                    <Typography variant="caption" sx={{ fontWeight: "bold" }}>
+                      {state} - {district}
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 1,
+                        mt: 1,
+                      }}
+                    >
+                      {cities.map((city, index) => (
+                        <Chip
+                          key={`selected-city-${districtKey}-${city}-${index}`}
+                          label={city}
+                          onDelete={() =>
+                            handleDomesticCitySelection(
+                              state,
+                              district,
+                              city,
+                              false,
+                              type
+                            )
+                          }
+                          color="primary"
+                          variant="outlined"
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                );
+              })}
             </Box>
           )}
 
@@ -1508,45 +1539,50 @@ const renderDomesticCityDrawer = useCallback(
                   .filter((city) =>
                     city.toLowerCase().includes(searchFilters.cities)
                   )
-                  .sort((a, b) => a.localeCompare(b.name));
+                  .sort((a, b) => a.localeCompare(b));
 
-                const chunkedCities = chunkArray(
-                  cities.map((name) => ({ name })),
-                  ITEMS_PER_ROW
-                );
+                if (cities.length === 0) return null;
 
-                const selectedCitiesForDistrict = citiesByDistrict[districtKey] || [];
+                const selectedCitiesForDistrict =
+                  citiesByDistrict[districtKey] || [];
 
                 return (
-                  <Box key={`cities-section-${districtKey}`} sx={{ mb: 3 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  <Box key={`cities-section-${districtKey}`} sx={{ mb: 4 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 1, color: "orange" }}>
                       {stateName} - {districtName}
                     </Typography>
-                    <FixedSizeList
-                      height={Math.min(300, cities.length * 50)}
-                      width="100%"
-                      itemSize={50}
-                      itemCount={chunkedCities.length}
-                      itemData={{
-                        chunkedItems: chunkedCities,
-                        selectedItems: selectedCitiesForDistrict,
-                        handleToggle: (city) => {
-                          const isSelected = selectedCitiesForDistrict.includes(
-                            city.name
-                          );
-                          handleDomesticCitySelection(
-                            stateName,
-                            districtName,
-                            city.name,
-                            !isSelected,
-                            type
-                          );
-                        },
-                        type: "cities",
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(5, 1fr)",
+                        gap: 1,
                       }}
                     >
-                      {VirtualizedGridRow}
-                    </FixedSizeList>
+                      {cities.map((city) => {
+                        const isSelected = selectedCitiesForDistrict.includes(city);
+                        return (
+                          <Box key={`city-${districtKey}-${city}`}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={isSelected}
+                                  onChange={() =>
+                                    handleDomesticCitySelection(
+                                      stateName,
+                                      districtName,
+                                      city,
+                                      !isSelected,
+                                      type
+                                    )
+                                  }
+                                />
+                              }
+                              label={city}
+                            />
+                          </Box>
+                        );
+                      })}
+                    </Box>
                   </Box>
                 );
               });
@@ -1561,11 +1597,11 @@ const renderDomesticCityDrawer = useCallback(
               Selected Cities:
             </Typography>
             {Object.entries(citiesByDistrict).map(([districtKey, cities]) => {
-              const [stateName, districtName] = districtKey.split('-');
+              const [state, district] = districtKey.split("-");
               return (
                 <Box key={`selected-cities-${districtKey}`} sx={{ mb: 2 }}>
                   <Typography variant="caption" sx={{ fontWeight: "bold" }}>
-                    {stateName} - {districtName}
+                    {state} - {district}
                   </Typography>
                   <Box
                     sx={{
@@ -1581,8 +1617,8 @@ const renderDomesticCityDrawer = useCallback(
                         label={city}
                         onDelete={() =>
                           handleDomesticCitySelection(
-                            stateName,
-                            districtName,
+                            state,
+                            district,
                             city,
                             false,
                             type
@@ -1612,94 +1648,170 @@ const renderDomesticCityDrawer = useCallback(
     statesData,
   ]
 );
-
   // Render international country selection drawer
-  const renderInternationalCountryDrawer = useCallback(
-    (type) => {
-      const selections =
-        type === "current"
-          ? currentInternationalSelections
-          : internationalSelections;
-      const toggle = (open) => toggleDrawer(type, { countries: open });
-      const chunkedCountries = chunkArray(sortedCountries, ITEMS_PER_ROW);
+const renderInternationalCountryDrawer = useCallback(
+  (type) => {
+    const selections =
+      type === "current"
+        ? currentInternationalSelections
+        : internationalSelections;
+    const toggle = (open) => toggleDrawer(type, { countries: open });
 
-      return (
-        <Box sx={{ mt: 2 }}>
-          <Button
-            variant="outlined"
+    return (
+      <Box sx={{ mt: 2 }}>
+        <Button
+          variant="outlined"
+          fullWidth
+          onClick={() => toggle(true)}
+          endIcon={<ChevronDown />}
+          sx={{ justifyContent: "space-between" }}
+        >
+          {selections.selectedCountries.length > 0
+            ? `${selections.selectedCountries.length} countries selected`
+            : "Select Countries"}
+        </Button>
+
+        <Drawer
+          anchor="top"
+          open={
+            type === "current"
+              ? currentDrawerOpen.countries
+              : drawerOpen.countries
+          }
+          onClose={() => toggle(false)}
+          PaperProps={{
+            sx: {
+              width: "98%",
+              height: "100vh",
+              maxHeight: "none",
+              borderRadius: 0,
+              p: 2,
+              display: "flex",
+              flexDirection: "column",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
+            <Typography variant="h6">Select Countries</Typography>
+            <Button onClick={() => toggle(false)}>Done</Button>
+          </Box>
+
+          <TextField
             fullWidth
-            onClick={() => toggle(true)}
-            endIcon={<ChevronDown />}
-            sx={{ justifyContent: "space-between" }}
-          >
-            {selections.selectedCountries.length > 0
-              ? `${selections.selectedCountries.length} countries selected`
-              : "Select Countries"}
-          </Button>
+            placeholder="Search countries..."
+            variant="outlined"
+            size="small"
+            sx={{ mb: 2 }}
+            onChange={(e) => handleSearchChange("countries", e.target.value)}
+            InputProps={{
+              startAdornment: <Search size={18} style={{ marginRight: 8 }} />,
+            }}
+          />
 
-          <Drawer
-            anchor="top"
-            open={
-              type === "current"
-                ? currentDrawerOpen.countries
-                : drawerOpen.countries
-            }
-            onClose={() => toggle(false)}
-            PaperProps={{ sx: { maxHeight: "80vh", p: 2 } }}
-          >
+          {/* Selected countries chips */}
+          {selections.selectedCountries.length > 0 && (
             <Box
               sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
                 mb: 2,
+                maxHeight: "120px",
+                overflowY: "auto",
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 1,
+                p: 1,
               }}
             >
-              <Typography variant="h6">Select Countries</Typography>
-              <Button onClick={() => toggle(false)}>Done</Button>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                Selected Countries:
+              </Typography>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                  gap: 1,
+                }}
+              >
+                {selections.selectedCountries.map((country, index) => (
+                  <Chip
+                    key={`selected-country-${index}`}
+                    label={country}
+                    onDelete={async () => {
+                      const newSelected = selections.selectedCountries.filter(
+                        (_, i) => i !== index
+                      );
+                      await handleInternationalCountrySelection(
+                        newSelected,
+                        type
+                      );
+                    }}
+                    color="primary"
+                    variant="outlined" 
+                  />
+                ))}
+              </Box>
             </Box>
+          )}
 
-            <TextField
-              fullWidth
-              placeholder="Search countries..."
-              variant="outlined"
-              size="small"
-              sx={{ mb: 2 }}
-              onChange={(e) => handleSearchChange("countries", e.target.value)}
-              InputProps={{
-                startAdornment: <Search size={18} style={{ marginRight: 8 }} />,
-              }}
-            />
-
-            <FixedSizeList
-              height={300}
-              width="100%"
-              itemSize={50}
-              itemCount={chunkedCountries.length}
-              itemData={{
-                chunkedItems: chunkedCountries,
-                selectedItems: selections.selectedCountries,
-                handleToggle: async (country) => {
-                  const currentSelected =
-                    type === "current"
-                      ? currentInternationalSelections.selectedCountries
-                      : internationalSelections.selectedCountries;
-
-                  const newSelected = currentSelected.includes(country.name)
-                    ? currentSelected.filter((c) => c !== country.name)
-                    : [...currentSelected, country.name];
-
-                  await handleInternationalCountrySelection(newSelected, type);
-                },
-                type: "countries",
+          <Box sx={{ flex: 1, overflow: "auto", mt:1 }}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(5, 1fr)",
+                gap: 1,
               }}
             >
-              {VirtualizedGridRow}
-            </FixedSizeList>
-          </Drawer>
+              {sortedCountries.map((country) => {
+                const isSelected = selections.selectedCountries.includes(
+                  country.name
+                );
+                return (
+                  <Box key={`country-${country.name}`}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isSelected}
+                          onChange={async () => {
+                            const newSelected = isSelected
+                              ? selections.selectedCountries.filter(
+                                  (c) => c !== country.name
+                                )
+                              : [...selections.selectedCountries, country.name];
+                            await handleInternationalCountrySelection(
+                              newSelected,
+                              type
+                            );
+                          }}
+                        />
+                      }
+                      label={country.name}
+                    />
+                  </Box>
+                );
+              })}
+            </Box>
+          </Box>
+        </Drawer>
 
-          {selections.selectedCountries.length > 0 && (
-            <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
+        {/* Selected countries outside drawer */}
+        {selections.selectedCountries.length > 0 && (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Selected Countries:
+            </Typography>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                gap: 1,
+              }}
+            >
               {selections.selectedCountries.map((country, index) => (
                 <Chip
                   key={`selected-country-${index}`}
@@ -1718,20 +1830,21 @@ const renderDomesticCityDrawer = useCallback(
                 />
               ))}
             </Box>
-          )}
-        </Box>
-      );
-    },
-    [
-      sortedCountries,
-      currentInternationalSelections,
-      internationalSelections,
-      currentDrawerOpen.countries,
-      drawerOpen.countries,
-      handleInternationalCountrySelection,
-      handleSearchChange,
-    ]
-  );
+          </Box>
+        )}
+      </Box>
+    );
+  },
+  [
+    sortedCountries,
+    currentInternationalSelections,
+    internationalSelections,
+    currentDrawerOpen.countries,
+    drawerOpen.countries,
+    handleInternationalCountrySelection,
+    handleSearchChange,
+  ]
+);
 
  const renderInternationalStateDrawer = useCallback(
   (type) => {
@@ -1772,7 +1885,10 @@ const renderDomesticCityDrawer = useCallback(
           onClose={() => toggle(false)}
           PaperProps={{
             sx: {
-              maxHeight: "80vh",
+              width: "98%",
+              height: "100vh",
+              maxHeight: "none",
+              borderRadius: 0,
               p: 2,
               display: "flex",
               flexDirection: "column",
@@ -1865,39 +1981,48 @@ const renderDomesticCityDrawer = useCallback(
                 )
                 .sort((a, b) => a.name.localeCompare(b.name));
 
-              const chunkedStates = chunkArray(filteredStates, ITEMS_PER_ROW);
               const countrySelectedStates =
                 selections.selectedStates[country] || [];
 
+              if (filteredStates.length === 0) return null;
+
               return (
-                <Box key={`states-section-${country}`} sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                <Box key={`states-section-${country}`} sx={{ mb: 4 }}>
+                  <Typography variant="subtitle1" sx={{ mb:1, color:"orange" }}>
                     {country}
                   </Typography>
-                  <FixedSizeList
-                    height={Math.min(300, filteredStates.length * 50)}
-                    width="100%"
-                    itemSize={50}
-                    itemCount={chunkedStates.length}
-                    itemData={{
-                      chunkedItems: chunkedStates,
-                      selectedItems: countrySelectedStates,
-                      handleToggle: (state) => {
-                        const isSelected = countrySelectedStates.includes(
-                          state.name
-                        );
-                        handleInternationalStateSelection(
-                          country,
-                          state.name,
-                          !isSelected,
-                          type
-                        );
-                      },
-                      type: "intStates",
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(5, 1fr)",
+                      gap: 1,
+                      
                     }}
                   >
-                    {VirtualizedGridRow}
-                  </FixedSizeList>
+                    {filteredStates.map((state) => {
+                      const isSelected = countrySelectedStates.includes(state.name);
+                      return (
+                        <Box key={`state-${country}-${state.name}`}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={isSelected}
+                                onChange={() =>
+                                  handleInternationalStateSelection(
+                                    country,
+                                    state.name,
+                                    !isSelected,
+                                    type
+                                  )
+                                }
+                              />
+                            }
+                            label={state.name}
+                          />
+                        </Box>
+                      );
+                    })}
+                  </Box>
                 </Box>
               );
             })}
@@ -1919,8 +2044,7 @@ const renderDomesticCityDrawer = useCallback(
                   <Box
                     sx={{
                       display: "grid",
-                      gridTemplateColumns:
-                        "repeat(auto-fill, minmax(200px, 1fr))",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
                       gap: 1,
                       mt: 1,
                     }}
@@ -2009,7 +2133,10 @@ const renderInternationalCityDrawer = useCallback(
           onClose={() => toggle(false)}
           PaperProps={{
             sx: {
-              maxHeight: "80vh",
+              width: "98%",
+              height: "100vh",
+              maxHeight: "none",
+              borderRadius: 0,
               p: 2,
               display: "flex",
               flexDirection: "column",
@@ -2109,43 +2236,48 @@ const renderInternationalCityDrawer = useCallback(
                     )
                     .sort((a, b) => a.localeCompare(b));
 
-                  const chunkedCities = chunkArray(
-                    filteredCities.map((c) => ({ name: c })),
-                    ITEMS_PER_ROW
-                  );
                   const stateSelectedCities =
                     selections.selectedCities[stateKey] || [];
 
+                  if (filteredCities.length === 0) return null;
+
                   return (
-                    <Box key={`cities-section-${stateKey}`} sx={{ mb: 3 }}>
-                      <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                    <Box key={`cities-section-${stateKey}`} sx={{ mb: 4 }}>
+                      <Typography variant="subtitle1" sx={{ mb: 1 ,color:"orange" }}>
                         {country} - {state}
                       </Typography>
-                      <FixedSizeList
-                        height={Math.min(300, filteredCities.length * 50)}
-                        width="100%"
-                        itemSize={50}
-                        itemCount={chunkedCities.length}
-                        itemData={{
-                          chunkedItems: chunkedCities,
-                          selectedItems: stateSelectedCities,
-                          handleToggle: (city) => {
-                            const isSelected = stateSelectedCities.includes(
-                              city.name
-                            );
-                            handleInternationalCitySelection(
-                              country,
-                              state,
-                              city.name,
-                              !isSelected,
-                              type
-                            );
-                          },
-                          type: "intCities",
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(5, 1fr)",
+                          gap: 1,
                         }}
                       >
-                        {VirtualizedGridRow}
-                      </FixedSizeList>
+                        {filteredCities.map((city) => {
+                          const isSelected = stateSelectedCities.includes(city);
+                          return (
+                            <Box key={`city-${stateKey}-${city}`}>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onChange={() =>
+                                      handleInternationalCitySelection(
+                                        country,
+                                        state,
+                                        city,
+                                        !isSelected,
+                                        type
+                                      )
+                                    }
+                                  />
+                                }
+                                label={city}
+                              />
+                            </Box>
+                          );
+                        })}
+                      </Box>
                     </Box>
                   );
                 });
@@ -2171,8 +2303,7 @@ const renderInternationalCityDrawer = useCallback(
                     <Box
                       sx={{
                         display: "grid",
-                        gridTemplateColumns:
-                          "repeat(auto-fill, minmax(200px, 1fr))",
+                        gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
                         gap: 1,
                         mt: 1,
                       }}

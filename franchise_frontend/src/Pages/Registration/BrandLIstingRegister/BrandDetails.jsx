@@ -64,6 +64,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   //     verified: false,
   //   },
   // });
+  
   const formData = {
     companyName: "",
     brandName: "",
