@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   Grid,
   Typography,
@@ -7,15 +8,16 @@ import {
   styled,
   CircularProgress,
   Avatar,
-  Chip,
+  IconButton,
   Stack,
   Alert,
   TextField,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
@@ -62,45 +64,17 @@ const ScrollableContent = styled("div")(({ theme }) => ({
   },
 }));
 
-const SectionHeader = styled(Typography)(({ theme }) => ({
-  marginBottom: theme.spacing(2),
-  color: theme.palette.primary.main,
-  fontWeight: 600,
-}));
-
-const ErrorContainer = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: theme.spacing(4),
-  color: theme.palette.error.main,
-  textAlign: "center",
-}));
-
 const FileUploadCard = styled(Box)(({ theme }) => ({
-  border: `1px dashed ${theme.palette.divider}`,
+  border: `2px dashed ${theme.palette.divider}`,
   borderRadius: theme.shape.borderRadius,
   padding: theme.spacing(2),
   textAlign: "center",
   marginBottom: theme.spacing(2),
   backgroundColor: theme.palette.background.default,
-}));
-
-const PreviewImage = styled("img")({
-  width: "100px",
-  height: "100px",
-  objectFit: "cover",
-  borderRadius: "4px",
-  border: "1px solid #e0e0e0",
-});
-
-const FilePreviewContainer = styled(Box)({
   display: "flex",
-  flexWrap: "wrap",
-  gap: "8px",
-  marginTop: "16px",
-});
+  flexDirection: "column",
+  flexGrow: 1,
+}));
 
 const Uploads = ({
   data = {},
@@ -111,6 +85,7 @@ const Uploads = ({
   onGstNumberChange,
   onPancardNumberChange,
 }) => {
+  const [awardsData, setAwardsData] = useState([]);
   const safeData = data || {};
   const safeOnChange = onChange || (() => {});
 
@@ -118,10 +93,11 @@ const Uploads = ({
     (field, options = {}) =>
     (e) => {
       const { maxFiles = Infinity, allowedTypes = [], maxSize = 5 } = options;
-      const files = Array.from(e.target.files);
+      const files = Array.from(e.target.files || []);
 
       // Validate file types
       const validFiles = files.filter((file) => {
+        if (!file || !file.type) return false;
         if (allowedTypes.length === 0) return true;
         return allowedTypes.some((type) => file.type.includes(type));
       });
@@ -149,7 +125,7 @@ const Uploads = ({
     };
 
   const handleRemoveFile = (field, index) => {
-    const updatedFiles = [...safeData[field]];
+    const updatedFiles = [...(safeData[field] || [])];
     updatedFiles.splice(index, 1);
     safeOnChange({ [field]: updatedFiles });
   };
@@ -163,6 +139,26 @@ const Uploads = ({
       return "";
     }
   };
+
+  const handleAddAward = () => {
+    const awardData = {
+      awardsText: safeData.awardsText || '',
+      awardsDocuments: safeData.awardsDocuments || []
+    };
+    
+    setAwardsData(prev => [...prev, awardData]);
+    
+    // Clear the form after submission
+    safeOnChange({ 
+      awardsText: '',
+      awardsDocuments: [] 
+    });
+  };
+
+  const handleAwardRemove = (index) => {
+    setAwardsData(prevAwards => prevAwards.filter((_, i) => i !== index));
+  };
+
   if (!data) {
     return (
       <StyledPaper elevation={2}>
@@ -176,7 +172,15 @@ const Uploads = ({
   if (data.error) {
     return (
       <StyledPaper elevation={2}>
-        <ErrorContainer>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 4,
+          color: 'error.main',
+          textAlign: 'center'
+        }}>
           <ErrorOutlineIcon fontSize="large" />
           <Typography variant="h6" sx={{ mt: 2 }}>
             Failed to load brand details
@@ -184,137 +188,72 @@ const Uploads = ({
           <Typography variant="body2" sx={{ mt: 1 }}>
             {data.error.message || "Unknown error occurred"}
           </Typography>
-        </ErrorContainer>
+        </Box>
       </StyledPaper>
     );
   }
 
   return (
-    
-      <ScrollableContent>
-  {/* Header Section */}
-  {/* <Box sx={{
-    backgroundColor: '#fff8e1',
-    p: 1,
-    borderRadius: 2,
-    mb: 1,
-    borderLeft: '4px solid #ff9800'
-  }}>
-    <SectionHeader variant="h6" sx={{ 
-      color: '#ff9800', 
-      display: 'flex',
-      alignItems: 'center',
-      gap: 1
-    }}>
-      <DescriptionIcon fontSize="medium" />
-      Brand Documentation
-    </SectionHeader>
-    <Alert severity="info" sx={{ 
-      mt: 1,
-      backgroundColor: 'rgba(255, 152, 0, 0.08)',
-      '& .MuiAlert-icon': { color: '#ff9800' }
-    }}>
-      Please upload all required documents to complete your brand registration.
-    </Alert>
-  </Box> */}
+    <ScrollableContent>
+      <Grid container spacing={{ xs: 3, md: 4 }} sx={{ alignItems: 'stretch' }}>
 
-  {/* Main Grid Container */}
-  <Grid container spacing={4} display={'flex'} flexDirection={'column'}>   
-    {/* Brand Logo Section */}
-    <Grid item xs={12} md={6}>
-      
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          mb: 2,
-          gap: 1
-        }}>
-          <Avatar sx={{ 
-            bgcolor: '#ff9800', 
-            width: 32, 
-            height: 32,
-            fontSize: '1rem'
-          }}>
-            1
-          </Avatar>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Brand Logo
-          </Typography>
-          {/* <Chip label="Required" size="small" sx={{ 
-            ml: 1, 
-            backgroundColor: '#ffebee', 
-            color: '#d32f2f' 
-          }} /> */}
-        </Box>
-        
-        <FileUploadCard sx={{ 
-          backgroundColor: '#fafafa',
-          border: '2px dashed #e0e0e0',
-          p: 3,
-          textAlign: 'center'
-        }}>
-          <Box sx={{ 
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 1
-          }}>
-            <CloudUploadIcon sx={{ 
-              fontSize: 48, 
-              color: '#9e9e9e',
-              mb: 1 
-            }} />
-            <Typography variant="body2" color="textSecondary" gutterBottom>
-              Drag & drop your logo here or click to browse
-            </Typography>
-            <Typography variant="caption" color="textSecondary">
-              Accepted formats: JPG, PNG (Max 10MB)
-            </Typography>
+        {/* Brand Logo Section */}
+        <Grid item xs={12} md={6}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+            <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>1</Avatar>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>Brand Logo</Typography>
           </Box>
           
-          <Button
-            component="label"
-            variant="contained"
-            startIcon={<CloudUploadIcon />}
-            sx={{ 
-              mt: 3,
-              backgroundColor: '#ff9800',
-              '&:hover': {
-                backgroundColor: '#fb8c00'
-              }
-            }}
-          >
-            Upload Logo
-            <VisuallyHiddenInput
-              type="file"
-              accept="image/jpeg,image/png"
-              onChange={handleFileChange("brandLogo", {
-                maxFiles: 1,
-                allowedTypes: ["image/jpeg", "image/png"],
-                maxSize: 10,
-              })}
-            />
-          </Button>
-          
-          {safeData.brandLogo?.length > 0 && (
+          <FileUploadCard>
             <Box sx={{ 
-              mt: 3,
-              p: 2,
-              backgroundColor: '#e8f5e9',
-              borderRadius: 1
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 1,
+              flexGrow: 1,
+              justifyContent: 'center'
             }}>
-              <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
-                {safeData.brandLogo.map(
-                  (file, index) =>
-                    file && (
+              <CloudUploadIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                Drag & drop your logo here or click to browse
+              </Typography>
+              <Typography variant="caption" color="textSecondary">
+                Accepted formats: JPG, PNG (Max 10MB)
+              </Typography>
+            </Box>
+            
+            <Box sx={{ mt: 'auto' }}>
+              <Button
+                component="label"
+                variant="contained"
+                startIcon={<CloudUploadIcon />}
+                sx={{ 
+                  mt: 3,
+                  backgroundColor: '#ff9800',
+                  width: '100%',
+                  '&:hover': { backgroundColor: '#fb8c00' }
+                }}
+              >
+                Upload Logo
+                <VisuallyHiddenInput
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  onChange={handleFileChange("brandLogo", {
+                    maxFiles: 1,
+                    allowedTypes: ["image/jpeg", "image/png"],
+                    maxSize: 10,
+                  })}
+                />
+              </Button>
+              
+              {safeData.brandLogo?.length > 0 && (
+                <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e9', borderRadius: 1 }}>
+                  <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
+                    {safeData.brandLogo.map((file, index) => (
                       <Box key={index} position="relative">
                         <Avatar
                           src={createObjectURL(file)}
-                          sx={{ 
-                            width: 80, 
-                            height: 80,
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                          }}
+                          sx={{ width: 80, height: 80, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
                           variant="rounded"
                         />
                         <IconButton
@@ -325,9 +264,9 @@ const Uploads = ({
                             right: -8,
                             backgroundColor: "error.main",
                             color: "white",
-                            "&:hover": {
-                              backgroundColor: "error.dark",
-                            },
+                            "&:hover": { backgroundColor: "error.dark" },
+                            width: 24,
+                            height: 24
                           }}
                         >
                           <DeleteIcon fontSize="small" />
@@ -346,154 +285,57 @@ const Uploads = ({
                           <CheckCircleIcon fontSize="small" />
                         </Box>
                       </Box>
-                    )
-                )}
-              </Stack>
-            </Box>
-          )}
-        </FileUploadCard>
-        {errors.brandLogo && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {errors.brandLogo}
-          </Alert>
-        )}
-    </Grid>
-
-    {/* Videos Section */}
-    <Grid item xs={12} md={6}>
-     
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          mb: 2,
-          gap: 1
-        }}>
-          <Avatar sx={{ 
-            bgcolor: '#ff9800', 
-            width: 32, 
-            height: 32,
-            fontSize: '1rem'
-          }}>
-            2
-          </Avatar>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Promotion Videos
-          </Typography>
-        </Box>
-        
-        <Grid container spacing={2} display={'flex'} flexDirection={'column'}>
-          {/* Brand Promotion Videos */}
-          {/* <Grid item xs={12} sm={6}>
-            <FileUploadCard sx={{ 
-              backgroundColor: '#fafafa',
-              border: '2px dashed #e0e0e0',
-              p: 2,
-              textAlign: 'center',
-              height: '100%'
-            }}>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Brand Videos
-              </Typography>
-              <Button
-                component="label"
-                variant="outlined"
-                startIcon={<VideoCameraBackIcon />}
-                size="small"
-                sx={{ mb: 1 }}
-              >
-                Upload
-                <VisuallyHiddenInput
-                  type="file"
-                  accept="video/mp4,video/quicktime"
-                  multiple
-                  onChange={handleFileChange("brandPromotionVideo", {
-                    maxFiles: 1,
-                    allowedTypes: ["video/mp4", "video/quicktime"],
-                    maxSize: 100 * 1024 * 1024,
-                  })}
-                />
-              </Button>
-              <Typography variant="caption" color="textSecondary" display="block">
-                MP4, MOV (Max 100MB)
-              </Typography>
-              
-              {safeData.brandPromotionVideo?.length > 0 && (
-                <Box sx={{ mt: 2 }}>
-                  <List dense>
-                    {safeData.brandPromotionVideo.map((file, index) => (
-                      <ListItem 
-                        key={index}
-                        secondaryAction={
-                          <IconButton
-                            edge="end"
-                            onClick={() => handleRemoveFile("brandPromotionVideo", index)}
-                            size="small"
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        }
-                        sx={{
-                          backgroundColor: '#f5f5f5',
-                          borderRadius: 1,
-                          mt: 0.5
-                        }}
-                      >
-                        <ListItemAvatar>
-                          <Avatar sx={{ bgcolor: '#e3f2fd' }}>
-                            <MovieIcon color="primary" />
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={file.name}
-                          primaryTypographyProps={{ variant: 'caption' }}
-                        />
-                      </ListItem>
                     ))}
-                  </List>
-                  <Typography
-                    variant="caption"
-                    color={
-                      safeData.brandPromotionVideo.length < 1
-                        ? "error"
-                        : "textSecondary"
-                    }
-                    sx={{ display: 'flex', alignItems: 'center', mt: 1 }}
-                  >
-                    {safeData.brandPromotionVideo.length < 1 ? (
-                      <>
-                        <ErrorOutlineIcon fontSize="small" sx={{ mr: 0.5 }} />
-                        Minimum 1 video required
-                      </>
-                    ) : (
-                      <CheckCircleIcon color="success" fontSize="small" sx={{ mr: 0.5 }} />
-                    )}
-                    {safeData.brandPromotionVideo.length} uploaded
-                  </Typography>
+                  </Stack>
                 </Box>
               )}
-            </FileUploadCard>
-          </Grid> */}
+            </Box>
+          </FileUploadCard>
+          {errors.brandLogo && (
+            <Alert severity="error" sx={{ mt: 1 }}>
+              {errors.brandLogo}
+            </Alert>
+          )}
+        </Grid>
+
+        {/* Videos Section */}
+        <Grid item xs={12} md={6}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+            <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>2</Avatar>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>Promotion Videos</Typography>
+          </Box>
           
-          {/* Franchise Promotion Videos */}
-          <Grid item xs={12} sm={6}>
-            <FileUploadCard sx={{ 
-              backgroundColor: '#fafafa',
-              border: '2px dashed #e0e0e0',
-              p: 2,
-              textAlign: 'center',
-              height: '100%'
+          <FileUploadCard>
+            <Box sx={{ 
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 1,
+              flexGrow: 1,
+              justifyContent: 'center'
             }}>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Franchise Videos
+              <VideoCameraBackIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                Drag & drop your videos here or click to browse
               </Typography>
+              <Typography variant="caption" color="textSecondary">
+                Accepted formats: MP4, MOV (Max 40MB)
+              </Typography>
+            </Box>
+            
+            <Box sx={{ mt: 'auto' }}>
               <Button
                 component="label"
-                variant="outlined"
+                variant="contained"
                 startIcon={<VideoCameraBackIcon />}
-                size="small"
-                sx={{ mb: 1 }}
+                sx={{ 
+                  mt: 3,
+                  backgroundColor: '#ff9800',
+                  width: '100%',
+                  '&:hover': { backgroundColor: '#fb8c00' }
+                }}
               >
-                Upload
+                Upload Videos
                 <VisuallyHiddenInput
                   type="file"
                   accept="video/mp4,video/quicktime"
@@ -501,100 +343,79 @@ const Uploads = ({
                   onChange={handleFileChange("franchisePromotionVideo", {
                     maxFiles: 1,
                     allowedTypes: ["video/mp4", "video/quicktime"],
-                    // maxSize: 100 * 1024 * 1024,
-                    maxSize: 40 * 1024 * 1024,
+                    maxSize: 40,
                   })}
                 />
               </Button>
-              <Typography variant="caption" color="textSecondary" display="block">
-                MP4, MOV (Max 40MB)
-              </Typography>
               
               {safeData.franchisePromotionVideo?.length > 0 && (
-                <Box sx={{ mt: 2 }}>
-                  <List dense>
+                <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e9', borderRadius: 1 }}>
+                  <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
                     {safeData.franchisePromotionVideo.map((file, index) => (
-                      <ListItem 
-                        key={index}
-                        secondaryAction={
-                          <IconButton
-                            edge="end"
-                            onClick={() => handleRemoveFile("franchisePromotionVideo", index)}
-                            size="small"
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        }
-                        sx={{
-                          backgroundColor: '#f5f5f5',
-                          borderRadius: 1,
-                          mt: 0.5
-                        }}
-                      >
-                        <ListItemAvatar>
-                          <Avatar sx={{ bgcolor: '#e3f2fd' }}>
-                            <MovieIcon color="primary" />
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={file.name}
-                          primaryTypographyProps={{ variant: 'caption' }}
-                        />
-                      </ListItem>
+                      <Box key={index} position="relative">
+                        <Avatar
+                          variant="rounded"
+                          sx={{ 
+                            width: 80, 
+                            height: 80,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            bgcolor: '#e3f2fd'
+                          }}
+                        >
+                          <MovieIcon color="primary" />
+                        </Avatar>
+                        <IconButton
+                          onClick={() => handleRemoveFile("franchisePromotionVideo", index)}
+                          sx={{
+                            position: "absolute",
+                            top: -8,
+                            right: -8,
+                            backgroundColor: "error.main",
+                            color: "white",
+                            "&:hover": { backgroundColor: "error.dark" },
+                            width: 24,
+                            height: 24
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            bottom: -5,
+                            right: -5,
+                            backgroundColor: "success.main",
+                            borderRadius: "50%",
+                            padding: "2px",
+                            color: "white",
+                          }}
+                        >
+                          <CheckCircleIcon fontSize="small" />
+                        </Box>
+                      </Box>
                     ))}
-                  </List>
-                  <Typography
-                    variant="caption"
-                    color={
-                      safeData.franchisePromotionVideo.length < 1
-                        ? "error"
-                        : "textSecondary"
-                    }
-                    sx={{ display: 'flex', alignItems: 'center', mt: 1 }}
-                  >
-                    {safeData.franchisePromotionVideo.length < 1 ? (
-                      <>
-                        <ErrorOutlineIcon fontSize="small" sx={{ mr: 0.5 }} />
-                        Minimum 1 video required
-                      </>
-                    ) : (
-                      <CheckCircleIcon color="success" fontSize="small" sx={{ mr: 0.5 }} />
-                    )}
-                    {safeData.franchisePromotionVideo.length} uploaded
-                  </Typography>
+                  </Stack>
                 </Box>
               )}
-            </FileUploadCard>
-          </Grid>
+            </Box>
+          </FileUploadCard>
+          {errors.franchisePromotionVideo && (
+            <Alert severity="error" sx={{ mt: 1 }}>
+              {errors.franchisePromotionVideo}
+            </Alert>
+          )}
         </Grid>
-    </Grid>
 
-    {/* Tax Documents Section */}
-    <Grid item xs={12} >
-      
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          mb: 3,
-          gap: 1
-        }}>
-          <Avatar sx={{ 
-            bgcolor: '#ff9800', 
-            width: 32, 
-            height: 32,
-            fontSize: '1rem'
-          }}>
-            3
-          </Avatar>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Tax Documents
-          </Typography>
-        </Box>
-        
-        <Grid container spacing={3} display={'flex'} flexDirection={'column'}>
-          {/* PAN Card */}
-          <Grid item xs={12} md={6}>
-            <Box sx={{ mb: 2 }}>
+        {/* Tax Documents Section */}
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+            <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>3</Avatar>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>Tax Documents</Typography>
+          </Box>
+          
+          <Grid container spacing={3}>
+            {/* PAN Card */}
+            <Grid item xs={12} md={6}>
               <TextField
                 label="PAN Number *"
                 fullWidth
@@ -609,73 +430,109 @@ const Uploads = ({
                 }}
                 sx={{ mb: 2 }}
                 variant="outlined"
-                size="small"
               />
-            </Box>
-            
-            <FileUploadCard sx={{ 
-              backgroundColor: '#fafafa',
-              border: '2px dashed #e0e0e0',
-              p: 2,
-              textAlign: 'center'
-            }}>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                PAN Card Document
-              </Typography>
-              <Button
-                component="label"
-                variant="outlined"
-                startIcon={<DescriptionIcon />}
-                size="small"
-                sx={{ mb: 1 }}
-              >
-                Upload PAN
-                <VisuallyHiddenInput
-                  type="file"
-                  accept=".pdf,image/jpeg,image/png"
-                  onChange={handleFileChange("pancard", {
-                    maxFiles: 1,
-                    allowedTypes: ["application/pdf", "image/jpeg", "image/png"],
-                    maxSize: 1 * 1024 * 1024,
-                  })}
-                />
-              </Button>
-              <Typography variant="caption" color="textSecondary" display="block">
-                 JPG, PNG (Max 1MB)
-              </Typography>
               
-              {safeData.pancard?.length > 0 && (
+              <FileUploadCard>
                 <Box sx={{ 
-                  mt: 2,
-                  p: 1,
-                  backgroundColor: '#e8f5e9',
-                  borderRadius: 1
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
+                  flexGrow: 1,
+                  justifyContent: 'center'
                 }}>
-                  {safeData.pancard.map((file, index) => (
-                    <Chip
-                      key={index}
-                      label={file.name}
-                      onDelete={() => handleRemoveFile("pancard", index)}
-                      deleteIcon={<DeleteIcon />}
-                      sx={{ m: 0.5 }}
-                      color="success"
-                      variant="outlined"
-                      icon={<PictureAsPdfIcon color="error" />}
-                    />
-                  ))}
+                  <DescriptionIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Drag & drop your PAN card here or click to browse
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    Accepted formats: PDF, JPG, PNG (Max 1MB)
+                  </Typography>
                 </Box>
+                
+                <Box sx={{ mt: 'auto' }}>
+                  <Button
+                    component="label"
+                    variant="contained"
+                    startIcon={<DescriptionIcon />}
+                    sx={{ 
+                      mt: 2,
+                      backgroundColor: '#ff9800',
+                      width: '100%',
+                      '&:hover': { backgroundColor: '#fb8c00' }
+                    }}
+                  >
+                    Upload PAN Card
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept=".pdf,image/jpeg,image/png"
+                      onChange={handleFileChange("pancard", {
+                        maxFiles: 1,
+                        allowedTypes: ["application/pdf", "image/jpeg", "image/png"],
+                        maxSize: 1,
+                      })}
+                    />
+                  </Button>
+                  
+                  {safeData.pancard?.length > 0 && (
+                    <Box sx={{ mt: 2, p: 1.5, backgroundColor: '#e8f5e9', borderRadius: 1 }}>
+                      <Box position="relative" sx={{ display: 'inline-block' }}>
+                        <Avatar
+                          variant="rounded"
+                          sx={{ 
+                            width: 80, 
+                            height: 80,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            bgcolor: '#e3f2fd'
+                          }}
+                        >
+                          <PictureAsPdfIcon color="error" fontSize={safeData.pancard[0]?.type === 'application/pdf' ? 'large' : 'small'} />
+                        </Avatar>
+                        <IconButton
+                          onClick={() => handleRemoveFile("pancard", 0)}
+                          sx={{
+                            position: "absolute",
+                            top: -8,
+                            right: -8,
+                            backgroundColor: "error.main",
+                            color: "white",
+                            "&:hover": { backgroundColor: "error.dark" },
+                            width: 24,
+                            height: 24
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            bottom: -5,
+                            right: -5,
+                            backgroundColor: "success.main",
+                            borderRadius: "50%",
+                            padding: "2px",
+                            color: "white",
+                          }}
+                        >
+                          <CheckCircleIcon fontSize="small" />
+                        </Box>
+                      </Box>
+                      <Typography variant="caption" display="block" sx={{ mt: 1, textAlign: 'center' }}>
+                        {safeData.pancard[0]?.name}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </FileUploadCard>
+              {errors.pancard && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  {errors.pancard}
+                </Alert>
               )}
-            </FileUploadCard>
-            {errors.pancard && (
-              <Alert severity="error" sx={{ mt: 1 }}>
-                {errors.pancard}
-              </Alert>
-            )}
-          </Grid>
-          
-          {/* GST Certificate */}
-          <Grid item xs={12} md={6}>
-            <Box sx={{ mb: 2 }}>
+            </Grid>
+            
+            {/* GST Certificate */}
+            <Grid item xs={12} md={6}>
               <TextField
                 label="GST Number *"
                 fullWidth
@@ -690,517 +547,588 @@ const Uploads = ({
                 }}
                 sx={{ mb: 2 }}
                 variant="outlined"
-                size="small"
               />
-            </Box>
-            
-            <FileUploadCard sx={{ 
-              backgroundColor: '#fafafa',
-              border: '2px dashed #e0e0e0',
-              p: 2,
-              textAlign: 'center'
-            }}>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                GST Certificate
-              </Typography>
-              <Button
-                component="label"
-                variant="outlined"
-                startIcon={<DescriptionIcon />}
-                size="small"
-                sx={{ mb: 1 }}
-              >
-                Upload GST
-                <VisuallyHiddenInput
-                  type="file"
-                  accept=".pdf,image/jpeg,image/png"
-                  onChange={handleFileChange("gstCertificate", {
-                    maxFiles: 1,
-                    allowedTypes: ["application/pdf", "image/jpeg", "image/png"],
-                    maxSize: 1 * 1024 * 1024,
-                  })}
-                />
-              </Button>
-              <Typography variant="caption" color="textSecondary" display="block">
-                JPG, PNG (Max 1MB)
-              </Typography>
               
-              {safeData.gstCertificate?.length > 0 && (
+              <FileUploadCard>
                 <Box sx={{ 
-                  mt: 2,
-                  p: 1,
-                  backgroundColor: '#e8f5e9',
-                  borderRadius: 1
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
+                  flexGrow: 1,
+                  justifyContent: 'center'
                 }}>
-                  {safeData.gstCertificate.map((file, index) => (
-                    <Chip
-                      key={index}
-                      label={file.name}
-                      onDelete={() => handleRemoveFile("gstCertificate", index)}
-                      deleteIcon={<DeleteIcon />}
-                      sx={{ m: 0.5 }}
-                      color="success"
-                      variant="outlined"
-                      icon={<PictureAsPdfIcon color="error" />}
-                    />
-                  ))}
-                </Box>
-              )}
-            </FileUploadCard>
-            {errors.gstCertificate && (
-              <Alert severity="error" sx={{ mt: 1 }}>
-                {errors.gstCertificate}
-              </Alert>
-            )}
-          </Grid>
-        </Grid>
- 
-    </Grid>
-
-    {/* Outlet Images Section */}
-    <Grid item xs={12}>
-     
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          mb: 3,
-          gap: 1
-        }}>
-          <Avatar sx={{ 
-            bgcolor: '#ff9800', 
-            width: 32, 
-            height: 32,
-            fontSize: '1rem'
-          }}>
-            4
-          </Avatar>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Outlet Images
-          </Typography>
-        </Box>
-        
-        <Grid container spacing={3} display={'flex'} flexDirection={'column'}>
-          {/* Exterior Images */}
-          <Grid item xs={12} md={6}>
-            <FileUploadCard sx={{ 
-              backgroundColor: '#fafafa',
-              border: '2px dashed #e0e0e0',
-              p: 2,
-              textAlign: 'center'
-            }}>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Exterior Outlet Images (3 required)
-              </Typography>
-              <Button
-                component="label"
-                variant="outlined"
-                startIcon={<PhotoCameraIcon />}
-                size="small"
-                sx={{ mb: 1 }}
-              >
-                Upload Exterior
-                <VisuallyHiddenInput
-                  type="file"
-                  accept="image/jpeg,image/png"
-                  multiple
-                  onChange={handleFileChange("exteriorOutlet", {
-                    maxFiles: 5,
-                    allowedTypes: ["image/jpeg", "image/png"],
-                    maxSize: 3 * 1024 * 1024,
-                  })}
-                />
-              </Button>
-              <Typography variant="caption" color="textSecondary" display="block">
-                JPG, PNG (Max 3MB )
-              </Typography>
-              
-              {safeData.exteriorOutlet?.length > 0 && (
-                <Box sx={{ mt: 2 }}>
-                  <Grid container spacing={1}>
-                    {safeData.exteriorOutlet.map((file, index) => (
-                      <Grid item xs={4} key={index}>
-                        <Box position="relative" sx={{ borderRadius: 1, overflow: 'hidden' }}>
-                          <img
-                            src={createObjectURL(file)}
-                            alt={`Exterior ${index + 1}`}
-                            style={{
-                              width: '100%',
-                              height: '80px',
-                              objectFit: 'cover',
-                              borderRadius: 4
-                            }}
-                          />
-                          <IconButton
-                            size="small"
-                            onClick={() => handleRemoveFile("exteriorOutlet", index)}
-                            sx={{
-                              position: "absolute",
-                              top: 4,
-                              right: 4,
-                              backgroundColor: "rgba(244, 67, 54, 0.8)",
-                              color: "white",
-                              "&:hover": {
-                                backgroundColor: "error.dark",
-                              },
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              bottom: 4,
-                              left: 4,
-                              backgroundColor: "rgba(0, 0, 0, 0.6)",
-                              color: "white",
-                              borderRadius: 1,
-                              px: 0.5,
-                              fontSize: '0.6rem'
-                            }}
-                          >
-                            {index + 1}
-                          </Box>
-                        </Box>
-                      </Grid>
-                    ))}
-                  </Grid>
-                  <Typography
-                    variant="caption"
-                    color={
-                      safeData.exteriorOutlet.length < 3
-                        ? "error"
-                        : "textSecondary"
-                    }
-                    sx={{ display: 'flex', alignItems: 'center', mt: 1 }}
-                  >
-                    {safeData.exteriorOutlet.length < 3 ? (
-                      <>
-                        <ErrorOutlineIcon fontSize="small" sx={{ mr: 0.5 }} />
-                        {3 - safeData.exteriorOutlet.length} more required
-                      </>
-                    ) : (
-                      <CheckCircleIcon color="success" fontSize="small" sx={{ mr: 0.5 }} />
-                    )}
-                    {safeData.exteriorOutlet.length} uploaded
+                  <DescriptionIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Drag & drop your GST certificate here or click to browse
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    Accepted formats: PDF, JPG, PNG (Max 1MB)
                   </Typography>
                 </Box>
+                
+                <Box sx={{ mt: 'auto' }}>
+                  <Button
+                    component="label"
+                    variant="contained"
+                    startIcon={<DescriptionIcon />}
+                    sx={{ 
+                      mt: 2,
+                      backgroundColor: '#ff9800',
+                      width: '100%',
+                      '&:hover': { backgroundColor: '#fb8c00' }
+                    }}
+                  >
+                    Upload GST Certificate
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept=".pdf,image/jpeg,image/png"
+                      onChange={handleFileChange("gstCertificate", {
+                        maxFiles: 1,
+                        allowedTypes: ["application/pdf", "image/jpeg", "image/png"],
+                        maxSize: 1,
+                      })}
+                    />
+                  </Button>
+                  
+                  {safeData.gstCertificate?.length > 0 && (
+                    <Box sx={{ mt: 2, p: 1.5, backgroundColor: '#e8f5e9', borderRadius: 1 }}>
+                      <Box position="relative" sx={{ display: 'inline-block' }}>
+                        <Avatar
+                          variant="rounded"
+                          sx={{ 
+                            width: 80, 
+                            height: 80,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            bgcolor: '#e3f2fd'
+                          }}
+                        >
+                          <PictureAsPdfIcon color="error" fontSize={safeData.gstCertificate[0]?.type === 'application/pdf' ? 'large' : 'small'} />
+                        </Avatar>
+                        <IconButton
+                          onClick={() => handleRemoveFile("gstCertificate", 0)}
+                          sx={{
+                            position: "absolute",
+                            top: -8,
+                            right: -8,
+                            backgroundColor: "error.main",
+                            color: "white",
+                            "&:hover": { backgroundColor: "error.dark" },
+                            width: 24,
+                            height: 24
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            bottom: -5,
+                            right: -5,
+                            backgroundColor: "success.main",
+                            borderRadius: "50%",
+                            padding: "2px",
+                            color: "white",
+                          }}
+                        >
+                          <CheckCircleIcon fontSize="small" />
+                        </Box>
+                      </Box>
+                      <Typography variant="caption" display="block" sx={{ mt: 1, textAlign: 'center' }}>
+                        {safeData.gstCertificate[0]?.name}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </FileUploadCard>
+              {errors.gstCertificate && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  {errors.gstCertificate}
+                </Alert>
               )}
-            </FileUploadCard>
+            </Grid>
+          </Grid>
+        </Grid>
+
+        {/* Outlet Images Section */}
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+            <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>4</Avatar>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>Outlet Images</Typography>
+          </Box>
+          
+          <Grid container spacing={3}>
+            {/* Exterior Images */}
+            <Grid item xs={12} md={6}>
+              <FileUploadCard>
+                <Box sx={{ 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
+                  flexGrow: 1,
+                  justifyContent: 'center'
+                }}>
+                  <PhotoCameraIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Exterior Outlet Images (3 required)
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    JPG, PNG (Max 3MB)
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ mt: 'auto' }}>
+                  <Button
+                    component="label"
+                    variant="contained"
+                    startIcon={<PhotoCameraIcon />}
+                    sx={{ 
+                      mt: 2,
+                      backgroundColor: '#ff9800',
+                      width: '100%',
+                      '&:hover': { backgroundColor: '#fb8c00' }
+                    }}
+                  >
+                    Upload Exterior
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept="image/jpeg,image/png"
+                      multiple
+                      onChange={handleFileChange("exteriorOutlet", {
+                        maxFiles: 5,
+                        allowedTypes: ["image/jpeg", "image/png"],
+                        maxSize: 3,
+                      })}
+                    />
+                  </Button>
+                  
+                  {safeData.exteriorOutlet?.length > 0 && (
+                    <Box sx={{ mt: 2 }}>
+                      <Grid container spacing={1}>
+                        {safeData.exteriorOutlet.map((file, index) => (
+                          <Grid item xs={4} key={index}>
+                            <Box position="relative" sx={{ borderRadius: 1, overflow: 'hidden' }}>
+                              <img
+                                src={createObjectURL(file)}
+                                alt={`Exterior ${index + 1}`}
+                                style={{
+                                  width: '100%',
+                                  height: '80px',
+                                  objectFit: 'cover',
+                                  borderRadius: 4
+                                }}
+                              />
+                              <IconButton
+                                size="small"
+                                onClick={() => handleRemoveFile("exteriorOutlet", index)}
+                                sx={{
+                                  position: "absolute",
+                                  top: 4,
+                                  right: 4,
+                                  backgroundColor: "rgba(244, 67, 54, 0.8)",
+                                  color: "white",
+                                  "&:hover": { backgroundColor: "error.dark" },
+                                  width: 24,
+                                  height: 24
+                                }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                              <Box
+                                sx={{
+                                  position: "absolute",
+                                  bottom: 4,
+                                  left: 4,
+                                  backgroundColor: "rgba(0, 0, 0, 0.6)",
+                                  color: "white",
+                                  borderRadius: 1,
+                                  px: 0.5,
+                                  fontSize: '0.6rem'
+                                }}
+                              >
+                                {index + 1}
+                              </Box>
+                            </Box>
+                          </Grid>
+                        ))}
+                      </Grid>
+                      <Typography
+                        variant="caption"
+                        color={safeData.exteriorOutlet.length < 3 ? "error" : "textSecondary"}
+                        sx={{ display: 'flex', alignItems: 'center', mt: 1 }}
+                      >
+                        {safeData.exteriorOutlet.length < 3 ? (
+                          <>
+                            <ErrorOutlineIcon fontSize="small" sx={{ mr: 0.5 }} />
+                            {3 - safeData.exteriorOutlet.length} more required
+                          </>
+                        ) : (
+                          <CheckCircleIcon color="success" fontSize="small" sx={{ mr: 0.5 }} />
+                        )}
+                        {safeData.exteriorOutlet.length} uploaded
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </FileUploadCard>
+              {errors.exteriorOutlet && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  {errors.exteriorOutlet}
+                </Alert>
+              )}
+            </Grid>
+            
+            {/* Interior Images */}
+            <Grid item xs={12} md={6}>
+              <FileUploadCard>
+                <Box sx={{ 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
+                  flexGrow: 1,
+                  justifyContent: 'center'
+                }}>
+                  <PhotoCameraIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Interior Outlet Images (3 required)
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    JPG, PNG (Max 3MB)
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ mt: 'auto' }}>
+                  <Button
+                    component="label"
+                    variant="contained"
+                    startIcon={<PhotoCameraIcon />}
+                    sx={{ 
+                      mt: 2,
+                      backgroundColor: '#ff9800',
+                      width: '100%',
+                      '&:hover': { backgroundColor: '#fb8c00' }
+                    }}
+                  >
+                    Upload Interior
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept="image/jpeg,image/png"
+                      multiple
+                      onChange={handleFileChange("interiorOutlet", {
+                        maxFiles: 5,
+                        allowedTypes: ["image/jpeg", "image/png"],
+                        maxSize: 3,
+                      })}
+                    />
+                  </Button>
+                  
+                  {safeData.interiorOutlet?.length > 0 && (
+                    <Box sx={{ mt: 2 }}>
+                      <Grid container spacing={1}>
+                        {safeData.interiorOutlet.map((file, index) => (
+                          <Grid item xs={4} key={index}>
+                            <Box position="relative" sx={{ borderRadius: 1, overflow: 'hidden' }}>
+                              <img
+                                src={createObjectURL(file)}
+                                alt={`Interior ${index + 1}`}
+                                style={{
+                                  width: '100%',
+                                  height: '80px',
+                                  objectFit: 'cover',
+                                  borderRadius: 4
+                                }}
+                              />
+                              <IconButton
+                                size="small"
+                                onClick={() => handleRemoveFile("interiorOutlet", index)}
+                                sx={{
+                                  position: "absolute",
+                                  top: 4,
+                                  right: 4,
+                                  backgroundColor: "rgba(244, 67, 54, 0.8)",
+                                  color: "white",
+                                  "&:hover": { backgroundColor: "error.dark" },
+                                  width: 24,
+                                  height: 24
+                                }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                              <Box
+                                sx={{
+                                  position: "absolute",
+                                  bottom: 4,
+                                  left: 4,
+                                  backgroundColor: "rgba(0, 0, 0, 0.6)",
+                                  color: "white",
+                                  borderRadius: 1,
+                                  px: 0.5,
+                                  fontSize: '0.6rem'
+                                }}
+                              >
+                                {index + 1}
+                              </Box>
+                            </Box>
+                          </Grid>
+                        ))}
+                      </Grid>
+                      <Typography
+                        variant="caption"
+                        color={safeData.interiorOutlet.length < 3 ? "error" : "textSecondary"}
+                        sx={{ display: 'flex', alignItems: 'center', mt: 1 }}
+                      >
+                        {safeData.interiorOutlet.length < 3 ? (
+                          <>
+                            <ErrorOutlineIcon fontSize="small" sx={{ mr: 0.5 }} />
+                            {3 - safeData.interiorOutlet.length} more required
+                          </>
+                        ) : (
+                          <CheckCircleIcon color="success" fontSize="small" sx={{ mr: 0.5 }} />
+                        )}
+                        {safeData.interiorOutlet.length} uploaded
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </FileUploadCard>
+              {errors.interiorOutlet && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  {errors.interiorOutlet}
+                </Alert>
+              )}
+            </Grid>
+          </Grid>
+        </Grid>
+
+        {/* Awards & Recognitions Section */}
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+            <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>5</Avatar>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>Awards & Recognitions</Typography>
+          </Box>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={5}>
+              <TextField
+                label="Awards text *"
+                fullWidth
+                value={safeData.awardsText || ""}
+                onChange={(e) => safeOnChange({ awardsText: e.target.value })}
+                placeholder="List any awards or recognitions your brand has received"
+                variant="outlined"
+                sx={{ mb: 2 }}
+              />
+            </Grid>
+            
+            <Grid item xs={12} md={5}>
+              <FileUploadCard>
+                <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                  <Button
+                    component="label"
+                    variant="contained"
+                    startIcon={<CloudUploadIcon />}
+                    sx={{
+                      backgroundColor: '#ff9800',
+                      width: '100%',
+                      '&:hover': { backgroundColor: '#fb8c00' }
+                    }}
+                  >
+                    Upload Documents
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept=".pdf,.doc,.docx,image/jpeg,image/png"
+                      multiple
+                      onChange={handleFileChange("awardsDocuments", {
+                        maxFiles: 1,
+                        allowedTypes: [
+                          "application/pdf",
+                          "application/msword",
+                          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                          "image/jpeg",
+                          "image/png"
+                        ],
+                        maxSize: 1,
+                      })}
+                    />
+                  </Button>
+                </Box>
+              </FileUploadCard>
+            </Grid>
+            
+            <Grid item xs={12} md={2}>
+              <Button
+                onClick={handleAddAward}
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ height: '100%' }}
+                disabled={
+                  !safeData.awardsText ||
+                  !safeData.awardsDocuments ||
+                  safeData.awardsDocuments.length === 0
+                }
+              >
+                Add Awards
+              </Button>
+            </Grid>
           </Grid>
           
-          {/* Interior Images */}
-          <Grid item xs={12} md={6}>
-            <FileUploadCard sx={{ 
-              backgroundColor: '#fafafa',
-              border: '2px dashed #e0e0e0',
-              p: 2,
-              textAlign: 'center'
-            }}>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Interior Outlet Images (3 required)
+          {awardsData.length > 0 && (
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                Saved Awards:
               </Typography>
-              <Button
-                component="label"
-                variant="outlined"
-                startIcon={<PhotoCameraIcon />}
-                size="small"
-                sx={{ mb: 1 }}
-              >
-                Upload Interior
-                <VisuallyHiddenInput
-                  type="file"
-                  accept="image/jpeg,image/png"
-                  multiple
-                  onChange={handleFileChange("interiorOutlet", {
-                    maxFiles: 5,
-                    allowedTypes: ["image/jpeg", "image/png"],
-                    maxSize: 3 * 1024 * 1024,
-                  })}
-                />
-              </Button>
-              <Typography variant="caption" color="textSecondary" display="block">
-                JPG, PNG (Max 3MB )
-              </Typography>
-              
-              {safeData.interiorOutlet?.length > 0 && (
-                <Box sx={{ mt: 2 }}>
-                  <Grid container spacing={1}>
-                    {safeData.interiorOutlet.map((file, index) => (
-                      <Grid item xs={4} key={index}>
-                        <Box position="relative" sx={{ borderRadius: 1, overflow: 'hidden' }}>
-                          <img
-                            src={createObjectURL(file)}
-                            alt={`Interior ${index + 1}`}
-                            style={{
-                              width: '100%',
-                              height: '80px',
-                              objectFit: 'cover',
-                              borderRadius: 4
-                            }}
-                          />
-                          <IconButton
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Description</TableCell>
+                      <TableCell>Documents Count</TableCell>
+                      <TableCell>Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {awardsData.map((award, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{award.awardsText || "No description"}</TableCell>
+                        <TableCell>{award.awardsDocuments?.length || 0}</TableCell>
+                        <TableCell>
+                          <Button 
+                            onClick={() => handleAwardRemove(index)}
+                            color="error"
                             size="small"
-                            onClick={() => handleRemoveFile("interiorOutlet", index)}
-                            sx={{
-                              position: "absolute",
-                              top: 4,
-                              right: 4,
-                              backgroundColor: "rgba(244, 67, 54, 0.8)",
-                              color: "white",
-                              "&:hover": {
-                                backgroundColor: "error.dark",
-                              },
-                            }}
+                            startIcon={<DeleteIcon />}
                           >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              bottom: 4,
-                              left: 4,
-                              backgroundColor: "rgba(0, 0, 0, 0.6)",
-                              color: "white",
-                              borderRadius: 1,
-                              px: 0.5,
-                              fontSize: '0.6rem'
-                            }}
-                          >
-                            {index + 1}
-                          </Box>
-                        </Box>
-                      </Grid>
+                            Remove
+                          </Button>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </Grid>
-                  <Typography
-                    variant="caption"
-                    color={
-                      safeData.interiorOutlet.length < 3
-                        ? "error"
-                        : "textSecondary"
-                    }
-                    sx={{ display: 'flex', alignItems: 'center', mt: 1 }}
-                  >
-                    {safeData.interiorOutlet.length < 3 ? (
-                      <>
-                        <ErrorOutlineIcon fontSize="small" sx={{ mr: 0.5 }} />
-                        {3 - safeData.interiorOutlet.length} more required
-                      </>
-                    ) : (
-                      <CheckCircleIcon color="success" fontSize="small" sx={{ mr: 0.5 }} />
-                    )}
-                    {safeData.interiorOutlet.length} uploaded
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+          )}
+        </Grid>
+
+        {/* Business Plan Section */}
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+            <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>6</Avatar>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>Business Plan (Optional)</Typography>
+          </Box>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <FileUploadCard>
+                <Box sx={{ 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
+                  flexGrow: 1,
+                  justifyContent: 'center'
+                }}>
+                  <DescriptionIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Upload Business Plan Document (Optional)
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    PDF, DOC, DOCX (Max 1MB)
                   </Typography>
                 </Box>
+                
+                <Box sx={{ mt: 'auto' }}>
+                  <Button
+                    component="label"
+                    variant="contained"
+                    startIcon={<DescriptionIcon />}
+                    sx={{ 
+                      mt: 2,
+                      backgroundColor: '#ff9800',
+                      width: '100%',
+                      '&:hover': { backgroundColor: '#fb8c00' }
+                    }}
+                  >
+                    Upload Business Plan
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleFileChange("businessPlan", {
+                        maxFiles: 1,
+                        allowedTypes: [
+                          "application/pdf",
+                          "application/msword",
+                          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        ],
+                        maxSize: 1,
+                      })}
+                    />
+                  </Button>
+                  
+                  {safeData.businessPlan?.length > 0 && (
+                    <Box sx={{ mt: 2, p: 1.5, backgroundColor: '#e8f5e9', borderRadius: 1 }}>
+                      <Box position="relative" sx={{ display: 'inline-block' }}>
+                        <Avatar
+                          variant="rounded"
+                          sx={{ 
+                            width: 80, 
+                            height: 80,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            bgcolor: '#e3f2fd'
+                          }}
+                        >
+                          <PictureAsPdfIcon color="error" fontSize={safeData.businessPlan[0]?.type === 'application/pdf' ? 'large' : 'small'} />
+                        </Avatar>
+                        <IconButton
+                          onClick={() => handleRemoveFile("businessPlan", 0)}
+                          sx={{
+                            position: "absolute",
+                            top: -8,
+                            right: -8,
+                            backgroundColor: "error.main",
+                            color: "white",
+                            "&:hover": { backgroundColor: "error.dark" },
+                            width: 24,
+                            height: 24
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            bottom: -5,
+                            right: -5,
+                            backgroundColor: "success.main",
+                            borderRadius: "50%",
+                            padding: "2px",
+                            color: "white",
+                          }}
+                        >
+                          <CheckCircleIcon fontSize="small" />
+                        </Box>
+                      </Box>
+                      <Typography variant="caption" display="block" sx={{ mt: 1, textAlign: 'center' }}>
+                        {safeData.businessPlan[0]?.name}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </FileUploadCard>
+              {errors.businessPlan && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  {errors.businessPlan}
+                </Alert>
               )}
-            </FileUploadCard>
+            </Grid>
           </Grid>
         </Grid>
-        {/* Awards & Recognitions Section */}
-<Grid item xs={12}>
-  <Box sx={{
-    display: 'flex',
-    alignItems: 'center',
-    mb: 3,
-    gap: 1
-  }}>
-    <Avatar sx={{ 
-      bgcolor: '#ff9800', 
-      width: 32, 
-      height: 32,
-      fontSize: '1rem'
-    }}>
-      5
-    </Avatar>
-    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-      Awards & Recognitions
-    </Typography>
-  </Box>
-  
-  <Grid container spacing={3} display={'flex'} flexDirection={'column'}>
-    {/* Text Input for Awards */}
-    <Grid item xs={12} md={6}>
-      <TextField
-        label="Awards & Recognitions (Text)"
-        fullWidth
-        multiline
-        rows={4}
-        value={safeData.awardsText || ""}
-        onChange={(e) => safeOnChange({ awardsText: e.target.value })}
-        placeholder="List any awards or recognitions your brand has received"
-        variant="outlined"
-        sx={{ mb: 2 }}
-      />
-    </Grid>
-    
-    {/* File Upload for Awards */}
-    <Grid item xs={12} md={6}>
-      <FileUploadCard sx={{ 
-        backgroundColor: '#fafafa',
-        border: '2px dashed #e0e0e0',
-        p: 2,
-        textAlign: 'center',
-        height: '100%'
-      }}>
-        <Typography variant="subtitle2" sx={{ mb: 1 }}>
-          Awards & Recognitions Documents (Optional)
-        </Typography>
-        <Button
-          component="label"
-          variant="outlined"
-          startIcon={<DescriptionIcon />}
-          size="small"
-          sx={{ mb: 1 }}
-        >
-          Upload Documents
-          <VisuallyHiddenInput
-            type="file"
-            accept=".pdf,.doc,.docx,image/jpeg,image/png"
-            multiple
-            onChange={handleFileChange("awardsDocuments", {
-              maxFiles: 5,
-              allowedTypes: ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "image/jpeg", "image/png"],
-              maxSize: 1 * 1024 * 1024,
-            })}
-          />
-        </Button>
-        <Typography variant="caption" color="textSecondary" display="block">
-          PDF, DOC, JPG, PNG (Max 1MB each)
-        </Typography>
-        
-        {safeData.awardsDocuments?.length > 0 && (
-          <Box sx={{ mt: 2 }}>
-            <List dense>
-              {safeData.awardsDocuments.map((file, index) => (
-                <ListItem 
-                  key={index}
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      onClick={() => handleRemoveFile("awardsDocuments", index)}
-                      size="small"
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  }
-                  sx={{
-                    backgroundColor: '#f5f5f5',
-                    borderRadius: 1,
-                    mt: 0.5
-                  }}
-                >
-                  <ListItemAvatar>
-                    <Avatar sx={{ 
-                      bgcolor: file.type.includes('image') ? '#e3f2fd' : '#fff8e1',
-                    }}>
-                      {file.type.includes('image') ? (
-                        <PhotoCameraIcon color="primary" />
-                      ) : (
-                        <PictureAsPdfIcon color="secondary" />
-                      )}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={file.name}
-                    primaryTypographyProps={{ variant: 'caption' }}
-                    secondary={`${(file.size / 1024 / 1024).toFixed(2)} MB`}
-                    secondaryTypographyProps={{ variant: 'caption' }}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-        )}
-      </FileUploadCard>
-    </Grid>
-  </Grid>
-</Grid>
-
-{/* Business Plan Section */}
-<Grid item xs={12}>
-  <Box sx={{
-    display: 'flex',
-    alignItems: 'center',
-    mb: 3,
-    gap: 1
-  }}>
-    <Avatar sx={{ 
-      bgcolor: '#ff9800', 
-      width: 32, 
-      height: 32,
-      fontSize: '1rem'
-    }}>
-      6
-    </Avatar>
-    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-      Business Plan (Optional)
-    </Typography>
-  </Box>
-  
-  <FileUploadCard sx={{ 
-    backgroundColor: '#fafafa',
-    border: '2px dashed #e0e0e0',
-    p: 2,
-    textAlign: 'center'
-  }}>
-    <Typography variant="subtitle2" sx={{ mb: 1 }}>
-      Upload Business Plan Document (Optional)
-    </Typography>
-    <Button
-      component="label"
-      variant="outlined"
-      startIcon={<DescriptionIcon />}
-      size="small"
-      sx={{ mb: 1 }}
-    >
-      Upload Business Plan
-      <VisuallyHiddenInput
-        type="file"
-        accept=".pdf,.doc,.docx"
-        onChange={handleFileChange("businessPlan", {
-          maxFiles: 1,
-          allowedTypes: ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
-          maxSize: 1 * 1024 * 1024,
-        })}
-      />
-    </Button>
-    <Typography variant="caption" color="textSecondary" display="block">
-      PDF, DOC, DOCX (Max 1MB)
-    </Typography>
-    
-    {safeData.businessPlan?.length > 0 && (
-      <Box sx={{ 
-        mt: 2,
-        p: 1,
-        backgroundColor: '#e8f5e9',
-        borderRadius: 1
-      }}>
-        {safeData.businessPlan.map((file, index) => (
-          <Chip
-            key={index}
-            label={file.name}
-            onDelete={() => handleRemoveFile("businessPlan", index)}
-            deleteIcon={<DeleteIcon />}
-            sx={{ m: 0.5 }}
-            color="success"
-            variant="outlined"
-            icon={
-              file.type.includes('pdf') ? 
-                <PictureAsPdfIcon color="error" /> : 
-                <DescriptionIcon color="primary" />
-            }
-          />
-        ))}
-      </Box>
-    )}
-  </FileUploadCard>
-</Grid>
-    </Grid>
-  </Grid>
-</ScrollableContent>
-   
+      </Grid>
+    </ScrollableContent>
   );
 };
 
 export default Uploads;
-
