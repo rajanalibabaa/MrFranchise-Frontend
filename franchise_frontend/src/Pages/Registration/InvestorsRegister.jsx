@@ -18,6 +18,7 @@ import {
   Button,
   Typography,
   Link,
+  Autocomplete,
   Paper,
   InputAdornment,
   Box,
@@ -309,6 +310,7 @@ const [selectedChild, setSelectedChild] = useState('');
       preferredCity: watch("preferredCity"),
       propertyType: watch("propertyType"),
       propertySize: watch("propertyType") === "Own Property" ? watch("propertySize") : "",
+   locationType: watch("preferredLocationType"),
     };
     if (
       !pref.category.length ||
@@ -423,7 +425,6 @@ alert('Add Multiple preferences to get more offers from us!','info')
     },
   });
 
-  
   // Handler for the first category dropdown
   const handleCategorySelection = (main, sub, child) => {
     const newCategory = { main, sub, child };
@@ -450,7 +451,7 @@ alert('Add Multiple preferences to get more offers from us!','info')
   //   setOtpModal({
   //     open: true,
   //     type,
-  //     otp: "",F
+  //     otp: "",
   //     loading: false,
   //     verified: otpStates[type]?.verified || false,
   //   });
@@ -572,27 +573,39 @@ useEffect(() => {
     ...(data.occupation === "Other" && {
       specifyOccupation: data.otherOccupation || "",
     }),
-  preferences: preferences.map(pref => ({
-  category: Array.isArray(pref.category)
-    ? pref.category.map(c => ({
-        main: c.main || "",
-        sub: c.sub || "",
-        child: c.child || ""
-      }))
-    : typeof pref.category === "string"
-      ? [(() => {
-          const [main, sub, child] = pref.category.split(">").map(s => s.trim());
-          return { main, sub, child };
-        })()]
-      : [],
-  investmentRange: pref.investmentRange,
-  investmentAmount: pref.investmentAmount,
-  propertyType: pref.propertyType,
-  propertySize: pref.propertyType === "Own Property" ? pref.propertySize : "",
-  preferredState: pref.preferredState,
-  preferredDistrict: pref.preferredDistrict,
-  preferredCity: pref.preferredCity,
-}))
+  preferences: preferences.map(pref => {
+    const isInternational = pref.locationType === "international";
+    return {
+      category: Array.isArray(pref.category)
+        ? pref.category.map(c => ({
+            main: c.main || "",
+            sub: c.sub || "",
+            child: c.child || ""
+          }))
+        : typeof pref.category === "string"
+          ? [(() => {
+              const [main, sub, child] = pref.category.split(">").map(s => s.trim());
+              return { main, sub, child };
+            })()]
+          : [],
+      investmentRange: pref.investmentRange,
+      investmentAmount: pref.investmentAmount,
+      propertyType: pref.propertyType,
+      propertySize: pref.propertyType === "Own Property" ? pref.propertySize : "",
+      ...(isInternational
+        ? {
+            country: pref.preferredState,
+            state: pref.preferredDistrict,
+            city: pref.preferredCity,
+          }
+        : {
+            state: pref.preferredState,
+            district: pref.preferredDistrict,
+            city: pref.preferredCity,
+          }),
+      locationType: pref.locationType, 
+    };
+  }),
 
       // category: selectedCategories,
       // investmentRange: data.investmentRange || "",
@@ -993,7 +1006,7 @@ useEffect(() => {
                   label="WhatsApp Number"
                   fullWidth
                   variant="outlined"
-                  disabled={!whatsappEnabled}
+                  // disabled={!whatsappEnabled}
                   error={!!errors.whatsappNumber}
                   helperText={errors.whatsappNumber?.message || " "}
                   inputProps={{
@@ -1075,35 +1088,36 @@ useEffect(() => {
       name="country"
       control={control}
       render={({ field }) => (
-        <FormControl fullWidth  variant="outlined">
-          <InputLabel id="country-label">Country</InputLabel>
-          <Select
-            {...field}
-            labelId="country-label"
+     <Autocomplete
+        options={countries}
+        getOptionLabel={(option) => option.name || ""}
+        isOptionEqualToValue={(option, value) => option.name === value}
+        value={countries.find(c => c.name === field.value) || null}
+        onChange={(_, newValue) => {
+          field.onChange(newValue ? newValue.name : "");
+          setSelectedCountry(newValue ? newValue.name : "");
+          setValue("state", "");
+          setValue("city", "");
+          setValue("pincode", "");
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
             label="Country"
-            value={field.value || ""}
-            onChange={e => {
-              field.onChange(e.target.value);
-              setSelectedCountry(e.target.value);
-              setValue("state", "");
-              setValue("city", "");
-              setValue("pincode", "");
-            }}
-            sx={{
-              borderRadius: '8px',
-              backgroundColor: "background.paper"
-            }}
-          >
-            <MenuItem value="">Select Country</MenuItem>
-            {countries.map((country) => (
-              <MenuItem key={country.code} value={country.name}>
-                {country.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      )}
-    />
+            variant="outlined"
+            error={!!errors.country}
+            helperText={errors.country?.message || " "}
+            InputLabelProps={{ shrink: true }}
+          />
+        )}
+        fullWidth
+        sx={{
+          borderRadius: '8px',
+          backgroundColor: "background.paper"
+        }}
+      />
+    )}
+  />
   </Grid></Grid>
 <Grid
               container
@@ -1355,6 +1369,7 @@ useEffect(() => {
               <InputLabel>Industry</InputLabel>
               <Select
                 value={selectedMainCategory || ''}
+                
                 onChange={(e) => {
                   setSelectedMainCategory(e.target.value);
                   setSelectedSubCategory('');
@@ -2087,6 +2102,7 @@ useEffect(() => {
           type="submit"
           variant="contained"
           size="large"
+          disabled={preferences.length === 0}
           sx={{
             width: { xs: '100%', sm: 'auto' },
             minWidth: '200px',
