@@ -1653,7 +1653,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               color="primary"
             />
           }
-          label={
+          label={ 
             <Typography variant="body2" sx={{ width: "145px" }}>
               {option}
             </Typography>
