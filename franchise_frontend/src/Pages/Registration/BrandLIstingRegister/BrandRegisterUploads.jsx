@@ -195,135 +195,120 @@ const Uploads = ({
 
   return (
     <ScrollableContent>
-      <Grid container spacing={{ xs: 3, md: 4 }} sx={{ alignItems: 'stretch' }}>
 
         {/* Brand Logo Section */}
-        <Grid item xs={12} md={6}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
-            <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>1</Avatar>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>Brand Logo</Typography>
-          </Box>
-          
-          <FileUploadCard>
-            <Box sx={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 1,
-              flexGrow: 1,
-              justifyContent: 'center'
-            }}>
-              <CloudUploadIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
-              <Typography variant="body2" color="textSecondary" gutterBottom>
-                Drag & drop your logo here or click to browse
-              </Typography>
-              <Typography variant="caption" color="textSecondary">
-                Accepted formats: JPG, PNG (Max 10MB)
-              </Typography>
-            </Box>
-            
-            <Box sx={{ mt: 'auto' }}>
-              <Button
-                component="label"
-                variant="contained"
-                startIcon={<CloudUploadIcon />}
-                sx={{ 
-                  mt: 3,
-                  backgroundColor: '#ff9800',
-                  width: '100%',
-                  '&:hover': { backgroundColor: '#fb8c00' }
+      <Grid item xs={12} md={6}>
+  <Box display="flex" flexDirection="column" gap={2}>
+    {/* Header Row */}
+    <Box display="flex" alignItems="center" gap={2}>
+      <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>1</Avatar>
+      <Typography variant="h6" sx={{ fontWeight: 600 }}>Brand Logo</Typography>
+    </Box>
+
+    {/* Description Row */}
+    <Box>
+      <Typography variant="caption" color="textSecondary">
+        Drag & drop your logo here or click to browse
+      </Typography>
+      <Typography variant="caption" color="textSecondary">
+        Accepted formats: JPG, PNG (Max 10MB)
+      </Typography>
+    </Box>
+
+    {/* Upload & Preview Section */}
+    <Box display="flex" flexDirection="row" alignItems="center" gap={2}>
+      {/* Upload Button */}
+      <Button
+        component="label"
+        variant="contained"
+        startIcon={<CloudUploadIcon />}
+        sx={{
+          backgroundColor: '#ff9800',
+          '&:hover': { backgroundColor: '#fb8c00' }
+        }}
+      >
+        Upload Logo
+        <VisuallyHiddenInput
+          type="file"
+          accept="image/jpeg,image/png"
+          onChange={handleFileChange("brandLogo", {
+            maxFiles: 1,
+            allowedTypes: ["image/jpeg", "image/png"],
+            maxSize: 10,
+          })}
+        />
+      </Button>
+
+      {/* Preview Thumbnails */}
+      {safeData.brandLogo?.length > 0 && (
+        <Stack direction="row" spacing={2}>
+          {safeData.brandLogo.map((file, index) => (
+            <Box key={index} position="relative">
+              <Avatar
+                src={createObjectURL(file)}
+                sx={{ width: 80, height: 80, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', borderRadius: '50%' }}
+                variant="rounded"
+              />
+              <IconButton
+                onClick={() => handleRemoveFile("brandLogo", index)}
+                sx={{
+                  position: "absolute",
+                  top: -8,
+                  right: -8,
+                  backgroundColor: "error.main",
+                  color: "white",
+                  '&:hover': { backgroundColor: "error.dark" },
+                  width: 24,
+                  height: 24
                 }}
               >
-                Upload Logo
-                <VisuallyHiddenInput
-                  type="file"
-                  accept="image/jpeg,image/png"
-                  onChange={handleFileChange("brandLogo", {
-                    maxFiles: 1,
-                    allowedTypes: ["image/jpeg", "image/png"],
-                    maxSize: 10,
-                  })}
-                />
-              </Button>
-              
-              {safeData.brandLogo?.length > 0 && (
-                <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e9', borderRadius: 1 }}>
-                  <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
-                    {safeData.brandLogo.map((file, index) => (
-                      <Box key={index} position="relative">
-                        <Avatar
-                          src={createObjectURL(file)}
-                          sx={{ width: 80, height: 80, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-                          variant="rounded"
-                        />
-                        <IconButton
-                          onClick={() => handleRemoveFile("brandLogo", index)}
-                          sx={{
-                            position: "absolute",
-                            top: -8,
-                            right: -8,
-                            backgroundColor: "error.main",
-                            color: "white",
-                            "&:hover": { backgroundColor: "error.dark" },
-                            width: 24,
-                            height: 24
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            bottom: -5,
-                            right: -5,
-                            backgroundColor: "success.main",
-                            borderRadius: "50%",
-                            padding: "2px",
-                            color: "white",
-                          }}
-                        >
-                          <CheckCircleIcon fontSize="small" />
-                        </Box>
-                      </Box>
-                    ))}
-                  </Stack>
-                </Box>
-              )}
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+              <Box
+                sx={{
+                  position: "absolute",
+                  bottom: -5,
+                  right: -5,
+                  backgroundColor: "success.main",
+                  borderRadius: "50%",
+                  padding: "2px",
+                  color: "white",
+                }}
+              >
+                <CheckCircleIcon fontSize="small" />
+              </Box>
             </Box>
-          </FileUploadCard>
-          {errors.brandLogo && (
-            <Alert severity="error" sx={{ mt: 1 }}>
-              {errors.brandLogo}
-            </Alert>
-          )}
-        </Grid>
+          ))}
+        </Stack>
+      )}
+    </Box>
+
+    {/* Error Message */}
+    {errors.brandLogo && (
+      <Alert severity="error">
+        {errors.brandLogo}
+      </Alert>
+    )}
+  </Box>
+</Grid>
+
 
         {/* Videos Section */}
         <Grid item xs={12} md={6}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
             <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}>2</Avatar>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>Promotion Videos</Typography>
-          </Box>
-          
-          <FileUploadCard>
-            <Box sx={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 1,
-              flexGrow: 1,
-              justifyContent: 'center'
-            }}>
-              <VideoCameraBackIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
-              <Typography variant="body2" color="textSecondary" gutterBottom>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
                 Drag & drop your videos here or click to browse
               </Typography>
               <Typography variant="caption" color="textSecondary">
                 Accepted formats: MP4, MOV (Max 40MB)
               </Typography>
-            </Box>
+          </Box>
+          
+         
             
-            <Box sx={{ mt: 'auto' }}>
+            <Box >
               <Button
                 component="label"
                 variant="contained"
@@ -331,7 +316,6 @@ const Uploads = ({
                 sx={{ 
                   mt: 3,
                   backgroundColor: '#ff9800',
-                  width: '100%',
                   '&:hover': { backgroundColor: '#fb8c00' }
                 }}
               >
@@ -349,7 +333,6 @@ const Uploads = ({
               </Button>
               
               {safeData.franchisePromotionVideo?.length > 0 && (
-                <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e9', borderRadius: 1 }}>
                   <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
                     {safeData.franchisePromotionVideo.map((file, index) => (
                       <Box key={index} position="relative">
@@ -395,10 +378,8 @@ const Uploads = ({
                       </Box>
                     ))}
                   </Stack>
-                </Box>
               )}
             </Box>
-          </FileUploadCard>
           {errors.franchisePromotionVideo && (
             <Alert severity="error" sx={{ mt: 1 }}>
               {errors.franchisePromotionVideo}
@@ -416,6 +397,12 @@ const Uploads = ({
           <Grid container spacing={3}>
             {/* PAN Card */}
             <Grid item xs={12} md={6}>
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Drag & drop your PAN card here or click to browse
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    Accepted formats: PDF, JPG, PNG (Max 1MB)
+                  </Typography>
               <TextField
                 label="PAN Number *"
                 fullWidth
@@ -432,23 +419,7 @@ const Uploads = ({
                 variant="outlined"
               />
               
-              <FileUploadCard>
-                <Box sx={{ 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 1,
-                  flexGrow: 1,
-                  justifyContent: 'center'
-                }}>
-                  <DescriptionIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Drag & drop your PAN card here or click to browse
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    Accepted formats: PDF, JPG, PNG (Max 1MB)
-                  </Typography>
-                </Box>
+          
                 
                 <Box sx={{ mt: 'auto' }}>
                   <Button
@@ -475,7 +446,7 @@ const Uploads = ({
                   </Button>
                   
                   {safeData.pancard?.length > 0 && (
-                    <Box sx={{ mt: 2, p: 1.5, backgroundColor: '#e8f5e9', borderRadius: 1 }}>
+                    <Box sx={{ mt: 2, p: 1.5,  borderRadius: 1 }}>
                       <Box position="relative" sx={{ display: 'inline-block' }}>
                         <Avatar
                           variant="rounded"
@@ -523,7 +494,6 @@ const Uploads = ({
                     </Box>
                   )}
                 </Box>
-              </FileUploadCard>
               {errors.pancard && (
                 <Alert severity="error" sx={{ mt: 1 }}>
                   {errors.pancard}
@@ -533,6 +503,13 @@ const Uploads = ({
             
             {/* GST Certificate */}
             <Grid item xs={12} md={6}>
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Drag & drop your GST certificate here or click to browse
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    Accepted formats: PDF, JPG, PNG (Max 1MB)
+                  </Typography>
+
               <TextField
                 label="GST Number *"
                 fullWidth
@@ -549,25 +526,9 @@ const Uploads = ({
                 variant="outlined"
               />
               
-              <FileUploadCard>
-                <Box sx={{ 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 1,
-                  flexGrow: 1,
-                  justifyContent: 'center'
-                }}>
-                  <DescriptionIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Drag & drop your GST certificate here or click to browse
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    Accepted formats: PDF, JPG, PNG (Max 1MB)
-                  </Typography>
-                </Box>
+             
                 
-                <Box sx={{ mt: 'auto' }}>
+                <Box >
                   <Button
                     component="label"
                     variant="contained"
@@ -592,7 +553,7 @@ const Uploads = ({
                   </Button>
                   
                   {safeData.gstCertificate?.length > 0 && (
-                    <Box sx={{ mt: 2, p: 1.5, backgroundColor: '#e8f5e9', borderRadius: 1 }}>
+                    <Box sx={{ mt: 2, p: 1.5,  borderRadius: 1 }}>
                       <Box position="relative" sx={{ display: 'inline-block' }}>
                         <Avatar
                           variant="rounded"
@@ -640,7 +601,6 @@ const Uploads = ({
                     </Box>
                   )}
                 </Box>
-              </FileUploadCard>
               {errors.gstCertificate && (
                 <Alert severity="error" sx={{ mt: 1 }}>
                   {errors.gstCertificate}
@@ -660,23 +620,13 @@ const Uploads = ({
           <Grid container spacing={3}>
             {/* Exterior Images */}
             <Grid item xs={12} md={6}>
-              <FileUploadCard>
-                <Box sx={{ 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 1,
-                  flexGrow: 1,
-                  justifyContent: 'center'
-                }}>
-                  <PhotoCameraIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
+               <Typography variant="body2" color="textSecondary" gutterBottom>
                     Exterior Outlet Images (3 required)
                   </Typography>
                   <Typography variant="caption" color="textSecondary">
                     JPG, PNG (Max 3MB)
                   </Typography>
-                </Box>
+                
                 
                 <Box sx={{ mt: 'auto' }}>
                   <Button
@@ -771,7 +721,6 @@ const Uploads = ({
                     </Box>
                   )}
                 </Box>
-              </FileUploadCard>
               {errors.exteriorOutlet && (
                 <Alert severity="error" sx={{ mt: 1 }}>
                   {errors.exteriorOutlet}
@@ -781,23 +730,13 @@ const Uploads = ({
             
             {/* Interior Images */}
             <Grid item xs={12} md={6}>
-              <FileUploadCard>
-                <Box sx={{ 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 1,
-                  flexGrow: 1,
-                  justifyContent: 'center'
-                }}>
-                  <PhotoCameraIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
+              <Typography variant="body2" color="textSecondary" gutterBottom>
                     Interior Outlet Images (3 required)
                   </Typography>
                   <Typography variant="caption" color="textSecondary">
                     JPG, PNG (Max 3MB)
                   </Typography>
-                </Box>
+               
                 
                 <Box sx={{ mt: 'auto' }}>
                   <Button
@@ -892,7 +831,6 @@ const Uploads = ({
                     </Box>
                   )}
                 </Box>
-              </FileUploadCard>
               {errors.interiorOutlet && (
                 <Alert severity="error" sx={{ mt: 1 }}>
                   {errors.interiorOutlet}
@@ -923,7 +861,6 @@ const Uploads = ({
             </Grid>
             
             <Grid item xs={12} md={5}>
-              <FileUploadCard>
                 <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
                   <Button
                     component="label"
@@ -954,7 +891,6 @@ const Uploads = ({
                     />
                   </Button>
                 </Box>
-              </FileUploadCard>
             </Grid>
             
             <Grid item xs={12} md={2}>
@@ -1021,24 +957,14 @@ const Uploads = ({
           </Box>
           
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <FileUploadCard>
-                <Box sx={{ 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 1,
-                  flexGrow: 1,
-                  justifyContent: 'center'
-                }}>
-                  <DescriptionIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 1 }} />
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
+             <Typography variant="body2" color="textSecondary" gutterBottom>
                     Upload Business Plan Document (Optional)
                   </Typography>
                   <Typography variant="caption" color="textSecondary">
                     PDF, DOC, DOCX (Max 1MB)
                   </Typography>
-                </Box>
+            <Grid item xs={12} md={6}>
+               
                 
                 <Box sx={{ mt: 'auto' }}>
                   <Button
@@ -1117,7 +1043,6 @@ const Uploads = ({
                     </Box>
                   )}
                 </Box>
-              </FileUploadCard>
               {errors.businessPlan && (
                 <Alert severity="error" sx={{ mt: 1 }}>
                   {errors.businessPlan}
@@ -1126,7 +1051,6 @@ const Uploads = ({
             </Grid>
           </Grid>
         </Grid>
-      </Grid>
     </ScrollableContent>
   );
 };
