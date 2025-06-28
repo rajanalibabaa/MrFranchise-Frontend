@@ -972,10 +972,11 @@ const renderDomesticStateDrawer = useCallback(
     const toggle = (open) => toggleDrawer(type, { states: open });
 
     return (
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 4,mb:3 }}>
         <Button
           variant="outlined"
           fullWidth
+          color="warning"
           onClick={() => toggle(true)}
           endIcon={<ChevronDown />}
           sx={{ justifyContent: "space-between" }}
@@ -986,6 +987,7 @@ const renderDomesticStateDrawer = useCallback(
         </Button>
 
         <Drawer
+        
           anchor="top"
           open={
             type === "current" ? currentDrawerOpen.states : drawerOpen.states
@@ -1008,15 +1010,18 @@ const renderDomesticStateDrawer = useCallback(
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              mb: 2,
+              
             }}
           >
-            <Typography variant="h6">Select States</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
+            <Typography  variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>Select States :</Typography>
+                                          <Button variant="outlined" color="warning" sx={{ padding: "10px", borderRadius: "5px",mb: 3}}  onClick={() => toggle(false)}>Add Your Selected States</Button>
+
           </Box>
 
           <TextField
-            fullWidth
+            // fullWidth
             placeholder="Search states..."
             variant="outlined"
             size="small"
@@ -1026,6 +1031,7 @@ const renderDomesticStateDrawer = useCallback(
               startAdornment: <Search size={18} style={{ marginRight: 8 }} />,
             }}
           />
+
 
           {/* Selected states chips */}
           {selections.selectedStates.length > 0 && (
@@ -1040,7 +1046,9 @@ const renderDomesticStateDrawer = useCallback(
                 p: 1,
               }}
             >
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              <Typography  variant="subtitle1"
+        fontWeight={500}
+        sx={{ mb:1, color: "#ff9800" }} >
                 Selected States:
               </Typography>
               <Box
@@ -1072,14 +1080,16 @@ const renderDomesticStateDrawer = useCallback(
             <Box
               sx={{
                 display: "grid",
+                m: 5,
                 gridTemplateColumns: "repeat(5, 1fr)",
                 gap: 1,
+                
               }}
             >
               {sortedStates.map((state) => {
                 const isSelected = selections.selectedStates.includes(state.name);
                 return (
-                  <Box key={`state-${state.name}`}>
+                  <Box key={`state-${state.name}`} >
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -1100,7 +1110,9 @@ const renderDomesticStateDrawer = useCallback(
                 );
               })}
             </Box>
+
           </Box>
+          
         </Drawer>
 
         {/* Selected states outside drawer */}
@@ -1126,7 +1138,6 @@ const renderDomesticStateDrawer = useCallback(
                     );
                     handleDomesticStateSelection(newSelected, type);
                   }}
-                  color="primary"
                   variant="outlined"
                 />
               ))}
@@ -1164,9 +1175,10 @@ const renderDomesticStateDrawer = useCallback(
     });
 
     return (
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 3,mb: 3 }}>
         <Button
           variant="outlined"
+          color="warning"
           fullWidth
           onClick={() => toggle(true)}
           endIcon={<ChevronDown />}
@@ -1206,8 +1218,10 @@ const renderDomesticStateDrawer = useCallback(
               mb: 2,
             }}
           >
-            <Typography variant="h6">Select Districts</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
+            <Typography  variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>Select Districts</Typography>
+            <Button variant="outlined" color="warning" onClick={() => toggle(false)}>Add Your Selected District</Button>
           </Box>
 
           <TextField
@@ -1305,7 +1319,7 @@ const renderDomesticStateDrawer = useCallback(
                     {districts.map((district) => {
                       const isSelected = selectedDistrictsForState.includes(district);
                       return (
-                        <Box key={`district-${stateName}-${district}`}>
+                        <Box key={`district-${stateName}-${district}`} >
                           <FormControlLabel
                             control={
                               <Checkbox
@@ -1363,7 +1377,6 @@ const renderDomesticStateDrawer = useCallback(
                           type
                         )
                       }
-                      color="secondary"
                       variant="outlined"
                     />
                   ))}
@@ -1415,8 +1428,9 @@ const renderDomesticCityDrawer = useCallback(
     });
 
     return (
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 3,mb:3 }}>
         <Button
+          color="warning"
           variant="outlined"
           fullWidth
           onClick={() => toggle(true)}
@@ -1456,7 +1470,7 @@ const renderDomesticCityDrawer = useCallback(
             }}
           >
             <Typography variant="h6">Select Cities</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
+            <Button variant="outlined" color="warning" onClick={() => toggle(false)}>Add Your Selected Cities</Button>
           </Box>
 
           <TextField
@@ -1515,7 +1529,6 @@ const renderDomesticCityDrawer = useCallback(
                               type
                             )
                           }
-                          color="primary"
                           variant="outlined"
                         />
                       ))}
@@ -1658,9 +1671,10 @@ const renderInternationalCountryDrawer = useCallback(
     const toggle = (open) => toggleDrawer(type, { countries: open });
 
     return (
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 3,mb: 3 }}>
         <Button
           variant="outlined"
+          color="success"
           fullWidth
           onClick={() => toggle(true)}
           endIcon={<ChevronDown />}
@@ -1700,7 +1714,7 @@ const renderInternationalCountryDrawer = useCallback(
             }}
           >
             <Typography variant="h6">Select Countries</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
+            <Button variant="outlined" color="warning" onClick={() => toggle(false)}>Add Your Selected Country</Button>
           </Box>
 
           <TextField
@@ -1751,7 +1765,6 @@ const renderInternationalCountryDrawer = useCallback(
                         type
                       );
                     }}
-                    color="primary"
                     variant="outlined" 
                   />
                 ))}
@@ -1825,7 +1838,7 @@ const renderInternationalCountryDrawer = useCallback(
                       type
                     );
                   }}
-                  color="primary"
+                  
                   variant="outlined"
                 />
               ))}
@@ -1859,9 +1872,10 @@ const renderInternationalCountryDrawer = useCallback(
     if (selections.selectedCountries.length === 0) return null;
 
     return (
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 3 ,mb:3}}>
         <Button
           variant="outlined"
+          color="success"
           fullWidth
           onClick={() => toggle(true)}
           endIcon={<ChevronDown />}
@@ -1904,7 +1918,7 @@ const renderInternationalCountryDrawer = useCallback(
             }}
           >
             <Typography variant="h6">Select States</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
+            <Button variant="outlined" color="warning" onClick={() => toggle(false)}>Add Your Selected States</Button>
           </Box>
 
           <TextField
@@ -1961,7 +1975,7 @@ const renderInternationalCountryDrawer = useCallback(
                               type
                             )
                           }
-                          color="primary"
+                          
                           variant="outlined"
                         />
                       ))}
@@ -2061,7 +2075,7 @@ const renderInternationalCountryDrawer = useCallback(
                             type
                           )
                         }
-                        color="secondary"
+                        
                         variant="outlined"
                         sx={{
                           "& .MuiChip-label": {
@@ -2107,9 +2121,10 @@ const renderInternationalCityDrawer = useCallback(
     if (Object.keys(selections.selectedStates).length === 0) return null;
 
     return (
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 3,mb: 3 }}>
         <Button
           variant="outlined"
+          color="success"
           fullWidth
           onClick={() => toggle(true)}
           endIcon={<ChevronDown />}
@@ -2152,7 +2167,7 @@ const renderInternationalCityDrawer = useCallback(
             }}
           >
             <Typography variant="h6">Select Cities</Typography>
-            <Button onClick={() => toggle(false)}>Done</Button>
+            <Button  color="warning" variant="outlined" onClick={() => toggle(false)}>Add Your Selected Cities</Button>
           </Box>
 
           <TextField
@@ -2212,7 +2227,7 @@ const renderInternationalCityDrawer = useCallback(
                                 type
                               )
                             }
-                            color="primary"
+                            
                             variant="outlined"
                           />
                         ))}
@@ -2357,18 +2372,22 @@ const renderInternationalCityDrawer = useCallback(
   // Main render
   return (
     <Box sx={{ mr: { sm: 0, md: 25 }, ml: { sm: 0, md: 25 } }}>
-      <Typography variant="h5">Brand Expansion Location Details</Typography>
+      <Typography  variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>Brand Expansion Location Details</Typography>
 
       {/* International Expansion Toggle */}
-      <Box sx={{ mb: 2, display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-        <Typography variant="subtitle1">
-          Is your brand expanding internationally?
+      <Box sx={{ mb: 2, display: "flex", alignItems: "center" }}>
+        <Typography variant="subtitle2" mt={0}    gap={2}>
+          Is your brand expanding internationally? :
+          
         </Typography>
         <RadioGroup
           row
           value={
             isInternationalExpansion === null ? "" : isInternationalExpansion
           }
+          sx={{gap:11,justifyContent:'start',ml:15}}
           onChange={(e) =>
             handleInternationalExpansionChange(e.target.value === "true")
           }
@@ -2380,10 +2399,15 @@ const renderInternationalCityDrawer = useCallback(
 
       {/* Current Outlet Locations */}
       <Divider sx={{ my: 2 }} />
-      <Typography variant="h6" gutterBottom>
+      
+      <Typography  variant="h6"
+        fontWeight={700}
+        sx={{ mb: 0, color: "#ff9800" }}>
         Current Outlet Locations
       </Typography>
+
       <RadioGroup
+      sx={{justifyContent:"center",gap:10}}
         row
         value={currentOutletLocationType}
         onChange={handleCurrentOutletLocationTypeChange}
@@ -2391,7 +2415,7 @@ const renderInternationalCityDrawer = useCallback(
         <FormControlLabel
           value="domestic"
           control={<Radio />}
-          label="Domestic (India)"
+          label="India"
         />
         <FormControlLabel
           value="international"
@@ -2406,7 +2430,8 @@ const renderInternationalCityDrawer = useCallback(
           {renderDomesticDistrictDrawer("current")}
           {renderDomesticCityDrawer("current")}
           <Button
-            variant="contained"
+            variant="outlined"
+            color="success"
             sx={{ mt: 2 }}
             onClick={() => addDomesticLocation("current")}
             disabled={loading.formSubmit}
@@ -2480,7 +2505,8 @@ const renderInternationalCityDrawer = useCallback(
           {renderInternationalStateDrawer("current")}
           {renderInternationalCityDrawer("current")}
           <Button
-            variant="contained"
+            variant="outlined"
+            color="success"
             sx={{ mt: 2 }}
             onClick={() => addInternationalLocation("current")}
             disabled={loading.formSubmit}
@@ -2552,14 +2578,17 @@ const renderInternationalCityDrawer = useCallback(
 
       {/* Expansion Locations */}
       <Divider sx={{ my: 2 }} />
-      <Typography variant="h6" gutterBottom>
+      <Typography  variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}>
         Expansion Locations
       </Typography>
-      <RadioGroup row value={locationType} onChange={handleLocationTypeChange}>
+      <RadioGroup row value={locationType} onChange={handleLocationTypeChange}       sx={{justifyContent:"center",gap:10}}
+>
         <FormControlLabel
           value="domestic"
           control={<Radio />}
-          label="Domestic (India)"
+          label="India"
         />
         <FormControlLabel
           value="international"
@@ -2574,7 +2603,8 @@ const renderInternationalCityDrawer = useCallback(
           {renderDomesticDistrictDrawer("expansion")}
           {renderDomesticCityDrawer("expansion")}
           <Button
-            variant="contained"
+            variant="outlined"
+            color="success"
             sx={{ mt: 2 }}
             onClick={() => addDomesticLocation("expansion")}
             disabled={loading.formSubmit}
@@ -2644,7 +2674,8 @@ const renderInternationalCityDrawer = useCallback(
           {renderInternationalStateDrawer("expansion")}
           {renderInternationalCityDrawer("expansion")}
           <Button
-            variant="contained"
+            variant="outlined"
+            color="success"
             sx={{ mt: 2 }}
             onClick={() => addInternationalLocation("expansion")}
             disabled={loading.formSubmit}
