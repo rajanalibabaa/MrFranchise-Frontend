@@ -13,6 +13,7 @@ import SideViewContent from "./Components/SideViewContentMenu/SideHoverMenu";
 import ProfilePage from "./Pages/Profile_Pages/profilePage";
 import IconBreadcrumbs from "./Pages/Profile_Pages/IconBreadcrumbs";
 import ManageProfile from "../src/Components/Investor_Profile_Component/ManageProfile.jsx";
+// import ManageProfile from "../src/Components/Investor_Profile_Component/ManageProfile/ManageProfile.jsx";
 // import PostRequirement from '../src/Components/Investor_Profile_Component/PostRequirement.jsx';
 import ResponseManager from "./Components/Investor_Profile_Component/ResponseManager.jsx";
 import DashBoard from "../src/Components/Investor_Profile_Component/DashBoard.jsx";
