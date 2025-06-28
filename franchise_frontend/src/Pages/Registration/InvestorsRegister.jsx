@@ -893,7 +893,7 @@ useEffect(() => {
 
 // Update localStorage when preferences change
 useEffect(() => {
-  const currentData = JSON.parse(localStorage.getItem(FORM_DATA_KEY) || {});
+  const currentData = JSON.parse(localStorage.getItem(FORM_DATA_KEY) || '{}');
   localStorage.setItem(FORM_DATA_KEY, JSON.stringify({
     ...currentData,
     preferences
@@ -1025,48 +1025,6 @@ useEffect(() => {
       >
         Investor Registration
       </Typography>
-        {/* <Toolbar sx={{ 
-      display: "flex", 
-      justifyContent: "flex-end", 
-      mt:9,
-      mb: 1,
-      position: 'absolute',
-      top: 16,
-      right: 16
-    }}>
-      <FormControl
-        size="small"
-        sx={{
-          minWidth: 130,
-          backgroundColor: "background.paper",
-          borderRadius: "8px",
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}
-      >
-        <Select
-          value={watch("country") || ""}
-          onChange={(e) => {
-            setValue("country", e.target.value);
-            setSelectedCountry(e.target.value);
-          }}
-          displayEmpty
-          inputProps={{ "aria-label": "Select country" }}
-          sx={{
-            borderRadius: '8px',
-            '& .MuiSelect-select': {
-              py: 1
-            }
-          }}
-        >
-           <MenuItem value="">Select Country</MenuItem>
-    {countries.map((country) => (
-      <MenuItem key={country.code} value={country.name}>
-        {country.name}
-      </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Toolbar> */}
     <Box
   sx={{
     // backgroundSize: "cover",
@@ -1833,7 +1791,7 @@ useEffect(() => {
         <FormControl component="fieldset" error={!!errors.preferredLocationType}>
           {/* <FormLabel component="legend">Location Type</FormLabel> */}
           <RadioGroup row {...field}>
-            <FormControlLabel value="domestic" control={<Radio />} label="Domestic" />
+            <FormControlLabel value="domestic" control={<Radio />} label="Domestic (India)" />
             <FormControlLabel value="international" control={<Radio />} label="International" />
           </RadioGroup>
           <FormHelperText>{errors.preferredLocationType?.message || " "}</FormHelperText>

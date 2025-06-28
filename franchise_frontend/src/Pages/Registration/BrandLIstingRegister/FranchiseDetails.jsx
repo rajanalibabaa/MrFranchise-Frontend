@@ -30,6 +30,7 @@ import {
   ListItemText,
   IconButton,
   Tooltip,
+  Autocomplete
 } from "@mui/material";
 import { useState } from "react";
 import categories from "./BrandCategories";
@@ -58,7 +59,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     agreementPeriod: "",
   });
 
-  console.log("auauauauauauua", currentFicoModel);
+  console.log("Franchise Details", currentFicoModel);
 
   const [savedFicoModels, setSavedFicoModels] = React.useState([]);
   const [currentUSP, setCurrentUSP] = useState("");
@@ -430,7 +431,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         }}
       >
         {/* Established Year */} {/* Established Year */}
-        <Grid item xs={12} sm={6} md={2.4}>
+        {/* <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth error={!!errors.establishedYear}>
             <InputLabel size="medium">Year Commenced Operations</InputLabel>
             <Select
@@ -457,7 +458,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               }}
             >
               {Array.from(
-                { length: 100 },
+                { length: 226 },
                 (_, i) => new Date().getFullYear() - i
               ).map((year) => (
                 <MenuItem
@@ -480,10 +481,153 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               </Typography>
             )}
           </FormControl>
-        </Grid>
+        </Grid> */}
+
+   <Grid item xs={12} sm={6} md={2.4}>
+  <Autocomplete
+    freeSolo
+    options={Array.from(
+      { length: 226 },
+      (_, i) => String(new Date().getFullYear() - i) // Convert years to strings
+    )}
+    value={data.establishedYear ? String(data.establishedYear) : null} // Ensure value is string
+    getOptionLabel={(option) => option} // Explicitly define getOptionLabel
+    onChange={(event, newValue) => {
+      handleChange({
+        target: {
+          name: "establishedYear",
+          value: newValue ? Number(newValue) : "" // Convert back to number if needed
+        }
+      });
+    }}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        label="Year Commenced Operations"
+        variant="outlined"
+        size="medium"
+        required
+        error={!!errors.establishedYear}
+        helperText={errors.establishedYear && (
+          <Typography variant="caption" color="error">
+            {errors.establishedYear}
+          </Typography>
+        )}
+        inputProps={{
+          ...params.inputProps,
+          type: "number",
+          min: new Date().getFullYear() - 225,
+          max: new Date().getFullYear()
+        }}
+      />
+    )}
+    PaperComponent={({ children }) => (
+      <Paper
+        sx={{
+          width: 390,
+          maxHeight: 300,
+          "& .MuiAutocomplete-listbox": {
+            display: "grid",
+            gridTemplateColumns: "repeat(5, 1fr)",
+            gap: "4px",
+            padding: "4px"
+          }
+        }}
+      >
+        {children}
+      </Paper>
+    )}
+    renderOption={(props, option) => (
+      <MenuItem
+        {...props}
+        key={option}
+        sx={{
+          minWidth: 0,
+          padding: "6px 4px",
+          display: "flex",
+          justifyContent: "center"
+        }}
+      >
+        {option}
+      </MenuItem>
+    )}
+  />
+</Grid>
+
+ <Grid item xs={12} sm={6} md={2.4}>
+  <Autocomplete
+    freeSolo
+    options={Array.from(
+      { length: 226 },
+      (_, i) => String(new Date().getFullYear() - i) // Convert years to strings
+    )}
+    value={data.franchiseSinceYear ? String(data.franchiseSinceYear) : null} // Ensure value is string
+    getOptionLabel={(option) => option} // Explicitly define getOptionLabel
+    onChange={(event, newValue) => {
+      handleChange({
+        target: {
+          name: "franchiseSinceYear",
+          value: newValue ? Number(newValue) : "" // Convert back to number if needed
+        }
+      });
+    }}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        label="Year Commenced Franchising"
+        variant="outlined"
+        size="medium"
+        required
+        error={!!errors.franchiseSinceYear}
+        helperText={errors.franchiseSinceYear && (
+          <Typography variant="caption" color="error">
+            {errors.franchiseSinceYear}
+          </Typography>
+        )}
+        inputProps={{
+          ...params.inputProps,
+          type: "number",
+          min: new Date().getFullYear() - 225,
+          max: new Date().getFullYear()
+        }}
+      />
+    )}
+    PaperComponent={({ children }) => (
+      <Paper
+        sx={{
+          width: 390,
+          maxHeight: 300,
+          "& .MuiAutocomplete-listbox": {
+            display: "grid",
+            gridTemplateColumns: "repeat(5, 1fr)",
+            gap: "4px",
+            padding: "4px"
+          }
+        }}
+      >
+        {children}
+      </Paper>
+    )}
+    renderOption={(props, option) => (
+      <MenuItem
+        {...props}
+        key={option}
+        sx={{
+          minWidth: 0,
+          padding: "6px 4px",
+          display: "flex",
+          justifyContent: "center"
+        }}
+      >
+        {option}
+      </MenuItem>
+    )}
+  />
+</Grid>
+
         {/* Franchise Since Year */}
         {/* Franchise Since Year */}
-        <Grid item xs={12} sm={6} md={2.4}>
+        {/* <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth error={!!errors.franchiseSinceYear}>
             <InputLabel size="medium">Year Commenced Franchising</InputLabel>
             <Select
@@ -510,7 +654,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               }}
             >
               {Array.from(
-                { length: 100 },
+                { length: 226 },
                 (_, i) => new Date().getFullYear() - i
               ).map((year) => (
                 <MenuItem
@@ -533,7 +677,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               </Typography>
             )}
           </FormControl>
-        </Grid>
+        </Grid> */}
       </Grid>
 
       {/* Franchise Network */}
@@ -600,6 +744,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       </Grid>
 
       {/* Franchise Details Section */}
+
       <Typography
         variant="h6"
         fontWeight={700}
@@ -609,6 +754,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       </Typography>
 
       {/* Show general FICO error if exists */}
+
       {errors.fico && typeof errors.fico === "string" && (
         <Typography color="error" sx={{ mb: 2 }}>
           {errors.fico}
@@ -628,6 +774,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         }}
       >
         {/* Column 1 - Franchise Model */}
+
         <Grid item>
           <FormControl
             fullWidth
@@ -655,6 +802,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 2 - Franchise Type */}
+
         <Grid item>
           <FormControl
             fullWidth
@@ -682,6 +830,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 3 - Investment Range */}
+
         <Grid item>
           <FormControl
             fullWidth
@@ -709,6 +858,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 4 - Area Required */}
+
         <Grid item>
           <FormControl
             fullWidth
@@ -724,7 +874,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               onChange={handleFicoChange}
               endAdornment={
                 <InputAdornment position="end" sx={{ mr: 2 }}>
-                  sq.ft
+                  Sq.Ft
                 </InputAdornment>
               }
             >
@@ -766,9 +916,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             required
             size="medium"
           >
-            <InputLabel>Agreement Period (years)</InputLabel>
+            <InputLabel>Agreement Period </InputLabel>
             <Select
-              label="Agreement Period (years)"
+              label="Agreement Period "
               name="agreementPeriod"
               value={currentFicoModel.agreementPeriod || ""}
               onChange={handleFicoChange}
@@ -834,6 +984,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 7 - Interior Cost */}
+
         <Grid item>
           <TextField
             fullWidth
@@ -852,6 +1003,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 8 - Stock Investment */}
+
         <Grid item>
           <TextField
             fullWidth
@@ -870,6 +1022,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 9 - Other Cost */}
+
         <Grid item>
           <TextField
             fullWidth
@@ -888,6 +1041,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 10 - Required Investment Capital */}
+
         <Grid item>
           <TextField
             fullWidth
@@ -906,6 +1060,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         {/* Column 11 - Royalty Fee */}
+
         <Grid item>
           <TextField
             fullWidth
@@ -983,6 +1138,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               name="roi"
               value={currentFicoModel.roi || ""}
               onChange={handleFicoChange}
+              renderValue={(selected) => (selected ? `${selected} %` : "")}
               MenuProps={{
                 PaperProps: {
                   sx: {
@@ -1002,7 +1158,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               {Array.from({ length: 99 }, (_, i) => (
                 <MenuItem
                   key={i + 1}
-                  value={`${i + 1}%`}
+                  value={`${i + 1}`}
                   sx={{
                     minWidth: 0,
                     padding: "6px 4px",
@@ -1044,12 +1200,13 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             required
             error={!!errors.marginOnSales}
           >
-            <InputLabel>marginOnSales (%)</InputLabel>
+            <InputLabel>MarginOnSales (%)</InputLabel>
             <Select
               label="Margin ON Sales (%)"
               name="marginOnSales"
               value={currentFicoModel.marginOnSales || ""}
               onChange={handleFicoChange}
+              renderValue={(selected) => (selected ? `${selected} %` : "")}
               MenuProps={{
                 PaperProps: {
                   sx: {
@@ -1068,7 +1225,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               {Array.from({ length: 99 }, (_, i) => (
                 <MenuItem
                   key={i + 1}
-                  value={`${i + 1}%`}
+                  value={`${i + 1}`}
                   sx={{
                     minWidth: 0,
                     padding: "6px 4px",
@@ -1099,7 +1256,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           onClick={handleAddFicoModel}
           size="large"
           sx={{
-            backgroundColor: "#4caf50",
+            backgroundColor: '#7ad03a',
             color: "#fff",
             "&:hover": { backgroundColor: "#388e3c" },
             padding: "8px 70px",
@@ -1267,7 +1424,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 p: 1,
               }}
             >
-              <Box sx={{ mr: { md: "247px" }, minWidth: { md: "300px" } }}>
+              <Box sx={{ mr: { md: "220px" }, minWidth: { md: "300px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
@@ -1278,7 +1435,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   Do you provide aid in financing?
                 </FormLabel>
               </Box>
-              <RadioGroup row sx={{ display: "flex", gap: 2 }}>
+              <RadioGroup row sx={{ display: "flex", ml:5, gap: 15 }}>
                 {aidFinancing.map((type) => (
                   <FormControlLabel
                     key={type}
@@ -1323,7 +1480,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 p: 1,
               }}
             >
-              <Box sx={{ mr: { md: "106px" }, minWidth: { md: "300px" } }}>
+              <Box sx={{ mr: { md: "77px" }, minWidth: { md: "300px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
@@ -1336,7 +1493,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   Would you like consultation for franchise development?
                 </FormLabel>
               </Box>
-              <RadioGroup row sx={{ display: "flex", gap: 2 }}>
+              <RadioGroup row sx={{ display: "flex", ml: 5, gap: 15 }}>
                 {aidFinancing.map((type) => (
                   <FormControlLabel
                     key={type}
@@ -1383,7 +1540,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                 p: 1,
               }}
             >
-              <Box sx={{ mr: { md: "35px" }, minWidth: { md: "300px" } }}>
+              <Box sx={{ mr: { md: "6px" }, minWidth: { md: "300px" } }}>
                 <FormLabel
                   component="legend"
                   sx={{
@@ -1397,7 +1554,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   franchise?
                 </FormLabel>
               </Box>
-              <RadioGroup row sx={{ display: "flex", gap: 2 }}>
+              <RadioGroup row sx={{ display: "flex", ml: 5, gap: 15 }}>
                 {aidFinancing.map((type) => (
                   <FormControlLabel
                     key={type}
@@ -1433,75 +1590,82 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             </FormControl>
           </Grid>
 
-          {/* Training Support - Checkbox Group */}
-          <Grid item xs={12}>
-            <FormControl
-              component="fieldset"
-              fullWidth
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", md: "row" },
-                alignItems: { md: "center" },
-                gap: { xs: 1, md: 7 },
-                p: 1,
+        {/* Training Support - Checkbox Group */}
+<Grid item xs={12}>
+  <FormControl
+    component="fieldset"
+    fullWidth
+    sx={{
+      display: "flex",
+      flexDirection: { xs: "column", md: "row" },
+      alignItems: "center", // Add vertical alignment
+      p: 1,
+    }}
+  >
+    <Box sx={{ 
+      minWidth: { md: "210px" },
+      alignSelf: "flex-start", // Align label to top
+      pt: 1.2, // Add some top padding
+      mr:{md:6}
+    }}>
+      <FormLabel
+        component="legend"
+        sx={{
+          fontWeight: "bold",
+        }}
+      >
+        Training Support Provider:
+      </FormLabel>
+    </Box>
+    
+    <FormGroup
+      sx={{ ml: { md: 5 },
+        display: "flex",
+        flexDirection: "row", // Force row direction
+        // flexWrap: "wrap", // Allow wrapping if needed
+        // justifyContent: "space-between", // Use space-between as fallback
+        // width: "100%", // Take full width
+        
+       
+      }}
+    >
+      {[
+        "Outlet Setup",
+        "Staff Training",
+        "Staff Recruitment", 
+        "Operations Support",
+        "Marketing Support",
+      ].map((option) => (
+        <FormControlLabel
+          key={option}
+          control={
+            <Checkbox
+              checked={data.trainingSupport?.includes(option) || false}
+              onChange={(e) => {
+                const newValue = e.target.checked
+                  ? [...(data.trainingSupport || []), option]
+                  : (data.trainingSupport || []).filter(v => v !== option);
+                handleChange({
+                  target: { name: "trainingSupport", value: newValue },
+                });
               }}
-            >
-              <Box sx={{ minWidth: { md: "250px" } }}>
-                <FormLabel
-                  component="legend"
-                  sx={{
-                    fontWeight: "bold",
-                  }}
-                >
-                  Training Support Provider:
-                </FormLabel>
-              </Box>
-              <FormGroup
-                row
-                sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 2,
-                  flexDirection: { xs: "column", sm: "row" },
-                }}
-              >
-                {[
-                  "Outlet Setup",
-                  "Staff Training",
-                  "Staff Recruitment",
-                  "Operations Support",
-                  "Marketing Support",
-                ].map((option) => (
-                  <FormControlLabel
-                    key={option}
-                    control={
-                      <Checkbox
-                        checked={
-                          data.trainingSupport?.includes(option) || false
-                        }
-                        onChange={(e) => {
-                          const newValue = e.target.checked
-                            ? [...(data.trainingSupport || []), option]
-                            : (data.trainingSupport || []).filter(
-                                (v) => v !== option
-                              );
-                          handleChange({
-                            target: {
-                              name: "trainingSupport",
-                              value: newValue,
-                            },
-                          });
-                        }}
-                        name="trainingSupport"
-                        color="primary"
-                      />
-                    }
-                    label={option}
-                  />
-                ))}
-              </FormGroup>
-            </FormControl>
-          </Grid>
+              name="trainingSupport"
+              color="primary"
+            />
+          }
+          label={ 
+            <Typography variant="body2" sx={{ width: "145px" }}>
+              {option}
+            </Typography>
+          }
+          sx={{
+            minWidth: "60px", // Set minimum width for each item
+          }}
+        />
+      ))}
+    </FormGroup>
+  </FormControl>
+</Grid>
 
           {/* Marketing Support - Text Input */}
           {/* <Grid item xs={12}>
@@ -1644,7 +1808,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               onClick={handleAddUSP}
               disabled={!currentUSP.trim()}
               sx={{
-                backgroundColor: "#4caf50",
+                backgroundColor: '#7ad03a',
                 color: "white",
                 "&:hover": { backgroundColor: "#388e3c" },
                 height: "56px",
@@ -1675,7 +1839,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                         onClick={() => handleRemoveUSP(index)}
                         size="small"
                       >
-                        <DeleteIcon fontSize="small" />
+                        <DeleteIcon fontSize="small" color="error" />
                       </IconButton>
                     }
                     sx={{
@@ -1728,4 +1892,4 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   );
 };
 
-export default FranchiseDetails;
+ export default FranchiseDetails;
