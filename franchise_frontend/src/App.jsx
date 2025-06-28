@@ -146,6 +146,7 @@ function App() {
           <Route path="/investfranchise" element={<InvestFranchise />} />
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
           <Route path="/otherindustries" element={<Otherindustries/>}/>
+
         </Routes>
       
     </>
