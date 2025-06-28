@@ -63,6 +63,7 @@ const InvestorRegister = () => {
     control,
     formState: { errors },
     clearErrors,
+    reset,
   } = useForm({
     defaultValues: {
       category: [],
@@ -87,6 +88,14 @@ const [selectedCountry, setSelectedCountry] = useState("");
   const [activeSubCategory, setActiveSubCategory] = useState(null);
   // const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
+// --- Property Location State ---
+const [propertyCountries, setPropertyCountries] = useState(["India"]);
+const [propertyStates, setPropertyStates] = useState([]);
+const [propertyCities, setPropertyCities] = useState([]);
+// const [propertyDistricts, setPropertyDistricts] = useState([]);
+const propertyCountry = watch("propertyCountry");
+const propertyState = watch("propertyState");
+// const propertyDistrict = watch("propertyDistrict");
 
   //Domestic country 
   const [indiaData, setIndiaData] = useState([]);
@@ -128,6 +137,9 @@ const [selectedChild, setSelectedChild] = useState('');
     otherOccupation: "",
     propertyType: "",
     propertySize: "",
+    propertyCountry: "",
+    propertyState: "",
+    propertyCity: "",
     preferredState: "",
     preferredDistrict: "",
     preferredCity: "",
@@ -141,6 +153,142 @@ const [selectedChild, setSelectedChild] = useState('');
   const closeLoginPopup = () => {
     setLoginOpen(false);
   };
+
+useEffect(() => {
+  fetch("https://countriesnow.space/api/v0.1/countries/positions")
+    .then(res => res.json())
+    .then(data => {
+      if (data.data) setPropertyCountries(data.data.map(c => c.name));
+    });
+  setValue("propertyCountry", "");
+  setValue("propertyState", "");
+  setValue("propertyCity", "");
+  setPropertyStates([]);
+  setPropertyCities([]);
+}, [setValue]);
+
+// --- Fetch Property States ---
+useEffect(() => {
+  if (!propertyCountry) {
+    setPropertyStates([]);
+    setValue("propertyState", "");
+    // setValue("propertyDistrict", "");
+    setValue("propertyCity", "");
+    // setPropertyDistricts([]);
+    setPropertyCities([]);
+    return;
+  }
+  fetch("https://countriesnow.space/api/v0.1/countries/states", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ country: propertyCountry.trim() }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.data && data.data.states) setPropertyStates(data.data.states.map(s => s.name));
+      else setPropertyStates([]);
+    });
+  setValue("propertyState", "");
+  // setValue("propertyDistrict", "");
+  setValue("propertyCity", "");
+  // setPropertyDistricts([]);
+  setPropertyCities([]);
+}, [propertyCountry, setValue]);
+
+// --- Fetch Property Districts (if your API provides districts, otherwise skip this) ---
+// useEffect(() => {
+//   if (!propertyState) {
+//     setPropertyDistricts([]);
+//     setValue("propertyDistrict", "");
+//     setValue("propertyCity", "");
+//     setPropertyCities([]);
+//     return;
+//   }
+//   // If you have a districts API, use it here. Otherwise, skip this effect.
+//   // For most international countries, you may not have districts, so you can skip or use propertyState as propertyDistrict.
+//   setPropertyDistricts([propertyState]);
+//   setValue("propertyDistrict", propertyState);
+//   setValue("propertyCity", "");
+//   setPropertyCities([]);
+// }, [propertyState, setValue]);
+
+// --- Fetch Property Cities ---
+useEffect(() => {
+  if (!propertyCountry || !propertyState) {
+    // setPropertyDistricts([]);
+    // setValue("propertyDistrict", "");
+    setValue("propertyCity", "");
+    setPropertyCities([]);
+    return;
+  }
+
+ if (propertyCountry === "India" && indiaData.length > 0) {
+    const stateObj = indiaData.find((s) => s.name === propertyState);
+    if (stateObj) {
+  const uniqueCities = Array.from(
+    new Set((stateObj.cities || []).map(city => city.name))
+  );
+  setPropertyCities(uniqueCities);
+} else {
+  setPropertyCities([]);
+}
+    setValue("propertyCity", "");
+  } else {
+    // International: use API
+    fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        country: propertyCountry.trim(),
+        state: propertyState.trim(),
+      }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.data && Array.isArray(data.data)) {
+          setPropertyCities(data.data);
+        } else {
+          setPropertyCities([]);
+        }
+      })
+      .catch(() => {
+        setPropertyCities([]);
+      });
+    setValue("propertyCity", "");
+  }
+}, [propertyCountry, propertyState, setValue, indiaData]);
+
+// --- RESTORE FORM DATA AND PREFERENCES ON MOUNT ---
+  useEffect(() => {
+    const savedData = localStorage.getItem(FORM_DATA_KEY);
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      // Restore preferences
+      if (parsed.preferences) setPreferences(parsed.preferences);
+      // Restore form fields
+      reset({ ...initialFormData, ...parsed });
+    }
+  }, []);
+
+  // --- SAVE FORM DATA AND PREFERENCES TO LOCALSTORAGE ON CHANGE ---
+  useEffect(() => {
+    const subscription = watch((value) => {
+      localStorage.setItem(
+        FORM_DATA_KEY,
+        JSON.stringify({ ...value, preferences })
+      );
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, preferences]);
+
+  // --- SAVE PREFERENCES TO LOCALSTORAGE WHEN THEY CHANGE ---
+  useEffect(() => {
+    const currentData = JSON.parse(localStorage.getItem(FORM_DATA_KEY) || "{}");
+    localStorage.setItem(
+      FORM_DATA_KEY,
+      JSON.stringify({ ...currentData, preferences })
+    );
+  }, [preferences]);
 
 //  country codes
 useEffect(() => {
@@ -324,6 +472,9 @@ useEffect(() => {
       propertyType: watch("propertyType"),
       propertySize: watch("propertyType") === "Own Property" ? watch("propertySize") : "",
    locationType: watch("preferredLocationType"),
+   propertyCountry: watch("propertyCountry"),
+    propertyState: watch("propertyState"),
+    propertyCity: watch("propertyCity"),
     };
     if (
       !pref.category.length ||
@@ -333,7 +484,11 @@ useEffect(() => {
       !pref.preferredDistrict ||
       !pref.preferredCity ||
       !pref.propertyType ||
-      (pref.propertyType === "Own Property" && !pref.propertySize)
+      (pref.propertyType === "Own Property" && !pref.propertySize ||
+ !pref.propertyCountry ||
+    !pref.propertyState ||
+    !pref.propertyCity
+      )
     ) {
       showSnackbar("Please fill all preference fields before adding.", "error");
       return;
@@ -344,8 +499,12 @@ useEffect(() => {
   setValue("preferredState", "");
   setValue("preferredDistrict", "");
   setValue("preferredCity", "");
+  setValue("preferredLocationType", "");
   setValue("propertyType", "");
   setValue("propertySize", "");
+  setValue("propertyCountry", "");
+  setValue("propertyState", "");
+  setValue("propertyCity", "");
     setSelectedCategories([]);
     setValue("category", []);
     setSelectedCategories([]);
@@ -361,6 +520,9 @@ useEffect(() => {
       "investmentRange",  
       "investmentAmount",   
       "category",
+      "propertyCountry",
+    "propertyState",
+    "propertyCity",
     ])
     showSnackbar("Preference added!", "success");
     setTimeout(() => {
@@ -395,6 +557,9 @@ alert('Add Multiple preferences to get more offers from us!','info')
   setValue("preferredCity", pref.preferredCity || "");
   setValue("propertyType", pref.propertyType || "");
   setValue("propertySize", pref.propertySize || "");
+  setValue("propertyCountry", pref.propertyCountry || "");
+  setValue("propertyState", pref.propertyState || "");
+  setValue("propertyCity", pref.propertyCity || "");
 
     setPreferences(preferences.filter((_, i) => i !== idx));
   }
@@ -579,7 +744,7 @@ useEffect(() => {
     whatsappNumber: formatNumber(data.whatsappNumber),
     address: data.address || "",
     pincode: data.pincode || "",
-    country: data.country || "",
+    country: data.country || "India",
     state: data.state || "",
     city: data.city || "",
     occupation: data.occupation || "",
@@ -603,18 +768,26 @@ useEffect(() => {
           : [],
       investmentRange: pref.investmentRange,
       investmentAmount: pref.investmentAmount,
-      propertyType: pref.propertyType,
-      propertySize: pref.propertyType === "Own Property" ? pref.propertySize : "",
-      ...(isInternational
+      propertyPreferred:[{
+         propertyType: pref.propertyType,
+...(pref.propertyType === "Own Property" && {
+          propertySize: pref.propertySize,
+    
+          propertyCountry: pref.propertyCountry || "",
+          propertyState: pref.propertyState || "",
+          propertyCity: pref.propertyCity || "",
+        }),
+      }],
+   ...(isInternational
         ? {
-            country: pref.preferredState,
-            state: pref.preferredDistrict,
-            city: pref.preferredCity,
+            preferredCountry: pref.preferredState,
+            preferredState: pref.preferredDistrict,
+            preferredCity: pref.preferredCity,
           }
         : {
-            state: pref.preferredState,
-            district: pref.preferredDistrict,
-            city: pref.preferredCity,
+            preferredState: pref.preferredState,
+            preferredDistrict: pref.preferredDistrict,
+            preferredCity: pref.preferredCity,
           }),
       locationType: pref.locationType, 
     };
@@ -645,7 +818,10 @@ useEffect(() => {
 console.log("Registration response:", response.data);
 
       if (response.status === 201) {
-        if (formattedData.firstName) {
+        localStorage.removeItem(FORM_DATA_KEY);
+setFormData(initialFormData);
+
+if (formattedData.firstName) {
     localStorage.setItem("investorName", formattedData.firstName);
   }
   if (formattedData.email) {
@@ -1113,44 +1289,12 @@ useEffect(() => {
                 alignItems:"flex-start"
               }}
             >
-          {/* Address */}
-          <Grid size={8} md={8}>
-            <Controller
-              name="address"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Address"
-                  fullWidth
-                  variant="outlined"
-                  multiline
-                  minRows={2}
-                  // maxRows={3}
-                  error={!!errors.address}
-                  helperText={errors.address?.message || " "}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Home color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                    },
-                  
-                    resize: 'vertical',
-                  }}
-                />
-              )}
-            />
-          </Grid>
+          
 
            <Grid size={4} mt={1}>
     <Controller
       name="country"
+      defaultValue="India"
       control={control}
       render={({ field }) => (
      <Autocomplete
@@ -1183,7 +1327,43 @@ useEffect(() => {
       />
     )}
   />
-  </Grid></Grid>
+  </Grid>
+
+  {/* Address */}
+          <Grid size={8} md={8}>
+            <Controller
+              name="address"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Address"
+                  fullWidth
+                  variant="outlined"
+                  // multiline
+                  // minRows={2}
+                  // maxRows={3}
+                  error={!!errors.address}
+                  helperText={errors.address?.message || " "}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Home color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    },
+                  
+                    // resize: 'vertical',
+                  }}
+                />
+              )}
+            />
+          </Grid>
+  </Grid>
 <Grid
               container
               spacing={2}
@@ -1984,8 +2164,206 @@ useEffect(() => {
                 )}
               />
             </Grid>
+            
           )}
-        </Grid></Grid>
+        </Grid>
+        
+        {watch("propertyType") === "Own Property" && (
+          
+   <Grid
+                       container
+                       spacing={2}
+                       sx={{
+                         display: "grid",
+                         gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+                         gap: 2,
+                         mt: 2
+                       }}
+                     >
+    {/* Property Country */}
+    <Grid item xs={12} md={3}>
+      <Controller
+        name="propertyCountry"
+        control={control}
+        rules={{
+          validate: value =>
+            watch("propertyType") === "Own Property"
+              ? !!value || "Country is required"
+              : true
+        }}
+        render={({ field }) => (
+          <Autocomplete
+            freeSolo
+            options={propertyCountries}
+            value={field.value || ""}
+            onChange={(_, newValue) => {
+              field.onChange(newValue || "");
+              setValue("propertyState", "");
+              setValue("propertyCity", "");
+              clearErrors("propertyCountry");
+            }}
+            onInputChange={(_, newInputValue, reason) => {
+              if (reason === "input") {
+                field.onChange(newInputValue);
+                setValue("propertyState", "");
+                setValue("propertyCity", "");
+              }
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Property Country"
+                error={!!errors.propertyCountry}
+                helperText={errors.propertyCountry?.message}
+                variant="outlined"
+                fullWidth
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                  }
+                }}
+              />
+            )}
+          />
+        )}
+      />
+    </Grid>
+
+
+    {/* Property State */}
+    <Grid item xs={12} md={3}>
+      <Controller
+        name="propertyState"
+        control={control}
+        rules={{
+          validate: value =>
+            watch("propertyType") === "Own Property"
+              ? !!value || "State is required"
+              : true
+        }}
+        render={({ field }) => (
+          <Autocomplete
+            freeSolo
+            options={propertyStates}
+            value={field.value || ""}
+            onChange={(_, newValue) => {
+              field.onChange(newValue || "");
+              setValue("propertyCity", "");
+              clearErrors("propertyState");
+            }}
+            onInputChange={(_, newInputValue, reason) => {
+              if (reason === "input") {
+                field.onChange(newInputValue);
+                setValue("propertyCity", "");
+              }
+            }}
+            disabled={!propertyCountries.length || !watch("propertyCountry")}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Property State"
+                error={!!errors.propertyState}
+                helperText={errors.propertyState?.message}
+                variant="outlined"
+                fullWidth
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                  }
+                }}
+              />
+            )}
+          />
+        )}
+      />
+    </Grid>
+
+    {/* Property District */}
+    {/* <Grid item xs={12} md={3}>
+     <Controller
+    name="propertyDistrict"
+    control={control}
+    rules={{ required: "District is required" }}
+    render={({ field }) => (
+      <Autocomplete
+        freeSolo
+        options={propertyDistricts}
+        value={field.value || ""}
+        onChange={(_, newValue) => {
+          field.onChange(newValue || "");
+          setValue("propertyCity", "");
+          clearErrors("propertyDistrict");
+        }}
+        onInputChange={(_, newInputValue, reason) => {
+          if (reason === "input") {
+            field.onChange(newInputValue);
+            setValue("propertyCity", "");
+          }
+        }}
+        disabled={!propertyStates.length || !watch("propertyState")}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Property District"
+            error={!!errors.propertyDistrict}
+            helperText={errors.propertyDistrict?.message}
+            variant="outlined"
+            fullWidth
+          />
+        )}
+      />
+    )}
+  />
+</Grid> */}
+
+    {/* Property City */}
+     <Grid item xs={12} md={3}>
+      <Controller
+        name="propertyCity"
+        control={control}
+        rules={{
+          validate: value =>
+            watch("propertyType") === "Own Property"
+              ? !!value || "City is required"
+              : true
+        }}
+        render={({ field }) => (
+          <Autocomplete
+            freeSolo
+            options={propertyCities}
+            value={field.value || ""}
+            onChange={(_, newValue) => {
+              field.onChange(newValue || "");
+              clearErrors("propertyCity");
+            }}
+            onInputChange={(_, newInputValue, reason) => {
+              if (reason === "input") {
+                field.onChange(newInputValue);
+              }
+            }}
+            disabled={!propertyStates.length || !watch("propertyState")}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Property City"
+                error={!!errors.propertyCity}
+                helperText={errors.propertyCity?.message}
+                variant="outlined"
+                fullWidth
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                  }
+                }}
+              />
+            )}
+          />
+        )}
+      />
+    </Grid>
+  </Grid>
+)}
+        </Grid>
 
         {/* Add Preference Button */}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
@@ -2016,19 +2394,21 @@ useEffect(() => {
               <Table size="small" aria-label="added preferences table">
                 <TableHead>
                   <TableRow sx={{ bgcolor: '#7ad03a' }}>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>#</TableCell>
-<TableCell sx={{  color: 'primary.contrastText' }}>Industry</TableCell>
-<TableCell sx={{  color: 'primary.contrastText' }}>Main Category</TableCell>
-<TableCell sx={{ color: 'primary.contrastText' }}>Sub Category</TableCell>
-            <TableCell sx={{ color: 'primary.contrastText' }}>Investment Range</TableCell>
-            <TableCell sx={{ color: 'primary.contrastText' }}>Preferred State</TableCell>
-            <TableCell sx={{  color: 'primary.contrastText' }}>Preferred District</TableCell>
-            <TableCell sx={{  color: 'primary.contrastText' }}>Preferred City</TableCell>
-                        <TableCell sx={{  color: 'primary.contrastText' }}>Investment Amount</TableCell>
-
-            <TableCell sx={{  color: 'primary.contrastText' }}>Property Type</TableCell>
-            <TableCell sx={{ color: 'primary.contrastText' }}>Property Size</TableCell>
-            <TableCell sx={{  color: 'primary.contrastText' }}>Actions</TableCell>
+            <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>#</TableCell>
+            <TableCell sx={{ color: 'primary.contrastText' }}>Industry</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Main Category</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Sub Category</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Investment Range</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Preferred State</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Preferred District</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Preferred City</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Property Country</TableCell> 
+    <TableCell sx={{ color: 'primary.contrastText' }}>Property State</TableCell>   
+    <TableCell sx={{ color: 'primary.contrastText' }}>Property City</TableCell>    
+    <TableCell sx={{ color: 'primary.contrastText' }}>Investment Amount</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Property Type</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Property Size</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Actions</TableCell>
           </TableRow>
         </TableHead>
                 <TableBody>
@@ -2050,38 +2430,33 @@ useEffect(() => {
                   <Typography key={i}>{cat.child}</Typography>
                 ))}
               </TableCell>
-                      <TableCell>
-                {/* <Typography variant="subtitle2" fontWeight="bold">Range:</Typography> */}
-                <Typography>{pref.investmentAmount}</Typography>
-              </TableCell>
-              
-              
-              {/* Location */}
-              <TableCell>
-                {/* <Typography variant="subtitle2" fontWeight="bold">State:</Typography> */}
-                <Typography>{pref.preferredState}</Typography>
-              </TableCell>
-              
-              <TableCell>
-                {/* <Typography variant="subtitle2" fontWeight="bold">District:</Typography> */}
-                <Typography>{pref.preferredDistrict}</Typography>
-              </TableCell>
-              
-              <TableCell>
-                {/* <Typography variant="subtitle2" fontWeight="bold">City:</Typography> */}
-                <Typography>{pref.preferredCity}</Typography>
-              </TableCell>
-              
-              {/* Investment Amount */}
-              <TableCell>
-                {/* <Typography variant="subtitle2" fontWeight="bold">Amount:</Typography> */}
-                <Typography>{pref.investmentRange}</Typography>
-              </TableCell>
-              {/* Property */}
-              <TableCell>
-                {/* <Typography variant="subtitle2" fontWeight="bold">Type:</Typography> */}
-                <Typography>{pref.propertyType}</Typography>
-              </TableCell>
+                <TableCell>
+        <Typography>{pref.investmentAmount}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.preferredState}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.preferredDistrict}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.preferredCity}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.propertyCountry}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.propertyState}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.propertyCity}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.investmentRange}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.propertyType}</Typography>
+      </TableCell>
               
               <TableCell>
                 {/* <Typography variant="subtitle2" fontWeight="bold">Size:</Typography> */}

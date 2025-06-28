@@ -80,10 +80,25 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const [openLocationModal, setOpenLocationModal] = useState(false);
  
   // Inside your BrandDetails component, add these state variables
-const [supportedCountries] = useState(getSupportedCountries());
-const [selectedCountry, setSelectedCountry] = useState('IN'); // Default to India
-const [countryInputValue, setCountryInputValue] = useState('');
-// Add this function to handle country change
+const [supportedCountries, setSupportedCountries] = useState([]);
+const [selectedCountry, setSelectedCountry] = useState(''); 
+const [countryInputValue, setCountryInputValue] = useState("");
+
+useEffect(() => {
+  fetch("https://countriesnow.space/api/v0.1/countries")
+    .then(res => res.json())
+    .then(data => {
+      if (data.data) {
+        setSupportedCountries(
+          data.data.map(c => ({
+            name: c.country,
+            code: c.iso2,
+            dial_code: c.phone_code ? `+${c.phone_code}` : "",
+          }))
+        );
+      }
+    });
+}, []);
 const handleCountryChange = (event, newValue) => {
   if (newValue) {
     setSelectedCountry(newValue.code);
@@ -1151,7 +1166,7 @@ useEffect(() => {
     )}
     renderOption={(props, option) => (
       <Box component="li" {...props}>
-        <FlagIcon sx={{ mr: 1 }} />
+        {/* <FlagIcon sx={{ mr: 1 }} /> */}
         {option.name}
       </Box>
     )}
