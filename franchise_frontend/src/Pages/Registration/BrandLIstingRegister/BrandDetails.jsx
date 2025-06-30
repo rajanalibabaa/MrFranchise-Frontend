@@ -100,20 +100,9 @@ useEffect(() => {
       }
     });
 }, []);
-const handleCountryChange = (event, newValue) => {
-  if (newValue) {
-    setSelectedCountry(newValue.code);
-    onChange({ country: newValue.name });
-  } else {
-    setSelectedCountry('');
-    onChange({ country: '' });
-  }
-};
 
-  const [supportedCountries] = useState(getSupportedCountries());
-  const [selectedCountry, setSelectedCountry] = useState("IN"); // Default to India
-  const [countryInputValue, setCountryInputValue] = useState("");
 
+ 
 
   // Add this function to handle country change
   const handleCountryChange = (event, newValue) => {

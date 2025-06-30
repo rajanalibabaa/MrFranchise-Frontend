@@ -168,6 +168,7 @@ function Footer() {
                 { text: "Advertise With Us", href: "/advertisewithus" },
                 { text: "Lead Distribution", href: "/franchisepromotion" },
                 { text: "Other Industries", href: "/otherindustries" },
+                { text: "Blogs", href: "/blogs" },
               ].map((item, index) => (
                 <Link
                   key={index}
