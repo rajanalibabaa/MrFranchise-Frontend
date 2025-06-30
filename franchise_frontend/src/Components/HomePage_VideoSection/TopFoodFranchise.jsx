@@ -133,6 +133,7 @@ const BrandCard = React.memo(
             {isVisible && videoUrl ? (
               <CardMedia
                 component="video"
+                loading="lazy"
                 src={videoUrl}
                 alt={brand.personalDetails?.brandName || "Brand"}
                 sx={{

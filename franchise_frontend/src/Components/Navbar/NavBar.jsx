@@ -199,9 +199,47 @@ function Navbar() {
         initial="hidden"
         animate="visible"
         variants={fadeIn}
-      >
+      >*/}
         
-        
+       <Box sx={{ 
+          display: "flex", 
+          flexWrap: "wrap",
+          ml: "60px", 
+          gap: isMobile ? 0.5 : 1,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          {['Expand Your Franchise', 'Investor', 'Advertise','Lead Distribution Packages','Other Industries',"Blogs"].map((text, index) => (
+            <motion.div
+              key={text}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                component={Link}
+                to={
+                  text === 'Expand Your Franchise' ? '/expandyourbrand' :
+                  text === 'Investor' ? '/investfranchise' :
+                  text === 'Advertise' ? '/advertisewithus' :
+                  text === 'Lead Distribution Packages' ? '/franchisepromotion' : 
+                  text === 'Other Industries' ? '/otherindustries' : 
+                  text === 'Blogs' ? '/blogs' : '/'
+                }
+                size="small"
+                sx={{ 
+                  textTransform: 'none',
+                  color: '#ff9800',
+                  '&:hover': {
+                    color: 'black',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                  }
+                }}
+              >
+                {text}
+              </Button>
+            </motion.div>
+          ))}
+        </Box>
 
       {/* Main Navigation Bar */}
       <AppBar 
@@ -286,43 +324,7 @@ function Navbar() {
             </motion.div>
             
           </Box>
-<Box sx={{ 
-          display: "flex", 
-          flexWrap: "wrap", 
-          gap: isMobile ? 0.5 : 1,
-          position: 'relative',
-          zIndex: 1
-        }}>
-          {['Expand Your Franchise', 'Investor', 'Advertise','Lead Distribution Packages','Other Industries'].map((text, index) => (
-            <motion.div
-              key={text}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button
-                component={Link}
-                to={
-                  text === 'Expand Your Franchise' ? '/expandyourbrand' :
-                  text === 'Investor' ? '/investfranchise' :
-                  text === 'Advertise' ? '/advertisewithus' :
-                  text === 'Lead Distribution Packages' ? '/franchisepromotion' : 
-                  text === 'Other Industries' ? '/otherindustries' : '/'
-                }
-                size="small"
-                sx={{ 
-                  textTransform: 'none',
-                  color: '#ff9800',
-                  '&:hover': {
-                    color: 'black',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                  }
-                }}
-              >
-                {text}
-              </Button>
-            </motion.div>
-          ))}
-        </Box>
+
 
             
           <Box sx={{ flexGrow: isMobile ? 1 : 1 }} />

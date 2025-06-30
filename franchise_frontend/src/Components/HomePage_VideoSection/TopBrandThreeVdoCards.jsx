@@ -433,6 +433,7 @@ function TopBrandVdoCards() {
                       mainBrand.brandDetails?.brandPromotionVideo?.[0] ||
                       mainBrand.brandDetails?.franchisePromotionVideo?.[0]
                     }
+                    alt={mainBrand.title}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -705,6 +706,7 @@ function TopBrandVdoCards() {
                         brand.brandDetails?.brandPromotionVideo?.[0] ||
                         brand.brandDetails?.franchisePromotionVideo?.[0]
                       }
+                      alt={brand.personalDetails?.brandName || "Brand"}
                       style={{
                         width: "100%",
                         height: "100%",

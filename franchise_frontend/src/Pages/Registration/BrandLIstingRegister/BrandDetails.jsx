@@ -114,6 +114,7 @@ useEffect(() => {
   // const [selectedCountry, setSelectedCountry] = useState("IN"); // Default to India
   // const [countryInputValue, setCountryInputValue] = useState("");
 
+ 
 
   // Add this function to handle country change
   const handleCountryChange = (event, newValue) => {
@@ -1289,12 +1290,15 @@ useEffect(() => {
                 helperText={errors.country || "Select your country first"}
               />
             )}
-            renderOption={(props, option) => (
-              <Box component="li" {...props}>
-                <FlagIcon sx={{ mr: 1 }} />
-                {option.name}
-              </Box>
-            )}
+            renderOption={(props, option) => {
+  const { key, ...rest } = props;
+  return (
+    <Box component="li" key={key} {...rest}>
+      <FlagIcon sx={{ mr: 1 }} />
+      {option.name}
+    </Box>
+  );
+}}
           />
         </Grid>
         {/* Pincode - spans 1 column */}

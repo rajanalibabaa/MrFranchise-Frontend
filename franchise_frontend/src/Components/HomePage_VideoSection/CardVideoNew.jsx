@@ -109,6 +109,7 @@ const CardsRow = () => (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <Box
                 component="img"
+                loading='lazy'
                 src={card.logoUrl}
                 alt={`${card.title} logo`}
                 sx={{

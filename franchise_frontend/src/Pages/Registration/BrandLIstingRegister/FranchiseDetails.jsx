@@ -1859,28 +1859,30 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           )}
         </Grid>
         <Box sx={{ mt: 2, mb: 4 }}>
-          <Editor
-            apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
-            value={data.brandDescription || ""}
-            init={{
-              height: 400,
-              menubar: true,
-              plugins: [
-                "advlist autolink lists link image charmap print preview anchor",
-                "searchreplace visualblocks code fullscreen",
-                "insertdatetime media table paste help wordcount",
-              ],
-              toolbar:
-                "undo redo | formatselect | bold italic backcolor | \
-               alignleft aligncenter alignright alignjustify | \
-               bullist numlist outdent indent | removeformat | help | image",
-              images_upload_url: "/api/upload-image",
-              automatic_uploads: true,
-              content_style:
-                "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
-            }}
-            onEditorChange={handleDescriptionChange}
-          />
+        <Editor
+  apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
+  value={data.brandDescription || ""}
+  init={{
+    height: 400,
+    menubar: true,
+    plugins: [
+      'advlist', 'autolink', 'lists', 'link', 'image',
+      'charmap', 'preview', 'anchor', 'searchreplace',
+      'visualblocks', 'code', 'fullscreen', 'insertdatetime',
+      'media', 'table', 'help'
+    ],
+    toolbar:
+      "undo redo | formatselect | bold italic backcolor | " +
+      "alignleft aligncenter alignright alignjustify | " +
+      "bullist numlist outdent indent | removeformat | help | image",
+    images_upload_url: "/api/upload-image",
+    automatic_uploads: true,
+    content_style:
+      "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+  }}
+  onEditorChange={handleDescriptionChange}
+/>
+
           {errors.description && (
             <Typography variant="caption" color="error" sx={{ mt: 1 }}>
               {errors.description}

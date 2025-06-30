@@ -48,6 +48,7 @@ import Navbar from "./Components/Navbar/NavBar.jsx";
 import { Box } from "@mui/material";
 import Otherindustries from "./Components/Footers/QuickLinks/Otherindustries.jsx";
 import GlobalLoader from './Components/GLobalLoader.jsx';
+import Blogs from './Components/Footers/QuickLinks/Blogs.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -133,7 +134,7 @@ function App() {
           <Route path="/brandsearchview" element={<BrandCategroyViewPage />} />
 
           {/* {Footer paths} */}
-          <Route path="/aboutus" element={<AboutUs />} />
+          
           <Route path="/contactus" element={<ContactUs />} />
           <Route path="/faq" element={<FAQs />} />
           <Route path="/help" element={<Help />} />
@@ -146,7 +147,7 @@ function App() {
           <Route path="/investfranchise" element={<InvestFranchise />} />
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
           <Route path="/otherindustries" element={<Otherindustries/>}/>
-
+          <Route path="/blogs" element={<Blogs />} />
         </Routes>
       
     </>
