@@ -29,37 +29,31 @@ const apiCache = {
   cities: {},
 };
 
-const BrandExpansionLocationDetails = ({ data, onChange }) => {
+const BrandExpansionLocationDetails = ({ data, onChange,setFormData }) => {
   const { enqueueSnackbar } = useSnackbar();
 
-  // Initialize form data with props or default values
-  const [formData, setFormData] = useState(() => ({
-    isInternationalExpansion: data?.isInternationalExpansion || null,
-    currentOutletLocations: data?.currentOutletLocations || {
-      domestic: {
-        states: [],
-        districts: [],
-        cities: [],
-      },
-      international: {
-        countries: [],
-        states: [],
-        cities: [],
-      },
+const [formData, setFormData] = useState(() => ({
+  isInternationalExpansion: data?.isInternationalExpansion || null,
+  currentOutletLocations: {
+    domestic: {
+      locations: data?.currentOutletLocations?.domestic?.locations || [],
     },
-    expansionLocations: data?.expansionLocations || {
-      domestic: {
-        states: [],
-        districts: [],
-        cities: [],
-      },
-      international: {
-        countries: [],
-        states: [],
-        cities: [],
-      },
+    international: {
+      locations: data?.currentOutletLocations?.international?.locations || [],
     },
-  }));
+  },
+  expansionLocations: {
+    domestic: {
+      locations: data?.expansionLocations?.domestic?.locations || [],
+    },
+    international: {
+      locations: data?.expansionLocations?.international?.locations || [],
+    },
+  },
+}));
+
+
+  console.log("location new", formData)
 
   // Location type state
   const [locationType, setLocationType] = useState("domestic");
@@ -148,7 +142,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
   // Update parent when formData changes
   useEffect(() => {
     onChange?.(formData);
-  }, [formData, onChange]);
+  }, []);
 
   // Debounced search functions
   const handleSearchChange = useCallback(
@@ -436,7 +430,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     []
   );
 
-  // Add domestic locations to form data
+  // Add domestic locations to form data in the new format
   const addDomesticLocation = useCallback(
     (type) => {
       const selections =
@@ -452,57 +446,72 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
       }
 
       setFormData((prev) => {
-        // Format districts and cities as per the required structure
-        const formattedDistricts = selections.selectedDistricts.reduce((acc, curr) => {
-          const existingState = acc.find(item => item.state === curr.state);
-          if (existingState) {
-            if (!existingState.districts.includes(curr.district)) {
-              existingState.districts.push(curr.district);
-            }
-          } else {
-            acc.push({
-              state: curr.state,
-              districts: [curr.district]
+        const newLocations = [...prev[locationKey].domestic.locations];
+
+        
+        // Process states
+        selections.selectedStates.forEach(stateName => {
+          const existingStateIndex = newLocations.findIndex(loc => loc.state === stateName);
+          
+          if (existingStateIndex === -1) {
+            // Add new state with empty districts
+            newLocations.push({
+              state: stateName,
+              districts: []
             });
           }
-          return acc;
-        }, []);
+        });
 
-        const formattedCities = selections.selectedCities.reduce((acc, curr) => {
-          const existingDistrict = acc.find(item => 
-            item.state === curr.state && item.district === curr.district
-          );
-          if (existingDistrict) {
-            if (!existingDistrict.cities.includes(curr.city)) {
-              existingDistrict.cities.push(curr.city);
+        // Process districts
+        selections.selectedDistricts.forEach(({ state, district }) => {
+          const stateIndex = newLocations.findIndex(loc => loc.state === state);
+          
+          if (stateIndex !== -1) {
+            const districtExists = newLocations[stateIndex].districts.some(
+              d => d.district === district
+            );
+            
+            if (!districtExists) {
+              newLocations[stateIndex].districts.push({
+                district,
+                cities: []
+              });
             }
-          } else {
-            acc.push({
-              state: curr.state,
-              district: curr.district,
-              cities: [curr.city]
-            });
           }
-          return acc;
-        }, []);
+        });
 
-        const newDomesticLocations = {
-          states: [
-            ...new Set([
-              ...prev[locationKey].domestic.states,
-              ...selections.selectedStates,
-            ]),
-          ],
-          districts: formattedDistricts,
-          cities: formattedCities,
-        };
+        // Process cities
+        selections.selectedCities.forEach(({ state, district, city }) => {
+          const stateIndex = newLocations.findIndex(loc => loc.state === state);
+          
+          if (stateIndex !== -1) {
+            const districtIndex = newLocations[stateIndex].districts.findIndex(
+              d => d.district === district
+            );
+            
+            if (districtIndex === -1) {
+              // Add district if it doesn't exist
+              newLocations[stateIndex].districts.push({
+                district,
+                cities: [city]
+              });
+            } else {
+              // Add city to existing district if not already present
+              if (!newLocations[stateIndex].districts[districtIndex].cities.includes(city)) {
+                newLocations[stateIndex].districts[districtIndex].cities.push(city);
+              }
+            }
+          }
+        });
 
         const newData = {
           ...prev,
           [locationKey]: {
             ...prev[locationKey],
-            domestic: newDomesticLocations,
-          },
+            domestic: {
+              locations: newLocations
+            }
+          }
         };
 
         return newData;
@@ -661,7 +670,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     []
   );
 
-  // Add international locations to form data
+  // Add international locations to form data in the new format
   const addInternationalLocation = useCallback(
     (type) => {
       const selections =
@@ -681,56 +690,74 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
       setLoading((prev) => ({ ...prev, formSubmit: true }));
       try {
         setFormData((prev) => {
-          // Prepare selected states and cities for storage
-          const selectedStates = [];
-          const selectedCities = [];
+          const newLocations = [...prev[locationKey].international.locations];
+          
+          // Process countries
+          selections.selectedCountries.forEach(country => {
+            const countryExists = newLocations.some(loc => loc.country === country);
+            if (!countryExists) {
+              newLocations.push({
+                country,
+                states: []
+              });
+            }
+          });
 
           // Process states
-          Object.entries(selections.selectedStates).forEach(
-            ([country, states]) => {
-              states.forEach((state) => {
-                selectedStates.push(`${country}, ${state}`);
+          Object.entries(selections.selectedStates).forEach(([country, states]) => {
+            const countryIndex = newLocations.findIndex(loc => loc.country === country);
+            
+            if (countryIndex !== -1) {
+              states.forEach(state => {
+                const stateExists = newLocations[countryIndex].states.some(
+                  s => s.state === state
+                );
+                
+                if (!stateExists) {
+                  newLocations[countryIndex].states.push({
+                    state,
+                    cities: []
+                  });
+                }
               });
             }
-          );
+          });
 
           // Process cities
-          Object.entries(selections.selectedCities).forEach(
-            ([stateKey, cities]) => {
-              const [country, state] = stateKey.split("-");
-              cities.forEach((city) => {
-                selectedCities.push(`${country}, ${state}, ${city}`);
-              });
+          Object.entries(selections.selectedCities).forEach(([stateKey, cities]) => {
+            const [country, state] = stateKey.split('-');
+            const countryIndex = newLocations.findIndex(loc => loc.country === country);
+            
+            if (countryIndex !== -1) {
+              const stateIndex = newLocations[countryIndex].states.findIndex(
+                s => s.state === state
+              );
+              
+              if (stateIndex === -1) {
+                // Add state if it doesn't exist
+                newLocations[countryIndex].states.push({
+                  state,
+                  cities
+                });
+              } else {
+                // Add cities to existing state
+                cities.forEach(city => {
+                  if (!newLocations[countryIndex].states[stateIndex].cities.includes(city)) {
+                    newLocations[countryIndex].states[stateIndex].cities.push(city);
+                  }
+                });
+              }
             }
-          );
-
-          const newInternationalLocations = {
-            countries: [
-              ...new Set([
-                ...prev[locationKey].international.countries,
-                ...selections.selectedCountries,
-              ]),
-            ],
-            states: [
-              ...new Set([
-                ...prev[locationKey].international.states,
-                ...selectedStates,
-              ]),
-            ],
-            cities: [
-              ...new Set([
-                ...prev[locationKey].international.cities,
-                ...selectedCities,
-              ]),
-            ],
-          };
+          });
 
           const newData = {
             ...prev,
             [locationKey]: {
               ...prev[locationKey],
-              international: newInternationalLocations,
-            },
+              international: {
+                locations: newLocations
+              }
+            }
           };
 
           return newData;
@@ -762,51 +789,131 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     [currentInternationalSelections, internationalSelections, enqueueSnackbar]
   );
 
-  // Remove location items from form data
-  const removeLocationItems = useCallback(
-    (type, locationType, field, index) => {
-      setFormData((prev) => {
-        const newData = { ...prev };
-        const locationArray = [...newData[type][locationType][field]];
-
-        // If removing a state, also remove associated districts and cities
-        if (field === "states" && locationType === "domestic") {
-          const stateToRemove = locationArray[index];
-
-          // Remove all associated districts
-          newData[type][locationType].districts = newData[type][
-            locationType
-          ].districts.filter((item) => item.state !== stateToRemove);
-
-          // Remove all associated cities
-          newData[type][locationType].cities = newData[type][
-            locationType
-          ].cities.filter((item) => item.state !== stateToRemove);
+const removeLocationItems = useCallback(
+  (type, locationType, field, index) => {
+    setFormData((prev) => {
+      const newData = { ...prev };
+      const locations = [...newData[type][locationType].locations];
+      
+      if (field === "state" && locationType === "domestic") {
+        // Remove state and all its districts/cities
+        locations.splice(index, 1);
+      } else if (field === "district" && locationType === "domestic") {
+        // Remove district and all its cities
+        const stateIndex = Math.floor(index / 1000);
+        const districtIndex = index % 1000;
+        if (locations[stateIndex]?.districts) {
+          locations[stateIndex].districts.splice(districtIndex, 1);
         }
-
-        // If removing a district, also remove associated cities
-        if (field === "districts" && locationType === "domestic") {
-          const districtToRemove = locationArray[index];
-
-          newData[type][locationType].cities = newData[type][
-            locationType
-          ].cities.filter(
-            (item) =>
-              !(
-                item.state === districtToRemove.state &&
-                item.district === districtToRemove.district
-              )
-          );
+      } else if (field === "city" && locationType === "domestic") {
+        // Remove city
+        const stateIndex = Math.floor(index / 1000000);
+        const districtIndex = Math.floor((index % 1000000) / 1000);
+        const cityIndex = index % 1000;
+        if (locations[stateIndex]?.districts[districtIndex]?.cities) {
+          locations[stateIndex].districts[districtIndex].cities.splice(cityIndex, 1);
         }
+      } else if (field === "country" && locationType === "international") {
+        // Remove country and all its states/cities
+        locations.splice(index, 1);
+      } else if (field === "state" && locationType === "international") {
+        // Remove state and all its cities
+        const countryIndex = Math.floor(index / 1000);
+        const stateIndex = index % 1000;
+        if (locations[countryIndex]?.states) {
+          locations[countryIndex].states.splice(stateIndex, 1);
+        }
+      } else if (field === "city" && locationType === "international") {
+        // Remove city
+        const countryIndex = Math.floor(index / 1000000);
+        const stateIndex = Math.floor((index % 1000000) / 1000);
+        const cityIndex = index % 1000;
+        if (locations[countryIndex]?.states[stateIndex]?.cities) {
+          locations[countryIndex].states[stateIndex].cities.splice(cityIndex, 1);
+        }
+      }
 
-        locationArray.splice(index, 1);
-        newData[type][locationType][field] = locationArray;
-        return newData;
+      newData[type][locationType].locations = locations;
+      return newData;
+    });
+  },
+  []
+);
+
+// Helper function to flatten locations for display
+const flattenLocations = (locations = [], type) => {
+  const result = [];
+  
+  if (!locations || !Array.isArray(locations)) return result;
+
+  if (type === "domestic") {
+    locations.forEach((stateObj, stateIndex) => {
+      if (!stateObj) return;
+      
+      // Add state
+      result.push({
+        type: "state",
+        label: stateObj.state,
+        index: stateIndex
       });
-    },
-    []
-  );
+      
+      // Add districts
+      stateObj.districts?.forEach((districtObj, districtIndex) => {
+        if (!districtObj) return;
+        
+        result.push({
+          type: "district",
+          label: `${stateObj.state} - ${districtObj.district}`,
+          index: stateIndex * 1000 + districtIndex
+        });
+        
+        // Add cities
+        districtObj.cities?.forEach((city, cityIndex) => {
+          result.push({
+            type: "city",
+            label: `${stateObj.state} - ${districtObj.district} - ${city}`,
+            index: stateIndex * 1000000 + districtIndex * 1000 + cityIndex
+          });
+        });
+      });
+    });
+  } else { // international
+    locations.forEach((countryObj, countryIndex) => {
+      if (!countryObj) return;
+      
+      // Add country
+      result.push({
+        type: "country",
+        label: countryObj.country,
+        index: countryIndex
+      });
+      
+      // Add states
+      countryObj.states?.forEach((stateObj, stateIndex) => {
+        if (!stateObj) return;
+        
+        result.push({
+          type: "state",
+          label: `${countryObj.country} - ${stateObj.state}`,
+          index: countryIndex * 1000 + stateIndex
+        });
+        
+        // Add cities
+        stateObj.cities?.forEach((city, cityIndex) => {
+          result.push({
+            type: "city",
+            label: `${countryObj.country} - ${stateObj.state} - ${city}`,
+            index: countryIndex * 1000000 + stateIndex * 1000 + cityIndex
+          });
+        });
+      });
+    });
+  }
+  
+  return result;
+};
 
+  // Render domestic state drawer (same as before)
   const renderDomesticStateDrawer = useCallback(
     (type) => {
       const selections =
@@ -1007,6 +1114,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     ]
   );
 
+  // Render domestic district drawer (same as before)
   const renderDomesticDistrictDrawer = useCallback(
     (type) => {
       const selections =
@@ -1259,6 +1367,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     ]
   );
 
+  // Render domestic city drawer (same as before)
   const renderDomesticCityDrawer = useCallback(
     (type) => {
       const selections =
@@ -1541,6 +1650,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     ]
   );
 
+  // Render international country drawer (same as before)
   const renderInternationalCountryDrawer = useCallback(
     (type) => {
       const selections =
@@ -1746,6 +1856,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     ]
   );
 
+  // Render international state drawer (same as before)
   const renderInternationalStateDrawer = useCallback(
     (type) => {
       const selections =
@@ -2003,6 +2114,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     ]
   );
 
+  // Render international city drawer (same as before)
   const renderInternationalCityDrawer = useCallback(
     (type) => {
       const selections =
@@ -2353,60 +2465,31 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle2">Selected Locations:</Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-              {formData.currentOutletLocations.domestic.states.map(
-                (state, idx) => (
-                  <Chip
-                    key={`current-state-${idx}`}
-                    label={state}
-                    onDelete={() =>
-                      removeLocationItems(
-                        "currentOutletLocations",
-                        "domestic",
-                        "states",
-                        idx
-                      )
-                    }
-                    color="primary"
-                    variant="outlined"
-                  />
-                )
-              )}
-              {formData.currentOutletLocations.domestic.districts.map(
-                (item, idx) => (
-                  <Chip
-                    key={`current-district-${idx}`}
-                    label={`${item.state} - ${item.districts.join(", ")}`}
-                    onDelete={() =>
-                      removeLocationItems(
-                        "currentOutletLocations",
-                        "domestic",
-                        "districts",
-                        idx
-                      )
-                    }
-                    color="secondary"
-                    variant="outlined"
-                  />
-                )
-              )}
-              {formData.currentOutletLocations.domestic.cities.map(
-                (item, idx) => (
-                  <Chip
-                    key={`current-city-${idx}`}
-                    label={`${item.state} - ${item.district} - ${item.cities.join(", ")}`}
-                    onDelete={() =>
-                      removeLocationItems(
-                        "currentOutletLocations",
-                        "domestic",
-                        "cities",
-                        idx
-                      )
-                    }
-                    color="success"
-                    variant="outlined"
-                  />
-                )
-              )}
+              {flattenLocations(
+                formData.currentOutletLocations.domestic.locations,
+                "domestic"
+              ).map((item) => (
+                <Chip
+                  key={`current-${item.type}-${item.index}`}
+                  label={item.label}
+                  onDelete={() =>
+                    removeLocationItems(
+                      "currentOutletLocations",
+                      "domestic",
+                      item.type,
+                      item.index
+                    )
+                  }
+                  color={
+                    item.type === "state"
+                      ? "primary"
+                      : item.type === "district"
+                      ? "secondary"
+                      : "success"
+                  }
+                  variant="outlined"
+                />
+              ))}
             </Box>
           </Box>
         </>
@@ -2428,60 +2511,31 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle2">Selected Locations:</Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-              {formData.currentOutletLocations.international.countries.map(
-                (country, idx) => (
-                  <Chip
-                    key={`current-country-${idx}`}
-                    label={country}
-                    onDelete={() =>
-                      removeLocationItems(
-                        "currentOutletLocations",
-                        "international",
-                        "countries",
-                        idx
-                      )
-                    }
-                    color="primary"
-                    variant="outlined"
-                  />
-                )
-              )}
-              {formData.currentOutletLocations.international.states.map(
-                (state, idx) => (
-                  <Chip
-                    key={`current-state-${idx}`}
-                    label={state}
-                    onDelete={() =>
-                      removeLocationItems(
-                        "currentOutletLocations",
-                        "international",
-                        "states",
-                        idx
-                      )
-                    }
-                    color="secondary"
-                    variant="outlined"
-                  />
-                )
-              )}
-              {formData.currentOutletLocations.international.cities.map(
-                (city, idx) => (
-                  <Chip
-                    key={`current-int-city-${idx}`}
-                    label={city}
-                    onDelete={() =>
-                      removeLocationItems(
-                        "currentOutletLocations",
-                        "international",
-                        "cities",
-                        idx
-                      )
-                    }
-                    color="success"
-                    variant="outlined"
-                  />
-                )
-              )}
+              {flattenLocations(
+                formData.currentOutletLocations.international.locations,
+                "international"
+              ).map((item) => (
+                <Chip
+                  key={`current-${item.type}-${item.index}`}
+                  label={item.label}
+                  onDelete={() =>
+                    removeLocationItems(
+                      "currentOutletLocations",
+                      "international",
+                      item.type,
+                      item.index
+                    )
+                  }
+                  color={
+                    item.type === "country"
+                      ? "primary"
+                      : item.type === "state"
+                      ? "secondary"
+                      : "success"
+                  }
+                  variant="outlined"
+                />
+              ))}
             </Box>
           </Box>
         </>
@@ -2528,53 +2582,28 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle2">Selected Locations:</Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-              {formData.expansionLocations.domestic.states.map((state, idx) => (
+              {flattenLocations(
+                formData.expansionLocations.domestic.locations,
+                "domestic"
+              ).map((item) => (
                 <Chip
-                  key={`expansion-state-${idx}`}
-                  label={state}
+                  key={`expansion-${item.type}-${item.index}`}
+                  label={item.label}
                   onDelete={() =>
                     removeLocationItems(
                       "expansionLocations",
                       "domestic",
-                      "states",
-                      idx
+                      item.type,
+                      item.index
                     )
                   }
-                  color="primary"
-                  variant="outlined"
-                />
-              ))}
-              {formData.expansionLocations.domestic.districts.map(
-                (district, idx) => (
-                  <Chip
-                    key={`expansion-district-${idx}`}
-                    label={`${district.state} - ${district.districts.join(", ")}`}
-                    onDelete={() =>
-                      removeLocationItems(
-                        "expansionLocations",
-                        "domestic",
-                        "districts",
-                        idx
-                      )
-                    }
-                    color="secondary"
-                    variant="outlined"
-                  />
-                )
-              )}
-              {formData.expansionLocations.domestic.cities.map((city, idx) => (
-                <Chip
-                  key={`expansion-city-${idx}`}
-                  label={`${city.state} - ${city.district} - ${city.cities.join(", ")}`}
-                  onDelete={() =>
-                    removeLocationItems(
-                      "expansionLocations",
-                      "domestic",
-                      "cities",
-                      idx
-                    )
+                  color={
+                    item.type === "state"
+                      ? "primary"
+                      : item.type === "district"
+                      ? "secondary"
+                      : "success"
                   }
-                  color="success"
                   variant="outlined"
                 />
               ))}
@@ -2599,60 +2628,31 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle2">Selected Locations:</Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-              {formData.expansionLocations.international.countries.map(
-                (country, idx) => (
-                  <Chip
-                    key={`expansion-country-${idx}`}
-                    label={country}
-                    onDelete={() =>
-                      removeLocationItems(
-                        "expansionLocations",
-                        "international",
-                        "countries",
-                        idx
-                      )
-                    }
-                    color="primary"
-                    variant="outlined"
-                  />
-                )
-              )}
-              {formData.expansionLocations.international.states.map(
-                (state, idx) => (
-                  <Chip
-                    key={`expansion-state-${idx}`}
-                    label={state}
-                    onDelete={() =>
-                      removeLocationItems(
-                        "expansionLocations",
-                        "international",
-                        "states",
-                        idx
-                      )
-                    }
-                    color="secondary"
-                    variant="outlined"
-                  />
-                )
-              )}
-              {formData.expansionLocations.international.cities.map(
-                (city, idx) => (
-                  <Chip
-                    key={`expansion-int-city-${idx}`}
-                    label={city}
-                    onDelete={() =>
-                      removeLocationItems(
-                        "expansionLocations",
-                        "international",
-                        "cities",
-                        idx
-                      )
-                    }
-                    color="success"
-                    variant="outlined"
-                  />
-                )
-              )}
+              {flattenLocations(
+                formData.expansionLocations.international.locations,
+                "international"
+              ).map((item) => (
+                <Chip
+                  key={`expansion-${item.type}-${item.index}`}
+                  label={item.label}
+                  onDelete={() =>
+                    removeLocationItems(
+                      "expansionLocations",
+                      "international",
+                      item.type,
+                      item.index
+                    )
+                  }
+                  color={
+                    item.type === "country"
+                      ? "primary"
+                      : item.type === "state"
+                      ? "secondary"
+                      : "success"
+                  }
+                  variant="outlined"
+                />
+              ))}
             </Box>
           </Box>
         </>

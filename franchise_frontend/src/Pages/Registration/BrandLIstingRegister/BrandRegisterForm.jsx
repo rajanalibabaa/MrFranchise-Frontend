@@ -178,32 +178,25 @@ const initialFormData = {
   },
 
   expansionLocationData: {
-    isInternationalExpansion: null, // boolean or null
-    currentOutletLocations: {
-      domestic: {
-        states: [], // array of strings
-        districts: [], // array of objects {state: string, district: string}
-        cities: [], // array of objects {state: string, district: string, city: string}
-      },
-      international: {
-        countries: [], // array of strings
-        states: [], // array of objects {country: string, state: string}
-        cities: [], // array of objects {country: string, state: string, city: string}
-      },
+    isInternationalExpansion: data?.isInternationalExpansion || null,
+  currentOutletLocations: {
+    domestic: {
+      locations: data?.currentOutletLocations?.domestic?.locations || [],
     },
-    expansionLocations: {
-      domestic: {
-        states: [],
-        districts: [],
-        cities: [],
-      },
-      international: {
-        countries: [],
-        states: [],
-        cities: [],
-      },
+    international: {
+      locations: data?.currentOutletLocations?.international?.locations || [],
     },
   },
+  expansionLocations: {
+    domestic: {
+      locations: data?.expansionLocations?.domestic?.locations || [],
+    },
+    international: {
+      locations: data?.expansionLocations?.international?.locations || [],
+    },
+  },
+  },
+  
   uploads: {
     franchisePromotionVideo: [],
     // brandPromotionVideo: [],
