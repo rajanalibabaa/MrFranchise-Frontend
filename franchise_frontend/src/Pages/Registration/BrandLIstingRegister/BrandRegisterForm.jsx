@@ -600,7 +600,7 @@ const BrandRegisterForm = () => {
   const handlePreviewClose = () => {
     setOpenPreview(false);
   };
-  
+
 const handleLocationChange = (newData) => {
   setFormData(prev => ({
     ...prev,
@@ -668,10 +668,16 @@ const handleLocationChange = (newData) => {
         );
       case 2:
         return (
-           <BrandExpansionLocationDetails
-            data={formData.expansionLocationData}
-            onChange={handleLocationChange}
-          />
+          <BrandExpansionLocationDetails 
+  data={formData.expansionLocationData} 
+  onChange={(newData) => setFormData(prev => ({
+    ...prev,
+    expansionLocationData: {
+      ...prev.expansionLocationData,
+      ...newData
+    }
+  }))} 
+/>
         );
       case 3:
         return (
