@@ -177,26 +177,26 @@ const initialFormData = {
     uniqueSellingPoints: [],
   },
 
-  expansionLocationData: {
-    isInternationalExpansion: data?.isInternationalExpansion || null,
-  currentOutletLocations: {
-    domestic: {
-      locations: data?.currentOutletLocations?.domestic?.locations || [],
+ expansionLocationData: {
+    isInternationalExpansion: null,
+    currentOutletLocations: {
+      domestic: {
+        locations: [],
+      },
+      international: {
+        locations: [],
+      },
     },
-    international: {
-      locations: data?.currentOutletLocations?.international?.locations || [],
+    expansionLocations: {
+      domestic: {
+        locations: [],
+      },
+      international: {
+        locations: [],
+      },
     },
   },
-  expansionLocations: {
-    domestic: {
-      locations: data?.expansionLocations?.domestic?.locations || [],
-    },
-    international: {
-      locations: data?.expansionLocations?.international?.locations || [],
-    },
-  },
-  },
-  
+
   uploads: {
     franchisePromotionVideo: [],
     // brandPromotionVideo: [],
@@ -662,15 +662,9 @@ const BrandRegisterForm = () => {
         );
       case 2:
         return (
-          <BrandExpansionLocationDetails
+           <BrandExpansionLocationDetails
             data={formData.expansionLocationData}
-            setFormData={setFormData}
-            onChange={(updatedData) => {
-              setFormData((prev) => ({
-                ...prev,
-                expansionLocationData: updatedData,
-              }));
-            }}
+            onChange={handleLocationChange}
           />
         );
       case 3:
