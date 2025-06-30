@@ -479,11 +479,11 @@ const BrandRegisterForm = () => {
         console.log("fileFields.....:", formDataSend);
 
         const response = await axios.post(
-          // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
+          "http://localhost:5000/api/v1/brandlisting/createBrandListing",
+          // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
           // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
 
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
+          // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
           // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
           // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
 
@@ -1325,17 +1325,7 @@ const handleLocationChange = (newData) => {
               ))}
             </Stepper>
 
-            <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
-              <Box width="30%">
-                {" "}
-                {activeStep >= 0 && renderSelectedCategories()}
-              </Box>
-              <Box width="25%">
-                {" "}
-                {activeStep >= 0 && renderExpansionLocations()}
-              </Box>
-              <Box width="45%"> {activeStep >= 1 && renderFicoModels()}</Box>
-            </Box>
+           
           </Box>
 
           <Box

@@ -2421,8 +2421,8 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
             handleInternationalExpansionChange(e.target.value === "true")
           }
         >
-          <FormControlLabel value="true" control={<Radio />} label="Yes" />
-          <FormControlLabel value="false" control={<Radio />} label="No" />
+          <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
+          <FormControlLabel value="No" control={<Radio />} label="No" />
         </RadioGroup>
       </Box>
 

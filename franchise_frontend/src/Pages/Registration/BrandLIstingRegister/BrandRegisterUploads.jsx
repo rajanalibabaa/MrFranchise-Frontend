@@ -702,13 +702,13 @@ const Uploads = ({
                          
               value={safeData.awardsText || ""}
               onChange={(e) => safeOnChange({ awardsText: e.target.value })}
-              multiline
+              // multiline
               rows={2}
               sx={{ mb: { xs: 2, md: 0 },width:'95vh' }}
             />
           </Grid>
           
-          <Grid item xs={12} md={4} mt={1}>
+          <Grid item xs={12} md={4} mt={0}>
             
             <UploadButton
               component="label"
@@ -739,7 +739,7 @@ const Uploads = ({
             
           </Grid>
           
-          <Grid item xs={12} md={2} mt={1}>
+          <Grid item xs={12} md={2} mt={0}>
             <Button
               variant="contained"
                               color="success"
