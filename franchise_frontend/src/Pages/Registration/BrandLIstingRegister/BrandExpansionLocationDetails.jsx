@@ -401,7 +401,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     []
   );
 
-  // Add domestic locations to form data
+  // Add domestic locations to form data in the new format
   const addDomesticLocation = useCallback(
     (type) => {
       const selections =
@@ -637,7 +637,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     []
   );
 
-  // Add international locations to form data
+  // Add international locations to form data in the new format
   const addInternationalLocation = useCallback(
     (type) => {
       const selections =
@@ -983,7 +983,7 @@ const removeLocationItems = useCallback(
                   }}
                 >
                   {selections.selectedStates.map((state, index) => (
-                    <MemoizedChip
+                    <Chip
                       key={`selected-state-${index}`}
                       label={state}
                       onDelete={() => {
@@ -1015,7 +1015,7 @@ const removeLocationItems = useCallback(
                   );
                   return (
                     <Box key={`state-${state.name}`}>
-                      <MemoizedFormControlLabel
+                      <FormControlLabel
                         control={
                           <Checkbox
                             checked={isSelected}
@@ -1051,7 +1051,7 @@ const removeLocationItems = useCallback(
                 }}
               >
                 {selections.selectedStates.map((state, index) => (
-                  <MemoizedChip
+                  <Chip
                     key={`selected-state-${index}`}
                     label={state}
                     onDelete={() => {
@@ -1195,7 +1195,7 @@ const removeLocationItems = useCallback(
                       sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
                     >
                       {districts.map((district, index) => (
-                        <MemoizedChip
+                        <Chip
                           key={`selected-district-${state}-${district}-${index}`}
                           label={district}
                           onDelete={() =>
@@ -1253,7 +1253,7 @@ const removeLocationItems = useCallback(
                           selectedDistrictsForState.includes(district);
                         return (
                           <Box key={`district-${stateName}-${district}`}>
-                            <MemoizedFormControlLabel
+                            <FormControlLabel
                               control={
                                 <Checkbox
                                   checked={isSelected}
@@ -1299,7 +1299,7 @@ const removeLocationItems = useCallback(
                     }}
                   >
                     {districts.map((district, index) => (
-                      <MemoizedChip
+                      <Chip
                         key={`selected-district-${state}-${district}-${index}`}
                         label={district}
                         onDelete={() =>
@@ -1464,7 +1464,7 @@ const removeLocationItems = useCallback(
                           }}
                         >
                           {cities.map((city, index) => (
-                            <MemoizedChip
+                            <Chip
                               key={`selected-city-${districtKey}-${city}-${index}`}
                               label={city}
                               onDelete={() =>
@@ -1528,7 +1528,7 @@ const removeLocationItems = useCallback(
                               selectedCitiesForDistrict.includes(city);
                             return (
                               <Box key={`city-${districtKey}-${city}`}>
-                                <MemoizedFormControlLabel
+                                <FormControlLabel
                                   control={
                                     <Checkbox
                                       checked={isSelected}
@@ -1579,7 +1579,7 @@ const removeLocationItems = useCallback(
                       }}
                     >
                       {cities.map((city, index) => (
-                        <MemoizedChip
+                        <Chip
                           key={`selected-city-${districtKey}-${city}-${index}`}
                           label={city}
                           onDelete={() =>
@@ -1715,7 +1715,7 @@ const removeLocationItems = useCallback(
                   }}
                 >
                   {selections.selectedCountries.map((country, index) => (
-                    <MemoizedChip
+                    <Chip
                       key={`selected-country-${index}`}
                       label={country}
                       onDelete={async () => {
@@ -1748,7 +1748,7 @@ const removeLocationItems = useCallback(
                   );
                   return (
                     <Box key={`country-${country.name}`}>
-                      <MemoizedFormControlLabel
+                      <FormControlLabel
                         control={
                           <Checkbox
                             checked={isSelected}
@@ -1790,7 +1790,7 @@ const removeLocationItems = useCallback(
                 }}
               >
                 {selections.selectedCountries.map((country, index) => (
-                  <MemoizedChip
+                  <Chip
                     key={`selected-country-${index}`}
                     label={country}
                     onDelete={async () => {
@@ -1934,7 +1934,7 @@ const removeLocationItems = useCallback(
                         }}
                       >
                         {states.map((state, index) => (
-                          <MemoizedChip
+                          <Chip
                             key={`drawer-selected-state-${country}-${state}-${index}`}
                             label={state}
                             onDelete={() =>
@@ -1990,7 +1990,7 @@ const removeLocationItems = useCallback(
                         );
                         return (
                           <Box key={`state-${country}-${state.name}`}>
-                            <MemoizedFormControlLabel
+                            <FormControlLabel
                               control={
                                 <Checkbox
                                   checked={isSelected}
@@ -2037,7 +2037,7 @@ const removeLocationItems = useCallback(
                       }}
                     >
                       {states.map((state, index) => (
-                        <MemoizedChip
+                        <Chip
                           key={`selected-state-${country}-${state}-${index}`}
                           label={state}
                           onDelete={() =>
@@ -2197,7 +2197,7 @@ const removeLocationItems = useCallback(
                           }}
                         >
                           {cities.map((city, index) => (
-                            <MemoizedChip
+                            <Chip
                               key={`drawer-selected-city-${stateKey}-${city}-${index}`}
                               label={city}
                               onDelete={() =>
@@ -2257,7 +2257,7 @@ const removeLocationItems = useCallback(
                               stateSelectedCities.includes(city);
                             return (
                               <Box key={`city-${stateKey}-${city}`}>
-                                <MemoizedFormControlLabel
+                                <FormControlLabel
                                   control={
                                     <Checkbox
                                       checked={isSelected}
@@ -2309,7 +2309,7 @@ const removeLocationItems = useCallback(
                         }}
                       >
                         {cities.map((city, index) => (
-                          <MemoizedChip
+                          <Chip
                             key={`selected-city-${stateKey}-${city}-${index}`}
                             label={city}
                             onDelete={() =>
@@ -2560,45 +2560,17 @@ const removeLocationItems = useCallback(
                     removeLocationItems(
                       "expansionLocations",
                       "domestic",
-                      "states",
-                      idx
+                      item.type,
+                      item.index
                     )
                   }
-                  color="primary"
-                  variant="outlined"
-                />
-              ))}
-              {formData.expansionLocations.domestic.districts.map(
-                (district, idx) => (
-                  <MemoizedChip
-                    key={`expansion-district-${idx}`}
-                    label={`${district.state} - ${district.districts.join(", ")}`}
-                    onDelete={() =>
-                      removeLocationItems(
-                        "expansionLocations",
-                        "domestic",
-                        "districts",
-                        idx
-                      )
-                    }
-                    color="secondary"
-                    variant="outlined"
-                  />
-                )
-              )}
-              {formData.expansionLocations.domestic.cities.map((city, idx) => (
-                <MemoizedChip
-                  key={`expansion-city-${idx}`}
-                  label={`${city.state} - ${city.district} - ${city.cities.join(", ")}`}
-                  onDelete={() =>
-                    removeLocationItems(
-                      "expansionLocations",
-                      "domestic",
-                      "cities",
-                      idx
-                    )
+                  color={
+                    item.type === "state"
+                      ? "primary"
+                      : item.type === "district"
+                      ? "secondary"
+                      : "success"
                   }
-                  color="success"
                   variant="outlined"
                 />
               ))}
@@ -2677,4 +2649,4 @@ const removeLocationItems = useCallback(
   );
 };
 
-export default React.memo(BrandExpansionLocationDetails);
+export default BrandExpansionLocationDetails;

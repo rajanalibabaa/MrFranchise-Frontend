@@ -177,20 +177,6 @@ const initialFormData = {
     uniqueSellingPoints: [],
   },
 
-<<<<<<< HEAD
-  expansionLocationData: {
-    isInternationalExpansion: null, // boolean or null
-    currentOutletLocations: {
-      domestic: {
-        states: [], // array of strings
-        districts: [], // array of objects {state: string, district: string}
-        cities: [], // array of objects {state: string, district: string, city: string}
-      },
-      international: {
-        countries: [], // array of strings
-        states: [], // array of objects {country: string, state: string}
-        cities: [], // array of objects {country: string, state: string, city: string}
-=======
  expansionLocationData: {
     isInternationalExpansion: null,
     currentOutletLocations: {
@@ -199,24 +185,10 @@ const initialFormData = {
       },
       international: {
         locations: [],
->>>>>>> 3062c2abbe5a208cf857c551589e73cb9f96e41b
       },
     },
     expansionLocations: {
       domestic: {
-<<<<<<< HEAD
-        states: [],
-        districts: [],
-        cities: [],
-      },
-      international: {
-        countries: [],
-        states: [],
-        cities: [],
-      },
-    },
-  },
-=======
         locations: [],
       },
       international: {
@@ -225,7 +197,6 @@ const initialFormData = {
     },
   },
 
->>>>>>> 3062c2abbe5a208cf857c551589e73cb9f96e41b
   uploads: {
     franchisePromotionVideo: [],
     // brandPromotionVideo: [],
