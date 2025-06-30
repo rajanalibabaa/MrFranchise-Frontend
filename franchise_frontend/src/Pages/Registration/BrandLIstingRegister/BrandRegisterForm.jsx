@@ -44,6 +44,7 @@ import FranchiseDetails from "./FranchiseDetails";
 import Uploads from "../BrandLIstingRegister/BrandRegisterUploads";
 import {
   validateBrandDetails,
+  validateExpansionLocationDetails,
   validateFranchiseDetails,
 } from "./BrandRegisterValidation";
 import axios from "axios";
@@ -260,41 +261,7 @@ const BrandRegisterForm = () => {
     return errors;
   };
 
-  const validateExpansionLocationDetails = (data) => {
-    const errors = {};
-    // if (!data.currentOutletsLocatedAt || data.currentOutletsLocatedAt.length === 0) {
-    //   errors.currentOutletsLocatedAt = "Current outlets located at is required";
-    // }
-    // if (!data.expansionLocations || data.expansionLocations.length === 0) {
-    //   errors.expansionLocations = "Expansion locations are required";
-    // } else {
-    //   data.expansionLocations.forEach((location, index) => {
-    //     if (!location.type) {
-    //       errors[`expansionLocations.${index}.type`] = "Location type is required";
-    //     }
-
-    //     if (!location.location || !location.location.country) {
-    //       errors[`expansionLocations.${index}.location.country`] =
-    //         "Country is required";
-    //     }
-    //     if (!location.location || !location.location.state) {
-    //       errors[`expansionLocations.${index}.location.state`] =
-
-    //         "State is required";
-    //     }
-    //     if (!location.location || !location.location.city) {
-    //       errors[`expansionLocations.${index}.location.city`] =
-    //         "City is required";
-    //     }
-    //     if (!location.location || !location.location.district) {
-    //       errors[`expansionLocations.${index}.location.district`] =
-    //         "District is required";
-    //     }
-    //   });
-    // }
-    return errors;
-  };
-
+ 
   const validateStep = useCallback(
     (step) => {
       const errors = {};
@@ -361,8 +328,7 @@ const BrandRegisterForm = () => {
         setIsSubmitting(true);
         setSubmitSuccess(false);
 
-        // Your submit logic here
-        //form data to submit
+        console.log("formData :",formData)
         const formDataSend = new FormData();
 
         formDataSend.append(
@@ -440,42 +406,8 @@ const BrandRegisterForm = () => {
           }
         });
 
-        //   const apiData = {
-        //   personalDetails: {
-        //     fullName: formData.brandDetails.fullName,
-        //     email: formData.brandDetails.email,
-        //     mobileNumber: formData.brandDetails.mobileNumber,
-        //     brandName: formData.brandDetails.brandName,
-        //     companyName: formData.brandDetails.companyName,
-        //     country: countries.find(c => c.code === formData.brandDetails.country)?.name || formData.brandDetails.country,
-        //     pincode: formData.brandDetails.pincode,
-        //     headOfficeAddress: formData.brandDetails.headOfficeAddress,
-        //     state: formData.brandDetails.state,
-        //     city: formData.brandDetails.city,
-        //     establishedYear: formData.brandDetails.establishedYear,
-        //     franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
-        //     brandCategories: formData.brandDetails.brandCategories,
-        //     brandDescription: formData.brandDetails.brandDescription,
-        //     expansionLocation: formData.brandDetails.expansionLocation,
-        //     pancardNumber: formData.brandDetails.pancardNumber,
-        //     gstNumber: formData.brandDetails.gstNumber,
-        //     website: formData.brandDetails.website,
-        //     facebook: formData.brandDetails.facebook,
-        //     instagram: formData.brandDetails.instagram,
-        //     linkedin: formData.brandDetails.linkedin,
-        //   },
-        //   franchiseDetails: {
-        //             },
-        //   brandDetails: {
-        //     pancard: formData.uploads.pancard,
-        //     gstCertificate: formData.uploads.gstCertificate,
-        //     brandLogo: formData.uploads.brandLogo,
-        //     exterioroutlet: formData.uploads.exteriorOutlet,
-        //     interiorOutlet: formData.uploads.interiorOutlet,
-        //     franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
-        //     brandPromotionVideo: formData.uploads.brandPromotionVideo,
-        //   }
-        // };
+      
+       
         console.log("fileFields.....:", formDataSend);
 
         const response = await axios.post(
@@ -600,10 +532,16 @@ const BrandRegisterForm = () => {
   const handlePreviewClose = () => {
     setOpenPreview(false);
   };
-  const handleLocationChange = (newData) => {
-    setFormData((prev) => ({ ...prev, ...newData }));
-  };
-
+  
+const handleLocationChange = (newData) => {
+  setFormData(prev => ({
+    ...prev,
+    expansionLocationData: {
+      ...prev.expansionLocationData,
+      ...newData
+    }
+  }));
+};
   const handleCancel = () => {
     // Show confirmation dialog
     const confirmCancel = window.confirm(
