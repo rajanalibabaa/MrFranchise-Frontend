@@ -199,7 +199,7 @@ function LoginPage({ open, onClose }) {
             py: 2,
           }}
         >
-          <Typography variant="h5">Login</Typography>
+          <Typography variant="h5" component={"span"}>Login</Typography>
           <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>

@@ -1082,6 +1082,7 @@ useEffect(() => {
               render={({ field }) => (
                 <TextField
                   {...field}
+                  value={field.value || ""}
                   label="First Name"
                   fullWidth
                   variant="outlined"
@@ -1121,6 +1122,7 @@ useEffect(() => {
               render={({ field }) => (
                 <TextField
                   {...field}
+                  value={field.value || ""}
                   label="Email"
                   type="email"
                   fullWidth
@@ -1152,6 +1154,7 @@ useEffect(() => {
               render={({ field }) => (
                 <TextField
                   {...field}
+                  value={field.value || ""}
                   label="Mobile Number"
                   fullWidth
                   variant="outlined"
@@ -1202,6 +1205,7 @@ useEffect(() => {
               render={({ field }) => (
                 <TextField
                   {...field}
+                  value={field.value || ""}
                   label="WhatsApp Number"
                   fullWidth
                   variant="outlined"
@@ -1295,6 +1299,7 @@ useEffect(() => {
               render={({ field }) => (
                 <TextField
                   {...field}
+                  value={field.value || ""}
                   label="Address"
                   fullWidth
                   variant="outlined"
@@ -1313,6 +1318,7 @@ useEffect(() => {
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '8px',
+                      mt: 1
                     },
                   
                     // resize: 'vertical',
@@ -1791,7 +1797,7 @@ useEffect(() => {
         <FormControl component="fieldset" error={!!errors.preferredLocationType}>
           {/* <FormLabel component="legend">Location Type</FormLabel> */}
           <RadioGroup row {...field}>
-            <FormControlLabel value="domestic" control={<Radio />} label="Domestic (India)" />
+            <FormControlLabel value="domestic" control={<Radio />} label="India" />
             <FormControlLabel value="international" control={<Radio />} label="International" />
           </RadioGroup>
           <FormHelperText>{errors.preferredLocationType?.message || " "}</FormHelperText>
@@ -2153,7 +2159,7 @@ useEffect(() => {
           <Autocomplete
             freeSolo
             options={propertyCountries}
-            value={field.value || ""}
+            value={field.value === "" ? null : field.value}
             onChange={(_, newValue) => {
               field.onChange(newValue || "");
               setValue("propertyState", "");
@@ -2203,7 +2209,7 @@ useEffect(() => {
           <Autocomplete
             freeSolo
             options={propertyStates}
-            value={field.value || ""}
+            value={field.value === "" ? null : field.value}
             onChange={(_, newValue) => {
               field.onChange(newValue || "");
               setValue("propertyCity", "");
@@ -2289,7 +2295,7 @@ useEffect(() => {
           <Autocomplete
             freeSolo
             options={propertyCities}
-            value={field.value || ""}
+            value={field.value === "" ? null : field.value}
             onChange={(_, newValue) => {
               field.onChange(newValue || "");
               clearErrors("propertyCity");

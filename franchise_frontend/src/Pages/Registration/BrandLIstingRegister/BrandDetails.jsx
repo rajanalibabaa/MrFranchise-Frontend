@@ -47,240 +47,280 @@ const BrandDetails = ({ data = {}, onChange, errors = {} }) => {
     (_, i) => new Date().getFullYear() - i
   );
   
-  const countries = [
-    { name: "United States", code: "US", phoneCode: "+1" },
-    { name: "India", code: "IN", phoneCode: "+91" },
-    { name: "United Kingdom", code: "GB", phoneCode: "+44" },
-  ];
+  const formData = {
+    companyName: "",
+    brandName: "",
+    brandCategories: [],
+    expansionLocation: [],
+    ...data,
+  };
 
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const [hoveredCategory, setHoveredCategory] = useState(null);
-  const [hoveredSubCategory, setHoveredSubCategory] = useState(null);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    onChange({ [name]: value });
+  };
+  const [pincodeError, setPincodeError] = useState(null);
+  const [loadingPincode, setLoadingPincode] = useState(false);
 
-  // OTP Verification State
-  const [otpModal, setOtpModal] = useState({
-    open: false, 
-    type: null, 
-    otp: "", 
-    loading: false, 
-    verified: false
-  });
-  
-  const [otpStates, setOtpStates] = useState({ 
-    email: {sent: false, token: "", verified: false, loading: false}, 
-    mobile: { sent: false, token: "", verified: false, loading: false}, 
-    whatsapp: { sent: false, token: "", verified: false, loading: false}
-  });
+  // Inside your BrandDetails component, add these state variables
+const [supportedCountries, setSupportedCountries] = useState([]);
+const [selectedCountry, setSelectedCountry] = useState(''); 
+const [countryInputValue, setCountryInputValue] = useState("");
 
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "info"
-  });
+useEffect(() => {
+  fetch("https://countriesnow.space/api/v0.1/countries")
+    .then(res => res.json())
+    .then(data => {
+      if (data.data) {
+        setSupportedCountries(
+          data.data.map(c => ({
+            name: c.country,
+            code: c.iso2,
+            dial_code: c.phone_code ? `+${c.phone_code}` : "",
+          }))
+        );
+      }
+    });
+}, []);
+// const handleCountryChange = (event, newValue) => {
+//   if (newValue) {
+//     setSelectedCountry(newValue.code);
+//     onChange({ country: newValue.name });
+//   } else {
+//     setSelectedCountry('');
+//     onChange({ country: '' });
+//   }
+// };
 
-  // Helper functions
-  const openOtpModal = (type) => {
-    setOtpModal({
-      open: true,
-      type,
-      otp: "",
-      loading: false,
-      verified: otpStates[type]?.verified || false
+  // const [supportedCountries] = useState(getSupportedCountries());
+  // const [selectedCountry, setSelectedCountry] = useState("IN"); // Default to India
+  // const [countryInputValue, setCountryInputValue] = useState("");
+
+ 
+
+  // Add this function to handle country change
+  const handleCountryChange = (event, newValue) => {
+    if (newValue) {
+      setSelectedCountry(newValue.code);
+      onChange({ country: newValue.name });
+    } else {
+      setSelectedCountry("");
+      onChange({ country: "" });
+    }
+  };
+
+  useEffect(() => {
+    if (
+      data.mobileNumber?.length === 10 &&
+      !whatsappEnabled &&
+      !data.whatsappNumber
+    ) {
+      setShowWhatsappSnackbar(true);
+    }
+  }, [data.mobileNumber, whatsappEnabled, data.whatsappNumber]);
+
+  // Inside your BrandDetails component
+
+  const fetchLocationDetails = async () => {
+    if (data.pincode && data.pincode.length >= 4 && selectedCountry) {
+      setLoadingPincode(true);
+      setPincodeError(null);
+
+      try {
+        const result = await fetchGlobalLocationByPostalCode(
+          data.pincode,
+          selectedCountry
+        );
+
+        if (result.status === "success") {
+          onChange({
+            country: result.country,
+            state: result.state,
+            city: result.city,
+            district: result.district,
+          });
+        } else {
+          throw new Error(result.message || "Failed to fetch location details");
+        }
+      } catch (error) {
+        console.error("Location fetch error:", error);
+        setPincodeError(error.message);
+        // Clear the location fields if pincode is invalid
+        onChange({
+          state: "",
+          city: "",
+          district: "",
+        });
+      } finally {
+        setLoadingPincode(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (data.pincode && data.pincode.length >= 4 && selectedCountry) {
+        fetchLocationDetails();
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [data.pincode, selectedCountry]);
+
+  const handleMainCategoryChange = (e) => {
+    const mainCat = e.target.value;
+    setSelectedCategory({
+      main: mainCat,
+      sub: "",
+      child: "",
+      groupId: "",
     });
   };
 
-  const closeOtpModal = () => {
-    setOtpModal({
-      open: false,
-      type: null,
-      otp: "",
-      loading: false,
-      verified: false
-    });
-  };
+  const handleSubCategoryChange = (e) => {
+    const subCat = e.target.value;
+    const mainCatObj = categories.find(
+      (cat) => cat.name === selectedCategory.main
+    );
+    const subCatObj = mainCatObj?.children?.find((sub) => sub.name === subCat);
 
-  const showSnackbar = (message, severity = "info") => {
-    setSnackbar({ open: true, message, severity });
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, open: false }));
-  };
-
-  // OTP Functions
-  const sendOtp = async (type) => {
-    let endpoint = "";
-    let payload = {};
-    let fieldName = "";
-    let fieldValue = "";
-
-    if (type === "email") {
-      fieldName = "email";
-      fieldValue = data.email;
-      endpoint = "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-email";
-      payload = { email: data.email, type: "email" };
-    } else if (type === "mobile") {
-      fieldName = "mobileNumber";
-      fieldValue = data.mobileNumber;
-      endpoint = "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-mobile";
-      payload = { mobile: `${phoneCode}${data.mobileNumber}`, type: "mobile" };
-    } else if (type === "whatsapp") {
-      fieldName = "whatsappNumber";
-      fieldValue = data.whatsappNumber;
-      endpoint = "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/send-otp-whatsapp";
-      payload = { mobile: `${phoneCode}${data.whatsappNumber}`, type: "whatsapp" };
-    }
-
-    // Basic validation
-    if (!fieldValue) {
-      showSnackbar(`Please enter a valid ${type}`, "error");
-      return;
-    }
-
-    if ((type === "mobile" || type === "whatsapp") && fieldValue.length !== 10) {
-      showSnackbar(`Please enter a valid 10-digit ${type} number`, "error");
-      return;
-    }
-
-    if (type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fieldValue)) {
-      showSnackbar("Please enter a valid email address", "error");
-      return;
-    }
-
-    setOtpStates(prev => ({
+    setSelectedCategory((prev) => ({
       ...prev,
-      [type]: {
-        ...prev[type],
-        loading: true,
-        error: false
-      }
+      sub: subCat,
+      groupId: subCatObj?.groupId || "",
+      child: "",
     }));
+  };
 
-    try {
-      const response = await axios.post(endpoint, payload, {
-        headers: { "Content-Type": "application/json" },
+  const handleChildCategoryChange = (e) => {
+    setSelectedCategory((prev) => ({
+      ...prev,
+      child: e.target.value,
+    }));
+  };
+
+  const handleAddCategory = () => {
+    if (selectedCategory.child) {
+      const isDuplicate =
+        Array.isArray(data.brandCategories) &&
+        data.brandCategories.some(
+          (cat) =>
+            cat.main === selectedCategory.main &&
+            cat.sub === selectedCategory.sub &&
+            cat.child === selectedCategory.child
+        );
+
+      if (!isDuplicate) {
+        const updatedCategories = [
+          ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
+          {
+            main: selectedCategory.main,
+            sub: selectedCategory.sub,
+            child: selectedCategory.child,
+            groupId: selectedCategory.groupId,
+          },
+        ];
+        onChange({ brandCategories: updatedCategories });
+        // Reset the child category selection after adding
+        setSelectedCategory((prev) => ({ ...prev, child: "" }));
+      }
+    }
+  };
+
+  // State for country codes
+  const [mobileCountryCode, setMobileCountryCode] = useState({
+    code: "IN",
+    dial_code: "+91",
+  });
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState({
+    code: "IN",
+    dial_code: "+91",
+  });
+  const [ceoCountryCode, setCeoCountryCode] = useState({
+    code: "IN",
+    dial_code: "+91",
+  });
+  const [officeCountryCode, setOfficeCountryCode] = useState({
+    code: "IN",
+    dial_code: "+91",
+  });
+
+  // Filter country codes to remove duplicates and sort
+  const uniqueCountryCodes = coutryCode
+    .reduce((acc, current) => {
+      const x = acc.find((item) => item.code === current.code);
+      if (!x) {
+        return acc.concat([current]);
+      } else {
+        return acc;
+      }
+    }, [])
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Handle country code change
+  const handleCountryCodeChange = (field, newValue) => {
+    if (newValue) {
+      switch (field) {
+        case "mobile":
+          setMobileCountryCode(newValue);
+          // Update the full mobile number with new dial code
+          if (data.mobileNumber) {
+            const numberWithoutCode = data.mobileNumber.replace(/^\+?\d+/, "");
+            onChange({
+              mobileNumber: newValue.dial_code + numberWithoutCode,
+            });
+          }
+          break;
+        case "whatsapp":
+          setWhatsappCountryCode(newValue);
+          // Update the full whatsapp number with new dial code
+          if (data.whatsappNumber) {
+            const numberWithoutCode = data.whatsappNumber.replace(
+              /^\+?\d+/,
+              ""
+            );
+            onChange({
+              whatsappNumber: newValue.dial_code + numberWithoutCode,
+            });
+          }
+          break;
+        case "ceo":
+          setCeoCountryCode(newValue);
+          // Update the full ceo mobile number with new dial code
+          if (data.ceoMobile) {
+            const numberWithoutCode = data.ceoMobile.replace(/^\+?\d+/, "");
+            onChange({
+              ceoMobile: newValue.dial_code + numberWithoutCode,
+            });
+          }
+          break;
+        case "office":
+          setOfficeCountryCode(newValue);
+          // Update the full office mobile number with new dial code
+          if (data.officeMobile) {
+            const numberWithoutCode = data.officeMobile.replace(/^\+?\d+/, "");
+            onChange({
+              officeMobile: newValue.dial_code + numberWithoutCode,
+            });
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  };
+
+  // Handle mobile number change - ensure it includes the country code
+  const handleMobileNumberChange = (e) => {
+    const { name, value } = e.target;
+    // Remove any non-digit characters
+    const digitsOnly = value.replace(/\D/g, "");
+
+    // For mobileNumber field, we'll prepend the country code
+    if (name === "mobileNumber") {
+      onChange({
+        [name]: mobileCountryCode.dial_code + digitsOnly,
       });
-
-      if (response.status === 200 && response.data.message) {
-        showSnackbar(`OTP sent to your ${type} successfully!`, "success");
-        setOtpStates(prev => ({
-          ...prev,
-          [type]: {
-            ...prev[type],
-            sent: true,
-            loading: false,
-            token: response.data.token || ""
-          }
-        }));
-        openOtpModal(type);
-      } else {
-        throw new Error(response.data.message || `Failed to send ${type} OTP`);
-      }
-    } catch (error) {
-      console.error(`Error sending ${type} OTP:`, error);
-      showSnackbar(
-        error.response?.data?.message ||
-        `Failed to send ${type} OTP. Please try again.`,
-        "error"
-      );
-      setOtpStates(prev => ({
-        ...prev,
-        [type]: {
-          ...prev[type],
-          loading: false,
-          error: true
-        }
-      }));
-    }
-  };
-
-  const verifyOtp = async () => {
-    const { type, otp } = otpModal;
-
-    if (!otp || otp.length !== 6) {
-      showSnackbar("Please enter a valid 6-digit OTP", "error");
-      return;
-    }
-
-    setOtpModal(prev => ({ ...prev, loading: true }));
-
-    try {
-      const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/verify-otp",
-        {
-          identifier: type === "email" 
-            ? data.email 
-            : `${phoneCode}${data[type === "mobile" ? "mobileNumber" : "whatsappNumber"]}`,
-          otp,
-          type
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${otpStates[type].token}`
-          }
-        }
-      );
-
-      if (response.status === 200 && response.data.message) {
-        showSnackbar(`${type} verified successfully!`, "success");
-        setOtpStates(prev => ({
-          ...prev,
-          [type]: {
-            ...prev[type],
-            verified: true,
-            loading: false
-          }
-        }));
-        
-        // Update the parent form state
-        if (type === "email") {
-          onChange("emailVerified", true);
-          onChange("verifiedEmail", data.email);
-        } else if (type === "mobile") {
-          onChange("mobileVerified", true);
-          onChange("verifiedMobileNumber", data.mobileNumber);
-        } else if (type === "whatsapp") {
-          onChange("whatsappVerified", true);
-          onChange("verifiedWhatsappNumber", data.whatsappNumber);
-        }
-        
-        setOtpModal(prev => ({ ...prev, open: false, loading: false, verified: true }));
-      } else {
-        throw new Error(response.data.message || "Verification failed");
-      }
-    } catch (error) {
-      console.error("OTP verification error:", error);
-      showSnackbar(
-        error.response?.data?.message || 
-        "Invalid OTP. Please try again.",
-        "error"
-      );
-      setOtpModal(prev => ({ ...prev, loading: false }));
-    }
-  };
-
-  // GST Validation function
-  const validateGSTIN = (gstin) => {
-    if (!gstin) {
-      return "GSTIN is required";
-    }
-    if (gstin.length !== 15) {
-      return "GSTIN must be 15 characters";
-    }
-    if (!/^[0-9A-Z]{15}$/.test(gstin)) {
-      return "Invalid GSTIN format";
-    }
-    return null;
-  };
-
-  const handleVerifyGSTIN = async () => {
-    const validationError = validateGSTIN(data.gstin);
-    if (validationError) {
-      setGstError(validationError);
-      return;
     }
 
     setIsVerifyingGST(true);
@@ -613,261 +653,145 @@ const BrandDetails = ({ data = {}, onChange, errors = {} }) => {
           />
         </Grid>
 
-        {/* Categories Section */}
-        <Grid item xs={12}>
-          <Box sx={{ display: "flex", mb: 2, gap: 1 }}>
-            <Box sx={{ position: "relative", flexGrow: 1 }}>
+        {/* CEO Email */}
+        <Grid item xs={12} md={1}>
+          <TextField
+            fullWidth
+            label="CEO/MD/Owner Email"
+            name="ceoEmail"
+            type="email"
+            value={data.ceoEmail || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.ceoEmail}
+            helperText={errors.ceoEmail}
+            required
+          />
+        </Grid>
+
+        {/* CEO Mobile */}
+        <Grid item xs={12} md={2}>
+          {renderCeoMobileField()}
+        </Grid>
+      </Grid>
+
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}
+      >
+        Head Office Location{" "}
+      </Typography>
+
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 2,
+          mb: 2,
+        }}
+      >
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Office Email (Optional)"
+            name="officeEmail"
+            value={data.officeEmail || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.officeEmail}
+            helperText={errors.officeEmail}
+            required
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          {renderOfficeMobileField()}
+        </Grid>
+      </Grid>
+
+   
+  <Grid
+  container
+  spacing={2}
+  sx={{
+    mt: 2,
+    display: "grid",
+    gridTemplateColumns: { md: "3fr 1fr", xs: "1fr" }, // 3:1 ratio on desktop
+    gap: 1.5,
+    
+  }}
+>
+
+        {/* Head Office Address - spans 3 columns */}
+        <Grid item size={{ xs: 12, md: 12.05 }}>
+          <TextField
+            fullWidth
+            label="Head Office Address"
+            name="headOfficeAddress"
+            value={data.headOfficeAddress || ""}
+            onChange={handleChange}
+            error={!!errors.headOfficeAddress}
+            helperText={errors.headOfficeAddress}
+            variant="outlined"
+            size="medium"
+            required
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Autocomplete
+            options={supportedCountries}
+            getOptionLabel={(option) => option.name}
+            value={
+              supportedCountries.find((c) => c.code === selectedCountry) || null
+            }
+            onChange={(event, newValue) => {
+              if (newValue) {
+                setSelectedCountry(newValue.code);
+                onChange({ country: newValue.name });
+              } else {
+                setSelectedCountry("");
+                onChange({ country: "" });
+              }
+              // Clear pincode-related fields when country changes
+              onChange({
+                pincode: "",
+                state: "",
+                city: "",
+                district: "",
+              });
+            }}
+            inputValue={countryInputValue}
+            onInputChange={(event, newInputValue) => {
+              setCountryInputValue(newInputValue);
+            }}
+            renderInput={(params) => (
               <TextField
-                label="Select Category"
-                value={selectedCategory}
-                onFocus={() => setDropdownOpen(true)}
-                onChange={() => {}}
-                fullWidth
-                size="small"
-                error={!!errors.categories}
-                helperText={errors.categories || "Select at least one category"}
+                {...params}
+                label="Country"
+                variant="outlined"
+                size="medium"
+                required
+                error={!!errors.country}
+                helperText={errors.country || "Select your country first"}
               />
-              {isDropdownOpen && (
-                <Paper
-                  sx={{
-                    position: "absolute",
-                    zIndex: 2,
-                    mt: 1,
-                    width: "100%",
-                    display: "flex",
-                    boxShadow: 3,
-                    minHeight: 300,
-                  }}
-                  onMouseLeave={() => setDropdownOpen(false)}
-                >
-                  {/* Parent Categories */}
-                  <Box sx={{ flex: 1, borderRight: "1px solid #eee" }}>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ p: 1, fontWeight: "bold", bgcolor: "grey.100" }}
-                    >
-                      Main Categories
-                    </Typography>
-                    <List sx={{ maxHeight: 300, overflow: "auto" }}>
-                      {categories.map((category) => (
-                        <ListItem
-                          key={category.name}
-                          button
-                          selected={hoveredCategory === category.name}
-                          onMouseEnter={() => {
-                            setHoveredCategory(category.name);
-                            setHoveredSubCategory(null);
-                          }}
-                          dense
-                        >
-                          <ListItemText
-                            primary={category.name}
-                            primaryTypographyProps={{
-                              fontWeight:
-                                hoveredCategory === category.name
-                                  ? "bold"
-                                  : "normal",
-                              color:
-                                hoveredCategory === category.name
-                                  ? "primary.main"
-                                  : "text.primary",
-                            }}
-                          />
-                          {category.children && category.children.length > 0 && (
-                            <ChevronRightIcon fontSize="small" color="action" />
-                          )}
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Box>
-
-                  {/* Subcategories */}
-                  <Box
-                    sx={{
-                      flex: 1,
-                      borderRight: "1px solid #eee",
-                      bgcolor: hoveredCategory ? "background.paper" : "grey.50",
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ p: 1, fontWeight: "bold", bgcolor: "grey.100" }}
-                    >
-                      Subcategories
-                    </Typography>
-                    {hoveredCategory ? (
-                      <List sx={{ maxHeight: 300, overflow: "auto" }}>
-                        {categories
-                          .find((cat) => cat.name === hoveredCategory)
-                          ?.children?.map((subCategory) => (
-                            <ListItem
-                              key={subCategory.name}
-                              button
-                              selected={hoveredSubCategory === subCategory.name}
-                              onMouseEnter={() =>
-                                setHoveredSubCategory(subCategory.name)
-                              }
-                              dense
-                            >
-                              <ListItemText
-                                primary={subCategory.name}
-                                primaryTypographyProps={{
-                                  fontWeight:
-                                    hoveredSubCategory === subCategory.name
-                                      ? "bold"
-                                      : "normal",
-                                  color:
-                                    hoveredSubCategory === subCategory.name
-                                      ? "primary.main"
-                                      : "text.primary",
-                                }}
-                              />
-                              {subCategory.children &&
-                                subCategory.children.length > 0 && (
-                                  <ChevronRightIcon
-                                    fontSize="small"
-                                    color="action"
-                                  />
-                                )}
-                            </ListItem>
-                          ))}
-                      </List>
-                    ) : (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          height: "100%",
-                        }}
-                      >
-                        <Typography variant="body2" color="text.secondary">
-                          Select a main category
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-
-                  {/* Subchild Categories */}
-                  <Box
-                    sx={{
-                      flex: 1,
-                      bgcolor: hoveredSubCategory
-                        ? "background.paper"
-                        : "grey.50",
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ p: 1, fontWeight: "bold", bgcolor: "grey.100" }}
-                    >
-                      Items
-                    </Typography>
-                    {hoveredSubCategory ? (
-                      <List sx={{ maxHeight: 300, overflow: "auto" }}>
-                        {categories
-                          .find((cat) => cat.name === hoveredCategory)
-                          ?.children?.find(
-                            (sub) => sub.name === hoveredSubCategory
-                          )
-                          ?.children?.map((child, index) => (
-                            <ListItem
-                              key={index}
-                              button
-                              onClick={() =>
-                                handleCategorySelection(
-                                  hoveredCategory,
-                                  hoveredSubCategory,
-                                  child
-                                )
-                              }
-                              dense
-                            >
-                              <ListItemText
-                                primary={child}
-                                primaryTypographyProps={{ color: "text.primary" }}
-                              />
-                            </ListItem>
-                          ))}
-                      </List>
-                    ) : (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          height: "100%",
-                        }}
-                      >
-                        <Typography variant="body2" color="text.secondary">
-                          {hoveredCategory
-                            ? "Select a subcategory"
-                            : "Select a main category first"}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                </Paper>
-              )}
-            </Box>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleAddCategory}
-              sx={{ height: "40px" }}
-              size="small"
-            >
-              Add
-            </Button>
-          </Box>
-
-          {/* Selected Categories */}
-          {selectedCategories.length > 0 && (
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: "bold" }}>
-                Selected Categories:
-              </Typography>
-              <List
-                dense
-                sx={{
-                  maxHeight: 200,
-                  overflow: "auto",
-                  border: "1px solid #eee",
-                  borderRadius: 1,
-                }}
-              >
-                {selectedCategories.map((category, index) => (
-                  <ListItem
-                    key={index}
-                    secondaryAction={
-                      <IconButton
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => handleRemoveCategory(index)}
-                        size="small"
-                      >
-                        <DeleteIcon fontSize="small" color="error" />
-                      </IconButton>
-                    }
-                    dense
-                    sx={{ borderBottom: "1px solid #f5f5f5" }}
-                  >
-                    <ListItemText
-                      primary={category}
-                      primaryTypographyProps={{
-                        variant: "body2",
-                        sx: {
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1,
-                        },
-                      }}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
-          )}
+            )}
+            renderOption={(props, option) => {
+  const { key, ...rest } = props;
+  return (
+    <Box component="li" key={key} {...rest}>
+      <FlagIcon sx={{ mr: 1 }} />
+      {option.name}
+    </Box>
+  );
+}}
+          />
         </Grid>
 
         {/* Mobile Number Field */}

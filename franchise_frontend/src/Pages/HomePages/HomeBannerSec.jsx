@@ -474,8 +474,8 @@ const HomeBannerSec = () => {
   >
             {/* <motion.div variants={pageConfig.animations.item}> */}
               <Typography
-                component="text"
                 mb={3}
+                component='span'
                 // maxWidth={isMobile ? "100%" : "100%"}
                 // sx={{
                 //   fontWeight: 200,

@@ -21,6 +21,7 @@ import GoogleIcon from "../../Assets/Images/GoogleIcon.png";
 import LoginPage from "../../Pages/LoginPage/LoginPage"
 import Footer from "../../Components/Footers/Footer";
 import { useDispatch } from "react-redux";
+import Navbar from "../../Components/Navbar/NavBar.jsx";
 // import { showLoading , hideLoading} from "../../Redux/Slices/loadingSlice";
 
 function RegisterHandleUser({boolean = true}) {
@@ -55,10 +56,10 @@ function RegisterHandleUser({boolean = true}) {
 
   return (
     <>
-    {/* <Navbar/> */}
+    <Navbar/>
     {/* {boolean && <Navbar/>} */}
     <Box
-    mt={isMobile ? 0 : 7}
+    mt={isMobile ? 0 : 0}
       sx={{
         height: "100vh",
         overflow: "hidden",
