@@ -100,19 +100,19 @@ useEffect(() => {
       }
     });
 }, []);
-const handleCountryChange = (event, newValue) => {
-  if (newValue) {
-    setSelectedCountry(newValue.code);
-    onChange({ country: newValue.name });
-  } else {
-    setSelectedCountry('');
-    onChange({ country: '' });
-  }
-};
+// const handleCountryChange = (event, newValue) => {
+//   if (newValue) {
+//     setSelectedCountry(newValue.code);
+//     onChange({ country: newValue.name });
+//   } else {
+//     setSelectedCountry('');
+//     onChange({ country: '' });
+//   }
+// };
 
-  const [supportedCountries] = useState(getSupportedCountries());
-  const [selectedCountry, setSelectedCountry] = useState("IN"); // Default to India
-  const [countryInputValue, setCountryInputValue] = useState("");
+  // const [supportedCountries] = useState(getSupportedCountries());
+  // const [selectedCountry, setSelectedCountry] = useState("IN"); // Default to India
+  // const [countryInputValue, setCountryInputValue] = useState("");
 
 
   // Add this function to handle country change
@@ -1234,79 +1234,7 @@ const handleCountryChange = (event, newValue) => {
     
   }}
 >
-  {/* Head Office Address - spans 3 columns */}
-  <Grid item size={{ xs:12, md:12.05 }} >
-    <TextField
-      fullWidth
-      label="Head Office Address"
-      name="headOfficeAddress"
-      value={data.headOfficeAddress || ""}
-      onChange={handleChange}
-      error={!!errors.headOfficeAddress}
-      helperText={errors.headOfficeAddress}
-      variant="outlined"
-      size="medium"
-      required
-    />
-  </Grid>
 
-<Grid item xs={12} sm={6} md={2.4}>
-  <Autocomplete
-    options={supportedCountries}
-    getOptionLabel={(option) => option.name}
-    value={supportedCountries.find(c => c.code === selectedCountry) || null}
-    onChange={(event, newValue) => {
-      if (newValue) {
-        setSelectedCountry(newValue.code);
-        onChange({ country: newValue.name });
-      } else {
-        setSelectedCountry('');
-        onChange({ country: '' });
-      }
-      // Clear pincode-related fields when country changes
-      onChange({
-        pincode: '',
-        state: '',
-        city: '',
-        district: ''
-      });
-    }}
-    inputValue={countryInputValue}
-    onInputChange={(event, newInputValue) => {
-      setCountryInputValue(newInputValue);
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="Country"
-        variant="outlined"
-        size="medium"
-        required
-        error={!!errors.country}
-        helperText={errors.country || "Select your country first"}
-      />
-    )}
-    renderOption={(props, option) => (
-      <Box component="li" {...props}>
-        {/* <FlagIcon sx={{ mr: 1 }} /> */}
-        {option.name}
-      </Box>
-    )}
-  />
-</Grid>
-  {/* Pincode - spans 1 column */}
-  {/* <Grid item sx={{ ml:{ md:1 }}} 
-
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          mt: 2,
-          display: "grid",
-          gridTemplateColumns: { md: "3fr 1fr", xs: "1fr" }, // 3:1 ratio on desktop
-          gap: 1.5,
-        }}
-      >
         {/* Head Office Address - spans 3 columns */}
         <Grid item size={{ xs: 12, md: 12.05 }}>
           <TextField
