@@ -29,6 +29,15 @@ const apiCache = {
   cities: {},
 };
 
+// Memoized components to prevent unnecessary re-renders
+const MemoizedChip = React.memo(({ label, onDelete, color, variant }) => (
+  <Chip label={label} onDelete={onDelete} color={color} variant={variant} />
+));
+
+const MemoizedFormControlLabel = React.memo(({ control, label }) => (
+  <FormControlLabel control={control} label={label} />
+));
+
 const BrandExpansionLocationDetails = ({ data, onChange }) => {
   const { enqueueSnackbar } = useSnackbar();
 
@@ -807,6 +816,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     []
   );
 
+  // Memoized render functions for drawers
   const renderDomesticStateDrawer = useCallback(
     (type) => {
       const selections =
@@ -909,7 +919,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                   }}
                 >
                   {selections.selectedStates.map((state, index) => (
-                    <Chip
+                    <MemoizedChip
                       key={`selected-state-${index}`}
                       label={state}
                       onDelete={() => {
@@ -941,7 +951,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                   );
                   return (
                     <Box key={`state-${state.name}`}>
-                      <FormControlLabel
+                      <MemoizedFormControlLabel
                         control={
                           <Checkbox
                             checked={isSelected}
@@ -977,7 +987,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                 }}
               >
                 {selections.selectedStates.map((state, index) => (
-                  <Chip
+                  <MemoizedChip
                     key={`selected-state-${index}`}
                     label={state}
                     onDelete={() => {
@@ -1120,7 +1130,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                       sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
                     >
                       {districts.map((district, index) => (
-                        <Chip
+                        <MemoizedChip
                           key={`selected-district-${state}-${district}-${index}`}
                           label={district}
                           onDelete={() =>
@@ -1178,7 +1188,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                           selectedDistrictsForState.includes(district);
                         return (
                           <Box key={`district-${stateName}-${district}`}>
-                            <FormControlLabel
+                            <MemoizedFormControlLabel
                               control={
                                 <Checkbox
                                   checked={isSelected}
@@ -1224,7 +1234,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                     }}
                   >
                     {districts.map((district, index) => (
-                      <Chip
+                      <MemoizedChip
                         key={`selected-district-${state}-${district}-${index}`}
                         label={district}
                         onDelete={() =>
@@ -1388,7 +1398,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                           }}
                         >
                           {cities.map((city, index) => (
-                            <Chip
+                            <MemoizedChip
                               key={`selected-city-${districtKey}-${city}-${index}`}
                               label={city}
                               onDelete={() =>
@@ -1452,7 +1462,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                               selectedCitiesForDistrict.includes(city);
                             return (
                               <Box key={`city-${districtKey}-${city}`}>
-                                <FormControlLabel
+                                <MemoizedFormControlLabel
                                   control={
                                     <Checkbox
                                       checked={isSelected}
@@ -1503,7 +1513,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                       }}
                     >
                       {cities.map((city, index) => (
-                        <Chip
+                        <MemoizedChip
                           key={`selected-city-${districtKey}-${city}-${index}`}
                           label={city}
                           onDelete={() =>
@@ -1638,7 +1648,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                   }}
                 >
                   {selections.selectedCountries.map((country, index) => (
-                    <Chip
+                    <MemoizedChip
                       key={`selected-country-${index}`}
                       label={country}
                       onDelete={async () => {
@@ -1671,7 +1681,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                   );
                   return (
                     <Box key={`country-${country.name}`}>
-                      <FormControlLabel
+                      <MemoizedFormControlLabel
                         control={
                           <Checkbox
                             checked={isSelected}
@@ -1713,7 +1723,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                 }}
               >
                 {selections.selectedCountries.map((country, index) => (
-                  <Chip
+                  <MemoizedChip
                     key={`selected-country-${index}`}
                     label={country}
                     onDelete={async () => {
@@ -1856,7 +1866,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                         }}
                       >
                         {states.map((state, index) => (
-                          <Chip
+                          <MemoizedChip
                             key={`drawer-selected-state-${country}-${state}-${index}`}
                             label={state}
                             onDelete={() =>
@@ -1912,7 +1922,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                         );
                         return (
                           <Box key={`state-${country}-${state.name}`}>
-                            <FormControlLabel
+                            <MemoizedFormControlLabel
                               control={
                                 <Checkbox
                                   checked={isSelected}
@@ -1959,7 +1969,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                       }}
                     >
                       {states.map((state, index) => (
-                        <Chip
+                        <MemoizedChip
                           key={`selected-state-${country}-${state}-${index}`}
                           label={state}
                           onDelete={() =>
@@ -2118,7 +2128,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                           }}
                         >
                           {cities.map((city, index) => (
-                            <Chip
+                            <MemoizedChip
                               key={`drawer-selected-city-${stateKey}-${city}-${index}`}
                               label={city}
                               onDelete={() =>
@@ -2178,7 +2188,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                               stateSelectedCities.includes(city);
                             return (
                               <Box key={`city-${stateKey}-${city}`}>
-                                <FormControlLabel
+                                <MemoizedFormControlLabel
                                   control={
                                     <Checkbox
                                       checked={isSelected}
@@ -2230,7 +2240,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                         }}
                       >
                         {cities.map((city, index) => (
-                          <Chip
+                          <MemoizedChip
                             key={`selected-city-${stateKey}-${city}-${index}`}
                             label={city}
                             onDelete={() =>
@@ -2355,7 +2365,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
               {formData.currentOutletLocations.domestic.states.map(
                 (state, idx) => (
-                  <Chip
+                  <MemoizedChip
                     key={`current-state-${idx}`}
                     label={state}
                     onDelete={() =>
@@ -2373,7 +2383,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
               )}
               {formData.currentOutletLocations.domestic.districts.map(
                 (item, idx) => (
-                  <Chip
+                  <MemoizedChip
                     key={`current-district-${idx}`}
                     label={`${item.state} - ${item.districts.join(", ")}`}
                     onDelete={() =>
@@ -2391,7 +2401,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
               )}
               {formData.currentOutletLocations.domestic.cities.map(
                 (item, idx) => (
-                  <Chip
+                  <MemoizedChip
                     key={`current-city-${idx}`}
                     label={`${item.state} - ${item.district} - ${item.cities.join(", ")}`}
                     onDelete={() =>
@@ -2430,7 +2440,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
               {formData.currentOutletLocations.international.countries.map(
                 (country, idx) => (
-                  <Chip
+                  <MemoizedChip
                     key={`current-country-${idx}`}
                     label={country}
                     onDelete={() =>
@@ -2448,7 +2458,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
               )}
               {formData.currentOutletLocations.international.states.map(
                 (state, idx) => (
-                  <Chip
+                  <MemoizedChip
                     key={`current-state-${idx}`}
                     label={state}
                     onDelete={() =>
@@ -2466,7 +2476,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
               )}
               {formData.currentOutletLocations.international.cities.map(
                 (city, idx) => (
-                  <Chip
+                  <MemoizedChip
                     key={`current-int-city-${idx}`}
                     label={city}
                     onDelete={() =>
@@ -2529,7 +2539,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
             <Typography variant="subtitle2">Selected Locations:</Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
               {formData.expansionLocations.domestic.states.map((state, idx) => (
-                <Chip
+                <MemoizedChip
                   key={`expansion-state-${idx}`}
                   label={state}
                   onDelete={() =>
@@ -2546,7 +2556,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
               ))}
               {formData.expansionLocations.domestic.districts.map(
                 (district, idx) => (
-                  <Chip
+                  <MemoizedChip
                     key={`expansion-district-${idx}`}
                     label={`${district.state} - ${district.districts.join(", ")}`}
                     onDelete={() =>
@@ -2563,7 +2573,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
                 )
               )}
               {formData.expansionLocations.domestic.cities.map((city, idx) => (
-                <Chip
+                <MemoizedChip
                   key={`expansion-city-${idx}`}
                   label={`${city.state} - ${city.district} - ${city.cities.join(", ")}`}
                   onDelete={() =>
@@ -2601,7 +2611,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
               {formData.expansionLocations.international.countries.map(
                 (country, idx) => (
-                  <Chip
+                  <MemoizedChip
                     key={`expansion-country-${idx}`}
                     label={country}
                     onDelete={() =>
@@ -2619,7 +2629,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
               )}
               {formData.expansionLocations.international.states.map(
                 (state, idx) => (
-                  <Chip
+                  <MemoizedChip
                     key={`expansion-state-${idx}`}
                     label={state}
                     onDelete={() =>
@@ -2637,7 +2647,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
               )}
               {formData.expansionLocations.international.cities.map(
                 (city, idx) => (
-                  <Chip
+                  <MemoizedChip
                     key={`expansion-int-city-${idx}`}
                     label={city}
                     onDelete={() =>
@@ -2682,4 +2692,4 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
   );
 };
 
-export default BrandExpansionLocationDetails;
+export default React.memo(BrandExpansionLocationDetails);
