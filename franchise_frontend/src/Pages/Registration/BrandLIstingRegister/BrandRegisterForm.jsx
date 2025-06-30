@@ -452,7 +452,7 @@ const BrandRegisterForm = () => {
           navigate("/");
         }, 1500);
       } catch (error) {
-        // console.log("submission error", error);
+        console.log("submission error", error);
         setSnackbar({
           open: true,
           message:
