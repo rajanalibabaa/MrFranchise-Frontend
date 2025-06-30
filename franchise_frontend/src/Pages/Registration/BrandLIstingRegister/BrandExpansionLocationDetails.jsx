@@ -401,7 +401,6 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     []
   );
 
-  // Add domestic locations to form data in the new format
   const addDomesticLocation = useCallback(
     (type) => {
       const selections =
@@ -416,34 +415,36 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
         return;
       }
 
-      const newLocations = [...(data?.[locationKey]?.domestic?.locations || [])];
-      
+      const newLocations = [];
+
       // Process states
-      selections.selectedStates.forEach(stateName => {
-        const existingStateIndex = newLocations.findIndex(loc => loc.state === stateName);
-        
+      selections.selectedStates.forEach((stateName) => {
+        const existingStateIndex = newLocations.findIndex(
+          (loc) => loc.state === stateName
+        );
+
         if (existingStateIndex === -1) {
           // Add new state with empty districts
           newLocations.push({
             state: stateName,
-            districts: []
+            districts: [],
           });
         }
       });
 
       // Process districts
       selections.selectedDistricts.forEach(({ state, district }) => {
-        const stateIndex = newLocations.findIndex(loc => loc.state === state);
-        
+        const stateIndex = newLocations.findIndex((loc) => loc.state === state);
+
         if (stateIndex !== -1) {
           const districtExists = newLocations[stateIndex].districts.some(
-            d => d.district === district
+            (d) => d.district === district
           );
-          
+
           if (!districtExists) {
             newLocations[stateIndex].districts.push({
               district,
-              cities: []
+              cities: [],
             });
           }
         }
@@ -451,22 +452,26 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
 
       // Process cities
       selections.selectedCities.forEach(({ state, district, city }) => {
-        const stateIndex = newLocations.findIndex(loc => loc.state === state);
-        
+        const stateIndex = newLocations.findIndex((loc) => loc.state === state);
+
         if (stateIndex !== -1) {
           const districtIndex = newLocations[stateIndex].districts.findIndex(
-            d => d.district === district
+            (d) => d.district === district
           );
-          
+
           if (districtIndex === -1) {
             // Add district if it doesn't exist
             newLocations[stateIndex].districts.push({
               district,
-              cities: [city]
+              cities: [city],
             });
           } else {
             // Add city to existing district if not already present
-            if (!newLocations[stateIndex].districts[districtIndex].cities.includes(city)) {
+            if (
+              !newLocations[stateIndex].districts[districtIndex].cities.includes(
+                city
+              )
+            ) {
               newLocations[stateIndex].districts[districtIndex].cities.push(city);
             }
           }
@@ -474,34 +479,36 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
       });
 
       const updatedData = {
+        ...data,
         [locationKey]: {
-          ...data?.[locationKey],
+          ...data[locationKey],
           domestic: {
-            locations: newLocations
-          }
-        }
+            locations: [
+              ...(data[locationKey]?.domestic?.locations || []),
+              ...newLocations,
+            ],
+          },
+        },
       };
 
       onChange(updatedData);
 
       // Clear selections
       if (type === "current") {
-        setCurrentDomesticSelections((prev) => ({
-          ...prev,
+        setCurrentDomesticSelections({
           selectedStates: [],
           selectedDistricts: [],
           selectedCities: [],
-        }));
+        });
       } else {
-        setDomesticSelections((prev) => ({
-          ...prev,
+        setDomesticSelections({
           selectedStates: [],
           selectedDistricts: [],
           selectedCities: [],
-        }));
+        });
       }
     },
-    [currentDomesticSelections, domesticSelections, enqueueSnackbar, data, onChange]
+    [currentDomesticSelections, domesticSelections, enqueueSnackbar, onChange, data]
   );
 
   // Handle international country selection
@@ -637,7 +644,6 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
     []
   );
 
-  // Add international locations to form data in the new format
   const addInternationalLocation = useCallback(
     (type) => {
       const selections =
@@ -656,92 +662,110 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
 
       setLoading((prev) => ({ ...prev, formSubmit: true }));
       try {
-        const newLocations = [...(data?.[locationKey]?.international?.locations || [])];
-        
+        const newLocations = [];
+
         // Process countries
-        selections.selectedCountries.forEach(country => {
-          const countryExists = newLocations.some(loc => loc.country === country);
+        selections.selectedCountries.forEach((country) => {
+          const countryExists = newLocations.some(
+            (loc) => loc.country === country
+          );
           if (!countryExists) {
             newLocations.push({
               country,
-              states: []
+              states: [],
             });
           }
         });
 
         // Process states
-        Object.entries(selections.selectedStates).forEach(([country, states]) => {
-          const countryIndex = newLocations.findIndex(loc => loc.country === country);
-          
-          if (countryIndex !== -1) {
-            states.forEach(state => {
-              const stateExists = newLocations[countryIndex].states.some(
-                s => s.state === state
-              );
-              
-              if (!stateExists) {
-                newLocations[countryIndex].states.push({
-                  state,
-                  cities: []
-                });
-              }
-            });
-          }
-        });
-
-        // Process cities
-        Object.entries(selections.selectedCities).forEach(([stateKey, cities]) => {
-          const [country, state] = stateKey.split('-');
-          const countryIndex = newLocations.findIndex(loc => loc.country === country);
-          
-          if (countryIndex !== -1) {
-            const stateIndex = newLocations[countryIndex].states.findIndex(
-              s => s.state === state
+        Object.entries(selections.selectedStates).forEach(
+          ([country, states]) => {
+            const countryIndex = newLocations.findIndex(
+              (loc) => loc.country === country
             );
-            
-            if (stateIndex === -1) {
-              // Add state if it doesn't exist
-              newLocations[countryIndex].states.push({
-                state,
-                cities
-              });
-            } else {
-              // Add cities to existing state
-              cities.forEach(city => {
-                if (!newLocations[countryIndex].states[stateIndex].cities.includes(city)) {
-                  newLocations[countryIndex].states[stateIndex].cities.push(city);
+
+            if (countryIndex !== -1) {
+              states.forEach((state) => {
+                const stateExists = newLocations[countryIndex].states.some(
+                  (s) => s.state === state
+                );
+
+                if (!stateExists) {
+                  newLocations[countryIndex].states.push({
+                    state,
+                    cities: [],
+                  });
                 }
               });
             }
           }
-        });
+        );
 
-        const updatedData = {
-          [locationKey]: {
-            ...data?.[locationKey],
-            international: {
-              locations: newLocations
+        // Process cities
+        Object.entries(selections.selectedCities).forEach(
+          ([stateKey, cities]) => {
+            const [country, state] = stateKey.split("-");
+            const countryIndex = newLocations.findIndex(
+              (loc) => loc.country === country
+            );
+
+            if (countryIndex !== -1) {
+              const stateIndex = newLocations[countryIndex].states.findIndex(
+                (s) => s.state === state
+              );
+
+              if (stateIndex === -1) {
+                // Add state if it doesn't exist
+                newLocations[countryIndex].states.push({
+                  state,
+                  cities,
+                });
+              } else {
+                // Add cities to existing state
+                cities.forEach((city) => {
+                  if (
+                    !newLocations[countryIndex].states[stateIndex].cities.includes(
+                      city
+                    )
+                  ) {
+                    newLocations[countryIndex].states[stateIndex].cities.push(
+                      city
+                    );
+                  }
+                });
+              }
             }
           }
+        );
+
+        const updatedData = {
+          ...data,
+          [locationKey]: {
+            ...data[locationKey],
+            international: {
+              locations: [
+                ...(data[locationKey]?.international?.locations || []),
+                ...newLocations,
+              ],
+            },
+          },
         };
 
         onChange(updatedData);
 
         // Clear selections
         if (type === "current") {
-          setCurrentInternationalSelections((prev) => ({
-            ...prev,
+          setCurrentInternationalSelections({
             selectedCountries: [],
             selectedStates: {},
             selectedCities: {},
-          }));
+          });
         } else {
-          setInternationalSelections((prev) => ({
-            ...prev,
+          setInternationalSelections({
             selectedCountries: [],
             selectedStates: {},
             selectedCities: {},
-          }));
+          });
         }
       } catch (error) {
         console.error("Error adding international locations:", error);
@@ -750,133 +774,146 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
         setLoading((prev) => ({ ...prev, formSubmit: false }));
       }
     },
-    [currentInternationalSelections, internationalSelections, enqueueSnackbar, data, onChange]
+    [currentInternationalSelections, internationalSelections, enqueueSnackbar, onChange, data]
   );
 
-const removeLocationItems = useCallback(
-  (type, locationType, field, index) => {
-    const updatedData = { ...data };
-    const locations = [...updatedData[type][locationType].locations];
-    
-    if (field === "state" && locationType === "domestic") {
-      // Remove state and all its districts/cities
-      locations.splice(index, 1);
-    } else if (field === "district" && locationType === "domestic") {
-      // Remove district and all its cities
-      const stateIndex = Math.floor(index / 1000);
-      const districtIndex = index % 1000;
-      if (locations[stateIndex] && locations[stateIndex].districts && 
-          locations[stateIndex].districts[districtIndex] && 
-          locations[stateIndex].districts[districtIndex].cities) {
-        locations[stateIndex].districts[districtIndex].cities.splice(cityIndex, 1);
-      }
-    } else if (field === "city" && locationType === "domestic") {
-      // Remove city
-      const stateIndex = Math.floor(index / 1000000);
-      const districtIndex = Math.floor((index % 1000000) / 1000);
-      const cityIndex = index % 1000;
-      if (locations[stateIndex] && locations[stateIndex].districts && 
-          locations[stateIndex].districts[districtIndex] && 
-          locations[stateIndex].districts[districtIndex].cities) {
-        locations[stateIndex].districts[districtIndex].cities.splice(cityIndex, 1);
-      }
-    } else if (field === "country" && locationType === "international") {
-      // Remove country and all its states/cities
-      locations.splice(index, 1);
-    } else if (field === "state" && locationType === "international") {
-      // Remove state and all its cities
-      const countryIndex = Math.floor(index / 1000);
-      const stateIndex = index % 1000;
-      if (locations[countryIndex] && locations[countryIndex].states) {
-        locations[countryIndex].states.splice(stateIndex, 1);
-      }
-    } else if (field === "city" && locationType === "international") {
-      // Remove city
-      const countryIndex = Math.floor(index / 1000000);
-      const stateIndex = Math.floor((index % 1000000) / 1000);
-      const cityIndex = index % 1000;
-      if (locations[countryIndex] && locations[countryIndex].states && 
-          locations[countryIndex].states[stateIndex] && 
-          locations[countryIndex].states[stateIndex].cities) {
-        locations[countryIndex].states[stateIndex].cities.splice(cityIndex, 1);
-      }
-    }
+  const removeLocationItems = useCallback(
+    (type, locationType, field, index) => {
+      const updatedData = { ...data };
+      const locations = [...updatedData[type][locationType].locations];
 
-    updatedData[type][locationType].locations = locations;
-    onChange(updatedData);
-  },
-  [data, onChange]
-);
+      if (field === "state" && locationType === "domestic") {
+        // Remove state and all its districts/cities
+        locations.splice(index, 1);
+      } else if (field === "district" && locationType === "domestic") {
+        // Remove district and all its cities
+        const stateIndex = Math.floor(index / 1000);
+        const districtIndex = index % 1000;
+        if (locations[stateIndex] && locations[stateIndex].districts) {
+          locations[stateIndex].districts.splice(districtIndex, 1);
+        }
+      } else if (field === "city" && locationType === "domestic") {
+        // Remove city
+        const stateIndex = Math.floor(index / 1000000);
+        const districtIndex = Math.floor((index % 1000000) / 1000);
+        const cityIndex = index % 1000;
+        if (
+          locations[stateIndex] &&
+          locations[stateIndex].districts &&
+          locations[stateIndex].districts[districtIndex]
+        ) {
+          locations[stateIndex].districts[districtIndex].cities.splice(
+            cityIndex,
+            1
+          );
+        }
+      } else if (field === "country" && locationType === "international") {
+        // Remove country and all its states/cities
+        locations.splice(index, 1);
+      } else if (field === "state" && locationType === "international") {
+        // Remove state and all its cities
+        const countryIndex = Math.floor(index / 1000);
+        const stateIndex = index % 1000;
+        if (
+          locations[countryIndex] &&
+          locations[countryIndex].states
+        ) {
+          locations[countryIndex].states.splice(stateIndex, 1);
+        }
+      } else if (field === "city" && locationType === "international") {
+        // Remove city
+        const countryIndex = Math.floor(index / 1000000);
+        const stateIndex = Math.floor((index % 1000000) / 1000);
+        const cityIndex = index % 1000;
+        if (
+          locations[countryIndex] &&
+          locations[countryIndex].states &&
+          locations[countryIndex].states[stateIndex]
+        ) {
+          locations[countryIndex].states[stateIndex].cities.splice(
+            cityIndex,
+            1
+          );
+        }
+      }
+
+      updatedData[type][locationType].locations = locations;
+      onChange(updatedData);
+    },
+    [data, onChange]
+  );
+
   // Helper function to flatten locations for display
   const flattenLocations = (locations = [], type) => {
     const result = [];
-    
+
     if (!locations || !Array.isArray(locations)) return result;
 
     if (type === "domestic") {
       locations.forEach((stateObj, stateIndex) => {
         if (!stateObj) return;
-        
+
         // Add state
         result.push({
           type: "state",
           label: stateObj.state,
-          index: stateIndex
+          index: stateIndex,
         });
-        
+
         // Add districts
         stateObj.districts?.forEach((districtObj, districtIndex) => {
           if (!districtObj) return;
-          
+
           result.push({
             type: "district",
             label: `${stateObj.state} - ${districtObj.district}`,
-            index: stateIndex * 1000 + districtIndex
+            index: stateIndex * 1000 + districtIndex,
           });
-          
+
           // Add cities
           districtObj.cities?.forEach((city, cityIndex) => {
             result.push({
               type: "city",
               label: `${stateObj.state} - ${districtObj.district} - ${city}`,
-              index: stateIndex * 1000000 + districtIndex * 1000 + cityIndex
+              index: stateIndex * 1000000 + districtIndex * 1000 + cityIndex,
             });
           });
         });
       });
-    } else { // international
+    } else {
+      // international
       locations.forEach((countryObj, countryIndex) => {
         if (!countryObj) return;
-        
+
         // Add country
         result.push({
           type: "country",
           label: countryObj.country,
-          index: countryIndex
+          index: countryIndex,
         });
-        
+
         // Add states
         countryObj.states?.forEach((stateObj, stateIndex) => {
           if (!stateObj) return;
-          
+
           result.push({
             type: "state",
             label: `${countryObj.country} - ${stateObj.state}`,
-            index: countryIndex * 1000 + stateIndex
+            index: countryIndex * 1000 + stateIndex,
           });
-          
+
           // Add cities
           stateObj.cities?.forEach((city, cityIndex) => {
             result.push({
               type: "city",
               label: `${countryObj.country} - ${stateObj.state} - ${city}`,
-              index: countryIndex * 1000000 + stateIndex * 1000 + cityIndex
+              index: countryIndex * 1000000 + stateIndex * 1000 + cityIndex,
             });
           });
         });
       });
     }
-    
+
     return result;
   };
 
