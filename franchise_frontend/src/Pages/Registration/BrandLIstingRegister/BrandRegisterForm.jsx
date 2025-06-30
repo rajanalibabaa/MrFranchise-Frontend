@@ -600,10 +600,16 @@ const BrandRegisterForm = () => {
   const handlePreviewClose = () => {
     setOpenPreview(false);
   };
-  const handleLocationChange = (newData) => {
-    setFormData((prev) => ({ ...prev, ...newData }));
-  };
-
+  
+const handleLocationChange = (newData) => {
+  setFormData(prev => ({
+    ...prev,
+    expansionLocationData: {
+      ...prev.expansionLocationData,
+      ...newData
+    }
+  }));
+};
   const handleCancel = () => {
     // Show confirmation dialog
     const confirmCancel = window.confirm(
