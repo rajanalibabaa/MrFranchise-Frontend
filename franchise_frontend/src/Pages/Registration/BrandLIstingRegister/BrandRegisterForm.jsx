@@ -447,43 +447,7 @@ const BrandRegisterForm = () => {
           }
         });
 
-        //   const apiData = {
-        //   personalDetails: {
-        //     fullName: formData.brandDetails.fullName,
-        //     email: formData.brandDetails.email,
-        //     mobileNumber: formData.brandDetails.mobileNumber,
-        //     brandName: formData.brandDetails.brandName,
-        //     companyName: formData.brandDetails.companyName,
-        //     country: countries.find(c => c.code === formData.brandDetails.country)?.name || formData.brandDetails.country,
-        //     pincode: formData.brandDetails.pincode,
-        //     headOfficeAddress: formData.brandDetails.headOfficeAddress,
-        //     state: formData.brandDetails.state,
-        //     city: formData.brandDetails.city,
-        //     establishedYear: formData.brandDetails.establishedYear,
-        //     franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
-        //     brandCategories: formData.brandDetails.brandCategories,
-        //     brandDescription: formData.brandDetails.brandDescription,
-        //     expansionLocation: formData.brandDetails.expansionLocation,
-        //     pancardNumber: formData.brandDetails.pancardNumber,
-        //     gstNumber: formData.brandDetails.gstNumber,
-        //     website: formData.brandDetails.website,
-        //     facebook: formData.brandDetails.facebook,
-        //     instagram: formData.brandDetails.instagram,
-        //     linkedin: formData.brandDetails.linkedin,
-        //   },
-        //   franchiseDetails: {
-        //             },
-        //   brandDetails: {
-        //     pancard: formData.uploads.pancard,
-        //     gstCertificate: formData.uploads.gstCertificate,
-        //     brandLogo: formData.uploads.brandLogo,
-        //     exterioroutlet: formData.uploads.exteriorOutlet,
-        //     interiorOutlet: formData.uploads.interiorOutlet,
-        //     franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
-        //     brandPromotionVideo: formData.uploads.brandPromotionVideo,
-        //   }
-        // };
-        console.log("fileFields.....:", formDataSend);
+      console.log("fileFields.....:", formDataSend);
 
         const response = await axios.post(
           // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
