@@ -176,47 +176,27 @@ const initialFormData = {
     trainingSupport: "",
     uniqueSellingPoints: [],
   },
-  //   expansionLocationDetails: {
-  //     currentOutletsLocatedAt: [
-  //   {
-  //     type: "domestic",
-  //     location: {
-  //       country: "",
-  //       state: "",
-  //       district: "",
-  //       city: ""
-  //     }
-  //   },
-  //   {
-  //     type: "international",
-  //     location: {
-  //       country: "",
-  //       state: "",
-  //       city: ""
-  //     }
-  //   }
-  // ],
-  // expansionLocations: [
-  //   {
-  //     type: "domestic",
-  //     location: {
-  //       country: '',
-  //       state: [],
-  //       district: [],
-  //       city: []
-  //     }
-  //   },
-  //   {
-  //     type: "international",
-  //     location: {
-  //       country: "",
-  //       state: [],
-  //       city: []
-  //     }
-  //   }
-  // ]
 
-  //   },
+ expansionLocationData: {
+    isInternationalExpansion: null,
+    currentOutletLocations: {
+      domestic: {
+        locations: [],
+      },
+      international: {
+        locations: [],
+      },
+    },
+    expansionLocations: {
+      domestic: {
+        locations: [],
+      },
+      international: {
+        locations: [],
+      },
+    },
+  },
+
   uploads: {
     franchisePromotionVideo: [],
     // brandPromotionVideo: [],
@@ -620,10 +600,16 @@ const BrandRegisterForm = () => {
   const handlePreviewClose = () => {
     setOpenPreview(false);
   };
-  const handleLocationChange = (newData) => {
-    setFormData((prev) => ({ ...prev, ...newData }));
-  };
 
+const handleLocationChange = (newData) => {
+  setFormData(prev => ({
+    ...prev,
+    expansionLocationData: {
+      ...prev.expansionLocationData,
+      ...newData
+    }
+  }));
+};
   const handleCancel = () => {
     // Show confirmation dialog
     const confirmCancel = window.confirm(
@@ -682,12 +668,16 @@ const BrandRegisterForm = () => {
         );
       case 2:
         return (
-          <BrandExpansionLocationDetails
-            data={formData.expansionLocationDetails}
-            errors={validationErrors.fraexpansionLocationDetailsnchiseDetails}
-            onChange={handleLocationChange}
-            // onChange={handleExpansionLocationDetails}
-          />
+          <BrandExpansionLocationDetails 
+  data={formData.expansionLocationData} 
+  onChange={(newData) => setFormData(prev => ({
+    ...prev,
+    expansionLocationData: {
+      ...prev.expansionLocationData,
+      ...newData
+    }
+  }))} 
+/>
         );
       case 3:
         return (
@@ -1253,8 +1243,6 @@ const BrandRegisterForm = () => {
       </Box>
     );
   };
-
-  
 
   return (
     <>
