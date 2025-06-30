@@ -176,47 +176,34 @@ const initialFormData = {
     trainingSupport: "",
     uniqueSellingPoints: [],
   },
-  //   expansionLocationDetails: {
-  //     currentOutletsLocatedAt: [
-  //   {
-  //     type: "domestic",
-  //     location: {
-  //       country: "",
-  //       state: "",
-  //       district: "",
-  //       city: ""
-  //     }
-  //   },
-  //   {
-  //     type: "international",
-  //     location: {
-  //       country: "",
-  //       state: "",
-  //       city: ""
-  //     }
-  //   }
-  // ],
-  // expansionLocations: [
-  //   {
-  //     type: "domestic",
-  //     location: {
-  //       country: '',
-  //       state: [],
-  //       district: [],
-  //       city: []
-  //     }
-  //   },
-  //   {
-  //     type: "international",
-  //     location: {
-  //       country: "",
-  //       state: [],
-  //       city: []
-  //     }
-  //   }
-  // ]
 
-  //   },
+  expansionLocationData: {
+    isInternationalExpansion: null, // boolean or null
+    currentOutletLocations: {
+      domestic: {
+        states: [], // array of strings
+        districts: [], // array of objects {state: string, district: string}
+        cities: [], // array of objects {state: string, district: string, city: string}
+      },
+      international: {
+        countries: [], // array of strings
+        states: [], // array of objects {country: string, state: string}
+        cities: [], // array of objects {country: string, state: string, city: string}
+      },
+    },
+    expansionLocations: {
+      domestic: {
+        states: [],
+        districts: [],
+        cities: [],
+      },
+      international: {
+        countries: [],
+        states: [],
+        cities: [],
+      },
+    },
+  },
   uploads: {
     franchisePromotionVideo: [],
     // brandPromotionVideo: [],
@@ -683,10 +670,14 @@ const BrandRegisterForm = () => {
       case 2:
         return (
           <BrandExpansionLocationDetails
-            data={formData.expansionLocationDetails}
-            errors={validationErrors.fraexpansionLocationDetailsnchiseDetails}
-            onChange={handleLocationChange}
-            // onChange={handleExpansionLocationDetails}
+            data={formData.expansionLocationData}
+            setFormData={setFormData}
+            onChange={(updatedData) => {
+              setFormData((prev) => ({
+                ...prev,
+                expansionLocationData: updatedData,
+              }));
+            }}
           />
         );
       case 3:
@@ -1253,8 +1244,6 @@ const BrandRegisterForm = () => {
       </Box>
     );
   };
-
-  
 
   return (
     <>
