@@ -449,10 +449,10 @@ const BrandRegisterForm = () => {
           });
 
           // Reset form after successful submission
-          localStorage.removeItem(FORM_DATA_KEY);
-          localStorage.removeItem(FORM_STEP_KEY);
-          setFormData(initialFormData);
-          setActiveStep(0);
+          // localStorage.removeItem(FORM_DATA_KEY);
+          // localStorage.removeItem(FORM_STEP_KEY);
+          // setFormData(initialFormData);
+          // setActiveStep(0);
           // setTimeout(() => {
           //   navigate("/");
           // }, 1500);
