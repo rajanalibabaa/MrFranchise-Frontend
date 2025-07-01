@@ -450,7 +450,7 @@ const BrandRegisterForm = () => {
         Object.entries(fileFields).forEach(([fieldName, files]) => {
           if (files && files.length > 0) {
             files.forEach((file, index) => {
-              formDataSend.append(`${fieldName}_${index}`, file);
+              formDataSend.append(fieldName, file);
             });
           }
         });
