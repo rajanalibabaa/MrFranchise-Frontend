@@ -411,16 +411,21 @@ const BrandRegisterForm = () => {
           businessPlan: formData.uploads.businessPlan,
         };
 
+        console.log("fileFields :",fileFields)
         Object.entries(fileFields).forEach(([fieldName, files]) => {
-          if (files && files.length > 0) {
-            files.forEach((file, index) => {
-              formDataSend.append(`${fieldName}_${index}`, file);
-            });
-          }
+      if (files && files.length > 0) {
+        files.forEach((file) => {
+          formDataSend.append(fieldName, file); // ✅ Correct
         });
+      }
+    });
+
+
+        console.log("formDataSend :",formDataSend)
 
         const response = await axios.post(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
+          // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
+          "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {
@@ -429,6 +434,7 @@ const BrandRegisterForm = () => {
           }
         );
 
+        console.log("response :",response.data.data)
         if (response.status === 200) {
           setSubmitSuccess(true);
           setSnackbar({
@@ -442,9 +448,9 @@ const BrandRegisterForm = () => {
           localStorage.removeItem(FORM_STEP_KEY);
           setFormData(initialFormData);
           setActiveStep(0);
-          setTimeout(() => {
-            navigate("/");
-          }, 1500);
+          // setTimeout(() => {
+          //   navigate("/");
+          // }, 1500);
         }
       } catch (error) {
         console.error("Submission error:", error);
@@ -460,6 +466,8 @@ const BrandRegisterForm = () => {
       }
     }
   };
+
+
   const handleCountryChange = (event) => {
     setFormData((prev) => ({
       ...prev,
