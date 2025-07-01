@@ -154,7 +154,8 @@ const initialFormData = {
     instagram: "",
     linkedin: "",
     gstNumber: "",
-    pancardNumber: "",
+    pancardNumber: "", 
+    awardtext:[]
   },
   franchiseDetails: {
     brandCategories: {
@@ -199,12 +200,13 @@ const initialFormData = {
 
   uploads: {
     franchisePromotionVideo: [],
-    // brandPromotionVideo: [],
     pancard: [],
     gstCertificate: [],
     brandLogo: [],
     exteriorOutlet: [],
     interiorOutlet: [],
+    awards: [], // Added for awards section
+    businessPlan: [], // Added for business plan section
   },
 };
 
@@ -353,163 +355,103 @@ const BrandRegisterForm = () => {
     setActiveStep((prev) => prev - 1);
   };
 
-  const handleSubmit = async () => {
-    const isValid = validateStep(activeStep);
+ const handleSubmit = async () => {
+  const isValid = validateStep(activeStep);
 
-    if (isValid) {
-      try {
-        setIsSubmitting(true);
-        setSubmitSuccess(false);
+  if (isValid) {
+    try {
+      setIsSubmitting(true);
+      setSubmitSuccess(false);
 
-        // Your submit logic here
-        //form data to submit
-        const formDataSend = new FormData();
+      const formDataSend = new FormData();
 
-        formDataSend.append(
-          "personalDetails",
-          JSON.stringify({
-            fullName: formData.brandDetails.fullName,
-            email: formData.brandDetails.email,
-            mobileNumber: formData.brandDetails.mobileNumber,
-            ceoEmail: formData.brandDetails.ceoEmail,
-            ceoMobile: formData.brandDetails.ceoMobile,
-            ceoName: formData.brandDetails.ceoName,
-            managerName: formData.brandDetails.managerName,
-            brandName: formData.brandDetails.brandName,
-            companyName: formData.brandDetails.companyName,
-            country:
-              countries.find((c) => c.code === formData.brandDetails.country)
-                ?.name || formData.brandDetails.country,
-            pincode: formData.brandDetails.pincode,
-            headOfficeAddress: formData.brandDetails.headOfficeAddress,
-            state: formData.brandDetails.state,
-            city: formData.brandDetails.city,
-            establishedYear: formData.brandDetails.establishedYear,
-            franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
-            brandCategories: formData.brandDetails.brandCategories,
-            brandDescription: formData.brandDetails.brandDescription,
-            expansionLocation: formData.brandDetails.expansionLocation,
-            pancardNumber: formData.brandDetails.pancardNumber,
-            gstNumber: formData.brandDetails.gstNumber,
-            website: formData.brandDetails.website,
-            facebook: formData.brandDetails.facebook,
-            instagram: formData.brandDetails.instagram,
-            linkedin: formData.brandDetails.linkedin,
-          })
-        );
-        formDataSend.append(
-          "franchiseDetails",
-          JSON.stringify({
-            modelsOfFranchise: formData.franchiseDetails.fico,
-            companyOwnedOutlets: formData.franchiseDetails.companyOwnedOutlets,
-            franchiseOutlets: formData.franchiseDetails.franchiseOutlets,
-            totalOutlets: formData.franchiseDetails.totalOutlets,
-            currentOutletsLocatedAt:
-              formData.franchiseDetails.currentOutletsLocatedAt,
-            internationalExpansion:
-              formData.franchiseDetails.internationalExpansion,
-            aidFinancing: formData.franchiseDetails.aidFinancing,
-            requirementSupport: formData.franchiseDetails.requirementSupport,
-            staffTraining: formData.franchiseDetails.staffTraining,
-            staffRecruitment: formData.franchiseDetails.staffRecruitment,
-            agreementPeriod: formData.franchiseDetails.agreementPeriod,
-            statergicPlan: formData.franchiseDetails.statergicPlan,
-            operatingProcedure: formData.franchiseDetails.operatingProcedure,
-            finacialOperating: formData.franchiseDetails.finacialOperating,
-            marketingSales: formData.franchiseDetails.marketingSales,
-            agreementFranchise: formData.franchiseDetails.agreementFranchise,
-          })
-        );
-        formDataSend.append("brandDetails", JSON.stringify({}));
-        // Add files to formData
-        const fileFields = {
-          brandLogo: formData.uploads.brandLogo,
-          gstCertificate: formData.uploads.gstCertificate,
-          pancard: formData.uploads.pancard,
-          exteriorOutlet: formData.uploads.exteriorOutlet,
-          interiorOutlet: formData.uploads.interiorOutlet,
-          franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
-          // brandPromotionVideo: formData.uploads.brandPromotionVideo,
-        };
+      // Append brand details
+      formDataSend.append("brandDetails", JSON.stringify({
+        fullName: formData.brandDetails.fullName,
+        brandName: formData.brandDetails.brandName,
+        ceoEmail: formData.brandDetails.ceoEmail,
+        ceoMobile: formData.brandDetails.ceoMobile,
+        ceoName: formData.brandDetails.ceoName,
+        managerName: formData.brandDetails.managerName,
+        companyName: formData.brandDetails.companyName,
+        email: formData.brandDetails.email,
+        mobileNumber: formData.brandDetails.mobileNumber,
+        country: countries.find(c => c.code === formData.brandDetails.country)?.name || formData.brandDetails.country,
+        whatsappNumber: formData.brandDetails.whatsappNumber,
+        headOfficeAddress: formData.brandDetails.headOfficeAddress,
+        state: formData.brandDetails.state,
+        city: formData.brandDetails.city,
+        pincode: formData.brandDetails.pincode,
+        website: formData.brandDetails.website,
+        facebook: formData.brandDetails.facebook,
+        instagram: formData.brandDetails.instagram,
+        linkedin: formData.brandDetails.linkedin,
+        gstNumber: formData.brandDetails.gstNumber,
+        pancardNumber: formData.brandDetails.pancardNumber,
+        awardtext: formData.brandDetails.awardtext
+      }));
 
-        Object.entries(fileFields).forEach(([fieldName, files]) => {
-          if (files && files.length > 0) {
-            files.forEach((file) => {
-              formDataSend.append(fieldName, file);
-            });
-          }
-        });
+      // Append franchise details
+      formDataSend.append("franchiseDetails", JSON.stringify({
+        brandCategories: formData.franchiseDetails.brandCategories,
+        brandDescription: formData.franchiseDetails.brandDescription,
+        fico: formData.franchiseDetails.fico,
+        establishedYear: formData.franchiseDetails.establishedYear,
+        franchiseSinceYear: formData.franchiseDetails.franchiseSinceYear,
+        companyOwnedOutlets: formData.franchiseDetails.companyOwnedOutlets,
+        franchiseOutlets: formData.franchiseDetails.franchiseOutlets,
+        totalOutlets: formData.franchiseDetails.totalOutlets,
+        aidFinancing: formData.franchiseDetails.aidFinancing,
+        franchiseDevelopment: formData.franchiseDetails.franchiseDevelopment,
+        consultationOrAssistance: formData.franchiseDetails.consultationOrAssistance,
+        trainingSupport: formData.franchiseDetails.trainingSupport,
+        uniqueSellingPoints: formData.franchiseDetails.uniqueSellingPoints
+      }));
 
-        //   const apiData = {
-        //   personalDetails: {
-        //     fullName: formData.brandDetails.fullName,
-        //     email: formData.brandDetails.email,
-        //     mobileNumber: formData.brandDetails.mobileNumber,
-        //     brandName: formData.brandDetails.brandName,
-        //     companyName: formData.brandDetails.companyName,
-        //     country: countries.find(c => c.code === formData.brandDetails.country)?.name || formData.brandDetails.country,
-        //     pincode: formData.brandDetails.pincode,
-        //     headOfficeAddress: formData.brandDetails.headOfficeAddress,
-        //     state: formData.brandDetails.state,
-        //     city: formData.brandDetails.city,
-        //     establishedYear: formData.brandDetails.establishedYear,
-        //     franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
-        //     brandCategories: formData.brandDetails.brandCategories,
-        //     brandDescription: formData.brandDetails.brandDescription,
-        //     expansionLocation: formData.brandDetails.expansionLocation,
-        //     pancardNumber: formData.brandDetails.pancardNumber,
-        //     gstNumber: formData.brandDetails.gstNumber,
-        //     website: formData.brandDetails.website,
-        //     facebook: formData.brandDetails.facebook,
-        //     instagram: formData.brandDetails.instagram,
-        //     linkedin: formData.brandDetails.linkedin,
-        //   },
-        //   franchiseDetails: {
-        //             },
-        //   brandDetails: {
-        //     pancard: formData.uploads.pancard,
-        //     gstCertificate: formData.uploads.gstCertificate,
-        //     brandLogo: formData.uploads.brandLogo,
-        //     exterioroutlet: formData.uploads.exteriorOutlet,
-        //     interiorOutlet: formData.uploads.interiorOutlet,
-        //     franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
-        //     brandPromotionVideo: formData.uploads.brandPromotionVideo,
-        //   }
-        // };
-        console.log("fileFields.....:", formDataSend);
+      // Append expansion location data
+      formDataSend.append("expansionLocationData", JSON.stringify({
+        isInternationalExpansion: formData.expansionLocationData.isInternationalExpansion,
+        currentOutletLocations: formData.expansionLocationData.currentOutletLocations,
+        expansionLocations: formData.expansionLocationData.expansionLocations
+      }));
 
-        const response = await axios.post(
-          // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
-          // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
+      // Append files
+      const fileFields = {
+        brandLogo: formData.uploads.brandLogo,
+        gstCertificate: formData.uploads.gstCertificate,
+        pancard: formData.uploads.pancard,
+        exteriorOutlet: formData.uploads.exteriorOutlet,
+        interiorOutlet: formData.uploads.interiorOutlet,
+        franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
+        awards: formData.uploads.awards,
+        businessPlan: formData.uploads.businessPlan
+      };
 
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
-          // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
-          // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
-
-          formDataSend,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-
-        console.log("response.data ====:", response);
-        console.log("response.data ====:", response.data.message);
-
-        // if (response.status !== 200 && response.status !== 201) {
-        //   throw new Error(response.data.message || "Submission failed");
-        // }
-
-        if (response.status === 200) {
-          setSubmitSuccess(true);
-          setSnackbar({
-            open: true,
-            message: "Form submitted successfully!",
-            severity: "success",
+      Object.entries(fileFields).forEach(([fieldName, files]) => {
+        if (files && files.length > 0) {
+          files.forEach((file, index) => {
+            formDataSend.append(`${fieldName}_${index}`, file);
           });
         }
+      });
+
+      const response = await axios.post(
+        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
+        formDataSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setSubmitSuccess(true);
+        setSnackbar({
+          open: true,
+          message: "Form submitted successfully!",
+          severity: "success",
+        });
 
         // Reset form after successful submission
         localStorage.removeItem(FORM_DATA_KEY);
@@ -519,19 +461,19 @@ const BrandRegisterForm = () => {
         setTimeout(() => {
           navigate("/");
         }, 1500);
-      } catch (error) {
-        // console.log("submission error", error);
-        setSnackbar({
-          open: true,
-          message:
-            "Submission failed. Please try again. or email already exists",
-          severity: "error",
-        });
-      } finally {
-        setIsSubmitting(false); // Stop loading regardless of success/failure
       }
+    } catch (error) {
+      console.error("Submission error:", error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || "Submission failed. Please try again.",
+        severity: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }
+};
 
   const handleCountryChange = (event) => {
     setFormData((prev) => ({
