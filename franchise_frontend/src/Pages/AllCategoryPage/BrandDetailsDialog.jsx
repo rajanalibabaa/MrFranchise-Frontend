@@ -38,6 +38,7 @@ import axios from "axios";
 import ShareDialogActions from "./ShareDialogActions.jsx";
 
 const BrandDetailsDialog = () => {
+  
   const [tabIndex, setTabIndex] = useState(0);
   const [openGallery, setOpenGallery] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
