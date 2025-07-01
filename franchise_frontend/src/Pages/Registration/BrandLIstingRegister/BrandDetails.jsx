@@ -1,51 +1,69 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TextField,
-  MenuItem,
   Grid,
-  Button,
-  InputAdornment,
-  Chip,
-  Box,
   Typography,
-  Paper,
+  InputAdornment,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
   List,
   ListItem,
   ListItemText,
-  Divider,
-  IconButton,
-  CircularProgress,
+  Paper,
+  Box,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  Button,
+  CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  RadioGroup,
+  Radio,
+  Chip,
+  Checkbox,
+  Autocomplete,
+  FormControlLabel,
+  IconButton,
+  Divider,
+  Avatar,
+  Badge,
+  Tooltip,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import SearchIcon from "@mui/icons-material/Search";
-import axios from "axios";
-
-import { categories } from "./BrandCategories";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import categories from "./BrandCategories.jsx";
+import AddIcon from "@mui/icons-material/Add";
+import SendIcon from "@mui/icons-material/Send";
+import axios from "axios";
+import CloseIcon from "@mui/icons-material/Close";
 
-const BrandDetails = ({ data = {}, onChange, errors = {} }) => {
-  const {
-    brandName = '',
-    companyName = '',
-    phoneCode = '+91' // Default to India's code
-  } = data;
+import LanguageIcon from "@mui/icons-material/Language";
+import FlagIcon from "@mui/icons-material/Flag";
+import { Editor } from "@tinymce/tinymce-react";
+import { fontSize, width } from "@mui/system";
+import {
+  fetchGlobalLocationByPostalCode,
+  getSupportedCountries,
+} from "../../../Utils/PincodeFetch.jsx";
+import coutryCode from "../../../Utils/AllCountryCode.jsx";
 
-  const [isVerifyingGST, setIsVerifyingGST] = useState(false);
-  const [gstError, setGstError] = useState('');
-  
-  const years = Array.from(
-    { length: 100 },
-    (_, i) => new Date().getFullYear() - i
-  );
+// const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+// const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
+const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
+  const [showWhatsappSnackbar, setShowWhatsappSnackbar] = useState(false);
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
+
+  // const [phoneVerifyStatus, setPhoneVerifyStatus] = useState({
+  //   mobileNumber: {
+  //     loading: false,
+  //     verified: false,
+  //   },
+  // });
   
   const formData = {
     companyName: "",
@@ -322,234 +340,586 @@ useEffect(() => {
         [name]: mobileCountryCode.dial_code + digitsOnly,
       });
     }
+    // For whatsappNumber field
+    else if (name === "whatsappNumber") {
+      onChange({
+        [name]: whatsappCountryCode.dial_code + digitsOnly,
+      });
+    }
+    // For ceoMobile field
+    else if (name === "ceoMobile") {
+      onChange({
+        [name]: ceoCountryCode.dial_code + digitsOnly,
+      });
+    }
+    // For officeMobile field
+    else if (name === "officeMobile") {
+      onChange({
+        [name]: officeCountryCode.dial_code + digitsOnly,
+      });
+    }
+  };
 
-    setIsVerifyingGST(true);
-    setGstError('');
+  const getDisplayNumber = (fullNumber, countryCode) => {
+    if (!fullNumber) return "";
+    // Remove the country code if it exists at the start
+    return fullNumber.replace(new RegExp(`^\\${countryCode.dial_code}`), "");
+  };
+
+  // OTP Verification States
+  const [verificationState, setVerificationState] = useState({
+    email: {
+      verified: false,
+      otpSent: false,
+      showDialog: false,
+      loading: false,
+      error: null,
+    },
+    mobileNumber: {
+      verified: false,
+      otpSent: false,
+      showDialog: false,
+      loading: false,
+      error: null,
+    },
+  });
+
+  const [otpInput, setOtpInput] = useState("");
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  // Handle OTP verification dialog open/close
+  const handleVerificationDialog = (field, open) => {
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        showDialog: open,
+        error: null,
+      },
+    }));
+    setOtpInput("");
+  };
+
+  // Send OTP for verification
+  const handleSendOtp = async (field) => {
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        loading: true,
+        error: null,
+      },
+    }));
 
     try {
-      const response = await axios.get('https://api.bulkpe.in/gst-verification', {
-        params: {
-          gstin: data.gstin,
-          api_key: process.env.REACT_APP_GST_API_KEY
-        }
+      // Call your OTP API endpoint
+      const response = await axios.post("/api/send-otp", {
+        [field === "email" ? "email" : "phone"]: data[field],
+        type: field,
       });
 
-      if (response.data.valid) {
-        onChange("gstVerified", true);
-        onChange("gstDetails", response.data.details);
-        setGstError(''); // Clear any previous errors
+      if (response.data.success) {
+        setVerificationState((prev) => ({
+          ...prev,
+          [field]: {
+            ...prev[field],
+            otpSent: true,
+            loading: false,
+          },
+        }));
+        setSnackbar({
+          open: true,
+          message: `OTP sent successfully to your ${field}`,
+          severity: "success",
+        });
       } else {
-        setGstError('GSTIN verification failed - Invalid number');
+        throw new Error(response.data.message || "Failed to send OTP");
       }
     } catch (error) {
-      console.error('GST verification failed:', error);
-      setGstError('Verification service unavailable. Please try again later.');
-    } finally {
-      setIsVerifyingGST(false);
+      console.error(`Error sending OTP for ${field}:`, error);
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          loading: false,
+          error: error.response?.data?.message || error.message,
+        },
+      }));
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || "Failed to send OTP",
+        severity: "error",
+      });
     }
   };
 
-  // Category selection functions
-  const handleCategorySelection = (category, subCategory, childCategory) => {
-    const fullPath = `${category} > ${subCategory} > ${childCategory}`;
-    setSelectedCategory(fullPath);
-    setDropdownOpen(false);
-  };
-
-  const handleAddCategory = () => {
-    if (selectedCategory && !selectedCategories.includes(selectedCategory)) {
-      const updatedCategories = [...selectedCategories, selectedCategory];
-      setSelectedCategories(updatedCategories);
-      onChange("categories", updatedCategories);
-      setSelectedCategory("");
+  // Verify the entered OTP
+  const handleVerifyOtp = async (field) => {
+    if (!otpInput || otpInput.length !== 6) {
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          error: "Please enter a valid 6-digit OTP",
+        },
+      }));
+      return;
     }
-  };
 
-  const handleRemoveCategory = (index) => {
-    const updatedCategories = selectedCategories.filter((_, i) => i !== index);
-    setSelectedCategories(updatedCategories);
-    onChange("categories", updatedCategories);
-  };
-
-  const handleCountryChange = (event) => {
-    const selectedCountry = countries.find(
-      (country) => country.name === event.target.value
-    );
-    onChange("country", selectedCountry.name);
-    onChange("countryCode", selectedCountry.code);
-    onChange("phoneCode", selectedCountry.phoneCode);
-
-    // Reset location-related fields when country changes
-    onChange("state", "");
-    onChange("city", "");
-    onChange("location", "");
-  };
-
-  // Location auto-fill
-  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
-  const [locationError, setLocationError] = useState(null);
-
- useEffect(() => {
-  const fetchLocation = async (pincode) => {
-    setIsFetchingLocation(true);
-    setLocationError(null);
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        loading: true,
+        error: null,
+      },
+    }));
 
     try {
-      const response = await fetch(
-        `https://api.postalpincode.in/pincode/${pincode}`
-      );
+      // Call your OTP verification API endpoint
+      const response = await axios.post("/api/verify-otp", {
+        [field === "email" ? "email" : "phone"]: data[field],
+        otp: otpInput,
+        type: field,
+      });
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const locationData = await response.json();
-      
-      // Check if the API returned valid data
-      if (locationData[0]?.Status !== "Success") {
-        throw new Error(locationData[0]?.Message || "Invalid pincode");
-      }
-
-      // Get the first post office entry (you might want to handle multiple entries differently)
-      const postOffice = locationData[0]?.PostOffice?.[0];
-      
-      if (postOffice) {
-        onChange("state", postOffice.State || "");
-        onChange("city", postOffice.District || postOffice.Name || "");
-        onChange("address", 
-          [postOffice.Name, postOffice.District, postOffice.State]
-            .filter(Boolean)
-            .join(", ")
-        );
+      if (response.data.success) {
+        setVerificationState((prev) => ({
+          ...prev,
+          [field]: {
+            ...prev[field],
+            verified: true,
+            showDialog: false,
+            loading: false,
+          },
+        }));
+        setSnackbar({
+          open: true,
+          message: `${
+            field === "email" ? "Email" : "Mobile number"
+          } verified successfully!`,
+          severity: "success",
+        });
       } else {
-        throw new Error("No location data found for this pincode");
+        throw new Error(response.data.message || "OTP verification failed");
       }
     } catch (error) {
-      console.error("Error fetching location:", error);
-      setLocationError(
-        error.message || "Could not auto-fill location. Please enter manually."
-      );
-    } finally {
-      setIsFetchingLocation(false);
+      console.error(`Error verifying OTP for ${field}:`, error);
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          loading: false,
+          error: error.response?.data?.message || error.message,
+        },
+      }));
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || "OTP verification failed",
+        severity: "error",
+      });
     }
   };
 
-  // Only fetch if pincode is valid length and in India
-  if (data.pincode && data.pincode.length >= 4 && data.countryCode === "IN") {
-    const debounceTimer = setTimeout(() => {
-      fetchLocation(data.pincode);
-    }, 1000); // 1 second debounce
+  // Resend OTP
+  const handleResendOtp = (field) => {
+    handleSendOtp(field);
+  };
 
-    return () => clearTimeout(debounceTimer);
-  }
-}, [data.pincode, data.countryCode]);
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
+  // ... (keep all your existing state and functions)
+
+  // Update your mobile number fields to include country code selectors:
+
+  // Mobile Number Field
+  const renderMobileNumberField = () => (
+    <Grid item xs={12} sm={6} md={2.4}>
+      <TextField
+        fullWidth
+        label="Mobile Number"
+        name="mobileNumber"
+        value={getDisplayNumber(data.mobileNumber, mobileCountryCode)}
+        onChange={handleMobileNumberChange}
+        error={!!errors.mobileNumber}
+        helperText={errors.mobileNumber}
+        variant="outlined"
+        size="medium"
+        inputProps={{ maxLength: 15 }}
+        placeholder="Enter mobile number"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Autocomplete
+                options={uniqueCountryCodes}
+                getOptionLabel={(option) => `${option.dial_code}`}
+                value={mobileCountryCode}
+                onChange={(event, newValue) =>
+                  handleCountryCodeChange("mobile", newValue)
+                }
+                clearIcon={null}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    sx={{ width: 70 }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} fontSize={12}>
+                    {option.dial_code} <br />({option.code})
+                  </Box>
+                )}
+              />
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              {verificationState.mobileNumber.verified ? (
+                <Box display="flex" alignItems="center" color="success.main">
+                  <CheckCircleIcon fontSize="medium" />
+                  <Typography variant="caption" sx={{ ml: 0.5 }}>
+                    Verified
+                  </Typography>
+                </Box>
+              ) : (
+                <Button
+                  variant="outlined"
+                  size="medium"
+                  onClick={() => handleVerificationDialog("mobileNumber", true)}
+                  disabled={
+                    !data.mobileNumber || verificationState.mobileNumber.loading
+                  }
+                  startIcon={
+                    verificationState.mobileNumber.loading ? (
+                      <CircularProgress size={14} />
+                    ) : (
+                      <SendIcon fontSize="medium" />
+                    )
+                  }
+                >
+                  Verify
+                </Button>
+              )}
+            </InputAdornment>
+          ),
+        }}
+        required
+      />
+    </Grid>
+  );
+  const renderWhatsAppNumberField = () => (
+    <Grid item xs={12} sm={6} md={2.4}>
+      <TextField
+        fullWidth
+        label="WhatsApp Number"
+        name="whatsappNumber"
+        value={getDisplayNumber(data.whatsappNumber, whatsappCountryCode)}
+        onChange={handleMobileNumberChange}
+        error={!!errors.whatsappNumber}
+        helperText={errors.whatsappNumber}
+        variant="outlined"
+        size="medium"
+        inputProps={{ maxLength: 15 }}
+        placeholder="Enter WhatsApp number"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Autocomplete
+                options={uniqueCountryCodes}
+                getOptionLabel={(option) => `${option.dial_code}`}
+                value={whatsappCountryCode}
+                onChange={(event, newValue) =>
+                  handleCountryCodeChange("whatsapp", newValue)
+                }
+                isOptionEqualToValue={(option, value) =>
+                  option.dial_code === value.dial_code
+                }
+                clearIcon={null}
+                sx={{ width: 100 }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    sx={{ width: 70 }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props}>
+                    {option.dial_code} ({option.code})
+                  </Box>
+                )}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+    </Grid>
+  );
+
+  // CEO Mobile Field
+  const renderCeoMobileField = () => (
+    <Grid item xs={12} sm={6} md={2}>
+      <TextField
+        fullWidth
+        label="CEO/MD/Owner Mobile No"
+        name="ceoMobile"
+        value={getDisplayNumber(data.ceoMobile, ceoCountryCode)}
+        onChange={handleMobileNumberChange}
+        variant="outlined"
+        size="medium"
+        inputProps={{ maxLength: 15 }}
+        placeholder="Enter mobile number"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Autocomplete
+                options={uniqueCountryCodes}
+                getOptionLabel={(option) => `${option.dial_code}`}
+                value={ceoCountryCode}
+                onChange={(event, newValue) =>
+                  handleCountryCodeChange("ceo", newValue)
+                }
+                clearIcon={null}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    sx={{ width: 70 }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} fontSize={12}>
+                    {option.dial_code}
+                    <br /> ({option.code})
+                  </Box>
+                )}
+              />
+            </InputAdornment>
+          ),
+        }}
+        error={!!errors.ceoMobile}
+        helperText={errors.ceoMobile}
+        required
+      />
+    </Grid>
+  );
+
+  // Office Mobile Field
+  const renderOfficeMobileField = () => (
+    <Grid item xs={12} sm={6} md={2.4}>
+      <TextField
+        fullWidth
+        label="Office Mobile Number (Optional)"
+        name="officeMobile"
+        value={getDisplayNumber(data.officeMobile, officeCountryCode)}
+        onChange={handleMobileNumberChange}
+        variant="outlined"
+        size="medium"
+        inputProps={{ maxLength: 15 }}
+        placeholder="Enter mobile number"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Autocomplete
+                options={uniqueCountryCodes}
+                getOptionLabel={(option) => `${option.dial_code}`}
+                value={officeCountryCode}
+                onChange={(event, newValue) =>
+                  handleCountryCodeChange("office", newValue)
+                }
+                clearIcon={null}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    sx={{ width: 70 }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} fontSize={12}>
+                    {option.dial_code}
+                    <br /> ({option.code})
+                  </Box>
+                )}
+              />
+            </InputAdornment>
+          ),
+        }}
+        error={!!errors.officeMobile}
+        helperText={errors.officeMobile}
+      />
+    </Grid>
+  );
+
+  // Location card component
+  const LocationCard = ({ location, onRemove }) => {
+    return (
+      <Paper
+        elevation={2}
+        sx={{
+          p: 1.5,
+          borderRadius: 2,
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          position: "relative",
+          borderLeft: `4px solid ${
+            location.type === "domestic" ? "#4caf50" : "#2196f3"
+          }`,
+          "&:hover": {
+            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+          },
+        }}
+      >
+        <Avatar
+          sx={{
+            bgcolor: location.type === "domestic" ? "#4caf50" : "#2196f3",
+            width: 40,
+            height: 40,
+          }}
+        >
+          {location.type === "domestic" ? <LocationOnIcon /> : <PublicIcon />}
+        </Avatar>
+
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            {location.city}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {location.type === "domestic"
+              ? `${location.district}, ${location.state}, ${location.country}`
+              : `${location.state}, ${location.country}`}
+          </Typography>
+        </Box>
+
+        <IconButton
+          size="medium"
+          onClick={onRemove}
+          sx={{
+            color: "#757575",
+            "&:hover": {
+              color: "#f44336",
+              backgroundColor: "rgba(244, 67, 54, 0.08)",
+            },
+          }}
+        >
+          <CloseIcon fontSize="medium" />
+        </IconButton>
+      </Paper>
+    );
+  };
 
   return (
-    <>
-      <Grid container spacing={2} sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2 }}>
-        {/* Company Name */}
-        <Grid item xs={12} md={6}>
+    <Box
+      sx={{
+        overflowY: "auto",
+        mr: { sm: 0, md: 25 },
+        ml: { sm: 0, md: 25 },
+        mt: 0,
+        maxWidth: "100%",
+      }}
+    >
+      {/* Brand Details Section */}
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}
+      >
+        Login Credentials
+      </Typography>
+
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 3,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
+          gap: 2,
+          mb: 2,
+        }}
+      >
+        {/* Full Name */}
+        <Grid item xs={12} sm={6} md={2.4}>
           <TextField
-            label="Company Name"
-            value={companyName}
-            onChange={(e) => onChange("companyName", e.target.value)}
             fullWidth
-            size="small"
-            error={!!errors?.companyName}
-            helperText={errors?.companyName || "Legal name of your company"}
+            label="Full Name"
+            name="fullName"
+            value={data.fullName || ""}
+            onChange={handleChange}
+            error={!!errors.fullName}
+            helperText={errors.fullName}
+            variant="outlined"
+            size="medium"
+            required
           />
         </Grid>
-
-        {/* Brand Name */}
-        <Grid item xs={12} md={6}>
+        {/* Email with Verification */}
+        <Grid item xs={12} sm={6} md={2.4}>
           <TextField
-            label="Brand Name"
-            value={brandName}
-            onChange={(e) => onChange("brandName", e.target.value)}
             fullWidth
-            size="small"
-            error={!!errors.brandName}
-            helperText={errors.brandName}
-          />
-        </Grid>
-
-        {/* Description */}
-        <Grid item xs={12}>
-          <TextField
-            label="Description"
-            value={data.description}
-            onChange={(e) => onChange("description", e.target.value)}
-            fullWidth
-            size="small"
-            error={!!errors.description}
-            helperText={errors?.description}
-          />
-        </Grid>
-
-        {/* GSTIN */}
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="GSTIN"
-            value={data.gstin || ''}
-            onChange={(e) => {
-              const newValue = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-              onChange("gstin", newValue);
-              
-              // Clear verification if GSTIN changes
-              if (data.gstVerified && newValue !== data.gstin) {
-                onChange("gstVerified", false);
-              }
-              
-              // Validate on change but don't show error until blurred
-              if (errors.gstin) {
-                const validationError = validateGSTIN(newValue);
-                if (!validationError) {
-                  delete errors.gstin;
-                }
-              }
-            }}
-            onBlur={() => {
-              const validationError = validateGSTIN(data.gstin);
-              if (validationError) {
-                setGstError(validationError);
-              }
-            }}
-            inputProps={{ maxLength: 15 }}
-            error={!!errors.gstin || !!gstError}
-            helperText={gstError || errors.gstin || "Enter 15-character GSTIN (e.g., 22AAAAA0000A1Z5)"}
-            fullWidth
-            disabled={data.gstVerified}
-            size="small"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                backgroundColor: data.gstVerified ? '#e8f5e9' : 'inherit',
-                '&.Mui-focused fieldset': {
-                  borderColor: data.gstVerified ? '#2e7d32' : '#3f51b5',
-                }
-              }
-            }}
+            label="Email"
+            name="email"
+            type="email"
+            value={data.email || ""}
+            onChange={handleChange}
+            error={!!errors.email}
+            helperText={errors.email}
+            variant="outlined"
+            size="medium"
+            required
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  {data.gstVerified ? (
-                    <Chip
-                      label="Verified"
-                      color="success"
-                      size="small"
-                      sx={{ color: 'white' }}
-                    />
+                  {verificationState.email.verified ? (
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      color="success.main"
+                    >
+                      <CheckCircleIcon fontSize="medium" />
+                      <Typography variant="caption" sx={{ ml: 0.5 }}>
+                        Verified
+                      </Typography>
+                    </Box>
                   ) : (
                     <Button
-                      variant="contained"
-                      onClick={handleVerifyGSTIN}
-                      disabled={isVerifyingGST || !!validateGSTIN(data.gstin)}
-                      size="small"
+                      variant="outlined"
+                      size="medium"
+                      onClick={() => handleVerificationDialog("email", true)}
+                      disabled={!data.email || verificationState.email.loading}
+                      startIcon={
+                        verificationState.email.loading ? (
+                          <CircularProgress size={14} />
+                        ) : (
+                          <SendIcon fontSize="medium" />
+                        )
+                      }
                     >
-                      {isVerifyingGST ? (
-                        <CircularProgress size={20} sx={{ color: 'white' }} />
-                      ) : (
-                        'Verify'
-                      )}
+                      Verify
                     </Button>
                   )}
                 </InputAdornment>
@@ -558,98 +928,236 @@ useEffect(() => {
           />
         </Grid>
 
-        {/* Country */}
-        <Grid item xs={12} md={6}>
-          <TextField
-            select
-            label="Select Country"
-            value={data.country || ""}
-            onChange={handleCountryChange}
-            fullWidth
-            size="small"
-            error={!!errors?.country}
-            helperText={errors?.country}
-          >
-            {countries.map((country) => (
-              <MenuItem key={country.code} value={country.name}>
-                {country.name}
-              </MenuItem>
-            ))}
-          </TextField>
+        {/* Mobile Number with Verification */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          {renderMobileNumberField()}
         </Grid>
 
-        {/* Pincode */}
-        <Grid item xs={12} md={6}>
+        {/* WhatsApp Number */}
+        <Grid item xs={12} sm={6} md={2.4}>
+          {renderWhatsAppNumberField()}
+        </Grid>
+      </Grid>
+
+      {/* OTP Verification Dialogs */}
+      {/* Email Verification Dialog */}
+      <Dialog
+        open={verificationState.email.showDialog}
+        onClose={() => handleVerificationDialog("email", false)}
+      >
+        <DialogTitle>Verify Email</DialogTitle>
+        <DialogContent>
+          <Box sx={{ minWidth: 300, pt: 1 }}>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              We've sent a 6-digit OTP to {data.email}
+            </Typography>
+            <TextField
+              fullWidth
+              label="Enter OTP"
+              value={otpInput}
+              onChange={(e) =>
+                setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
+              variant="outlined"
+              size="medium"
+              inputProps={{ maxLength: 6 }}
+              error={!!verificationState.email.error}
+              helperText={verificationState.email.error}
+            />
+            <Box
+              sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}
+            >
+              <Button
+                onClick={() => handleResendOtp("email")}
+                disabled={verificationState.email.loading}
+                sx={{ color: "#ff9800" }}
+              >
+                {verificationState.email.loading ? "Sending..." : "Resend OTP"}
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleVerifyOtp("email")}
+                disabled={
+                  otpInput.length !== 6 || verificationState.email.loading
+                }
+                startIcon={
+                  verificationState.email.loading ? (
+                    <CircularProgress size={14} />
+                  ) : null
+                }
+                sx={{ bgcolor: "green" }}
+              >
+                {verificationState.email.loading ? "Verifying..." : "Verify"}
+              </Button>
+            </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mobile Verification Dialog */}
+      <Dialog
+        open={verificationState.mobileNumber.showDialog}
+        onClose={() => handleVerificationDialog("mobileNumber", false)}
+      >
+        <DialogTitle>Verify Mobile Number</DialogTitle>
+        <DialogContent>
+          <Box sx={{ minWidth: 300, pt: 1 }}>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              We've sent a 6-digit OTP to +91 {data.mobileNumber}
+            </Typography>
+            <TextField
+              fullWidth
+              label="Enter OTP"
+              value={otpInput}
+              onChange={(e) =>
+                setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
+              variant="outlined"
+              size="medium"
+              inputProps={{ maxLength: 6 }}
+              error={!!verificationState.mobileNumber.error}
+              helperText={verificationState.mobileNumber.error}
+            />
+            <Box
+              sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}
+            >
+              <Button
+                onClick={() => handleResendOtp("mobileNumber")}
+                disabled={verificationState.mobileNumber.loading}
+                sx={{ color: "#ff9800" }}
+              >
+                {verificationState.mobileNumber.loading
+                  ? "Sending..."
+                  : "Resend OTP"}
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleVerifyOtp("mobileNumber")}
+                disabled={
+                  otpInput.length !== 6 ||
+                  verificationState.mobileNumber.loading
+                }
+                startIcon={
+                  verificationState.mobileNumber.loading ? (
+                    <CircularProgress size={14} />
+                  ) : null
+                }
+                sx={{ bgcolor: "green" }}
+              >
+                {verificationState.mobileNumber.loading
+                  ? "Verifying..."
+                  : "Verify"}
+              </Button>
+            </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}
+      >
+        Brand Details
+      </Typography>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          mb: 2,
+        }}
+      >
+        {/* Company Name - 1 column */}
+        <Grid item xs={12} md={1}>
           <TextField
-            label="Pincode/Postal Code"
-            value={data.pincode || ""}
-            onChange={(e) => {
-      const newPincode = e.target.value.replace(/\D/g, "");
-      onChange("pincode", newPincode);
-      
-      // Clear location fields when pincode is cleared
-      if (!newPincode) {
-        onChange("state", "");
-        onChange("city", "");
-        onChange("address", "");
-      }
-    }}
-            inputProps={{ maxLength: 10 }}
-            error={!!errors.pincode || !!locationError}
-            helperText={
-              locationError ||errors.pincode || (data.state ? `Auto-filled: ${data.city}, ${data.state}` : "Enter 6-digit Indian pincode to auto-fill location")}
             fullWidth
-            size="small"
-            disabled={isFetchingLocation}
-            InputProps={{
-              endAdornment: isFetchingLocation ? (
-                <InputAdornment position="end">
-                  <CircularProgress size={20} />
-                </InputAdornment>
-              ) : <IconButton onClick={()=>fetchLocation(data.pincode)} 
-              disabled={!data.pincode || data.pincode.length !== 6} size="small">
-                <SearchIcon fontSize="small" />
-              </IconButton>,
-            }}
+            label="Company Name"
+            name="companyName"
+            value={formData.companyName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.companyName}
+            helperText={errors.companyName}
+            required
           />
         </Grid>
 
-        {/* State */}
-        <Grid item xs={12} md={6}>
+        {/* Brand Name - 1 column */}
+        <Grid item xs={12} md={1}>
           <TextField
-            label="State/Province"
-            value={data.state || ""}
-            onChange={(e) => onChange("state", e.target.value)}
             fullWidth
-            size="small"
+            label="Brand Name"
+            name="brandName"
+            value={formData.brandName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.brandName}
+            helperText={errors.brandName}
+            required
           />
         </Grid>
 
-        {/* City */}
-        <Grid item xs={12} md={6}>
+        {/* Tagline - spans 2 columns */}
+        <Grid item size={{ xs: 12, md: 24 }}>
           <TextField
-            label="City"
-            value={data.city || ""}
-            onChange={(e) => onChange("city", e.target.value)}
             fullWidth
-            size="small"
+            label="Tagline"
+            name="Tagline"
+            value={formData.Tagline || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.Tagline}
+            helperText={errors.Tagline}
+            required
           />
         </Grid>
+      </Grid>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
 
-        {/* Full Address */}
-        <Grid item xs={12}>
+          mb: 2,
+        }}
+      >
+        {/* CEO Name */}
+        <Grid item xs={12} md={1}>
           <TextField
-            label="Full Address"
-            value={data.address || ""}
-            onChange={(e) => onChange("address", e.target.value)}
             fullWidth
-            multiline
-            rows={2}
-            size="small"
-            error={!!errors.address}
-            helperText={
-              errors.address || "Include street, building, and landmark details"
-            }
+            label="CEO/MD/Owner Name"
+            name="ceoName"
+            value={data.ceoName || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.ceoName}
+            helperText={errors.ceoName}
+            required
           />
         </Grid>
 
@@ -793,307 +1301,328 @@ useEffect(() => {
 }}
           />
         </Grid>
+        {/* Pincode - spans 1 column */}
+        {/* <Grid item sx={{ ml:{ md:1 }}} >
 
-        {/* Mobile Number Field */}
-        <Grid item xs={12} md={6}>
+    <TextField
+      fullWidth
+      label="Pincode"
+      name="pincode"
+      value={data.pincode || ""}
+      onChange={(e) => {
+        const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+        onChange({ pincode: value });
+      }}
+      error={!!errors.pincode || !!pincodeError}
+      helperText={errors.pincode || pincodeError}
+      variant="outlined"
+      size="medium"
+      required
+      InputProps={{
+        endAdornment: loadingPincode ? (
+          <InputAdornment position="end">
+            <CircularProgress size={20} />
+          </InputAdornment>
+        ) : null,
+      }}
+    />
+  </Grid> */}
+      </Grid>
+
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
+        <Grid item xs={12} sm={6} md={2.4}>
           <TextField
-            label="Mobile Number"
-            value={data.mobileNumber || ""}
-            onChange={(e) =>
-              onChange("mobileNumber", e.target.value.replace(/\D/g, ""))
-            }
-            inputProps={{ maxLength: 10 }}
             fullWidth
-            disabled={data.mobileVerified}
-            size="small"
-            error={!!errors?.mobileNumber}
-            helperText={errors.mobileNumber || "Enter 10-digit mobile number"}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  {phoneCode}
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  {data.mobileVerified ? (
-                    <CheckCircleIcon color="success" />
-                  ) : (
-                    <Button
-                      variant="contained"
-                      onClick={() => sendOtp("mobile")}
-                      disabled={
-                        data.mobileVerified || 
-                        !data.mobileNumber || 
-                        data.mobileNumber.length !== 10 ||
-                        otpStates.mobile.loading
-                      }
-                      size="small"
-                    >
-                      {otpStates.mobile.loading ? (
-                        <CircularProgress size={20} sx={{ color: 'white' }} />
-                      ) : (
-                        'Verify'
-                      )}
-                    </Button>
-                  )}
-                </InputAdornment>
-              ),
+            label={selectedCountry === "IN" ? "Pincode" : "Postal Code"}
+            name="pincode"
+            value={data.pincode || ""}
+            onChange={(e) => {
+              const value = e.target.value
+                .replace(/\D/g, "")
+                .slice(0, selectedCountry === "IN" ? 6 : 10);
+              onChange({ pincode: value });
             }}
-          />
-        </Grid>
-
-        {/* WhatsApp Number Field */}
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="WhatsApp Number"
-            value={data.whatsappNumber || ""}
-            onChange={(e) =>
-              onChange("whatsappNumber", e.target.value.replace(/\D/g, ""))
-            }
-            inputProps={{ maxLength: 10 }}
-            fullWidth
-            disabled={data.whatsappVerified}
-            size="small"
-            error={!!errors?.whatsappNumber}
-            helperText={errors?.whatsappNumber}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  {phoneCode}
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  {data.whatsappVerified ? (
-                    <CheckCircleIcon color="success" />
-                  ) : (
-                    <Button
-                      variant="contained"
-                      onClick={() => sendOtp("whatsapp")}
-                      disabled={
-                        data.whatsappVerified || 
-                        !data.whatsappNumber || 
-                        data.whatsappNumber.length !== 10 ||
-                        otpStates.whatsapp.loading
-                      }
-                      size="small"
-                    >
-                      {otpStates.whatsapp.loading ? (
-                        <CircularProgress size={20} sx={{ color: 'white' }} />
-                      ) : (
-                        'Verify'
-                      )}
-                    </Button>
-                  )}
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-
-        {/* Email Field */}
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="Email"
-            value={data.email || ""}
-            onChange={(e) => onChange("email", e.target.value)}
-            fullWidth
-            disabled={data.emailVerified}
-            size="small"
-            error={!!errors?.email}
+            error={!!errors.pincode || !!pincodeError}
             helperText={
-              errors.email || "We'll send verification OTP to this email"
+              errors.pincode ||
+              pincodeError ||
+              (selectedCountry === "IN" ? "6-digit pincode" : "Postal code")
             }
+            variant="outlined"
+            size="medium"
+            required
+            disabled={!selectedCountry}
             InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  {data.emailVerified ? (
-                    <CheckCircleIcon color="success" />
-                  ) : (
-                    <Button
-                      variant="contained"
-                      onClick={() => sendOtp("email")}
-                      disabled={
-                        data.emailVerified || 
-                        !data.email || 
-                        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email) ||
-                        otpStates.email.loading
-                      }
-                      size="small"
-                    >
-                      {otpStates.email.loading ? (
-                        <CircularProgress size={20} sx={{ color: 'white' }} />
-                      ) : (
-                        'Verify'
-                      )}
-                    </Button>
-                  )}
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Tooltip
+                    title={
+                      supportedCountries.find((c) => c.code === selectedCountry)
+                        ?.name || "Country"
+                    }
+                  >
+                    <FlagIcon
+                      color={selectedCountry ? "primary" : "disabled"}
+                    />
+                  </Tooltip>
                 </InputAdornment>
               ),
+              endAdornment: loadingPincode ? (
+                <InputAdornment position="end">
+                  <CircularProgress size={20} />
+                </InputAdornment>
+              ) : null,
             }}
           />
         </Grid>
+        {/* <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="Pincode"
+            name="pincode"
+            value={data.pincode || ""}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+              onChange({ pincode: value });
+            }}
+            error={!!errors.pincode || !!pincodeError}
+            helperText={errors.pincode || pincodeError}
+            variant="outlined"
+            size="medium"
+            required
+            InputProps={{
+              endAdornment: loadingPincode ? (
+                <InputAdornment position="end">
+                  <CircularProgress size={20} />
+                </InputAdornment>
+              ) : null,
+            }}
+          />
+        </Grid> */}
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="State"
+            name="state"
+            value={data.state || ""}
+            onChange={handleChange}
+            error={!!errors.state}
+            helperText={errors.state}
+            variant="outlined"
+            size="medium"
+            required
+            InputProps={{
+              readOnly: !!data.state,
+            }}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="District"
+            name="district"
+            value={data.district || ""}
+            onChange={handleChange}
+            error={!!errors.district}
+            helperText={errors.district}
+            variant="outlined"
+            size="medium"
+            required
+            InputProps={{
+              readOnly: !!data.district,
+            }}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <TextField
+            fullWidth
+            label="City"
+            name="city"
+            value={data.city || ""}
+            onChange={handleChange}
+            error={!!errors.city}
+            helperText={errors.city}
+            variant="outlined"
+            size="medium"
+            required
+            InputProps={{
+              readOnly: !!data.city,
+            }}
+          />
+        </Grid>
+      </Grid>
+
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 0.7fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      >
+        {/* Email */}
 
         {/* Website */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} sm={6} md={2.4}>
           <TextField
-            label="Website"
-            value={data.website || ""}
-            onChange={(e) => onChange("website", e.target.value)}
             fullWidth
-            size="small"
-            error={!!errors?.website}
-            helperText={errors.website || "https://example.com"}
+            label="Website "
+            name="website"
+            value={data.website || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.website}
+            helperText={errors.website}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">https://</InputAdornment>
+              ),
+            }}
           />
         </Grid>
 
         {/* Facebook */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} sm={6} md={2.4}>
           <TextField
-            label="Facebook"
-            value={data.facebook || ""}
-            onChange={(e) => onChange("facebook", e.target.value)}
             fullWidth
-            size="small"
-            error={!!errors?.facebook}
-            helperText={errors.facebook || "https://facebook.com/yourpage"}
+            label="Facebook (optional)"
+            name="facebook"
+            value={data.facebook || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.facebook}
+            helperText={errors.facebook}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
           />
         </Grid>
 
         {/* Instagram */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} sm={6} md={2.4}>
           <TextField
-            label="Instagram"
-            value={data.instagram || ""}
-            onChange={(e) => onChange("instagram", e.target.value)}
             fullWidth
-            size="small"
-            error={!!errors?.instagram}
-            helperText={errors?.instagram}
+            label="Instagram (optional)"
+            name="instagram"
+            value={data.instagram || ""}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.instagram}
+            helperText={errors.instagram}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
           />
         </Grid>
 
         {/* LinkedIn */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} sm={6} md={2.4}>
           <TextField
-            label="LinkedIn"
+            fullWidth
+            label="LinkedIn   (optional)"
+            name="linkedin"
             value={data.linkedin || ""}
-            onChange={(e) => onChange("linkedin", e.target.value)}
-            fullWidth
-            size="small"
-            error={!!errors?.linkedin}
-            helperText={errors?.linkedin}
+            onChange={handleChange}
+            variant="outlined"
+            size="medium"
+            error={!!errors.linkedin}
+            helperText={errors.linkedin}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">@</InputAdornment>
+              ),
+            }}
           />
-        </Grid>
-
-        {/* Established Year */}
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="Established Year"
-            select
-            value={data.establishedYear || ""}
-            onChange={(e) => onChange("establishedYear", e.target.value)}
-            fullWidth
-            size="small"
-            error={!!errors?.establishedYear}
-            helperText={errors?.establishedYear}
-          >
-            {years.map((year) => (
-              <MenuItem key={year} value={year}>
-                {year}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Grid>
-
-        {/* Franchise Since Year */}
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="Franchise Since Year"
-            select
-            value={data.franchiseSinceYear || ""}
-            onChange={(e) => onChange("franchiseSinceYear", e.target.value)}
-            fullWidth
-            size="small"
-            error={!!errors?.franchiseSinceYear}
-            helperText={errors?.franchiseSinceYear}
-          >
-            {years.map((year) => (
-              <MenuItem key={year} value={year}>
-                {year}
-              </MenuItem>
-            ))}
-          </TextField>
         </Grid>
       </Grid>
 
-      {/* OTP Verification Modal */}
-      <Dialog open={otpModal.open} onClose={closeOtpModal}>
-        <DialogTitle>
-          Verify {otpModal.type === 'email' ? 'Email' : 
-                 otpModal.type === 'mobile' ? 'Mobile' : 'WhatsApp'}
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ mt: 2, minWidth: 300 }}>
-            <TextField
-              label={`Enter OTP sent to your ${otpModal.type}`}
-              value={otpModal.otp}
-              onChange={(e) => setOtpModal(prev => ({ 
-                ...prev, 
-                otp: e.target.value.replace(/\D/g, "") 
-              }))}
-              inputProps={{ maxLength: 6 }}
-              fullWidth
-              disabled={otpModal.loading}
-              helperText="Enter the 6-digit verification code"
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button 
-            onClick={closeOtpModal}
-            disabled={otpModal.loading}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={() => sendOtp(otpModal.type)}
-            disabled={otpModal.loading}
-            color="secondary"
-          >
-            Resend OTP
-          </Button>
-          <Button 
-            onClick={verifyOtp}
-            disabled={otpModal.loading || otpModal.otp.length !== 6}
-            variant="contained"
-          >
-            {otpModal.loading ? (
-              <CircularProgress size={20} sx={{ color: 'white' }} />
-            ) : (
-              'Verify'
-            )}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Communication Information Section */}
 
-      {/* Snackbar for notifications */}
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { md: "repeat(4, 1fr)", xs: "1fr" },
+          gap: 2,
+        }}
+      ></Grid>
+
       <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        open={showWhatsappSnackbar}
+        autoHideDuration={null}
+        onClose={() => setShowWhatsappSnackbar(false)}
+        anchorOrigin={{ vertical: "center", horizontal: "center" }}
+        sx={{
+          width: "100%",
+          maxWidth: "700px",
+          mb: 12,
+        }}
       >
-        <Alert 
-          onClose={handleCloseSnackbar} 
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
+        <Alert
+          severity="info"
+          // icon={<WhatsApp fontSize="inherit" />}
+          sx={{
+            width: "100%",
+            borderRadius: "12px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            alignItems: "center",
+          }}
+          action={
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                color="success"
+                variant="contained"
+                size="medium"
+                onClick={() => {
+                  onChange({ whatsappNumber: data.mobileNumber || "" });
+                  setWhatsappEnabled(false);
+                  setShowWhatsappSnackbar(false);
+                }}
+                sx={{ borderRadius: "8px" }}
+              >
+                Yes
+              </Button>
+              <Button
+                color="inherit"
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  setWhatsappEnabled(true);
+                  setShowWhatsappSnackbar(false);
+                }}
+                sx={{ borderRadius: "8px" }}
+              >
+                No
+              </Button>
+            </Box>
+          }
         >
-          {snackbar.message}
+          Is your WhatsApp number same as your mobile number?
         </Alert>
       </Snackbar>
-    </>
+    </Box>
   );
 };
 
