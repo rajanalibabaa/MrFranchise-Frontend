@@ -2406,25 +2406,21 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
 
       {/* International Expansion Toggle */}
       <Box sx={{ mb: 2, display: "flex", alignItems: "center" }}>
-        <Typography variant="subtitle2" mt={0} gap={2}>
-          Is your brand expanding internationally? :
-        </Typography>
-        <RadioGroup
-          row
-          value={
-            data?.isInternationalExpansion === null
-              ? ""
-              : data?.isInternationalExpansion
-          }
-          sx={{ gap: 11, justifyContent: "start", ml: 15 }}
-          onChange={(e) =>
-            handleInternationalExpansionChange(e.target.value === "true")
-          }
-        >
-          <FormControlLabel value="true" control={<Radio />} label="Yes" />
-          <FormControlLabel value="false" control={<Radio />} label="No" />
-        </RadioGroup>
-      </Box>
+  <Typography variant="subtitle2" mt={0} gap={2}>
+    Is your brand expanding internationally? :
+  </Typography>
+
+  <RadioGroup
+    row
+    value={data?.isInternationalExpansion || ""}
+    sx={{ gap: 11, justifyContent: "start", ml: 15 }}
+    onChange={(e) => handleInternationalExpansionChange(e.target.value)} // 👈 no conversion to boolean
+  >
+    <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
+    <FormControlLabel value="No" control={<Radio />} label="No" />
+  </RadioGroup>
+</Box>
+
 
       {/* Current Outlet Locations */}
       <Divider sx={{ my: 2 }} />

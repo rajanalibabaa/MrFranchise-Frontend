@@ -1,108 +1,101 @@
 const validateBrandDetails = (data) => {
   const errors = {};
   
-  // Helper function to check if a value is empty
-  const isEmpty = (value) => !value || !value.toString().trim();
+  // // Helper function to check if a value is empty
+  // const isEmpty = (value) => !value || !value.toString().trim();
   
-  // Personal Information
-  if (isEmpty(data.fullName)) errors.fullName = "Full name is required";
+  // // Personal Information
+  // if (isEmpty(data.fullName)) errors.fullName = "Full name is required";
   
-  // Contact Information
-  if (isEmpty(data.email)) {
-    errors.email = "Email is required";
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.email = "Invalid email format";
-  }
+  // // Contact Information
+  // if (isEmpty(data.email)) {
+  //   errors.email = "Email is required";
+  // } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+  //   errors.email = "Invalid email format";
+  // }
   
-  if (isEmpty(data.mobileNumber)) {
-    errors.mobileNumber = "Mobile number is required";
-  } else if (!/^\+\d{8,15}$/.test(data.mobileNumber)) {
-    errors.mobileNumber = "Invalid mobile number format";
-  }
+  // if (isEmpty(data.mobileNumber)) {
+  //   errors.mobileNumber = "Mobile number is required";
+  // } else if (!/^\+\d{8,15}$/.test(data.mobileNumber)) {
+  //   errors.mobileNumber = "Invalid mobile number format";
+  // }
   
-  if (isEmpty(data.whatsappNumber)) {
-    errors.whatsappNumber = "WhatsApp number is required";
-  } else if (!/^\+\d{8,15}$/.test(data.whatsappNumber)) {
-    errors.whatsappNumber = "Invalid WhatsApp number format";
-  }
+  // if (isEmpty(data.whatsappNumber)) {
+  //   errors.whatsappNumber = "WhatsApp number is required";
+  // } else if (!/^\+\d{8,15}$/.test(data.whatsappNumber)) {
+  //   errors.whatsappNumber = "Invalid WhatsApp number format";
+  // }
   
   // Brand Information
-  if (isEmpty(data.companyName)) errors.companyName = "Company name is required";
-  if (isEmpty(data.brandName)) errors.brandName = "Brand name is required";
-    if (isEmpty(data.brandName)) errors.Tagline = "Brand name is required";
+  // if (isEmpty(data.companyName)) errors.companyName = "Company name is required";
+  // if (isEmpty(data.brandName)) errors.brandName = "Brand name is required";
+  //   if (isEmpty(data.tagLine)) errors.tagLine = "TagLine is required";
   
-  // CEO Information
-  if (isEmpty(data.ceoName)) errors.ceoName = "CEO name is required";
+  // // CEO Information
+  // if (isEmpty(data.ceoName)) errors.ceoName = "CEO name is required";
   
-  if (isEmpty(data.ceoEmail)) {
-    errors.ceoEmail = "CEO email is required";
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.ceoEmail)) {
-    errors.ceoEmail = "Invalid CEO email format";
-  }
+  // if (isEmpty(data.ceoEmail)) {
+  //   errors.ceoEmail = "CEO email is required";
+  // } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.ceoEmail)) {
+  //   errors.ceoEmail = "Invalid CEO email format";
+  // }
   
-  if (isEmpty(data.ceoMobile)) {
-    errors.ceoMobile = "CEO mobile number is required";
-  } else if (!/^\+\d{8,15}$/.test(data.ceoMobile)) {
-    errors.ceoMobile = "Invalid CEO mobile number format";
-  }
+  // if (isEmpty(data.ceoMobile)) {
+  //   errors.ceoMobile = "CEO mobile number is required";
+  // } else if (!/^\+\d{8,15}$/.test(data.ceoMobile)) {
+  //   errors.ceoMobile = "Invalid CEO mobile number format";
+  // }
   
   // Office Information
-  if (isEmpty(data.headOfficeAddress)) {
-    errors.headOfficeAddress = "Head office address is required";
-  }
+  // if (isEmpty(data.headOfficeAddress)) {
+  //   errors.headOfficeAddress = "Head office address is required";
+  // }
+  //   if (isEmpty(data.officeemail)) {
+  //   errors.officeEmail = " Office Email is required";
+  // }
+  //   if (isEmpty(data.officeMobile)) {
+  //   errors.officeMobile = " Office Mobile Number is required";
+  // }
   
-  if (isEmpty(data.country)) errors.country = "Country is required";
-  if (isEmpty(data.pincode)) {
-    errors.pincode = data.country === "India" ? "Pincode is required" : "Postal code is required";
-  } else if (data.country === "India" && !/^\d{6}$/.test(data.pincode)) {
-    errors.pincode = "Pincode must be 6 digits";
-  }
+  // if (isEmpty(data.country)) errors.country = "Country is required";
+  // if (isEmpty(data.pincode)) {
+  //   errors.pincode = data.country === "India" ? "Pincode is required" : "Postal code is required";
+  // } else if (data.country === "India" && !/^\d{6}$/.test(data.pincode)) {
+  //   errors.pincode = "Pincode must be 6 digits";
+  // }
   
-  if (isEmpty(data.state)) errors.state = "State is required";
-  if (isEmpty(data.city)) errors.city = "City is required";
-  if (isEmpty(data.district)) errors.district = "District is required";
+  // if (isEmpty(data.state)) errors.state = "State is required";
+  // if (isEmpty(data.city)) errors.city = "City is required";
+  // if (isEmpty(data.district)) errors.district = "District is required";
   
-  // Brand Details
-  if (!Array.isArray(data.brandCategories) || data.brandCategories.length === 0) {
-    errors.brandCategories = "At least one category is required";
-  }
+  // // Brand Details
+  // if (!Array.isArray(data.brandCategories) || data.brandCategories.length === 0) {
+  //   errors.brandCategories = "At least one category is required";
+  // }
   
-  if (isEmpty(data.brandDescription)) {
-    errors.brandDescription = "Brand description is required";
-  }
+  // if (isEmpty(data.brandDescription)) {
+  //   errors.brandDescription = "Brand description is required";
+  // }
   
-  if (!Array.isArray(data.expansionLocation) || data.expansionLocation.length === 0) {
-    errors.expansionLocation = "At least one expansion location is required";
-  }
+  // if (!Array.isArray(data.expansionLocation) || data.expansionLocation.length === 0) {
+  //   errors.expansionLocation = "At least one expansion location is required";
+  // }
   
-  // Business Information
-  if (isEmpty(data.establishedYear)) {
-    errors.establishedYear = "Established year is required";
-  } else if (!/^\d{4}$/.test(data.establishedYear)) {
-    errors.establishedYear = "Year must be 4 digits";
-  } else if (parseInt(data.establishedYear) > new Date().getFullYear()) {
-    errors.establishedYear = "Year cannot be in the future";
-  }
-  
-  if (isEmpty(data.franchiseSinceYear)) {
-    errors.franchiseSinceYear = "Franchise since year is required";
-  } else if (!/^\d{4}$/.test(data.franchiseSinceYear)) {
-    errors.franchiseSinceYear = "Year must be 4 digits";
-  } else if (parseInt(data.franchiseSinceYear) > new Date().getFullYear()) {
-    errors.franchiseSinceYear = "Year cannot be in the future";
-  } else if (
-    data.establishedYear &&
-    parseInt(data.franchiseSinceYear) < parseInt(data.establishedYear)
-  ) {
-    errors.franchiseSinceYear = "Cannot be before established year";
-  }
+  // // Business Information
+  // if (isEmpty(data.establishedYear)) {
+  //   errors.establishedYear = "Established year is required";
+  // } else if (!/^\d{4}$/.test(data.establishedYear)) {
+  //   errors.establishedYear = "Year must be 4 digits";
+  // } else if (parseInt(data.establishedYear) > new Date().getFullYear()) {
+  //   errors.establishedYear = "Year cannot be in the future";
+  // }
   
   // Website validation if provided
-  if (data.website && !isEmpty(data.website)) {
-    if (!/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(data.website)) {
-      errors.website = "Invalid website URL";
-    }
-  }
+  // if ( isEmpty(data.website)) {
+  //   if (!/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(data.website)) {
+  //     errors.website = "Invalid website URL";
+  //   }
+  // }
   
   return errors;
 };
