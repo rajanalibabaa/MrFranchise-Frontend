@@ -9,9 +9,8 @@ function BrandCategroyViewPage() {
   return (
     <>
       {/* Fixed Navbar */}
- <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 1100 }}>
         <Navbar />
-      </Box>
+  
       {/* Scrollable Content below the fixed Navbar */}
       <Box
         sx={{

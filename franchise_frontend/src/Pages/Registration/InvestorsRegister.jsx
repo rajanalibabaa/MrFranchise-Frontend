@@ -18,6 +18,7 @@ import {
   Button,
   Typography,
   Link,
+  Autocomplete,
   Paper,
   InputAdornment,
   Box,
@@ -37,6 +38,7 @@ import {
   TableCell,
   TableBody,
   IconButton,
+   Tooltip,
 } from "@mui/material";
 import { FavoriteBorderOutlined, Person, PersonOutlined, WhatsApp,Email, Phone, Home, LocationCity, Work, HomeWork, MeetingRoom } from "@mui/icons-material";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
@@ -46,20 +48,11 @@ import {EditIcon} from "lucide-react";
 import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 import RegisterationMediaHandling from "./RegisterationMediaHandling";
-const phoneCodes = {
-  India: "+91",
-  USA: "+1",
-  UK: "+44",
-  Canada: "+1",
-  Australia: "+61",
-};
-const countries = [
-  { code: "IN", name: "India" },
-  { code: "US", name: "USA" },
-  { code: "GB", name: "UK" },
-  { code: "CA", name: "Canada" },
-  { code: "AU", name: "Australia" },
-];
+import { InfoOutlined } from "@mui/icons-material";
+import FlagIcon from '@mui/icons-material/Flag';
+import Navbar from "../../Components/Navbar/NavBar";
+import Footer from "../../Components/Footers/Footer";
+
 
 const InvestorRegister = () => {
   const {
@@ -70,10 +63,11 @@ const InvestorRegister = () => {
     control,
     formState: { errors },
     clearErrors,
+    reset,
   } = useForm({
     defaultValues: {
       category: [],
-      country: "India",
+      country: "",
       preferredState: "",
       preferredCity: "",
       preferredDistrict: "",
@@ -83,9 +77,10 @@ const InvestorRegister = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [phonePrefix, setPhonePrefix] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("India");
-
+const [countryCodes, setCountryCodes] = useState([]);
+const [selectedCountry, setSelectedCountry] = useState("");
   const dropdownRef = useRef(null);
+  const [countries, setCountries] = useState([]);
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [showWhatsappSnackbar, setShowWhatsappSnackbar] = useState(false);
   const [isCategoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
@@ -93,15 +88,30 @@ const InvestorRegister = () => {
   const [activeSubCategory, setActiveSubCategory] = useState(null);
   // const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
+// --- Property Location State ---
+const [propertyCountries, setPropertyCountries] = useState(["India"]);
+const [propertyStates, setPropertyStates] = useState([]);
+const [propertyCities, setPropertyCities] = useState([]);
+// const [propertyDistricts, setPropertyDistricts] = useState([]);
+const propertyCountry = watch("propertyCountry");
+const propertyState = watch("propertyState");
+// const propertyDistrict = watch("propertyDistrict");
 
+  //Domestic country 
   const [indiaData, setIndiaData] = useState([]);
   const [preferredStates, setPreferredStates] = useState([]);
   const [preferredCities, setPreferredCities] = useState([]);
   const [preferredDistricts, setPreferredDistricts] = useState([]);
 
+  // International country
+const [intlCountries, setIntlCountries] = useState([]);
+  const [intlStates, setIntlStates] = useState([]);
+  const [intlCities, setIntlCities] = useState([]);
+const [loadingPincode, setLoadingPincode] = useState(false);
+const [pincodeError, setPincodeError] = useState('');
  const preferredStateValue = watch("preferredState");
   const preferredDistrictValue = watch("preferredDistrict");
-
+const preferredLocationType = watch("preferredLocationType");
   const [loginOpen, setLoginOpen] = useState(false);
   const [preferences, setPreferences] = useState([]);
   const [preferenceDialogOpen, setPreferenceDialogOpen] = useState(false);
@@ -117,7 +127,7 @@ const [selectedChild, setSelectedChild] = useState('');
     whatsappNumber: "",
     address: "",
     pincode: "",
-    country: "India",
+    country: "",
     state: "",
     city: "",
     categories: [],
@@ -127,17 +137,14 @@ const [selectedChild, setSelectedChild] = useState('');
     otherOccupation: "",
     propertyType: "",
     propertySize: "",
+    propertyCountry: "",
+    propertyState: "",
+    propertyCity: "",
     preferredState: "",
     preferredDistrict: "",
     preferredCity: "",
     terms: false,
   };
-
-
-
-
-
-
   const openLoginPopup = () => {
     document.activeElement.blur();
     setLoginOpen(true);
@@ -147,7 +154,166 @@ const [selectedChild, setSelectedChild] = useState('');
     setLoginOpen(false);
   };
 
+useEffect(() => {
+  fetch("https://countriesnow.space/api/v0.1/countries/positions")
+    .then(res => res.json())
+    .then(data => {
+      if (data.data) setPropertyCountries(data.data.map(c => c.name));
+    });
+  setValue("propertyCountry", "");
+  setValue("propertyState", "");
+  setValue("propertyCity", "");
+  setPropertyStates([]);
+  setPropertyCities([]);
+}, [setValue]);
+
+// --- Fetch Property States ---
+useEffect(() => {
+  if (!propertyCountry) {
+    setPropertyStates([]);
+    setValue("propertyState", "");
+    // setValue("propertyDistrict", "");
+    setValue("propertyCity", "");
+    // setPropertyDistricts([]);
+    setPropertyCities([]);
+    return;
+  }
+  fetch("https://countriesnow.space/api/v0.1/countries/states", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ country: propertyCountry.trim() }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.data && data.data.states) setPropertyStates(data.data.states.map(s => s.name));
+      else setPropertyStates([]);
+    });
+  setValue("propertyState", "");
+  // setValue("propertyDistrict", "");
+  setValue("propertyCity", "");
+  // setPropertyDistricts([]);
+  setPropertyCities([]);
+}, [propertyCountry, setValue]);
+
+// --- Fetch Property Districts (if your API provides districts, otherwise skip this) ---
+// useEffect(() => {
+//   if (!propertyState) {
+//     setPropertyDistricts([]);
+//     setValue("propertyDistrict", "");
+//     setValue("propertyCity", "");
+//     setPropertyCities([]);
+//     return;
+//   }
+//   // If you have a districts API, use it here. Otherwise, skip this effect.
+//   // For most international countries, you may not have districts, so you can skip or use propertyState as propertyDistrict.
+//   setPropertyDistricts([propertyState]);
+//   setValue("propertyDistrict", propertyState);
+//   setValue("propertyCity", "");
+//   setPropertyCities([]);
+// }, [propertyState, setValue]);
+
+// --- Fetch Property Cities ---
+useEffect(() => {
+  if (!propertyCountry || !propertyState) {
+    // setPropertyDistricts([]);
+    // setValue("propertyDistrict", "");
+    setValue("propertyCity", "");
+    setPropertyCities([]);
+    return;
+  }
+
+ if (propertyCountry === "India" && indiaData.length > 0) {
+    const stateObj = indiaData.find((s) => s.name === propertyState);
+    if (stateObj) {
+  const uniqueCities = Array.from(
+    new Set((stateObj.cities || []).map(city => city.name))
+  );
+  setPropertyCities(uniqueCities);
+} else {
+  setPropertyCities([]);
+}
+    setValue("propertyCity", "");
+  } else {
+    // International: use API
+    fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        country: propertyCountry.trim(),
+        state: propertyState.trim(),
+      }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.data && Array.isArray(data.data)) {
+          setPropertyCities(data.data);
+        } else {
+          setPropertyCities([]);
+        }
+      })
+      .catch(() => {
+        setPropertyCities([]);
+      });
+    setValue("propertyCity", "");
+  }
+}, [propertyCountry, propertyState, setValue, indiaData]);
+
+// --- RESTORE FORM DATA AND PREFERENCES ON MOUNT ---
   useEffect(() => {
+    const savedData = localStorage.getItem(FORM_DATA_KEY);
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      // Restore preferences
+      if (parsed.preferences) setPreferences(parsed.preferences);
+      // Restore form fields
+      reset({ ...initialFormData, ...parsed });
+    }
+  }, []);
+
+  // --- SAVE FORM DATA AND PREFERENCES TO LOCALSTORAGE ON CHANGE ---
+  useEffect(() => {
+    const subscription = watch((value) => {
+      localStorage.setItem(
+        FORM_DATA_KEY,
+        JSON.stringify({ ...value, preferences })
+      );
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, preferences]);
+
+  // --- SAVE PREFERENCES TO LOCALSTORAGE WHEN THEY CHANGE ---
+  useEffect(() => {
+    const currentData = JSON.parse(localStorage.getItem(FORM_DATA_KEY) || "{}");
+    localStorage.setItem(
+      FORM_DATA_KEY,
+      JSON.stringify({ ...currentData, preferences })
+    );
+  }, [preferences]);
+
+//  country codes
+useEffect(() => {
+  fetch("https://countriesnow.space/api/v0.1/countries/codes")
+    .then(res => res.json())
+    .then(data => {
+      if (data.data) setCountryCodes(data.data);
+    });
+}, []);
+
+//
+useEffect(() => {
+  const country = watch("country");
+  if (!country) {
+    setPhonePrefix("");
+    return;
+  }
+  const found = countryCodes.find(
+    c => c.name === country || c.iso2 === country || c.iso3 === country
+  );
+  setPhonePrefix(found ? found.dial_code : "");
+}, [watch("country"), countryCodes]);
+
+
+ useEffect(() => {
     const fetchStates = async () => {
       try {
         const res = await axios.get(
@@ -156,18 +322,16 @@ const [selectedChild, setSelectedChild] = useState('');
         setIndiaData(res.data);
         setPreferredStates(res.data.map((state) => state.name));
       } catch (err) {
-        console.error("Error fetching location data:", err);
         setIndiaData([]);
         setPreferredStates([]);
       }
-      //  finally {
-      // }
     };
     fetchStates();
   }, []);
 
+  // Domestic
   useEffect(() => {
-    if (preferredStateValue && indiaData.length > 0) {
+    if (preferredLocationType === "domestic" && preferredStateValue && indiaData.length > 0) {
       const stateObj = indiaData.find((s) => s.name === preferredStateValue);
       if (stateObj) {
         setPreferredDistricts(stateObj.districts || []);
@@ -178,14 +342,19 @@ const [selectedChild, setSelectedChild] = useState('');
       }
       setValue("preferredDistrict", "");
       setValue("preferredCity", "");
-    } else {
+    } else if (preferredLocationType === "domestic") {
       setPreferredDistricts([]);
       setPreferredCities([]);
     }
-  }, [preferredStateValue, indiaData, setValue]);
+  }, [preferredStateValue, indiaData, setValue, preferredLocationType]);
 
   useEffect(() => {
-    if (preferredStateValue && preferredDistrictValue && indiaData.length > 0) {
+    if (
+      preferredLocationType === "domestic" &&
+      preferredStateValue &&
+      preferredDistrictValue &&
+      indiaData.length > 0
+    ) {
       const stateObj = indiaData.find((s) => s.name === preferredStateValue);
       if (stateObj) {
         const filteredCities = (stateObj.cities || [])
@@ -195,10 +364,68 @@ const [selectedChild, setSelectedChild] = useState('');
       } else {
         setPreferredCities([]);
       }
-    } else {
+    } else if (preferredLocationType === "domestic") {
       setPreferredCities([]);
     }
-  }, [preferredStateValue, preferredDistrictValue, indiaData]);
+  }, [preferredStateValue, preferredDistrictValue, indiaData, preferredLocationType]);
+
+  // International
+  useEffect(() => {
+    if (preferredLocationType === "international") {
+      fetch("https://countriesnow.space/api/v0.1/countries/positions")
+        .then(res => res.json())
+        .then(data => {
+          if (data.data) setIntlCountries(data.data.map(c => c.name));
+        });
+      setValue("preferredState", "");
+      setValue("preferredDistrict", "");
+      setValue("preferredCity", "");
+      setIntlStates([]);
+      setIntlCities([]);
+    }
+  }, [preferredLocationType, setValue]);
+
+  // International: fetch states
+  useEffect(() => {
+    if (preferredLocationType === "international" && preferredStateValue) {
+      fetch("https://countriesnow.space/api/v0.1/countries/states", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ country: preferredStateValue })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.data && data.data.states) setIntlStates(data.data.states.map(s => s.name));
+        });
+      setValue("preferredDistrict", "");
+      setValue("preferredCity", "");
+      setIntlCities([]);
+    }
+  }, [preferredStateValue, preferredLocationType, setValue]);
+
+  // International: fetch cities
+  useEffect(() => {
+    if (
+      preferredLocationType === "international" &&
+      preferredStateValue &&
+      preferredDistrictValue
+    ) {
+      fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          country: preferredStateValue,
+          state: preferredDistrictValue,
+        }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.data) setIntlCities(data.data);
+        });
+      setValue("preferredCity", "");
+    }
+  }, [preferredDistrictValue, preferredStateValue, preferredLocationType, setValue]);
+
 
   // Add this useEffect hook to handle outside clicks
   useEffect(() => {
@@ -244,6 +471,10 @@ const [selectedChild, setSelectedChild] = useState('');
       preferredCity: watch("preferredCity"),
       propertyType: watch("propertyType"),
       propertySize: watch("propertyType") === "Own Property" ? watch("propertySize") : "",
+   locationType: watch("preferredLocationType"),
+   propertyCountry: watch("propertyCountry"),
+    propertyState: watch("propertyState"),
+    propertyCity: watch("propertyCity"),
     };
     if (
       !pref.category.length ||
@@ -253,7 +484,11 @@ const [selectedChild, setSelectedChild] = useState('');
       !pref.preferredDistrict ||
       !pref.preferredCity ||
       !pref.propertyType ||
-      (pref.propertyType === "Own Property" && !pref.propertySize)
+      (pref.propertyType === "Own Property" && !pref.propertySize ||
+ !pref.propertyCountry ||
+    !pref.propertyState ||
+    !pref.propertyCity
+      )
     ) {
       showSnackbar("Please fill all preference fields before adding.", "error");
       return;
@@ -264,8 +499,12 @@ const [selectedChild, setSelectedChild] = useState('');
   setValue("preferredState", "");
   setValue("preferredDistrict", "");
   setValue("preferredCity", "");
+  setValue("preferredLocationType", "");
   setValue("propertyType", "");
   setValue("propertySize", "");
+  setValue("propertyCountry", "");
+  setValue("propertyState", "");
+  setValue("propertyCity", "");
     setSelectedCategories([]);
     setValue("category", []);
     setSelectedCategories([]);
@@ -281,6 +520,9 @@ const [selectedChild, setSelectedChild] = useState('');
       "investmentRange",  
       "investmentAmount",   
       "category",
+      "propertyCountry",
+    "propertyState",
+    "propertyCity",
     ])
     showSnackbar("Preference added!", "success");
     setTimeout(() => {
@@ -315,6 +557,9 @@ alert('Add Multiple preferences to get more offers from us!','info')
   setValue("preferredCity", pref.preferredCity || "");
   setValue("propertyType", pref.propertyType || "");
   setValue("propertySize", pref.propertySize || "");
+  setValue("propertyCountry", pref.propertyCountry || "");
+  setValue("propertyState", pref.propertyState || "");
+  setValue("propertyCity", pref.propertyCity || "");
 
     setPreferences(preferences.filter((_, i) => i !== idx));
   }
@@ -358,7 +603,6 @@ alert('Add Multiple preferences to get more offers from us!','info')
     },
   });
 
-  
   // Handler for the first category dropdown
   const handleCategorySelection = (main, sub, child) => {
     const newCategory = { main, sub, child };
@@ -385,7 +629,7 @@ alert('Add Multiple preferences to get more offers from us!','info')
   //   setOtpModal({
   //     open: true,
   //     type,
-  //     otp: "",F
+  //     otp: "",
   //     loading: false,
   //     verified: otpStates[type]?.verified || false,
   //   });
@@ -500,34 +744,54 @@ useEffect(() => {
     whatsappNumber: formatNumber(data.whatsappNumber),
     address: data.address || "",
     pincode: data.pincode || "",
-    country: data.country || "",
+    country: data.country || "India",
     state: data.state || "",
     city: data.city || "",
     occupation: data.occupation || "",
     ...(data.occupation === "Other" && {
       specifyOccupation: data.otherOccupation || "",
     }),
-  preferences: preferences.map(pref => ({
-  category: Array.isArray(pref.category)
-    ? pref.category.map(c => ({
-        main: c.main || "",
-        sub: c.sub || "",
-        child: c.child || ""
-      }))
-    : typeof pref.category === "string"
-      ? [(() => {
-          const [main, sub, child] = pref.category.split(">").map(s => s.trim());
-          return { main, sub, child };
-        })()]
-      : [],
-  investmentRange: pref.investmentRange,
-  investmentAmount: pref.investmentAmount,
-  propertyType: pref.propertyType,
-  propertySize: pref.propertyType === "Own Property" ? pref.propertySize : "",
-  preferredState: pref.preferredState,
-  preferredDistrict: pref.preferredDistrict,
-  preferredCity: pref.preferredCity,
-}))
+  preferences: preferences.map(pref => {
+    const isInternational = pref.locationType === "international";
+    return {
+      category: Array.isArray(pref.category)
+        ? pref.category.map(c => ({
+            main: c.main || "",
+            sub: c.sub || "",
+            child: c.child || ""
+          }))
+        : typeof pref.category === "string"
+          ? [(() => {
+              const [main, sub, child] = pref.category.split(">").map(s => s.trim());
+              return { main, sub, child };
+            })()]
+          : [],
+      investmentRange: pref.investmentRange,
+      investmentAmount: pref.investmentAmount,
+      propertyPreferred:[{
+         propertyType: pref.propertyType,
+...(pref.propertyType === "Own Property" && {
+          propertySize: pref.propertySize,
+    
+          propertyCountry: pref.propertyCountry || "",
+          propertyState: pref.propertyState || "",
+          propertyCity: pref.propertyCity || "",
+        }),
+      }],
+   ...(isInternational
+        ? {
+            preferredCountry: pref.preferredState,
+            preferredState: pref.preferredDistrict,
+            preferredCity: pref.preferredCity,
+          }
+        : {
+            preferredState: pref.preferredState,
+            preferredDistrict: pref.preferredDistrict,
+            preferredCity: pref.preferredCity,
+          }),
+      locationType: pref.locationType, 
+    };
+  }),
 
       // category: selectedCategories,
       // investmentRange: data.investmentRange || "",
@@ -554,7 +818,10 @@ useEffect(() => {
 console.log("Registration response:", response.data);
 
       if (response.status === 201) {
-        if (formattedData.firstName) {
+        localStorage.removeItem(FORM_DATA_KEY);
+setFormData(initialFormData);
+
+if (formattedData.firstName) {
     localStorage.setItem("investorName", formattedData.firstName);
   }
   if (formattedData.email) {
@@ -626,7 +893,7 @@ useEffect(() => {
 
 // Update localStorage when preferences change
 useEffect(() => {
-  const currentData = JSON.parse(localStorage.getItem(FORM_DATA_KEY) || {});
+  const currentData = JSON.parse(localStorage.getItem(FORM_DATA_KEY) || '{}');
   localStorage.setItem(FORM_DATA_KEY, JSON.stringify({
     ...currentData,
     preferences
@@ -634,46 +901,74 @@ useEffect(() => {
 }, [preferences]);
 
 
-  useEffect(() => {
-    if (selectedCountry && phoneCodes[selectedCountry]) {
-      setPhonePrefix(phoneCodes[selectedCountry]);
-    } else {
-      setPhonePrefix("");
-    }
-  }, [selectedCountry]);
+ useEffect(() => {
+  fetch("https://countriesnow.space/api/v0.1/countries")
+    .then(res => res.json())
+    .then(data => {
+      if (data.data) setCountries(data.data.map(c => ({ name: c.country, code: c.iso2 })));
+    });
+}, []);
 
   const pincode = watch("pincode");
 
-  useEffect(() => {
-    const fetchLocationDetails = async () => {
-      if (selectedCountry === "India" && pincode && pincode.length === 6) {
-        try {
-          const response = await axios.get(
-            `https://api.postalpincode.in/pincode/${pincode}`
-          );
-          const data = response.data[0];
-          if (data.Status === "Success") {
-            const locationDetails = data.PostOffice[0];
-            setValue("state", locationDetails.State || "");
-            setValue(
-              "city",
-              locationDetails.Block || locationDetails.Name || ""
-            );
-            setValue("district", locationDetails.District || "");
+ useEffect(() => {
+  const pincode = watch("pincode");
+  const country = watch("country");
+  if (!pincode || !country) return;
+
+  const selectedCountryObj = countries.find(c => c.name === country);
+  const countryCode = selectedCountryObj?.code || "IN";
+  setPincodeError('');
+  setLoadingPincode(false);
+
+  if ((countryCode === "IN" && pincode.length === 6) || (countryCode !== "IN" && pincode.length >= 3)) {
+    setLoadingPincode(true);
+
+    const fetchLocation = async () => {
+      try {
+        if (countryCode === "IN") {
+          // India Post API
+          const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+          const data = await res.json();
+          if (data[0]?.Status === "Success" && data[0]?.PostOffice?.length) {
+            const po = data[0].PostOffice[0];
+            setValue("state", po.State || "");
+            setValue("city", po.District || po.Block || "");
+            setPincodeError('');
           } else {
             setValue("state", "");
             setValue("city", "");
-            setValue("district", "");
-            showSnackbar("Invalid Pincode", "error");
+            setPincodeError("Invalid Indian pincode");
           }
-        } catch (error) {
-          console.error("Error fetching location details:", error);
-          showSnackbar("Error fetching location details", "error");
+        } else {
+          // Zippopotam.us for international
+          const code = countryCode.toLowerCase();
+          const res = await fetch(`https://api.zippopotam.us/${code}/${pincode}`);
+          if (!res.ok) throw new Error("Not found");
+          const data = await res.json();
+          setValue("state", data.places?.[0]?.state || "");
+          setValue("city", data.places?.[0]?.["place name"] || "");
+          setPincodeError('');
         }
+      } catch (err) {
+        setValue("state", "");
+        setValue("city", "");
+        setPincodeError("Postal code not found for selected country");
+      } finally {
+        setLoadingPincode(false);
       }
     };
-    fetchLocationDetails();
-  }, [selectedCountry, pincode, setValue]);
+
+    fetchLocation();
+  } else {
+    setValue("state", "");
+    setValue("city", "");
+    if (countryCode === "IN" && pincode.length > 0 && pincode.length < 6) {
+      setPincodeError("Enter 6-digit pincode");
+    }
+  }
+  // eslint-disable-next-line
+}, [watch("pincode"), watch("country")]);
 
   // Render functions
   // const renderSelectField = (
@@ -705,13 +1000,23 @@ useEffect(() => {
 
   return (
     <>
+    <Box 
+    sx={{ 
+    position: "fixed", 
+    top: 0, 
+    left: 0, 
+    width: "100%", 
+    zIndex: 1000 
+  }}>
+      <Navbar />
+    </Box>
      <Typography
         variant="h3"
         gutterBottom
         fontWeight="bold"
         sx={{ 
           color: "#7ad03a", 
-          // mb: 2,
+          mb: -2,
           mt: 10,
           textAlign: 'center',
           textDecoration: 'underline',
@@ -720,47 +1025,6 @@ useEffect(() => {
       >
         Investor Registration
       </Typography>
-        <Toolbar sx={{ 
-      display: "flex", 
-      justifyContent: "flex-end", 
-      mt:9,
-      mb: 1,
-      position: 'absolute',
-      top: 16,
-      right: 16
-    }}>
-      <FormControl
-        size="small"
-        sx={{
-          minWidth: 130,
-          backgroundColor: "background.paper",
-          borderRadius: "8px",
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}
-      >
-        <Select
-          value={watch("country") || "India"}
-          onChange={(e) => {
-            setValue("country", e.target.value);
-            setSelectedCountry(e.target.value);
-          }}
-          displayEmpty
-          inputProps={{ "aria-label": "Select country" }}
-          sx={{
-            borderRadius: '8px',
-            '& .MuiSelect-select': {
-              py: 1
-            }
-          }}
-        >
-          {countries.map((country) => (
-            <MenuItem key={country.code} value={country.name}>
-              {country.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Toolbar>
     <Box
   sx={{
     // backgroundSize: "cover",
@@ -818,6 +1082,7 @@ useEffect(() => {
               render={({ field }) => (
                 <TextField
                   {...field}
+                  value={field.value || ""}
                   label="First Name"
                   fullWidth
                   variant="outlined"
@@ -847,7 +1112,7 @@ useEffect(() => {
                        sx={{
                          display: "grid",
                          gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-                         gap: 5,
+                         gap: 2,
                        }}
                      >
           <Grid item xs={12} md={6}>
@@ -857,6 +1122,7 @@ useEffect(() => {
               render={({ field }) => (
                 <TextField
                   {...field}
+                  value={field.value || ""}
                   label="Email"
                   type="email"
                   fullWidth
@@ -888,6 +1154,7 @@ useEffect(() => {
               render={({ field }) => (
                 <TextField
                   {...field}
+                  value={field.value || ""}
                   label="Mobile Number"
                   fullWidth
                   variant="outlined"
@@ -915,7 +1182,7 @@ useEffect(() => {
                       <InputAdornment position="start">
                         <Phone color="action" />
                         <Typography variant="body1" sx={{ ml: 1 }}>
-                          {phonePrefix}
+                           {phonePrefix}
                         </Typography>
                       </InputAdornment>
                     ),
@@ -938,10 +1205,11 @@ useEffect(() => {
               render={({ field }) => (
                 <TextField
                   {...field}
+                  value={field.value || ""}
                   label="WhatsApp Number"
                   fullWidth
                   variant="outlined"
-                  disabled={!whatsappEnabled}
+                  // disabled={!whatsappEnabled}
                   error={!!errors.whatsappNumber}
                   helperText={errors.whatsappNumber?.message || " "}
                   inputProps={{
@@ -959,7 +1227,7 @@ useEffect(() => {
                       <InputAdornment position="start">
                         <Phone color="action" />
                         <Typography variant="body1" sx={{ ml: 1 }}>
-                          {phonePrefix}
+                     {phonePrefix}
                         </Typography>
                       </InputAdornment>
                     ),
@@ -973,20 +1241,71 @@ useEffect(() => {
               )}
             />
           </Grid></Grid>
+<Grid
+              container
+              spacing={2}
+              sx={{
+                display: "flex",
+                // gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
+                gap: 2,
+                alignItems:"flex-start"
+              }}
+            >
+          
 
-          {/* Address */}
-          <Grid item xs={12}>
+           <Grid size={4} mt={1}>
+    <Controller
+      name="country"
+      defaultValue="India"
+      control={control}
+      render={({ field }) => (
+     <Autocomplete
+        options={countries}
+        getOptionLabel={(option) => option.name || ""}
+        isOptionEqualToValue={(option, value) => option.name === value}
+        value={countries.find(c => c.name === field.value) || null}
+        onChange={(_, newValue) => {
+          field.onChange(newValue ? newValue.name : "");
+          setSelectedCountry(newValue ? newValue.name : "");
+          setValue("state", "");
+          setValue("city", "");
+          setValue("pincode", "");
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Country"
+            variant="outlined"
+            error={!!errors.country}
+            helperText={errors.country?.message || " "}
+            InputLabelProps={{ shrink: true }}
+          />
+        )}
+        fullWidth
+        sx={{
+          borderRadius: '8px',
+          backgroundColor: "background.paper"
+        }}
+      />
+    )}
+  />
+  </Grid>
+
+  {/* Address */}
+          <Grid size={8} md={8}>
             <Controller
               name="address"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
+                  value={field.value || ""}
                   label="Address"
                   fullWidth
                   variant="outlined"
-                  multiline
-                  rows={2}
+                  // multiline
+                  // minRows={2}
+                  // maxRows={3}
                   error={!!errors.address}
                   helperText={errors.address?.message || " "}
                   InputProps={{
@@ -999,14 +1318,16 @@ useEffect(() => {
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '8px',
-                    }
+                      mt: 1
+                    },
+                  
+                    // resize: 'vertical',
                   }}
                 />
               )}
             />
           </Grid>
-
-
+  </Grid>
 <Grid
               container
               spacing={2}
@@ -1019,31 +1340,59 @@ useEffect(() => {
           {/* Pincode */}
           <Grid item xs={12} md={4}>
             <Controller
-              name="pincode"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Pincode"
-                  fullWidth
-                  variant="outlined"
-                  error={!!errors.pincode}
-                  helperText={errors.pincode?.message || " "}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationCity color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                    }
-                  }}
-                />
-              )}
-            />
+    name="pincode"
+    control={control}
+    render={({ field }) => {
+      // Get country code from dropdown value
+      const selectedCountryObj = countries.find(c => c.name === watch("country"));
+      const selectedCountryCode = selectedCountryObj?.code || "IN";
+      return (
+        <TextField
+          {...field}
+          label={selectedCountryCode === 'IN' ? 'Pincode' : 'Postal Code'}
+          fullWidth
+          variant="outlined"
+          required
+          error={!!errors.pincode || !!pincodeError}
+          helperText={
+            errors.pincode?.message ||
+            pincodeError ||
+            (selectedCountryCode === 'IN' ? '' : '')
+          }
+          inputProps={{
+            maxLength: selectedCountryCode === 'IN' ? 6 : 10,
+            inputMode: "numeric",
+            pattern: "[0-9]*",
+          }}
+          onChange={e => {
+            const value = e.target.value.replace(/\D/g, '').slice(0, selectedCountryCode === 'IN' ? 6 : 10);
+            field.onChange(value);
+            setPincodeError('');
+          }}
+          disabled={!selectedCountryCode}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Tooltip title={selectedCountryObj?.name || 'Country'}>
+                  <FlagIcon  />
+                </Tooltip>
+              </InputAdornment>
+            ),
+            endAdornment: loadingPincode ? (
+              <InputAdornment position="end">
+                <CircularProgress size={20} />
+              </InputAdornment>
+            ) : null,
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '8px',
+            }
+          }}
+        />
+      );
+    }}
+  />
           </Grid>
 
           {/* State */}
@@ -1110,6 +1459,7 @@ useEffect(() => {
                   label="Occupation"
                   fullWidth
                   variant="outlined"
+                  value={field.value || ""}
                   error={!!errors.occupation}
                   helperText={errors.occupation?.message || " "}
                   InputProps={{
@@ -1180,6 +1530,32 @@ useEffect(() => {
           }}
         >
           <FavoriteBorderOutlined color="primary" /> Preferences
+          <Tooltip title={
+                          <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+                           You can add multiple preferences to get more offers from us!
+                          </span>
+                        }
+                        placement="right-start"
+                        arrow
+                        enterTouchDelay={0} // makes it responsive on mobile too
+                      >
+                        <IconButton
+                          size="small"
+                          sx={{
+                            // p: 0.8,
+                            color: "warning.main",
+                            // backgroundColor: 'info.light',
+                            "&:hover": {
+                              backgroundColor: "info.main",
+                              color: "white",
+                            },
+                            marginLeft: "5px",
+                            // borderRadius: '50%',
+                          }}
+                        >
+                          <InfoOutlined fontSize="medium" />
+                        </IconButton>
+                      </Tooltip>{" "}
         </Typography>
 
         {/* Category Selection */}
@@ -1202,6 +1578,7 @@ useEffect(() => {
               <InputLabel>Industry</InputLabel>
               <Select
                 value={selectedMainCategory || ''}
+                
                 onChange={(e) => {
                   setSelectedMainCategory(e.target.value);
                   setSelectedSubCategory('');
@@ -1420,7 +1797,7 @@ useEffect(() => {
         <FormControl component="fieldset" error={!!errors.preferredLocationType}>
           {/* <FormLabel component="legend">Location Type</FormLabel> */}
           <RadioGroup row {...field}>
-            <FormControlLabel value="domestic" control={<Radio />} label="Domestic" />
+            <FormControlLabel value="domestic" control={<Radio />} label="India" />
             <FormControlLabel value="international" control={<Radio />} label="International" />
           </RadioGroup>
           <FormHelperText>{errors.preferredLocationType?.message || " "}</FormHelperText>
@@ -1439,109 +1816,138 @@ useEffect(() => {
                      >
           {/* Preferred Location */}
          <Grid item xs={12} md={4}>
-    <Controller
-      name="preferredState"
-      control={control}
-      defaultValue=""
-      render={({ field }) => (
-        <TextField
-          {...field}
-          select
-          fullWidth
-          label="Preferred State"
-          variant="outlined"
-          disabled={watch("preferredLocationType") !== "domestic"} // Enable only if Domestic
-          error={!!errors.preferredState}
-          helperText={errors.preferredState?.message || " "}
-          onChange={(e) => {
-            field.onChange(e);
-            setValue("preferredDistrict", "");
-            setValue("preferredCity", "");
-          }}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
-            },
-          }}
-        >
-          <MenuItem value="">Select State</MenuItem>
-          {preferredStates.map((state) => (
-            <MenuItem key={state} value={state}>
-              {state}
-            </MenuItem>
-          ))}
-        </TextField>
-      )}
-    />
-  </Grid>
+          <Controller
+            name="preferredState"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <TextField
+                {...field}
+                select
+                fullWidth
+                label={
+                  preferredLocationType === "international"
+                    ? "Country"
+                    : "Preferred State"
+                }
+                variant="outlined"
+                disabled={preferredLocationType === ""}
+                error={!!errors.preferredState}
+                helperText={errors.preferredState?.message || " "}
+                onChange={e => {
+                  field.onChange(e);
+                  setValue("preferredDistrict", "");
+                  setValue("preferredCity", "");
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "8px",
+                  },
+                }}
+              >
+                <MenuItem value="">
+                  Select {preferredLocationType === "international" ? "Country" : "State"}
+                </MenuItem>
+                {(preferredLocationType === "international"
+                  ? intlCountries
+                  : preferredStates
+                ).map(item => (
+                  <MenuItem key={item} value={item}>
+                    {item}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
+          />
+        </Grid>
 
-         <Grid item xs={12} md={4}>
-    <Controller
-      name="preferredDistrict"
-      control={control}
-      defaultValue=""
-      render={({ field }) => (
-        <TextField
-          {...field}
-          select
-          fullWidth
-          label="Preferred District"
-          variant="outlined"
-          disabled={watch("preferredLocationType") !== "domestic" || !watch("preferredState")}
-          error={!!errors.preferredDistrict}
-          helperText={errors.preferredDistrict?.message || " "}
-          onChange={(e) => {
-            field.onChange(e);
-            setValue("preferredCity", "");
-          }}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
-            },
-          }}
-        >
-          <MenuItem value="">Select District</MenuItem>
-          {preferredDistricts.map((district) => (
-            <MenuItem key={district} value={district}>
-              {district}
-            </MenuItem>
-          ))}
-        </TextField>
-      )}
-    />
-  </Grid>
+        {/* Preferred District/State */}
+        <Grid item xs={12} md={4}>
+          <Controller
+            name="preferredDistrict"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <TextField
+                {...field}
+                select
+                fullWidth
+                label={
+                  preferredLocationType === "international"
+                    ? "State"
+                    : "Preferred District"
+                }
+                variant="outlined"
+                disabled={
+                  preferredLocationType === "" ||
+                  !watch("preferredState")
+                }
+                error={!!errors.preferredDistrict}
+                helperText={errors.preferredDistrict?.message || " "}
+                onChange={e => {
+                  field.onChange(e);
+                  setValue("preferredCity", "");
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "8px",
+                  },
+                }}
+              >
+                <MenuItem value="">
+                  Select {preferredLocationType === "international" ? "State" : "District"}
+                </MenuItem>
+                {(preferredLocationType === "international"
+                  ? intlStates
+                  : preferredDistricts
+                ).map(item => (
+                  <MenuItem key={item} value={item}>
+                    {item}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
+          />
+        </Grid>
 
-          <Grid item xs={12} md={4}>
-    <Controller
-      name="preferredCity"
-      control={control}
-      defaultValue=""
-      render={({ field }) => (
-        <TextField
-          {...field}
-          select
-          fullWidth
-          label="Preferred City"
-          variant="outlined"
-          disabled={watch("preferredLocationType") !== "domestic" || !watch("preferredDistrict")}
-          error={!!errors.preferredCity}
-          helperText={errors.preferredCity?.message || " "}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
-            },
-          }}
-        >
-          <MenuItem value="">Select City</MenuItem>
-          {preferredCities.map((city) => (
-            <MenuItem key={city} value={city}>
-              {city}
-            </MenuItem>
-          ))}
-        </TextField>
-      )}
-    />
-  </Grid>
+        {/* Preferred City */}
+        <Grid item xs={12} md={4}>
+          <Controller
+            name="preferredCity"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <TextField
+                {...field}
+                select
+                fullWidth
+                label="Preferred City"
+                variant="outlined"
+                disabled={
+                  preferredLocationType === "" ||
+                  !watch("preferredDistrict")
+                }
+                error={!!errors.preferredCity}
+                helperText={errors.preferredCity?.message || " "}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "8px",
+                  },
+                }}
+              >
+                <MenuItem value="">Select City</MenuItem>
+                {(preferredLocationType === "international"
+                  ? intlCities
+                  : preferredCities
+                ).map(item => (
+                  <MenuItem key={item} value={item}>
+                    {item}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
+          />
+        </Grid>
   {/* International Country */}
   {/* <Grid item xs={12} md={4}>
     <Controller
@@ -1722,8 +2128,206 @@ useEffect(() => {
                 )}
               />
             </Grid>
+            
           )}
-        </Grid></Grid>
+        </Grid>
+        
+        {watch("propertyType") === "Own Property" && (
+          
+   <Grid
+                       container
+                       spacing={2}
+                       sx={{
+                         display: "grid",
+                         gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+                         gap: 2,
+                         mt: 2
+                       }}
+                     >
+    {/* Property Country */}
+    <Grid item xs={12} md={3}>
+      <Controller
+        name="propertyCountry"
+        control={control}
+        rules={{
+          validate: value =>
+            watch("propertyType") === "Own Property"
+              ? !!value || "Country is required"
+              : true
+        }}
+        render={({ field }) => (
+          <Autocomplete
+            freeSolo
+            options={propertyCountries}
+            value={field.value === "" ? null : field.value}
+            onChange={(_, newValue) => {
+              field.onChange(newValue || "");
+              setValue("propertyState", "");
+              setValue("propertyCity", "");
+              clearErrors("propertyCountry");
+            }}
+            onInputChange={(_, newInputValue, reason) => {
+              if (reason === "input") {
+                field.onChange(newInputValue);
+                setValue("propertyState", "");
+                setValue("propertyCity", "");
+              }
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Property Country"
+                error={!!errors.propertyCountry}
+                helperText={errors.propertyCountry?.message}
+                variant="outlined"
+                fullWidth
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                  }
+                }}
+              />
+            )}
+          />
+        )}
+      />
+    </Grid>
+
+
+    {/* Property State */}
+    <Grid item xs={12} md={3}>
+      <Controller
+        name="propertyState"
+        control={control}
+        rules={{
+          validate: value =>
+            watch("propertyType") === "Own Property"
+              ? !!value || "State is required"
+              : true
+        }}
+        render={({ field }) => (
+          <Autocomplete
+            freeSolo
+            options={propertyStates}
+            value={field.value === "" ? null : field.value}
+            onChange={(_, newValue) => {
+              field.onChange(newValue || "");
+              setValue("propertyCity", "");
+              clearErrors("propertyState");
+            }}
+            onInputChange={(_, newInputValue, reason) => {
+              if (reason === "input") {
+                field.onChange(newInputValue);
+                setValue("propertyCity", "");
+              }
+            }}
+            disabled={!propertyCountries.length || !watch("propertyCountry")}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Property State"
+                error={!!errors.propertyState}
+                helperText={errors.propertyState?.message}
+                variant="outlined"
+                fullWidth
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                  }
+                }}
+              />
+            )}
+          />
+        )}
+      />
+    </Grid>
+
+    {/* Property District */}
+    {/* <Grid item xs={12} md={3}>
+     <Controller
+    name="propertyDistrict"
+    control={control}
+    rules={{ required: "District is required" }}
+    render={({ field }) => (
+      <Autocomplete
+        freeSolo
+        options={propertyDistricts}
+        value={field.value || ""}
+        onChange={(_, newValue) => {
+          field.onChange(newValue || "");
+          setValue("propertyCity", "");
+          clearErrors("propertyDistrict");
+        }}
+        onInputChange={(_, newInputValue, reason) => {
+          if (reason === "input") {
+            field.onChange(newInputValue);
+            setValue("propertyCity", "");
+          }
+        }}
+        disabled={!propertyStates.length || !watch("propertyState")}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Property District"
+            error={!!errors.propertyDistrict}
+            helperText={errors.propertyDistrict?.message}
+            variant="outlined"
+            fullWidth
+          />
+        )}
+      />
+    )}
+  />
+</Grid> */}
+
+    {/* Property City */}
+     <Grid item xs={12} md={3}>
+      <Controller
+        name="propertyCity"
+        control={control}
+        rules={{
+          validate: value =>
+            watch("propertyType") === "Own Property"
+              ? !!value || "City is required"
+              : true
+        }}
+        render={({ field }) => (
+          <Autocomplete
+            freeSolo
+            options={propertyCities}
+            value={field.value === "" ? null : field.value}
+            onChange={(_, newValue) => {
+              field.onChange(newValue || "");
+              clearErrors("propertyCity");
+            }}
+            onInputChange={(_, newInputValue, reason) => {
+              if (reason === "input") {
+                field.onChange(newInputValue);
+              }
+            }}
+            disabled={!propertyStates.length || !watch("propertyState")}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Property City"
+                error={!!errors.propertyCity}
+                helperText={errors.propertyCity?.message}
+                variant="outlined"
+                fullWidth
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                  }
+                }}
+              />
+            )}
+          />
+        )}
+      />
+    </Grid>
+  </Grid>
+)}
+        </Grid>
 
         {/* Add Preference Button */}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
@@ -1754,19 +2358,21 @@ useEffect(() => {
               <Table size="small" aria-label="added preferences table">
                 <TableHead>
                   <TableRow sx={{ bgcolor: '#7ad03a' }}>
-                    <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>#</TableCell>
-<TableCell sx={{  color: 'primary.contrastText' }}>Industry</TableCell>
-<TableCell sx={{  color: 'primary.contrastText' }}>Main Category</TableCell>
-<TableCell sx={{ color: 'primary.contrastText' }}>Sub Category</TableCell>
-            <TableCell sx={{ color: 'primary.contrastText' }}>Investment Range</TableCell>
-            <TableCell sx={{ color: 'primary.contrastText' }}>Preferred State</TableCell>
-            <TableCell sx={{  color: 'primary.contrastText' }}>Preferred District</TableCell>
-            <TableCell sx={{  color: 'primary.contrastText' }}>Preferred City</TableCell>
-                        <TableCell sx={{  color: 'primary.contrastText' }}>Investment Amount</TableCell>
-
-            <TableCell sx={{  color: 'primary.contrastText' }}>Property Type</TableCell>
-            <TableCell sx={{ color: 'primary.contrastText' }}>Property Size</TableCell>
-            <TableCell sx={{  color: 'primary.contrastText' }}>Actions</TableCell>
+            <TableCell sx={{ fontWeight: 'bold', color: 'primary.contrastText' }}>#</TableCell>
+            <TableCell sx={{ color: 'primary.contrastText' }}>Industry</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Main Category</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Sub Category</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Investment Range</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Preferred State</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Preferred District</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Preferred City</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Property Country</TableCell> 
+    <TableCell sx={{ color: 'primary.contrastText' }}>Property State</TableCell>   
+    <TableCell sx={{ color: 'primary.contrastText' }}>Property City</TableCell>    
+    <TableCell sx={{ color: 'primary.contrastText' }}>Investment Amount</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Property Type</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Property Size</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Actions</TableCell>
           </TableRow>
         </TableHead>
                 <TableBody>
@@ -1788,38 +2394,33 @@ useEffect(() => {
                   <Typography key={i}>{cat.child}</Typography>
                 ))}
               </TableCell>
-                      <TableCell>
-                {/* <Typography variant="subtitle2" fontWeight="bold">Range:</Typography> */}
-                <Typography>{pref.investmentAmount}</Typography>
-              </TableCell>
-              
-              
-              {/* Location */}
-              <TableCell>
-                {/* <Typography variant="subtitle2" fontWeight="bold">State:</Typography> */}
-                <Typography>{pref.preferredState}</Typography>
-              </TableCell>
-              
-              <TableCell>
-                {/* <Typography variant="subtitle2" fontWeight="bold">District:</Typography> */}
-                <Typography>{pref.preferredDistrict}</Typography>
-              </TableCell>
-              
-              <TableCell>
-                {/* <Typography variant="subtitle2" fontWeight="bold">City:</Typography> */}
-                <Typography>{pref.preferredCity}</Typography>
-              </TableCell>
-              
-              {/* Investment Amount */}
-              <TableCell>
-                {/* <Typography variant="subtitle2" fontWeight="bold">Amount:</Typography> */}
-                <Typography>{pref.investmentRange}</Typography>
-              </TableCell>
-              {/* Property */}
-              <TableCell>
-                {/* <Typography variant="subtitle2" fontWeight="bold">Type:</Typography> */}
-                <Typography>{pref.propertyType}</Typography>
-              </TableCell>
+                <TableCell>
+        <Typography>{pref.investmentAmount}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.preferredState}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.preferredDistrict}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.preferredCity}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.propertyCountry}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.propertyState}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.propertyCity}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.investmentRange}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>{pref.propertyType}</Typography>
+      </TableCell>
               
               <TableCell>
                 {/* <Typography variant="subtitle2" fontWeight="bold">Size:</Typography> */}
@@ -1905,6 +2506,7 @@ useEffect(() => {
           type="submit"
           variant="contained"
           size="large"
+          disabled={preferences.length === 0}
           sx={{
             width: { xs: '100%', sm: 'auto' },
             minWidth: '200px',
@@ -2107,6 +2709,9 @@ useEffect(() => {
   <Box> 
     <RegisterationMediaHandling />
   </Box>
+</Box>
+<Box>
+  <Footer/>
 </Box>
 </>
   );

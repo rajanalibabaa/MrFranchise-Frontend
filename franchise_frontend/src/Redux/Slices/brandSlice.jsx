@@ -123,7 +123,7 @@ export const viewApi = createAsyncThunk(
         }
       );
       console.log("viewres", res);
-      return res;
+      return res.data.data;
     } catch (error) {
       console.log(error);
     }
@@ -198,7 +198,7 @@ const brandSlice = createSlice({
         );
       })
       .addCase(viewApi.fulfilled, (state, action) => {
-        const { brandID } = action.payload;
+        const { brandID } = action.payload || {};
         state.brandID = brandID;
       })
 
@@ -208,7 +208,7 @@ const brandSlice = createSlice({
       })
       .addCase(fetchBrands.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = action.payload;
+        state.data = action.payload || [];
         state.filteredData = applyFiltersToBrands(
           action.payload,
           state.filters

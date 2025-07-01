@@ -53,6 +53,7 @@ import Footer from "../../../Components/Footers/Footer";
 import categories from "./BrandCategories";
 import BrandExpansionLocationDetails from "./BrandExpansionLocationDetails";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { HomeIcon } from "lucide-react";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
 const FORM_STEP_KEY = "brandRegistrationActiveStep";
@@ -135,32 +136,30 @@ const countries = [
 const initialFormData = {
   brandDetails: {
     fullName: "",
-    brandName: "",
-    ceoEmail: "",
-    ceoMobile: "",
-    ceoName: "",
-    managerName: "",
-    companyName: "",
     email: "",
-    secondaryEmail: "",
     mobileNumber: "",
-    country: "IN",
     whatsappNumber: "",
+    companyName: "",
+    brandName: "",
+    tagLine: "",
+    ceoMobile: "",
+    ceoEmail: "",
+    ceoName: "",
+    officeEmail: "",
+    officeMobile: "",
     headOfficeAddress: "",
+    country: "",
     state: "",
+    district: "",
     city: "",
     pincode: "",
-    establishedYear: "",
-    franchiseSinceYear: "",
-    brandCategories: [],
-    brandDescription: "",
-    expansionLocation: [],
     website: "",
     facebook: "",
     instagram: "",
     linkedin: "",
     gstNumber: "",
     pancardNumber: "",
+    awardText: [],
   },
   franchiseDetails: {
     brandCategories: {
@@ -182,55 +181,36 @@ const initialFormData = {
     trainingSupport: "",
     uniqueSellingPoints: [],
   },
-  //   expansionLocationDetails: {
-  //     currentOutletsLocatedAt: [
-  //   {
-  //     type: "domestic",
-  //     location: {
-  //       country: "",
-  //       state: "",
-  //       district: "",
-  //       city: ""
-  //     }
-  //   },
-  //   {
-  //     type: "international",
-  //     location: {
-  //       country: "",
-  //       state: "",
-  //       city: ""
-  //     }
-  //   }
-  // ],
-  // expansionLocations: [
-  //   {
-  //     type: "domestic",
-  //     location: {
-  //       country: '',
-  //       state: [],
-  //       district: [],
-  //       city: []
-  //     }
-  //   },
-  //   {
-  //     type: "international",
-  //     location: {
-  //       country: "",
-  //       state: [],
-  //       city: []
-  //     }
-  //   }
-  // ]
 
-  //   },
+  expansionLocationData: {
+    isInternationalExpansion: null,
+    currentOutletLocations: {
+      domestic: {
+        locations: [],
+      },
+      international: {
+        locations: [],
+      },
+    },
+    expansionLocations: {
+      domestic: {
+        locations: [],
+      },
+      international: {
+        locations: [],
+      },
+    },
+  },
+
   uploads: {
     franchisePromotionVideo: [],
-    // brandPromotionVideo: [],
     pancard: [],
     gstCertificate: [],
     brandLogo: [],
     exteriorOutlet: [],
     interiorOutlet: [],
+    awardDoc: [], // Added for awards section
+    businessPlan: [], // Added for business plan section
   },
 };
 
@@ -247,7 +227,7 @@ const BrandRegisterForm = () => {
     return savedData ? JSON.parse(savedData) : initialFormData;
   });
 
-  console.log("Form Data:", formData);
+  // console.log("Form Data:", formData);
 
   const [validationErrors, setValidationErrors] = useState({
     brandDetails: {},
@@ -387,67 +367,78 @@ const BrandRegisterForm = () => {
         setIsSubmitting(true);
         setSubmitSuccess(false);
 
-        // Your submit logic here
-        //form data to submit
         const formDataSend = new FormData();
 
+        // Append brand details
         formDataSend.append(
-          "personalDetails",
+          "brandDetails",
           JSON.stringify({
             fullName: formData.brandDetails.fullName,
-            email: formData.brandDetails.email,
-            mobileNumber: formData.brandDetails.mobileNumber,
+            brandName: formData.brandDetails.brandName,
             ceoEmail: formData.brandDetails.ceoEmail,
             ceoMobile: formData.brandDetails.ceoMobile,
             ceoName: formData.brandDetails.ceoName,
-            managerName: formData.brandDetails.managerName,
-            brandName: formData.brandDetails.brandName,
+            tagLine: formData.brandDetails.tagLine,
             companyName: formData.brandDetails.companyName,
+            email: formData.brandDetails.email,
+            mobileNumber: formData.brandDetails.mobileNumber,
             country:
               countries.find((c) => c.code === formData.brandDetails.country)
                 ?.name || formData.brandDetails.country,
-            pincode: formData.brandDetails.pincode,
+            whatsappNumber: formData.brandDetails.whatsappNumber,
+            officeEmail: formData.brandDetails.officeEmail,
+            officeMobile: formData.brandDetails.officeMobile,
             headOfficeAddress: formData.brandDetails.headOfficeAddress,
             state: formData.brandDetails.state,
+            district: formData.brandDetails.district,
             city: formData.brandDetails.city,
-            establishedYear: formData.brandDetails.establishedYear,
-            franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
-            brandCategories: formData.brandDetails.brandCategories,
-            brandDescription: formData.brandDetails.brandDescription,
-            expansionLocation: formData.brandDetails.expansionLocation,
-            pancardNumber: formData.brandDetails.pancardNumber,
-            gstNumber: formData.brandDetails.gstNumber,
+            pincode: formData.brandDetails.pincode,
             website: formData.brandDetails.website,
             facebook: formData.brandDetails.facebook,
             instagram: formData.brandDetails.instagram,
             linkedin: formData.brandDetails.linkedin,
+            gstNumber: formData.brandDetails.gstNumber,
+            pancardNumber: formData.brandDetails.pancardNumber,
+            awardText: formData.brandDetails.awardText || [], // Include award texts
           })
         );
+
+        // Append franchise details
         formDataSend.append(
           "franchiseDetails",
           JSON.stringify({
-            modelsOfFranchise: formData.franchiseDetails.fico,
+            brandCategories: formData.franchiseDetails.brandCategories,
+            brandDescription: formData.franchiseDetails.brandDescription,
+            fico: formData.franchiseDetails.fico,
+            establishedYear: formData.franchiseDetails.establishedYear,
+            franchiseSinceYear: formData.franchiseDetails.franchiseSinceYear,
             companyOwnedOutlets: formData.franchiseDetails.companyOwnedOutlets,
             franchiseOutlets: formData.franchiseDetails.franchiseOutlets,
             totalOutlets: formData.franchiseDetails.totalOutlets,
-            currentOutletsLocatedAt:
-              formData.franchiseDetails.currentOutletsLocatedAt,
-            internationalExpansion:
-              formData.franchiseDetails.internationalExpansion,
             aidFinancing: formData.franchiseDetails.aidFinancing,
-            requirementSupport: formData.franchiseDetails.requirementSupport,
-            staffTraining: formData.franchiseDetails.staffTraining,
-            staffRecruitment: formData.franchiseDetails.staffRecruitment,
-            agreementPeriod: formData.franchiseDetails.agreementPeriod,
-            statergicPlan: formData.franchiseDetails.statergicPlan,
-            operatingProcedure: formData.franchiseDetails.operatingProcedure,
-            finacialOperating: formData.franchiseDetails.finacialOperating,
-            marketingSales: formData.franchiseDetails.marketingSales,
-            agreementFranchise: formData.franchiseDetails.agreementFranchise,
+            franchiseDevelopment:
+              formData.franchiseDetails.franchiseDevelopment,
+            consultationOrAssistance:
+              formData.franchiseDetails.consultationOrAssistance,
+            trainingSupport: formData.franchiseDetails.trainingSupport,
+            uniqueSellingPoints: formData.franchiseDetails.uniqueSellingPoints,
           })
         );
-        formDataSend.append("brandDetails", JSON.stringify({}));
-        // Add files to formData
+
+        // Append expansion location data
+        formDataSend.append(
+          "expansionLocationData",
+          JSON.stringify({
+            isInternationalExpansion:
+              formData.expansionLocationData.isInternationalExpansion,
+            currentOutletLocations:
+              formData.expansionLocationData.currentOutletLocations,
+            expansionLocations:
+              formData.expansionLocationData.expansionLocations,
+          })
+        );
+
+        // Append all files
         const fileFields = {
           brandLogo: formData.uploads.brandLogo,
           gstCertificate: formData.uploads.gstCertificate,
@@ -455,64 +446,20 @@ const BrandRegisterForm = () => {
           exteriorOutlet: formData.uploads.exteriorOutlet,
           interiorOutlet: formData.uploads.interiorOutlet,
           franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
-          // brandPromotionVideo: formData.uploads.brandPromotionVideo,
+          awardDoc: formData.uploads.awardDoc || [], // Include award documents
+          businessPlan: formData.uploads.businessPlan,
         };
 
         Object.entries(fileFields).forEach(([fieldName, files]) => {
           if (files && files.length > 0) {
-            files.forEach((file) => {
+            files.forEach((file, index) => {
               formDataSend.append(fieldName, file);
             });
           }
         });
 
-        //   const apiData = {
-        //   personalDetails: {
-        //     fullName: formData.brandDetails.fullName,
-        //     email: formData.brandDetails.email,
-        //     mobileNumber: formData.brandDetails.mobileNumber,
-        //     brandName: formData.brandDetails.brandName,
-        //     companyName: formData.brandDetails.companyName,
-        //     country: countries.find(c => c.code === formData.brandDetails.country)?.name || formData.brandDetails.country,
-        //     pincode: formData.brandDetails.pincode,
-        //     headOfficeAddress: formData.brandDetails.headOfficeAddress,
-        //     state: formData.brandDetails.state,
-        //     city: formData.brandDetails.city,
-        //     establishedYear: formData.brandDetails.establishedYear,
-        //     franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
-        //     brandCategories: formData.brandDetails.brandCategories,
-        //     brandDescription: formData.brandDetails.brandDescription,
-        //     expansionLocation: formData.brandDetails.expansionLocation,
-        //     pancardNumber: formData.brandDetails.pancardNumber,
-        //     gstNumber: formData.brandDetails.gstNumber,
-        //     website: formData.brandDetails.website,
-        //     facebook: formData.brandDetails.facebook,
-        //     instagram: formData.brandDetails.instagram,
-        //     linkedin: formData.brandDetails.linkedin,
-        //   },
-        //   franchiseDetails: {
-        //             },
-        //   brandDetails: {
-        //     pancard: formData.uploads.pancard,
-        //     gstCertificate: formData.uploads.gstCertificate,
-        //     brandLogo: formData.uploads.brandLogo,
-        //     exterioroutlet: formData.uploads.exteriorOutlet,
-        //     interiorOutlet: formData.uploads.interiorOutlet,
-        //     franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
-        //     brandPromotionVideo: formData.uploads.brandPromotionVideo,
-        //   }
-        // };
-        console.log("fileFields.....:", formDataSend);
-
         const response = await axios.post(
-          // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
-          // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
-
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
-          // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
-          // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
-
           formDataSend,
           {
             headers: {
@@ -521,13 +468,6 @@ const BrandRegisterForm = () => {
           }
         );
 
-        console.log("response.data ====:", response);
-        console.log("response.data ====:", response.data.message);
-
-        // if (response.status !== 200 && response.status !== 201) {
-        //   throw new Error(response.data.message || "Submission failed");
-        // }
-
         if (response.status === 200) {
           setSubmitSuccess(true);
           setSnackbar({
@@ -535,30 +475,30 @@ const BrandRegisterForm = () => {
             message: "Form submitted successfully!",
             severity: "success",
           });
-        }
 
-        // Reset form after successful submission
-        localStorage.removeItem(FORM_DATA_KEY);
-        localStorage.removeItem(FORM_STEP_KEY);
-        setFormData(initialFormData);
-        setActiveStep(0);
-        setTimeout(() => {
-          navigate("/");
-        }, 1500);
+          // Reset form after successful submission
+          localStorage.removeItem(FORM_DATA_KEY);
+          localStorage.removeItem(FORM_STEP_KEY);
+          setFormData(initialFormData);
+          setActiveStep(0);
+          setTimeout(() => {
+            navigate("/");
+          }, 1500);
+        }
       } catch (error) {
-        // console.log("submission error", error);
+        // console.error("Submission error:", error);
         setSnackbar({
           open: true,
           message:
-            "Submission failed. Please try again. or email already exists",
+            error.response?.data?.message ||
+            "Submission failed. Please try again.",
           severity: "error",
         });
       } finally {
-        setIsSubmitting(false); // Stop loading regardless of success/failure
+        setIsSubmitting(false);
       }
     }
   };
-
   const handleCountryChange = (event) => {
     setFormData((prev) => ({
       ...prev,
@@ -619,6 +559,16 @@ const BrandRegisterForm = () => {
     }));
   };
 
+  const onAwardTextChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      brandDetails: {
+        ...prev.brandDetails,
+        pancardNumber: value,
+      },
+    }));
+  };
+
   const handlePreviewOpen = () => {
     setOpenPreview(true);
   };
@@ -626,10 +576,16 @@ const BrandRegisterForm = () => {
   const handlePreviewClose = () => {
     setOpenPreview(false);
   };
-  const handleLocationChange = (newData) => {
-    setFormData((prev) => ({ ...prev, ...newData }));
-  };
 
+  const handleLocationChange = (newData) => {
+    setFormData((prev) => ({
+      ...prev,
+      expansionLocationData: {
+        ...prev.expansionLocationData,
+        ...newData,
+      },
+    }));
+  };
   const handleCancel = () => {
     // Show confirmation dialog
     const confirmCancel = window.confirm(
@@ -689,10 +645,16 @@ const BrandRegisterForm = () => {
       case 2:
         return (
           <BrandExpansionLocationDetails
-            data={formData.expansionLocationDetails}
-            errors={validationErrors.fraexpansionLocationDetailsnchiseDetails}
-            onChange={handleLocationChange}
-            // onChange={handleExpansionLocationDetails}
+            data={formData.expansionLocationData}
+            onChange={(newData) =>
+              setFormData((prev) => ({
+                ...prev,
+                expansionLocationData: {
+                  ...prev.expansionLocationData,
+                  ...newData,
+                },
+              }))
+            }
           />
         );
       case 3:
@@ -703,6 +665,10 @@ const BrandRegisterForm = () => {
             onChange={handleUploadsChange}
             gstNumber={formData.brandDetails.gstNumber}
             pancardNumber={formData.brandDetails.pancardNumber}
+            awardText={formData.brandDetails.awardText}
+            onAwardTextChange={(texts) =>
+              handleBrandDetailsChange({ awardText: texts })
+            }
             onGstNumberChange={handleGstNumberChange}
             onPancardNumberChange={handlePancardNumberChange}
           />
@@ -1260,8 +1226,6 @@ const BrandRegisterForm = () => {
     );
   };
 
-  
-
   return (
     <>
       <Box
@@ -1314,7 +1278,7 @@ const BrandRegisterForm = () => {
                 },
               }}
             >
-              <ArrowBackIcon />
+              <HomeIcon />
             </Button>
 
             {/* Stepper ==> To Navigate The Particular Page */}
@@ -1341,35 +1305,7 @@ const BrandRegisterForm = () => {
                   </StepLabel>
                 </Step>
               ))}
-              <Toolbar sx={{ justifyContent: "flex-end" }}>
-                <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
-                  <Select
-                    value={formData.brandDetails.country}
-                    onChange={handleCountryChange}
-                    displayEmpty
-                    inputProps={{ "aria-label": "Select country" }}
-                  >
-                    {countries.map((country) => (
-                      <MenuItem key={country.code} value={country.code}>
-                        {country.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Toolbar>
             </Stepper>
-
-            <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
-              <Box width="30%">
-                {" "}
-                {activeStep >= 0 && renderSelectedCategories()}
-              </Box>
-              <Box width="25%">
-                {" "}
-                {activeStep >= 0 && renderExpansionLocations()}
-              </Box>
-              <Box width="45%"> {activeStep >= 1 && renderFicoModels()}</Box>
-            </Box>
           </Box>
 
           <Box
