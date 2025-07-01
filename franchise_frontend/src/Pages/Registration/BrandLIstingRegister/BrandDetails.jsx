@@ -64,7 +64,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   //     verified: false,
   //   },
   // });
-  
+
   const formData = {
     companyName: "",
     brandName: "",
@@ -1123,13 +1123,13 @@ useEffect(() => {
           <TextField
             fullWidth
             label="Tagline"
-            name="Tagline"
-            value={formData.Tagline || ""}
+            name="tagLine"
+            value={formData.tagLine || ""}
             onChange={handleChange}
             variant="outlined"
             size="medium"
-            error={!!errors.Tagline}
-            helperText={errors.Tagline}
+            error={!!errors.tagLine}
+            helperText={errors.tagLine}
             required
           />
         </Grid>
