@@ -84,10 +84,17 @@ const Uploads = ({
   onGstNumberChange,
   onPancardNumberChange,
 }) => {
-  const [awardsData, setAwardsData] = useState([]);
+
   const theme = useTheme();
   const safeData = data || {};
   const safeOnChange = onChange || (() => {});
+
+  const [awardsData, setAwardsData] = useState(safeData.awards || []);
+  const [currentAward, setCurrentAward] = useState({
+    text: '',
+    documents: []
+  });
+
 
   const handleFileChange =
     (field, options = {}) =>
@@ -142,25 +149,55 @@ const Uploads = ({
       return "";
     }
   };
-
-  const handleAddAward = () => {
-    const awardData = {
-      awardsText: safeData.awardsText || '',
-      awardsDocuments: safeData.awardsDocuments || []
-    };
-    
-    setAwardsData(prev => [...prev, awardData]);
-    
-    // Clear the form after submission
-    safeOnChange({ 
-      awardsText: '',
-      awardsDocuments: [] 
-    });
+  
+  const handleAwardTextChange = (e) => {
+    setCurrentAward(prev => ({
+      ...prev,
+      text: e.target.value
+    }));
   };
 
-  const handleAwardRemove = (index) => {
-    setAwardsData(prevAwards => prevAwards.filter((_, i) => i !== index));
+  const handleAwardFileChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      setCurrentAward(prev => ({
+        ...prev,
+        documents: files // Store the file object
+      }));
+    }
   };
+
+ const handleAddAward = () => {
+  if (!currentAward.text || currentAward.documents.length === 0) return;
+  
+  const newAward = {
+    text: currentAward.text,
+    documents: currentAward.documents
+  };
+
+  // Update local state
+  const updatedAwards = [...awardsData, newAward];
+  setAwardsData(updatedAwards);
+
+  // Update parent state
+  safeOnChange({ 
+    awards: updatedAwards,
+    awardsText: '',
+    awardsDocuments: []
+  });
+
+  // Reset form
+  setCurrentAward({
+    text: '',
+    documents: []
+  });
+};
+
+const handleAwardRemove = (index) => {
+  const updatedAwards = awardsData.filter((_, i) => i !== index);
+  setAwardsData(updatedAwards);
+  safeOnChange({ awards: updatedAwards });
+};
 
   if (!data) {
     return (
@@ -663,136 +700,103 @@ const Uploads = ({
 
       {/* Section 4: Awards & Recognitions */}
       <StyledPaper>
-        <SectionTitle variant="h6">
-          Awards & Recognitions
-          <Tooltip title={
-                          <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
-                            <span style={{ fontWeight: "bold" }}>Awards: </span>
-                            You can list up to 5 awards or recognitions.
-                          </span>
-                        }
-                        placement="right-start"
-                        arrow
-                        enterTouchDelay={0} // makes it responsive on mobile too
-                      >
-                        <IconButton
-                          size="small"
-                          sx={{
-                            // p: 0.8,
-                            color: "warning.main",
-                            // backgroundColor: 'info.light',
-                            "&:hover": {
-                              backgroundColor: "info.main",
-                              color: "white",
-                            },
-                            marginLeft: "5px",
-                            // borderRadius: '50%',
-                          }}
-                        >
-                          <InfoOutlined fontSize="medium" />
-                        </IconButton>
-                      </Tooltip>{" "}
-        </SectionTitle>
-        
-        <Grid   display={"flex"} flexDirection={"row"} justifyContent={"space-between"}>
-          <Grid item xs={12} md={6}>
-            <TextField
-              label="Award Description"
-            size="large"
-                         
-              value={safeData.awardsText || ""}
-              onChange={(e) => safeOnChange({ awardsText: e.target.value })}
-              multiline
-              rows={2}
-              sx={{ mb: { xs: 2, md: 0 },width:'95vh' }}
-            />
-          </Grid>
-          
-          <Grid item xs={12} md={4} mt={1}>
-            
-            <UploadButton
-              component="label"
-              variant="outlined"
-              fullWidth
-                              color="success"
-
-              startIcon={<CloudUpload />}
-            >
-              Upload (PDF JPEG, PNG)
-              
-              <VisuallyHiddenInput
-                type="file"
-                accept=".pdf,.doc,.docx,image/jpeg,image/png"
-                onChange={handleFileChange("awardsDocuments", {
-                  maxFiles: 1,
-                  allowedTypes: [
-                    "application/pdf",
-                    "application/msword",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    "image/jpeg",
-                    "image/png"
-                  ],
-                  maxSize: 1,
-                })}
-              />
-            </UploadButton>
-            
-          </Grid>
-          
-          <Grid item xs={12} md={2} mt={1}>
-            <Button
-              variant="contained"
-                              color="success"
-
-              // fullWidth
-              sx={{ height: 56 }}
-              disabled={
-                !safeData.awardsText ||
-                !safeData.awardsDocuments ||
-                safeData.awardsDocuments.length === 0
-              }
-              onClick={handleAddAward}
-            >
-              Add Award
-            </Button>
-          </Grid>
-        </Grid>
-        
-        {awardsData.length > 0 && (
-          <Box sx={{ mt: 3 }}>
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Description</TableCell>
-                    <TableCell>Document</TableCell>
-                    <TableCell align="right">Remove</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {awardsData.map((award, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{award.awardsText}</TableCell>
-                      <TableCell>
-                        {award.awardsDocuments?.[0]?.name || 'No document'}
-                      </TableCell>
-                      <TableCell align="right">
-                        <IconButton 
-                          onClick={() => handleAwardRemove(index)}
-                          color="error"
-                          size="small"
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        )}
-      </StyledPaper>
+  <SectionTitle variant="h6">
+    Awards & Recognitions
+    <Tooltip title={
+      <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+        <span style={{ fontWeight: "bold" }}>Awards: </span>
+        You can list up to 5 awards or recognitions.
+      </span>
+    } placement="right-start" arrow enterTouchDelay={0}>
+      <IconButton size="small" sx={{ color: "warning.main", "&:hover": { backgroundColor: "info.main", color: "white" }, marginLeft: "5px" }}>
+        <InfoOutlined fontSize="medium" />
+      </IconButton>
+    </Tooltip>
+  </SectionTitle>
+  
+  <Grid display={"flex"} flexDirection={"row"} justifyContent={"space-between"}>
+    <Grid item xs={12} md={6}>
+      <TextField
+        label="Award Description"
+        size="large"
+        value={currentAward.text}
+        onChange={handleAwardTextChange}
+        multiline
+        rows={2}
+        sx={{ mb: { xs: 2, md: 0 }, width: '95vh' }}
+      />
+    </Grid>
+    
+    <Grid item xs={12} md={4} mt={1}>
+      <UploadButton
+        component="label"
+        variant="outlined"
+        fullWidth
+        color="success"
+        startIcon={<CloudUpload />}
+      >
+        Upload (PDF JPEG, PNG)
+        <VisuallyHiddenInput
+          type="file"
+          accept=".pdf,.doc,.docx,image/jpeg,image/png"
+          onChange={handleAwardFileChange}
+        />
+      </UploadButton>
+      {currentAward.documents.length > 0 && (
+        <Typography variant="caption">
+          {currentAward.documents[0].name}
+        </Typography>
+      )}
+    </Grid>
+    
+    <Grid item xs={12} md={2} mt={1}>
+      <Button
+        variant="contained"
+        color="success"
+        sx={{ height: 56 }}
+        disabled={!currentAward.text || currentAward.documents.length === 0}
+        onClick={handleAddAward}
+      >
+        Add Award
+      </Button>
+    </Grid>
+  </Grid>
+  
+  {awardsData.length > 0 && (
+    <Box sx={{ mt: 3 }}>
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>Description</TableCell>
+              <TableCell>Document</TableCell>
+              <TableCell align="right">Remove</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {awardsData.map((award, index) => (
+              <TableRow key={index}>
+                <TableCell>{award.text}</TableCell>
+                <TableCell>
+                  {award.documents[0]?.name || 'No document'}
+                </TableCell>
+                <TableCell align="right">
+                  <IconButton 
+                    onClick={() => handleAwardRemove(index)}
+                    color="error"
+                    size="small"
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  )}
+</StyledPaper>
 
       {/* Section 5: Business Plan */}
       <StyledPaper>
