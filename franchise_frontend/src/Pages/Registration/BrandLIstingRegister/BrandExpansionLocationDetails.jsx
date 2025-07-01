@@ -2413,7 +2413,7 @@ const BrandExpansionLocationDetails = ({ data, onChange }) => {
   <RadioGroup
     row
     value={data?.isInternationalExpansion || ""}
-    sx={{ gap: 11, justifyContent: "start", ml: 15 }}
+    sx={{ gap: 11, justifyContent: "start", ml: 15.1 }}
     onChange={(e) => handleInternationalExpansionChange(e.target.value)} // 👈 no conversion to boolean
   >
     <FormControlLabel value="Yes" control={<Radio />} label="Yes" />

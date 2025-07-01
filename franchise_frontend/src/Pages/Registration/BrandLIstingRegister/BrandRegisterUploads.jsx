@@ -167,14 +167,14 @@ const Uploads = ({
   };
 
   const handleAddAward = () => {
-    if (!currentAward.text || !currentAward.document) return;
+    if (!currentAward.text || !currentAward.documents) return;
 
     // Update award text in parent
     const updatedAwardTexts = [...awardText, currentAward.text];
     onAwardTextChange(updatedAwardTexts);
 
     // Update award documents in parent
-    const updatedAwardDocs = [...(data.awardDoc || []), currentAward.document];
+    const updatedAwardDocs = [...(data.awardDoc || []), currentAward.documents];
     onChange({ awardDoc: updatedAwardDocs });
 
     // Reset form
@@ -704,21 +704,21 @@ const Uploads = ({
       <StyledPaper>
         <SectionTitle variant="h6">Awards & Recognitions</SectionTitle>
 
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
+        <Grid display={"flex"}  justifyContent={"space-between"} spacing={2}>
+          <Grid item xs={12} md={6} >
             <TextField
               label="Award Description"
-              fullWidth
+              sx={{width:'100vh'}}
               value={currentAward.text}
               onChange={handleAwardTextChange}
             />
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={4} mt={1}>
             <Button
               component="label"
               variant="outlined"
-              fullWidth
+              size="large"
               startIcon={<CloudUpload />}
             >
               Upload Document
@@ -728,19 +728,19 @@ const Uploads = ({
                 onChange={handleAwardFileChange}
               />
             </Button>
-            {currentAward.document && (
+            {currentAward.documents && (
               <Typography variant="caption">
-                {currentAward.document.name}
+                {currentAward.documents.name}
               </Typography>
             )}
           </Grid>
 
-          <Grid item xs={12} md={2}>
+          <Grid item xs={12} mt={1} md={2}>
             <Button
               variant="contained"
-              fullWidth
+              size="large"
               onClick={handleAddAward}
-              disabled={!currentAward.text || !currentAward.document}
+              disabled={!currentAward.text || !currentAward.documents}
             >
               Add Award
             </Button>

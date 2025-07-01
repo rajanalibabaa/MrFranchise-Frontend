@@ -204,7 +204,8 @@ function Navbar() {
        <Box sx={{ 
           display: "flex", 
           flexWrap: "wrap",
-          ml: "60px", 
+          ml: "40px", 
+          
           gap: isMobile ? 0.5 : 1,
           position: 'relative',
           zIndex: 1
@@ -227,6 +228,7 @@ function Navbar() {
                 }
                 size="small"
                 sx={{ 
+                  fontSize: isMobile ? '0.75rem' : '0.875rem',
                   textTransform: 'none',
                   color: '#ff9800',
                   '&:hover': {

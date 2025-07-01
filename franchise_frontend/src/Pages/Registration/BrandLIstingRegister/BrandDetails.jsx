@@ -595,7 +595,7 @@ useEffect(() => {
               ) : (
                 <Button
                   variant="outlined"
-                  size="medium"
+                  size="small"
                   onClick={() => handleVerificationDialog("mobileNumber", true)}
                   disabled={
                     !data.mobileNumber || verificationState.mobileNumber.loading
@@ -908,7 +908,7 @@ useEffect(() => {
                   ) : (
                     <Button
                       variant="outlined"
-                      size="medium"
+                      size="small"
                       onClick={() => handleVerificationDialog("email", true)}
                       disabled={!data.email || verificationState.email.loading}
                       startIcon={
@@ -976,6 +976,7 @@ useEffect(() => {
               </Button>
               <Button
                 variant="contained"
+                size="small"
                 onClick={() => handleVerifyOtp("email")}
                 disabled={
                   otpInput.length !== 6 || verificationState.email.loading

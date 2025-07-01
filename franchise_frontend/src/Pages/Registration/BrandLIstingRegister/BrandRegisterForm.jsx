@@ -227,7 +227,7 @@ const BrandRegisterForm = () => {
     return savedData ? JSON.parse(savedData) : initialFormData;
   });
 
-  console.log("Form Data:", formData);
+  // console.log("Form Data:", formData);
 
   const [validationErrors, setValidationErrors] = useState({
     brandDetails: {},
@@ -459,7 +459,7 @@ const BrandRegisterForm = () => {
         });
 
         const response = await axios.post(
-          "http://localhost:5000/api/v1/brandlisting/createBrandListing",
+          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {
@@ -486,7 +486,7 @@ const BrandRegisterForm = () => {
           }, 1500);
         }
       } catch (error) {
-        console.error("Submission error:", error);
+        // console.error("Submission error:", error);
         setSnackbar({
           open: true,
           message:
