@@ -53,6 +53,7 @@ import Footer from "../../../Components/Footers/Footer";
 import categories from "./BrandCategories";
 import BrandExpansionLocationDetails from "./BrandExpansionLocationDetails";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { HomeIcon } from "lucide-react";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
 const FORM_STEP_KEY = "brandRegistrationActiveStep";
@@ -1238,7 +1239,7 @@ const handleLocationChange = (newData) => {
                 },
               }}
             >
-              <ArrowBackIcon />
+              <HomeIcon />
             </Button>
 
             {/* Stepper ==> To Navigate The Particular Page */}
