@@ -141,14 +141,14 @@ const initialFormData = {
     whatsappNumber: "",
     companyName: "",
     brandName: "",
-    tagLine:"",
+    tagLine: "",
     ceoMobile: "",
     ceoEmail: "",
     ceoName: "",
-    officeEmail:"",
-    officeMobile:"",
+    officeEmail: "",
+    officeMobile: "",
     headOfficeAddress: "",
-    country:"",
+    country: "",
     state: "",
     district: "",
     city: "",
@@ -378,7 +378,7 @@ const BrandRegisterForm = () => {
             ceoEmail: formData.brandDetails.ceoEmail,
             ceoMobile: formData.brandDetails.ceoMobile,
             ceoName: formData.brandDetails.ceoName,
-            managerName: formData.brandDetails.managerName,
+            tagLine: formData.brandDetails.tagLine,
             companyName: formData.brandDetails.companyName,
             email: formData.brandDetails.email,
             mobileNumber: formData.brandDetails.mobileNumber,
@@ -386,8 +386,11 @@ const BrandRegisterForm = () => {
               countries.find((c) => c.code === formData.brandDetails.country)
                 ?.name || formData.brandDetails.country,
             whatsappNumber: formData.brandDetails.whatsappNumber,
+            officeEmail: formData.brandDetails.officeEmail,
+            officeMobile: formData.brandDetails.officeMobile,
             headOfficeAddress: formData.brandDetails.headOfficeAddress,
             state: formData.brandDetails.state,
+            district: formData.brandDetails.district,
             city: formData.brandDetails.city,
             pincode: formData.brandDetails.pincode,
             website: formData.brandDetails.website,
@@ -1303,8 +1306,6 @@ const BrandRegisterForm = () => {
                 </Step>
               ))}
             </Stepper>
-
-           
           </Box>
 
           <Box
