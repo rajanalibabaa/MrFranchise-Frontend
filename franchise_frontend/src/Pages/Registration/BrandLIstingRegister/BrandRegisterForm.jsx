@@ -137,18 +137,21 @@ const countries = [
 const initialFormData = {
   brandDetails: {
     fullName: "",
-    brandName: "",
-    ceoEmail: "",
-    ceoMobile: "",
-    ceoName: "",
-    managerName: "",
-    companyName: "",
     email: "",
     mobileNumber: "",
-    country: "IN",
     whatsappNumber: "",
+    companyName: "",
+    brandName: "",
+    tagLine:"",
+    ceoMobile: "",
+    ceoEmail: "",
+    ceoName: "",
+    officeEmail:"",
+    officeMobile:"",
     headOfficeAddress: "",
+    country:"",
     state: "",
+    district: "",
     city: "",
     pincode: "",
     website: "",
@@ -424,7 +427,6 @@ const BrandRegisterForm = () => {
         console.log("formDataSend :",formDataSend)
 
         const response = await axios.post(
-          // "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
           "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
