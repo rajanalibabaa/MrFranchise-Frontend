@@ -29,7 +29,7 @@ const validateBrandDetails = (data) => {
   // Brand Information
   if (isEmpty(data.companyName)) errors.companyName = "Company name is required";
   if (isEmpty(data.brandName)) errors.brandName = "Brand name is required";
-    if (isEmpty(data.brandName)) errors.Tagline = "Brand name is required";
+    if (isEmpty(data.tagLine)) errors.tagLine = "TagLine is required";
   
   // CEO Information
   if (isEmpty(data.ceoName)) errors.ceoName = "CEO name is required";
@@ -49,6 +49,12 @@ const validateBrandDetails = (data) => {
   // Office Information
   if (isEmpty(data.headOfficeAddress)) {
     errors.headOfficeAddress = "Head office address is required";
+  }
+    if (isEmpty(data.officeemail)) {
+    errors.officeEmail = " Office Email is required";
+  }
+    if (isEmpty(data.officeMobile)) {
+    errors.officeMobile = " Office Mobile Number is required";
   }
   
   if (isEmpty(data.country)) errors.country = "Country is required";
@@ -84,21 +90,8 @@ const validateBrandDetails = (data) => {
     errors.establishedYear = "Year cannot be in the future";
   }
   
-  if (isEmpty(data.franchiseSinceYear)) {
-    errors.franchiseSinceYear = "Franchise since year is required";
-  } else if (!/^\d{4}$/.test(data.franchiseSinceYear)) {
-    errors.franchiseSinceYear = "Year must be 4 digits";
-  } else if (parseInt(data.franchiseSinceYear) > new Date().getFullYear()) {
-    errors.franchiseSinceYear = "Year cannot be in the future";
-  } else if (
-    data.establishedYear &&
-    parseInt(data.franchiseSinceYear) < parseInt(data.establishedYear)
-  ) {
-    errors.franchiseSinceYear = "Cannot be before established year";
-  }
-  
   // Website validation if provided
-  if (data.website && !isEmpty(data.website)) {
+  if ( isEmpty(data.website)) {
     if (!/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(data.website)) {
       errors.website = "Invalid website URL";
     }
