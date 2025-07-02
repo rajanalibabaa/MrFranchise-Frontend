@@ -260,6 +260,105 @@ const validateFranchiseDetails = (data) => {
     return errors;
   };
 
-export { validateBrandDetails, validateFranchiseDetails,validateExpansionLocationDetails };
+
+  const validateUploadsDetails = (data) => {
+  const errors = {};
+  const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  const allowedDocTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+  const allowedVideoTypes = ['video/mp4', 'video/quicktime'];
+
+  // Validate brand logo
+  if (!data.brandLogo || data.brandLogo.length === 0) {
+    errors.brandLogo = "Brand logo is required";
+  } else if (!allowedImageTypes.includes(data.brandLogo[0].type)) {
+    errors.brandLogo = "Only JPEG, PNG or GIF images are allowed";
+  } else if (data.brandLogo[0].size > 5 * 1024 * 1024) { // 5MB
+    errors.brandLogo = "Image size should be less than 5MB";
+  }
+
+  // Validate PAN card
+  if (!data.pancard || data.pancard.length === 0) {
+    errors.pancard = "PAN card document is required";
+  } else if (!allowedDocTypes.includes(data.pancard[0].type)) {
+    errors.pancard = "Only PDF, JPEG or PNG files are allowed";
+  } else if (data.pancard[0].size > 5 * 1024 * 1024) { // 5MB
+    errors.pancard = "File size should be less than 5MB";
+  }
+
+  // Validate GST certificate
+  if (!data.gstCertificate || data.gstCertificate.length === 0) {
+    errors.gstCertificate = "GST certificate is required";
+  } else if (!allowedDocTypes.includes(data.gstCertificate[0].type)) {
+    errors.gstCertificate = "Only PDF, JPEG or PNG files are allowed";
+  } else if (data.gstCertificate[0].size > 5 * 1024 * 1024) { // 5MB
+    errors.gstCertificate = "File size should be less than 5MB";
+  }
+
+  // Validate exterior outlet images
+  if (!data.exteriorOutlet || data.exteriorOutlet.length === 0) {
+    errors.exteriorOutlet = "At least one exterior outlet image is required";
+  } else {
+    data.exteriorOutlet.forEach((file, index) => {
+      if (!allowedImageTypes.includes(file.type)) {
+        if (!errors.exteriorOutlet) errors.exteriorOutlet = [];
+        errors.exteriorOutlet[index] = "Only JPEG, PNG or GIF images are allowed";
+      } else if (file.size > 5 * 1024 * 1024) {
+        if (!errors.exteriorOutlet) errors.exteriorOutlet = [];
+        errors.exteriorOutlet[index] = "Image size should be less than 5MB";
+      }
+    });
+  }
+
+  // Validate interior outlet images
+  if (!data.interiorOutlet || data.interiorOutlet.length === 0) {
+    errors.interiorOutlet = "At least one interior outlet image is required";
+  } else {
+    data.interiorOutlet.forEach((file, index) => {
+      if (!allowedImageTypes.includes(file.type)) {
+        if (!errors.interiorOutlet) errors.interiorOutlet = [];
+        errors.interiorOutlet[index] = "Only JPEG, PNG or GIF images are allowed";
+      } else if (file.size > 5 * 1024 * 1024) {
+        if (!errors.interiorOutlet) errors.interiorOutlet = [];
+        errors.interiorOutlet[index] = "Image size should be less than 5MB";
+      }
+    });
+  }
+
+  // Validate promotion video (optional)
+  if (data.franchisePromotionVideo && data.franchisePromotionVideo.length > 0) {
+    if (!allowedVideoTypes.includes(data.franchisePromotionVideo[0].type)) {
+      errors.franchisePromotionVideo = "Only MP4 or MOV videos are allowed";
+    } else if (data.franchisePromotionVideo[0].size > 50 * 1024 * 1024) { // 50MB
+      errors.franchisePromotionVideo = "Video size should be less than 50MB";
+    }
+  }
+
+  // Validate award documents (optional)
+  if (data.awardDoc && data.awardDoc.length > 0) {
+    data.awardDoc.forEach((file, index) => {
+      if (!allowedDocTypes.includes(file.type)) {
+        if (!errors.awardDoc) errors.awardDoc = [];
+        errors.awardDoc[index] = "Only PDF, JPEG or PNG files are allowed";
+      } else if (file.size > 5 * 1024 * 1024) {
+        if (!errors.awardDoc) errors.awardDoc = [];
+        errors.awardDoc[index] = "File size should be less than 5MB";
+      }
+    });
+  }
+
+  // Validate business plan (optional)
+  if (data.businessPlan && data.businessPlan.length > 0) {
+    if (!allowedDocTypes.includes(data.businessPlan[0].type)) {
+      errors.businessPlan = "Only PDF, JPEG or PNG files are allowed";
+    } else if (data.businessPlan[0].size > 10 * 1024 * 1024) { // 10MB
+      errors.businessPlan = "File size should be less than 10MB";
+    }
+  }
+
+  return errors;
+};
+  
+
+export { validateBrandDetails, validateFranchiseDetails,validateExpansionLocationDetails,validateUploadsDetails };
 
 
