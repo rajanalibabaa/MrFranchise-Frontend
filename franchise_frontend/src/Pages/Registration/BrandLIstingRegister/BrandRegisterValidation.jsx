@@ -26,7 +26,7 @@ const validateBrandDetails = (data) => {
   //   errors.whatsappNumber = "Invalid WhatsApp number format";
   // }
   
-  // Brand Information
+  // // Brand Information
   // if (isEmpty(data.companyName)) errors.companyName = "Company name is required";
   // if (isEmpty(data.brandName)) errors.brandName = "Brand name is required";
   //   if (isEmpty(data.tagLine)) errors.tagLine = "TagLine is required";
@@ -46,13 +46,11 @@ const validateBrandDetails = (data) => {
   //   errors.ceoMobile = "Invalid CEO mobile number format";
   // }
   
-  // Office Information
+  // // Office Information
   // if (isEmpty(data.headOfficeAddress)) {
   //   errors.headOfficeAddress = "Head office address is required";
   // }
-  //   if (isEmpty(data.officeemail)) {
-  //   errors.officeEmail = " Office Email is required";
-  // }
+  
   //   if (isEmpty(data.officeMobile)) {
   //   errors.officeMobile = " Office Mobile Number is required";
   // }
@@ -90,7 +88,7 @@ const validateBrandDetails = (data) => {
   //   errors.establishedYear = "Year cannot be in the future";
   // }
   
-  // Website validation if provided
+  // // Website validation if provided
   // if ( isEmpty(data.website)) {
   //   if (!/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(data.website)) {
   //     errors.website = "Invalid website URL";
@@ -103,10 +101,53 @@ const validateBrandDetails = (data) => {
 // Validation for Franchise Details
 const validateFranchiseDetails = (data) => {
   const errors = {};
-  
-//   // // Validate FICO models
+
+//   // Brand Categories Validation
+//   if (!data.brandCategories?.main) {
+//     errors.mainCategory = "Industry is required";
+//   }
+//   if (!data.brandCategories?.sub) {
+//     errors.subCategory = "Main category is required";
+//   }
+//   if (!data.brandCategories?.child) {
+//     errors.childCategory = "Sub category is required";
+//   }
+
+//   // Establishment & Franchise Year Validation
+//   if (!data.establishedYear) {
+//     errors.establishedYear = "Year commenced operations is required";
+//   } else if (isNaN(data.establishedYear) ) {
+//     errors.establishedYear = "Must be a valid year";
+//   } else if (data.establishedYear > new Date().getFullYear()) {
+//     errors.establishedYear = "Cannot be in the future";
+//   }
+
+//   if (!data.franchiseSinceYear) {
+//     errors.franchiseSinceYear = "Year commenced franchising is required";
+//   } else if (isNaN(data.franchiseSinceYear)) {
+//     errors.franchiseSinceYear = "Must be a valid year";
+//   } else if (data.franchiseSinceYear > new Date().getFullYear()) {
+//     errors.franchiseSinceYear = "Cannot be in the future";
+//   } else if (data.establishedYear && data.franchiseSinceYear < data.establishedYear) {
+//     errors.franchiseSinceYear = "Cannot be before establishment year";
+//   }
+
+//   // Franchise Network Validation
+//   if (!data.companyOwnedOutlets) {
+//     errors.companyOwnedOutlets = "Company owned outlets is required";
+//   } else if (isNaN(data.companyOwnedOutlets) || data.companyOwnedOutlets < 0) {
+//     errors.companyOwnedOutlets = "Must be a valid number";
+//   }
+
+//   if (!data.franchiseOutlets) {
+//     errors.franchiseOutlets = "Franchise outlets is required";
+//   } else if (isNaN(data.franchiseOutlets) || data.franchiseOutlets < 0) {
+//     errors.franchiseOutlets = "Must be a valid number";
+//   }
+
+//   // FICO Models Validation
 //   if (!data.fico || data.fico.length === 0) {
-//     errors.fico = "At least one FICO model is required";
+//     errors.fico = "At least one franchise model is required";
 //   } else {
 //     data.fico.forEach((model, index) => {
 //       if (!model.investmentRange) {
@@ -123,242 +164,136 @@ const validateFranchiseDetails = (data) => {
 //       }
 //       if (!model.franchiseFee) {
 //         errors[`fico[${index}].franchiseFee`] = "Franchise fee is required";
+//       } else if (isNaN(model.franchiseFee)) {
+//         errors[`fico[${index}].franchiseFee`] = "Must be a valid number";
 //       }
 //       if (!model.royaltyFee) {
 //         errors[`fico[${index}].royaltyFee`] = "Royalty fee is required";
 //       }
 //       if (!model.interiorCost) {
 //         errors[`fico[${index}].interiorCost`] = "Interior cost is required";
+//       } else if (isNaN(model.interiorCost)) {
+//         errors[`fico[${index}].interiorCost`] = "Must be a valid number";
 //       }
-//       if (!model.stockCost) {
-//         errors[`fico[${index}].stockCost`] = "Stock Investment is required";
+//       if (!model.stockInvestment) {
+//         errors[`fico[${index}].stockInvestment`] = "Stock investment is required";
+//       } else if (isNaN(model.stockInvestment)) {
+//         errors[`fico[${index}].stockInvestment`] = "Must be a valid number";
 //       }
 //       if (!model.otherCost) {
 //         errors[`fico[${index}].otherCost`] = "Other cost is required";
+//       } else if (isNaN(model.otherCost)) {
+//         errors[`fico[${index}].otherCost`] = "Must be a valid number";
+//       }
+//       if (!model.requireWorkingCapital) {
+//         errors[`fico[${index}].requireWorkingCapital`] = "Working capital is required";
+//       } else if (isNaN(model.requireWorkingCapital)) {
+//         errors[`fico[${index}].requireWorkingCapital`] = "Must be a valid number";
 //       }
 //       if (!model.roi) {
-//         errors[`fico[${index}].roi`] = "ROI period is required";
+//         errors[`fico[${index}].roi`] = "ROI is required";
+//       } else if (isNaN(model.roi)) {
+//         errors[`fico[${index}].roi`] = "Must be a valid number";
 //       }
-  
 //       if (!model.breakEven) {
 //         errors[`fico[${index}].breakEven`] = "Break even period is required";
 //       }
-//       if (!model.requireWorkingCapital) {
-//         errors[`fico[${index}].requireWorkingCapital`] = "Required working capital is required";
+//       if (!model.payBackPeriod) {
+//         errors[`fico[${index}].payBackPeriod`] = "Payback period is required";
 //       }
-//       if (!model.propertyType) {
-//         errors[`fico[${index}].propertyType`] = "Property type is required";
+//       if (!model.marginOnSales) {
+//         errors[`fico[${index}].marginOnSales`] = "Margin on sales is required";
+//       } else if (isNaN(model.marginOnSales)) {
+//         errors[`fico[${index}].marginOnSales`] = "Must be a valid number";
+//       }
+//       if (!model.agreementPeriod) {
+//         errors[`fico[${index}].agreementPeriod`] = "Agreement period is required";
 //       }
 //     });
 //   }
 
-//   // // Validate franchise network
-//   // if (!data.companyOwnedOutlets) {
-//   //   errors.companyOwnedOutlets = "Company owned outlets is required";
-//   // }
-//   // if (!data.franchiseOutlets) {
-//   //   errors.franchiseOutlets = "Franchise outlets is required";
-//   // }
-//   // if (!data.totalOutlets) {
-//   //   errors.totalOutlets = "Total outlets is required";
-//   // }
-//   // // Validate franchise network
-//   if (!data.companyOwnedOutlets) {
-//     errors.companyOwnedOutlets = "Company owned outlets is required";
+//   // Support and Training Validation
+//   if (!data.aidFinancing) {
+//     errors.aidFinancing = "Please specify if you provide aid in financing";
 //   }
-//   if (!data.franchiseOutlets) {
-//     errors.franchiseOutlets = "Franchise outlets is required";
+//   if (!data.franchiseDevelopment) {
+//     errors.franchiseDevelopment = "Please specify franchise development consultation";
 //   }
-//   if (!data.totalOutlets) {
-//     errors.totalOutlets = "Total outlets is required";
+//   if (!data.consultationOrAssistance) {
+//     errors.consultationOrAssistance = "Please specify marketing recruitment consultation";
 //   }
-//   if( !data.currentOutletsLocatedAt){
-//     errors.currentOutletsLocatedAt="Current outlets located at is required";
-//   }
-//   if(!data.internationalExpansion){
-//     errors.internationalExpansion="International expansion is required";
-//   }
-//   if(!data.aidFinancing){
-//     errors.aidFinancing="Aid financing is required";
+//   if (!data.trainingSupport || data.trainingSupport.length === 0) {
+//     errors.trainingSupport = "At least one training support option is required";
 //   }
 
-//   // // Validate support and training
-//   // if (!data.requirementSupport) {
-//   //   errors.requirementSupport = "Requirement support is required";
-//   // }
-//   // if (!data.trainingProvidedBy) {
-//   //   errors.trainingProvidedBy = "Training provider is required";
-//   // }
-//   // if (!data.agreementPeriod) {
-//   //   errors.agreementPeriod = "Agreement period is required";
-//   // }
-
-//   // Validate support and training
-//   if (!data.requirementSupport) {
-//     errors.requirementSupport = "Requirement support is required";
-//   }
-//   if (!data.staffTraining) {
-//     errors.staffTraining = "Staff Training provider is required";
-//   }
-//    if (!data.staffRecruitment) {
-//     errors.staffRecruitment = "Staff Recruitment provider is required";
-//   }
-//   if (!data.agreementPeriod) {
-//     errors.agreementPeriod = "Agreement period is required";
-//   }
-//   if (!data.statergicPlan){
-//     errors.statergicPlan="Field is required";
-//   }
-//   if (!data.operatingProcedure){
-//     errors.operatingProcedure="Field is required";
-//   }
-// if (!data.finacialOperating){
-//     errors.finacialOperating="Field is required";
+//  // Brand Description Validation
+//   if (!data.uniqueSellingPoints || data.uniqueSellingPoints.length === 0) {
+//     errors.uniqueSellingPoints = "At least one unique selling point is required";
+//   } else if (data.uniqueSellingPoints.length < 2) {
+//     errors.uniqueSellingPoints = "Please add at least 2 unique selling points";
+//   } else if (data.uniqueSellingPoints.length > 5) {
+//     errors.uniqueSellingPoints = "Maximum 5 unique selling points allowed";
+//   } else {
+//     // Validate each USP
+//     data.uniqueSellingPoints.forEach((usp, index) => {
+//       if (!usp.trim()) {
+//         errors[`uniqueSellingPoints[${index}]`] = "USP cannot be empty";
+//       } else if (usp.length < 10) {
+//         errors[`uniqueSellingPoints[${index}]`] = "USP is too short (min 10 chars)";
+//       } else if (usp.length > 100) {
+//         errors[`uniqueSellingPoints[${index}]`] = "USP is too long (max 100 chars)";
+//       }
+//     });
 //   }
 
-//   if (!data.marketingSales){
-//     errors.marketingSales="Field is required";
+//   // Brand Description Rich Text Validation
+//   if (!data.brandDescription) {
+//     errors.brandDescription = "Brand description is required";
+//   } else {
+//     // Strip HTML tags and validate text content
+//     const textContent = data.brandDescription.replace(/<[^>]*>/g, '').trim();
+//     if (textContent.length < 500) {
+//       errors.brandDescription = "Description must be at least 500 characters";
+//     } else if (textContent.length > 1000) {
+//       errors.brandDescription = "Description is too long (max 1500 characters)";
+//     }
 //   }
-//   if (!data.agreementFranchise){
-//     errors.agreementFranchise="Field is required";
-//   }
+
   return errors;
 };
 
- const validateExpansionLocationDetails = (data) => {
-    const errors = {};
-    // if (!data.currentOutletsLocatedAt || data.currentOutletsLocatedAt.length === 0) {
-    //   errors.currentOutletsLocatedAt = "Current outlets located at is required";
-    // }
-    // if (!data.expansionLocations || data.expansionLocations.length === 0) {
-    //   errors.expansionLocations = "Expansion locations are required";
-    // } else {
-    //   data.expansionLocations.forEach((location, index) => {
-    //     if (!location.type) {
-    //       errors[`expansionLocations.${index}.type`] = "Location type is required";
-    //     }
 
-    //     if (!location.location || !location.location.country) {
-    //       errors[`expansionLocations.${index}.location.country`] =
-    //         "Country is required";
-    //     }
-    //     if (!location.location || !location.location.state) {
-    //       errors[`expansionLocations.${index}.location.state`] =
-
-    //         "State is required";
-    //     }
-    //     if (!location.location || !location.location.city) {
-    //       errors[`expansionLocations.${index}.location.city`] =
-    //         "City is required";
-    //     }
-    //     if (!location.location || !location.location.district) {
-    //       errors[`expansionLocations.${index}.location.district`] =
-    //         "District is required";
-    //     }
-    //   });
-    // }
-    return errors;
-  };
-
-
-  const validateUploadsDetails = (data) => {
+const validateExpansionLocationDetails = (data) => {
   const errors = {};
-  const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
-  const allowedDocTypes = ['application/pdf', 'image/jpeg', 'image/png'];
-  const allowedVideoTypes = ['video/mp4', 'video/quicktime'];
+  
+  // // 1. Validate "Is your brand expanding internationally?" (required boolean)
+  // if (data?.isInternationalExpansion === null || data?.isInternationalExpansion === undefined) {
+  //   errors.isInternationalExpansion = "Please specify if your brand is expanding internationally";
+  // }
 
-  // Validate brand logo
-  if (!data.brandLogo || data.brandLogo.length === 0) {
-    errors.brandLogo = "Brand logo is required";
-  } else if (!allowedImageTypes.includes(data.brandLogo[0].type)) {
-    errors.brandLogo = "Only JPEG, PNG or GIF images are allowed";
-  } else if (data.brandLogo[0].size > 5 * 1024 * 1024) { // 5MB
-    errors.brandLogo = "Image size should be less than 5MB";
-  }
+  // // 2. Validate current outlet locations (must have either domestic or international)
+  // const hasCurrentDomestic = 
+  //   data?.currentOutletLocations?.domestic?.locations?.length > 0;
+  // const hasCurrentInternational = 
+  //   data?.currentOutletLocations?.international?.locations?.length > 0;
+  
+  // if (!hasCurrentDomestic && !hasCurrentInternational) {
+  //   errors.currentOutletLocations = "Please select at least one location (India or International) for current outlets";
+  // }
 
-  // Validate PAN card
-  if (!data.pancard || data.pancard.length === 0) {
-    errors.pancard = "PAN card document is required";
-  } else if (!allowedDocTypes.includes(data.pancard[0].type)) {
-    errors.pancard = "Only PDF, JPEG or PNG files are allowed";
-  } else if (data.pancard[0].size > 5 * 1024 * 1024) { // 5MB
-    errors.pancard = "File size should be less than 5MB";
-  }
-
-  // Validate GST certificate
-  if (!data.gstCertificate || data.gstCertificate.length === 0) {
-    errors.gstCertificate = "GST certificate is required";
-  } else if (!allowedDocTypes.includes(data.gstCertificate[0].type)) {
-    errors.gstCertificate = "Only PDF, JPEG or PNG files are allowed";
-  } else if (data.gstCertificate[0].size > 5 * 1024 * 1024) { // 5MB
-    errors.gstCertificate = "File size should be less than 5MB";
-  }
-
-  // Validate exterior outlet images
-  if (!data.exteriorOutlet || data.exteriorOutlet.length === 0) {
-    errors.exteriorOutlet = "At least one exterior outlet image is required";
-  } else {
-    data.exteriorOutlet.forEach((file, index) => {
-      if (!allowedImageTypes.includes(file.type)) {
-        if (!errors.exteriorOutlet) errors.exteriorOutlet = [];
-        errors.exteriorOutlet[index] = "Only JPEG, PNG or GIF images are allowed";
-      } else if (file.size > 5 * 1024 * 1024) {
-        if (!errors.exteriorOutlet) errors.exteriorOutlet = [];
-        errors.exteriorOutlet[index] = "Image size should be less than 5MB";
-      }
-    });
-  }
-
-  // Validate interior outlet images
-  if (!data.interiorOutlet || data.interiorOutlet.length === 0) {
-    errors.interiorOutlet = "At least one interior outlet image is required";
-  } else {
-    data.interiorOutlet.forEach((file, index) => {
-      if (!allowedImageTypes.includes(file.type)) {
-        if (!errors.interiorOutlet) errors.interiorOutlet = [];
-        errors.interiorOutlet[index] = "Only JPEG, PNG or GIF images are allowed";
-      } else if (file.size > 5 * 1024 * 1024) {
-        if (!errors.interiorOutlet) errors.interiorOutlet = [];
-        errors.interiorOutlet[index] = "Image size should be less than 5MB";
-      }
-    });
-  }
-
-  // Validate promotion video (optional)
-  if (data.franchisePromotionVideo && data.franchisePromotionVideo.length > 0) {
-    if (!allowedVideoTypes.includes(data.franchisePromotionVideo[0].type)) {
-      errors.franchisePromotionVideo = "Only MP4 or MOV videos are allowed";
-    } else if (data.franchisePromotionVideo[0].size > 50 * 1024 * 1024) { // 50MB
-      errors.franchisePromotionVideo = "Video size should be less than 50MB";
-    }
-  }
-
-  // Validate award documents (optional)
-  if (data.awardDoc && data.awardDoc.length > 0) {
-    data.awardDoc.forEach((file, index) => {
-      if (!allowedDocTypes.includes(file.type)) {
-        if (!errors.awardDoc) errors.awardDoc = [];
-        errors.awardDoc[index] = "Only PDF, JPEG or PNG files are allowed";
-      } else if (file.size > 5 * 1024 * 1024) {
-        if (!errors.awardDoc) errors.awardDoc = [];
-        errors.awardDoc[index] = "File size should be less than 5MB";
-      }
-    });
-  }
-
-  // Validate business plan (optional)
-  if (data.businessPlan && data.businessPlan.length > 0) {
-    if (!allowedDocTypes.includes(data.businessPlan[0].type)) {
-      errors.businessPlan = "Only PDF, JPEG or PNG files are allowed";
-    } else if (data.businessPlan[0].size > 10 * 1024 * 1024) { // 10MB
-      errors.businessPlan = "File size should be less than 10MB";
-    }
-  }
+  // // 3. Validate expansion locations (must have either domestic or international)
+  // const hasExpansionDomestic = 
+  //   data?.expansionLocations?.domestic?.locations?.length > 0;
+  // const hasExpansionInternational = 
+  //   data?.expansionLocations?.international?.locations?.length > 0;
+  
+  // if (!hasExpansionDomestic && !hasExpansionInternational) {
+  //   errors.expansionLocations = "Please select at least one location (India or International) for expansion";
+  // }
 
   return errors;
 };
-  
 
-export { validateBrandDetails, validateFranchiseDetails,validateExpansionLocationDetails,validateUploadsDetails };
+export { validateBrandDetails, validateFranchiseDetails ,validateExpansionLocationDetails};
 
 

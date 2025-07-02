@@ -50,6 +50,7 @@ import { Box } from "@mui/material";
 import Otherindustries from "./Components/Footers/QuickLinks/Otherindustries.jsx";
 import GlobalLoader from './Components/GLobalLoader.jsx';
 import Blogs from './Components/Footers/QuickLinks/Blogs.jsx';
+import BrandDetailsPage from './Pages/AllCategoryPage/BrandDetailsDialog.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -149,6 +150,7 @@ function App() {
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
           <Route path="/otherindustries" element={<Otherindustries/>}/>
           <Route path="/blogs" element={<Blogs />} />
+<Route path="/brand/:brandId" element={<BrandDetailsPage />} />
         </Routes>
       
     </>

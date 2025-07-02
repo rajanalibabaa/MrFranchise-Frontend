@@ -30,18 +30,18 @@ import {
   fetchBrands,
   setFilters,
   clearFilters,
-  openBrandDialog,
-  closeBrandDialog,
+  
   toggleLikeBrand,
   viewApi,
 } from "../../Redux/Slices/brandSlice";
-import BrandDetailsDialog from "./BrandDetailsDialog";
+// import BrandDetailsDialog from "./BrandDetailsDialog";
 import { useLocation } from "react-router-dom";
 import { Compare } from "@mui/icons-material";
 import BrandComparison from "./BrandComparison";
 import FilterPanel from "./FillterPannel.jsx";
 import BrandCard from "./BrandCard.jsx";
 // import axios from "axios";
+import BrandDetailsPage from "./BrandDetailsDialog.jsx";
 
 function BrandList() {
   const dispatch = useDispatch();
@@ -825,9 +825,8 @@ function BrandList() {
           </Box>
         </Box>
       </Drawer>
-      <BrandDetailsDialog
-        open={openDialog}
-        onClose={handleCloseDialog}
+      <BrandDetailsPage
+        
         brand={selectedBrand}
       /> */}
     </Container>

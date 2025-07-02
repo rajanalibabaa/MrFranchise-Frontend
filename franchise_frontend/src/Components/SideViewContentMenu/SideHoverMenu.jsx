@@ -25,10 +25,10 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  openBrandDialog,
-  closeBrandDialog,
-} from "../../Redux/Slices/brandSlice";
+// import {
+//   openBrandDialog,
+//   closeBrandDialog,
+// } from "../../Redux/Slices/brandSlice";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
