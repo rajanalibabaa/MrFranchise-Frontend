@@ -42,11 +42,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import BrandDetails from "./BrandDetails";
 import FranchiseDetails from "./FranchiseDetails";
 import Uploads from "../BrandLIstingRegister/BrandRegisterUploads";
-import {
-  validateBrandDetails,
-  validateExpansionLocationDetails,
-  validateFranchiseDetails,
-} from "./BrandRegisterValidation";
+// import {
+//   validateBrandDetails,
+//   validateExpansionLocationDetails,
+//   validateFranchiseDetails,
+//   validateExpansionLocationDetails
+// } from "./BrandRegisterValidation";
 import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -620,6 +621,7 @@ const BrandRegisterForm = () => {
         return (
           <BrandExpansionLocationDetails
             data={formData.expansionLocationData}
+            errors={validationErrors.BrandExpansionLocationDetails} 
             onChange={(newData) =>
               setFormData((prev) => ({
                 ...prev,
