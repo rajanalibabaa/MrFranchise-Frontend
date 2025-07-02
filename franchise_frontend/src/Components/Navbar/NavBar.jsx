@@ -201,7 +201,44 @@ function Navbar() {
         variants={fadeIn}
       >*/}
         
-       <Box sx={{ 
+       
+
+      {/* Main Navigation Bar */}
+      <AppBar 
+        position="sticky" 
+        color="transparent" 
+        elevation={0}
+        sx={{
+          backdropFilter: scrolled ? "blur(12px)" : "blur(8px)",
+          background: scrolled ? "rgba(255, 255, 255, 0.95)" : "rgba(255, 255, 255, 0.9)",
+          borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+          position: 'relative',
+          transition: 'all 0.3s ease',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            // background: 'linear-gradient(90deg, #ff9800, #ff5722, #ff9800)',
+            backgroundSize: '200% 100%',
+            animation: 'gradient 3s ease infinite',
+          },
+          '@keyframes gradient': {
+            '0%': {
+              backgroundPosition: '0% 50%',
+            },
+            '50%': {
+              backgroundPosition: '100% 50%',
+            },
+            '100%': {
+              backgroundPosition: '0% 50%',
+            },
+          }
+        }}
+      >
+        <Box sx={{ 
           display: "flex", 
           flexWrap: "wrap",
           ml: "40px", 
@@ -242,42 +279,6 @@ function Navbar() {
             </motion.div>
           ))}
         </Box>
-
-      {/* Main Navigation Bar */}
-      <AppBar 
-        position="sticky" 
-        color="transparent" 
-        elevation={0}
-        sx={{
-          backdropFilter: scrolled ? "blur(12px)" : "blur(8px)",
-          background: scrolled ? "rgba(255, 255, 255, 0.95)" : "rgba(255, 255, 255, 0.9)",
-          borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-          position: 'relative',
-          transition: 'all 0.3s ease',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '4px',
-            // background: 'linear-gradient(90deg, #ff9800, #ff5722, #ff9800)',
-            backgroundSize: '200% 100%',
-            animation: 'gradient 3s ease infinite',
-          },
-          '@keyframes gradient': {
-            '0%': {
-              backgroundPosition: '0% 50%',
-            },
-            '50%': {
-              backgroundPosition: '100% 50%',
-            },
-            '100%': {
-              backgroundPosition: '0% 50%',
-            },
-          }
-        }}
-      >
         <Toolbar
           sx={{
             display: "flex",

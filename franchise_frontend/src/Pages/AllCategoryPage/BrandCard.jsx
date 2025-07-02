@@ -157,7 +157,7 @@ const handleLikeClick = async (brandId, isLiked) => {
         </Box>
 
         {/* Categories */}
-       <Box sx={{ mb: 2, minHeight: 32 }}>
+       <Box sx={{  minHeight: 32 }}>
   {brand.franchiseDetails?.brandCategories ? (
     [ "sub", "child"].map((key, index) => (
       brand.franchiseDetails.brandCategories[key] && (
@@ -189,7 +189,7 @@ const handleLikeClick = async (brandId, isLiked) => {
             mb: 2,
             flexGrow: 1,
             "& > *:not(:last-child)": {
-              mb: 1.5,
+              mb: 1,
             },
           }}
         >

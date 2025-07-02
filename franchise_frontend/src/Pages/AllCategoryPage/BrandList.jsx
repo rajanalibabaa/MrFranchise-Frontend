@@ -132,9 +132,9 @@ function BrandList() {
     setSelectedForComparison((prev) => prev.filter((b) => b.uuid !== brandId));
   };
 
-  const clearComparison = () => {
-    setSelectedForComparison([]);
-  };
+  // const clearComparison = () => {
+  //   setSelectedForComparison([]);
+  // };
 
   useEffect(() => {
     try {
@@ -196,6 +196,7 @@ function BrandList() {
             startIcon={<Compare />}
             onClick={() => setComparisonOpen(true)}
             sx={{
+              mt: 10,
               borderRadius: 4,
               boxShadow: 3,
               bgcolor: "#ff9800",
