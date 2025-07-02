@@ -430,8 +430,8 @@ function TopBrandVdoCards() {
                     ref={(el) => (videoRefs.current[0] = el)}
                     loading="lazy"
                     src={
-                      mainBrand.brandDetails?.brandPromotionVideo?.[0] ||
-                      mainBrand.brandDetails?.franchisePromotionVideo?.[0]
+                      // mainBrand.uploads?.brandPromotionVideo?.[0] ||
+                      mainBrand.uploads?.franchisePromotionVideo?.[0]
                     }
                     alt={mainBrand.title}
                     style={{
@@ -476,8 +476,8 @@ function TopBrandVdoCards() {
                       sx={{ minWidth: 0, flex: 1 }}
                     >
                       <Avatar
-                        src={mainBrand.brandDetails?.brandLogo?.[0]}
-                        alt={mainBrand.personalDetails?.brandName}
+                        src={mainBrand.uploads?.brandLogo?.[0]}
+                        alt={mainBrand.brandDetails?.brandName}
                         sx={{
                           width: 50,
                           height: 50,
@@ -501,22 +501,23 @@ function TopBrandVdoCards() {
                             WebkitTextFillColor: "transparent",
                           }}
                         >
-                          {mainBrand.personalDetails?.brandName ||
+                          {mainBrand.brandDetails?.brandName ||
                             mainBrand.title}
                         </Typography>
 
                         {/* Categories */}
-                        <Typography
-                          variant="body2"
-                          noWrap
-                          overflow={"hidden"}
-                          textOverflow="ellipsis"
-                          color="text.secondary"
-                        >
-                          {(
-                            mainBrand.personalDetails?.brandCategories ?? []
-                          ).map((c) => c.child)}
-                        </Typography>
+                      <Typography
+  variant="body2"
+  noWrap
+  overflow="hidden"
+  textOverflow="ellipsis"
+  color="text.secondary"
+>
+  {mainBrand.franchiseDetails?.brandCategories
+    ? `${mainBrand.franchiseDetails.brandCategories.child}`
+    : "N/A"}
+</Typography>
+
                       </Box>
                     </Stack>
 
@@ -532,27 +533,18 @@ function TopBrandVdoCards() {
                       direction="column"
                       spacing={1}
                      
-                    >
-                      <Fact
-                        label="Investment"
-                        value={
-                          mainBrand.franchiseDetails?.modelsOfFranchise?.[0]
-                            ?.investmentRange
-                        }
-                      />
-                      <Fact
-                        label="Area"
-                        value={
-                          mainBrand.franchiseDetails?.modelsOfFranchise?.[0]
-                            ?.areaRequired
-                        }
-                      />
+                    ><Fact
+  label="Investment"
+  value={mainBrand.franchiseDetails?.fico?.[0]?.investmentRange}
+/>
+                     <Fact
+  label="Area Required"
+  value={mainBrand.franchiseDetails?.fico?.[0]?.areaRequired}
+/>
                       <Fact
                         label="Model Type"
-                        value={
-                          mainBrand.franchiseDetails?.modelsOfFranchise?.[0]
-                            ?.franchiseType
-                        }
+                         value={mainBrand.franchiseDetails?.fico?.[0]?.franchiseModel}
+
                       />
                     </Stack>
 
