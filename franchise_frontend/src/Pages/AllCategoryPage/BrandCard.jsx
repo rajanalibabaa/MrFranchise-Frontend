@@ -17,12 +17,11 @@ import {
   Description,
 } from '@mui/icons-material';
 import LoginPage from '../LoginPage/LoginPage';
-import { useNavigate } from 'react-router-dom';
 
 
 const BrandCard = ({
   brand,
-  // handleOpenBrand,
+  handleOpenBrand,
   toggleLike,
   showLogin,
   setShowLogin,
@@ -32,7 +31,7 @@ const BrandCard = ({
 const [isProcessingLike, setIsProcessingLike] = useState({});
 
 // console.log("brand",brand.length)
-const navigate = useNavigate();
+
 const handleLikeClick = async (brandId, isLiked) => {
   if (isProcessingLike[brandId]) return;
   
@@ -266,7 +265,7 @@ const handleLikeClick = async (brandId, isLiked) => {
         <Button
           fullWidth
           variant="contained"
-          onClick={() => navigate(`/brand/${brand.uuid}`)}
+          onClick={() => handleOpenBrand(brand)}
           startIcon={<Description />}
           sx={{
             py: 1.25,

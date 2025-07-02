@@ -26,6 +26,7 @@ import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
 import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
@@ -551,7 +552,7 @@ function TopBrandVdoCards() {
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Button
                         variant="contained"
-          onClick={() => navigate(`/brand/${brand.uuid}`)}
+                        onClick={() => handleApply(mainBrand)}
                         sx={{
                           px: 3,
                           fontWeight: 600,
@@ -936,7 +937,7 @@ function TopBrandVdoCards() {
       </Box>
 
       {/* Brand Details Dialog */}
-      <BrandDetailsDialog  />
+      <BrandDetailsDialog />
 
       {/* Login Dialog */}
       {showLogin && (

@@ -29,6 +29,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBrands,
+  openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
 import LoginPage from "../../Pages/LoginPage/LoginPage";

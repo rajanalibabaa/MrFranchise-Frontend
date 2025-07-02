@@ -26,6 +26,7 @@ import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import {
   fetchBrands,
+  openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
 import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
@@ -280,7 +281,7 @@ const BrandCard = React.memo(({
             <Button
               variant="contained"
               fullWidth
-          onClick={() => navigate(`/brand/${brand.uuid}`)}
+              onClick={() => handleApply(brand)}
               sx={{
                 backgroundColor: "#f29724",
                 "&:hover": {
