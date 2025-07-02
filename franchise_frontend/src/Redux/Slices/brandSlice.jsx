@@ -370,6 +370,6 @@ const applyFiltersToBrands = (brands, filters) => {
   return result;
 };
 
-export const { setFilters, clearFilters } =
+export const { setFilters, clearFilters ,openBrandDialog} =
   brandSlice.actions;
 export default brandSlice.reducer;

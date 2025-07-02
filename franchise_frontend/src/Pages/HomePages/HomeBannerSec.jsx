@@ -335,10 +335,14 @@ const HomeBannerSec = () => {
       setIsPopupOpen(true);
       sessionStorage.setItem("popup-shown", "true");
     }
-    controls.start("visible");
+    // controls.start("visible");
     dispatch(hideLoading())
    }, 1000);
-  }, [controls, dispatch]);
+  }, [ dispatch]);
+
+  useEffect(() => {
+  controls.start("visible");
+}, [controls]);
   // Rotate text every 2 minutes
   useEffect(() => {
     const interval = setInterval(() => {
