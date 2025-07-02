@@ -267,19 +267,23 @@ const OverviewTab = ({ brand }) => {
                     <TableCell sx={{ width: "8%" }}>Type</TableCell>
                     <TableCell sx={{ width: "8%" }}>Investment</TableCell>
                     <TableCell sx={{ width: "8%" }}>Area</TableCell>
+                    <TableCell sx={{ width: "8%" }}>Agreement</TableCell>
                     <TableCell sx={{ width: "8%" }}>Franchise</TableCell>
+                                        <TableCell sx={{ width: "8%" }}>Interior</TableCell>
+<TableCell sx={{ width: "8%" }}>Stock</TableCell>
+<TableCell sx={{ width: "8%" }}>Additional</TableCell>
+<TableCell sx={{ width: "8%" }}>Annual</TableCell>
                     <TableCell sx={{ width: "8%" }}>Royalty</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Interior</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Exterior</TableCell>
-                    <TableCell sx={{ width: "8%" }}>ROI</TableCell>
                     <TableCell sx={{ width: "8%" }}>BreakEven</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Margin On Sale</TableCell> 
-                    <TableCell sx={{ width: "8%" }}>Fixed Return</TableCell> 
-                    {/* <TableCell sx={{ width: "8%" }}>Select</TableCell> */}
+
+                    <TableCell sx={{ width: "8%" }}>ROI</TableCell>
+                    <TableCell sx={{ width: "8%" }}> Playback </TableCell>
+                    <TableCell sx={{ width: "8%" }}>MOS</TableCell> 
+                    
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {brand.franchiseDetails?.modelsOfFranchise?.map(
+                  {brand.franchiseDetails?.fico?.map(
                     (model, index) => (
                       <motion.tr
                         key={index}
@@ -292,6 +296,7 @@ const OverviewTab = ({ brand }) => {
                             selectedModel?._id === model._id
                               ? "#fff3e0"
                               : "inherit",
+                              
                         }}
                       >
 <TableCell>
@@ -299,7 +304,7 @@ const OverviewTab = ({ brand }) => {
 </TableCell>
 
 
-                        <TableCell>
+                        <TableCell >
                           {model.franchiseType || "Not specified"}
                         </TableCell>
                         <TableCell>
@@ -309,23 +314,36 @@ const OverviewTab = ({ brand }) => {
                           {model.areaRequired || "Not specified"}
                         </TableCell>
                         <TableCell>
+                          {model.agreementPeriod || "Not specified"}
+                        </TableCell>
+                        <TableCell>
                           {model.franchiseFee || "Not specified"}
                         </TableCell>
                         <TableCell>
+                          {model.
+interiorCost || "Not specified"}
+                        </TableCell>
+                        <TableCell>
+                          {model.
+stockInvestment || "Not specified"}
+                        </TableCell>
+                        <TableCell>
+                          {model.
+otherCost || "Not specified"}
+                        </TableCell>
+                        <TableCell>
+                          {model.
+requireWorkingCapital || "Not specified"}
+                        </TableCell>
+                        <TableCell>
                           {model.royaltyFee || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.interiorCost || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.exteriorCost || "Not specified"}
                         </TableCell>
                         <TableCell>{model.roi || "Not specified"}</TableCell>
                         <TableCell>
                           {model.breakEven || "Not specified"}
                         </TableCell>
-                         <TableCell>{model.marginOnSale || "Not specified"}</TableCell> 
-                         <TableCell>{model.fixedReturn || "Not specified"}</TableCell> 
+                         <TableCell>{model.payBackPeriod || "Not specified"}</TableCell> 
+                         <TableCell>{model.marginOnSales || "Not specified"}</TableCell> 
                         {/* <TableCell>
                           <motion.div whileHover={{ scale: 1.05 }}>
                             <Button

@@ -790,7 +790,7 @@ const Uploads = ({
             title={
               <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
                 <span style={{ fontWeight: "bold" }}>Business Plan: </span>
-                You can upload your business plan in PDF, JPEG format.
+                You can upload your business plan in PDF, DOC, or DOCX format.
               </span>
             }
             placement="right-start"
@@ -827,7 +827,7 @@ const Uploads = ({
           Upload (PDF JPEG, PNG)
           <VisuallyHiddenInput
             type="file"
-            accept=".pdf,.doc,.docx"
+            accept=".pdf,.doc,.docx,"
             onChange={handleFileChange("businessPlan", {
               maxFiles: 1,
               allowedTypes: [
