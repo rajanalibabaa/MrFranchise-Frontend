@@ -225,6 +225,41 @@ const validateFranchiseDetails = (data) => {
   return errors;
 };
 
-export { validateBrandDetails, validateFranchiseDetails };
+ const validateExpansionLocationDetails = (data) => {
+    const errors = {};
+    // if (!data.currentOutletsLocatedAt || data.currentOutletsLocatedAt.length === 0) {
+    //   errors.currentOutletsLocatedAt = "Current outlets located at is required";
+    // }
+    // if (!data.expansionLocations || data.expansionLocations.length === 0) {
+    //   errors.expansionLocations = "Expansion locations are required";
+    // } else {
+    //   data.expansionLocations.forEach((location, index) => {
+    //     if (!location.type) {
+    //       errors[`expansionLocations.${index}.type`] = "Location type is required";
+    //     }
+
+    //     if (!location.location || !location.location.country) {
+    //       errors[`expansionLocations.${index}.location.country`] =
+    //         "Country is required";
+    //     }
+    //     if (!location.location || !location.location.state) {
+    //       errors[`expansionLocations.${index}.location.state`] =
+
+    //         "State is required";
+    //     }
+    //     if (!location.location || !location.location.city) {
+    //       errors[`expansionLocations.${index}.location.city`] =
+    //         "City is required";
+    //     }
+    //     if (!location.location || !location.location.district) {
+    //       errors[`expansionLocations.${index}.location.district`] =
+    //         "District is required";
+    //     }
+    //   });
+    // }
+    return errors;
+  };
+
+export { validateBrandDetails, validateFranchiseDetails,validateExpansionLocationDetails };
 
 

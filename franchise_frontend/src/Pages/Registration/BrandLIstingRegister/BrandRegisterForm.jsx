@@ -44,6 +44,7 @@ import FranchiseDetails from "./FranchiseDetails";
 import Uploads from "../BrandLIstingRegister/BrandRegisterUploads";
 import {
   validateBrandDetails,
+  validateExpansionLocationDetails,
   validateFranchiseDetails,
 } from "./BrandRegisterValidation";
 import axios from "axios";
@@ -266,41 +267,7 @@ const BrandRegisterForm = () => {
     return errors;
   };
 
-  const validateExpansionLocationDetails = (data) => {
-    const errors = {};
-    // if (!data.currentOutletsLocatedAt || data.currentOutletsLocatedAt.length === 0) {
-    //   errors.currentOutletsLocatedAt = "Current outlets located at is required";
-    // }
-    // if (!data.expansionLocations || data.expansionLocations.length === 0) {
-    //   errors.expansionLocations = "Expansion locations are required";
-    // } else {
-    //   data.expansionLocations.forEach((location, index) => {
-    //     if (!location.type) {
-    //       errors[`expansionLocations.${index}.type`] = "Location type is required";
-    //     }
-
-    //     if (!location.location || !location.location.country) {
-    //       errors[`expansionLocations.${index}.location.country`] =
-    //         "Country is required";
-    //     }
-    //     if (!location.location || !location.location.state) {
-    //       errors[`expansionLocations.${index}.location.state`] =
-
-    //         "State is required";
-    //     }
-    //     if (!location.location || !location.location.city) {
-    //       errors[`expansionLocations.${index}.location.city`] =
-    //         "City is required";
-    //     }
-    //     if (!location.location || !location.location.district) {
-    //       errors[`expansionLocations.${index}.location.district`] =
-    //         "District is required";
-    //     }
-    //   });
-    // }
-    return errors;
-  };
-
+ 
   const validateStep = useCallback(
     (step) => {
       const errors = {};
@@ -450,6 +417,7 @@ const BrandRegisterForm = () => {
           businessPlan: formData.uploads.businessPlan,
         };
 
+        console.log("fileFields :",fileFields)
         Object.entries(fileFields).forEach(([fieldName, files]) => {
           if (files && files.length > 0) {
             files.forEach((file, index) => {
@@ -458,8 +426,11 @@ const BrandRegisterForm = () => {
           }
         });
 
+
+        console.log("formDataSend :",formDataSend)
+
         const response = await axios.post(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
+          "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {
@@ -468,6 +439,7 @@ const BrandRegisterForm = () => {
           }
         );
 
+        console.log("response :",response.data.data)
         if (response.status === 200) {
           setSubmitSuccess(true);
           setSnackbar({
@@ -477,13 +449,13 @@ const BrandRegisterForm = () => {
           });
 
           // Reset form after successful submission
-          localStorage.removeItem(FORM_DATA_KEY);
-          localStorage.removeItem(FORM_STEP_KEY);
-          setFormData(initialFormData);
-          setActiveStep(0);
-          setTimeout(() => {
-            navigate("/");
-          }, 1500);
+          // localStorage.removeItem(FORM_DATA_KEY);
+          // localStorage.removeItem(FORM_STEP_KEY);
+          // setFormData(initialFormData);
+          // setActiveStep(0);
+          // setTimeout(() => {
+          //   navigate("/");
+          // }, 1500);
         }
       } catch (error) {
         // console.error("Submission error:", error);
@@ -499,6 +471,8 @@ const BrandRegisterForm = () => {
       }
     }
   };
+
+
   const handleCountryChange = (event) => {
     setFormData((prev) => ({
       ...prev,

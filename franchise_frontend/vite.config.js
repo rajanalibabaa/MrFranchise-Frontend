@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     target: 'es2015', // ensures broader browser compatibility
     minify: 'terser',
-    minify:'esbuild',
+   
     cssCodeSplit: true,
     sourcemap: false, // no sourcemaps in production
     chunkSizeWarningLimit: 500,
