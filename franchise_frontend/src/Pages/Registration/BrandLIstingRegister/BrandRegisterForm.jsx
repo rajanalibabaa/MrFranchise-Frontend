@@ -228,7 +228,7 @@ const BrandRegisterForm = () => {
     return savedData ? JSON.parse(savedData) : initialFormData;
   });
 
-  // console.log("Form Data:", formData);
+  console.log("Form Data:", formData);
 
   const [validationErrors, setValidationErrors] = useState({
     brandDetails: {},
