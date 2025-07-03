@@ -413,12 +413,11 @@ function BrandList() {
               <Typography
                 variant="h4"
                 component="h1"
-                gutterBottom
                 sx={{ color: "#4caf50" }}
               >
                 Available Franchise Brands
               </Typography>
-              <Typography variant="body1" sx={{ color: "black", mb: 3 }}>
+              <Typography variant="body1" sx={{ color: "black", mb: 0 }}>
                 Showing {filteredBrands.length} of {brands.length} brands
               </Typography>
 
