@@ -44,8 +44,9 @@ import FranchiseDetails from "./FranchiseDetails";
 import Uploads from "../BrandLIstingRegister/BrandRegisterUploads";
 import {
   validateBrandDetails,
-  validateExpansionLocationDetails,
+  // validateExpansionLocationDetails,
   validateFranchiseDetails,
+  validateExpansionLocationDetails
 } from "./BrandRegisterValidation";
 import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -620,6 +621,7 @@ const BrandRegisterForm = () => {
         return (
           <BrandExpansionLocationDetails
             data={formData.expansionLocationData}
+            errors={validationErrors.BrandExpansionLocationDetails} 
             onChange={(newData) =>
               setFormData((prev) => ({
                 ...prev,
