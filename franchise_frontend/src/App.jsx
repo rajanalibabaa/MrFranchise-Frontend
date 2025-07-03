@@ -150,8 +150,8 @@ function App() {
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
           <Route path="/otherindustries" element={<Otherindustries/>}/>
           <Route path="/blogs" element={<Blogs />} />
-<Route path="/brand/:brandId" element={<BrandDetailsPage />} />
-        </Routes>
+
+<Route path="/brand/:brandId" element={<BrandDetailsPage />} />        </Routes>
       
     </>
   );
