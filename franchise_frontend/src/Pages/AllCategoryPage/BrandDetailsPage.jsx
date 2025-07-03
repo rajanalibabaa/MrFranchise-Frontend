@@ -12,14 +12,14 @@ function BrandDetailsPage() {
 
   useEffect(() => {
     // Find the brand by ID when the route changes
-    const brand = brands.find(b => b.uuid === brandId);
+    const brand = location.state?.brand ||brands.find(b => b.uuid === brandId);
     if (brand) {
       dispatch(openBrandDialog(brand));
     } else {
       dispatch(closeBrandDialog());
       navigate('/brands'); // Redirect if brand not found
     }
-  }, [brandId, brands, dispatch, navigate]);
+  }, [brandId, brands, dispatch, navigate, location.state]);
 
   return <BrandDetails />;
 }
