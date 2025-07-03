@@ -1138,6 +1138,10 @@ import {
   Container,
   Divider,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from "@mui/material";
 import {
   Share,
@@ -1147,6 +1151,8 @@ import {
   StarBorder,
   Business as BusinessIcon,
   ArrowBack,
+  Close,
+  
 } from "@mui/icons-material";
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -1198,7 +1204,8 @@ const BrandDetailsPage = () => {
     const fetchBrandDetails = async () => {
       try {
         const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/brand/getBrandByUUID/${brandId}`
+          `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${brandId}`,
+          
         );
         setBrand(response.data.data);
         setLoading(false);
