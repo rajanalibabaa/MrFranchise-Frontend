@@ -695,10 +695,10 @@ function TopBrandVdoCards() {
                       ref={(el) => (videoRefs.current[i + 1] = el)}
                       loading="lazy"
                       src={
-                        brand.brandDetails?.brandPromotionVideo?.[0] ||
-                        brand.brandDetails?.franchisePromotionVideo?.[0]
+                        brand.uploads?.brandPromotionVideo?.[0] ||
+                        brand.uploads?.franchisePromotionVideo?.[0]
                       }
-                      alt={brand.personalDetails?.brandName || "Brand"}
+                      alt={brand.brandDetails?.brandName || "Brand"}
                       style={{
                         width: "100%",
                         height: "100%",
@@ -768,11 +768,11 @@ function TopBrandVdoCards() {
                       >
                         <Tooltip
                           title={
-                            brand.personalDetails?.brandName || brand.title
+                            brand.brandDetails?.brandName || brand.title
                           }
                         >
                           <Typography
-                            variant="h6"
+                            variant="body2"
                             color="#7ad03a"
                             fontWeight="bold"
                             noWrap={false}
@@ -784,7 +784,7 @@ function TopBrandVdoCards() {
                               overflowWrap: "break-word", // wraps at word boundaries
                             }}
                           >
-                            {brand.personalDetails?.brandName || brand.title}
+                            {brand.brandDetails?.brandName || brand.title}
                           </Typography>
                         </Tooltip>
                         <IconButton
@@ -826,9 +826,7 @@ function TopBrandVdoCards() {
                         }}
                       >
                         Categories:{" "}
-                        {(brand.personalDetails?.brandCategories || []).map(
-                          (cat) => cat.child
-                        )}
+                      {brand?.franchiseDetails?.brandCategories?.child}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -846,7 +844,7 @@ function TopBrandVdoCards() {
                       >
                         Investment:{" "}
                         {
-                          brand.franchiseDetails?.modelsOfFranchise?.[0]
+                          brand.franchiseDetails?.fico?.[0]
                             ?.investmentRange
                         }
                       </Typography>
@@ -866,7 +864,7 @@ function TopBrandVdoCards() {
                       >
                         Area:{" "}
                         {
-                          brand.franchiseDetails?.modelsOfFranchise?.[0]
+                          brand.franchiseDetails?.fico?.[0]
                             ?.areaRequired
                         }
                       </Typography>
@@ -886,7 +884,7 @@ function TopBrandVdoCards() {
                       >
                         Type:{" "}
                         {
-                          brand.franchiseDetails?.modelsOfFranchise?.[0]
+                          brand.franchiseDetails?.fico?.[0]
                             ?.franchiseType
                         }
                       </Typography>
