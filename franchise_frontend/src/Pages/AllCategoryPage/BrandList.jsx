@@ -15,6 +15,7 @@ import {
   Badge,
   Drawer,
   IconButton,
+
 } from "@mui/material";
 import {
   Close,
@@ -35,7 +36,7 @@ import {
   toggleLikeBrand,
   viewApi,
 } from "../../Redux/Slices/brandSlice";
-import BrandDetailsDialog from "./BrandDetailsDialog";
+import BrandDetail from "./BrandDetail.jsx";
 import { useLocation } from "react-router-dom";
 import { Compare } from "@mui/icons-material";
 import BrandComparison from "./BrandComparison";
@@ -132,9 +133,9 @@ function BrandList() {
     setSelectedForComparison((prev) => prev.filter((b) => b.uuid !== brandId));
   };
 
-  const clearComparison = () => {
-    setSelectedForComparison([]);
-  };
+  // const clearComparison = () => {
+  //   setSelectedForComparison([]);
+  // };
 
   useEffect(() => {
     try {
@@ -196,6 +197,7 @@ function BrandList() {
             startIcon={<Compare />}
             onClick={() => setComparisonOpen(true)}
             sx={{
+              mt: 10,
               borderRadius: 4,
               boxShadow: 3,
               bgcolor: "#ff9800",
@@ -412,12 +414,11 @@ function BrandList() {
               <Typography
                 variant="h4"
                 component="h1"
-                gutterBottom
                 sx={{ color: "#4caf50" }}
               >
                 Available Franchise Brands
               </Typography>
-              <Typography variant="body1" sx={{ color: "black", mb: 3 }}>
+              <Typography variant="body1" sx={{ color: "black", mb: 0 }}>
                 Showing {filteredBrands.length} of {brands.length} brands
               </Typography>
 
@@ -446,12 +447,7 @@ function BrandList() {
                 ))}
               </Grid>
               {/* Comparison dialog */}
-              <BrandComparison
-                open={comparisonOpen}
-                onClose={() => setComparisonOpen(false)}
-                selectedBrands={selectedForComparison}
-                removeFromComparison={removeFromComparison}
-              />
+            
             </>
           )}
         </Box>
@@ -508,11 +504,13 @@ function BrandList() {
           </Box>
         </Box>
       </Drawer>
-      <BrandDetailsDialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        brand={selectedBrand}
-      />
+          <BrandDetail />
+              <BrandComparison
+                open={comparisonOpen}
+                onClose={() => setComparisonOpen(false)}
+                selectedBrands={selectedForComparison}
+                removeFromComparison={removeFromComparison}
+              />
     </Container>
   );
 }

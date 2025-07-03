@@ -35,7 +35,7 @@ import {
   openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
-import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
+// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 
 const CARD_DIMENSIONS = {
@@ -524,7 +524,7 @@ const TopFoodFranchises = () => {
           />
         ))}
       </Box>
-      <BrandDetailsDialog />
+      {/* <BrandDetailsDialog /> */}
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}

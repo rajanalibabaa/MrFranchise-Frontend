@@ -7,7 +7,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { openBrandDialog } from "../../Redux/Slices/brandSlice";
-import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
+// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 
 
 const TopInvestVdocardround = () => {
@@ -144,8 +144,8 @@ const TopInvestVdocardround = () => {
 
               {/* Brand Logo */}
               <Avatar
-                src={brand.brandDetails?.brandLogo}
-                alt={brand.personalDetails?.brandName}
+                src={brand.uploads?.brandLogo}
+                alt={brand.uploads?.brandName}
                 loading="lazy"
                 sx={{
                   width: 70,
@@ -157,8 +157,8 @@ const TopInvestVdocardround = () => {
 
               {/* Brand Name */}
               <Typography 
-                variant="body1" 
-                fontWeight={700}
+                variant="caption" 
+                fontWeight={600}
                 textAlign="center"
                 sx={{
                   mb: 0.5,
@@ -168,7 +168,7 @@ const TopInvestVdocardround = () => {
                   maxWidth: '100%'
                 }}
               >
-                {brand.personalDetails?.brandName}
+                {brand.brandDetails?.brandName}
               </Typography>
  {/* Category Chips */}
               <Box sx={{ 
@@ -179,18 +179,17 @@ const TopInvestVdocardround = () => {
                 mt: 0.5,
                 mb: 1
               }}>
-                {brand.personalDetails?.brandCategories?.slice(0, 2).map((category, idx) => (
-                  <Typography key={idx} variant="subtitle2" fontWeight={500}>{category.child}</Typography>
-                ))}
+               {brand?.franchiseDetails?.brandCategories?.child
+}
               </Box>
               {/* Investment */}
               <Stack direction="column"  spacing={0.5} sx={{ mb: 0.5 }}>
                 {/* <MonetizationOnIcon sx={{ color: '#f29724', fontSize: 16 }} /> */}
-                <Typography variant="body2" fontWeight={500}>
-                 Investment: {brand.franchiseDetails?.modelsOfFranchise?.[0]?.investmentRange || 'N/A'}
+                <Typography variant="caption" fontWeight={500}>
+                 Investment: {brand.franchiseDetails?.fico?.[0]?.investmentRange || 'N/A'}
                 </Typography>
                 <Typography variant="body2" fontWeight={500}>
-                Area:  {brand.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired || 'N/A'} sq.ft
+                Area:  {brand.franchiseDetails?.fico?.[0]?.areaRequired || 'N/A'} sq.ft
                 </Typography>
               </Stack>
 
@@ -244,7 +243,7 @@ const TopInvestVdocardround = () => {
           </Button>
         </Box>
       )}
-      <BrandDetailsDialog />
+      {/* <BrandDetailsDialog /> */}
     </Box>
   );
 };

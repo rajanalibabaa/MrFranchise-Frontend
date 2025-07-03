@@ -335,7 +335,7 @@ const HomeBannerSec = () => {
       setIsPopupOpen(true);
       sessionStorage.setItem("popup-shown", "true");
     }
-    controls.start("visible");
+    // controls.start("visible");
     dispatch(hideLoading())
    }, 1000);
   }, [controls, dispatch]);

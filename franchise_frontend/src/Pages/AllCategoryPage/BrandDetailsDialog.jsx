@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogTitle,
@@ -49,7 +50,7 @@ const BrandDetailsDialog = () => {
 
   const [imageModalOpen, setImageModalOpen] = useState(false);
 const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+ const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -64,6 +65,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
   });
 
   const dispatch = useDispatch();
+ 
 
   const [userData, setUserData] = useState(null);
 
@@ -77,6 +79,8 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const handleShareClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
+  
 
   useEffect(() => {
     const fetchInvestorDetails = async () => {
@@ -267,9 +271,10 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
     setSubmitSuccess(false);
   };
 
-  const handleClose = () => {
-    dispatch(closeBrandDialog());
-  };
+const handleClose = () => {
+  dispatch(closeBrandDialog());
+  navigate(-1); // Go back to previous page
+};
 
   const handleMediaClick = (media) => {
     setSelectedMedia(media);
@@ -279,26 +284,25 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
   if (!selectedBrand) return null;
 
   const allVideos = [
-    ...(selectedBrand.brandDetails?.brandPromotionVideo || []),
-    ...(selectedBrand.brandDetails?.franchisePromotionVideo || []),
+    ...(selectedBrand.uploads?.brandPromotionVideo || []),
+    ...(selectedBrand.uploads?.franchisePromotionVideo || []),
   ];
 
   const allImages = [
-    ...(selectedBrand.brandDetails?.brandLogo
-      ? [selectedBrand.brandDetails.brandLogo]
+    ...(selectedBrand.uploads?.brandLogo
+      ? [selectedBrand.uploads.brandLogo]
       : []),
-    ...(selectedBrand.brandDetails?.companyImage || []),
-    ...(selectedBrand.brandDetails?.exterioroutlet || []),
-    ...(selectedBrand.brandDetails?.interiorOutlet || []),
+    ...(selectedBrand.uploads?.exteriorOutlet || []),
+    ...(selectedBrand.uploads?.interiorOutlet || []),
+    
   ];
 
   return (
-    <Box>
+    <Box >
       <Dialog
         open={isModalOpen}
         onClose={handleModalClose}
         maxWidth="md"
-        fullWidth
         PaperProps={{
           sx: {
             borderRadius: "12px",
@@ -639,8 +643,8 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
               }}
             >
               <img
-                src={selectedBrand.brandDetails?.brandLogo}
-                alt={selectedBrand.personalDetails?.brandName}
+                src={selectedBrand.uploads?.brandLogo}
+                alt={selectedBrand.brandDetails?.brandName}
                 style={{
                   width: 100,
                   height: 100,
@@ -680,7 +684,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
                 WebkitTextFillColor: "transparent",
               }}
             >
-              {selectedBrand.personalDetails?.brandName}
+              {selectedBrand.brandDetails?.brandName}
             </Typography>
           </Box>
           <Box>
@@ -815,6 +819,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
   open={imageModalOpen}
   onClose={() => setImageModalOpen(false)}
   maxWidth="lg"
+  width="100%"
   fullWidth
   sx={{
     '& .MuiDialog-paper': {

@@ -29,7 +29,7 @@ import {
   openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
-import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
+// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 function TopBrandVdoCards() {
@@ -147,6 +147,7 @@ function TopBrandVdoCards() {
 
   const handleApply = (brand) => {
     dispatch(openBrandDialog(brand));
+    navigate(`/brands/${brand.uuid}`)
   };
 
   if (brandsLoading && brands.length === 0) {
@@ -430,8 +431,8 @@ function TopBrandVdoCards() {
                     ref={(el) => (videoRefs.current[0] = el)}
                     loading="lazy"
                     src={
-                      mainBrand.brandDetails?.brandPromotionVideo?.[0] ||
-                      mainBrand.brandDetails?.franchisePromotionVideo?.[0]
+                      // mainBrand.uploads?.brandPromotionVideo?.[0] ||
+                      mainBrand.uploads?.franchisePromotionVideo?.[0]
                     }
                     alt={mainBrand.title}
                     style={{
@@ -476,8 +477,8 @@ function TopBrandVdoCards() {
                       sx={{ minWidth: 0, flex: 1 }}
                     >
                       <Avatar
-                        src={mainBrand.brandDetails?.brandLogo?.[0]}
-                        alt={mainBrand.personalDetails?.brandName}
+                        src={mainBrand.uploads?.brandLogo?.[0]}
+                        alt={mainBrand.brandDetails?.brandName}
                         sx={{
                           width: 50,
                           height: 50,
@@ -501,22 +502,23 @@ function TopBrandVdoCards() {
                             WebkitTextFillColor: "transparent",
                           }}
                         >
-                          {mainBrand.personalDetails?.brandName ||
+                          {mainBrand.brandDetails?.brandName ||
                             mainBrand.title}
                         </Typography>
 
                         {/* Categories */}
-                        <Typography
-                          variant="body2"
-                          noWrap
-                          overflow={"hidden"}
-                          textOverflow="ellipsis"
-                          color="text.secondary"
-                        >
-                          {(
-                            mainBrand.personalDetails?.brandCategories ?? []
-                          ).map((c) => c.child)}
-                        </Typography>
+                      <Typography
+  variant="body2"
+  noWrap
+  overflow="hidden"
+  textOverflow="ellipsis"
+  color="text.secondary"
+>
+  {mainBrand.franchiseDetails?.brandCategories
+    ? `${mainBrand.franchiseDetails.brandCategories.child}`
+    : "N/A"}
+</Typography>
+
                       </Box>
                     </Stack>
 
@@ -532,27 +534,18 @@ function TopBrandVdoCards() {
                       direction="column"
                       spacing={1}
                      
-                    >
-                      <Fact
-                        label="Investment"
-                        value={
-                          mainBrand.franchiseDetails?.modelsOfFranchise?.[0]
-                            ?.investmentRange
-                        }
-                      />
-                      <Fact
-                        label="Area"
-                        value={
-                          mainBrand.franchiseDetails?.modelsOfFranchise?.[0]
-                            ?.areaRequired
-                        }
-                      />
+                    ><Fact
+  label="Investment"
+  value={mainBrand.franchiseDetails?.fico?.[0]?.investmentRange}
+/>
+                     <Fact
+  label="Area Required"
+  value={mainBrand.franchiseDetails?.fico?.[0]?.areaRequired}
+/>
                       <Fact
                         label="Model Type"
-                        value={
-                          mainBrand.franchiseDetails?.modelsOfFranchise?.[0]
-                            ?.franchiseType
-                        }
+                         value={mainBrand.franchiseDetails?.fico?.[0]?.franchiseModel}
+
                       />
                     </Stack>
 
@@ -703,8 +696,9 @@ function TopBrandVdoCards() {
                       ref={(el) => (videoRefs.current[i + 1] = el)}
                       loading="lazy"
                       src={
-                        brand.brandDetails?.brandPromotionVideo?.[0] ||
-                        brand.brandDetails?.franchisePromotionVideo?.[0]
+                        brand.uploads
+?.franchisePromotionVideo
+?.[0]
                       }
                       alt={brand.personalDetails?.brandName || "Brand"}
                       style={{
@@ -776,7 +770,7 @@ function TopBrandVdoCards() {
                       >
                         <Tooltip
                           title={
-                            brand.personalDetails?.brandName || brand.title
+                            brand.brandDetails?.brandName || brand.title
                           }
                         >
                           <Typography
@@ -792,7 +786,7 @@ function TopBrandVdoCards() {
                               overflowWrap: "break-word", // wraps at word boundaries
                             }}
                           >
-                            {brand.personalDetails?.brandName || brand.title}
+                            {brand.brandDetails?.brandName || brand.title}
                           </Typography>
                         </Tooltip>
                         <IconButton
@@ -834,9 +828,7 @@ function TopBrandVdoCards() {
                         }}
                       >
                         Categories:{" "}
-                        {(brand.personalDetails?.brandCategories || []).map(
-                          (cat) => cat.child
-                        )}
+                       {brand?.franchiseDetails?.brandCategories?.child}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -854,7 +846,7 @@ function TopBrandVdoCards() {
                       >
                         Investment:{" "}
                         {
-                          brand.franchiseDetails?.modelsOfFranchise?.[0]
+                          brand.franchiseDetails?.fico?.[0]
                             ?.investmentRange
                         }
                       </Typography>
@@ -874,7 +866,7 @@ function TopBrandVdoCards() {
                       >
                         Area:{" "}
                         {
-                          brand.franchiseDetails?.modelsOfFranchise?.[0]
+                          brand.franchiseDetails?.fico?.[0]
                             ?.areaRequired
                         }
                       </Typography>
@@ -894,7 +886,7 @@ function TopBrandVdoCards() {
                       >
                         Type:{" "}
                         {
-                          brand.franchiseDetails?.modelsOfFranchise?.[0]
+                          brand.franchiseDetails?.fico?.[0]
                             ?.franchiseType
                         }
                       </Typography>
@@ -944,8 +936,7 @@ function TopBrandVdoCards() {
         </Box>
       </Box>
 
-      {/* Brand Details Dialog */}
-      <BrandDetailsDialog />
+    
 
       {/* Login Dialog */}
       {showLogin && (
