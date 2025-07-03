@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState ,} from 'react';
+import { useNavigate, } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import {
   Box,
   Button,
@@ -17,11 +19,12 @@ import {
   Description,
 } from '@mui/icons-material';
 import LoginPage from '../LoginPage/LoginPage';
+import { openBrandDialog } from '../../Redux/Slices/brandSlice.jsx';
 
 
 const BrandCard = ({
   brand,
-  handleOpenBrand,
+ 
   toggleLike,
   showLogin,
   setShowLogin,
@@ -31,6 +34,16 @@ const BrandCard = ({
 const [isProcessingLike, setIsProcessingLike] = useState({});
 
 // console.log("brand",brand.length)
+
+const navigate = useNavigate();
+const dispatch = useDispatch()
+
+const handleOpenBrand = (brand) => {
+  // Update Redux state
+  dispatch(openBrandDialog(brand));
+  // Update URL
+  navigate(`/brands/${brand.uuid}`);
+};
 
 const handleLikeClick = async (brandId, isLiked) => {
   if (isProcessingLike[brandId]) return;
