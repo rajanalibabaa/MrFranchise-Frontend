@@ -13,6 +13,7 @@ import SideViewContent from "./Components/SideViewContentMenu/SideHoverMenu";
 import ProfilePage from "./Pages/Profile_Pages/profilePage";
 import IconBreadcrumbs from "./Pages/Profile_Pages/IconBreadcrumbs";
 import ManageProfile from "../src/Components/Investor_Profile_Component/ManageProfile.jsx";
+// import ManageProfile from "../src/Components/Investor_Profile_Component/ManageProfile/ManageProfile.jsx";
 // import PostRequirement from '../src/Components/Investor_Profile_Component/PostRequirement.jsx';
 import ResponseManager from "./Components/Investor_Profile_Component/ResponseManager.jsx";
 import DashBoard from "../src/Components/Investor_Profile_Component/DashBoard.jsx";
@@ -49,6 +50,7 @@ import { Box } from "@mui/material";
 import Otherindustries from "./Components/Footers/QuickLinks/Otherindustries.jsx";
 import GlobalLoader from './Components/GLobalLoader.jsx';
 import Blogs from './Components/Footers/QuickLinks/Blogs.jsx';
+import BrandDetailsPage from './Pages/AllCategoryPage/BrandDetailsPage.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -148,6 +150,7 @@ function App() {
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
           <Route path="/otherindustries" element={<Otherindustries/>}/>
           <Route path="/blogs" element={<Blogs />} />
+          <Route path="/brands/:brandId" element={<BrandDetailsPage />} />
           
         </Routes>
       

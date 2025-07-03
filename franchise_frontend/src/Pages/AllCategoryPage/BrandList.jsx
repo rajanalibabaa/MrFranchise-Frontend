@@ -15,6 +15,7 @@ import {
   Badge,
   Drawer,
   IconButton,
+
 } from "@mui/material";
 import {
   Close,
@@ -35,7 +36,7 @@ import {
   toggleLikeBrand,
   viewApi,
 } from "../../Redux/Slices/brandSlice";
-import BrandDetailsDialog from "./BrandDetailsDialog";
+import BrandDetail from "./BrandDetail.jsx";
 import { useLocation } from "react-router-dom";
 import { Compare } from "@mui/icons-material";
 import BrandComparison from "./BrandComparison";
@@ -187,7 +188,7 @@ function BrandList() {
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 3, mb: 6 }}>
+    <Container maxWidth="xl" sx={{ mt: 0, mb: 6 }}>
       <Box sx={{ position: "fixed", right: 20, zIndex: 1000 }}>
         <Badge badgeContent={selectedForComparison.length} color="primary">
           <Button
@@ -446,12 +447,7 @@ function BrandList() {
                 ))}
               </Grid>
               {/* Comparison dialog */}
-              <BrandComparison
-                open={comparisonOpen}
-                onClose={() => setComparisonOpen(false)}
-                selectedBrands={selectedForComparison}
-                removeFromComparison={removeFromComparison}
-              />
+            
             </>
           )}
         </Box>
@@ -508,11 +504,13 @@ function BrandList() {
           </Box>
         </Box>
       </Drawer>
-      <BrandDetailsDialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        brand={selectedBrand}
-      />
+          <BrandDetail />
+              <BrandComparison
+                open={comparisonOpen}
+                onClose={() => setComparisonOpen(false)}
+                selectedBrands={selectedForComparison}
+                removeFromComparison={removeFromComparison}
+              />
     </Container>
   );
 }
