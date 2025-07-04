@@ -19,8 +19,15 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-   DialogActions
-
+  DialogActions,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Avatar,
 } from "@mui/material";
 import {
   Close,
@@ -31,6 +38,20 @@ import {
   StarBorder,
   Business as BusinessIcon,
   ArrowBack,
+  AccountTree,
+  AttachMoney,
+  Support,
+  LocationOn,
+  CalendarToday,
+  People,
+  Store,
+  EmojiEvents,
+  Phone,
+  Email,
+  Language,
+  LinkedIn,
+  Facebook,
+  Instagram,
 } from "@mui/icons-material";
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -78,6 +99,8 @@ const BrandDetails = () => {
     setAnchorEl(event.currentTarget);
   };
 
+  console.log("selectedBrand",selectedBrand)
+
   useEffect(() => {
     const fetchInvestorDetails = async () => {
       if (!investorUUID || !AccessToken) return;
@@ -111,7 +134,7 @@ const BrandDetails = () => {
 
   const franchiseModels = [
     ...new Set(
-      selectedBrand?.franchiseDetails?.modelsOfFranchise?.map(
+      selectedBrand?.franchiseDetails?.fico?.map(
         (m) => m.franchiseModel
       ) || []
     ),
@@ -119,7 +142,7 @@ const BrandDetails = () => {
 
   const franchiseTypes = [
     ...new Set(
-      selectedBrand?.franchiseDetails?.modelsOfFranchise?.map(
+      selectedBrand?.franchiseDetails?.fico?.map(
         (m) => m.franchiseType
       ) || []
     ),
@@ -127,7 +150,7 @@ const BrandDetails = () => {
 
   const investmentRanges = [
     ...new Set(
-      selectedBrand?.franchiseDetails?.modelsOfFranchise?.map(
+      selectedBrand?.franchiseDetails?.fico?.map(
         (m) => m.investmentRange
       ) || []
     ),
@@ -163,11 +186,9 @@ const BrandDetails = () => {
       const payload = {
         ...formData,
         brandId: selectedBrand?.uuid,
-        brandName: selectedBrand?.personalDetails?.brandName || "",
-        brandEmail: selectedBrand.personalDetails?.email || "",
-        brandLogo: Array.isArray(selectedBrand.brandDetails?.brandLogo)
-          ? selectedBrand.brandDetails.brandLogo[0] || ""
-          : selectedBrand.brandDetails?.brandLogo || "",
+        brandName: selectedBrand?.brandDetails?.brandName || "",
+        brandEmail: selectedBrand.brandDetails?.email || "",
+        brandLogo: selectedBrand.brandDetails?.brandLogo || "",
       };
 
       const token = localStorage.getItem("accessToken");
@@ -251,18 +272,17 @@ const BrandDetails = () => {
 
   if (!selectedBrand) return null;
 
-  const allVideos = [
-    ...(selectedBrand.uploads?.brandPromotionVideo || []),
-    ...(selectedBrand.uploads?.franchisePromotionVideo || []),
-  ];
+  const allVideos = selectedBrand.uploads?.brandPromotionVideo || [];
+  const allImages = selectedBrand.uploads?.brandLogo ? [selectedBrand.uploads.brandLogo] : [];
 
-  const allImages = [
-    ...(selectedBrand.uploads?.brandLogo
-      ? [selectedBrand.uploads.brandLogo]
-      : []),
-    ...(selectedBrand.uploads?.exteriorOutlet || []),
-    ...(selectedBrand.uploads?.interiorOutlet || []),
-  ];
+  const formatCurrency = (value) => {
+    if (!value) return "Not specified";
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(Number(value.replace(/[^0-9]/g, "")));
+  };
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -281,14 +301,13 @@ const BrandDetails = () => {
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
           <Box display="flex" alignItems="center" gap={3}>
             <Box position="relative">
-              <img
+              <Avatar
                 src={selectedBrand.uploads?.brandLogo}
                 alt={selectedBrand.brandDetails?.brandName}
-                style={{
+                sx={{
                   width: 100,
                   height: 100,
-                  borderRadius: "50%",
-                  objectFit: "cover",
+                  border: "2px solid #ff9800",
                 }}
               />
               <Box
@@ -310,22 +329,96 @@ const BrandDetails = () => {
                 <BusinessIcon fontSize="small" />
               </Box>
             </Box>
-            <Typography
-              variant="h3"
-              component="h1"
-              sx={{
-                fontWeight: 700,
-                background: "linear-gradient(45deg, #000 30%, #000 90%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              {selectedBrand.brandDetails?.brandName}
-            </Typography>
+            <Box>
+              <Typography
+                variant="h3"
+                component="h1"
+                sx={{
+                  fontWeight: 700,
+                  background: "linear-gradient(45deg, #000 30%, #000 90%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                {selectedBrand.brandDetails?.brandName}
+              </Typography>
+              <Typography variant="subtitle1" color="text.secondary">
+                {selectedBrand.brandDetails?.tagLine}
+              </Typography>
+            </Box>
           </Box>
           <IconButton onClick={handleShareClick} size="large">
             <Share sx={{ color: "#ff9800" }} />
           </IconButton>
+        </Box>
+
+        {/* Brand quick info */}
+        <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
+          <Chip
+            icon={<Store />}
+            label={`${selectedBrand.franchiseDetails?.totalOutlets || "N/A"} Outlets`}
+            variant="outlined"
+            sx={{ borderColor: "#ff9800", color: "#ff9800" }}
+          />
+          <Chip
+            icon={<CalendarToday />}
+            label={`Est. ${selectedBrand.franchiseDetails?.establishedYear || "N/A"}`}
+            variant="outlined"
+            sx={{ borderColor: "#ff9800", color: "#ff9800" }}
+          />
+          <Chip
+            icon={<People />}
+            label={`${selectedBrand.franchiseDetails?.franchiseOutlets || "N/A"} Franchise Outlets`}
+            variant="outlined"
+            sx={{ borderColor: "#ff9800", color: "#ff9800" }}
+          />
+          <Chip
+            icon={<EmojiEvents />}
+            label={selectedBrand.franchiseDetails?.brandCategories?.child || "N/A"}
+            variant="outlined"
+            sx={{ borderColor: "#ff9800", color: "#ff9800" }}
+          />
+        </Box>
+
+        {/* Contact info */}
+        <Box display="flex" flexWrap="wrap" gap={3} mb={3}>
+          {selectedBrand.brandDetails?.mobileNumber && (
+            <Box display="flex" alignItems="center" gap={1}>
+              <Phone color="primary" />
+              <Typography>{selectedBrand.brandDetails.mobileNumber}</Typography>
+            </Box>
+          )}
+          {selectedBrand.brandDetails?.email && (
+            <Box display="flex" alignItems="center" gap={1}>
+              <Email color="primary" />
+              <Typography>{selectedBrand.brandDetails.email}</Typography>
+            </Box>
+          )}
+          {selectedBrand.brandDetails?.website && selectedBrand.brandDetails.website !== "-" && (
+            <Box display="flex" alignItems="center" gap={1}>
+              <Language color="primary" />
+              <Typography>{selectedBrand.brandDetails.website}</Typography>
+            </Box>
+          )}
+        </Box>
+
+        {/* Social media links */}
+        <Box display="flex" gap={2} mb={3}>
+          {selectedBrand.brandDetails?.facebook && selectedBrand.brandDetails.facebook !== "-" && (
+            <IconButton href={selectedBrand.brandDetails.facebook} target="_blank">
+              <Facebook sx={{ color: "#1877F2" }} />
+            </IconButton>
+          )}
+          {selectedBrand.brandDetails?.instagram && selectedBrand.brandDetails.instagram !== "-" && (
+            <IconButton href={selectedBrand.brandDetails.instagram} target="_blank">
+              <Instagram sx={{ color: "#E4405F" }} />
+            </IconButton>
+          )}
+          {selectedBrand.brandDetails?.linkedin && selectedBrand.brandDetails.linkedin !== "-" && (
+            <IconButton href={selectedBrand.brandDetails.linkedin} target="_blank">
+              <LinkedIn sx={{ color: "#0A66C2" }} />
+            </IconButton>
+          )}
         </Box>
 
         <Divider sx={{ my: 3 }} />
@@ -338,33 +431,27 @@ const BrandDetails = () => {
               height: 430,
               borderRadius: 2,
               overflow: 'hidden',
-              backgroundColor: '#f5f5f5'
+              backgroundColor: '#f5f5f5',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}>
               {allVideos.length > 0 ? (
-                allVideos.map((videoUrl, index) => (
-                  <Box key={index} sx={{ width: '100%', height: '100%' }}>
-                    <video
-                      controls
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      }}
-                    >
-                      <source src={videoUrl} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                  </Box>
-                ))
+                <video
+                  controls
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                >
+                  <source src={allVideos[0]} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
               ) : (
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  alignItems: 'center', 
-                  height: '100%' 
-                }}>
-                  <Typography>No videos available</Typography>
-                </Box>
+                <Typography variant="body1" color="text.secondary">
+                  No promotional video available
+                </Typography>
               )}
             </Box>
           </Grid>
@@ -377,80 +464,108 @@ const BrandDetails = () => {
               flexWrap: 'wrap',
               gap: 2
             }}>
-              {allImages.map((imageUrl, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    width: '100%',
-                    height: 200,
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    backgroundColor: '#f5f5f5',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    setCurrentImageIndex(index);
-                    setImageModalOpen(true);
-                  }}
-                >
-                  <img
-                    src={imageUrl}
-                    alt={`Gallery ${index}`}
-                    style={{
+              {allImages.length > 0 ? (
+                allImages.map((imageUrl, index) => (
+                  <Box
+                    key={index}
+                    sx={{
                       width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
+                      height: 200,
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      backgroundColor: '#f5f5f5',
+                      cursor: 'pointer',
                     }}
-                  />
+                    onClick={() => {
+                      setCurrentImageIndex(index);
+                      setImageModalOpen(true);
+                    }}
+                  >
+                    <img
+                      src={imageUrl}
+                      alt={`Gallery ${index}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                    />
+                  </Box>
+                ))
+              ) : (
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  height: '100%',
+                  width: '100%'
+                }}>
+                  <Typography variant="body1" color="text.secondary">
+                    No images available
+                  </Typography>
                 </Box>
-              ))}
+              )}
             </Box>
           </Grid>
         </Grid>
 
-        {/* Brand details */}
+        {/* Quick franchise details */}
         <Box mt={4}>
-          <Typography variant="subtitle1" mb={2}>
-            {selectedBrand.personalDetails?.brandCategories &&
-              selectedBrand.personalDetails.brandCategories.length > 0 && (
-                <Box>
-                  {selectedBrand.personalDetails.brandCategories.map(
-                    (category, index) => (
-                      <Box key={index}>
-                        <Box display="flex" gap={3} flexWrap="wrap">
-                          <Typography variant="body1">
-                            <strong>Category:</strong> {category.child}
-                          </Typography>
-                          <Typography variant="body1">
-                            <strong>Investment:</strong>{" "}
-                            {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
-                              (model) => model.investmentRange
-                            )}
-                          </Typography>
-                          <Typography variant="body1">
-                            <strong>Area:</strong>{" "}
-                            {selectedBrand.franchiseDetails?.modelsOfFranchise?.map(
-                              (model) => model.areaRequired
-                            )}{" "}
-                            sq.ft
-                          </Typography>
-                        </Box>
-
-                        {selectedBrand.personalDetails?.expansionLocation?.length > 0 && (
-                          <Typography variant="body1" mt={1}>
-                            <strong>Expansions:</strong>
-                            {selectedBrand.personalDetails.expansionLocation.map(
-                              (location) => ` ${location.city},`
-                            )}
-                          </Typography>
-                        )}
-                      </Box>
-                    )
-                  )}
-                </Box>
-              )}
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+            Franchise Quick Facts
           </Typography>
+          <Grid container spacing={2}>
+            {selectedBrand.franchiseDetails?.fico?.map((model, index) => (
+              <React.Fragment key={index}>
+                <Grid item xs={12} md={4}>
+                  <Paper sx={{ p: 2, height: '100%' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                      <AccountTree sx={{ color: "#ff9800", mr: 1 }} />
+                      {model.franchiseModel || "Franchise Model"}
+                    </Typography>
+                    <Typography variant="body2">
+                      {model.franchiseType || "Not specified"}
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Paper sx={{ p: 2, height: '100%' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                      <AttachMoney sx={{ color: "#ff9800", mr: 1 }} />
+                      Investment Range
+                    </Typography>
+                    <Typography variant="body2">
+                      {model.investmentRange || "Not specified"}
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Paper sx={{ p: 2, height: '100%' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                      <LocationOn sx={{ color: "#ff9800", mr: 1 }} />
+                      Area Required
+                    </Typography>
+                    <Typography variant="body2">
+                      {model.areaRequired || "Not specified"}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </React.Fragment>
+            ))}
+          </Grid>
         </Box>
+
+        {/* Brand description */}
+        {selectedBrand.brandDetails?.brandDescription && (
+          <Box mt={4}>
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+              Brand Story
+            </Typography>
+            <Paper sx={{ p: 3 }}>
+              <div dangerouslySetInnerHTML={{ __html: selectedBrand.brandDetails.brandDescription }} />
+            </Paper>
+          </Box>
+        )}
 
         {/* Overview tab */}
         <Box mt={4}>
@@ -601,18 +716,12 @@ const BrandDetails = () => {
                     size="small"
                     sx={{ mb: 2 }}
                   >
-                    {(selectedBrand.personalDetails?.expansionLocation || [])
-                      .length > 0 ? (
-                      selectedBrand.personalDetails.expansionLocation.map(
-                        (loc, i) => (
-                          <MenuItem key={i} value={loc.city}>
-                            {loc.city}
-                          </MenuItem>
-                        )
-                      )
-                    ) : (
-                      <MenuItem value="">Not specified</MenuItem>
-                    )}
+                    {(selectedBrand.expansionLocationData?.expansionLocations?.domestic?.cities || [])
+                      .map((city, i) => (
+                        <MenuItem key={i} value={city}>
+                          {city}
+                        </MenuItem>
+                      ))}
                   </TextField>
                 </Grid>
                 <Grid item xs={12} md={4}>

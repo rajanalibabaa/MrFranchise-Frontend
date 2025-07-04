@@ -425,7 +425,7 @@ const BrandRegisterForm = () => {
         });
 
         const response = await axios.post(
-          "http://localhost:5000/api/v1/brandlisting/createBrandListing",
+          "http://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {
@@ -830,369 +830,417 @@ const BrandRegisterForm = () => {
     }
     return value || "Not provided";
   };
-  const renderPreviewContent = () => {
-    // Add null checks for all form data sections
-    const brandDetails = formData.brandDetails || {};
-    const franchiseDetails = formData.franchiseDetails || {};
-    const uploads = formData.uploads || {};
 
-    // Helper function to render file previews
-    const renderFilePreviews = (files) => {
-      if (!files || !Array.isArray(files) || files.length === 0)
-        return "No files uploaded";
 
-      return (
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
-          {files.map((file, index) => {
-            // Handle both string URLs and File objects
-            let url =
-              typeof file === "string"
-                ? file
-                : file instanceof File
-                ? URL.createObjectURL(file)
-                : "";
+const renderPreviewContent = () => {
+  const { 
+    brandDetails = {}, 
+    franchiseDetails = {}, 
+    expansionLocationData = {}, 
+    uploads = {} 
+  } = formData;
 
-            // Determine file type
-            const isImage =
-              typeof file === "string"
-                ? file.match(/\.(jpeg|jpg|gif|png)$/i)
-                : file.type?.includes("image");
-            const isVideo =
-              typeof file === "string"
-                ? file.match(/\.(mp4|mov|avi)$/i)
-                : file.type?.includes("video");
-            const fileName =
-              typeof file === "string" ? file.split("/").pop() : file.name;
+  // Helper function to render file previews
+ const renderFilePreviews = (files) => {
+  if (!files || !Array.isArray(files) || files.length === 0) {
+    return <Typography variant="body2" color="textSecondary">No files uploaded</Typography>;
+  }
 
-            return (
-              <Box key={index} sx={{ width: 150 }}>
-                {isImage ? (
-                  <img
-                    src={url}
-                    alt={`Preview ${index}`}
-                    style={{ width: "100%", height: "auto", borderRadius: 4 }}
-                  />
-                ) : isVideo ? (
-                  <video controls style={{ width: "100%", borderRadius: 4 }}>
-                    <source src={url} type={file.type || "video/mp4"} />
-                    Your browser does not support the video tag.
-                  </video>
-                ) : (
-                  <Paper sx={{ p: 1, textAlign: "center" }}>
-                    <Typography variant="caption">{fileName}</Typography>
-                  </Paper>
-                )}
-                <Typography
-                  variant="caption"
-                  noWrap
-                  sx={{ display: "block", mt: 0.5 }}
-                >
-                  {fileName}
-                </Typography>
-              </Box>
-            );
-          })}
-        </Box>
-      );
-    };
+  return (
+    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
+      {files.map((file, index) => {
+        // Handle case where file is already a URL string
+        if (typeof file === 'string') {
+          const fileName = file.split('/').pop();
+          const isImage = fileName.match(/\.(jpeg|jpg|gif|png)$/i);
+          const isVideo = fileName.match(/\.(mp4|mov|avi)$/i);
 
-    // Helper function to render brand categories
-    const renderBrandCategories = (categories) => {
-      if (!categories || categories.length === 0)
-        return "No categories selected";
-
-      return (
-        <Box>
-          {categories.map((category, index) => (
-            <Box
-              key={index}
-              sx={{
-                mb: 1,
-                p: 1,
-                border: "1px solid #e0e0e0",
-                borderRadius: 1,
-              }}
-            >
-              <Typography variant="body2">
-                <strong>Main Category:</strong>{" "}
-                {category.main || "Not specified"}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Sub Category:</strong> {category.sub || "Not specified"}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Child Category:</strong>{" "}
-                {category.child || "Not specified"}
+          return (
+            <Box key={index} sx={{ width: 150 }}>
+              {isImage ? (
+                <img
+                  src={file}
+                  alt={`Preview ${index}`}
+                  style={{ width: "100%", height: "auto", borderRadius: 4 }}
+                />
+              ) : isVideo ? (
+                <video controls style={{ width: "100%", borderRadius: 4 }}>
+                  <source src={file} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <Paper sx={{ p: 1, textAlign: "center" }}>
+                  <Typography variant="caption">{fileName}</Typography>
+                </Paper>
+              )}
+              <Typography variant="caption" noWrap sx={{ display: "block", mt: 0.5 }}>
+                {fileName}
               </Typography>
             </Box>
-          ))}
-        </Box>
-      );
-    };
+          );
+        }
 
-    // Helper function to render expansion locations
-    const renderExpansionLocations = (locations) => {
-      if (!locations || locations.length === 0) return "No locations added";
+        // Handle case where file is a File object
+        if (file instanceof File) {
+          const url = URL.createObjectURL(file);
+          const fileName = file.name;
+          const isImage = fileName.match(/\.(jpeg|jpg|gif|png)$/i);
+          const isVideo = fileName.match(/\.(mp4|mov|avi)$/i);
 
-      return (
-        <Box>
-          {locations.map((location, index) => (
-            <Box
-              key={index}
-              sx={{
-                mb: 1,
-                p: 1,
-                border: "1px solid #e0e0e0",
-                borderRadius: 1,
-              }}
-            >
-              <Typography variant="body2">
-                <strong>Country:</strong> {location.country || "Not specified"}
-              </Typography>
-              <Typography variant="body2">
-                <strong>State:</strong> {location.state || "Not specified"}
-              </Typography>
-              <Typography variant="body2">
-                <strong>District:</strong>{" "}
-                {location.district || "Not specified"}
-              </Typography>
-              <Typography variant="body2">
-                <strong>City:</strong> {location.city || "Not specified"}
+          return (
+            <Box key={index} sx={{ width: 150 }}>
+              {isImage ? (
+                <img
+                  src={url}
+                  alt={`Preview ${index}`}
+                  style={{ width: "100%", height: "auto", borderRadius: 4 }}
+                />
+              ) : isVideo ? (
+                <video controls style={{ width: "100%", borderRadius: 4 }}>
+                  <source src={url} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <Paper sx={{ p: 1, textAlign: "center" }}>
+                  <Typography variant="caption">{fileName}</Typography>
+                </Paper>
+              )}
+              <Typography variant="caption" noWrap sx={{ display: "block", mt: 0.5 }}>
+                {fileName}
               </Typography>
             </Box>
-          ))}
-        </Box>
-      );
-    };
+          );
+        }
 
-    // Helper function to render FICO models with all details
-    const renderFicoModels = (ficoModels) => {
-      if (!ficoModels || ficoModels.length === 0) return "No FICO models added";
+        // Fallback for other cases
+        return (
+          <Box key={index} sx={{ width: 150 }}>
+            <Paper sx={{ p: 1, textAlign: "center" }}>
+              <Typography variant="caption">Unsupported file type</Typography>
+            </Paper>
+          </Box>
+        );
+      })}
+    </Box>
+  );
+};
 
-      return (
-        <Box>
-          {ficoModels.map((model, index) => {
-            // Filter out empty/null/undefined fields
-            const modelFields = Object.entries(model).filter(
-              ([, value]) =>
-                value !== "" && value !== null && value !== undefined
-            );
+  // Improved location rendering with proper formatting
+  const renderLocationDetails = (location, index) => (
+    <Paper key={index} sx={{ p: 2, mb: 2, border: "1px solid #e0e0e0" }}>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6} md={4}>
+          <Typography variant="body2">
+            <strong>Country:</strong> {location.country || "Not specified"}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <Typography variant="body2">
+            <strong>State:</strong> {location.state || "Not specified"}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <Typography variant="body2">
+            <strong>District:</strong> {location.district || "Not specified"}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <Typography variant="body2">
+            <strong>City:</strong> {location.city || "Not specified"}
+          </Typography>
+        </Grid>
+        {location.pincode && (
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography variant="body2">
+              <strong>Pincode:</strong> {location.pincode}
+            </Typography>
+          </Grid>
+        )}
+      </Grid>
+    </Paper>
+  );
 
-            if (modelFields.length === 0) {
-              return (
-                <Box
-                  key={index}
-                  sx={{
-                    mb: 2,
-                    p: 2,
-                    border: "1px solid #e0e0e0",
-                    borderRadius: 1,
-                  }}
-                >
-                  <Typography variant="body2">
-                    Model {index + 1} (No details provided)
-                  </Typography>
-                </Box>
-              );
-            }
-
-            return (
-              <Box
-                key={index}
-                sx={{
-                  mb: 2,
-                  p: 2,
-                  border: "1px solid #e0e0e0",
-                  borderRadius: 1,
-                }}
-              >
-                <Typography
-                  variant="subtitle2"
-                  sx={{ mb: 1, fontWeight: "bold" }}
-                >
-                  Model {index + 1}
-                </Typography>
-
-                <Grid container spacing={1}>
-                  {modelFields.map(([key, value]) => (
-                    <Grid item xs={12} sm={6} key={key}>
-                      <Typography variant="body2">
-                        <strong>{formatFieldName(key)}:</strong> {value}
-                      </Typography>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Box>
-            );
-          })}
-        </Box>
-      );
-    };
+  // Improved expansion details section
+  const renderExpansionDetails = () => {
+    const { 
+      isInternationalExpansion,
+      currentOutletLocations = {},
+      expansionLocations = {}
+    } = expansionLocationData;
 
     return (
-      <Box
-        sx={{
-          mt: 2,
-          px: { xs: 0.5, sm: 2, md: 4 },
-          width: "100%",
-          maxWidth: "100vw",
-        }}
-      >
-        <TableContainer
-          component={Paper}
-          sx={{
-            mb: 4,
-            boxShadow: { xs: 0, sm: 1 },
-            borderRadius: { xs: 0, sm: 2 },
-            overflowX: "auto",
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            sx={{
-              p: 2,
-              fontWeight: "bold",
-              backgroundColor: "#f5f5f5",
-              fontSize: { xs: 16, sm: 18 },
-            }}
-          >
-            Brand Details
+      <Accordion defaultExpanded sx={{ mb: 3 }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="subtitle1" fontWeight="bold">
+            Expansion & Location Details
           </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body1" gutterBottom>
+              <strong>International Expansion Planned:</strong> 
+              {isInternationalExpansion ? ' Yes' : ' No'}
+            </Typography>
+          </Box>
+
+          {/* Current Outlet Locations */}
+          <Accordion sx={{ mb: 3 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="subtitle1" fontWeight="bold">
+                Current Outlet Locations
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
+                Domestic Locations
+              </Typography>
+              {currentOutletLocations?.domestic?.locations?.length > 0 ? (
+                currentOutletLocations.domestic.locations.map((loc, idx) => 
+                  renderLocationDetails(loc, idx))
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  No domestic locations added
+                </Typography>
+              )}
+
+              <Typography variant="subtitle2" gutterBottom sx={{ mt: 3, mb: 2 }}>
+                International Locations
+              </Typography>
+              {currentOutletLocations?.international?.locations?.length > 0 ? (
+                currentOutletLocations.international.locations.map((loc, idx) => 
+                  renderLocationDetails(loc, idx))
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  No international locations added
+                </Typography>
+              )}
+            </AccordionDetails>
+          </Accordion>
+
+          {/* Expansion Locations */}
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="subtitle1" fontWeight="bold">
+                Planned Expansion Locations
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
+                Domestic Expansion
+              </Typography>
+              {expansionLocations?.domestic?.locations?.length > 0 ? (
+                expansionLocations.domestic.locations.map((loc, idx) => 
+                  renderLocationDetails(loc, idx))
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  No domestic expansion locations planned
+                </Typography>
+              )}
+
+              <Typography variant="subtitle2" gutterBottom sx={{ mt: 3, mb: 2 }}>
+                International Expansion
+              </Typography>
+              {expansionLocations?.international?.locations?.length > 0 ? (
+                expansionLocations.international.locations.map((loc, idx) => 
+                  renderLocationDetails(loc, idx))
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  No international expansion locations planned
+                </Typography>
+              )}
+            </AccordionDetails>
+          </Accordion>
+        </AccordionDetails>
+      </Accordion>
+    );
+  };
+
+  // Brand details section
+  const renderBrandDetails = () => (
+    <Accordion defaultExpanded sx={{ mb: 3 }}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Typography variant="subtitle1" fontWeight="bold">
+          Brand Details
+        </Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <TableContainer component={Paper} sx={{ mb: 2 }}>
           <Table size="small">
             <TableBody>
               {Object.entries(brandDetails).map(([key, value]) => {
-                // Skip brandCategories and expansionLocation as we'll render them separately
-                if (key === "brandCategories" || key === "expansionLocation") {
-                  return null;
+                if (key === 'awardText') {
+                  return (
+                    <TableRow key={key}>
+                      <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>
+                        Awards
+                      </TableCell>
+                      <TableCell>
+                        {value?.length > 0 ? (
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                            {value.map((award, idx) => (
+                              <Chip key={idx} label={award} variant="outlined" />
+                            ))}
+                          </Box>
+                        ) : 'None'}
+                      </TableCell>
+                    </TableRow>
+                  );
                 }
-                return (
-                  <TableRow key={key}>
-                    <TableCell
-                      sx={{
-                        fontWeight: "bold",
-                        width: { xs: "45%", sm: "30%" },
-                        fontSize: { xs: 13, sm: 15 },
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {formatFieldName(key)}
-                    </TableCell>
-                    <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
-                      {formatFieldValue(value)}
-                    </TableCell>
-                  </TableRow>
-                );
+                
+                if (typeof value !== 'object' || value === null) {
+                  return (
+                    <TableRow key={key}>
+                      <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>
+                        {formatFieldName(key)}
+                      </TableCell>
+                      <TableCell>
+                        {value || 'Not provided'}
+                      </TableCell>
+                    </TableRow>
+                  );
+                }
+                return null;
               })}
-
-              {/* Brand Categories row */}
-              <TableRow>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    width: { xs: "45%", sm: "30%" },
-                    fontSize: { xs: 13, sm: 15 },
-                  }}
-                >
-                  Brand Categories
-                </TableCell>
-                <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
-                  {renderBrandCategories(brandDetails.brandCategories)}
-                </TableCell>
-              </TableRow>
-
-              {/* Expansion Locations row */}
-              <TableRow>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    width: { xs: "45%", sm: "30%" },
-                    fontSize: { xs: 13, sm: 15 },
-                  }}
-                >
-                  Expansion Locations
-                </TableCell>
-                <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
-                  {renderExpansionLocations(brandDetails.expansionLocation)}
-                </TableCell>
-              </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
+      </AccordionDetails>
+    </Accordion>
+  );
 
-        <TableContainer
-          component={Paper}
-          sx={{
-            mb: 2,
-            boxShadow: { xs: 0, sm: 1 },
-            borderRadius: { xs: 0, sm: 2 },
-            overflowX: "auto",
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            sx={{
-              p: 2,
-              fontWeight: "bold",
-              backgroundColor: "#ff9800",
-              fontSize: { xs: 16, sm: 18 },
-            }}
-          >
-            Franchise Details
-          </Typography>
-
+  // Franchise details section
+  const renderFranchiseDetails = () => (
+    <Accordion defaultExpanded sx={{ mb: 3 }}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Typography variant="subtitle1" fontWeight="bold">
+          Franchise Details
+        </Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <TableContainer component={Paper} sx={{ mb: 2 }}>
           <Table size="small">
             <TableBody>
-              {Object.entries(franchiseDetails).map(([key, value]) => (
-                <TableRow key={key}>
-                  <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
-                    {formatFieldName(key)}
-                  </TableCell>
-                  <TableCell>
-                    {key === "fico"
-                      ? renderFicoModels(value)
-                      : formatFieldValue(value)}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {Object.entries(franchiseDetails).map(([key, value]) => {
+                if (key === 'brandCategories') {
+                  return (
+                    <TableRow key={key}>
+                      <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>
+                        Brand Categories
+                      </TableCell>
+                      <TableCell>
+                        {value.main && (
+                          <Box>
+                            <Typography><strong>Main:</strong> {value.main}</Typography>
+                            {value.sub && <Typography><strong>Sub:</strong> {value.sub}</Typography>}
+                            {value.child && <Typography><strong>Child:</strong> {value.child}</Typography>}
+                          </Box>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                }
+
+                if (key === 'fico') {
+                  return (
+                    <TableRow key={key}>
+                      <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>
+                        FICO Models
+                      </TableCell>
+                      <TableCell>
+                        {value?.length > 0 ? (
+                          <Box sx={{ mt: 1 }}>
+                            {value.map((model, idx) => (
+                              <Accordion key={idx} sx={{ mb: 2 }}>
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                  <Typography>FICO Model {idx + 1}</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                  <Grid container spacing={2}>
+                                    {Object.entries(model).map(([field, val]) => (
+                                      <Grid item xs={12} sm={6} key={field}>
+                                        <Typography variant="body2">
+                                          <strong>{formatFieldName(field)}:</strong> {val || 'Not specified'}
+                                        </Typography>
+                                      </Grid>
+                                    ))}
+                                  </Grid>
+                                </AccordionDetails>
+                              </Accordion>
+                            ))}
+                          </Box>
+                        ) : 'No FICO models added'}
+                      </TableCell>
+                    </TableRow>
+                  );
+                }
+
+                if (typeof value !== 'object' || value === null) {
+                  return (
+                    <TableRow key={key}>
+                      <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>
+                        {formatFieldName(key)}
+                      </TableCell>
+                      <TableCell>
+                        {Array.isArray(value) ? 
+                          (value.length > 0 ? (
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                              {value.map((item, idx) => (
+                                <Chip key={idx} label={item} variant="outlined" />
+                              ))}
+                            </Box>
+                          ) : 'None') : 
+                          (value || 'Not provided')}
+                      </TableCell>
+                    </TableRow>
+                  );
+                }
+                return null;
+              })}
             </TableBody>
           </Table>
         </TableContainer>
+      </AccordionDetails>
+    </Accordion>
+  );
 
+  // Uploads section
+  const renderUploads = () => (
+    <Accordion defaultExpanded sx={{ mb: 2 }}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Typography variant="subtitle1" fontWeight="bold">
+          Uploads
+        </Typography>
+      </AccordionSummary>
+      <AccordionDetails>
         <TableContainer component={Paper}>
-          <Typography
-            variant="subtitle1"
-            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5" }}
-          >
-            Uploads
-          </Typography>
           <Table size="small">
             <TableBody>
               {Object.entries(uploads).map(([key, value]) => (
                 <TableRow key={key}>
-                  <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                  <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>
                     {formatFieldName(key)}
                   </TableCell>
                   <TableCell>
-                    {value.length > 0 ? (
-                      <>
-                        <Typography variant="body2" sx={{ mb: 1 }}>
-                          {value.length} file(s) uploaded
-                        </Typography>
-                        {renderFilePreviews(value)}
-                      </>
-                    ) : (
-                      "No files uploaded"
-                    )}
+                    {renderFilePreviews(value)}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-      </Box>
-    );
-  };
+      </AccordionDetails>
+    </Accordion>
+  );
 
+  return (
+    <Box sx={{ p: 2 }}>
+      {renderBrandDetails()}
+      {renderFranchiseDetails()}
+      {renderExpansionDetails()}
+      {renderUploads()}
+    </Box>
+  );
+};
   return (
     <>
       <Box
@@ -1366,23 +1414,44 @@ const BrandRegisterForm = () => {
         </Box>
 
         {/* Preview Dialog */}
-        <Dialog
-          open={openPreview}
-          onClose={handlePreviewClose}
-          maxWidth="md"
-          fullWidth
-          scroll="paper"
-        >
-          <DialogTitle sx={{ borderBottom: "1px solid #e0e0e0" }}>
-            Form Data Preview
-          </DialogTitle>
-          <DialogContent dividers>{renderPreviewContent()}</DialogContent>
-          <DialogActions sx={{ borderTop: "1px solid #e0e0e0" }}>
-            <Button onClick={handlePreviewClose} variant="contained">
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
+      <Dialog
+  open={openPreview}
+  onClose={handlePreviewClose}
+  maxWidth="lg" // Changed from "md" to "lg" for wider view
+  fullWidth
+  scroll="paper"
+  sx={{
+    '& .MuiDialog-paper': {
+      width: '90%', // Take up 90% of screen width
+      maxWidth: '1200px', // Set a maximum width
+      height: '90vh' // Take up 90% of viewport height
+    }
+  }}
+>
+  <DialogTitle sx={{ 
+    borderBottom: "1px solid #e0e0e0",
+    position: 'sticky',
+    top: 0,
+    backgroundColor: 'background.paper',
+    zIndex: 1
+  }}>
+    Form Data Preview
+  </DialogTitle>
+  <DialogContent dividers sx={{ overflowY: 'auto' }}>
+    {renderPreviewContent()}
+  </DialogContent>
+  <DialogActions sx={{ 
+    borderTop: "1px solid #e0e0e0",
+    position: 'sticky',
+    bottom: 0,
+    backgroundColor: 'background.paper',
+    zIndex: 1
+  }}>
+    <Button onClick={handlePreviewClose} variant="contained">
+      Close
+    </Button>
+  </DialogActions>
+</Dialog>
 
         {/* Snackbar for notifications */}
         <Snackbar
