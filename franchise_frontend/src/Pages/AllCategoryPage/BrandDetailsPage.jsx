@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
-import BrandDetails from "./BrandDetail.jsx"; // This will be our renamed component
+import BrandDetails from "./BrandDetail.jsx";
 import { openBrandDialog, closeBrandDialog } from "../../Redux/Slices/brandSlice.jsx";
 
 function BrandDetailsPage() {
@@ -11,13 +11,20 @@ function BrandDetailsPage() {
   const { data: brands } = useSelector((state) => state.brands);
 
   useEffect(() => {
-    // Find the brand by ID when the route changes
-    const brand = location.state?.brand ||brands.find(b => b.uuid === brandId);
+    
+    const storedBrand = localStorage.getItem(`brand-${brandId}`);
+    if (storedBrand) {
+      dispatch(openBrandDialog(JSON.parse(storedBrand)));
+      return;
+    }
+
+    // If not in localStorage, try to find it in Redux store
+    const brand = brands.find(b => b.uuid === brandId);
     if (brand) {
       dispatch(openBrandDialog(brand));
     } else {
       dispatch(closeBrandDialog());
-      navigate('/brand'); // Redirect if brand not found
+      navigate('/brands'); 
     }
   }, [brandId, brands, dispatch, navigate, location.state]);
 

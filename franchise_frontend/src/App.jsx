@@ -107,7 +107,9 @@ function App() {
           <Route path="/registerhandleuser" element={<RegisterHandleUser />} />
           <Route path="/brandlistingform" element={<BrandRegisterForm />} />
           <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
-          <Route path="/brandviewpage" element={<BrandCategroyViewPage />} />
+          <Route path="/brandviewpage" element={<BrandCategroyViewPage />} >
+          
+          </Route>
 
           <Route path="/investordashboard" element={<ProfilePage />}>
             <Route index element={<DashBoard />} />
