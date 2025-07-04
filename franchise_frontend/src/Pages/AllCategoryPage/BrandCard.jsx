@@ -20,6 +20,8 @@ import {
 } from '@mui/icons-material';
 import LoginPage from '../LoginPage/LoginPage';
 import { openBrandDialog } from '../../Redux/Slices/brandSlice.jsx';
+import brandData from './BrandDetailsPage.jsx';
+
 
 
 const BrandCard = ({
@@ -33,16 +35,22 @@ const BrandCard = ({
 }) => {
 const [isProcessingLike, setIsProcessingLike] = useState({});
 
-// console.log("brand",brand.length)
 
 const navigate = useNavigate();
 const dispatch = useDispatch()
 
 const handleOpenBrand = (brand) => {
-  // Update Redux state
-  dispatch(openBrandDialog(brand));
-  // Update URL
-  navigate(`/brands/${brand.uuid}`);
+  
+
+  const newWindow = window.open(`/brands/${brand.uuid}`, '_blank');
+  localStorage.setItem(`brand-${brand.uuid}`, JSON.stringify(brand));
+
+  if (newWindow) {
+    newWindow.onbeforeunload = () => {
+      localStorage.removeItem(`brand-${brand.uuid}`);
+    };
+  }
+
 };
 
 const handleLikeClick = async (brandId, isLiked) => {
