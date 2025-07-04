@@ -38,6 +38,7 @@ import { Editor } from "@tinymce/tinymce-react";
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Info, InfoOutlined, InfoOutlineRounded } from "@mui/icons-material";
+import { height } from "@mui/system";
 
 const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   const [currentFicoModel, setCurrentFicoModel] = React.useState({
@@ -1883,10 +1884,11 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
       )}
     </Typography>
     <Editor
+   
       apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
       value={data.brandDescription || ""}
       init={{
-        height: 400,
+        height: 450,
         menubar: true,
         plugins: [
           'advlist', 'autolink', 'lists', 'link', 'image',

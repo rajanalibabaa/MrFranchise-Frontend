@@ -95,6 +95,7 @@ const Uploads = ({
     text: "",
     documents: [],
   });
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const handleFileChange =
     (field, options = {}) =>
@@ -701,45 +702,123 @@ const Uploads = ({
       </StyledPaper>
 
       {/* Section 4: Awards & Recognitions */}
-      <StyledPaper>
-        <SectionTitle variant="h6">Awards & Recognitions</SectionTitle>
+      <StyledPaper sx={{ p: 3 }}>
+        <SectionTitle variant="h6">
+           Award Description & Documents 
+          <Tooltip
+            title={
+              <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+                <strong>Brand Images</strong> <br />
+                Accepted formats: JPEG, PNG ( up to 1MB )
+              </span>
+            }
+            placement="right-start"
+            arrow
+            enterTouchDelay={0} // makes it responsive on mobile too
+          >
+            <IconButton
+              size="small"
+              sx={{
+                // p: 0.8,
+                color: "warning.main",
+                // backgroundColor: 'info.light',
+                "&:hover": {
+                  backgroundColor: "info.main",
+                  color: "white",
+                },
+                marginLeft: "5px",
+                // borderRadius: '50%',
+              }}
+            >
+              <InfoOutlined fontSize="medium" />
+            </IconButton>
+          </Tooltip>{" "}
+        </SectionTitle>
 
-        <Grid  display={"flex"} spacing={2}>
+        <Grid container spacing={2} alignItems="flex-start">
+          {/* Award Description Field */}
           <Grid item xs={12} md={6}>
             <TextField
+            
               label="Award Description"
               value={currentAward.text}
               onChange={handleAwardTextChange}
-              sx={{width:'90vh'}}
+              sx={{
+                 width:{md:500,}
+              }}
+              error={!currentAward.text && formSubmitted}
+              helperText={
+                !currentAward.text && formSubmitted
+                  ? "Award description is required"
+                  : ""
+              }
             />
           </Grid>
 
+          {/* Document Upload with Error Handling */}
           <Grid item xs={12} md={4}>
-            <Button
-              component="label"
-              variant="outlined"
-               
-              startIcon={<CloudUpload />}
-            >
-              Upload Document
-              <VisuallyHiddenInput
-                type="file"
-                accept=".pdf,.doc,.docx,image/*"
-                onChange={handleAwardFileChange}
-              />
-            </Button>
-            {currentAward.document && (
-              <Typography variant="caption">
-                {currentAward.document.name}
-              </Typography>
-            )}
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              <UploadButton
+                component="label"
+                variant="outlined"
+                size="small"
+                sx={{
+                
+                  borderColor: "green",
+                  color: "#5a8f29",
+                  "&:hover": {
+                    backgroundColor: "rgba(122, 208, 58, 0.08)",
+                    borderColor: "#5db024",
+                  },
+                  ...(!currentAward.document && formSubmitted
+                    ? {
+                        borderColor: "error.main",
+                        color: "error.main",
+                      }
+                    : {}),
+                }}
+                startIcon={<CloudUpload />}
+              >
+                Upload Document
+                <VisuallyHiddenInput
+                  type="file"
+                  accept=".pdf,.doc,.docx,image/*"
+                  onChange={handleAwardFileChange}
+                />
+              </UploadButton>
+
+              {/* Document name and error message */}
+              <Box sx={{ mt: 0.5, minHeight: 24 }}>
+                {currentAward.document ? (
+                  <Typography variant="caption" sx={{ color: "#666" }}>
+                    {currentAward.document.name}
+                  </Typography>
+                ) : (
+                  formSubmitted && (
+                    <Typography variant="caption" sx={{ color: "error.main" }}>
+                      Please upload a document
+                    </Typography>
+                  )
+                )}
+              </Box>
+            </Box>
           </Grid>
 
+          {/* Add Button */}
           <Grid item xs={12} md={2}>
             <Button
               variant="contained"
               fullWidth
-              onClick={handleAddAward}
+              sx={{
+                py: 2,
+                backgroundColor: "#7ad03a",
+                "&:hover": { backgroundColor: "#5db024" },
+                "&:disabled": { backgroundColor: "#e0e0e0" },
+              }}
+              onClick={() => {
+                setFormSubmitted(true);
+                handleAddAward();
+              }}
               disabled={!currentAward.text || !currentAward.document}
             >
               Add Award
