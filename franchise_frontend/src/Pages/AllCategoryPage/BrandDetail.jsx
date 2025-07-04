@@ -272,9 +272,14 @@ const BrandDetails = () => {
 
   if (!selectedBrand) return null;
 
-  const allVideos = selectedBrand.uploads?.brandPromotionVideo || [];
-  const allImages = selectedBrand.uploads?.brandLogo ? [selectedBrand.uploads.brandLogo] : [];
-
+  const allVideos = selectedBrand.uploads?.franchisePromotionVideo || [];
+const allImages = [
+    ...(selectedBrand.uploads?.brandLogo
+      ? [selectedBrand.uploads.brandLogo]
+      : []),
+    ...(selectedBrand.uploads?.exteriorOutlet || []),
+    ...(selectedBrand.uploads?.interiorOutlet || []),
+]
   const formatCurrency = (value) => {
     if (!value) return "Not specified";
     return new Intl.NumberFormat("en-IN", {
@@ -287,16 +292,15 @@ const BrandDetails = () => {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* Back button */}
-      <Button
+      {/* <Button
         startIcon={<ArrowBack />}
         onClick={handleClose}
         sx={{ mb: 3, color: "#ff9800" }}
       >
         Back to Brands
-      </Button>
+      </Button> */}
 
       {/* Main content */}
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
         {/* Brand header */}
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
           <Box display="flex" alignItems="center" gap={3}>
@@ -347,9 +351,6 @@ const BrandDetails = () => {
               </Typography>
             </Box>
           </Box>
-          <IconButton onClick={handleShareClick} size="large">
-            <Share sx={{ color: "#ff9800" }} />
-          </IconButton>
         </Box>
 
         {/* Brand quick info */}
@@ -381,7 +382,7 @@ const BrandDetails = () => {
         </Box>
 
         {/* Contact info */}
-        <Box display="flex" flexWrap="wrap" gap={3} mb={3}>
+        {/* <Box display="flex" flexWrap="wrap" gap={3} mb={3}>
           {selectedBrand.brandDetails?.mobileNumber && (
             <Box display="flex" alignItems="center" gap={1}>
               <Phone color="primary" />
@@ -400,10 +401,10 @@ const BrandDetails = () => {
               <Typography>{selectedBrand.brandDetails.website}</Typography>
             </Box>
           )}
-        </Box>
+        </Box> */}
 
         {/* Social media links */}
-        <Box display="flex" gap={2} mb={3}>
+        {/* <Box display="flex"  gap={2} mb={3}>
           {selectedBrand.brandDetails?.facebook && selectedBrand.brandDetails.facebook !== "-" && (
             <IconButton href={selectedBrand.brandDetails.facebook} target="_blank">
               <Facebook sx={{ color: "#1877F2" }} />
@@ -419,150 +420,122 @@ const BrandDetails = () => {
               <LinkedIn sx={{ color: "#0A66C2" }} />
             </IconButton>
           )}
-        </Box>
+        </Box> */}
 
         <Divider sx={{ my: 3 }} />
 
         {/* Media section */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
-            <Box sx={{ 
+<Grid  display={"flex"} gap={3}  spacing={3}>
+   {/* Right Side - Video (fixed large size) */}
+  <Grid xs={12} md={8}>
+    <Box
+      sx={{
+        width: '120vh',
+        height: 450,
+        borderRadius: 2,
+        overflow: 'hidden',
+        backgroundColor: '#f5f5f5',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {allVideos.length > 0 ? (
+        <video
+          controls
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            cursor: 'pointer',
+          }}
+        >
+          <source src={allVideos[0]} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      ) : (
+        <Typography variant="body1" color="text.secondary">
+          No promotional video available
+        </Typography>
+      )}
+    </Box>
+  </Grid>
+  {/* Left Side - Images (smaller fixed size) */}
+  <Grid xs={12} md={4}>
+  <Box
+    sx={{
+      maxHeight: 450,
+      overflowY: 'auto',
+      width:'70vh',
+      // display: 'flex',
+      // flexDirection: 'column',
+      gap: 2,
+      pr: 1, // optional padding for scrollbar
+    }}
+  >
+    {allImages.length > 0 ? (
+      allImages.map((imageUrl, index) => (
+        <Box
+          key={index}
+          sx={{
+            width: '100%',
+            height: { xs: 150, md: 300 },  // Responsive height
+            // borderRadius: 2,
+            overflow: 'hidden',
+            // backgroundColor: '#f5f5f5',
+            cursor: 'pointer',
+          }}
+          onClick={() => {
+            setCurrentImageIndex(index);
+            setImageModalOpen(true);
+          }}
+        >
+          <img
+            src={imageUrl}
+            alt={`Gallery ${index}`}
+            style={{
               width: '100%',
-              height: 430,
-              borderRadius: 2,
-              overflow: 'hidden',
-              backgroundColor: '#f5f5f5',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              {allVideos.length > 0 ? (
-                <video
-                  controls
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                  }}
-                >
-                  <source src={allVideos[0]} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-              ) : (
-                <Typography variant="body1" color="text.secondary">
-                  No promotional video available
-                </Typography>
-              )}
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Box sx={{ 
-              maxHeight: 430,
-              overflowY: 'auto',
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 2
-            }}>
-              {allImages.length > 0 ? (
-                allImages.map((imageUrl, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      width: '100%',
-                      height: 200,
-                      borderRadius: 2,
-                      overflow: 'hidden',
-                      backgroundColor: '#f5f5f5',
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => {
-                      setCurrentImageIndex(index);
-                      setImageModalOpen(true);
-                    }}
-                  >
-                    <img
-                      src={imageUrl}
-                      alt={`Gallery ${index}`}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      }}
-                    />
-                  </Box>
-                ))
-              ) : (
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  alignItems: 'center', 
-                  height: '100%',
-                  width: '100%'
-                }}>
-                  <Typography variant="body1" color="text.secondary">
-                    No images available
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          </Grid>
-        </Grid>
-
-        {/* Quick franchise details */}
-        <Box mt={4}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-            Franchise Quick Facts
-          </Typography>
-          <Grid container spacing={2}>
-            {selectedBrand.franchiseDetails?.fico?.map((model, index) => (
-              <React.Fragment key={index}>
-                <Grid item xs={12} md={4}>
-                  <Paper sx={{ p: 2, height: '100%' }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                      <AccountTree sx={{ color: "#ff9800", mr: 1 }} />
-                      {model.franchiseModel || "Franchise Model"}
-                    </Typography>
-                    <Typography variant="body2">
-                      {model.franchiseType || "Not specified"}
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <Paper sx={{ p: 2, height: '100%' }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                      <AttachMoney sx={{ color: "#ff9800", mr: 1 }} />
-                      Investment Range
-                    </Typography>
-                    <Typography variant="body2">
-                      {model.investmentRange || "Not specified"}
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <Paper sx={{ p: 2, height: '100%' }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                      <LocationOn sx={{ color: "#ff9800", mr: 1 }} />
-                      Area Required
-                    </Typography>
-                    <Typography variant="body2">
-                      {model.areaRequired || "Not specified"}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              </React.Fragment>
-            ))}
-          </Grid>
+              height: '100%',
+              objectFit: 'contain',
+            }}
+          />
         </Box>
+      ))
+    ) : (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100%',
+          width: '100%',
+        }}
+      >
+        <Typography variant="body1" color="text.secondary">
+          No images available
+        </Typography>
+      </Box>
+    )}
+  </Box>
+</Grid>
+
+
+ 
+</Grid>
+
+
+
+      
 
         {/* Brand description */}
-        {selectedBrand.brandDetails?.brandDescription && (
+        {selectedBrand.franchiseDetails?.brandDescription && (
           <Box mt={4}>
-            <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-              Brand Story
-            </Typography>
+            
             <Paper sx={{ p: 3 }}>
-              <div dangerouslySetInnerHTML={{ __html: selectedBrand.brandDetails.brandDescription }} />
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+              Brand Description
+            </Typography>
+              <div dangerouslySetInnerHTML={{ __html: selectedBrand.franchiseDetails.brandDescription }} />
             </Paper>
           </Box>
         )}
@@ -606,7 +579,7 @@ const BrandDetails = () => {
             Apply for Franchise
           </Button>
         </Box>
-      </Paper>
+    
 
       {/* Application Modal */}
       <Modal

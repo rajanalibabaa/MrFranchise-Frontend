@@ -42,7 +42,7 @@ const handleOpenBrand = (brand) => {
   // Update Redux state
   dispatch(openBrandDialog(brand));
   // Update URL
- window.open(`/brands/${brand.uuid}`, '_blank', 'noopener,noreferrer');};
+ navigate(`/brands/${brand.uuid}`);};
 
 const handleLikeClick = async (brandId, isLiked) => {
   if (isProcessingLike[brandId]) return;
