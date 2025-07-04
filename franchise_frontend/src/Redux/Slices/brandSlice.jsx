@@ -105,6 +105,25 @@ export const fetchBrands = createAsyncThunk(
   }
 );
 
+export const fetchBrandById = createAsyncThunk(
+  "brands/fetchBrandById",
+  async (brandId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingById/${brandId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data.data;
+    } catch (err) {
+      return rejectWithValue(err.message || "Failed to fetch brand");
+    }
+  }
+);
+
 export const viewApi = createAsyncThunk(
   "brands/viewApi",
   async (brandID, { rejectWithValue }) => {

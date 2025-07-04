@@ -150,6 +150,7 @@ function App() {
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
           <Route path="/otherindustries" element={<Otherindustries/>}/>
           <Route path="/blogs" element={<Blogs />} />
+          
           <Route path="/brands/:brandId" element={<BrandDetailsPage />} />
           
         </Routes>

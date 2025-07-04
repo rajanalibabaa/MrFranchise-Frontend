@@ -17,7 +17,7 @@ function BrandDetailsPage() {
       dispatch(openBrandDialog(brand));
     } else {
       dispatch(closeBrandDialog());
-      navigate('/brands'); // Redirect if brand not found
+      navigate('/brand'); // Redirect if brand not found
     }
   }, [brandId, brands, dispatch, navigate, location.state]);
 

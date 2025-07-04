@@ -20,7 +20,7 @@ import {
 } from '@mui/icons-material';
 import LoginPage from '../LoginPage/LoginPage';
 import { openBrandDialog } from '../../Redux/Slices/brandSlice.jsx';
-
+import {Link} from 'react-router-dom'
 
 const BrandCard = ({
   brand,
@@ -42,8 +42,7 @@ const handleOpenBrand = (brand) => {
   // Update Redux state
   dispatch(openBrandDialog(brand));
   // Update URL
-  navigate(`/brands/${brand.uuid}`);
-};
+ window.open(`/brands/${brand.uuid}`, '_blank', 'noopener,noreferrer');};
 
 const handleLikeClick = async (brandId, isLiked) => {
   if (isProcessingLike[brandId]) return;
@@ -279,9 +278,11 @@ const handleLikeClick = async (brandId, isLiked) => {
         </Box>
 
         {/* View Details Button */}
+        
         <Button
           fullWidth
           variant="contained"
+          
           onClick={() => handleOpenBrand(brand)}
           startIcon={<Description />}
           sx={{

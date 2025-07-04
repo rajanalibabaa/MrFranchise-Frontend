@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -38,7 +38,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import OverviewTab from "./OverviewTab";
 import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
-import { closeBrandDialog } from "../../Redux/Slices/brandSlice.jsx";
+import { closeBrandDialog ,fetchBrands} from "../../Redux/Slices/brandSlice.jsx";
 import axios from "axios";
 import ShareDialogActions from "./ShareDialogActions.jsx";
 
@@ -62,6 +62,13 @@ const BrandDetails = () => {
     readyToInvest: "",
   });
   const dispatch = useDispatch();
+  const {uuid} = useParams();
+  useEffect(()=>{
+  if(uuid){
+    dispatch(fetchBrands(uuid));
+  }
+},[uuid,dispatch])
+
   const [userData, setUserData] = useState(null);
   const investorUUID = localStorage.getItem("investorUUID");
   const AccessToken = localStorage.getItem("accessToken");
@@ -138,6 +145,7 @@ const BrandDetails = () => {
     "Going To Loan",
     "Need Loan Assistance",
   ];
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
