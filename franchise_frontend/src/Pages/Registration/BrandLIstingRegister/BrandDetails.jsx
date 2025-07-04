@@ -163,7 +163,6 @@ useEffect(() => {
       } catch (error) {
         console.error("Location fetch error:", error);
         setPincodeError(error.message);
-        // Clear the location fields if pincode is invalid
         onChange({
           state: "",
           city: "",
