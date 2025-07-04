@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState ,} from 'react';
+import { useNavigate, } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import {
   Box,
   Button,
@@ -17,12 +19,12 @@ import {
   Description,
 } from '@mui/icons-material';
 import LoginPage from '../LoginPage/LoginPage';
-import { useNavigate } from 'react-router-dom';
+import { openBrandDialog } from '../../Redux/Slices/brandSlice.jsx';
 
 
 const BrandCard = ({
   brand,
-  // handleOpenBrand,
+ 
   toggleLike,
   showLogin,
   setShowLogin,
@@ -32,7 +34,17 @@ const BrandCard = ({
 const [isProcessingLike, setIsProcessingLike] = useState({});
 
 // console.log("brand",brand.length)
+
 const navigate = useNavigate();
+const dispatch = useDispatch()
+
+const handleOpenBrand = (brand) => {
+  // Update Redux state
+  dispatch(openBrandDialog(brand));
+  // Update URL
+  navigate(`/brands/${brand.uuid}`);
+};
+
 const handleLikeClick = async (brandId, isLiked) => {
   if (isProcessingLike[brandId]) return;
   
@@ -92,19 +104,8 @@ const handleLikeClick = async (brandId, isLiked) => {
       </IconButton>
 
       {/* Brand Logo Image */}
-      <Box
-        component="img"
-        src={brand.uploads?.brandLogo}
-        alt={brand.brandDetails?.brandName || "Brand logo"}
-        sx={{
-          objectFit: "contain",
-          backgroundColor: "#f9f9f9",
-          py: 2,
-          height: 180,
-          width: "100%",
-          borderBottom: "1px solid #eee",
-        }}
-      />
+   
+      
 
       {/* Content Container */}
       <Box
@@ -115,12 +116,27 @@ const handleLikeClick = async (brandId, isLiked) => {
           flexDirection: "column",
         }}
       >
+
+      <Box
+        component="img"
+        src={brand.uploads?.brandLogo}
+        alt={brand.brandDetails?.brandName || "Brand logo"}
+        sx={{
+          objectFit: "contain",
+          backgroundColor: "#f9f9f9",
+          py: 2,
+          height: "200px" ,
+          width: "100%",
+          borderBottom: "1px solid #eee",
+        }}
+      />     
+
         {/* Brand Name and Like Button */}
         <Box
           display="flex"
           justifyContent="space-between"
           alignItems="flex-start"
-          mb={1}
+          mt={1}
         >
          <Typography
   variant="h6"
@@ -158,9 +174,9 @@ const handleLikeClick = async (brandId, isLiked) => {
         </Box>
 
         {/* Categories */}
-       <Box sx={{ mb: 2, minHeight: 32 }}>
+       <Box sx={{ mb: 1, minHeight: 32 }}>
   {brand.franchiseDetails?.brandCategories ? (
-    [ "sub", "child"].map((key, index) => (
+    [  "child"].map((key, index) => (
       brand.franchiseDetails.brandCategories[key] && (
         <Chip
           key={index}
@@ -190,7 +206,7 @@ const handleLikeClick = async (brandId, isLiked) => {
             mb: 2,
             flexGrow: 1,
             "& > *:not(:last-child)": {
-              mb: 1.5,
+              mb: 1,
             },
           }}
         >
@@ -214,7 +230,7 @@ const handleLikeClick = async (brandId, isLiked) => {
         ]
           .map((loc) => loc.state || loc.country) // Use 'state' for domestic, 'country' fallback for international
           .filter(Boolean)
-          .slice(0, 2) // Show first 2 only
+          .slice(0, 1) // Show first 2 only
           .join(", ")}
 
         <Button
@@ -266,7 +282,7 @@ const handleLikeClick = async (brandId, isLiked) => {
         <Button
           fullWidth
           variant="contained"
-          onClick={() => navigate(`/brand/${brand.uuid}`)}
+          onClick={() => handleOpenBrand(brand)}
           startIcon={<Description />}
           sx={{
             py: 1.25,

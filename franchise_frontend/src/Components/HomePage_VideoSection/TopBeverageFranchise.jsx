@@ -26,9 +26,10 @@ import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import {
   fetchBrands,
+  openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
-import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
+// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 import { showLoading , hideLoading} from "../../Redux/Slices/loadingSlice";
 
 const CARD_DIMENSIONS = {
@@ -280,7 +281,7 @@ const BrandCard = React.memo(({
             <Button
               variant="contained"
               fullWidth
-          onClick={() => navigate(`/brand/${brand.uuid}`)}
+              onClick={() => handleApply(brand)}
               sx={{
                 backgroundColor: "#f29724",
                 "&:hover": {
@@ -507,7 +508,7 @@ const beverageBrands = useMemo(() => {
           />
         ))}
       </Box>
-      <BrandDetailsDialog />
+      {/* <BrandDetailsDialog /> */}
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}

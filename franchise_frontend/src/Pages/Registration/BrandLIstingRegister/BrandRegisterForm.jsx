@@ -42,12 +42,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import BrandDetails from "./BrandDetails";
 import FranchiseDetails from "./FranchiseDetails";
 import Uploads from "../BrandLIstingRegister/BrandRegisterUploads";
-// import {
-//   validateBrandDetails,
-//   validateExpansionLocationDetails,
-//   validateFranchiseDetails,
-//   validateExpansionLocationDetails
-// } from "./BrandRegisterValidation";
+import {
+  validateBrandDetails,
+  validateFranchiseDetails,
+  validateExpansionLocationDetails,
+} from "./BrandRegisterValidation";
 import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -268,7 +267,6 @@ const BrandRegisterForm = () => {
     return errors;
   };
 
- 
   const validateStep = useCallback(
     (step) => {
       const errors = {};
@@ -358,7 +356,6 @@ const BrandRegisterForm = () => {
             officeMobile: formData.brandDetails.officeMobile,
             headOfficeAddress: formData.brandDetails.headOfficeAddress,
             state: formData.brandDetails.state,
-            district: formData.brandDetails.district,
             city: formData.brandDetails.city,
             pincode: formData.brandDetails.pincode,
             website: formData.brandDetails.website,
@@ -418,19 +415,16 @@ const BrandRegisterForm = () => {
           businessPlan: formData.uploads.businessPlan,
         };
 
-        console.log("fileFields :",fileFields)
         Object.entries(fileFields).forEach(([fieldName, files]) => {
           if (files && files.length > 0) {
-            files.forEach((file, index) => {
+            files.forEach((file) => {
               formDataSend.append(fieldName, file);
             });
           }
         });
 
-
-        console.log("formDataSend :",formDataSend)
-
         const response = await axios.post(
+          // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
@@ -440,7 +434,6 @@ const BrandRegisterForm = () => {
           }
         );
 
-        console.log("response :",response.data.data)
         if (response.status === 200) {
           setSubmitSuccess(true);
           setSnackbar({
@@ -450,16 +443,16 @@ const BrandRegisterForm = () => {
           });
 
           // Reset form after successful submission
-          // localStorage.removeItem(FORM_DATA_KEY);
-          // localStorage.removeItem(FORM_STEP_KEY);
-          // setFormData(initialFormData);
-          // setActiveStep(0);
-          // setTimeout(() => {
-          //   navigate("/");
-          // }, 1500);
+          localStorage.removeItem(FORM_DATA_KEY);
+          localStorage.removeItem(FORM_STEP_KEY);
+          setFormData(initialFormData);
+          setActiveStep(0);
+          setTimeout(() => {
+            navigate("/");
+          }, 1500);
         }
       } catch (error) {
-        // console.error("Submission error:", error);
+        console.error("Submission error:", error);
         setSnackbar({
           open: true,
           message:
@@ -472,8 +465,6 @@ const BrandRegisterForm = () => {
       }
     }
   };
-
-
   const handleCountryChange = (event) => {
     setFormData((prev) => ({
       ...prev,
@@ -621,7 +612,7 @@ const BrandRegisterForm = () => {
         return (
           <BrandExpansionLocationDetails
             data={formData.expansionLocationData}
-            errors={validationErrors.BrandExpansionLocationDetails} 
+            errors={validationErrors.BrandExpansionLocationDetails}
             onChange={(newData) =>
               setFormData((prev) => ({
                 ...prev,

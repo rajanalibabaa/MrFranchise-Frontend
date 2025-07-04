@@ -176,14 +176,14 @@ const brandSlice = createSlice({
       };
       state.filteredData = state.data;
     },
-    // openBrandDialog: (state, action) => {
-    //   state.openDialog = true;
-    //   state.selectedBrand = action.payload;
-    // },
-    // closeBrandDialog: (state) => {
-    //   state.openDialog = false;
-    //   state.selectedBrand = null;
-    // },
+    openBrandDialog: (state, action) => {
+      state.openDialog = true;
+      state.selectedBrand = action.payload;
+    },
+    closeBrandDialog: (state) => {
+      state.openDialog = false;
+      state.selectedBrand = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -370,6 +370,6 @@ const applyFiltersToBrands = (brands, filters) => {
   return result;
 };
 
-export const { setFilters, clearFilters ,openBrandDialog} =
+export const { setFilters, clearFilters, openBrandDialog, closeBrandDialog } =
   brandSlice.actions;
 export default brandSlice.reducer;

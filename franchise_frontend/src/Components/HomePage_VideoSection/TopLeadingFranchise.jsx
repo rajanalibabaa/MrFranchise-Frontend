@@ -28,9 +28,10 @@ import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import {
   fetchBrands,
+  openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
-import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
+// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 
 const CARD_DIMENSIONS = {
@@ -59,11 +60,14 @@ const BrandCard = React.memo(({
   const observerRef = useRef();
 
   const brandId = brand.uuid;
-  const franchiseModels = brand.franchiseDetails?.modelsOfFranchise || [];
+  const franchiseModels = brand.franchiseDetails?.fico || [];
   const firstModel = franchiseModels[0] || {};
-  const categories = brand.personalDetails?.brandCategories || [];
-  const videoUrl = brand?.brandDetails?.brandPromotionVideo?.[0] || 
-                  brand?.brandDetails?.franchisePromotionVideo?.[0];
+  const categories = brand.franchiseDetails
+?.brandCategories?.child || "No category";
+;
+  const videoUrl =  
+                  brand?.uploads?.franchisePromotionVideo
+ || [];
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
 
   useEffect(() => {
@@ -128,7 +132,8 @@ const BrandCard = React.memo(({
               component="video"
               loading="lazy"
               src={videoUrl}
-              alt={brand.personalDetails?.brandName || "Brand"}
+              alt={brand.brandDetails?.brandName || "Brand"}
+              poster={brand.uploads?.brandLogo}
               sx={{
                 position: "absolute",
                 top: 0,
@@ -174,7 +179,7 @@ const BrandCard = React.memo(({
               }}
             >
               <Avatar
-                src={brand?.brandDetails?.brandLogo?.[0]}
+                src={brand?.uploads?.brandLogo?.[0]}
                 sx={{
                   width: 50,
                   height: 50,
@@ -183,7 +188,7 @@ const BrandCard = React.memo(({
                 }}
               />
               <Typography
-                variant="h6"
+                variant="body2"
                 fontWeight={600}
                 sx={{
                   whiteSpace: "nowrap",
@@ -192,7 +197,7 @@ const BrandCard = React.memo(({
                   flex: 1,
                 }}
               >
-                {brand.personalDetails?.brandName}
+                {brand.brandDetails?.brandName}
               </Typography>
               <IconButton
                 onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
@@ -215,10 +220,9 @@ const BrandCard = React.memo(({
             {categories.length > 0 && (
               <Box sx={{ mb: 2 }}>
                 <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-                  {categories.slice(0, 3).map((category, index) => (
-                    <Chip
-                      key={index}
-                      label={category.child}
+                 <Chip
+                     
+                      label={categories}
                       size="small"
                       sx={{
                         bgcolor: "rgba(255, 152, 0, 0.1)",
@@ -227,7 +231,6 @@ const BrandCard = React.memo(({
                         mb: 1,
                       }}
                     />
-                  ))}
                 </Stack>
               </Box>
             )}
@@ -371,6 +374,7 @@ const TopLeadingFranchise = () => {
 
   const handleApply = useCallback((brand) => {
     dispatch(openBrandDialog(brand));
+    navigate(`/brands/${brand.uuid}`);
   }, [dispatch]);
 
   const handleMouseEnter = useCallback(() => {
@@ -494,7 +498,7 @@ const TopLeadingFranchise = () => {
           />
         ))}
       </Box>
-      <BrandDetailsDialog />
+  
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}

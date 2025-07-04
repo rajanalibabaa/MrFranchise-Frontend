@@ -26,9 +26,10 @@ import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
-import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
+// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 function TopBrandVdoCards() {
@@ -146,6 +147,7 @@ function TopBrandVdoCards() {
 
   const handleApply = (brand) => {
     dispatch(openBrandDialog(brand));
+    navigate(`/brands/${brand.uuid}`)
   };
 
   if (brandsLoading && brands.length === 0) {
@@ -551,7 +553,7 @@ function TopBrandVdoCards() {
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Button
                         variant="contained"
-          onClick={() => navigate(`/brand/${brand.uuid}`)}
+                        onClick={() => handleApply(mainBrand)}
                         sx={{
                           px: 3,
                           fontWeight: 600,
@@ -694,8 +696,9 @@ function TopBrandVdoCards() {
                       ref={(el) => (videoRefs.current[i + 1] = el)}
                       loading="lazy"
                       src={
-                        brand.brandDetails?.brandPromotionVideo?.[0] ||
-                        brand.brandDetails?.franchisePromotionVideo?.[0]
+                        brand.uploads
+?.franchisePromotionVideo
+?.[0]
                       }
                       alt={brand.personalDetails?.brandName || "Brand"}
                       style={{
@@ -767,7 +770,7 @@ function TopBrandVdoCards() {
                       >
                         <Tooltip
                           title={
-                            brand.personalDetails?.brandName || brand.title
+                            brand.brandDetails?.brandName || brand.title
                           }
                         >
                           <Typography
@@ -783,7 +786,7 @@ function TopBrandVdoCards() {
                               overflowWrap: "break-word", // wraps at word boundaries
                             }}
                           >
-                            {brand.personalDetails?.brandName || brand.title}
+                            {brand.brandDetails?.brandName || brand.title}
                           </Typography>
                         </Tooltip>
                         <IconButton
@@ -825,9 +828,7 @@ function TopBrandVdoCards() {
                         }}
                       >
                         Categories:{" "}
-                        {(brand.personalDetails?.brandCategories || []).map(
-                          (cat) => cat.child
-                        )}
+                       {brand?.franchiseDetails?.brandCategories?.child}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -845,7 +846,7 @@ function TopBrandVdoCards() {
                       >
                         Investment:{" "}
                         {
-                          brand.franchiseDetails?.modelsOfFranchise?.[0]
+                          brand.franchiseDetails?.fico?.[0]
                             ?.investmentRange
                         }
                       </Typography>
@@ -865,7 +866,7 @@ function TopBrandVdoCards() {
                       >
                         Area:{" "}
                         {
-                          brand.franchiseDetails?.modelsOfFranchise?.[0]
+                          brand.franchiseDetails?.fico?.[0]
                             ?.areaRequired
                         }
                       </Typography>
@@ -885,7 +886,7 @@ function TopBrandVdoCards() {
                       >
                         Type:{" "}
                         {
-                          brand.franchiseDetails?.modelsOfFranchise?.[0]
+                          brand.franchiseDetails?.fico?.[0]
                             ?.franchiseType
                         }
                       </Typography>
@@ -935,8 +936,7 @@ function TopBrandVdoCards() {
         </Box>
       </Box>
 
-      {/* Brand Details Dialog */}
-      <BrandDetailsDialog  />
+    
 
       {/* Login Dialog */}
       {showLogin && (
