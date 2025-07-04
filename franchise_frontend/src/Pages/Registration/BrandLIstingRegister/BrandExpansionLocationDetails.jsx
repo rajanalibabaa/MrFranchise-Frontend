@@ -2541,7 +2541,7 @@ const renderInternationalCityDrawer = useCallback(
 
   // Main render
   return (
-    <Box sx={{ mr: { sm: 0, md: 25 }, ml: { sm: 0, md: 25 } }}>
+    <Box sx={{  pr: 1, mr: { sm: 0, md: 10 }, ml: { sm: 0, md: 10 }}}>
       <Typography
         variant="h6"
         fontWeight={700}

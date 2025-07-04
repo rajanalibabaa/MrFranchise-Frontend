@@ -198,7 +198,8 @@ const Uploads = ({
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, margin: "0 auto", p: { xs: 2, md: 3 } }}>
+    // <Box sx={{ maxWidth: 1200, margin: "0 auto", p: { xs: 2, md: 3 } }}>
+    <Box sx={{  pr: 1, mr: { sm: 0, md: 10 }, ml: { sm: 0, md: 10 } }}>
       {/* Section 1: Brand Identity */}
       <StyledPaper>
         <SectionTitle variant="h6">

@@ -416,16 +416,16 @@ const BrandRegisterForm = () => {
           businessPlan: formData.uploads.businessPlan,
         };
 
-          Object.entries(fileFields).forEach(([fieldName, files]) => {
+        Object.entries(fileFields).forEach(([fieldName, files]) => {
           if (files && files.length > 0) {
-            files.forEach((file,) => {
+            files.forEach((file) => {
               formDataSend.append(fieldName, file);
             });
           }
         });
 
         const response = await axios.post(
-          "http://localhost:5000/api/v1/brandlisting/createBrandListing",
+          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {
