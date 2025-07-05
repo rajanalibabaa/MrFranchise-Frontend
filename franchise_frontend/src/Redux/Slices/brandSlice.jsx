@@ -198,6 +198,15 @@ const brandSlice = createSlice({
     openBrandDialog: (state, action) => {
       state.openDialog = true;
       state.selectedBrand = action.payload;
+      console.log("action.payload :",action.payload.uuid)
+      const newWindow = window.open(`/brands/${action.payload.uuid}?`, '_blank');
+  localStorage.setItem(`brand-${action.payload.uuid}`, JSON.stringify(action.payload));
+ 
+  if (newWindow) {
+    newWindow.onbeforeunload = () => {
+      localStorage.removeItem(`brand-${action.payload.uuid}`);
+    };
+  }
     },
     closeBrandDialog: (state) => {
       state.openDialog = false;

@@ -14,6 +14,7 @@ import {
   Divider,
   Avatar,
   Stack,
+  Tooltip,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import Favorite from "@mui/icons-material/Favorite";
@@ -29,8 +30,7 @@ import {
   openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
-// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
-import { showLoading , hideLoading} from "../../Redux/Slices/loadingSlice";
+import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -58,12 +58,30 @@ const BrandCard = React.memo(({
   const observerRef = useRef();
 
   const brandId = brand.uuid;
-  const franchiseModels = brand.franchiseDetails?.modelsOfFranchise || [];
-  const firstModel = franchiseModels[0] || {};
-  const categories = brand.personalDetails?.brandCategories || [];
-  const videoUrl = brand?.brandDetails?.brandPromotionVideo?.[0] || 
-                  brand?.brandDetails?.franchisePromotionVideo?.[0];
+  const franchiseModel = brand.franchiseDetails?.fico?.[0] || {};
+  const category = brand.franchiseDetails?.brandCategories || {};
+  const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
+
+  // Extract brand details with fallbacks
+  const brandDetails = brand.brandDetails || {};
+  const {
+    brandName = "N/A",
+    tagLine = "",
+    companyName = "N/A",
+  } = brandDetails;
+
+  // Extract franchise details with fallbacks
+  const {
+    investmentRange = "Not specified",
+    areaRequired = "Not specified",
+    franchiseType = "N/A",
+    franchiseModel: modelType = "N/A",
+    franchiseFee = "N/A",
+    royaltyFee = "N/A",
+    roi = "N/A",
+    payBackPeriod = "N/A"
+  } = franchiseModel;
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -112,6 +130,7 @@ const BrandCard = React.memo(({
           },
         }}
       >
+        {/* Video/Image Section */}
         <Box
           ref={videoRef}
           sx={{
@@ -127,7 +146,7 @@ const BrandCard = React.memo(({
               component="video"
               loading="lazy"
               src={videoUrl}
-              alt={brand.personalDetails?.brandName || "Brand"}
+              alt={brandName}
               sx={{
                 position: "absolute",
                 top: 0,
@@ -152,17 +171,20 @@ const BrandCard = React.memo(({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                backgroundColor: theme.palette.grey[300],
               }}
             >
               <Typography variant="body2" color="text.secondary">
-                No video available
+                No media available
               </Typography>
             </Box>
           )}
         </Box>
 
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
+        {/* Content Section */}
+        <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
           <CardContent sx={{ pb: 1 }}>
+            {/* Brand Header */}
             <Box
               sx={{
                 display: "flex",
@@ -173,7 +195,7 @@ const BrandCard = React.memo(({
               }}
             >
               <Avatar
-                src={brand?.brandDetails?.brandLogo?.[0]}
+                src={brand?.uploads?.brandLogo?.[0]}
                 sx={{
                   width: 50,
                   height: 50,
@@ -181,21 +203,41 @@ const BrandCard = React.memo(({
                   flexShrink: 0,
                 }}
               />
-              <Typography
-                variant="h6"
-                fontWeight={600}
-                sx={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  flex: 1,
-                }}
-              >
-                {brand.personalDetails?.brandName}
-              </Typography>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Tooltip title={brandName} placement="top">
+                  <Typography
+                    variant="h6"
+                    fontWeight={600}
+                    sx={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {brandName}
+                  </Typography>
+                </Tooltip>
+                {tagLine && (
+                  <Tooltip title={tagLine} placement="top">
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        display: "block",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {tagLine}
+                    </Typography>
+                  </Tooltip>
+                )}
+              </Box>
               <IconButton
                 onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
                 disabled={likeProcessing[brand.uuid]}
+                sx={{ ml: 1 }}
               >
                 {likeProcessing[brand.uuid] ? (
                   <CircularProgress size={24} />
@@ -211,12 +253,24 @@ const BrandCard = React.memo(({
               </IconButton>
             </Box>
 
-            {categories.length > 0 && (
+            {/* Categories */}
+            {(category.main || category.child) && (
               <Box sx={{ mb: 2 }}>
-                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-                  {categories.slice(0, 3).map((category, index) => (
+                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                  {category.main && (
                     <Chip
-                      key={index}
+                      label={category.main}
+                      size="small"
+                      sx={{
+                        bgcolor: "rgba(255, 152, 0, 0.1)",
+                        color: "orange.dark",
+                        fontWeight: 500,
+                        mb: 1,
+                      }}
+                    />
+                  )}
+                  {category.child && (
+                    <Chip
                       label={category.child}
                       size="small"
                       sx={{
@@ -226,11 +280,12 @@ const BrandCard = React.memo(({
                         mb: 1,
                       }}
                     />
-                  ))}
+                  )}
                 </Stack>
               </Box>
             )}
 
+            {/* Franchise Details */}
             <Stack spacing={1} sx={{ mb: 2 }}>
               <Box display="flex" alignItems="center">
                 <Business
@@ -242,7 +297,7 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  Franchise Type : {firstModel.franchiseType || "N/A"}
+                  <strong>Model:</strong> {modelType} | <strong>Type:</strong> {franchiseType}
                 </Typography>
               </Box>
 
@@ -256,9 +311,10 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  Investment : {firstModel.investmentRange || "Not specified"}
+                  <strong>Investment:</strong> {investmentRange} | <strong>Fee:</strong> {franchiseFee}
                 </Typography>
               </Box>
+
               <Box display="flex" alignItems="center">
                 <AreaChart
                   sx={{
@@ -269,7 +325,7 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  Area : {firstModel.investmentRange || "Not specified"}
+                  <strong>Area:</strong> {areaRequired} | <strong>ROI:</strong> {roi}% in {payBackPeriod}
                 </Typography>
               </Box>
             </Stack>
@@ -277,7 +333,8 @@ const BrandCard = React.memo(({
             <Divider sx={{ my: 1 }} />
           </CardContent>
 
-          <Box sx={{ px: 2, pb: 2 }}>
+          {/* Action Button */}
+          <Box sx={{ px: 2, pb: 2, mt: 'auto' }}>
             <Button
               variant="contained"
               fullWidth
@@ -294,7 +351,7 @@ const BrandCard = React.memo(({
                 fontWeight: 500,
               }}
             >
-              View Details
+              View Full Details
             </Button>
           </Box>
         </Box>
@@ -319,22 +376,15 @@ const TopBeverageFranchises = () => {
   const dispatch = useDispatch();
   const { data: brands = [] } = useSelector((state) => state.brands);
 
-  // Filter brands that belong to Beverage Franchise subcategory
-// Filter brands that belong to Beverage Franchise subcategory and all its child categories
-const beverageBrands = useMemo(() => {
-  return brands.filter(brand => {
-    const categories = brand.personalDetails?.brandCategories || [];
-    return categories.some(cat => {
-      // Check if the subcategory is "Beverage Franchises" 
-      // OR if the parent category is "Food & Beverages" and subcategory is related to beverages
+  // Filter beverage franchises
+  const beverageBrands = useMemo(() => {
+    return brands.filter(brand => {
+      const category = brand.franchiseDetails?.brandCategories || {};
       return (
-        // cat.sub === "Beverage Franchises" 
-        cat.sub=== "Beverage Franchises"
-       
+        category.main === "Food & Beverages"
       );
     });
-  });
-}, [brands]);
+  }, [brands]);
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -345,7 +395,7 @@ const beverageBrands = useMemo(() => {
   const initializeData = useCallback(() => {
     try {
       if (!beverageBrands || beverageBrands.length === 0) {
-        setError("No beverage franchises found.");
+        setError("Loading...");
       } else {
         setError(null);
       }
@@ -414,7 +464,11 @@ const beverageBrands = useMemo(() => {
   }
 
   return (
-    <Box
+    
+
+    <>
+      {beverageBrands.length > 0 && (
+        <Box
       sx={{
         py: isMobile ? 1 : 2,
         px: isMobile ? 0 : 2,
@@ -451,7 +505,7 @@ const beverageBrands = useMemo(() => {
             },
           }}
         >
-        Top Beverage Franchises
+          Top Beverage Franchises
         </Typography>
 
         <Button
@@ -467,12 +521,13 @@ const beverageBrands = useMemo(() => {
               backgroundColor: "transparent",
             },
           }}
-          onClick={() => 
-          {dispatch(showLoading());
+          onClick={async () => {
+            dispatch(showLoading());
             navigate("/brandviewpage");
             setTimeout(() => {
               dispatch(hideLoading());
-            }, 2000);}}
+            }, 2000);
+          }}
         >
           View More
         </Button>
@@ -508,11 +563,12 @@ const beverageBrands = useMemo(() => {
           />
         ))}
       </Box>
-      {/* <BrandDetailsDialog /> */}
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}
     </Box>
+      )}
+    </>
   );
 };
 
