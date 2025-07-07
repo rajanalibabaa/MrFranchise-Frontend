@@ -239,7 +239,7 @@ function Navbar() {
         }}
       >
         <Box sx={{ 
-          display: "flex", 
+          display:{ xs: "none", sm: "flex"}, 
           flexWrap: "wrap",
           ml: "40px", 
           
@@ -338,6 +338,14 @@ function Navbar() {
               flex: isTablet ? 1 : 'none',
               justifyContent: isTablet ? 'center' : 'flex-end'
             }}>
+
+              <motion.div >
+    <IconButton sx={{backgroundColor:"white", "&:hover": { backgroundColor: "white" }}}
+      onClick={() => navigate('/search')}  >
+      <Search size={25}  />
+      <Typography>Search</Typography>
+    </IconButton>
+  </motion.div>
               <motion.div whileHover={{ y: -2 }}>
                 <Button 
                 onClick={() => navigate('/brandlistingform')}
@@ -347,7 +355,7 @@ function Navbar() {
                     color: 'black',  
                     backgroundColor: '#7ad03a',
                     borderRadius: '8px',
-                    px: 5,
+                    px: {5: 3, xs: 2},
                     py: 1,
                     textTransform: 'none',
                     fontWeight: 500,
