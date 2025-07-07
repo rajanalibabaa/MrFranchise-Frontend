@@ -284,8 +284,8 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
 
 
 const ExpansionLocationGrid = ({ data }) => {
-  const [expandedState, setExpandedState] = useState(null);
-  const [expandedDistrict, setExpandedDistrict] = useState(null);
+  const [expandedState, setExpandedState] = useState(0);
+  const [expandedDistrict, setExpandedDistrict] = useState( data?.locations?.[0]?.districts?.length > 0 ? "0-0" : null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -361,7 +361,7 @@ const ExpansionLocationGrid = ({ data }) => {
                 display: 'flex',
                 alignItems: 'center'
               }}>
-                <Place sx={{ mr: 1, color: 'primary.main' }} />
+                <Place sx={{ mr: 1, color: '#fff' }} />
                 States
               </Typography>
               <Box sx={{ p: 1 }}>
@@ -391,6 +391,7 @@ const ExpansionLocationGrid = ({ data }) => {
                         label={loc.districts?.length || 0} 
                         size="small" 
                         color={expandedState === stateIndex ? 'primary' : 'default'}
+                      sx={{backgroundColor:'#ff9800'}}
                       />
                     </CardContent>
                   </Card>
@@ -417,7 +418,7 @@ const ExpansionLocationGrid = ({ data }) => {
                 display: 'flex',
                 alignItems: 'center'
               }}>
-                <Map sx={{ mr: 1, color: 'primary.main' }} />
+                <Map sx={{ mr: 1, color: '#fff' }} />
                 Districts
                 {isMobile && expandedState !== null && (
                   <IconButton 
@@ -509,7 +510,7 @@ const ExpansionLocationGrid = ({ data }) => {
                 display: 'flex',
                 alignItems: 'center'
               }}>
-                <LocationCity sx={{ mr: 1, color: 'primary.main' }} />
+                <LocationCity sx={{ mr: 1, color: '#fff' }} />
                 Cities
                 {isMobile && expandedDistrict !== null && (
                   <IconButton 
@@ -668,7 +669,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
                 p: 2,
                 position: 'sticky',
                 top: 0,
-                bgcolor: 'background.paper',
+                bgcolor: '#7ad03a',
                 zIndex: 2,
                 borderBottom: '1px solid #e0e0e0',
                 display: 'flex',
@@ -736,7 +737,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
                 p: 2,
                 position: 'sticky',
                 top: 0,
-                bgcolor: 'background.paper',
+                bgcolor: '#7ad03a',
                 zIndex: 2,
                 borderBottom: '1px solid #e0e0e0',
                 display: 'flex',
@@ -833,7 +834,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
                 p: 2,
                 position: 'sticky',
                 top: 0,
-                bgcolor: 'background.paper',
+                bgcolor: '#7ad03a',
                 zIndex: 2,
                 borderBottom: '1px solid #e0e0e0',
                 display: 'flex',
@@ -993,6 +994,13 @@ const ExpansionLocationGridInternational = ({ data }) => {
     );
   };
 
+  const hasData = (sectionData) => {
+    if (Array.isArray(sectionData)) {
+      return sectionData.length > 0;
+    }
+    return !!sectionData;
+  };
+
   const sections = [
    
     {
@@ -1001,7 +1009,8 @@ const ExpansionLocationGridInternational = ({ data }) => {
       content: (
 
         <Box>
-          <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: colors.dark }}>
+          {hasData(brand.franchiseDetails?.fico) && ( <>
+                <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: colors.dark }}>
     Franchise Details
           </Typography>
          <Box sx={{ mb: 4 }}>
@@ -1197,129 +1206,125 @@ const ExpansionLocationGridInternational = ({ data }) => {
     </Table>
   </TableContainer>
 </Box>
+</>)}
+    
+
+{/* Brand Description - Only show if data exists */}
+          {brand.franchiseDetails?.brandDescription && (
+            <Box sx={{ 
+              mb: 4, 
+              p: 3, 
+              borderRadius: '16px', 
+              background: '#fff',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+            }}>
+              <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: colors.dark }}>
+                Brand Description
+              </Typography>
+              <Box 
+                dangerouslySetInnerHTML={{ __html: brand.franchiseDetails.brandDescription }} 
+                sx={{ 
+                  color: colors.dark,
+                  '& p': { mb: 2 },
+                  '& strong': { color: colors.primary }
+                }}
+              />
+            </Box>
+          )}
 
 
-          <Box sx={{ 
-            mb: 4, 
-            p: 3, 
-            borderRadius: '16px', 
-            // background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-          }}>
-            <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: colors.dark }}>
-              Brand Description
-            </Typography>
-            <Box 
-              dangerouslySetInnerHTML={{ __html: brand.franchiseDetails.brandDescription }} 
-              sx={{ 
-                color: colors.dark,
-                '& p': { mb: 2 },
-                '& strong': { color: colors.primary }
-              }}
-            />
-          </Box>
-          <Grid container spacing={3} sx={{ mt: 2, mb: 3 }}>
-            {/* <Grid item xs={12} md={6}>
-              <Zoom in={true} timeout={500}>
-                <AnimatedCard sx={{ 
-                  borderRadius: '16px', 
-                  background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
-                  height: '100%'
-                }}>
-                  <CardContent>
-                    <Typography variant="h6" fontWeight={700} gutterBottom display="flex" alignItems="center">
-                      <Business sx={{ color: colors.secondary, mr: 1 }} /> Brand Details
-                    </Typography>
-                    <Divider sx={{ mb: 2, borderColor: 'rgba(0,0,0,0.1)' }} />
-                    <Box sx={{ pl: 1 }}>
-                      <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-                        <strong style={{ color: colors.primary }}>Category:</strong> {[brand.franchiseDetails?.brandCategories?.main, brand.franchiseDetails?.brandCategories?.sub, brand.franchiseDetails?.brandCategories?.child].filter(Boolean).join(" > ") || 'N/A'}
+         {/* Support Provided By Brand - Only show if data exists */}
+          {(hasData(brand.franchiseDetails?.trainingSupport) || 
+            brand.franchiseDetails?.aidFinancing || 
+            hasData(brand.franchiseDetails?.uniqueSellingPoints)) && (
+            <Grid container spacing={3} sx={{ mt: 2, mb: 3 }}>
+              <Grid item xs={12} md={6}>
+                <Zoom in={true} timeout={700}>
+                  <AnimatedCard sx={{ 
+                    borderRadius: '16px', 
+                    height: '100%'
+                  }}>
+                    <CardContent>
+                      <Typography variant="h6" fontWeight={700} gutterBottom display="flex" alignItems="center">
+                        <Business sx={{ color: colors.secondary, mr: 1 }} /> Support Provided By Brand
                       </Typography>
-                      <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-                        <strong style={{ color: colors.primary }}>Company Owned Outlets:</strong> {brand.franchiseDetails?.companyOwnedOutlets || "N/A"}
-                      </Typography>
-                      <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-                        <strong style={{ color: colors.primary }}>Franchise Owned Outlets:</strong> {brand.franchiseDetails?.franchiseOwnedOutlets || "N/A"}
-                      </Typography>
-                      <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-                        <strong style={{ color: colors.primary }}>Total Outlets:</strong> {brand.franchiseDetails?.totalOutlets || "N/A"}
-                      </Typography>
-                      <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-                        <strong style={{ color: colors.primary }}>Established Year:</strong> {brand.franchiseDetails?.establishedYear || "N/A"}
-                      </Typography>
-                      <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-                        <strong style={{ color: colors.primary }}>Franchising Since:</strong> {brand.franchiseDetails?.franchiseSinceYear || "N/A"}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </AnimatedCard>
-              </Zoom>
-            </Grid> */}
-
-            <Grid item xs={12} md={6}>
-              <Zoom in={true} timeout={700}>
-                <AnimatedCard sx={{ 
-                  borderRadius: '16px', 
-                  // background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
-                  height: '100%'
-                }}>
-                  <CardContent>
-                    <Typography variant="h6" fontWeight={700} gutterBottom display="flex" alignItems="center">
-                      <Business sx={{ color: colors.secondary, mr: 1 }} /> Support Provider By Brand
-                    </Typography>
-                    <Divider sx={{ mb: 2, borderColor: 'rgba(0,0,0,0.1)' }} />
-                    <Box sx={{ pl: 1 }}>
-                     <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-  <strong >Training Support:</strong>{' '}
-  {Array.isArray(brand.franchiseDetails?.trainingSupport) && brand.franchiseDetails.trainingSupport.length > 0
-    ? brand.franchiseDetails.trainingSupport.map((item) => `✅ ${item}`).join('  ')
-    : 'N/A'}
-</Typography>
-                      <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-                        <strong >Financing Aid:</strong> {brand.franchiseDetails?.aidFinancing || "N/A"}
-                      </Typography>
-                      
-                      <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-                        <strong >Unique Selling Points:</strong> {brand.franchiseDetails?.uniqueSellingPoints?.join(", ") || "N/A"}
-                      </Typography>
-                      <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-                        <strong >International Expansion:</strong> {brand.expansionLocationData?.isInternationalExpansion ? "Yes" : "No"}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </AnimatedCard>
-              </Zoom>
+                      <Divider sx={{ mb: 2, borderColor: 'rgba(0,0,0,0.1)' }} />
+                      <Box sx={{ pl: 1 }}>
+                        {hasData(brand.franchiseDetails?.trainingSupport) && (
+                          <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
+                            <strong>Training Support:</strong>{' '}
+                            {brand.franchiseDetails.trainingSupport.map((item) => `✅ ${item}`).join('  ')}
+                          </Typography>
+                        )}
+                        {brand.franchiseDetails?.aidFinancing && (
+                          <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
+                            <strong>Financing Aid:</strong> {brand.franchiseDetails.aidFinancing}
+                          </Typography>
+                        )}
+                        {hasData(brand.franchiseDetails?.uniqueSellingPoints) && (
+                          <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
+                            <strong>Unique Selling Points:</strong> {brand.franchiseDetails.uniqueSellingPoints.join(", ")}
+                          </Typography>
+                        )}
+                        <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
+                          <strong>International Expansion:</strong> {brand.expansionLocationData?.isInternationalExpansion ? "Yes" : "No"}
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </AnimatedCard>
+                </Zoom>
+              </Grid>
             </Grid>
-          </Grid>
+          )}          
           
-          
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
-              Current Outlets (Domestic)
-            </Typography>
-            <ExpansionLocationGrid data={brand.expansionLocationData?.currentOutletLocations?.domestic} />
+               {/* Current Outlets (Domestic) - Only show if data exists */}
+          {hasData(brand.expansionLocationData?.currentOutletLocations?.domestic?.locations) && (
+            <>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: colors.dark }}>
+                Current Outlets (Domestic)
+              </Typography>
+              <ExpansionLocationGrid data={brand.expansionLocationData.currentOutletLocations.domestic} />
+            </>
+          )}
           
       
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
-              Current Outlets (International)
-            </Typography>
-            <ExpansionLocationGridInternational data={brand.expansionLocationData?.currentOutletLocations?.international} />
+                    {/* Current Outlets (International) - Only show if data exists */}
+          {hasData(brand.expansionLocationData?.currentOutletLocations?.international?.country) && (
+            <>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: colors.dark }}>
+                Current Outlets (International)
+              </Typography>
+              <ExpansionLocationGridInternational data={brand.expansionLocationData.currentOutletLocations.international} />
+            </>
+          )}
           
-          <Divider sx={{ my: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
           
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
-              Expansion Locations (Domestic)
-            </Typography>
-            <ExpansionLocationGrid data={brand.expansionLocationData?.expansionLocations?.domestic} />   
+                  {/* Expansion Locations (Domestic) - Only show if data exists */}
+          {hasData(brand.expansionLocationData?.expansionLocations?.domestic?.locations) && (
+            <>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: colors.dark }}>
+                Expansion Locations (Domestic)
+              </Typography>
+              <ExpansionLocationGrid data={brand.expansionLocationData.expansionLocations.domestic} />
+            </>
+          )}
           
        
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
-              Expansion Locations (International)
-            </Typography>
-            <ExpansionLocationGridInternational data={brand.expansionLocationData?.expansionLocations?.international} />
+                     {/* Expansion Locations (International) - Only show if data exists */}
+          {hasData(brand.expansionLocationData?.expansionLocations?.international?.country) && (
+            <>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: colors.dark }}>
+                Expansion Locations (International)
+              </Typography>
+              <ExpansionLocationGridInternational data={brand.expansionLocationData.expansionLocations.international} />
+            </>
+          )}
         
           
-          <Divider sx={{ my: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
           
+          {hasData(brand.uploads?.awards) && (
+            <>
+
             <Typography variant="h6" fontWeight={600} gutterBottom>
               Awards
             </Typography>
@@ -1392,14 +1397,77 @@ const ExpansionLocationGridInternational = ({ data }) => {
                 No awards available.
               </Typography>
             )}
+            </>
+          )}
+
+           {/* Business Plan Documentation - New Section */}
+          {hasData(brand.uploads?.businessPlan) && (
+            <>
+              <Typography variant="h6" fontWeight={600} gutterBottom>
+                Business Plan Documentation
+              </Typography>
+              <Grid container spacing={2}>
+                {brand.uploads.businessPlan.map((doc, idx) => (
+                  <Grid item xs={12} sm={6} md={4} key={idx}>
+                    <Slide direction="up" in={true} timeout={idx * 200}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        alignItems: 'center', 
+                        mb: 2,
+                        p: 2,
+                        borderRadius: '12px',
+                        background: 'white',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-5px)',
+                          boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
+                        }
+                      }}>
+                        <DescriptionIcon sx={{ 
+                          fontSize: 60, 
+                          color: colors.primary,
+                          mb: 1 
+                        }} />
+                        <Typography variant="body2" align="center" sx={{ 
+                          color: colors.dark,
+                          fontWeight: 500,
+                          mb: 1
+                        }}>
+                          {doc.title || "Business Document"}
+                        </Typography>
+                        <Button 
+                          variant="contained" 
+                          size="small"
+                          color="primary"
+                          href={doc.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          sx={{ mt: 1 }}
+                        >
+                          View Document
+                        </Button>
+                      </Box>
+                    </Slide>
+                  </Grid>
+                ))}
+              </Grid>
+            </>
+          )}
          
-          <Divider sx={{ my: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
 
         
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
-              Location Tags
-            </Typography>
-            <ExpansionLocationTags brand={brand}/>
+           {/* Location Tags - Only show if data exists */}
+          {hasData(brand.expansionLocationData?.expansionLocations?.domestic?.locations) && (
+            <>
+              <Divider sx={{ my: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
+                Location Tags
+              </Typography>
+              <ExpansionLocationTags brand={brand}/>
+            </>
+          )}
           
           <Box sx={{ 
             mt: 4,
