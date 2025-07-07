@@ -39,6 +39,8 @@ import {
   TableBody,
   IconButton,
    Tooltip,
+   useMediaQuery,
+   useTheme,
 } from "@mui/material";
 import { FavoriteBorderOutlined, Person, PersonOutlined, WhatsApp,Email, Phone, Home, LocationCity, Work, HomeWork, MeetingRoom } from "@mui/icons-material";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
@@ -76,6 +78,9 @@ const InvestorRegister = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const [phonePrefix, setPhonePrefix] = useState("");
 const [countryCodes, setCountryCodes] = useState([]);
 const [selectedCountry, setSelectedCountry] = useState("");
@@ -118,6 +123,7 @@ const preferredLocationType = watch("preferredLocationType");
 const [selectedMainCategory, setSelectedMainCategory] = useState('');
 const [selectedSubCategory, setSelectedSubCategory] = useState('');
 const [selectedChild, setSelectedChild] = useState('');
+const propertyTypeValue = useWatch({ control, name: "propertyType" });
 
   const FORM_DATA_KEY = "investor_form_data";
   const initialFormData = {
@@ -649,7 +655,6 @@ alert('Add Multiple preferences to get more offers from us!','info')
     const { type, otp } = otpModal;
 
     if (!otp || otp.length < 6) {
-      // Assuming 4-6 digit OTP
       showSnackbar("Please enter a valid OTP", "error");
       return;
     }
@@ -714,10 +719,6 @@ alert('Add Multiple preferences to get more offers from us!','info')
     return savedData ? JSON.parse(savedData) : initialFormData;
   });
 
-  // Initialize react-hook-form with the stored data
-
-
-  // Save to localStorage whenever form data changes
 useEffect(() => {
   const subscription = watch((value) => {
     localStorage.setItem(FORM_DATA_KEY, JSON.stringify(value));
@@ -878,8 +879,6 @@ dispatch(hideLoading());
   
 }
   };
-
-
   // Make sure to also save preferences to localStorage
 useEffect(() => {
   const savedData = localStorage.getItem(FORM_DATA_KEY);
@@ -1016,8 +1015,8 @@ useEffect(() => {
         fontWeight="bold"
         sx={{ 
           color: "#7ad03a", 
-          mb: -2,
-          mt: 10,
+          mb: -3,
+          mt: {xs:20, md: 15, lg: 15, sm: 15},
           textAlign: 'center',
           textDecoration: 'underline',
           fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.5rem' }
@@ -1027,25 +1026,25 @@ useEffect(() => {
       </Typography>
     <Box
   sx={{
-    // backgroundSize: "cover",
-    // backgroundPosition: "center",
     minHeight: "100vh",
+flexDirection: isMobile ? "column" : "row",
     display: "flex",
-    // justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center",
+    alignItems: "flex-start",
+   marginLeft:{xs:"0"},
+    width:{xs:"70%",lg:"100%", md:"100%", sm:"100%"},
   }}
 >
   
   <Box
     ref={dropdownRef}
-    ml={13}
+   
     sx={{
       p: 4,
+      ml:"30px",
       width: "100%",
       maxWidth: "900px",
-      
-      position: "relative",
- 
+            position: "relative",
       borderColor: "divider"
     }}
   >
@@ -2133,27 +2132,21 @@ useEffect(() => {
         </Grid>
         
         {watch("propertyType") === "Own Property" && (
-          
-   <Grid
-                       container
-                       spacing={2}
-                       sx={{
-                         display: "grid",
-                         gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-                         gap: 2,
-                         mt: 2
-                       }}
-                     >
+  <Grid container spacing={2} sx={{ 
+    display: "grid", 
+    gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" }, 
+    gap: 2, 
+    mt: 2 
+  }}>
     {/* Property Country */}
-    <Grid item xs={12} md={3}>
+    <Grid item xs={12} md={4}>
       <Controller
         name="propertyCountry"
         control={control}
         rules={{
-          validate: value =>
-            watch("propertyType") === "Own Property"
-              ? !!value || "Country is required"
-              : true
+          required: watch("propertyType") === "Own Property" 
+            ? "Country is required" 
+            : false
         }}
         render={({ field }) => (
           <Autocomplete
@@ -2181,6 +2174,7 @@ useEffect(() => {
                 helperText={errors.propertyCountry?.message}
                 variant="outlined"
                 fullWidth
+                required={watch("propertyType") === "Own Property"}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '8px',
@@ -2193,17 +2187,15 @@ useEffect(() => {
       />
     </Grid>
 
-
     {/* Property State */}
-    <Grid item xs={12} md={3}>
+ <Grid item xs={12} md={4}>
       <Controller
         name="propertyState"
         control={control}
         rules={{
-          validate: value =>
-            watch("propertyType") === "Own Property"
-              ? !!value || "State is required"
-              : true
+          required: watch("propertyType") === "Own Property" 
+            ? "State is required" 
+            : false
         }}
         render={({ field }) => (
           <Autocomplete
@@ -2230,6 +2222,7 @@ useEffect(() => {
                 helperText={errors.propertyState?.message}
                 variant="outlined"
                 fullWidth
+                required={watch("propertyType") === "Own Property"}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '8px',
@@ -2241,6 +2234,7 @@ useEffect(() => {
         )}
       />
     </Grid>
+
 
     {/* Property District */}
     {/* <Grid item xs={12} md={3}>
@@ -2281,15 +2275,14 @@ useEffect(() => {
 </Grid> */}
 
     {/* Property City */}
-     <Grid item xs={12} md={3}>
+     <Grid item xs={12} md={4}>
       <Controller
         name="propertyCity"
         control={control}
         rules={{
-          validate: value =>
-            watch("propertyType") === "Own Property"
-              ? !!value || "City is required"
-              : true
+          required: watch("propertyType") === "Own Property" 
+            ? "City is required" 
+            : false
         }}
         render={({ field }) => (
           <Autocomplete
@@ -2314,6 +2307,7 @@ useEffect(() => {
                 helperText={errors.propertyCity?.message}
                 variant="outlined"
                 fullWidth
+                required={watch("propertyType") === "Own Property"}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '8px',
@@ -2330,7 +2324,7 @@ useEffect(() => {
         </Grid>
 
         {/* Add Preference Button */}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 ,mr:{xs:"40px", sm:"50px"}}}>
           <Button 
         
             onClick={handleAddPreference}
@@ -2354,6 +2348,29 @@ useEffect(() => {
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               Your Investment Preferences
             </Typography>
+                <TableContainer
+      component={Paper}
+      sx={{
+        borderRadius: '12px',
+        overflowX: 'auto',
+width: '100%',
+WebkitOverflowScrolling: 'touch',
+        // Custom horizontal scrollbar styles
+        '&::-webkit-scrollbar': {
+          height: '8px',
+        },
+        '&::-webkit-scrollbar-track': {
+          backgroundColor: 'transparent',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: '#555',
+          borderRadius: '8px',
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          backgroundColor: '#333',
+        },
+      }}
+    ></TableContainer>
             <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'auto' }}>
               <Table size="small" aria-label="added preferences table">
                 <TableHead>
@@ -2706,9 +2723,11 @@ useEffect(() => {
       </Alert>
     </Snackbar>
   </Box>
-  <Box> 
+  {!isMobile && (
+  <Box sx={{marginTop:{sm:"35px"}}}>
     <RegisterationMediaHandling />
   </Box>
+  )}
 </Box>
 <Box>
   <Footer/>
