@@ -93,8 +93,8 @@ const handleLikeClick = async (brandId, isLiked) => {
       {/* Brand Logo Image */}
       <Box
         component="img"
-        src={brand.brandDetails?.brandLogo}
-        alt={brand.personalDetails?.brandName || "Brand logo"}
+        src={brand.uploads?.brandLogo}
+        alt={brand.brandDetails?.brandName || "Brand logo"}
         sx={{
           objectFit: "contain",
           backgroundColor: "#f9f9f9",
@@ -138,7 +138,7 @@ const handleLikeClick = async (brandId, isLiked) => {
     wordBreak: "break-word", 
   }}
 >
-  {brand.personalDetails?.brandName}
+  {brand.brandDetails?.brandName}
 </Typography>
           <IconButton
             onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
@@ -157,24 +157,31 @@ const handleLikeClick = async (brandId, isLiked) => {
         </Box>
 
         {/* Categories */}
-        <Box sx={{ mb: 2, minHeight: 32 }}>
-          {brand.personalDetails?.brandCategories
-            ?.slice(0, 2)
-            .map((category, index) => (
-              <Chip
-                key={index}
-                label={category.child}
-                size="small"
-                sx={{
-                  mr: 1,
-                  mb: 1,
-                  bgcolor: "rgba(255, 152, 0, 0.1)",
-                  color: "orange.dark",
-                  fontWeight: 500,
-                }}
-              />
-            ))}
-        </Box>
+       <Box sx={{  minHeight: 32 }}>
+  {brand.franchiseDetails?.brandCategories ? (
+    [ "sub", "child"].map((key, index) => (
+      brand.franchiseDetails.brandCategories[key] && (
+        <Chip
+          key={index}
+          label={brand.franchiseDetails.brandCategories[key]}
+          size="small"
+          sx={{
+            mr: 1,
+            mb: 1,
+            bgcolor: "rgba(255, 152, 0, 0.1)",
+            color: "orange.dark",
+            fontWeight: 500,
+          }}
+        />
+      )
+    ))
+  ) : (
+    <Typography variant="body2" color="text.secondary">
+      N/A
+    </Typography>
+  )}
+</Box>
+
 
         {/* Details List */}
         <Box
@@ -182,43 +189,47 @@ const handleLikeClick = async (brandId, isLiked) => {
             mb: 2,
             flexGrow: 1,
             "& > *:not(:last-child)": {
-              mb: 1.5,
+              mb: 1,
             },
           }}
         >
           <Box display="flex" alignItems="center">
-            <LocationOn
-              sx={{
-                mr: 1.5,
-                fontSize: "1rem",
-                color: "text.secondary",
-                flexShrink: 0,
-              }}
-            />
-            <Typography variant="body2" noWrap>
-              <span style={{ fontWeight: 600 }}>Expansion Location:</span>
-              <br />
-              {brand.personalDetails.expansionLocation?.length > 0 ? (
-                <>
-                  {brand.personalDetails.expansionLocation
-                    .slice(0, 2) // Always show first 2 states
-                    .map((loc) => loc.state)
-                    .join(", ")}
+  <LocationOn
+    sx={{
+      mr: 1.5,
+      fontSize: "1rem",
+      color: "text.secondary",
+      flexShrink: 0,
+    }}
+  />
+  <Typography variant="body2" noWrap>
+    <span style={{ fontWeight: 600 }}>Expansion Location:</span>
+    <br />
+    {brand?.expansionLocationData?.expansionLocations ? (
+      <>
+        {[
+          ...(brand.expansionLocationData.expansionLocations.domestic?.locations || []),
+          ...(brand.expansionLocationData.expansionLocations.international?.locations || []),
+        ]
+          .map((loc) => loc.state || loc.country) // Use 'state' for domestic, 'country' fallback for international
+          .filter(Boolean)
+          .slice(0, 2) // Show first 2 only
+          .join(", ")}
 
-                  {/* Always show "more" if there are locations (even if ≤2) */}
-                  <Button
-                    size="small"
-                    sx={{ ml: 0.5, minWidth: 0, padding: 0 }}
-                    onClick={() => handleOpenBrand(brand)}
-                  >
-                    ...more
-                  </Button>
-                </>
-              ) : (
-                "Multiple locations"
-              )}
-            </Typography>
-          </Box>
+        <Button
+          size="small"
+          sx={{ ml: 0.5, minWidth: 0, padding: 0 }}
+          onClick={() => handleOpenBrand(brand)}
+        >
+          ...more
+        </Button>
+      </>
+    ) : (
+      "Multiple locations"
+    )}
+  </Typography>
+</Box>
+
 
           <Box display="flex" alignItems="center">
             <AttachMoney
@@ -231,8 +242,7 @@ const handleLikeClick = async (brandId, isLiked) => {
             />
             <Typography variant="body2" noWrap>
               <span style={{ fontWeight: 600 }}>Investment Range:</span>{" "}
-              {brand.franchiseDetails?.modelsOfFranchise?.[0]
-                ?.investmentRange || "Not specified"}
+              {brand.franchiseDetails?.fico?.[0]?.investmentRange || "Not specified"}
             </Typography>
           </Box>
 
@@ -246,9 +256,7 @@ const handleLikeClick = async (brandId, isLiked) => {
             />
             <Typography variant="body2" noWrap>
               <span style={{ fontWeight: 600 }}>Area Required:</span>{" "}
-              {brand.franchiseDetails?.modelsOfFranchise?.[0]?.areaRequired
-                ? `${brand.franchiseDetails.modelsOfFranchise[0].areaRequired} sq.ft`
-                : "Not specified"}
+            { brand.franchiseDetails?.fico?.[0]?.areaRequired || "Not specified"}
             </Typography>
           </Box>
         </Box>

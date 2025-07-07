@@ -190,7 +190,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     "State Franchise",
   ];
 
-  const franchiseModels = ["FOFO ", "FOCO ", "FICO ", "COCO ", "KIOSK","SHOPPING SHOP"];
+  const franchiseModels = ["FOFO ", "FOCO ", "FICO ", "COCO ", "KIOSK","SHOPPING SHOP","CLOUD KITCHEN"];
 
   const investmentRanges = [
     { label: "Below ₹50K", value: "Below-50,000" },
@@ -355,7 +355,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           <FormControl
             fullWidth
             size="medium"
-            disabled={!selectedCategory.main}
+       
           >
             <InputLabel>Main Category</InputLabel>
             <Select
@@ -380,7 +380,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
         </Grid>
 
         <Grid item xs={12} sm={4}>
-          <FormControl fullWidth size="medium" disabled={!selectedCategory.sub}>
+          <FormControl fullWidth size="medium">
             <InputLabel>Sub Category</InputLabel>
             <Select
               value={selectedCategory.child || ""}
@@ -1455,7 +1455,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   />
                 ))}
               </RadioGroup>
-              {errors.aidFinancing && (
+              
+            </FormControl>
+            {errors.aidFinancing && (
                 <FormHelperText
                   error
                   sx={{ ml: { md: 2 }, mt: { xs: 0, md: 0 } }}
@@ -1463,7 +1465,6 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   {errors.aidFinancing}
                 </FormHelperText>
               )}
-            </FormControl>
           </Grid>
 
           <Grid item xs={12}>
@@ -1515,6 +1516,8 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   />
                 ))}
               </RadioGroup>
+            
+            </FormControl>
               {errors.franchiseDevelopment && (
                 <FormHelperText
                   error
@@ -1523,7 +1526,6 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   {errors.franchiseDevelopment}
                 </FormHelperText>
               )}
-            </FormControl>
           </Grid>
 
           <Grid item xs={12}>
@@ -1579,7 +1581,9 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   />
                 ))}
               </RadioGroup>
-              {errors.consultationOrAssistance && (
+              
+            </FormControl>
+            {errors.consultationOrAssistance && (
                 <FormHelperText
                   error
                   sx={{ ml: { md: 2 }, mt: { xs: 0, md: 0 } }}
@@ -1587,7 +1591,6 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
                   {errors.consultationOrAssistance}
                 </FormHelperText>
               )}
-            </FormControl>
           </Grid>
 
         {/* Training Support - Checkbox Group */}
@@ -1745,151 +1748,165 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
           </Grid> */}
         </Grid>
       </Grid>
+<Grid item xs={12}>
+  <Typography
+    variant="h6"
+    color="#ff9800"
+    sx={{ mb: 2, mt: 4, fontWeight: "bold" }}
+  >
+    Brand Description
+  </Typography>
 
-      <Grid item xs={12}>
-        <Typography
-          variant="h6"
-          color="#ff9800"
-          sx={{ mb: 2, mt: 4, fontWeight: "bold" }}
+  <Grid item xs={12}>
+    <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
+      Unique Selling Points (USP):
+      <Tooltip
+        title={
+          <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+            Highlight what makes your brand or business unique. Try to list
+            2–5 bullet points that make you stand out.
+          </span>
+        }
+        placement="right-start"
+        arrow
+        enterTouchDelay={0}
+      >
+        <IconButton
+          size="small"
+          sx={{
+            color: "warning.main",
+            "&:hover": {
+              backgroundColor: "info.main",
+              color: "white",
+            },
+            marginLeft: "5px",
+          }}
         >
-          Brand Description
+          <InfoOutlined fontSize="medium" />
+        </IconButton>
+      </Tooltip>
+      {errors.uniqueSellingPoints && typeof errors.uniqueSellingPoints === 'string' && (
+        <Typography variant="caption" color="error" sx={{ ml: 1 }}>
+          {errors.uniqueSellingPoints}
         </Typography>
+      )}
+    </Typography>
 
-        <Grid item xs={12}>
-          <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
-            Unique Selling Points (USP):
-            <Tooltip
-              title={
-                <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
-                  Highlight what makes your brand or business unique Try to list
-                  2–5 bullet points that make you stand out.
-                </span>
+    {/* USP Input and Add Button */}
+    <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
+      <TextField
+        fullWidth
+        variant="outlined"
+        value={currentUSP}
+        onChange={(e) => setCurrentUSP(e.target.value)}
+        placeholder="Add a unique selling point"
+        onKeyPress={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleAddUSP();
+          }
+        }}
+        error={!!errors.uniqueSellingPoints}
+        helperText={
+          errors.uniqueSellingPoints && typeof errors.uniqueSellingPoints === 'string' 
+            ? errors.uniqueSellingPoints 
+            : null
+        }
+      />
+      <Button
+        variant="contained"
+        onClick={handleAddUSP}
+        disabled={!currentUSP.trim()}
+        sx={{
+          backgroundColor: '#7ad03a',
+          color: "white",
+          "&:hover": { backgroundColor: "#388e3c" },
+          py:2,
+          px:6
+        }}
+      >
+        Add
+      </Button>
+    </Box>
+
+    {/* Display added USPs */}
+    {data.uniqueSellingPoints?.length > 0 && (
+      <Paper sx={{ p: 2, mb: 3, border: "1px solid #e0e0e0" }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
+          Added USPs:
+        </Typography>
+        <List dense sx={{ maxHeight: 200, overflow: "auto" }}>
+          {data.uniqueSellingPoints.map((usp, index) => (
+            <ListItem
+              key={index}
+              secondaryAction={
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  onClick={() => handleRemoveUSP(index)}
+                  size="small"
+                >
+                  <DeleteIcon fontSize="small" color="error" />
+                </IconButton>
               }
-              placement="right-start"
-              arrow
-              enterTouchDelay={0} // makes it responsive on mobile too
-            >
-              <IconButton
-                size="small"
-                sx={{
-                  // p: 0.8,
-                  color: "warning.main",
-                  // backgroundColor: 'info.light',
-                  "&:hover": {
-                    backgroundColor: "info.main",
-                    color: "white",
-                  },
-                  marginLeft: "5px",
-                  // borderRadius: '50%',
-                }}
-              >
-                <InfoOutlined fontSize="medium" />
-              </IconButton>
-            </Tooltip>{" "}
-          </Typography>
-
-          {/* USP Input and Add Button */}
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              value={currentUSP}
-              onChange={(e) => setCurrentUSP(e.target.value)}
-              placeholder="Add a unique selling point"
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleAddUSP();
-                }
-              }}
-            />
-            <Button
-              variant="contained"
-              onClick={handleAddUSP}
-              disabled={!currentUSP.trim()}
               sx={{
-                backgroundColor: '#7ad03a',
-                color: "white",
-                "&:hover": { backgroundColor: "#388e3c" },
-                height: "56px",
-                minWidth: "100px",
+                py: 0.5,
+                borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+                "&:last-child": { borderBottom: "none" },
               }}
             >
-              Add
-            </Button>
-          </Box>
-
-          {/* Display added USPs */}
-          {data.uniqueSellingPoints?.length > 0 && (
-            <Paper sx={{ p: 2, mb: 3, border: "1px solid #e0e0e0" }}>
-              <Typography
-                variant="subtitle2"
-                sx={{ fontWeight: "bold", mb: 1 }}
-              >
-                Added USPs:
-              </Typography>
-              <List dense sx={{ maxHeight: 200, overflow: "auto" }}>
-                {data.uniqueSellingPoints.map((usp, index) => (
-                  <ListItem
-                    key={index}
-                    secondaryAction={
-                      <IconButton
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => handleRemoveUSP(index)}
-                        size="small"
-                      >
-                        <DeleteIcon fontSize="small" color="error" />
-                      </IconButton>
-                    }
-                    sx={{
-                      py: 0.5,
-                      borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-                      "&:last-child": { borderBottom: "none" },
-                    }}
-                  >
-                    <ListItemText
-                      primary={`${index + 1}. ${usp}`}
-                      primaryTypographyProps={{ variant: "body2" }}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
-          )}
-        </Grid>
-        <Box sx={{ mt: 2, mb: 4 }}>
-        <Editor
-  apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
-  value={data.brandDescription || ""}
-  init={{
-    height: 400,
-    menubar: true,
-    plugins: [
-      'advlist', 'autolink', 'lists', 'link', 'image',
-      'charmap', 'preview', 'anchor', 'searchreplace',
-      'visualblocks', 'code', 'fullscreen', 'insertdatetime',
-      'media', 'table', 'help'
-    ],
-    toolbar:
-      "undo redo | formatselect | bold italic backcolor | " +
-      "alignleft aligncenter alignright alignjustify | " +
-      "bullist numlist outdent indent | removeformat | help | image",
-    images_upload_url: "/api/upload-image",
-    automatic_uploads: true,
-    content_style:
-      "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
-  }}
-  onEditorChange={handleDescriptionChange}
-/>
-
-          {errors.description && (
-            <Typography variant="caption" color="error" sx={{ mt: 1 }}>
-              {errors.description}
-            </Typography>
-          )}
-        </Box>
-      </Grid>
+              <ListItemText
+                primary={`${index + 1}. ${usp}`}
+                primaryTypographyProps={{ variant: "body2" }}
+                secondary={
+                  errors[`uniqueSellingPoints[${index}]`] && (
+                    <Typography variant="caption" color="error">
+                      {errors[`uniqueSellingPoints[${index}]`]}
+                    </Typography>
+                  )
+                }
+              />
+            </ListItem>
+          ))}
+        </List>
+      </Paper>
+    )}
+  </Grid>
+  
+  <Box sx={{ mt: 2, mb: 4 }}>
+    <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 1 }}>
+      Brand Description:
+      {errors.brandDescription && (
+        <Typography variant="caption" color="error" sx={{ ml: 1 }}>
+          {errors.brandDescription}
+        </Typography>
+      )}
+    </Typography>
+    <Editor
+      apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
+      value={data.brandDescription || ""}
+      init={{
+        height: 400,
+        menubar: true,
+        plugins: [
+          'advlist', 'autolink', 'lists', 'link', 'image',
+          'charmap', 'preview', 'anchor', 'searchreplace',
+          'visualblocks', 'code', 'fullscreen', 'insertdatetime',
+          'media', 'table', 'help'
+        ],
+        toolbar:
+          "undo redo | formatselect | bold italic backcolor | " +
+          "alignleft aligncenter alignright alignjustify | " +
+          "bullist numlist outdent indent | removeformat | help | image",
+        images_upload_url: "/api/upload-image",
+        automatic_uploads: true,
+        content_style:
+          "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+      }}
+      onEditorChange={handleDescriptionChange}
+    />
+  </Box>
+</Grid>
     </Box>
   );
 };

@@ -45,6 +45,7 @@ import Uploads from "../BrandLIstingRegister/BrandRegisterUploads";
 import {
   validateBrandDetails,
   validateFranchiseDetails,
+  validateExpansionLocationDetails
 } from "./BrandRegisterValidation";
 import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -266,41 +267,7 @@ const BrandRegisterForm = () => {
     return errors;
   };
 
-  const validateExpansionLocationDetails = (data) => {
-    const errors = {};
-    // if (!data.currentOutletsLocatedAt || data.currentOutletsLocatedAt.length === 0) {
-    //   errors.currentOutletsLocatedAt = "Current outlets located at is required";
-    // }
-    // if (!data.expansionLocations || data.expansionLocations.length === 0) {
-    //   errors.expansionLocations = "Expansion locations are required";
-    // } else {
-    //   data.expansionLocations.forEach((location, index) => {
-    //     if (!location.type) {
-    //       errors[`expansionLocations.${index}.type`] = "Location type is required";
-    //     }
-
-    //     if (!location.location || !location.location.country) {
-    //       errors[`expansionLocations.${index}.location.country`] =
-    //         "Country is required";
-    //     }
-    //     if (!location.location || !location.location.state) {
-    //       errors[`expansionLocations.${index}.location.state`] =
-
-    //         "State is required";
-    //     }
-    //     if (!location.location || !location.location.city) {
-    //       errors[`expansionLocations.${index}.location.city`] =
-    //         "City is required";
-    //     }
-    //     if (!location.location || !location.location.district) {
-    //       errors[`expansionLocations.${index}.location.district`] =
-    //         "District is required";
-    //     }
-    //   });
-    // }
-    return errors;
-  };
-
+ 
   const validateStep = useCallback(
     (step) => {
       const errors = {};
@@ -390,7 +357,6 @@ const BrandRegisterForm = () => {
             officeMobile: formData.brandDetails.officeMobile,
             headOfficeAddress: formData.brandDetails.headOfficeAddress,
             state: formData.brandDetails.state,
-            district: formData.brandDetails.district,
             city: formData.brandDetails.city,
             pincode: formData.brandDetails.pincode,
             website: formData.brandDetails.website,
@@ -450,9 +416,9 @@ const BrandRegisterForm = () => {
           businessPlan: formData.uploads.businessPlan,
         };
 
-        Object.entries(fileFields).forEach(([fieldName, files]) => {
+          Object.entries(fileFields).forEach(([fieldName, files]) => {
           if (files && files.length > 0) {
-            files.forEach((file, index) => {
+            files.forEach((file,) => {
               formDataSend.append(fieldName, file);
             });
           }
@@ -646,6 +612,7 @@ const BrandRegisterForm = () => {
         return (
           <BrandExpansionLocationDetails
             data={formData.expansionLocationData}
+            errors={validationErrors.BrandExpansionLocationDetails} 
             onChange={(newData) =>
               setFormData((prev) => ({
                 ...prev,

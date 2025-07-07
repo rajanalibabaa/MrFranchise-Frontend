@@ -56,7 +56,6 @@ const ManageProfile = () => {
   });
   const [otpDialogOpen, setOtpDialogOpen] = useState(false);
   const [otpStep, setOtpStep] = useState(1);
-  const [contactValue, setContactValue] = useState("");
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
   const [requestOTP, setRequestOTP] = useState(false);
@@ -203,7 +202,9 @@ const ManageProfile = () => {
             },
           }
         );
+
         
+        console.log("response.data?.data :",response.data?.data)
         if (response.data?.data) {
           const data = response.data.data;
           const formattedData = {
@@ -211,11 +212,13 @@ const ManageProfile = () => {
             mobileNumber: formatNumber(data.mobileNumber),
             whatsappNumber: formatNumber(data.whatsappNumber),
             occupation: data.occupation || "",
-            preferences:
-              data.preferences?.map((pref) => ({
-                ...pref,
-                category: Array.isArray(pref.category) ? pref.category : [],
-              })) || [],
+            preferences: data.preferences?.map((pref) => ({
+              ...pref,
+              category: Array.isArray(pref.category) ? pref.category : [],
+              locationType: pref.locationType === "international" ? "International" : "Domestic",
+              propertyPreferred: Array.isArray(pref.propertyPreferred) ? pref.propertyPreferred : []
+            })) || [],
+            investorID: data.inveterID || ""
           };
           setInvestorData(formattedData);
           setOriginalData(formattedData);
@@ -248,11 +251,10 @@ const ManageProfile = () => {
     setOtp("");
     setOtpError("");
     setErrorMSG("");
-    setContactValue(investorData.email || investorData.mobileNumber || "");
   };
 
   const handleRequestOtp = async () => {
-    if (!contactValue) return;
+    if (!investorData.email) return;
     setErrorMSG("");
     setRequestOTP(true);
 
@@ -392,9 +394,6 @@ const ManageProfile = () => {
     if (!investorData.address?.trim()) {
       errors.address = "Address is required";
       isValid = false;
-    } else if (investorData.address.trim().length < 10) {
-      errors.address = "Address must be at least 10 characters";
-      isValid = false;
     }
 
     // Validate pincode
@@ -442,20 +441,10 @@ const ManageProfile = () => {
           break;
         }
         
-        if (!pref.propertyType) {
+        if (!pref.locationType) {
           setSnackbar({
             open: true,
-            message: "Property type is required for all preferences",
-            severity: "error",
-          });
-          isValid = false;
-          break;
-        }
-        
-        if (pref.propertyType === "Own Property" && !pref.propertySize) {
-          setSnackbar({
-            open: true,
-            message: "Property size is required when property type is Own Property",
+            message: "Location type is required for all preferences",
             severity: "error",
           });
           isValid = false;
@@ -513,6 +502,31 @@ const ManageProfile = () => {
             break;
           }
         }
+
+        // Validate property preferences
+        if (pref.propertyPreferred && pref.propertyPreferred.length > 0) {
+          for (const prop of pref.propertyPreferred) {
+            if (!prop.propertyType) {
+              setSnackbar({
+                open: true,
+                message: "Property type is required for all property preferences",
+                severity: "error",
+              });
+              isValid = false;
+              break;
+            }
+            
+            if (prop.propertyType === "Own Property" && !prop.propertySize) {
+              setSnackbar({
+                open: true,
+                message: "Property size is required when property type is Own Property",
+                severity: "error",
+              });
+              isValid = false;
+              break;
+            }
+          }
+        }
       }
     }
 
@@ -548,8 +562,22 @@ const ManageProfile = () => {
     }
     
     // Handle preferences if changed
-    if (JSON.stringify(investorData.preferences) !== JSON.stringify(originalData.preferences)) {
-      changes.preferences = investorData.preferences;
+    const normalizedOriginalPrefs = originalData.preferences.map(pref => ({
+      ...pref,
+      locationType: pref.locationType.toLowerCase()
+    }));
+    
+    const normalizedCurrentPrefs = investorData.preferences.map(pref => ({
+      ...pref,
+      locationType: pref.locationType.toLowerCase()
+    }));
+    
+    if (JSON.stringify(normalizedCurrentPrefs) !== JSON.stringify(normalizedOriginalPrefs)) {
+      changes.preferences = investorData.preferences.map(pref => ({
+        ...pref,
+        locationType: pref.locationType.toLowerCase(),
+        propertyPreferred: pref.propertyPreferred || []
+      }));
     }
     
     // Handle profile image changes
@@ -621,6 +649,11 @@ const ManageProfile = () => {
           mobileNumber: formatNumber(updatedData.mobileNumber),
           whatsappNumber: formatNumber(updatedData.whatsappNumber),
           profileImage: updatedData.profileImage || "",
+          preferences: updatedData.preferences?.map(pref => ({
+            ...pref,
+            locationType: pref.locationType === "international" ? "International" : "Domestic",
+            propertyPreferred: pref.propertyPreferred || []
+          })) || []
         };
         
         setOriginalData(newOriginalData);
@@ -688,17 +721,49 @@ const ManageProfile = () => {
     setInvestorData({ ...investorData, preferences: newPrefs });
   };
 
+  // Property preference handling
+  const handlePropertyPreferenceChange = (prefIndex, propIndex, key, value) => {
+    const newPrefs = [...(investorData.preferences || [])];
+    const newProps = [...(newPrefs[prefIndex].propertyPreferred || [])];
+    newProps[propIndex] = { ...newProps[propIndex], [key]: value };
+    newPrefs[prefIndex].propertyPreferred = newProps;
+    setInvestorData({ ...investorData, preferences: newPrefs });
+  };
+
+  const addPropertyPreference = (prefIndex) => {
+    const newPrefs = [...(investorData.preferences || [])];
+    if (!newPrefs[prefIndex].propertyPreferred) {
+      newPrefs[prefIndex].propertyPreferred = [];
+    }
+    newPrefs[prefIndex].propertyPreferred.push({
+      propertyType: "",
+      propertySize: "",
+      country: newPrefs[prefIndex].locationType === "International" ? investorData.country : "India",
+      state: newPrefs[prefIndex].preferredState,
+      city: newPrefs[prefIndex].preferredCity
+    });
+    setInvestorData({ ...investorData, preferences: newPrefs });
+  };
+
+  const removePropertyPreference = (prefIndex, propIndex) => {
+    const newPrefs = [...(investorData.preferences || [])];
+    const newProps = [...(newPrefs[prefIndex].propertyPreferred || [])];
+    newProps.splice(propIndex, 1);
+    newPrefs[prefIndex].propertyPreferred = newProps;
+    setInvestorData({ ...investorData, preferences: newPrefs });
+  };
+
   const addPreference = () => {
     const newPrefs = [...(investorData.preferences || [])];
     newPrefs.push({
       investmentRange: "",
       investmentAmount: "",
-      propertyType: "",
-      propertySize: "",
+      locationType: "Domestic",
       preferredState: "",
       preferredDistrict: "",
       preferredCity: "",
       category: [{ main: "", sub: "", child: "" }],
+      propertyPreferred: [],
       _id: Date.now().toString(),
     });
     setInvestorData({ ...investorData, preferences: newPrefs });
@@ -760,7 +825,12 @@ const ManageProfile = () => {
                 required
               >
                 <MenuItem value="Investor">Investor</MenuItem>
-                <MenuItem value="Brand">Brand</MenuItem>
+                <MenuItem value="Student">Student</MenuItem>
+                <MenuItem value="Salaried Professional">Salaried Professional</MenuItem>
+                <MenuItem value="Business Owner/ Self-Employed">Business Owner/ Self-Employed</MenuItem>
+                <MenuItem value="Retired">Retired</MenuItem>
+                <MenuItem value="Freelancer/ Consultant">Freelancer/ Consultant</MenuItem>
+                <MenuItem value="Homemaker">Homemaker</MenuItem>
                 <MenuItem value="Other">Other</MenuItem>
               </TextField>
             ) : isPincodeField ? (
@@ -1232,73 +1302,34 @@ const ManageProfile = () => {
                     <MenuItem value="Rs.5Cr-above">Rs.5 Cr - Above</MenuItem>
                   </TextField>
 
-                  {/* Property Type */}
+                  {/* Location Type */}
                   <TextField
                     size="small"
-                    label="Property Type"
-                    value={pref.propertyType || ""}
-                    onChange={(e) => {
-                      const newValue = e.target.value;
-                      const newPrefs = [...(investorData.preferences || [])];
-                      newPrefs[prefIndex] = {
-                        ...newPrefs[prefIndex],
-                        propertyType: newValue,
-                        propertySize: newValue === "Own Property" ? pref.propertySize : "",
-                      };
-                      setInvestorData({ ...investorData, preferences: newPrefs });
-                    }}
+                    label="Location Type"
+                    value={pref.locationType || ""}
+                    onChange={(e) =>
+                      handlePreferenceChange(
+                        prefIndex,
+                        "locationType",
+                        e.target.value
+                      )
+                    }
                     disabled={!editMode}
                     select
                     fullWidth
                     required
-                    error={editMode && !pref.propertyType}
-                    helperText={editMode && !pref.propertyType ? "This field is required" : ""}
+                    error={editMode && !pref.locationType}
+                    helperText={editMode && !pref.locationType ? "This field is required" : ""}
                   >
-                    <MenuItem value="">Select Property Type</MenuItem>
-                    <MenuItem value="Own Property">Own Property</MenuItem>
-                    <MenuItem value="Rental Property">Rental Property</MenuItem>
+                    <MenuItem value="Domestic">Domestic</MenuItem>
+                    <MenuItem value="International">International</MenuItem>
                   </TextField>
-
-                  {/* Property Size */}
-                  {pref.propertyType === "Own Property" && (
-                    <TextField
-                      size="small"
-                      label="Property Size"
-                      value={pref.propertySize || ""}
-                      onChange={(e) =>
-                        handlePreferenceChange(
-                          prefIndex,
-                          "propertySize",
-                          e.target.value
-                        )
-                      }
-                      disabled={!editMode}
-                      select
-                      fullWidth
-                      required
-                      error={editMode && !pref.propertySize}
-                      helperText={editMode && !pref.propertySize ? "This field is required" : ""}
-                    >
-                      <MenuItem value="">Select Total Area</MenuItem>
-                      <MenuItem value="Below - 100 sq ft">Below - 100 sq ft</MenuItem>
-                      <MenuItem value="100 sq ft - 200 sq ft">100 sq ft - 200 sq ft</MenuItem>
-                      <MenuItem value="200 sq ft - 500 sq ft">200 sq ft - 500 sq ft</MenuItem>
-                      <MenuItem value="500 sq ft - 1000 sq ft">500 sq ft - 1000 sq ft</MenuItem>
-                      <MenuItem value="1000 sq ft - 1500 sq ft">1000 sq ft - 1500 sq ft</MenuItem>
-                      <MenuItem value="1500 sq ft - 2000 sq ft">1500 sq ft - 2000 sq ft</MenuItem>
-                      <MenuItem value="2000 sq ft - 3000 sq ft">2000 sq ft - 3000 sq ft</MenuItem>
-                      <MenuItem value="3000 sq ft - 5000 sq ft">3000 sq ft - 5000 sq ft</MenuItem>
-                      <MenuItem value="5000 sq ft - 7000 sq ft">5000 sq ft - 7000 sq ft</MenuItem>
-                      <MenuItem value="7000 sq ft - 10000 sq ft">7000 sq ft - 10000 sq ft</MenuItem>
-                      <MenuItem value="Above 10000 sq ft">Above 10000 sq ft</MenuItem>
-                    </TextField>
-                  )}
 
                   {/* Location Selection */}
                   <TextField
                     size="small"
                     label="Preferred State"
-                    value={pref.preferredState || ""}
+                    value={pref?.preferredState || ""}
                     onChange={(e) => handleStateChange(prefIndex, e.target.value)}
                     disabled={!editMode || indiaData.length === 0}
                     select
@@ -1524,6 +1555,154 @@ const ManageProfile = () => {
                         disabled={isSubmitting}
                       >
                         Add Category
+                      </Button>
+                    )}
+                  </Box>
+
+                  {/* Property Preferences */}
+                  <Box mt={2}>
+                    <Typography fontWeight={600} mb={1}>
+                      Property Preferences
+                    </Typography>
+
+                    {(pref.propertyPreferred || []).map((prop, propIndex) => (
+                      <Box key={propIndex} mb={2} sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                          <Typography variant="subtitle2">Property #{propIndex + 1}</Typography>
+                          {editMode && (
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => removePropertyPreference(prefIndex, propIndex)}
+                              disabled={isSubmitting}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          )}
+                        </Box>
+
+                        <Box display="flex" flexDirection="column" gap={1}>
+                          {/* Property Type */}
+                          <TextField
+                            size="small"
+                            label="Property Type"
+                            value={prop.propertyType || ""}
+                            onChange={(e) =>
+                              handlePropertyPreferenceChange(
+                                prefIndex,
+                                propIndex,
+                                "propertyType",
+                                e.target.value
+                              )
+                            }
+                            disabled={!editMode}
+                            select
+                            required
+                            error={editMode && !prop.propertyType}
+                            helperText={editMode && !prop.propertyType ? "This field is required" : ""}
+                          >
+                            <MenuItem value="">Select Property Type</MenuItem>
+                            <MenuItem value="Own Property">Own Property</MenuItem>
+                            <MenuItem value="Rental Property">Rental Property</MenuItem>
+                          </TextField>
+
+                          {/* Property Size - Only show if property type is Own Property */}
+                          {prop.propertyType === "Own Property" && (
+                            <TextField
+                              size="small"
+                              label="Property Size"
+                              value={prop.propertySize || ""}
+                              onChange={(e) =>
+                                handlePropertyPreferenceChange(
+                                  prefIndex,
+                                  propIndex,
+                                  "propertySize",
+                                  e.target.value
+                                )
+                              }
+                              disabled={!editMode}
+                              select
+                              required
+                              error={editMode && !prop.propertySize}
+                              helperText={editMode && !prop.propertySize ? "This field is required" : ""}
+                            >
+                              <MenuItem value="">Select Total Area</MenuItem>
+                              <MenuItem value="Below - 100 sq ft">Below - 100 sq ft</MenuItem>
+                              <MenuItem value="100 sq ft - 200 sq ft">100 sq ft - 200 sq ft</MenuItem>
+                              <MenuItem value="200 sq ft - 500 sq ft">200 sq ft - 500 sq ft</MenuItem>
+                              <MenuItem value="500 sq ft - 1000 sq ft">500 sq ft - 1000 sq ft</MenuItem>
+                              <MenuItem value="1000 sq ft - 1500 sq ft">1000 sq ft - 1500 sq ft</MenuItem>
+                              <MenuItem value="1500 sq ft - 2000 sq ft">1500 sq ft - 2000 sq ft</MenuItem>
+                              <MenuItem value="2000 sq ft - 3000 sq ft">2000 sq ft - 3000 sq ft</MenuItem>
+                              <MenuItem value="3000 sq ft - 5000 sq ft">3000 sq ft - 5000 sq ft</MenuItem>
+                              <MenuItem value="5000 sq ft - 7000 sq ft">5000 sq ft - 7000 sq ft</MenuItem>
+                              <MenuItem value="7000 sq ft - 10000 sq ft">7000 sq ft - 10000 sq ft</MenuItem>
+                              <MenuItem value="Above 10000 sq ft">Above 10000 sq ft</MenuItem>
+                            </TextField>
+                          )}
+
+                          {/* Location fields */}
+                          <TextField
+                            size="small"
+                            label="Country"
+                            value={prop.country || ""}
+                            onChange={(e) =>
+                              handlePropertyPreferenceChange(
+                                prefIndex,
+                                propIndex,
+                                "country",
+                                e.target.value
+                              )
+                            }
+                            disabled={!editMode || pref.locationType !== "International"}
+                            required
+                          />
+
+                          <TextField
+                            size="small"
+                            label="State"
+                            value={prop.state || ""}
+                            onChange={(e) =>
+                              handlePropertyPreferenceChange(
+                                prefIndex,
+                                propIndex,
+                                "state",
+                                e.target.value
+                              )
+                            }
+                            disabled={!editMode}
+                            required
+                          />
+
+                          <TextField
+                            size="small"
+                            label="City"
+                            value={prop.city || ""}
+                            onChange={(e) =>
+                              handlePropertyPreferenceChange(
+                                prefIndex,
+                                propIndex,
+                                "city",
+                                e.target.value
+                              )
+                            }
+                            disabled={!editMode}
+                            required
+                          />
+                        </Box>
+                      </Box>
+                    ))}
+
+                    {editMode && (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<AddIcon />}
+                        onClick={() => addPropertyPreference(prefIndex)}
+                        sx={{ mt: 1 }}
+                        disabled={isSubmitting}
+                      >
+                        Add Property Preference
                       </Button>
                     )}
                   </Box>
