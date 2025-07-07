@@ -89,6 +89,7 @@ export const fetchBrands = createAsyncThunk(
             headers: {
               "Content-Type": "application/json",
             },
+           
           }
         );
       }

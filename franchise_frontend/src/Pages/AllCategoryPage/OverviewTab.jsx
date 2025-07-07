@@ -282,161 +282,450 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
     setSubmitSuccess(false);
   };
 
-  const ExpansionLocationAccordion = ({ data }) => {
-    const [expandedStates, setExpandedStates] = useState({});
-    const [showAll, setShowAll] = useState(false);
+const ExpansionLocationGrid = ({ data }) => {
+  const [expandedState, setExpandedState] = useState(null);
+  const [expandedDistrict, setExpandedDistrict] = useState(null);
+  // const [showAll, setShowAll] = useState(false);
 
-    if (!data || !Array.isArray(data.locations)) return null;
+  if (!data || !Array.isArray(data.locations)) return null;
 
-    const visibleLocations = showAll ? data.locations : data.locations.slice(0, 2);
+  const visibleLocations = data.locations;
+  const hasData = data.locations.length > 0;
 
-    const toggleState = (stateIndex) => {
-      setExpandedStates((prev) => ({
-        ...prev,
-        [stateIndex]: !prev[stateIndex],
-      }));
-    };
-
-    return (
-      <Box sx={{ mt: 2 }}>
-        {visibleLocations.map((loc, stateIndex) => (
-          <Grow in={true} key={stateIndex} timeout={stateIndex * 300}>
-            <Accordion
-              expanded={expandedStates[stateIndex] || false}
-              onChange={() => toggleState(stateIndex)}
-              disableGutters
-              sx={{
-                mb: 1,
-                borderRadius: '8px',
-                overflow: 'hidden',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                '&:before': { display: 'none' }
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMore sx={{ color: colors.secondary }} />}
-                aria-controls={`panel-${stateIndex}-content`}
-                id={`panel-${stateIndex}-header`}
-                sx={{
-                  bgcolor: 'rgba(255, 152, 0, 0.05)',
-                  borderLeft: `4px solid ${colors.secondary}`
-                }}
-              >
-                <Typography fontWeight={600} color={colors.dark}>
-                  {loc.state || 'Unknown State'}
-                </Typography>
-              </AccordionSummary>
-
-              <AccordionDetails sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
-                {Array.isArray(loc.districts) && loc.districts.map((dist, distIndex) => (
-                  <Box key={distIndex} sx={{ mb: 1, ml: 1 }}>
-                    <Typography variant="subtitle2" fontWeight={500} color={colors.dark}>
-                      District: {dist.district || 'N/A'}
-                    </Typography>
-                    {Array.isArray(dist.cities) && dist.cities.length > 0 && (
-                      <Typography variant="body2" sx={{ ml: 2, color: 'text.secondary' }}>
-                        Cities: {dist.cities.join(', ')}
-                      </Typography>
-                    )}
-                  </Box>
-                ))}
-              </AccordionDetails>
-            </Accordion>
-          </Grow>
-        ))}
-
-        {data.locations.length > 2 && (
-          <Button
-            size="small"
-            onClick={() => setShowAll((prev) => !prev)}
-            sx={{ mt: 2, color: colors.secondary }}
-          >
-            {showAll ? 'Show Less' : `View All (${data.locations.length})`}
-          </Button>
-        )}
-      </Box>
-    );
+  const toggleState = (stateIndex) => {
+    if (expandedState === stateIndex) {
+      setExpandedState(null);
+      setExpandedDistrict(null);
+    } else {
+      setExpandedState(stateIndex);
+      setExpandedDistrict(null);
+    }
   };
 
-  const ExpansionLocationAccordionInternational = ({ data }) => {
-    const [expandedCountries, setExpandedCountries] = useState({});
-    const [showAll, setShowAll] = useState(false);
+  const toggleDistrict = (stateIndex, distIndex) => {
+    const districtKey = `${stateIndex}-${distIndex}`;
+    setExpandedDistrict(expandedDistrict === districtKey ? null : districtKey);
+  };
 
-    if (!data || !Array.isArray(data.country)) return null;
-
-    const visibleCountries = showAll ? data.country : data.country.slice(0, 2);
-
-    const toggleCountry = (index) => {
-      setExpandedCountries((prev) => ({
-        ...prev,
-        [index]: !prev[index],
-      }));
-    };
-
-    return (
-      <Box sx={{ mt: 2 }}>
-        {visibleCountries.map((countryItem, index) => (
-          <Slide direction="up" in={true} key={index} timeout={index * 300}>
-            <Accordion
-              expanded={expandedCountries[index] || false}
-              onChange={() => toggleCountry(index)}
-              disableGutters
-              sx={{
-                mb: 1,
-                borderRadius: '8px',
-                overflow: 'hidden',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                '&:before': { display: 'none' }
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMore sx={{ color: colors.primary }} />}
-                aria-controls={`panel-${index}-content`}
-                id={`panel-${index}-header`}
-                sx={{
-                  bgcolor: 'rgba(63, 81, 181, 0.05)',
-                  borderLeft: `4px solid ${colors.primary}`
-                }}
-              >
-                <Typography fontWeight={600} color={colors.dark}>
-                  {countryItem.states || 'Unknown Country/State'}
-                </Typography>
-              </AccordionSummary>
-
-              <AccordionDetails sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
-                {Array.isArray(countryItem.district) && countryItem.district.map((distItem, distIndex) => (
-                  <Box key={distIndex} sx={{ mb: 1, ml: 1 }}>
-                    <Typography variant="subtitle2" fontWeight={500} color={colors.dark}>
-                      District: {distItem.district || 'N/A'}
+  return (
+    <Box sx={{ 
+      mt: 2,
+      border: '1px solid #e0e0e0',
+      borderRadius: '8px',
+      overflow: 'hidden'
+    }}>
+      {!hasData ? (
+        <Box sx={{
+          p: 3,
+          textAlign: 'center',
+          color: 'text.secondary'
+        }}>
+          <Typography variant="body1">No locations available</Typography>
+        </Box>
+      ) : (
+        <>
+          <Grid container sx={{ height: '300px' }}>
+            {/* State Column */}
+            <Grid item xs={12} md={4} sx={{
+              borderRight: '1px solid #e0e0e0',
+              height: '100%',
+              overflowY: 'auto'
+            }}>
+              <Typography variant="h6" sx={{ 
+                p: 2,
+                position: 'sticky',
+                top: 0,
+                bgcolor: 'background.paper',
+                zIndex: 1,
+                borderBottom: '1px solid #e0e0e0'
+              }}>
+                States
+              </Typography>
+              <Box sx={{ p: 1 }}>
+                {visibleLocations.map((loc, stateIndex) => (
+                  <Grow in={true} key={`state-${stateIndex}`} timeout={stateIndex * 300}>
+                    <Typography 
+                      onClick={() => toggleState(stateIndex)}
+                      sx={{
+                        mb: 1,
+                        cursor: 'pointer',
+                        borderRadius: '4px',
+                        boxShadow: 'none',
+                        borderLeft: `4px solid ${expandedState === stateIndex ? colors.secondary : 'transparent'}`,
+                        bgcolor: expandedState === stateIndex ? 'rgba(255, 152, 0, 0.05)' : 'background.paper',
+                        '&:hover': {
+                          bgcolor: 'action.hover'
+                        }
+                      }}
+                    >
+                      <CardContent sx={{ py: 1.5 }}>
+                        <Typography fontWeight={600}>
+                          {loc.state || 'Unknown State'}
+                        </Typography>
+                      </CardContent>
                     </Typography>
-                    {Array.isArray(distItem.cities) && distItem.cities.length > 0 && (
-                      <Typography variant="body2" sx={{ ml: 2, color: 'text.secondary' }}>
-                        Cities: {distItem.cities.join(', ')}
-                      </Typography>
-                    )}
-                  </Box>
+                  </Grow>
                 ))}
-              </AccordionDetails>
-            </Accordion>
-          </Slide>
-        ))}
+              </Box>
+            </Grid>
 
-        {data.country.length > 2 && (
-          <Button
-            size="small"
-            onClick={() => setShowAll((prev) => !prev)}
-            sx={{ mt: 2, color: colors.primary }}
-          >
-            {showAll ? 'Show Less' : `View All (${data.country.length})`}
-          </Button>
-        )}
-      </Box>
-    );
-  }
+            {/* District Column */}
+            <Grid item xs={12} md={4} sx={{
+              borderRight: '1px solid #e0e0e0',
+              height: '100%',
+              overflowY: 'auto',
+              bgcolor: expandedState !== null ? 'background.paper' : 'action.disabledBackground'
+            }}>
+              <Typography variant="h6" sx={{ 
+                p: 2,
+                position: 'sticky',
+                top: 0,
+                bgcolor: 'background.paper',
+                zIndex: 1,
+                borderBottom: '1px solid #e0e0e0'
+              }}>
+                Districts
+              </Typography>
+              <Box sx={{ p: 1 }}>
+                {expandedState !== null && Array.isArray(data.locations[expandedState].districts) ? (
+                  data.locations[expandedState].districts.length > 0 ? (
+                    data.locations[expandedState].districts.map((dist, distIndex) => {
+                      const districtKey = `${expandedState}-${distIndex}`;
+                      return (
+                        <Grow in={true} key={`district-${districtKey}`}>
+                          <Card
+                            onClick={() => toggleDistrict(expandedState, distIndex)}
+                            sx={{
+                              mb: 1,
+                              cursor: 'pointer',
+                              borderRadius: '4px',
+                              boxShadow: 'none',
+                              borderLeft: `4px solid ${expandedDistrict === districtKey ? colors.secondary : 'transparent'}`,
+                              bgcolor: expandedDistrict === districtKey ? 'rgba(255, 152, 0, 0.05)' : 'background.paper',
+                              '&:hover': {
+                                bgcolor: 'action.hover'
+                              }
+                            }}
+                          >
+                            <CardContent sx={{ py: 1.5 }}>
+                              <Typography variant="subtitle1">
+                                {dist.district || 'N/A'}
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        </Grow>
+                      );
+                    })
+                  ) : (
+                    <Typography variant="body2" sx={{ p: 2, color: 'text.secondary' }}>
+                      No districts available
+                    </Typography>
+                  )
+                ) : (
+                  <Typography variant="body2" sx={{ p: 2, color: 'text.secondary' }}>
+                    {expandedState === null ? 'Select a state' : 'Loading...'}
+                  </Typography>
+                )}
+              </Box>
+            </Grid>
 
-  const ExpansionLocationTags = ({ brand }) => {
-    const [showAll, setShowAll] = useState(false);
+            {/* Cities Column */}
+            <Grid item xs={12} md={4} sx={{
+              height: '100%',
+              overflowY: 'auto',
+              bgcolor: expandedDistrict !== null ? 'background.paper' : 'action.disabledBackground'
+            }}>
+              <Typography variant="h6" sx={{ 
+                p: 2,
+                position: 'sticky',
+                top: 0,
+                bgcolor: 'background.paper',
+                zIndex: 1,
+                borderBottom: '1px solid #e0e0e0'
+              }}>
+                Cities
+              </Typography>
+              <Box sx={{ p: 1 }}>
+                {expandedDistrict !== null ? (
+                  (() => {
+                    const [stateIdx, districtIdx] = expandedDistrict.split('-').map(Number);
+                    const cities = data.locations[stateIdx]?.districts[districtIdx]?.cities;
+                    
+                    return Array.isArray(cities) && cities.length > 0 ? (
+                      cities.map((city, cityIndex) => (
+                        <Grow in={true} key={`city-${cityIndex}`}>
+                          <Card sx={{ 
+                            mb: 1, 
+                            borderRadius: '4px',
+                            boxShadow: 'none',
+                            bgcolor: 'rgba(0,0,0,0.02)'
+                          }}>
+                            <CardContent sx={{ py: 1.5 }}>
+                              <Typography variant="body2">
+                                {city}
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        </Grow>
+                      ))
+                    ) : (
+                      <Typography variant="body2" sx={{ p: 2, color: 'text.secondary' }}>
+                        No cities available
+                      </Typography>
+                    );
+                  })()
+                ) : (
+                  <Typography variant="body2" sx={{ p: 2, color: 'text.secondary' }}>
+                    {expandedState === null ? 'Select a district' : 'Select a district to view cities'}
+                  </Typography>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
 
+          {/* {data.locations.length > 2 && (
+            <Box sx={{ 
+              p: 1, 
+              borderTop: '1px solid #e0e0e0',
+              textAlign: 'center'
+            }}>
+              <Button
+                size="small"
+                onClick={() => setShowAll(prev => !prev)}
+                sx={{ color: colors.secondary }}
+              >
+                {showAll ? 'Show Less' : `View All (${data.locations.length})`}
+              </Button>
+            </Box>
+          )} */}
+        </>
+      )}
+    </Box>
+  );
+};
+const ExpansionLocationGridInternational = ({ data }) => {
+  const [expandedCountry, setExpandedCountry] = useState(null);
+  const [expandedDistrict, setExpandedDistrict] = useState(null);
+  // const [showAll, setShowAll] = useState(false);
+
+  if (!data || !Array.isArray(data.country)) return null;
+
+  const visibleCountries =data.country;
+  const hasData = data.country.length > 0;
+
+  const toggleCountry = (countryIndex) => {
+    if (expandedCountry === countryIndex) {
+      setExpandedCountry(null);
+      setExpandedDistrict(null);
+    } else {
+      setExpandedCountry(countryIndex);
+      setExpandedDistrict(null);
+    }
+  };
+
+  const toggleDistrict = (countryIndex, distIndex) => {
+    const districtKey = `${countryIndex}-${distIndex}`;
+    setExpandedDistrict(expandedDistrict === districtKey ? null : districtKey);
+  };
+
+  return (
+    <Box sx={{ 
+      mt: 2,
+      border: '1px solid #e0e0e0',
+      borderRadius: '8px',
+      overflow: 'hidden'
+    }}>
+      {!hasData ? (
+        <Box sx={{
+          p: 3,
+          textAlign: 'center',
+          color: 'text.secondary'
+        }}>
+          <Typography variant="body1">No locations available</Typography>
+        </Box>
+      ) : (
+        <>
+          <Grid container sx={{ height: '400px' }}>
+            {/* Country/State Column */}
+            <Grid item xs={12} md={4} sx={{
+              borderRight: '1px solid #e0e0e0',
+              height: '100%',
+              overflowY: 'auto'
+            }}>
+              <Typography variant="h6" sx={{ 
+                p: 2,
+                position: 'sticky',
+                top: 0,
+                bgcolor: 'background.paper',
+                zIndex: 1,
+                borderBottom: '1px solid #e0e0e0'
+              }}>
+                Country/State
+              </Typography>
+              <Box sx={{ p: 1 }}>
+                {visibleCountries.map((countryItem, countryIndex) => (
+                  <Slide direction="up" in={true} key={`country-${countryIndex}`}>
+                    <Card 
+                      onClick={() => toggleCountry(countryIndex)}
+                      sx={{
+                        mb: 1,
+                        cursor: 'pointer',
+                        borderRadius: '4px',
+                        boxShadow: 'none',
+                        borderLeft: `4px solid ${expandedCountry === countryIndex ? colors.primary : 'transparent'}`,
+                        bgcolor: expandedCountry === countryIndex ? 'rgba(63, 81, 181, 0.05)' : 'background.paper',
+                        '&:hover': {
+                          bgcolor: 'action.hover'
+                        }
+                      }}
+                    >
+                      <CardContent sx={{ py: 1.5 }}>
+                        <Typography fontWeight={600}>
+                          {countryItem.states || 'Unknown Country/State'}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Slide>
+                ))}
+              </Box>
+            </Grid>
+
+            {/* District Column */}
+            <Grid item xs={12} md={4} sx={{
+              borderRight: '1px solid #e0e0e0',
+              height: '100%',
+              overflowY: 'auto',
+              bgcolor: expandedCountry !== null ? 'background.paper' : 'action.disabledBackground'
+            }}>
+              <Typography variant="h6" sx={{ 
+                p: 2,
+                position: 'sticky',
+                top: 0,
+                bgcolor: 'background.paper',
+                zIndex: 1,
+                borderBottom: '1px solid #e0e0e0'
+              }}>
+                Districts
+              </Typography>
+              <Box sx={{ p: 1 }}>
+                {expandedCountry !== null && Array.isArray(data.country[expandedCountry].district) ? (
+                  data.country[expandedCountry].district.length > 0 ? (
+                    data.country[expandedCountry].district.map((distItem, distIndex) => {
+                      const districtKey = `${expandedCountry}-${distIndex}`;
+                      return (
+                        <Slide in={true} key={`district-${districtKey}`}>
+                          <Card
+                            onClick={() => toggleDistrict(expandedCountry, distIndex)}
+                            sx={{
+                              mb: 1,
+                              cursor: 'pointer',
+                              borderRadius: '4px',
+                              boxShadow: 'none',
+                              borderLeft: `4px solid ${expandedDistrict === districtKey ? colors.primary : 'transparent'}`,
+                              bgcolor: expandedDistrict === districtKey ? 'rgba(63, 81, 181, 0.05)' : 'background.paper',
+                              '&:hover': {
+                                bgcolor: 'action.hover'
+                              }
+                            }}
+                          >
+                            <CardContent sx={{ py: 1.5 }}>
+                              <Typography variant="subtitle1">
+                                {distItem.district || 'N/A'}
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        </Slide>
+                      );
+                    })
+                  ) : (
+                    <Typography variant="body2" sx={{ p: 2, color: 'text.secondary' }}>
+                      No districts available
+                    </Typography>
+                  )
+                ) : (
+                  <Typography variant="body2" sx={{ p: 2, color: 'text.secondary' }}>
+                    {expandedCountry === null ? 'Select a country' : 'Loading...'}
+                  </Typography>
+                )}
+              </Box>
+            </Grid>
+
+            {/* Cities Column */}
+            <Grid item xs={12} md={4} sx={{
+              height: '100%',
+              overflowY: 'auto',
+              bgcolor: expandedDistrict !== null ? 'background.paper' : 'action.disabledBackground'
+            }}>
+              <Typography variant="h6" sx={{ 
+                p: 2,
+                position: 'sticky',
+                top: 0,
+                bgcolor: 'background.paper',
+                zIndex: 1,
+                borderBottom: '1px solid #e0e0e0'
+              }}>
+                Cities
+              </Typography>
+              <Box sx={{ p: 1 }}>
+                {expandedDistrict !== null ? (
+                  (() => {
+                    const [countryIdx, districtIdx] = expandedDistrict.split('-').map(Number);
+                    const cities = data.country[countryIdx]?.district[districtIdx]?.cities;
+                    
+                    return Array.isArray(cities) && cities.length > 0 ? (
+                      cities.map((city, cityIndex) => (
+                        <Slide in={true} key={`city-${cityIndex}`}>
+                          <Card sx={{ 
+                            mb: 1, 
+                            borderRadius: '4px',
+                            boxShadow: 'none',
+                            bgcolor: 'rgba(0,0,0,0.02)'
+                          }}>
+                            <CardContent sx={{ py: 1.5 }}>
+                              <Typography variant="body2">
+                                {city}
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        </Slide>
+                      ))
+                    ) : (
+                      <Typography variant="body2" sx={{ p: 2, color: 'text.secondary' }}>
+                        No cities available
+                      </Typography>
+                    );
+                  })()
+                ) : (
+                  <Typography variant="body2" sx={{ p: 2, color: 'text.secondary' }}>
+                    {expandedCountry === null ? 'Select a district' : 'Select a district to view cities'}
+                  </Typography>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
+
+          {/* {data.country.length > 2 && (
+            <Box sx={{ 
+              p: 1, 
+              borderTop: '1px solid #e0e0e0',
+              textAlign: 'center'
+            }}>
+              <Button
+                size="small"
+                onClick={() => setShowAll(prev => !prev)}
+                sx={{ color: colors.primary }}
+              >
+                {showAll ? 'Show Less' : `View All (${data.country.length})`}
+              </Button>
+            </Box>
+          )} */}
+        </>
+      )}
+    </Box>
+  );
+};
+
+ const ExpansionLocationTags = ({ brand }) => {
     const locations = Array.isArray(brand.expansionLocationData?.expansionLocations?.domestic?.locations)
       ? brand.expansionLocationData.expansionLocations.domestic.locations.flatMap(loc =>
           Array.isArray(loc.districts) ?
@@ -456,39 +745,47 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
     const category = brand.franchiseDetails?.brandCategories || {};
     const formattedChips = locations.map((loc, index) => ({
       key: `${loc.state}-${loc.district}-${loc.city}-${index}`,
-      label: `(${loc.city} - ${loc.district} - ${loc.state} - ${category.main || ''} - ${category.sub || ''} - ${category.child || ''} ),`
+      label: `${loc.city} - ${loc.district} - ${loc.state} - ${category.main || ''} - ${category.sub || ''} - ${category.child || ''}`
     }));
 
-    const visibleChips = showAll ? formattedChips : formattedChips.slice(0, 5);
-
     return (
-      <Box>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {visibleChips.map(chip => (
-            <Typography
-              key={chip.key}
-              variant="caption"
-              sx={{ 
-                // mb: 0.5,
-                // p: '4px 8px',
-                // bgcolor: 'rgba(63, 81, 181, 0.1)',
-                // borderRadius: '4px',
-                // color: colors.dark
-              }}
-            >
-              {chip.label}
-            </Typography>
-          ))}
-        </Box>
-        {formattedChips.length > 5 && (
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => setShowAll(prev => !prev)}
-            sx={{ mt: 1, color: colors.primary }}
+      <Box sx={{ 
+        border: '1px solid #e0e0e0',
+        borderRadius: '8px',
+        p: 1,
+        height: '150px', // Fixed height
+        overflowY: 'auto' // Scrollable content
+      }}>
+        {formattedChips.length > 0 ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column',  gap: 1 }}>
+            {formattedChips.map(chip => (
+              <Typography
+                key={chip.key}
+                variant="caption"
+                sx={{ 
+                  display: 'inline-block',
+                  // p: '4px 8px',
+                  // bgcolor: 'rgba(63, 81, 181, 0.1)',
+                  borderRadius: '4px',
+                  color: colors.dark,
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {chip.label}
+              </Typography>
+            ))}
+          </Box>
+        ) : (
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              color: 'text.secondary',
+              textAlign: 'center',
+              mt: 2
+            }}
           >
-            {showAll ? 'View Less' : 'View More'}
-          </Button>
+            No locations available
+          </Typography>
         )}
       </Box>
     );
@@ -496,7 +793,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
 
   const sections = [
     {
-      title: "Franchise Models",
+      title: "Franchise Details",
       icon: <AccountTree sx={{ color: colors.secondary }} />,
       content: (
         <Box sx={{ mb: 4 }}>
@@ -545,7 +842,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
                   <TableCell>Model</TableCell>
                   <TableCell>Type</TableCell>
                   <TableCell>Investment</TableCell>
-                  <TableCell>Area (sq.ft)</TableCell>
+                  <TableCell>Area</TableCell>
                   <TableCell>Agreement</TableCell>
                   <TableCell>Franchise Fee</TableCell>
                   <TableCell>Interior Cost</TableCell>
@@ -583,7 +880,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
                         {model.investmentRange || "N/A"}
                       </TableCell>
                       <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.05)', padding: '12px 16px',  }}>
-                        {model.areaRequired ? `${model.areaRequired} sq.ft` : "N/A"}
+                        {model.areaRequired ? `${model.areaRequired} ` : "N/A"}
                       </TableCell>
                       <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.05)', padding: '12px 16px',  }}>
                         {model.agreementPeriod ? `${model.agreementPeriod} yrs` : "N/A"}
@@ -601,13 +898,13 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
                         {model.otherCost ? `₹${Number(model.otherCost).toLocaleString('en-IN')}` : "N/A"}
                       </TableCell>
                       <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.05)', padding: '12px 16px',  }}>
-                        {model.requireWorkingCapital ? `₹${Number(model.requireWorkingCapital).toLocaleString('en-IN')}/yr` : "N/A"}
+                        {model.requireWorkingCapital ? `₹${Number(model.requireWorkingCapital).toLocaleString('en-IN')}` : "N/A"}
                       </TableCell>
                       <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.05)', padding: '12px 16px',  }}>
-                        {model.royaltyFee ? `${model.royaltyFee}%` : "N/A"}
+                        {model.royaltyFee ? `${model.royaltyFee}` : "N/A"}
                       </TableCell>
                       <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.05)', padding: '12px 16px',  }}>
-                        {model.breakEven ? `${model.breakEven} mos` : "N/A"}
+                        {model.breakEven ? `${model.breakEven} ` : "N/A"}
                       </TableCell>
                       <TableCell sx={{ 
                         borderBottom: '1px solid rgba(0, 0, 0, 0.05)', 
@@ -618,7 +915,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
                         {model.roi ? `${model.roi}%` : "N/A"}
                       </TableCell>
                       <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.05)', padding: '12px 16px',  }}>
-                        {model.payBackPeriod ? `${model.payBackPeriod} mos` : "N/A"}
+                        {model.payBackPeriod ? `${model.payBackPeriod}` : "N/A"}
                       </TableCell>
                       <TableCell sx={{ 
                         borderBottom: '1px solid rgba(0, 0, 0, 0.05)', 
@@ -635,7 +932,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
             </Table>
           </TableContainer>
 
-          <Box mt={4} textAlign="center">
+          {/* <Box mt={4} textAlign="center">
             <GradientButton
               onClick={() => {
                 setIsLocalModalOpen(true);
@@ -650,7 +947,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
             >
               Apply for Selected Model
             </GradientButton>
-          </Box>
+          </Box> */}
         </Box>
       ),
     },
@@ -659,8 +956,27 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
       icon: <Business sx={{ color: colors.secondary }} />,
       content: (
         <Box> 
+          <Box sx={{ 
+            mb: 4, 
+            p: 3, 
+            borderRadius: '16px', 
+            background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+          }}>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: colors.dark }}>
+              Brand Description
+            </Typography>
+            <Box 
+              dangerouslySetInnerHTML={{ __html: brand.franchiseDetails.brandDescription }} 
+              sx={{ 
+                color: colors.dark,
+                '& p': { mb: 2 },
+                '& strong': { color: colors.primary }
+              }}
+            />
+          </Box>
           <Grid container spacing={3} sx={{ mt: 2, mb: 3 }}>
-            <Grid item xs={12} md={6}>
+            {/* <Grid item xs={12} md={6}>
               <Zoom in={true} timeout={500}>
                 <AnimatedCard sx={{ 
                   borderRadius: '16px', 
@@ -695,7 +1011,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
                   </CardContent>
                 </AnimatedCard>
               </Zoom>
-            </Grid>
+            </Grid> */}
 
             <Grid item xs={12} md={6}>
               <Zoom in={true} timeout={700}>
@@ -706,22 +1022,20 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
                 }}>
                   <CardContent>
                     <Typography variant="h6" fontWeight={700} gutterBottom display="flex" alignItems="center">
-                      <Business sx={{ color: colors.secondary, mr: 1 }} /> Support & Services
+                      <Business sx={{ color: colors.secondary, mr: 1 }} /> Support Provider By Brand
                     </Typography>
                     <Divider sx={{ mb: 2, borderColor: 'rgba(0,0,0,0.1)' }} />
                     <Box sx={{ pl: 1 }}>
-                      <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-                        <strong style={{ color: colors.primary }}>Consultation/Assistance:</strong> {brand.franchiseDetails?.consultationOrAssistance || "N/A"}
-                      </Typography>
-                      <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-                        <strong style={{ color: colors.primary }}>Franchise Development:</strong> {brand.franchiseDetails?.franchiseDevelopment || "N/A"}
-                      </Typography>
+                     <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
+  <strong style={{ color: colors.primary }}>Training Support:</strong>{' '}
+  {Array.isArray(brand.franchiseDetails?.trainingSupport) && brand.franchiseDetails.trainingSupport.length > 0
+    ? brand.franchiseDetails.trainingSupport.map((item) => `✅ ${item}`).join('  ')
+    : 'N/A'}
+</Typography>
                       <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
                         <strong style={{ color: colors.primary }}>Financing Aid:</strong> {brand.franchiseDetails?.aidFinancing || "N/A"}
                       </Typography>
-                      <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
-                        <strong style={{ color: colors.primary }}>Training Support:</strong> {brand.franchiseDetails?.trainingSupport?.join(", ") || "N/A"}
-                      </Typography>
+                      
                       <Typography variant="body2" paragraph sx={{ color: colors.dark }}>
                         <strong style={{ color: colors.primary }}>Unique Selling Points:</strong> {brand.franchiseDetails?.uniqueSellingPoints?.join(", ") || "N/A"}
                       </Typography>
@@ -735,6 +1049,20 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
             </Grid>
           </Grid>
           
+          
+ <Box sx={{ 
+            mb: 4, 
+            p: 3, 
+            borderRadius: '16px', 
+            background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+          }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
+              Current Outlets (Domestic)
+            </Typography>
+            <ExpansionLocationGrid data={brand.expansionLocationData?.currentOutletLocations?.domestic} />
+          </Box>
+          
           <Box sx={{ 
             mb: 4, 
             p: 3, 
@@ -742,19 +1070,45 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
             background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
             boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
           }}>
-            <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: colors.dark }}>
-              Brand Description
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
+              Current Outlets (International)
             </Typography>
-            <Box 
-              dangerouslySetInnerHTML={{ __html: brand.franchiseDetails.brandDescription }} 
-              sx={{ 
-                color: colors.dark,
-                '& p': { mb: 2 },
-                '& strong': { color: colors.primary }
-              }}
-            />
+            <ExpansionLocationGridInternational data={brand.expansionLocationData?.currentOutletLocations?.international} />
           </Box>
+          
+          <Divider sx={{ my: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
+          
+          <Box sx={{ 
+            mb: 4, 
+            p: 3, 
+            borderRadius: '16px', 
+            background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+          }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
+              Expansion Locations (Domestic)
+            </Typography>
+            <ExpansionLocationGrid data={brand.expansionLocationData?.expansionLocations?.domestic} />   
+          </Box>
+          
+          <Box sx={{ 
+            mb: 4, 
+            p: 3, 
+            borderRadius: '16px', 
+            background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+          }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
+              Expansion Locations (International)
+            </Typography>
+            <ExpansionLocationGridInternational data={brand.expansionLocationData?.expansionLocations?.international} />
+          </Box>
+          
+          <Divider sx={{ my: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
+          
+         
 
+          
           <Box sx={{ 
             mb: 4, 
             p: 3, 
@@ -835,65 +1189,8 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
               </Typography>
             )}
           </Box>
+          <Divider sx={{ my: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
 
-          <Divider sx={{ my: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
-          
-          <Box sx={{ 
-            mb: 4, 
-            p: 3, 
-            borderRadius: '16px', 
-            background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-          }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
-              Current Outlets (Domestic)
-            </Typography>
-            <ExpansionLocationAccordion data={brand.expansionLocationData?.currentOutletLocations?.domestic} />
-          </Box>
-          
-          <Box sx={{ 
-            mb: 4, 
-            p: 3, 
-            borderRadius: '16px', 
-            background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-          }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
-              Current Outlets (International)
-            </Typography>
-            <ExpansionLocationAccordionInternational data={brand.expansionLocationData?.currentOutletLocations?.international} />
-          </Box>
-          
-          <Divider sx={{ my: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
-          
-          <Box sx={{ 
-            mb: 4, 
-            p: 3, 
-            borderRadius: '16px', 
-            background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-          }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
-              Expansion Locations (Domestic)
-            </Typography>
-            <ExpansionLocationAccordion data={brand.expansionLocationData?.expansionLocations?.domestic} />   
-          </Box>
-          
-          <Box sx={{ 
-            mb: 4, 
-            p: 3, 
-            borderRadius: '16px', 
-            background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-          }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: colors.dark }}>
-              Expansion Locations (International)
-            </Typography>
-            <ExpansionLocationAccordionInternational data={brand.expansionLocationData?.expansionLocations?.international} />
-          </Box>
-
-          <Divider sx={{ my: 3, borderColor: 'rgba(0,0,0,0.1)' }} />
-          
           <Box sx={{ 
             mb: 4, 
             p: 3, 
@@ -925,7 +1222,219 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
       ),
     },
   ];
-
+ const InstantApplyForm = () => (
+    <Box sx={{
+      position: isMobile ? 'relative' : 'sticky',
+      top: isMobile ? 0 : 100,
+      mb: isMobile ? 4 : 0,
+      p: 4,
+      borderRadius: '16px',
+      background: 'white',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+      border: '1px solid rgba(0,0,0,0.05)'
+    }}>
+      <Typography variant="h5" fontWeight={700} sx={{ 
+        mb: 3, 
+        color: colors.dark,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2
+      }}>
+        <ContactMail sx={{ color: colors.primary }} />
+        Instant Franchise Application
+      </Typography>
+      
+      <form onSubmit={handleSubmit}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <StyledTextField
+              fullWidth
+              label="Full Name"
+              name="fullName"
+              value={formData.fullName || userData?.firstName || ""}
+              onChange={handleChange}
+              required
+              variant="outlined"
+              size="medium"
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, color: 'rgba(0,0,0,0.54)' }}>
+                    <Business />
+                  </Box>
+                )
+              }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <StyledTextField
+              fullWidth
+              label="Email"
+              name="investorEmail"
+              value={formData.investorEmail || userData?.email || ""}
+              onChange={handleChange}
+              required
+              variant="outlined"
+              size="medium"
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, color: 'rgba(0,0,0,0.54)' }}>
+                    <ContactMail />
+                  </Box>
+                )
+              }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <StyledTextField
+              fullWidth
+              label="Mobile Number"
+              name="mobileNumber"
+              value={formData.mobileNumber || userData?.mobileNumber || ""}
+              onChange={handleChange}
+              required
+              variant="outlined"
+              size="medium"
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, color: 'rgba(0,0,0,0.54)' }}>
+                    <Schedule />
+                  </Box>
+                )
+              }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <StyledTextField
+              select
+              fullWidth
+              label="Location"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              required
+              variant="outlined"
+              size="medium"
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, color: 'rgba(0,0,0,0.54)' }}>
+                    <LocationOn />
+                  </Box>
+                )
+              }}
+            >
+              {expansionLocations.map((loc, i) => (
+                <MenuItem key={i} value={loc} sx={{ color: colors.dark }}>
+                  {loc}
+                </MenuItem>
+              ))}
+            </StyledTextField>
+          </Grid>
+          <Grid item xs={12}>
+            <StyledTextField
+              select
+              fullWidth
+              label="Investment Range"
+              name="investmentRange"
+              value={formData.investmentRange}
+              onChange={handleChange}
+              required
+              variant="outlined"
+              size="medium"
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, color: 'rgba(0,0,0,0.54)' }}>
+                    <AttachMoney />
+                  </Box>
+                )
+              }}
+            >
+              {investmentRanges.map((range, i) => (
+                <MenuItem key={i} value={range} sx={{ color: colors.dark }}>
+                  {range}
+                </MenuItem>
+              ))}
+            </StyledTextField>
+          </Grid>
+          <Grid item xs={12}>
+            <StyledTextField
+              select
+              fullWidth
+              label="Plan to Invest"
+              name="planToInvest"
+              value={formData.planToInvest}
+              onChange={handleChange}
+              required
+              variant="outlined"
+              size="medium"
+            >
+              {investmentTimings.map((option, i) => (
+                <MenuItem key={i} value={option} sx={{ color: colors.dark }}>
+                  {option}
+                </MenuItem>
+              ))}
+            </StyledTextField>
+          </Grid>
+          <Grid item xs={12}>
+            <StyledTextField
+              select
+              fullWidth
+              label="Ready to Invest"
+              name="readyToInvest"
+              value={formData.readyToInvest}
+              onChange={handleChange}
+              required
+              variant="outlined"
+              size="medium"
+            >
+              {readyToInvestOptions.map((option, i) => (
+                <MenuItem key={i} value={option} sx={{ color: colors.dark }}>
+                  {option}
+                </MenuItem>
+              ))}
+            </StyledTextField>
+          </Grid>
+          <Grid item xs={12}>
+            <GradientButton
+              type="submit"
+              fullWidth
+              size="large"
+              disabled={isSubmitting}
+              sx={{
+                mt: 2,
+                py: 1.5,
+                fontSize: '1rem',
+                '&:disabled': {
+                  background: '#e0e0e0',
+                  color: '#9e9e9e'
+                }
+              }}
+            >
+              {isSubmitting ? (
+                <>
+                  <CircularProgress size={24} color="inherit" sx={{ mr: 2 }} />
+                  Submitting...
+                </>
+              ) : (
+                "Apply Now"
+              )}
+            </GradientButton>
+          </Grid>
+        </Grid>
+      </form>
+      
+      <Box sx={{ 
+        mt: 3,
+        p: 2,
+        borderRadius: '8px',
+        bgcolor: 'rgba(102, 126, 234, 0.05)',
+        borderLeft: `4px solid ${colors.primary}`
+      }}>
+        <Typography variant="body2" sx={{ color: colors.dark }}>
+          <strong>Note:</strong> Our team will contact you within 24 hours to discuss the franchise opportunity in detail.
+        </Typography>
+      </Box>
+    </Box>
+  );
   return (
     <Box sx={{ mt: 4 }} ref={overviewRef}>
       {sections.map((section, index) => (
@@ -957,7 +1466,9 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
         </Box>
       ))}
 
-      {/* Application Dialog */}
+      <InstantApplyForm />
+
+      {/* Application Dialog
       <Dialog
         open={isModalOpen}
         onClose={handleModalClose}
@@ -1243,7 +1754,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
             </form>
           )}
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* Back to Top Button */}
       {showBackToTop && (

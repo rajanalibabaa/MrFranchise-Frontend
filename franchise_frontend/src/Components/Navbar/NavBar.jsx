@@ -550,7 +550,7 @@ function Navbar() {
             </IconButton>
           </motion.div> */}
           
-          <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 10 }}>
+          {/* <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 10 }}>
             <Select
               value="en"
               disableUnderline
@@ -569,14 +569,14 @@ function Navbar() {
                 }
               }}
             > 
-              <MenuItem value="en" sx={{ color: '#ff9800'}}>
+              {/* <MenuItem value="en" sx={{ color: '#ff9800'}}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Globe size={18} color="rgba(5, 5, 5, 0.9)" /> 
                   <span>EN</span>
                 </Box>
-              </MenuItem>
+              </MenuItem> 
             </Select>
-          </FormControl>
+          </FormControl> */}
         </Box>
         </Toolbar>
 

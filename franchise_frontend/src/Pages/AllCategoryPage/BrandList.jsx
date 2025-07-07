@@ -822,12 +822,7 @@ function BrandList() {
         </Box>
       </Drawer>
           <BrandDetail />
-              <BrandComparison
-                open={comparisonOpen}
-                onClose={() => setComparisonOpen(false)}
-                selectedBrands={selectedForComparison}
-                removeFromComparison={removeFromComparison}
-              />
+              
               */}
     </Container>
 

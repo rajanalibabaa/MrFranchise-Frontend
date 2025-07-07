@@ -222,7 +222,23 @@ const BrandDetails = () => {
   }, [allImages.length]);
 
   if (!selectedBrand) return null;
-  const imageBoxSize = { xs: 150, sm: 180, md: 232 }; // Fixed sizes
+  const imageBoxSize = { xs: 150, sm: 180, md: 196 }; // Fixed sizes
+
+const getOutletRange = (value) => {
+  const numericValue = Number(value);  // Ensure value is a number
+
+  if (isNaN(numericValue) || numericValue === null) {
+    return 'N/A';
+  }
+
+  if (numericValue < 10) {
+    return 'Below 10';
+  } else {
+    const lower = Math.floor(numericValue / 10) * 10;
+    const upper = lower + 10;
+    return `${lower} - ${upper}`;
+  }
+};
 
   return (
     <>
@@ -231,7 +247,7 @@ const BrandDetails = () => {
       mx: "auto",
       my: 4,
       // position: "relative",
-      maxWidth: 1400,
+      maxWidth: 1200,
     }}>
       {/* Brand header with animation */}
       <motion.div
@@ -246,38 +262,20 @@ const BrandDetails = () => {
                 src={selectedBrand.uploads?.brandLogo}
                 alt={selectedBrand.brandDetails?.brandName}
                 sx={{
-                  width: 100,
-                  height: 100,
+                  width: 70,
+                  height: 70,
                   // border: "2px solid #ff9800",
                   objectFit: "fit",
                   
                 }}
               />
-              <Box
-                sx={{
-                  position: "absolute",
-                  bottom: 5,
-                  right: -10,
-                  bgcolor: "#ff9800",
-                  color: "white",
-                  borderRadius: "50%",
-                  width: 30,
-                  height: 30,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: 2,
-                }}
-              >
-                <BusinessIcon fontSize="small" />
-              </Box>
             </Box>
             <Box>
               <Typography
-                variant="h3"
-                component="h1"
+                variant="h5"
+                // component="h1"
                 sx={{
-                  fontWeight: 700,
+                  fontWeight: 600,
                   background: "linear-gradient(45deg, #000 30%, #000 90%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
@@ -285,9 +283,32 @@ const BrandDetails = () => {
               >
                 {selectedBrand.brandDetails?.brandName}
               </Typography>
-              <Typography variant="subtitle1" color="text.secondary">
+              <Typography variant=" body2" color="text.secondary">
                 {selectedBrand.brandDetails?.tagLine}
               </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Established Year :  {selectedBrand.franchiseDetails?.establishedYear}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                   Franchise Since Year : {selectedBrand.franchiseDetails?.franchiseSinceYear}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Category : {[ selectedBrand.franchiseDetails?.brandCategories?.child].filter(Boolean).join(" , ") || 'N/A'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Area Required : {selectedBrand.franchiseDetails?.fico[0]?.areaRequired || 'N/A'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Investment Range : {selectedBrand.franchiseDetails?.fico[0]?.investmentRange || 'N/A'}
+                </Typography>
+                
+               <Typography variant="body2" color="text.secondary">
+  Total brand outlet: {getOutletRange(selectedBrand.franchiseDetails?.totalOutlets)}
+</Typography>
+              </Box>
             </Box>
           </Box>
         </Box>
@@ -306,7 +327,7 @@ const BrandDetails = () => {
             <Box
               sx={{
                 width: '100vh',
-                height: 490,
+                height: 400,
                 borderRadius: 2,
                 overflow: 'hidden',
                 backgroundColor: '#f5f5f5',
@@ -342,7 +363,7 @@ const BrandDetails = () => {
         sx={{
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)', // Always 4 blocks
-          gap: 3,
+          gap: 1,
           maxWidth: '100%',
         }}
       >
@@ -356,7 +377,7 @@ const BrandDetails = () => {
           >
             <Box
               sx={{
-                width: '40vh',
+                // width: '0vh',
                 height: imageBoxSize,
                 overflow: 'hidden',
                 borderRadius: 2,
@@ -372,8 +393,8 @@ const BrandDetails = () => {
                 src={imageUrl}
                 alt={`Gallery ${index}`}
                 style={{
-                  width: '100%',
-                  height: '100%',
+                  width: '30vh',
+                  height: '30vh',
                   objectFit: 'cover',
                 }}
               />
@@ -432,6 +453,7 @@ const BrandDetails = () => {
         </Grid>
       </motion.div>
  <Divider sx={{ my: 5, }} />
+ 
       {/* Overview tab */}
       <Box mt={4} component={motion.div} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
         <OverviewTab
@@ -440,63 +462,7 @@ const BrandDetails = () => {
         />
       </Box>
 
-      {/* Apply button with animation */}
-      <Box mt={4} display="flex" justifyContent="center">
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Button
-            variant="contained"
-            disabled={!userData}
-            sx={{
-              bgcolor: "#ff9800",
-              color: "white",
-              fontWeight: 600,
-              px: 4,
-              py: 1.5,
-              borderRadius: "8px",
-              fontSize: "1rem",
-              minWidth: "240px",
-              "&:hover": {
-                bgcolor: "#fb8c00",
-              }
-            }}
-            onClick={() => setIsModalOpen(true)}
-          >
-            Apply for Franchise
-          </Button>
-        </motion.div>
-      </Box>
-
-      {/* Application Modal */}
-      <Modal
-        open={isModalOpen}
-        onClose={handleModalClose}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-        >
-          <Paper sx={{
-            width: '80vw',
-            maxWidth: 800,
-            maxHeight: '90vh',
-            overflow: 'auto',
-            p: 3,
-            borderRadius: 2
-          }}>
-            {/* Modal content remains the same */}
-            {/* ... */}
-          </Paper>
-        </motion.div>
-      </Modal>
+    
 
       {/* Image Modal */}
      <Dialog

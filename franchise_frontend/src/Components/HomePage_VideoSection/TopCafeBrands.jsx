@@ -58,7 +58,7 @@ const BrandCard = React.memo(({
   const observerRef = useRef();
 
   const brandId = brand.uuid;
-  const franchiseModels = brand.franchiseDetails?.modelsOfFranchise || [];
+  const franchiseModels = brand.franchiseDetails?.fico || [];
   const firstModel = franchiseModels[0] || {};
   const categories = brand.personalDetails?.brandCategories || [];
   const videoUrl = brand?.brandDetails?.brandPromotionVideo?.[0] || 
