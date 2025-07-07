@@ -834,12 +834,14 @@ useEffect(() => {
   return (
     <Box
       sx={{
-        overflowY: "auto",
-        mr: { sm: 0, md: 25 },
-        ml: { sm: 0, md: 25 },
-        mt: 0,
-        maxWidth: "100%",
+        // overflowY: "auto",
+        // mr: { sm: 0, md: 25 },
+        // ml: { sm: 0, md: 25 },
+        // mt: 0,
+        // maxWidth: "100%",
+         pr: 1, mr: { sm: 0, md: 10 }, ml: { sm: 0, md: 10 }
       }}
+      
     >
       {/* Brand Details Section */}
       <Typography

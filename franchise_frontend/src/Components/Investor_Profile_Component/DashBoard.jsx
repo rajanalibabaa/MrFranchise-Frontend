@@ -25,7 +25,7 @@ import { useMediaQuery, useTheme } from '@mui/material';
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 // import { openBrandDialog } from "../../Redux/Slices/brandSlice.jsx";
-import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog.jsx";
+// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog.jsx";
 import img from "../../assets/images/brandLogo.jpg";
 
 const Dashboard = ({ selectedSection, sectionContent }) => {

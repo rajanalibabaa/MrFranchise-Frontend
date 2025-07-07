@@ -50,7 +50,7 @@ import { Box } from "@mui/material";
 import Otherindustries from "./Components/Footers/QuickLinks/Otherindustries.jsx";
 import GlobalLoader from './Components/GLobalLoader.jsx';
 import Blogs from './Components/Footers/QuickLinks/Blogs.jsx';
-import BrandDetailsPage from './Pages/AllCategoryPage/BrandDetailsDialog.jsx';
+import BrandDetailsPage from './Pages/AllCategoryPage/BrandDetailsPage.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -107,7 +107,9 @@ function App() {
           <Route path="/registerhandleuser" element={<RegisterHandleUser />} />
           <Route path="/brandlistingform" element={<BrandRegisterForm />} />
           <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
-          <Route path="/brandviewpage" element={<BrandCategroyViewPage />} />
+          <Route path="/brandviewpage" element={<BrandCategroyViewPage />} >
+          
+          </Route>
 
           <Route path="/investordashboard" element={<ProfilePage />}>
             <Route index element={<DashBoard />} />
@@ -150,8 +152,10 @@ function App() {
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
           <Route path="/otherindustries" element={<Otherindustries/>}/>
           <Route path="/blogs" element={<Blogs />} />
-
-<Route path="/brand/:brandId" element={<BrandDetailsPage />} />        </Routes>
+          
+          <Route path="/brands/:brandId" element={<BrandDetailsPage />} />
+          
+        </Routes>
       
     </>
   );

@@ -29,7 +29,7 @@ import {
   openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
-import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
+// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 function TopBrandVdoCards() {
@@ -147,6 +147,7 @@ function TopBrandVdoCards() {
 
   const handleApply = (brand) => {
     dispatch(openBrandDialog(brand));
+    navigate(`/brands/${brand.uuid}`)
   };
 
   if (brandsLoading && brands.length === 0) {
@@ -695,10 +696,11 @@ function TopBrandVdoCards() {
                       ref={(el) => (videoRefs.current[i + 1] = el)}
                       loading="lazy"
                       src={
-                        brand.uploads?.brandPromotionVideo?.[0] ||
-                        brand.uploads?.franchisePromotionVideo?.[0]
+                        brand.uploads
+?.franchisePromotionVideo
+?.[0]
                       }
-                      alt={brand.brandDetails?.brandName || "Brand"}
+                      alt={brand.personalDetails?.brandName || "Brand"}
                       style={{
                         width: "100%",
                         height: "100%",
@@ -772,7 +774,7 @@ function TopBrandVdoCards() {
                           }
                         >
                           <Typography
-                            variant="body2"
+                            variant="h6"
                             color="#7ad03a"
                             fontWeight="bold"
                             noWrap={false}
@@ -826,7 +828,7 @@ function TopBrandVdoCards() {
                         }}
                       >
                         Categories:{" "}
-                      {brand?.franchiseDetails?.brandCategories?.child}
+                       {brand?.franchiseDetails?.brandCategories?.child}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -934,8 +936,7 @@ function TopBrandVdoCards() {
         </Box>
       </Box>
 
-      {/* Brand Details Dialog */}
-      <BrandDetailsDialog />
+    
 
       {/* Login Dialog */}
       {showLogin && (

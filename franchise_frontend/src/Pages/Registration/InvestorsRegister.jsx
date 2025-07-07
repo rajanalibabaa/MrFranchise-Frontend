@@ -468,6 +468,9 @@ useEffect(() => {
     severity: "info",
   });
  const handleAddPreference = () => {
+   const propertyType = watch("propertyType");
+       const isOwnProperty = propertyType === "own Property";
+
     const pref = {
       category: selectedCategories,
       investmentRange: watch("investmentRange"),
@@ -475,27 +478,30 @@ useEffect(() => {
       preferredState: watch("preferredState"),
       preferredDistrict: watch("preferredDistrict"),
       preferredCity: watch("preferredCity"),
-      propertyType: watch("propertyType"),
-      propertySize: watch("propertyType") === "Own Property" ? watch("propertySize") : "",
-   locationType: watch("preferredLocationType"),
-   propertyCountry: watch("propertyCountry"),
-    propertyState: watch("propertyState"),
-    propertyCity: watch("propertyCity"),
+      propertyType,
+    locationType: watch("preferredLocationType"),
+    ...(isOwnProperty && {
+      propertySize: watch("propertySize"),
+      propertyCountry: watch("propertyCountry"),
+      propertyState: watch("propertyState"),
+      propertyCity: watch("propertyCity"),
+    }),
     };
     if (
-      !pref.category.length ||
-      !pref.investmentRange ||
-      !pref.investmentAmount ||
-      !pref.preferredState ||
-      !pref.preferredDistrict ||
-      !pref.preferredCity ||
-      !pref.propertyType ||
-      (pref.propertyType === "Own Property" && !pref.propertySize ||
- !pref.propertyCountry ||
-    !pref.propertyState ||
-    !pref.propertyCity
-      )
-    ) {
+    !pref.category.length ||
+    !pref.investmentRange ||
+    !pref.investmentAmount ||
+    !pref.preferredState ||
+    !pref.preferredDistrict ||
+    !pref.preferredCity ||
+    !pref.propertyType ||
+    (isOwnProperty && (
+      !pref.propertySize ||
+      !pref.propertyCountry ||
+      !pref.propertyState ||
+      !pref.propertyCity
+    )))
+     {
       showSnackbar("Please fill all preference fields before adding.", "error");
       return;
     }
@@ -769,16 +775,15 @@ useEffect(() => {
           : [],
       investmentRange: pref.investmentRange,
       investmentAmount: pref.investmentAmount,
-      propertyPreferred:[{
-         propertyType: pref.propertyType,
-...(pref.propertyType === "Own Property" && {
-          propertySize: pref.propertySize,
-    
-          propertyCountry: pref.propertyCountry || "",
-          propertyState: pref.propertyState || "",
-          propertyCity: pref.propertyCity || "",
-        }),
-      }],
+      propertyPreferred: [{
+  propertyType: pref.propertyType,
+  ...(pref.propertyType === "Own Property" && {
+    propertySize: pref.propertySize,
+    propertyCountry: pref.propertyCountry || "",
+    propertyState: pref.propertyState || "",
+    propertyCity: pref.propertyCity || "",
+  }),
+}],
    ...(isInternational
         ? {
             preferredCountry: pref.preferredState,
@@ -1035,10 +1040,8 @@ flexDirection: isMobile ? "column" : "row",
     width:{xs:"70%",lg:"100%", md:"100%", sm:"100%"},
   }}
 >
-  
   <Box
     ref={dropdownRef}
-   
     sx={{
       p: 4,
       ml:"30px",
@@ -1049,12 +1052,7 @@ flexDirection: isMobile ? "column" : "row",
     }}
   >
     {/* <Box sx={{ textAlign: "center", mb: 4 }}>
-     
-      
     </Box> */}
-
-  
-
     <form onSubmit={handleSubmit(onSubmit)}>
       {/* Personal Details Section */}
     
@@ -1071,7 +1069,6 @@ flexDirection: isMobile ? "column" : "row",
         >
           <PersonOutlined color="primary" /> Personal Details
         </Typography>
-
         <Grid  spacing={3}>
           {/* First Name */}
           <Grid item xs={12} md={6}>
@@ -2039,6 +2036,9 @@ flexDirection: isMobile ? "column" : "row",
                     field.onChange(e.target.value);
                     if (e.target.value !== "Own Property") {
                       setValue("propertySize", "");
+                    setValue("propertyCountry", "");
+              setValue("propertyState", "");
+              setValue("propertyCity", "");
                     }
                   }}
                   sx={{ gap: 3 }}
@@ -2072,8 +2072,13 @@ flexDirection: isMobile ? "column" : "row",
           {watch("propertyType") === "Own Property" && (
             <Grid item xs={12} md={6}>
               <Controller
-                name="propertySize"
-                control={control}
+        name="propertySize"
+        control={control}
+       rules={{
+         required: watch("propertyType") === "Own Property"
+           ? "Property size is required"
+          : false
+      }}
                 render={({ field }) => (
                   <TextField
                     {...field}
@@ -2131,40 +2136,27 @@ flexDirection: isMobile ? "column" : "row",
           )}
         </Grid>
         
-        {watch("propertyType") === "Own Property" && (
-  <Grid container spacing={2} sx={{ 
-    display: "grid", 
-    gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" }, 
-    gap: 2, 
-    mt: 2 
+      {watch("propertyType") === "Own Property" && (
+  <Grid container spacing={2} sx={{
+    display: "grid",
+    gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+    gap: 2,
+    mt: 2,
   }}>
-    {/* Property Country */}
     <Grid item xs={12} md={4}>
       <Controller
         name="propertyCountry"
         control={control}
-        rules={{
-          required: watch("propertyType") === "Own Property" 
-            ? "Country is required" 
-            : false
-        }}
+        rules={{ required: "Country is required" }}
         render={({ field }) => (
           <Autocomplete
             freeSolo
             options={propertyCountries}
-            value={field.value === "" ? null : field.value}
+            value={field.value || ""}
             onChange={(_, newValue) => {
               field.onChange(newValue || "");
               setValue("propertyState", "");
               setValue("propertyCity", "");
-              clearErrors("propertyCountry");
-            }}
-            onInputChange={(_, newInputValue, reason) => {
-              if (reason === "input") {
-                field.onChange(newInputValue);
-                setValue("propertyState", "");
-                setValue("propertyCity", "");
-              }
             }}
             renderInput={(params) => (
               <TextField
@@ -2172,14 +2164,9 @@ flexDirection: isMobile ? "column" : "row",
                 label="Property Country"
                 error={!!errors.propertyCountry}
                 helperText={errors.propertyCountry?.message}
-                variant="outlined"
                 fullWidth
-                required={watch("propertyType") === "Own Property"}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                  }
-                }}
+                variant="outlined"
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
               />
             )}
           />
@@ -2187,47 +2174,30 @@ flexDirection: isMobile ? "column" : "row",
       />
     </Grid>
 
-    {/* Property State */}
- <Grid item xs={12} md={4}>
+    <Grid item xs={12} md={4}>
       <Controller
         name="propertyState"
         control={control}
-        rules={{
-          required: watch("propertyType") === "Own Property" 
-            ? "State is required" 
-            : false
-        }}
+        rules={{ required: "State is required" }}
         render={({ field }) => (
           <Autocomplete
             freeSolo
             options={propertyStates}
-            value={field.value === "" ? null : field.value}
+            value={field.value || ""}
             onChange={(_, newValue) => {
               field.onChange(newValue || "");
               setValue("propertyCity", "");
-              clearErrors("propertyState");
             }}
-            onInputChange={(_, newInputValue, reason) => {
-              if (reason === "input") {
-                field.onChange(newInputValue);
-                setValue("propertyCity", "");
-              }
-            }}
-            disabled={!propertyCountries.length || !watch("propertyCountry")}
+            disabled={!watch("propertyCountry")}
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Property State"
                 error={!!errors.propertyState}
                 helperText={errors.propertyState?.message}
-                variant="outlined"
                 fullWidth
-                required={watch("propertyType") === "Own Property"}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                  }
-                }}
+                variant="outlined"
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
               />
             )}
           />
@@ -2235,84 +2205,27 @@ flexDirection: isMobile ? "column" : "row",
       />
     </Grid>
 
-
-    {/* Property District */}
-    {/* <Grid item xs={12} md={3}>
-     <Controller
-    name="propertyDistrict"
-    control={control}
-    rules={{ required: "District is required" }}
-    render={({ field }) => (
-      <Autocomplete
-        freeSolo
-        options={propertyDistricts}
-        value={field.value || ""}
-        onChange={(_, newValue) => {
-          field.onChange(newValue || "");
-          setValue("propertyCity", "");
-          clearErrors("propertyDistrict");
-        }}
-        onInputChange={(_, newInputValue, reason) => {
-          if (reason === "input") {
-            field.onChange(newInputValue);
-            setValue("propertyCity", "");
-          }
-        }}
-        disabled={!propertyStates.length || !watch("propertyState")}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Property District"
-            error={!!errors.propertyDistrict}
-            helperText={errors.propertyDistrict?.message}
-            variant="outlined"
-            fullWidth
-          />
-        )}
-      />
-    )}
-  />
-</Grid> */}
-
-    {/* Property City */}
-     <Grid item xs={12} md={4}>
+    <Grid item xs={12} md={4}>
       <Controller
         name="propertyCity"
         control={control}
-        rules={{
-          required: watch("propertyType") === "Own Property" 
-            ? "City is required" 
-            : false
-        }}
+        rules={{ required: "City is required" }}
         render={({ field }) => (
           <Autocomplete
             freeSolo
             options={propertyCities}
-            value={field.value === "" ? null : field.value}
-            onChange={(_, newValue) => {
-              field.onChange(newValue || "");
-              clearErrors("propertyCity");
-            }}
-            onInputChange={(_, newInputValue, reason) => {
-              if (reason === "input") {
-                field.onChange(newInputValue);
-              }
-            }}
-            disabled={!propertyStates.length || !watch("propertyState")}
+            value={field.value || ""}
+            onChange={(_, newValue) => field.onChange(newValue || "")}
+            disabled={!watch("propertyState")}
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Property City"
                 error={!!errors.propertyCity}
                 helperText={errors.propertyCity?.message}
-                variant="outlined"
                 fullWidth
-                required={watch("propertyType") === "Own Property"}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                  }
-                }}
+                variant="outlined"
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
               />
             )}
           />
@@ -2321,6 +2234,7 @@ flexDirection: isMobile ? "column" : "row",
     </Grid>
   </Grid>
 )}
+
         </Grid>
 
         {/* Add Preference Button */}
