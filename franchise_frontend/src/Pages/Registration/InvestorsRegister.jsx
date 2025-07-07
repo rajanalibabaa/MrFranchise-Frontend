@@ -1021,7 +1021,7 @@ useEffect(() => {
         sx={{ 
           color: "#7ad03a", 
           mb: -3,
-          mt: {xs:20, md: 15, lg: 15, sm: 15},
+          mt: {xs:13, md: 15, lg: 15, sm: 15},
           textAlign: 'center',
           textDecoration: 'underline',
           fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.5rem' }
@@ -1060,6 +1060,7 @@ flexDirection: isMobile ? "column" : "row",
           variant="h5"
           sx={{
             mb: 3,
+            mt: 1,
             fontWeight: "bold",
             color: "text.primary",
             display: 'flex',
