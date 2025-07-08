@@ -9,20 +9,22 @@ function BrandCategroyViewPage() {
   return (
     <>
       {/* Fixed Navbar */}
-        <Navbar />
-  
+      {/* <Box sx={{ position: "fixed", top: 0, left: 0, width: "100%", zIndex: 1100 }}>
+        
+      </Box> */}
+<Navbar />
       {/* Scrollable Content below the fixed Navbar */}
       <Box
         sx={{
-          mt: "12px", // Adjust this value based on your Navbar height (e.g. 64px) // Full viewport height minus Navbar
-          // overflowY: "auto",
+          mt: "64px", // Adjust this value to match your Navbar height
+          overflowY: "auto",
         }}
       >
         <BrandListNew />
       </Box>
-      <Box></Box>
-
-      {/* {/* <BrandList /> */}
+      <Box>
+        {/* Footer or other content can go here */}
+      </Box>
     </>
   );
 }

@@ -78,7 +78,7 @@ const TopInvestVdocardround = () => {
   );
 
   return (
-    <Box component="section" sx={{  maxWidth: 1400, mx: "auto" }}>
+    <Box component="section" sx={{  maxWidth: 1300, mx: "auto" }}>
       <Typography variant="h5" sx={{ 
         mb: 2, 
         fontWeight: 800,

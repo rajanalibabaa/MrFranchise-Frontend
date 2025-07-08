@@ -405,7 +405,7 @@ const TopLeadingFranchise = () => {
       sx={{
         py: isMobile ? 1 : 2,
         px: isMobile ? 0 : 2,
-        maxWidth: isMobile ? "100%" : 1400,
+        maxWidth: isMobile ? "100%" : 1300,
         mx: "auto",
         mb: isMobile ? 0 : 2,
       }}

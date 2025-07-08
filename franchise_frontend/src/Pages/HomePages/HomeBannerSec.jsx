@@ -361,7 +361,7 @@ const HomeBannerSec = () => {
         sx={{
           py: 1,
           px: 2,
-          backgroundColor: sectionConfig.background,
+          // backgroundColor: sectionConfig.background,
           position: "relative",
           overflow: "hidden",
           ...(sectionConfig.backgroundImage && {

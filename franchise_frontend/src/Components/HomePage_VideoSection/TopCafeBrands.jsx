@@ -420,8 +420,33 @@ const TopCafeFranchises = () => {
 
   return (
     <>
+<<<<<<< HEAD
       {coffeeTeaBrands.length > 0 && (
         <Box
+=======
+    {coffeeTeaBrands.length > 0 && (
+      <Box
+      sx={{
+        py: isMobile ? 1 : 2,
+        px: isMobile ? 0 : 2,
+        maxWidth: isMobile ? "100%" : 1300,
+        mx: "auto",
+        mb: isMobile ? 0 : 2,
+      }}
+      ref={containerRef}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 1,
+        }}
+      >
+        <Typography
+          variant={isMobile ? "body1" : "h5"}
+          fontWeight="bold"
+>>>>>>> 589c238a21c1b9a8cb2663b54be6b720ea030c5c
           sx={{
             py: isMobile ? 1 : 2,
             px: isMobile ? 0 : 2,
