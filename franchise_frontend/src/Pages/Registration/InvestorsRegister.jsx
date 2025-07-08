@@ -581,7 +581,7 @@ alert('Add Multiple preferences to get more offers from us!','info')
   // OTP related states
   const [otpModal, setOtpModal] = useState({
     open: false, 
-    type: null, // 'email', 'mobile', or 'whatsapp'
+    type: null, 
     otp: "",
     loading: false,
     verified: false,
@@ -627,7 +627,7 @@ alert('Add Multiple preferences to get more offers from us!','info')
 
       if (!exists) {
         const updatedCategories = [...prev, newCategory];
-        setValue("category", updatedCategories); // Update form value
+        setValue("category", updatedCategories); 
         return updatedCategories;
       }
       return prev;
@@ -1021,7 +1021,7 @@ useEffect(() => {
         sx={{ 
           color: "#7ad03a", 
           mb: -3,
-          mt: {xs:20, md: 15, lg: 15, sm: 15},
+          mt: {xs:12, md: 15, lg: 15, sm: 20},
           textAlign: 'center',
           textDecoration: 'underline',
           fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.5rem' }
@@ -2238,7 +2238,7 @@ flexDirection: isMobile ? "column" : "row",
         </Grid>
 
         {/* Add Preference Button */}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 ,mr:{xs:"40px", sm:"50px"}}}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 ,mr:{xs:"40px", sm:"55px"}}}>
           <Button 
         
             onClick={handleAddPreference}

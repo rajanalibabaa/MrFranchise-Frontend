@@ -34,6 +34,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../../assets/Images/logo.png";
 import { showLoading } from "../../Redux/Slices/loadingSlice";
+import NavbarSearch from "../Navbar/NavbarSearch";
 // import backgroundPattern from "../../assets/Images/network-pattern.png";
 
 function Navbar() {
@@ -51,6 +52,7 @@ function Navbar() {
   const [anchorEl, setAnchorEl] = useState(null);
   const menuRef = useRef(null);
   const avatarRef = useRef(null);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [logoutLoading, setlogoutLoading] = useState(false);
 
@@ -69,6 +71,7 @@ function Navbar() {
   }, []);
 
   useEffect(() => {
+
     const handleClickOutside = (event) => {
       if (
         menuOpen &&
@@ -286,10 +289,10 @@ function Navbar() {
             alignItems: "center",
             px: { xs: 1, sm: 2 },
             minHeight: "64px !important",
-            gap: isMobile ? 1 : 2
+            gap: isMobile ? 0 : 2
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap:isMobile?0: 1 }}>
             <motion.div whileHover={{ scale: 1.1 }}>
               <IconButton 
                 edge="start" 
@@ -330,20 +333,21 @@ function Navbar() {
 
 
             
-          <Box sx={{ flexGrow: isMobile ? 1 : 1 }} />
+          <Box sx={{ flexGrow: isMobile ? 0 : 1 }} />
 
 <Box  sx={{ 
               display: 'flex', 
-              gap: 5,
+              gap:isMobile?1: 5,
               flex: isTablet ? 1 : 'none',
-              justifyContent: isTablet ? 'center' : 'flex-end'
+              justifyContent: isTablet ? 'center' : 'flex-end',
+              alignItems:"center"
             }}>
 
               <motion.div >
     <IconButton sx={{backgroundColor:"white", "&:hover": { backgroundColor: "white" }}}
-      onClick={() => navigate('/search')}  >
-      <Search size={25}  />
-      <Typography>Search</Typography>
+      onClick={() => setSearchOpen(true)}  >
+      <Search  size={25}  />
+      <Typography sx={{display:{xs:"none", sm:"flex"}}}>Search</Typography>
     </IconButton>
   </motion.div>
               <motion.div whileHover={{ y: -2 }}>
@@ -355,9 +359,11 @@ function Navbar() {
                     color: 'black',  
                     backgroundColor: '#7ad03a',
                     borderRadius: '8px',
-                    px: {5: 3, xs: 2},
-                    py: 1,
+                    px: {4: 3, xs: 2},
+                    py:isMobile?0: 1,
+                    margin:{ xs:"5px"},
                     textTransform: 'none',
+                    fontSize: isMobile ? '0.5': '1rem',
                     fontWeight: 500,
                     '&:hover': {
                       backgroundColor: 'rgba(111, 255, 0, 0.98)'
@@ -695,6 +701,7 @@ function Navbar() {
           </Box>
         )}
       </AnimatePresence>
+      <NavbarSearch open={searchOpen} handleClose={() => setSearchOpen(false)} />
     </>
   );
 }
