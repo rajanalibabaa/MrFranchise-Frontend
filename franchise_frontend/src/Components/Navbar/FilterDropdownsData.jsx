@@ -32,7 +32,7 @@ const FilterDropdowns = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
-    categories = [],
+    subCategories = [],
     states = [],
     filters,
     loading,
@@ -83,14 +83,14 @@ dispatch(fetchBrands());
         <FormControl fullWidth sx={{ minWidth: 180, }}>
           <InputLabel>Category</InputLabel>
           <Select
-            value={filters.selectedCategory || ""}
+            value={filters.selectedSubCategory || ""}
             onChange={(e) =>
-              handleFilterChange("selectedCategory", e.target.value)
+              handleFilterChange("selectedSubCategory", e.target.value)
             }
             label="Category"
           >
             <MenuItem value="">All Categories</MenuItem>
-            {categories.map((category) => (
+            {subCategories.map((category) => (
               <MenuItem key={category.id} value={category.id}>
                 {category.name}
               </MenuItem>
