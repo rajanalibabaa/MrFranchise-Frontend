@@ -428,7 +428,7 @@ const HomeBannerSec = () => {
           position: "relative",
           overflow: "hidden",
           color: "white",
-          minHeight: isMobile ? "80vh" : "40vh",
+          minHeight: isMobile ? "95vh" : "40vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
