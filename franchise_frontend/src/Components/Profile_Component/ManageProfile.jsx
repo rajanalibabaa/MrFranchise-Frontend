@@ -18,7 +18,7 @@ const id = useSelector((state) => state.user.investorUUID);
         const fetchData = async () => {
             try {
                 const response = await axios.get(
-                    `https://franchise-backend-wgp6.onrender.com/api/investor/getInvestor/${id}`,
+                    `http://localhost:5000/api/investor/getInvestor/${id}`,
                     {
                         headers: {
                             "Content-Type": "application/json",
