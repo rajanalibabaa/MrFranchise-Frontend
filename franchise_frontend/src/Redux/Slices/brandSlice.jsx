@@ -181,7 +181,10 @@ const brandSlice = createSlice({
     setFilters: (state, action) => {
       state.filters = { ...state.filters, ...action.payload };
       state.filteredData = applyFiltersToBrands(state.data, state.filters);
+    
+      console.log("action.payload :",action.payload)
     },
+    
     clearFilters: (state) => {
       state.filters = {
         searchTerm: "",
@@ -320,6 +323,9 @@ const brandSlice = createSlice({
 const applyFiltersToBrands = (brands, filters) => {
   let result = [...brands];
 
+  console.log("===brands=== :",brands)
+  console.log("===filters=== :",filters)
+
   if (filters.searchTerm) {
     const term = filters.searchTerm.toLowerCase();
     result = result.filter((brand) => {
@@ -336,7 +342,7 @@ const applyFiltersToBrands = (brands, filters) => {
 
   if (filters.selectedCategory) {
     result = result.filter((brand) =>
-      brand.personalDetails?.brandCategories?.some(
+      brand.franchiseDetails?.brandCategories?.some(
         (cat) => cat.main === filters.selectedCategory
       )
     );
@@ -344,7 +350,7 @@ const applyFiltersToBrands = (brands, filters) => {
   // Sub category filter
   if (filters.selectedSubCategory) {
     result = result.filter((brand) =>
-      brand.personalDetails?.brandCategories?.some(
+      brand.franchiseDetails?.brandCategories?.some(
         (cat) => cat.sub === filters.selectedSubCategory
       )
     );
@@ -352,7 +358,7 @@ const applyFiltersToBrands = (brands, filters) => {
   // Child categories filter
   if (filters.selectedChildCategories?.length > 0) {
     result = result.filter((brand) =>
-      brand.personalDetails?.brandCategories?.some((cat) =>
+      brand.franchiseDetails?.brandCategories?.some((cat) =>
         filters.selectedChildCategories.includes(cat.child)
       )
     );
@@ -360,6 +366,7 @@ const applyFiltersToBrands = (brands, filters) => {
 
   if (filters.selectedModelType) {
     result = result.filter((brand) =>
+      
       brand.franchiseDetails?.modelsOfFranchise?.some(
         (model) => model.franchiseType === filters.selectedModelType
       )

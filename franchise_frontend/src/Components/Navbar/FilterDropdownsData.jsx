@@ -56,6 +56,8 @@ setTimeout(() => {
 }, 2000);
   };
 
+  // console.log("filters :",filters)
+
   return (
     <Box>
       <Box
