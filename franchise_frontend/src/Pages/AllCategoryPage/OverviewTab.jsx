@@ -1010,7 +1010,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
 
         <Box>
           {hasData(brand.franchiseDetails?.fico) && ( <>
-                <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: colors.dark }}>
+                <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: '#7ad03a'  }}>
     Franchise Details
           </Typography>
          <Box sx={{ mb: 4 }}>
@@ -1021,12 +1021,8 @@ const ExpansionLocationGridInternational = ({ data }) => {
       border: 'none',
       overflowX: 'auto',
       maxHeight: 'calc(100vh - 300px)',
-      '&::-webkit-scrollbar': {
-        height: '8px',
-      },
-      '&::-webkit-scrollbar-thumb': {
-        borderRadius: '4px',
-      },
+     
+     
     }}
   >
     <Table 
@@ -1055,7 +1051,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
           }
         }}>
           <TableCell sx={{ width: '150px' }}>Model</TableCell>
-          <TableCell sx={{ width: '120px' }}>Type</TableCell>
+          <TableCell sx={{ width: '150px' }}>Type</TableCell>
           <TableCell sx={{ width: '150px' }}>Investment</TableCell>
           <TableCell sx={{ width: '100px' }}>Area</TableCell>
           <TableCell sx={{ width: '120px' }}>Agreement</TableCell>
@@ -1100,7 +1096,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
               <TableCell sx={{ 
                 borderBottom: '1px solid rgba(0, 0, 0, 0.05)', 
                 padding: { xs: '8px 12px', sm: '12px 16px' },
-                width: '120px'
+                width: '150px'
               }}>
                 {model.franchiseType || "N/A"}
               </TableCell>
@@ -1218,9 +1214,10 @@ const ExpansionLocationGridInternational = ({ data }) => {
               background: '#fff',
               boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
             }}>
-              <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: colors.dark }}>
+              <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: '#7ad03a'}}>
                 Brand Description
               </Typography>
+              <Divider sx={{ mb: 2, borderColor: 'rgba(0,0,0,0.1)' }} />
               <Box 
                 dangerouslySetInnerHTML={{ __html: brand.franchiseDetails.brandDescription }} 
                 sx={{ 
@@ -1245,7 +1242,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
                     height: '100%'
                   }}>
                     <CardContent>
-                      <Typography variant="h6" fontWeight={700} gutterBottom display="flex" alignItems="center">
+                      <Typography variant="h6" fontWeight={700} gutterBottom display="flex" alignItems="center" color='#7ad03a'>
                         <Business sx={{ color: colors.secondary, mr: 1 }} /> Support Provided By Brand
                       </Typography>
                       <Divider sx={{ mb: 2, borderColor: 'rgba(0,0,0,0.1)' }} />
@@ -1280,7 +1277,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
                {/* Current Outlets (Domestic) - Only show if data exists */}
           {hasData(brand.expansionLocationData?.currentOutletLocations?.domestic?.locations) && (
             <>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: colors.dark }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: '#7ad03a' }}>
                 Current Outlets (Domestic)
               </Typography>
               <ExpansionLocationGrid data={brand.expansionLocationData.currentOutletLocations.domestic} />
@@ -1291,7 +1288,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
                     {/* Current Outlets (International) - Only show if data exists */}
           {hasData(brand.expansionLocationData?.currentOutletLocations?.international?.country) && (
             <>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: colors.dark }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: '#7ad03a' }}>
                 Current Outlets (International)
               </Typography>
               <ExpansionLocationGridInternational data={brand.expansionLocationData.currentOutletLocations.international} />
@@ -1302,7 +1299,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
                   {/* Expansion Locations (Domestic) - Only show if data exists */}
           {hasData(brand.expansionLocationData?.expansionLocations?.domestic?.locations) && (
             <>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: colors.dark }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: '#7ad03a' }}>
                 Expansion Locations (Domestic)
               </Typography>
               <ExpansionLocationGrid data={brand.expansionLocationData.expansionLocations.domestic} />
@@ -1313,7 +1310,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
                      {/* Expansion Locations (International) - Only show if data exists */}
           {hasData(brand.expansionLocationData?.expansionLocations?.international?.country) && (
             <>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: colors.dark }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: '#7ad03a' }}>
                 Expansion Locations (International)
               </Typography>
               <ExpansionLocationGridInternational data={brand.expansionLocationData.expansionLocations.international} />
@@ -1325,7 +1322,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
           {hasData(brand.uploads?.awards) && (
             <>
 
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+            <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mt: 4, color: '#7ad03a' }}>
               Awards
             </Typography>
             {Array.isArray(brand.uploads?.awards) && brand.uploads.awards.length > 0 ? (
@@ -1403,7 +1400,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
            {/* Business Plan Documentation - New Section */}
           {hasData(brand.uploads?.businessPlan) && (
             <>
-              <Typography variant="h6" fontWeight={600} gutterBottom>
+              <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mt: 4, color: '#7ad03a' }}>
                 Business Plan Documentation
               </Typography>
               <Grid container spacing={2}>
@@ -1440,11 +1437,10 @@ const ExpansionLocationGridInternational = ({ data }) => {
                         <Button 
                           variant="contained" 
                           size="small"
-                          color="primary"
+                          sx={{ backgroundColor: '#ff9800', color: 'white',mt: 1  }}
                           href={doc.fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          sx={{ mt: 1 }}
                         >
                           View Document
                         </Button>
@@ -1513,7 +1509,9 @@ const ExpansionLocationGridInternational = ({ data }) => {
             }}>
               {section.icon}
             </Box>
-            {section.title}
+            <Typography variant="h5" fontWeight={700} color='#ff9800'>
+              {section.title}
+            </Typography>
           </SectionHeader>
           {section.content}
           
@@ -1522,7 +1520,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
 
 
      
-      {/* Back to Top Button */}
+      {/* Back to Top Button
       {showBackToTop && (
         <Zoom in={showBackToTop}>
           <Fab
@@ -1543,7 +1541,7 @@ const ExpansionLocationGridInternational = ({ data }) => {
             <KeyboardArrowUp />
           </Fab>
         </Zoom>
-      )}
+      )} */}
     </Box>
   );
 };
