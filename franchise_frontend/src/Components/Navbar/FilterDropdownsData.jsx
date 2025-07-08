@@ -46,14 +46,20 @@ dispatch(fetchBrands());
     dispatch(setFilters({ [name]: value }));
   };
 
-  const handleFindBrands = () => {
-    dispatch(showLoading());
-    navigate("/brandviewpage", {
-      state: { filters }, // Pass current filters to the next page
-    });
-setTimeout(() => {
-  dispatch(hideLoading());
-}, 2000);
+  const handleFindBrands = async () => {
+    try {
+      dispatch(showLoading());
+      // Assuming fetchBrands returns a promise and throws on error
+      await dispatch(fetchBrands()).unwrap();
+      navigate("/brandviewpage", {
+        state: { filters },
+      });
+      dispatch(hideLoading());
+    } catch (error) {
+      // Optionally handle error (e.g., show a message)
+      // Keep loading if needed, or hide if you want to stop spinner on error
+      // dispatch(hideLoading());
+    }
   };
 
   // console.log("filters :",filters)

@@ -34,7 +34,7 @@ const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
   }}
   PaperProps={{
     sx: {
-        marginLeft:"160px",
+        marginLeft:"100px",
       boxShadow: "none",
     //   color :"white",
       backgroundColor: "white", 

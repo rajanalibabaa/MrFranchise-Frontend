@@ -144,6 +144,7 @@ const BrandCard = React.memo(({
           {isVisible && videoUrl ? (
             <CardMedia
               component="video"
+              poster={brand?.uploads?.brandLogo?.[0] || ""}
               loading="lazy"
               src={videoUrl}
               alt={brandName}
