@@ -249,7 +249,7 @@ const Uploads = ({
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  width: "100%", // Make it full width of the grid item
+                  // width: "100%", // Make it full width of the grid item
                   width: { md: "568px" }, // Limit width on medium screens
                 }}
               >
@@ -310,7 +310,7 @@ const Uploads = ({
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  width: "100%", // Make it full width of the grid item
+                  // width: "100%", // Make it full width of the grid item
                   width: { md: "568px" }, // Limit width on medium screens
                 }}
               >
@@ -583,7 +583,7 @@ const Uploads = ({
                   display: "flex",
                   flexDirection: "column",
                   gap: 2,
-                  width: "100%", // Make it full width of the grid item
+                  // width: "100%", // Make it full width of the grid item
                   width: { md: "568px" }, // Limit width on medium screens
                 }}
               >
@@ -712,7 +712,7 @@ const Uploads = ({
                   display: "flex",
                   flexDirection: "column",
                   gap: 2,
-                  width: "100%", // Make it full width of the grid item
+                  // width: "100%", // Make it full width of the grid item
                   width: { md: "568px" }, // Limit width on medium screens
                 }}
               >

@@ -36,11 +36,12 @@ import {
   toggleLikeBrand,
   viewApi,
 } from "../../Redux/Slices/brandSlice";
-import BrandDetail from "./BrandDetail.jsx";
 import { useLocation } from "react-router-dom";
 import { Compare } from "@mui/icons-material";
 import BrandComparison from "./BrandComparison";
 import FilterPanel from "./FillterPannel.jsx";
+import BrandDetail from "./BrandDetail.jsx";
+
 import BrandCard from "./BrandCard.jsx";
 import axios from "axios";
 

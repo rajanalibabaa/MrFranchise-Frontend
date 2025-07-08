@@ -69,14 +69,14 @@ const BrandComparison = ({
 
   // Main comparison fields
   const basicInfoFields = [
-    { label: "Brand Name", field: "personalDetails.brandName" },
-    { label: "Company Name", field: "personalDetails.companyName" },
-    { label: "Established Year", field: "personalDetails.establishedYear" },
+    { label: "Brand Name", field: "brandDetails.brandName" },
+    { label: "Company Name", field: "brandDetails.companyName" },
+    { label: "Established Year", field: "franchiseDetails.establishedYear" },
     { label: "Total Outlets", field: "franchiseDetails.totalOutlets" },
     { label: "Company Owned Outlets", field: "franchiseDetails.companyOwnedOutlets" },
     { label: "Franchise Outlets", field: "franchiseDetails.franchiseOutlets" },
-    { label: "Agreement Period", field: "franchiseDetails.agreementPeriod" },
-    { label: "Requirement Support", field: "franchiseDetails.requirementSupport" },
+    { label: "Agreement Period", field: "fico.agreementPeriod" },
+    { label: "Requirement Support", field: "franchiseDetails.trainingSupport" },
   ];
 
   // Franchise model fields
@@ -122,8 +122,8 @@ const BrandComparison = ({
                     <TableCell key={brand.uuid} align="center" sx={{ width: `${80/selectedBrands.length}%` }}>
                       <Box display="flex" flexDirection="column" alignItems="center">
                         <Avatar
-                          src={brand.brandDetails?.brandLogo}
-                          alt={brand.personalDetails?.brandName}
+                          src={brand.uploads?.brandLogo}
+                          alt={brand.brandDetails?.brandName}
                           sx={{ 
                             width: 80, 
                             height: 80, 
@@ -136,7 +136,7 @@ const BrandComparison = ({
                           variant="rounded"
                         />
                         <Typography variant="subtitle1" sx={{ fontWeight: "bold", color: "#4caf50" }}>
-                          {brand.personalDetails?.brandName}
+                          {brand.brandDetails?.brandName}
                         </Typography>
                         <Chip
                           label="Remove"
