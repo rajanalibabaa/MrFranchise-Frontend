@@ -16,86 +16,82 @@ import {
 } from "@mui/material";
 import { Clear as ClearIcon, Search as SearchIcon } from "@mui/icons-material";
 
-// Investment range options (should be defined or imported)
-const investmentRangeOptions = [
-  { label: "All Ranges", value: "" },
-  { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
-  { label: "Rs.2L-5L", value: "Rs.2L-5L" },
-  { label: "Rs.5L-10L", value: "Rs.5L-10L" },
-  { label: "Rs.10L-20L", value: "Rs.10L-20L" },
-  { label: "Rs.20L-30L", value: "Rs.20L-30L" },
-  { label: "Rs.30L-50L", value: "Rs.30L-50L" },
-  { label: "Rs.50L-1Cr", value: "Rs.50L-1Cr" },
-  { label: "Rs.1Cr-2Cr", value: "Rs.1Cr-2Cr" },
-  { label: "Rs.2Cr-5Cr", value: "Rs.2Cr-5Cr" },
-  { label: "Rs.5Cr-above", value: "Rs.5Cr-above" },
-];
-
 const FilterPanel = ({
   filters,
   handleFilterChange,
   handleClearFilters,
   activeFilterCount,
-  availableCategories = [],
   availableSubCategories = [],
   availableChildCategories = [],
   availableModelTypes = [],
   availableStates = [],
+  availableDistricts = [],
   availableCities = [],
+  availableInvestmentRanges = [],
   filteredBrands = [],
   brands = [],
 }) => {
-  const [selectedMainCategory, setSelectedMainCategory] = useState(
-    filters.selectedCategory || ""
-  );
   const [selectedSubCategory, setSelectedSubCategory] = useState(
     filters.selectedSubCategory || ""
   );
   const [selectedChildCategories, setSelectedChildCategories] = useState(
-    filters.selectedChildCategories || []
+    filters.selectedChildCategory || []
   );
+  const [filteredDistricts, setFilteredDistricts] = useState([]);
+  const [filteredCities, setFilteredCities] = useState([]);
+  const [filteredChildCategories, setFilteredChildCategories] = useState([]);
 
   // Sync local state with Redux filters
   useEffect(() => {
-    setSelectedMainCategory(filters.selectedCategory || "");
     setSelectedSubCategory(filters.selectedSubCategory || "");
-    setSelectedChildCategories(filters.selectedChildCategories || []);
+    setSelectedChildCategories(filters.selectedChildCategory || []);
   }, [
-    filters.selectedCategory,
     filters.selectedSubCategory,
-    filters.selectedChildCategories,
+    filters.selectedChildCategory,
   ]);
 
-  // Reset sub and child categories when main category changes
+  // Filter child categories based on selected sub category
   useEffect(() => {
-    if (!selectedMainCategory) {
-      if (selectedSubCategory || selectedChildCategories.length > 0) {
-        setSelectedSubCategory("");
-        setSelectedChildCategories([]);
-        handleFilterChange("selectedSubCategory", "");
-        handleFilterChange("selectedChildCategories", []);
-      }
+    if (selectedSubCategory) {
+      const children = availableChildCategories.filter(
+        (child) => child?.parentSubCategory === selectedSubCategory
+      );
+      setFilteredChildCategories(children);
+    } else {
+      setFilteredChildCategories([]);
     }
-  }, [selectedMainCategory]);
+  }, [selectedSubCategory, availableChildCategories]);
 
-  // Reset child categories when sub category changes
+  // Filter districts based on selected state
   useEffect(() => {
-    if (!selectedSubCategory && selectedChildCategories.length > 0) {
-      setSelectedChildCategories([]);
-      handleFilterChange("selectedChildCategories", []);
+    if (filters.selectedState) {
+      const districtsForState = availableDistricts.filter(
+        (district) => district.state === filters.selectedState
+      );
+      setFilteredDistricts(districtsForState);
+    } else {
+      setFilteredDistricts(availableDistricts);
     }
-  }, [selectedSubCategory]);
+  }, [filters.selectedState, availableDistricts]);
 
-  const handleMainCategoryChange = (event) => {
-    const value = event.target.value;
-    setSelectedMainCategory(value);
-    handleFilterChange("selectedCategory", value);
-  };
+  // Filter cities based on selected district
+  useEffect(() => {
+    if (filters.selectedDistrict) {
+      const citiesForDistrict = availableCities.filter(
+        (city) => city.district === filters.selectedDistrict
+      );
+      setFilteredCities(citiesForDistrict);
+    } else {
+      setFilteredCities(availableCities);
+    }
+  }, [filters.selectedDistrict, availableCities]);
 
   const handleSubCategoryChange = (event) => {
     const value = event.target.value;
     setSelectedSubCategory(value);
+    setSelectedChildCategories([]);
     handleFilterChange("selectedSubCategory", value);
+    handleFilterChange("selectedChildCategory", []);
   };
 
   const handleChildCategoryChange = (event) => {
@@ -111,32 +107,14 @@ const FilterPanel = ({
     }
 
     setSelectedChildCategories(newChildCategories);
-    handleFilterChange("selectedChildCategories", newChildCategories);
-  };
-
-  // Get filtered subcategories based on selected main category
-  const getFilteredSubCategories = () => {
-    if (!selectedMainCategory || !availableSubCategories) return [];
-    return availableSubCategories.filter(
-      (sub) => sub?.parentCategory === selectedMainCategory
-    );
-  };
-
-  // Get filtered child categories based on selected sub category
-  const getFilteredChildCategories = () => {
-    if (!selectedSubCategory || !availableChildCategories) return [];
-    return availableChildCategories.filter(
-      (child) => child?.parentSubCategory === selectedSubCategory
-    );
+    handleFilterChange("selectedChildCategory", newChildCategories);
   };
 
   return (
     <Box
       sx={{
-        width: 280,
         pr: 2,
-        position: { md: "fixed" },
-        height: { md: "calc(90vh - 32px)" },
+        height: "calc(100vh - 120px)",
         overflowY: "auto",
         "&::-webkit-scrollbar": {
           width: "6px",
@@ -153,11 +131,7 @@ const FilterPanel = ({
         },
       }}
     >
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-      >
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h6">Filters</Typography>
         <Button
           size="small"
@@ -182,69 +156,40 @@ const FilterPanel = ({
         sx={{ mb: 3 }}
       />
       
-      {/* Main Category Radio Buttons */}
+      {/* Sub Category Radio Buttons */}
       <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
-        Main Category
+        Sub Category
       </Typography>
       <FormControl component="fieldset" fullWidth sx={{ mb: 2 }}>
         <RadioGroup
-          value={selectedMainCategory}
-          onChange={handleMainCategoryChange}
+          value={selectedSubCategory}
+          onChange={handleSubCategoryChange}
         >
           <FormControlLabel
             value=""
             control={<Radio color="primary" />}
-            label="All Categories"
+            label="All Sub Categories"
           />
-          {availableCategories.map((category) => (
+          {availableSubCategories.map((subCategory) => (
             <FormControlLabel
-              key={category.id}
-              value={category.id}
+              key={subCategory.id}
+              value={subCategory.id}
               control={<Radio color="primary" />}
-              label={category.name}
+              label={subCategory.name}
             />
           ))}
         </RadioGroup>
       </FormControl>
 
-      {/* Sub Category Radio Buttons (only shown when main category is selected) */}
-      {selectedMainCategory && (
-        <>
-          <Divider sx={{ my: 2 }} />
-          <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
-            Sub Category
-          </Typography>
-          <FormControl component="fieldset" fullWidth sx={{ mb: 2 }}>
-            <RadioGroup
-              value={selectedSubCategory}
-              onChange={handleSubCategoryChange}
-            >
-              <FormControlLabel
-                value=""
-                control={<Radio color="primary" />}
-                label="All Sub Categories"
-              />
-              {getFilteredSubCategories().map((subCategory) => (
-                <FormControlLabel
-                  key={subCategory.id}
-                  value={subCategory.id}
-                  control={<Radio color="primary" />}
-                  label={subCategory.name}
-                />
-              ))}
-            </RadioGroup>
-          </FormControl>
-        </>
-      )}
-
-      {selectedSubCategory && (
+      {/* Child Categories Checkboxes */}
+      {selectedSubCategory && filteredChildCategories.length > 0 && (
         <>
           <Divider sx={{ my: 2 }} />
           <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
             Child Categories
           </Typography>
           <Box sx={{ maxHeight: 200, overflow: "auto" }}>
-            {getFilteredChildCategories().map((childCategory) => (
+            {filteredChildCategories.map((childCategory) => (
               <FormControlLabel
                 key={childCategory.id}
                 control={
@@ -264,21 +209,15 @@ const FilterPanel = ({
       )}
 
       {/* Model Type Select */}
+      <Divider sx={{ my: 2 }} />
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>Model Type</InputLabel>
         <Select
-          value={filters.selectedModelType}
+          value={filters.selectedModelType || ""}
           onChange={(e) => handleFilterChange("selectedModelType", e.target.value)}
           label="Model Type"
-          sx={{
-            "& .MuiSelect-icon": {
-              color: "#ff9800",
-            },
-          }}
         >
-          <MenuItem value="">
-            <em>All Model Types</em>
-          </MenuItem>
+          <MenuItem value="">All Model Types</MenuItem>
           {availableModelTypes.map((type) => (
             <MenuItem key={type} value={type}>
               {type}
@@ -287,25 +226,49 @@ const FilterPanel = ({
         </Select>
       </FormControl>
 
+      {/* Location Filters */}
+      <Divider sx={{ my: 2 }} />
+      <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
+        Location
+      </Typography>
+      
       {/* State Select */}
-      <FormControl fullWidth sx={{ mb: 3 }}>
+      <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>State</InputLabel>
         <Select
-          value={filters.selectedState}
-          onChange={(e) => handleFilterChange("selectedState", e.target.value)}
-          label="State"
-          sx={{
-            "& .MuiSelect-icon": {
-              color: "#ff9800",
-            },
+          value={filters.selectedState || ""}
+          onChange={(e) => {
+            handleFilterChange("selectedState", e.target.value);
+            handleFilterChange("selectedDistrict", "");
+            handleFilterChange("selectedCity", "");
           }}
+          label="State"
         >
-          <MenuItem value="">
-            <em>All States</em>
-          </MenuItem>
+          <MenuItem value="">All States</MenuItem>
           {availableStates.map((state) => (
             <MenuItem key={state} value={state}>
               {state}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* District Select */}
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel>District</InputLabel>
+        <Select
+          value={filters.selectedDistrict || ""}
+          onChange={(e) => {
+            handleFilterChange("selectedDistrict", e.target.value);
+            handleFilterChange("selectedCity", "");
+          }}
+          label="District"
+          disabled={!filters.selectedState}
+        >
+          <MenuItem value="">All Districts</MenuItem>
+          {filteredDistricts.map((district) => (
+            <MenuItem key={district.district} value={district.district}>
+              {district.district}
             </MenuItem>
           ))}
         </Select>
@@ -315,50 +278,44 @@ const FilterPanel = ({
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>City</InputLabel>
         <Select
-          value={filters.selectedCity}
+          value={filters.selectedCity || ""}
           onChange={(e) => handleFilterChange("selectedCity", e.target.value)}
           label="City"
-          sx={{
-            "& .MuiSelect-icon": {
-              color: "#ff9800",
-            },
-          }}
+          disabled={!filters.selectedDistrict}
         >
-          <MenuItem value="">
-            <em>All Cities</em>
-          </MenuItem>
-          {availableCities.map((city) => (
-            <MenuItem key={city} value={city}>
-              {city}
+          <MenuItem value="">All Cities</MenuItem>
+          {filteredCities.map((city) => (
+            <MenuItem key={city.city} value={city.city}>
+              {city.city}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
 
       {/* Investment Range */}
-      <Typography gutterBottom sx={{ color: "#4caf50"  }}>
+      <Divider sx={{ my: 2 }} />
+      <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
         Investment Range
       </Typography>
-      <Select
-        value={filters.selectedInvestmentRange}
-        onChange={(e) => handleFilterChange("selectedInvestmentRange", e.target.value)}
-        label="Investment Range"
-        sx={{
-          "& .MuiSelect-icon": {
-            color: "#ff9800",
-          },
-          width: "100%",
-          mb: 3
-        }}
-      >
-        {investmentRangeOptions.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
-            {option.label}
-          </MenuItem>
-        ))}
-      </Select>
+      <FormControl fullWidth sx={{ mb: 3 }}>
+        <InputLabel>Investment Range</InputLabel>
+        <Select
+          value={filters.selectedInvestmentRange || ""}
+          onChange={(e) => handleFilterChange("selectedInvestmentRange", e.target.value)}
+          label="Investment Range"
+        >
+          <MenuItem value="">All Ranges</MenuItem>
+          {availableInvestmentRanges.map((range) => (
+            <MenuItem key={range} value={range}>
+              {range}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
-      <Typography variant="body2" sx={{ color: "#4caf50" }}>
+      {/* Results Count */}
+      <Divider sx={{ my: 2 }} />
+      <Typography variant="body2" sx={{ color: "#4caf50", textAlign: "center" }}>
         Showing {filteredBrands.length} of {brands.length} brands
       </Typography>
     </Box>
