@@ -58,7 +58,7 @@ const TopInvestVdo2 = React.memo(() => {
   const { data: brands = [], loading, error } = useSelector((state) => state.brands);
 
 
-  console.log("brand === :",brands)
+  // console.log("brand === :",brands)
 
   // Memoized values
   const CARD_DIMENSIONS = useMemo(() => ({

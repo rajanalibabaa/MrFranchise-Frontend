@@ -64,6 +64,8 @@ dispatch(fetchBrands());
     }
   };
 
+  // console.log("filters :",filters)
+
   return (
     <Box>
       <Box

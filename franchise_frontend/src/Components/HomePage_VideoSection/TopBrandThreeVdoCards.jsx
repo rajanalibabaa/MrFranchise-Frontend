@@ -200,7 +200,7 @@ function TopBrandVdoCards() {
         py: isMobile ? 1 : 2,
         mx: "auto",
         position: "relative",
-        maxWidth: 1300,
+        maxWidth: 1400,
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
