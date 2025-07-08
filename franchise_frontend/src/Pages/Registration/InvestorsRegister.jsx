@@ -671,7 +671,7 @@ alert('Add Multiple preferences to get more offers from us!','info')
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/otpverify/verify-otp",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/verify-otp",
         {
           identifier:
             type === "email"
@@ -817,7 +817,7 @@ useEffect(() => {
       dispatch(showLoading());
       const response = await axios.post(
         "http://localhost:5000/api/v1/investor/createInvestor",
-        // "http://localhost:5000/api/v1/investor/createInvestor",
+        // "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
