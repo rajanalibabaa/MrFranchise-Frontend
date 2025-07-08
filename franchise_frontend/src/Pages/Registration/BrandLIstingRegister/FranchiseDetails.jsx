@@ -213,7 +213,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             const totalMonths = (100 / roiValue) * 12;
             const years = Math.floor(totalMonths / 12);
             const months = Math.round(totalMonths % 12);
-            payBackPeriod = `${years} year${years !== 1 ? 's' : ''} ${months} month${months !== 1 ? 's' : ''}`;
+            payBackPeriod = `${years} year${years !== 1 ? 's' : ''} ${months} Month${months !== 1 ? 's' : ''}`;
           }
         }
         

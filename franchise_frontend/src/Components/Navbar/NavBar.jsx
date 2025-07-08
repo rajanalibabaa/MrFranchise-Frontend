@@ -239,7 +239,7 @@ function Navbar() {
         }}
       >
         <Box sx={{ 
-          display: "flex", 
+          display:{ xs: "none", sm: "flex"}, 
           flexWrap: "wrap",
           ml: "40px", 
           
@@ -338,6 +338,14 @@ function Navbar() {
               flex: isTablet ? 1 : 'none',
               justifyContent: isTablet ? 'center' : 'flex-end'
             }}>
+
+              <motion.div >
+    <IconButton sx={{backgroundColor:"white", "&:hover": { backgroundColor: "white" }}}
+      onClick={() => navigate('/search')}  >
+      <Search size={25}  />
+      <Typography>Search</Typography>
+    </IconButton>
+  </motion.div>
               <motion.div whileHover={{ y: -2 }}>
                 <Button 
                 onClick={() => navigate('/brandlistingform')}
@@ -347,7 +355,7 @@ function Navbar() {
                     color: 'black',  
                     backgroundColor: '#7ad03a',
                     borderRadius: '8px',
-                    px: 5,
+                    px: {5: 3, xs: 2},
                     py: 1,
                     textTransform: 'none',
                     fontWeight: 500,
@@ -550,7 +558,7 @@ function Navbar() {
             </IconButton>
           </motion.div> */}
           
-          <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 10 }}>
+          {/* <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 10 }}>
             <Select
               value="en"
               disableUnderline
@@ -569,14 +577,14 @@ function Navbar() {
                 }
               }}
             > 
-              <MenuItem value="en" sx={{ color: '#ff9800'}}>
+              {/* <MenuItem value="en" sx={{ color: '#ff9800'}}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Globe size={18} color="rgba(5, 5, 5, 0.9)" /> 
                   <span>EN</span>
                 </Box>
-              </MenuItem>
+              </MenuItem> 
             </Select>
-          </FormControl>
+          </FormControl> */}
         </Box>
         </Toolbar>
 
