@@ -22,13 +22,13 @@ export const toggleLikeBrand = createAsyncThunk(
       const brandID = brandId;
       if (!isLiked) {
         await axios.post(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
+          "http://localhost:5000/api/v1/like/post-favbrands",
           { branduuid: brandId },
           config
         );
       } else if (isLiked) {
         const res = await axios.delete(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${id}`,
+          `http://localhost:5000/api/v1/like/delete-favbrand/${id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export const toggleLikeBrand = createAsyncThunk(
 export const Likeshow = async () => {
   try {
     const response = await axios.get(
-      `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
+      `http://localhost:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +73,7 @@ export const fetchBrands = createAsyncThunk(
 
       if (!token) {
         response = await axios.get(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+          "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
           {
             headers: {
               "Content-Type": "application/json",
@@ -97,7 +97,7 @@ export const fetchBrandById = createAsyncThunk(
   async (brandId, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingById/${brandId}`,
+        `http://localhost:5000/api/v1/brandlisting/getBrandListingById/${brandId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -116,7 +116,7 @@ export const viewApi = createAsyncThunk(
   async (brandID, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
+        `http://localhost:5000/api/v1/view/postViewBrands/${id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -131,6 +131,33 @@ export const viewApi = createAsyncThunk(
     }
   }
 );
+
+
+let viewID = null
+
+if (viewID) {
+
+  console.log("viewID :",viewID)
+  console.log("id :",viewID)
+  console.log("token :",token)
+  try {
+      const res = await axios.post(
+        `http://localhost:5000/api/v1/view/postViewBrands/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            data: { viewID },
+          },
+        }
+      );
+      console.log (res.data.data);
+
+      viewID = null
+    } catch (error) {
+      console.log(error);
+    }
+}
 
 
 const brandSlice = createSlice({
@@ -187,7 +214,7 @@ const brandSlice = createSlice({
       state.selectedBrand = action.payload;
       const newWindow = window.open(`/brands/${action.payload.uuid}?`, '_blank');
       localStorage.setItem(`brand-${action.payload.uuid}`, JSON.stringify(action.payload));
-     
+     viewID = action.payload.uuid
       if (newWindow) {
         newWindow.onbeforeunload = () => {
           localStorage.removeItem(`brand-${action.payload.uuid}`);

@@ -150,7 +150,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
       if (!investorUUID || !AccessToken) return;
       try {
         const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -252,7 +252,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
       const id = investorUUID || brandUUID;
 
       const response = await axios.post(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication/${id}`,
+        `http://localhost:5000/api/v1/instantapply/postApplication/${id}`,
         payload,
         {
           headers: {
