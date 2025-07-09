@@ -70,6 +70,8 @@ const BrandCard = React.memo(({
   const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
 
+  
+
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
@@ -131,6 +133,7 @@ const BrandCard = React.memo(({
             <CardMedia
               component="video"
               loading="lazy"
+              poster={brand?.uploads?.brandLogo?.[0] || ""}
               src={videoUrl}
               alt={brand.personalDetails?.brandName || "Brand"}
               sx={{
@@ -196,7 +199,7 @@ const BrandCard = React.memo(({
                   flex: 1,
                 }}
               >
-                {brand.personalDetails?.brandName}
+                {brand.brandDetails.brandName}
               </Typography>
               <IconButton
                 onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
@@ -216,10 +219,27 @@ const BrandCard = React.memo(({
               </IconButton>
             </Box>
 
-            {categories.length > 0 && (
+            {categories && (
               <Box sx={{ mb: 2 }}>
                 <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-                  {categories.slice(0, 3).map((category, index) => (
+                
+                    <Chip
+                      label={categories.child}
+                      size="small"
+                      sx={{
+                        bgcolor: "rgba(255, 152, 0, 0.1)",
+                        color: "orange.dark",
+                        fontWeight: 500,
+                        mb: 1,
+                      }}
+                    />
+                  
+                  
+                </Stack>
+              </Box>
+            )}
+
+            {/* {categories.map((category, index) => (
                     <Chip
                       key={index}
                       label={category.child}
@@ -231,10 +251,8 @@ const BrandCard = React.memo(({
                         mb: 1,
                       }}
                     />
-                  ))}
-                </Stack>
-              </Box>
-            )}
+                  ))} */}
+            
 
             <Stack spacing={1} sx={{ mb: 2 }}>
               <Box display="flex" alignItems="center">
@@ -426,7 +444,7 @@ const beverageBrands = useMemo(() => {
       sx={{
         py: isMobile ? 1 : 2,
         px: isMobile ? 0 : 2,
-        maxWidth: isMobile ? "100%" : 1400,
+        maxWidth: isMobile ? "100%" : 1300,
         mx: "auto",
         mb: isMobile ? 0 : 2,
       }}

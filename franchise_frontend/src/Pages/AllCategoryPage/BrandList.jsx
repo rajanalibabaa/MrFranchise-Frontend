@@ -30,10 +30,11 @@ import {
   toggleLikeBrand,
   viewApi,
 } from "../../Redux/Slices/brandSlice";
-import BrandDetail from "./BrandDetail.jsx";
 import { useLocation } from "react-router-dom";
 import BrandComparison from "./BrandComparison";
 import FilterPanel from "./FillterPannel.jsx";
+import BrandDetail from "./BrandDetail.jsx";
+
 import BrandCard from "./BrandCard.jsx";
 
 function BrandList() {
@@ -381,8 +382,7 @@ function BrandList() {
           </Box>
         </Box>
       </Drawer>
-
-      <BrandDetail />
+            <BrandDetail />
       <BrandComparison
         open={comparisonOpen}
         onClose={() => setComparisonOpen(false)}

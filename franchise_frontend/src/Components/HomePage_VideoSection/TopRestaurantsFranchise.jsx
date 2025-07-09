@@ -71,6 +71,7 @@ const BrandCard = React.memo(
     const videoUrl =
       brand?.uploads?.franchisePromotionVideo?.[0]; 
     const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
+    const brandName = brand.brandDetails.brandName || "Brand"
 
     useEffect(() => {
       observerRef.current = new IntersectionObserver(
@@ -133,8 +134,9 @@ const BrandCard = React.memo(
               <CardMedia
                 component="video"
                 loading="lazy"
+                poster={brand?.uploads?.brandLogo?.[0] || ""}
                 src={videoUrl}
-                alt={brand.personalDetails?.brandName || "Brand"}
+                alt={brandName|| "Brand"}
                 sx={{
                   position: "absolute",
                   top: 0,
@@ -198,7 +200,7 @@ const BrandCard = React.memo(
                     flex: 1,
                   }}
                 >
-                  {brand.personalDetails?.brandName}
+                  {brandName}
                 </Typography>
                 <IconButton
                   onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
@@ -218,13 +220,12 @@ const BrandCard = React.memo(
                 </IconButton>
               </Box>
 
-              {categories.length > 0 && (
+              {categories && (
                 <Box sx={{ mb: 2 }}>
                   <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-                    {categories.slice(0, 3).map((category, index) => (
+                    
                       <Chip
-                        key={index}
-                        label={category.child}
+                        label={categories.child}
                         size="small"
                         sx={{
                           bgcolor: "rgba(255, 152, 0, 0.1)",
@@ -233,7 +234,7 @@ const BrandCard = React.memo(
                           mb: 1,
                         }}
                       />
-                    ))}
+                    
                   </Stack>
                 </Box>
               )}
@@ -428,7 +429,7 @@ const TopRestaurantsFranchise = () => {
       sx={{
         py: isMobile ? 1 : 2,
         px: isMobile ? 0 : 2,
-        maxWidth: isMobile ? "100%" : 1400,
+        maxWidth: isMobile ? "100%" : 1300,
         mx: "auto",
         mb: isMobile ? 0 : 2,
       }}

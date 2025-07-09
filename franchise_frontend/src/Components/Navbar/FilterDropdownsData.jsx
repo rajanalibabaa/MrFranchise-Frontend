@@ -48,19 +48,23 @@ dispatch(fetchBrands());
 
   const handleFindBrands = async () => {
     try {
-      dispatch(showLoading());
+      // dispatch(showLoading());
       // Assuming fetchBrands returns a promise and throws on error
       await dispatch(fetchBrands()).unwrap();
       navigate("/brandviewpage", {
         state: { filters },
       });
-      dispatch(hideLoading());
+      // dispatch(hideLoading());
     } catch (error) {
       // Optionally handle error (e.g., show a message)
       // Keep loading if needed, or hide if you want to stop spinner on error
       // dispatch(hideLoading());
+      console.log("Error fetching brands:", error);
+      
     }
   };
+
+  // console.log("filters :",filters)
 
   return (
     <Box>
@@ -73,7 +77,7 @@ dispatch(fetchBrands());
           p: 2,
           borderRadius: 2,
           alignItems: "center",
-                    backgroundColor: "#fff",
+         backgroundColor: "#fff",
 
         }}
       >

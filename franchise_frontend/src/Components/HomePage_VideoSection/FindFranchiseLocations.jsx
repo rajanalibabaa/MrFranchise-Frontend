@@ -58,7 +58,7 @@ const TopInvestVdo2 = React.memo(() => {
   const { data: brands = [], loading, error } = useSelector((state) => state.brands);
 
 
-  console.log("brand === :",brands)
+  // console.log("brand === :",brands)
 
   // Memoized values
   const CARD_DIMENSIONS = useMemo(() => ({
@@ -392,7 +392,7 @@ const TopInvestVdo2 = React.memo(() => {
   return (
     <Box sx={{
       p: isMobile ? 2 : 4,
-      maxWidth: 1400,
+      maxWidth: 1300,
       mx: "auto",
       overflow: "hidden",
     }}>

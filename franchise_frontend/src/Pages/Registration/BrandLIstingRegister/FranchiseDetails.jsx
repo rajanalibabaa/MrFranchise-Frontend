@@ -902,7 +902,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               name="agreementPeriod"
               value={currentFicoModel.agreementPeriod || ""}
               onChange={handleFicoChange}
-              renderValue={(selected) => (selected ? `${selected} years` : "")}
+              renderValue={(selected) => (selected ? `${selected} ` : "")}
               endAdornment={
                 <InputAdornment position="end" sx={{ mr: 2 }}>
                   Years
