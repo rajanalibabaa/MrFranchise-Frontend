@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -13,10 +13,11 @@ import {
   RadioGroup,
   FormControlLabel,
   Checkbox,
+  InputAdornment,
 } from "@mui/material";
 import { Clear as ClearIcon, Search as SearchIcon } from "@mui/icons-material";
 
-const FilterPanel = ({
+const FilterPanel = React.memo(({
   filters,
   handleFilterChange,
   handleClearFilters,
@@ -31,84 +32,84 @@ const FilterPanel = ({
   filteredBrands = [],
   brands = [],
 }) => {
-  const [selectedSubCategory, setSelectedSubCategory] = useState(
-    filters.selectedSubCategory || ""
-  );
-  const [selectedChildCategories, setSelectedChildCategories] = useState(
-    filters.selectedChildCategory || []
-  );
-  const [filteredDistricts, setFilteredDistricts] = useState([]);
-  const [filteredCities, setFilteredCities] = useState([]);
-  const [filteredChildCategories, setFilteredChildCategories] = useState([]);
+  const [selectedSubCategory, setSelectedSubCategory] = useState(filters.selectedSubCategory || "");
+  const [selectedChildCategories, setSelectedChildCategories] = useState(filters.selectedChildCategory || []);
+  const [searchTermState, setSearchTermState] = useState("");
+  const [searchTermDistrict, setSearchTermDistrict] = useState("");
+  const [searchTermCity, setSearchTermCity] = useState("");
 
-  // Sync local state with Redux filters
-  useEffect(() => {
-    setSelectedSubCategory(filters.selectedSubCategory || "");
-    setSelectedChildCategories(filters.selectedChildCategory || []);
-  }, [
-    filters.selectedSubCategory,
-    filters.selectedChildCategory,
-  ]);
-
-  // Filter child categories based on selected sub category
-  useEffect(() => {
-    if (selectedSubCategory) {
-      const children = availableChildCategories.filter(
-        (child) => child?.parentSubCategory === selectedSubCategory
-      );
-      setFilteredChildCategories(children);
-    } else {
-      setFilteredChildCategories([]);
-    }
+  // Memoize filtered data to prevent unnecessary recalculations
+  const filteredChildCategories = useMemo(() => {
+    if (!selectedSubCategory) return [];
+    return availableChildCategories.filter(
+      (child) => child?.parentSubCategory === selectedSubCategory
+    );
   }, [selectedSubCategory, availableChildCategories]);
 
-  // Filter districts based on selected state
-  useEffect(() => {
-    if (filters.selectedState) {
-      const districtsForState = availableDistricts.filter(
-        (district) => district.state === filters.selectedState
-      );
-      setFilteredDistricts(districtsForState);
-    } else {
-      setFilteredDistricts(availableDistricts);
-    }
+  const filteredDistricts = useMemo(() => {
+    if (!filters.selectedState) return availableDistricts;
+    return availableDistricts.filter(
+      (district) => district.state === filters.selectedState
+    );
   }, [filters.selectedState, availableDistricts]);
 
-  // Filter cities based on selected district
-  useEffect(() => {
-    if (filters.selectedDistrict) {
-      const citiesForDistrict = availableCities.filter(
-        (city) => city.district === filters.selectedDistrict
-      );
-      setFilteredCities(citiesForDistrict);
-    } else {
-      setFilteredCities(availableCities);
-    }
+  const filteredCities = useMemo(() => {
+    if (!filters.selectedDistrict) return availableCities;
+    return availableCities.filter(
+      (city) => city.district === filters.selectedDistrict
+    );
   }, [filters.selectedDistrict, availableCities]);
 
-  const handleSubCategoryChange = (event) => {
+  const filteredStates = useMemo(() => {
+    if (!searchTermState) return availableStates;
+    const term = searchTermState.toLowerCase();
+    return availableStates.filter(state => 
+      state.toLowerCase().includes(term)
+    )
+  }, [searchTermState, availableStates]);
+
+  const filteredDistrictsForSearch = useMemo(() => {
+    if (!searchTermDistrict) return filteredDistricts;
+    const term = searchTermDistrict.toLowerCase();
+    return filteredDistricts.filter(district => 
+      district.district.toLowerCase().includes(term)
+    );
+  }, [searchTermDistrict, filteredDistricts]);
+
+  const filteredCitiesForSearch = useMemo(() => {
+    if (!searchTermCity) return filteredCities;
+    const term = searchTermCity.toLowerCase();
+    return filteredCities.filter(city => 
+      city.city.toLowerCase().includes(term)
+    );
+  }, [searchTermCity, filteredCities]);
+
+  // Event handlers with useCallback to prevent unnecessary recreations
+  const handleSubCategoryChange = useCallback((event) => {
     const value = event.target.value;
     setSelectedSubCategory(value);
     setSelectedChildCategories([]);
     handleFilterChange("selectedSubCategory", value);
     handleFilterChange("selectedChildCategory", []);
-  };
+  }, [handleFilterChange]);
 
-  const handleChildCategoryChange = (event) => {
+  const handleChildCategoryChange = useCallback((event) => {
     const { value, checked } = event.target;
-    let newChildCategories = [...selectedChildCategories];
+    setSelectedChildCategories(prev => 
+      checked ? [...prev, value] : prev.filter(item => item !== value)
+    )
+  }, []);
 
-    if (checked) {
-      if (!newChildCategories.includes(value)) {
-        newChildCategories.push(value);
-      }
-    } else {
-      newChildCategories = newChildCategories.filter((item) => item !== value);
-    }
+  // Sync child categories with filter change
+  useEffect(() => {
+    handleFilterChange("selectedChildCategory", selectedChildCategories);
+  }, [selectedChildCategories, handleFilterChange]);
 
-    setSelectedChildCategories(newChildCategories);
-    handleFilterChange("selectedChildCategory", newChildCategories);
-  };
+  // Sync local state with Redux filters
+  useEffect(() => {
+    setSelectedSubCategory(filters.selectedSubCategory || "");
+    setSelectedChildCategories(filters.selectedChildCategory || []);
+  }, [filters.selectedSubCategory, filters.selectedChildCategory]);
 
   return (
     <Box
@@ -232,7 +233,7 @@ const FilterPanel = ({
         Location
       </Typography>
       
-      {/* State Select */}
+      {/* State Select with Search */}
       <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>State</InputLabel>
         <Select
@@ -241,11 +242,39 @@ const FilterPanel = ({
             handleFilterChange("selectedState", e.target.value);
             handleFilterChange("selectedDistrict", "");
             handleFilterChange("selectedCity", "");
+            setSearchTermDistrict("");
+            setSearchTermCity("");
           }}
           label="State"
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: 300,
+              },
+            },
+          }}
         >
-          <MenuItem value="">All States</MenuItem>
-          {availableStates.map((state) => (
+          <MenuItem value="">
+            <em>All States</em>
+          </MenuItem>
+          <Box px={2} pb={1}>
+            <TextField
+              fullWidth
+              size="small"
+              variant="outlined"
+              placeholder="Search states..."
+              value={searchTermState}
+              onChange={(e) => setSearchTermState(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+          {filteredStates.map((state) => (
             <MenuItem key={state} value={state}>
               {state}
             </MenuItem>
@@ -253,7 +282,7 @@ const FilterPanel = ({
         </Select>
       </FormControl>
 
-      {/* District Select */}
+      {/* District Select with Search */}
       <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>District</InputLabel>
         <Select
@@ -261,12 +290,39 @@ const FilterPanel = ({
           onChange={(e) => {
             handleFilterChange("selectedDistrict", e.target.value);
             handleFilterChange("selectedCity", "");
+            setSearchTermCity("");
           }}
           label="District"
           disabled={!filters.selectedState}
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: 300,
+              },
+            },
+          }}
         >
-          <MenuItem value="">All Districts</MenuItem>
-          {filteredDistricts.map((district) => (
+          <MenuItem value="">
+            <em>All Districts</em>
+          </MenuItem>
+          <Box px={2} pb={1}>
+            <TextField
+              fullWidth
+              size="small"
+              variant="outlined"
+              placeholder="Search districts..."
+              value={searchTermDistrict}
+              onChange={(e) => setSearchTermDistrict(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+          {filteredDistrictsForSearch.map((district) => (
             <MenuItem key={district.district} value={district.district}>
               {district.district}
             </MenuItem>
@@ -274,7 +330,7 @@ const FilterPanel = ({
         </Select>
       </FormControl>
 
-      {/* City Select */}
+      {/* City Select with Search */}
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>City</InputLabel>
         <Select
@@ -282,9 +338,35 @@ const FilterPanel = ({
           onChange={(e) => handleFilterChange("selectedCity", e.target.value)}
           label="City"
           disabled={!filters.selectedDistrict}
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: 300,
+              },
+            },
+          }}
         >
-          <MenuItem value="">All Cities</MenuItem>
-          {filteredCities.map((city) => (
+          <MenuItem value="">
+            <em>All Cities</em>
+          </MenuItem>
+          <Box px={2} pb={1}>
+            <TextField
+              fullWidth
+              size="small"
+              variant="outlined"
+              placeholder="Search cities..."
+              value={searchTermCity}
+              onChange={(e) => setSearchTermCity(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+          {filteredCitiesForSearch.map((city) => (
             <MenuItem key={city.city} value={city.city}>
               {city.city}
             </MenuItem>
@@ -320,6 +402,6 @@ const FilterPanel = ({
       </Typography>
     </Box>
   );
-};
+});
 
 export default FilterPanel;

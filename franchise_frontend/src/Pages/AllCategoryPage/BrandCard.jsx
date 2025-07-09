@@ -42,7 +42,7 @@ const dispatch = useDispatch()
 const handleOpenBrand = (brand) => {
   
 
-  const newWindow = window.open(`/brands/${brand.uuid}?`, '_blank');
+  const newWindow = window.open(`/brands/${brand.uuid}?$`, '_blank');
   localStorage.setItem(`brand-${brand.uuid}`, JSON.stringify(brand));
 
   if (newWindow) {

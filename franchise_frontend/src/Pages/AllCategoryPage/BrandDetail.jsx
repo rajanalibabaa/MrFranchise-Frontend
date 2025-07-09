@@ -12,6 +12,7 @@ import {
   Modal,
   IconButton,
   Divider,
+  Drawer,
   Avatar,
   Dialog,
   DialogTitle,
@@ -20,6 +21,8 @@ import {
   useTheme,
   useMediaQuery,
   Stack,
+  Chip
+  
 } from "@mui/material";
 import {
   Close,
@@ -57,6 +60,7 @@ const BrandDetails = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -85,7 +89,12 @@ const BrandDetails = () => {
   });
 
   
-
+const toggleDrawer = (open) => (event) => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+    setDrawerOpen(open);
+  };
  
 
   const investmentRanges = React.useMemo(() => [
@@ -323,686 +332,69 @@ const BrandDetails = () => {
         my: 4,
         px: isMobile ? 2 : 4,
       }}>
-        {/* Brand header with animation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} alignItems={isMobile ? 'flex-start' : 'center'} justifyContent="space-between" mb={3} gap={2}>
-            <Box display="flex" alignItems="center" gap={3} flexDirection={isMobile ? 'column' : 'row'} width="100%">
-              <Box position="relative">
-                <Avatar
-                  src={selectedBrand.uploads?.brandLogo}
-                  alt={selectedBrand.brandDetails?.brandName}
-                  sx={{
-                    width: isMobile ? 100 : 70,
-                    height: isMobile ? 100 : 70,
-                    objectFit: "contain",
-                  }}
-                />
-              </Box>
-              <Box width="100%">
-                <Typography
-                  variant={isMobile ? "h6" : "h5"}
-                  sx={{
-                    fontWeight: 600,
-                    mb: 1,
-                    background: "linear-gradient(45deg, #000 30%, #000 90%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    textAlign: isMobile ? 'center' : 'left',
-                  }}
-                >
-                  {selectedBrand.brandDetails?.brandName}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {selectedBrand.brandDetails?.tagLine}
-                </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: isMobile ?1 : 6, mt: 1 }}>
-                  <Typography>
-                    Established Year:  <label variant="body1" color="text.secondary">{selectedBrand.franchiseDetails?.establishedYear || 'N/A'}</label>
-                  </Typography>
-                  <Typography >
-                    Franchise Since:  <label variant="body1" color="text.secondary">{selectedBrand.franchiseDetails?.franchiseSinceYear || 'N/A'}</label>
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: isMobile ? 1.3 : 5, mt: 1 }}>
-                  <Typography>
-                    Category:  <label variant="body1" color="text.secondary">{[selectedBrand.franchiseDetails?.brandCategories?.child].filter(Boolean).join(" , ") || 'N/A'}</label>
-                  </Typography>
-                  <Typography >
-                    Area:  <label variant="body1" color="text.secondary">{selectedBrand.franchiseDetails?.fico[0]?.areaRequired || 'N/A'}</label>
-                  </Typography>
-                  <Typography >
-                    Investment:  <label variant="body1" color="text.secondary">{selectedBrand.franchiseDetails?.fico[0]?.investmentRange || 'N/A'}</label>
-                  </Typography>
-                  <Typography >
-                    Outlets:  <label variant="body1" color="text.secondary">{getOutletRange(selectedBrand.franchiseDetails?.totalOutlets)}</label>
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-        </motion.div>
 
-        <Divider sx={{ my: 3 }} />
-
-        {/* Media section with animations */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
-          <Grid  display={isMobile ? 'block' : 'flex'}  flexDirection={isMobile ? 'column' : 'row'}  gap={4} spacing={3}>
-            <Grid item xs={12} md={8}>
-              <Box
-                sx={{
-                  width: isMobile ? '49vh' : '100vh',
-                  height: isMobile ? 250 : 416,
-                  borderRadius: 2,
-                  overflow: 'hidden',
-              
-                }}
-                component={motion.div}
-                whileHover={{ scale: 1.01 }}
-              >
-                {allVideos.length > 0 ? (
-                  <video
-                    controls
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <source src={allVideos[0]} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                ) : (
-                  <Typography variant="body1" color="text.secondary">
-                    No promotional video available
-                  </Typography>
-                )}
-              </Box>
-            </Grid>
-            
-            <Grid >
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: 1,
-                }}
-              >
-                {allImages.slice(0, 3).map((imageUrl, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <Box
-                      sx={{
-                        width: isMobile ? '25vh' : '32vh',
-                        height: getImageBoxSize(),
-                        overflow: 'hidden',
-                        borderRadius: 2,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        bgcolor: '#f5f5f5',
-                      }}
-                      onClick={() => handleImageOpen(index)}
-                    >
-                      <img
-                        src={imageUrl}
-                        alt={`Gallery ${index}`}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                        }}
-                      />
-                    </Box>
-                  </motion.div>
-                ))}
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <Box
-                    sx={{
-                      width: '100%',
-                      height: getImageBoxSize(),
-                      overflow: 'hidden',
-                      borderRadius: 2,
-                      cursor: 'pointer',
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      bgcolor: 'rgba(0,0,0,0.05)',
-                      '&:hover': {
-                        bgcolor: 'rgba(0,0,0,0.1)',
-                      },
-                    }}
-                    onClick={() => {
-                      setCurrentImageIndex(3);
-                      setImageModalOpen(true);
-                    }}
-                  >
-                    <Typography variant={isMobile ? "body2" : "h6"} sx={{ fontWeight: 600, textAlign: 'center', zIndex: 1 }}>
-                      View More ({Math.max(allImages.length - 3, 0)}+)
-                    </Typography>
-                    {allImages[3] && (
-                      <img
-                        src={allImages[3]}
-                        alt="Preview"
-                        style={{
-                          position: 'absolute',
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          opacity: 0.25,
-                          zIndex: 0,
-                        }}
-                      />
-                    )}
-                  </Box>
-                </motion.div>
-              </Box>
-            </Grid>
-          </Grid>
-        </motion.div>
-
-        <Divider sx={{ my: 5 }} />
-
-        <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 4 }}>
-          {/* Overview tab */}
-          <Box sx={{maxWidth: isMobile ? '100%' : 800}}>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-              <OverviewTab
-                brand={selectedBrand}
-                setIsModalOpen={setIsModalOpen}
-              />
-            </motion.div>
-          </Box>
-
-          {!isMobile && (
-            <>
-            <Divider orientation="vertical"  />
-
-          {/* Application Form */}
-            <Typography >
-
- <Box sx={{
-      border: '1px solid #e0e0e0',
-      borderRadius: 2,
-      p: 2,
-      mb:10,
-      bgcolor: 'background.paper',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-    }}>
-      {/* Contact Button */}
-      <Button 
-        variant="contained" 
-        fullWidth
-        size="large"
-        startIcon={<Phone />}
-        sx={{
-          py: 1.5,
-          mb: 1,
-          bgcolor: '#7ad03a',
-          '&:hover': {
-            bgcolor: '#66c32a'
-          }
-        }}
-      >
-        VIEW CONTACT
-      </Button>
-      
-  
-
-      <Divider sx={{ my: 2 }} />
-
-      {/* Action Buttons */}
-      <Stack direction="row" spacing={2} justifyContent="space-evenly" >
-        <IconButton 
-          aria-label="Like" 
-          sx={{ 
-            flexDirection: 'column',
-            color: 'text.secondary'
-          }}
-        >
-          <FavoriteBorder fontSize="large" />
-          <Typography variant="caption" sx={{ mt: 0.5 }}>
-            Like
-          </Typography>
-        </IconButton>
-
-        <IconButton 
-          aria-label="Interest" 
-          sx={{ 
-            flexDirection: 'column',
-            color: 'text.secondary'
-          }}
-        >
-          <BookmarkBorder fontSize="large" />
-          <Typography variant="caption" sx={{ mt: 0.5 }}>
-            Interest
-          </Typography>
-        </IconButton>
-
-        <IconButton 
-          aria-label="Share" 
-          sx={{ 
-            flexDirection: 'column',
-            color: 'text.secondary'
-          }}
-          onClick={handleShareClick}
-        >
-          <Share fontSize="large" />
-          <Typography variant="caption" sx={{ mt: 0.5 }}>
-            Share
-          </Typography>
-        </IconButton>
-      </Stack>
-    </Box>
-               <Box sx={{
-
-            width: isMobile ? '100%' : 305,
-            height: isMobile ? '100%' : 900,
-            // flexShrink: 0,
-            p: 3,
-            borderRadius: 2,
-            background: "#fff",
-            boxShadow: 2,
-            border: "1px solid #eee",
-            
+        
+          <Box sx={{
+            position: 'fixed',
+            bottom: isMobile ? 0 : 200,
+            left: 0,
+            right: isMobile ? 0 : 50,
+            display: 'flex',
+            justifyContent: isMobile ? 'center' : 'flex-end',
+            zIndex: 1000
           }}>
-            <Typography variant="h6" fontWeight={700} sx={{ 
-              mb: 3,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2,
-              color:'#ff9800',
-            }}>
-              Instant Franchise Application
-            </Typography>
-            
-             <form onSubmit={handleSubmit}>
-            <Grid spacing={2} sx={{ display: 'flex', flexDirection: 'column', gap: 2}}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Full Name"
-                  name="fullName"
-                  value={formData.fullName || userData?.firstName || ""}
-                  onChange={handleChange}
-                  required
-                  variant="outlined"
-                  size="medium"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Email"
-                  name="investorEmail"
-                  value={formData.investorEmail || userData?.email || ""}
-                  onChange={handleChange}
-                  required
-                  variant="outlined"
-                  size="medium"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Mobile Number"
-                  name="mobileNumber"
-                  value={formData.mobileNumber || userData?.mobileNumber || ""}
-                  onChange={handleChange}
-                  required
-                  variant="outlined"
-                  size="medium"
-                />
-              </Grid>
-              
-              {/* State Dropdown */}
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  fullWidth
-                  label="State"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleChange}
-                  required
-                  variant="outlined"
-                  size="medium"
-                >
-                  {locationData.states.map((state, i) => (
-                    <MenuItem key={i} value={state}>
-                      {state}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              
-              {/* District Dropdown */}
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  fullWidth
-                  label="District"
-                  name="district"
-                  value={formData.district}
-                  onChange={handleChange}
-                  required
-                  variant="outlined"
-                  size="medium"
-                  disabled={!formData.state}
-                >
-                  {locationData.districts.map((district, i) => (
-                    <MenuItem key={i} value={district}>
-                      {district}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              
-              {/* City Dropdown */}
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  fullWidth
-                  label="City"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  required
-                  variant="outlined"
-                  size="medium"
-                  disabled={!formData.district}
-                >
-                  {locationData.cities.map((city, i) => (
-                    <MenuItem key={i} value={city}>
-                      {city}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Investment Range"
-                  name="investmentRange"
-                  value={formData.investmentRange}
-                  onChange={handleChange}
-                  required
-                  variant="outlined"
-                  size="medium"
-                >
-                  {investmentRanges.map((range, i) => (
-                    <MenuItem key={i} value={range}>
-                      {range}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Plan to Invest"
-                  name="planToInvest"
-                  value={formData.planToInvest}
-                  onChange={handleChange}
-                  required
-                  variant="outlined"
-                  size="medium"
-                >
-                  {investmentTimings.map((option, i) => (
-                    <MenuItem key={i} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Ready to Invest"
-                  name="readyToInvest"
-                  value={formData.readyToInvest}
-                  onChange={handleChange}
-                  required
-                  variant="outlined"
-                  size="medium"
-                >
-                  {readyToInvestOptions.map((option, i) => (
-                    <MenuItem key={i} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  type="submit"
-                  fullWidth
-                  size="large"
-                  variant="contained"
-                  disabled={isSubmitting}
-                  sx={{
-                    mt: 2,
-                    backgroundColor:'#ff9800',
-                    py: 1.5,
-                    fontSize: '1rem',
-                    '&:disabled': {
-                      background: '#e0e0e0',
-                      color: '#9e9e9e'
-                    }
-                  }}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <CircularProgress size={24} color="inherit" sx={{ mr: 2 }} />
-                      Submitting...
-                    </>
-                  ) : (
-                    "Apply Now"
-                  )}
-                </Button>
-              </Grid>
-            </Grid>
-          </form>
-            
-            <Box sx={{ 
-              mt: 3,
-              p: 2,
-              borderRadius: '8px',
-              bgcolor: 'rgba(102, 126, 234, 0.05)',
-              borderLeft: `4px solid #667eea`
-            }}>
-              <Typography variant="body2">
-                <strong>Note:</strong> Our team will contact you within 24 hours to discuss the franchise opportunity in detail.
-              </Typography>
-            </Box>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={toggleDrawer(true)}
+              sx={{
+                backgroundColor: '#ff9800',
+                color: 'white',
+                borderRadius: 50,
+                px: 4,
+                py: 1.5,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                '&:hover': {
+                  backgroundColor: '#e65100',
+                }
+              }}
+            >
+              Apply Now
+            </Button>
           </Box>
-
-            </Typography>
-           
-          
-       
-
-            </>
-          )}
- </Box>
-        {/* Image Modal */}
-        <Dialog
-          open={imageModalOpen}
-          onClose={() => setImageModalOpen(false)}
-          maxWidth="lg"
-          fullWidth
-          sx={{
-            '& .MuiDialog-paper': {
-              backgroundColor: 'rgba(0,0,0,0.9)',
-              overflow: 'hidden'
+      
+      
+         {/* Mobile Drawer for Application Form */}
+        <Drawer
+          anchor="right"
+          open={drawerOpen}
+          onClose={toggleDrawer(false)}
+          PaperProps={{
+            sx: {
+              // borderTopLeftRadius: 16,
+              // borderTopRightRadius: 16,
+              maxHeight: '100vh',
+              overflow: 'auto'
             }
           }}
         >
-          <DialogTitle sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            color: 'white'
-          }}>
-            <Typography>
-              Image {currentImageIndex + 1} of {allImages.length}
-            </Typography>
-            <IconButton onClick={() => setImageModalOpen(false)} color="inherit">
-              <Close />
-            </IconButton>
-          </DialogTitle>
-          
-          <DialogContent sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: isMobile ? '50vh' : '70vh'
-          }}>
-            <Box sx={{
-              position: 'relative',
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
-              <IconButton
-                sx={{ 
-                  position: 'absolute', 
-                  left: 16,
-                  color: 'white',
-                  backgroundColor: 'rgba(0,0,0,0.5)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(0,0,0,0.7)'
-                  }
-                }}
-                onClick={handlePrevImage}
-              >
-                <ArrowBack fontSize="large" />
-              </IconButton>
-              
-              <img
-                src={allImages[currentImageIndex]}
-                alt={`Gallery ${currentImageIndex}`}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain',
-                  margin: '0 auto'
-                }}
-              />
-              
-              <IconButton
-                sx={{ 
-                  position: 'absolute', 
-                  right: 16,
-                  color: 'white',
-                  backgroundColor: 'rgba(0,0,0,0.5)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(0,0,0,0.7)'
-                  }
-                }}
-                onClick={handleNextImage}
-              >
-                <ArrowForward fontSize="large" />
-              </IconButton>
-            </Box>
-          </DialogContent>
-          
-          <DialogActions sx={{
-            justifyContent: 'center',
-            pb: 3
-          }}>
-            <Box sx={{
-              display: 'flex',
-              gap: 1,
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              maxWidth: '100%',
-              overflowX: 'auto',
-              px: 2,
-              py: 1
-            }}>
-              {allImages.map((img, index) => (
-                <Box
-                  key={index}
-                  onClick={() => setCurrentImageIndex(index)}
-                  sx={{
-                    width: 60,
-                    height: 60,
-                    borderRadius: 1,
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    border: currentImageIndex === index ? '2px solid #1976d2' : '1px solid #555',
-                    opacity: currentImageIndex === index ? 1 : 0.7,
-                    flexShrink: 0
-                  }}
-                >
-                  <img
-                    src={img}
-                    alt={`Thumbnail ${index}`}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                  />
-                </Box>
-              ))}
-            </Box>
-          </DialogActions>
-        </Dialog>
-
-        <ShareDialogActions anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
-
-         <Box  sx={{
-          mt: 4,
-            // position: isMobile ? 'relative' : 'sticky',
-            top: isMobile ? 0 : 100,
-            mb: isMobile ? 4 : 0,
-            p: 4,
-            borderRadius: '16px',
-            background: 'white',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-            border: '1px solid rgba(0,0,0,0.05)'
-          }}>
-            <Typography variant="h5" fontWeight={700} sx={{ 
-              mb: 3, 
-              // color: colors.dark,
-              display: 'flex',
+          <Box sx={{ p: 3 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
               alignItems: 'center',
-              gap: 2,
-              color:'#ff9800',
+              mb: 2
             }}>
-              {/* <ContactMail sx={{ color: colors.primary }} /> */}
-              Instant Franchise Application
-            </Typography>
+              <Typography variant="h6" fontWeight={700} color="#ff9800">
+                Apply for Franchise
+              </Typography>
+              <IconButton onClick={toggleDrawer(false)}>
+                <Close />
+              </IconButton>
+            </Box>
+            
              <form onSubmit={handleSubmit}>
-            <Grid spacing={2} sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2}}>
+            <Grid spacing={2} sx={{ display: 'grid', gap: 2}}>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -1193,6 +585,619 @@ const BrandDetails = () => {
               </Grid>
             </Grid>
           </form>
+          </Box>
+        </Drawer>
+
+        {/* Brand header with animation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} alignItems={isMobile ? 'flex-start' : 'center'} justifyContent="space-between" mb={3} gap={2}>
+            <Box display="flex" alignItems="center" gap={3} flexDirection={isMobile ? 'column' : 'row'} width="100%">
+              <Box position="relative">
+                <Avatar
+                  src={selectedBrand.uploads?.brandLogo}
+                  alt={selectedBrand.brandDetails?.brandName}
+                  sx={{
+                    width: isMobile ? 100 : 70,
+                    height: isMobile ? 100 : 70,
+                    objectFit: "contain",
+                  }}
+                />
+              </Box>
+              
+              <Box width="100%">
+                <Typography
+                  variant={isMobile ? "h6" : "h5"}
+                  sx={{
+                    fontWeight: 600,
+                    mb: 1,
+                    background: "linear-gradient(45deg, #000 30%, #000 90%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    textAlign: isMobile ? 'center' : 'left',
+                  }}
+                >
+                  {selectedBrand.brandDetails?.brandName}
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  {selectedBrand.brandDetails?.tagLine}
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: isMobile ?1 : 6, mt: 1 }}>
+                  <Typography>
+                    Established Year:  <label variant="body1" color="text.secondary">{selectedBrand.franchiseDetails?.establishedYear || 'N/A'}</label>
+                  </Typography>
+                  <Typography >
+                    Franchise Since:  <label variant="body1" color="text.secondary">{selectedBrand.franchiseDetails?.franchiseSinceYear || 'N/A'}</label>
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: isMobile ? 1.3 : 5, mt: 1 }}>
+                  <Typography>
+
+<Chip 
+  label={
+    <Typography variant="body2" color="black">
+      Category: {[selectedBrand.franchiseDetails?.brandCategories?.child].filter(Boolean).join(" , ") || 'N/A'}
+    </Typography>
+  } 
+  variant="outlined" 
+  sx={{ borderRadius: '8px', py: 1, px: 2,backgroundColor: '#7ad03a' }} 
+/>
+
+                  </Typography>
+                  <Typography >
+                    <Chip 
+                      label={
+                        <Typography variant="body2" color="black">
+                          Area: {selectedBrand.franchiseDetails?.fico[0]?.areaRequired || 'N/A'}
+                        </Typography>
+                      } 
+                      variant="outlined"
+                      sx={{ borderRadius: '8px', py: 1, px: 2,backgroundColor: '#7ad03a' }} 
+                    />
+                  </Typography>
+                  <Typography >
+                    <Chip 
+                      label={
+                        <Typography variant="body2" color="black">
+                          Investment: {selectedBrand.franchiseDetails?.fico[0]?.investmentRange || 'N/A'}
+                        </Typography>
+                      } 
+                      variant="outlined"
+                      sx={{ borderRadius: '8px', py: 1, px: 2 ,backgroundColor: '#7ad03a'}} 
+                    />
+                  </Typography>
+                  <Typography >
+                    <Chip 
+                      label={
+                        <Typography variant="body2" color="black">
+                          Outlets: {getOutletRange(selectedBrand.franchiseDetails?.totalOutlets)}
+                        </Typography>
+                      } 
+                      variant="outlined"  
+                      sx={{ borderRadius: '8px', py: 1, px: 2,backgroundColor: '#7ad03a' }} 
+                    />  
+                  </Typography>
+                   
+                </Box>
+              </Box>
+            </Box>
+            {/* Contact Button */}
+      <Button 
+        variant="contained" 
+        // fullWidth
+        size="medium"
+        startIcon={<Phone />}
+        sx={{
+          // px: 1.5,
+          // mb: 1,
+          bgcolor: '#ff9800',
+          '&:hover': {
+            bgcolor: '#e65100',
+          }
+        }}
+      >
+        VIEW CONTACT
+      </Button>
+          </Box>
+          
+        </motion.div>
+
+        <Divider sx={{ my: 3 }} />
+
+        {/* Media section with animations */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <Grid  display={isMobile ? 'block' : 'flex'}  flexDirection={isMobile ? 'column' : 'row'}  gap={4} spacing={3}>
+            <Grid item xs={12} md={8}>
+              <Box
+                sx={{
+                  width: isMobile ? '49vh' : '100vh',
+                  height: isMobile ? 250 : 416,
+                  borderRadius: 2,
+                  overflow: 'hidden',
+              
+                }}
+                component={motion.div}
+                whileHover={{ scale: 1.01 }}
+              >
+                {allVideos.length > 0 ? (
+                  <video
+                    controls
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <source src={allVideos[0]} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <Typography variant="body1" color="text.secondary">
+                    No promotional video available
+                  </Typography>
+                )}
+              </Box>
+            </Grid>
+            
+            <Grid >
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: 1,
+                }}
+              >
+                {allImages.slice(0, 3).map((imageUrl, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <Box
+                      sx={{
+                        width: isMobile ? '25vh' : '32vh',
+                        height: getImageBoxSize(),
+                        overflow: 'hidden',
+                        borderRadius: 2,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: '#f5f5f5',
+                      }}
+                      onClick={() => handleImageOpen(index)}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={`Gallery ${index}`}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                    </Box>
+                  </motion.div>
+                ))}
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: getImageBoxSize(),
+                      overflow: 'hidden',
+                      borderRadius: 2,
+                      cursor: 'pointer',
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'rgba(0,0,0,0.05)',
+                      '&:hover': {
+                        bgcolor: 'rgba(0,0,0,0.1)',
+                      },
+                    }}
+                    onClick={() => {
+                      setCurrentImageIndex(3);
+                      setImageModalOpen(true);
+                    }}
+                  >
+                    <Typography variant={isMobile ? "body2" : "h6"} sx={{ fontWeight: 600, textAlign: 'center', zIndex: 1 }}>
+                      View More ({Math.max(allImages.length - 3, 0)}+)
+                    </Typography>
+                    {allImages[3] && (
+                      <img
+                        src={allImages[3]}
+                        alt="Preview"
+                        style={{
+                          position: 'absolute',
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          opacity: 0.25,
+                          zIndex: 0,
+                        }}
+                      />
+                    )}
+                  </Box>
+                </motion.div>
+              </Box>
+            </Grid>
+          </Grid>
+        </motion.div>
+
+        <Divider sx={{ my: 5 }} />
+
+        <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 4 }}>
+          {/* Overview tab */}
+          <Box sx={{maxWidth: isMobile ? '100%' : 1200}}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+              <OverviewTab
+                brand={selectedBrand}
+                setIsModalOpen={setIsModalOpen}
+              />
+            </motion.div>
+          </Box>
+
+     
+ </Box>
+        {/* Image Modal */}
+        <Dialog
+          open={imageModalOpen}
+          onClose={() => setImageModalOpen(false)}
+          maxWidth="lg"
+          fullWidth
+          sx={{
+            '& .MuiDialog-paper': {
+              backgroundColor: 'rgba(0,0,0,0.9)',
+              overflow: 'hidden'
+            }
+          }}
+        >
+          <DialogTitle sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            color: 'white'
+          }}>
+            <Typography>
+              Image {currentImageIndex + 1} of {allImages.length}
+            </Typography>
+            <IconButton onClick={() => setImageModalOpen(false)} color="inherit">
+              <Close />
+            </IconButton>
+          </DialogTitle>
+          
+          <DialogContent sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: isMobile ? '50vh' : '70vh'
+          }}>
+            <Box sx={{
+              position: 'relative',
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <IconButton
+                sx={{ 
+                  position: 'absolute', 
+                  left: 16,
+                  color: 'white',
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0,0,0,0.7)'
+                  }
+                }}
+                onClick={handlePrevImage}
+              >
+                <ArrowBack fontSize="large" />
+              </IconButton>
+              
+              <img
+                src={allImages[currentImageIndex]}
+                alt={`Gallery ${currentImageIndex}`}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
+                  margin: '0 auto'
+                }}
+              />
+              
+              <IconButton
+                sx={{ 
+                  position: 'absolute', 
+                  right: 16,
+                  color: 'white',
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0,0,0,0.7)'
+                  }
+                }}
+                onClick={handleNextImage}
+              >
+                <ArrowForward fontSize="large" />
+              </IconButton>
+            </Box>
+          </DialogContent>
+          
+          <DialogActions sx={{
+            justifyContent: 'center',
+            pb: 3
+          }}>
+            <Box sx={{
+              display: 'flex',
+              gap: 1,
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              maxWidth: '100%',
+              overflowX: 'auto',
+              px: 2,
+              py: 1
+            }}>
+              {allImages.map((img, index) => (
+                <Box
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  sx={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: 1,
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    border: currentImageIndex === index ? '2px solid #1976d2' : '1px solid #555',
+                    opacity: currentImageIndex === index ? 1 : 0.7,
+                    flexShrink: 0
+                  }}
+                >
+                  <img
+                    src={img}
+                    alt={`Thumbnail ${index}`}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                </Box>
+              ))}
+            </Box>
+          </DialogActions>
+        </Dialog>
+
+        <ShareDialogActions anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
+
+         {!isMobile && (
+          <Box  sx={{
+          mt: 4,
+            // position: isMobile ? 'relative' : 'sticky',
+            top: isMobile ? 0 : 100,
+            mb: isMobile ? 4 : 0,
+            p: 4,
+            borderRadius: '16px',
+            background: 'white',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+            border: '1px solid rgba(0,0,0,0.05)'
+          }}>
+            <Typography variant="h5" fontWeight={700} sx={{ 
+              mb: 3, 
+              // color: colors.dark,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              color:'#ff9800',
+            }}>
+              {/* <ContactMail sx={{ color: colors.primary }} /> */}
+              Instant Franchise Application
+            </Typography>
+             <form onSubmit={handleSubmit}>
+            <Grid spacing={2} sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2}}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Full Name"
+                  name="fullName"
+                  value={formData.fullName || userData?.firstName || ""}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="investorEmail"
+                  value={formData.investorEmail || userData?.email || ""}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Mobile Number"
+                  name="mobileNumber"
+                  value={formData.mobileNumber || userData?.mobileNumber || ""}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                />
+              </Grid>
+              
+              {/* State Dropdown */}
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="State"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                >
+                  {locationData.states.map((state, i) => (
+                    <MenuItem key={i} value={state}>
+                      {state}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              
+              {/* District Dropdown */}
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="District"
+                  name="district"
+                  value={formData.district}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                  disabled={!formData.state}
+                >
+                  {locationData.districts.map((district, i) => (
+                    <MenuItem key={i} value={district}>
+                      {district}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              
+              {/* City Dropdown */}
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="City"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                  disabled={!formData.district}
+                >
+                  {locationData.cities.map((city, i) => (
+                    <MenuItem key={i} value={city}>
+                      {city}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Investment Range"
+                  name="investmentRange"
+                  value={formData.investmentRange}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                >
+                  {investmentRanges.map((range, i) => (
+                    <MenuItem key={i} value={range}>
+                      {range}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Plan to Invest"
+                  name="planToInvest"
+                  value={formData.planToInvest}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                >
+                  {investmentTimings.map((option, i) => (
+                    <MenuItem key={i} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Ready to Invest"
+                  name="readyToInvest"
+                  value={formData.readyToInvest}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                >
+                  {readyToInvestOptions.map((option, i) => (
+                    <MenuItem key={i} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+            </Grid>
+<Box display="flex" justifyContent="center" mt={2}>
+  <Button
+    type="submit"
+    size="large"
+    variant="contained"
+    disabled={isSubmitting}
+    sx={{
+      backgroundColor: '#ff9800',
+      py: 1.5,
+      fontSize: '1rem',
+      px: 4, // optional: makes the button look wider
+      '&:disabled': {
+        background: '#e0e0e0',
+        color: '#9e9e9e'
+      }
+    }}
+  >
+    {isSubmitting ? (
+      <>
+        <CircularProgress size={24} color="inherit" sx={{ mr: 2 }} />
+        Submitting...
+      </>
+    ) : (
+      "Apply Now"
+    )}
+  </Button>
+</Box>
+          </form>
                        
                        <Box sx={{ 
                          mt: 3,
@@ -1206,6 +1211,7 @@ const BrandDetails = () => {
                          </Typography>
                        </Box>
           </Box>
+          )}
       </Box>
      
       <Footer />

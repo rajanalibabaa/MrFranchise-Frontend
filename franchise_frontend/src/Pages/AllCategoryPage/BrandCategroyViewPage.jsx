@@ -16,10 +16,8 @@ function BrandCategroyViewPage() {
       {/* Scrollable Content below the fixed Navbar */}
       <Box
         sx={{
-          mt: "64px", // Adjust this value to match your Navbar height
-          overflowY: "auto",
-          // mt: "12px"
-         }}
+          mt: "12px", // Adjust this value based on your Navbar height (e.g. 64px) // Full viewport height minus Navbar
+        }}
       >
         <BrandListNew />
       </Box>
