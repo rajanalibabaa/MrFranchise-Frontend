@@ -218,7 +218,7 @@ const BrandCard = React.memo(({
                     {brandName}
                   </Typography>
                 </Tooltip>
-                {tagLine && (
+                {/* {tagLine && (
                   <Tooltip title={tagLine} placement="top">
                     <Typography
                       variant="caption"
@@ -233,7 +233,7 @@ const BrandCard = React.memo(({
                       {tagLine}
                     </Typography>
                   </Tooltip>
-                )}
+                )} */}
               </Box>
               <IconButton
                 onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
@@ -258,7 +258,7 @@ const BrandCard = React.memo(({
             {(category.main || category.child) && (
               <Box sx={{ mb: 2 }}>
                 <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
-                  {category.main && (
+                  {/* {category.main && (
                     <Chip
                       label={category.main}
                       size="small"
@@ -269,7 +269,7 @@ const BrandCard = React.memo(({
                         mb: 1,
                       }}
                     />
-                  )}
+                  )} */}
                   {category.child && (
                     <Chip
                       label={category.child}

@@ -133,6 +133,7 @@ const BrandCard = React.memo(({
             <CardMedia
               component="video"
               loading="lazy"
+              poster={brand?.uploads?.brandLogo?.[0] || ""}
               src={videoUrl}
               alt={brand.personalDetails?.brandName || "Brand"}
               sx={{
