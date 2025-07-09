@@ -32,7 +32,7 @@ const FilterDropdowns = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
-    categories = [],
+    subCategories = [],
     states = [],
     filters,
     loading,
@@ -48,19 +48,23 @@ dispatch(fetchBrands());
 
   const handleFindBrands = async () => {
     try {
-      dispatch(showLoading());
+      // dispatch(showLoading());
       // Assuming fetchBrands returns a promise and throws on error
       await dispatch(fetchBrands()).unwrap();
       navigate("/brandviewpage", {
         state: { filters },
       });
-      dispatch(hideLoading());
+      // dispatch(hideLoading());
     } catch (error) {
       // Optionally handle error (e.g., show a message)
       // Keep loading if needed, or hide if you want to stop spinner on error
       // dispatch(hideLoading());
+      console.log("Error fetching brands:", error);
+      
     }
   };
+
+  // console.log("filters :",filters)
 
   return (
     <Box>
@@ -81,14 +85,14 @@ dispatch(fetchBrands());
         <FormControl fullWidth sx={{ minWidth: 180, }}>
           <InputLabel>Category</InputLabel>
           <Select
-            value={filters.selectedCategory || ""}
+            value={filters.selectedSubCategory || ""}
             onChange={(e) =>
-              handleFilterChange("selectedCategory", e.target.value)
+              handleFilterChange("selectedSubCategory", e.target.value)
             }
             label="Category"
           >
             <MenuItem value="">All Categories</MenuItem>
-            {categories.map((category) => (
+            {subCategories.map((category) => (
               <MenuItem key={category.id} value={category.id}>
                 {category.name}
               </MenuItem>

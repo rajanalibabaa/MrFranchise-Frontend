@@ -12,6 +12,7 @@ import {
   Modal,
   IconButton,
   Divider,
+  Drawer,
   Avatar,
   Dialog,
   DialogTitle,
@@ -19,6 +20,9 @@ import {
   DialogActions,
   useTheme,
   useMediaQuery,
+  Stack,
+  Chip
+  
 } from "@mui/material";
 import {
   Close,
@@ -27,6 +31,11 @@ import {
   Business as BusinessIcon,
   ArrowBack,
   ArrowForward,
+  Phone,
+  Email,
+  FavoriteBorder,
+  BookmarkBorder,
+  Share,
 } from "@mui/icons-material";
 import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
@@ -51,6 +60,7 @@ const BrandDetails = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -65,34 +75,98 @@ const BrandDetails = () => {
     investorEmail: "",
     mobileNumber: "",
     investmentRange: "",
-    location: "",
+    state: "",
+    district: "",
+    city: "",
     planToInvest: "",
     readyToInvest: "",
   });
 
-  // Memoize derived data
-  const franchiseModels = React.useMemo(() => [
-    ...new Set(selectedBrand?.franchiseDetails?.fico?.map(m => m.franchiseModel) || [])
-  ], [selectedBrand]);
+   const [locationData, setLocationData] = useState({
+    states: [],
+    districts: [],
+    cities: []
+  });
 
-  const franchiseTypes = React.useMemo(() => [
-    ...new Set(selectedBrand?.franchiseDetails?.fico?.map(m => m.franchiseType) || [])
-  ], [selectedBrand]);
+  
+const toggleDrawer = (open) => (event) => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+    setDrawerOpen(open);
+  };
+ 
 
   const investmentRanges = React.useMemo(() => [
     ...new Set(selectedBrand?.franchiseDetails?.fico?.map(m => m.investmentRange) || [])
   ], [selectedBrand]);
 
   const investmentTimings = React.useMemo(() => [
-    "Immediately", "1-3 months", "3-6 months", "6+ months"
+    "Immediately", "1 - 3 Months", "3 - 6 Months", "6 + Months"
   ], []);
 
   const readyToInvestOptions = React.useMemo(() => [
     "Own Investment", "Going To Loan", "Need Loan Assistance"
   ], []);
 
-  const expansionLocations =
-    selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.cities || [];
+    // Extract location data from brand
+ useEffect(() => {
+  if (selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
+    const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
+    const states = locations.map(loc => loc.state).filter(Boolean);
+    setLocationData(prev => ({
+      ...prev,
+      states,
+      districts: [],
+      cities: []
+    }));
+  }
+}, [selectedBrand]);
+
+  // Update districts when state changes
+  useEffect(() => {
+  if (
+    formData.state &&
+    selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations
+  ) {
+    const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
+    const stateObj = locations.find(loc => loc.state === formData.state);
+    const districts = stateObj?.districts?.map(d => d.district) || [];
+    setLocationData(prev => ({
+      ...prev,
+      districts,
+      cities: []
+    }));
+    setFormData(prev => ({
+      ...prev,
+      district: "",
+      city: ""
+    }));
+  }
+}, [formData.state, selectedBrand]);
+
+  // Update cities when district changes
+  useEffect(() => {
+  if (
+    formData.state &&
+    formData.district &&
+    selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations
+  ) {
+    const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
+    const stateObj = locations.find(loc => loc.state === formData.state);
+    const districtObj = stateObj?.districts?.find(d => d.district === formData.district);
+    const cities = districtObj?.cities || [];
+    setLocationData(prev => ({
+      ...prev,
+      cities
+    }));
+    setFormData(prev => ({
+      ...prev,
+      city: ""
+    }));
+  }
+}, [formData.district, formData.state, selectedBrand]);
+
 
   // Media data
   const allVideos = React.useMemo(() => 
@@ -107,9 +181,9 @@ const BrandDetails = () => {
 
   // Image box sizes based on screen size
   const getImageBoxSize = () => {
-    if (isMobile) return 120;
+    if (isMobile) return 100;
     if (isTablet) return 150;
-    return 200;
+    return 204;
   };
 
   // Fetch brand data
@@ -120,36 +194,36 @@ const BrandDetails = () => {
   }, [uuid, dispatch]);
 
   // Fetch investor data
-  useEffect(() => {
-    const fetchInvestorDetails = async () => {
-      if (!investorUUID || !AccessToken) return;
-      try {
-        const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${AccessToken}`,
-            },
-          }
-        );
-        setUserData(response.data.data);
-        const investor = response.data?.data;
-        if (investor) {
-          setFormData(prev => ({
-            ...prev,
-            fullName: investor.firstName || "",
-            investorEmail: investor.email || "",
-            mobileNumber: investor.mobileNumber || "",
-          }));
-        }
-      } catch (error) {
-        console.error("Failed to fetch investor details:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchInvestorDetails = async () => {
+  //     if (!investorUUID || !AccessToken) return;
+  //     try {
+  //       const response = await axios.get(
+  //         `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+  //         {
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${AccessToken}`,
+  //           },
+  //         }
+  //       );
+  //       setUserData(response.data.data);
+  //       const investor = response.data?.data;
+  //       if (investor) {
+  //         setFormData(prev => ({
+  //           ...prev,
+  //           fullName: investor.firstName || "",
+  //           investorEmail: investor.email || "",
+  //           mobileNumber: investor.mobileNumber || "",
+  //         }));
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to fetch investor details:", error);
+  //     }
+  //   };
 
-    fetchInvestorDetails();
-  }, [investorUUID, AccessToken]);
+  //   fetchInvestorDetails();
+  // }, [investorUUID, AccessToken]);
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -163,14 +237,19 @@ const BrandDetails = () => {
     try {
       const payload = {
         ...formData,
+        state: formData.state || "",
+        district: formData.district || "",
+        city: formData.city || "",
         brandId: selectedBrand?.uuid,
         brandName: selectedBrand?.brandDetails?.brandName || "",
-        brandEmail: selectedBrand.brandDetails?.email || "",
-        brandLogo: selectedBrand.brandDetails?.brandLogo || "",
+        // brandEmail: selectedBrand.brandDetails?.email || "",
+        // brandLogo: selectedBrand.uploads?.brandLogo || "",
       };
 
-      const token = localStorage.getItem("accessToken");
-      const id = investorUUID || localStorage.getItem("brandUUID");
+      console.log("Payload to submit:", payload);
+
+      // const token = localStorage.getItem("accessToken");
+      // const id = investorUUID || localStorage.getItem("brandUUID");
 
       if (!id) {
         alert("User not logged in or missing ID. Please login again.");
@@ -178,19 +257,19 @@ const BrandDetails = () => {
       }
 
       if (!payload.fullName || !payload.investorEmail || !payload.mobileNumber || 
-          !payload.location || !payload.investmentRange || !payload.planToInvest || 
+          !payload.state || !payload.district || !payload.city || 
+          !payload.investmentRange || !payload.planToInvest || 
           !payload.readyToInvest) {
         alert("Please fill all required fields.");
         return;
       }
 
       const response = await axios.post(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication/${id}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication`,
         payload,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -204,17 +283,11 @@ const BrandDetails = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, selectedBrand, investorUUID]);
+  }, [formData, selectedBrand,]);
 
-  const handleModalClose = useCallback(() => {
-    setIsModalOpen(false);
-    setSubmitSuccess(false);
-  }, []);
 
-  const handleClose = useCallback(() => {
-    dispatch(closeBrandDialog());
-    navigate(-1);
-  }, [dispatch, navigate]);
+
+
 
   const handleShareClick = useCallback((event) => {
     setAnchorEl(event.currentTarget);
@@ -254,10 +327,267 @@ const BrandDetails = () => {
       <Box sx={{
         width: '100%',
         maxWidth: 1200,
+        // backgroundColor: '#fffef2',
         mx: 'auto',
         my: 4,
         px: isMobile ? 2 : 4,
       }}>
+
+        
+          <Box sx={{
+            position: 'fixed',
+            bottom: isMobile ? 0 : 200,
+            left: 0,
+            right: isMobile ? 0 : 50,
+            display: 'flex',
+            justifyContent: isMobile ? 'center' : 'flex-end',
+            zIndex: 1000
+          }}>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={toggleDrawer(true)}
+              sx={{
+                backgroundColor: '#ff9800',
+                color: 'white',
+                borderRadius: 50,
+                px: 4,
+                py: 1.5,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                '&:hover': {
+                  backgroundColor: '#e65100',
+                }
+              }}
+            >
+              Apply Now
+            </Button>
+          </Box>
+      
+      
+         {/* Mobile Drawer for Application Form */}
+        <Drawer
+          anchor="right"
+          open={drawerOpen}
+          onClose={toggleDrawer(false)}
+          PaperProps={{
+            sx: {
+              // borderTopLeftRadius: 16,
+              // borderTopRightRadius: 16,
+              maxHeight: '100vh',
+              overflow: 'auto'
+            }
+          }}
+        >
+          <Box sx={{ p: 3 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              mb: 2
+            }}>
+              <Typography variant="h6" fontWeight={700} color="#ff9800">
+                Apply for Franchise
+              </Typography>
+              <IconButton onClick={toggleDrawer(false)}>
+                <Close />
+              </IconButton>
+            </Box>
+            
+             <form onSubmit={handleSubmit}>
+            <Grid spacing={2} sx={{ display: 'grid', gap: 2}}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Full Name"
+                  name="fullName"
+                  value={formData.fullName || userData?.firstName || ""}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="investorEmail"
+                  value={formData.investorEmail || userData?.email || ""}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Mobile Number"
+                  name="mobileNumber"
+                  value={formData.mobileNumber || userData?.mobileNumber || ""}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                />
+              </Grid>
+              
+              {/* State Dropdown */}
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="State"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                >
+                  {locationData.states.map((state, i) => (
+                    <MenuItem key={i} value={state}>
+                      {state}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              
+              {/* District Dropdown */}
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="District"
+                  name="district"
+                  value={formData.district}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                  disabled={!formData.state}
+                >
+                  {locationData.districts.map((district, i) => (
+                    <MenuItem key={i} value={district}>
+                      {district}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              
+              {/* City Dropdown */}
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="City"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                  disabled={!formData.district}
+                >
+                  {locationData.cities.map((city, i) => (
+                    <MenuItem key={i} value={city}>
+                      {city}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Investment Range"
+                  name="investmentRange"
+                  value={formData.investmentRange}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                >
+                  {investmentRanges.map((range, i) => (
+                    <MenuItem key={i} value={range}>
+                      {range}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Plan to Invest"
+                  name="planToInvest"
+                  value={formData.planToInvest}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                >
+                  {investmentTimings.map((option, i) => (
+                    <MenuItem key={i} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Ready to Invest"
+                  name="readyToInvest"
+                  value={formData.readyToInvest}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                >
+                  {readyToInvestOptions.map((option, i) => (
+                    <MenuItem key={i} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Button
+
+                  type="submit"
+                  fullWidth
+                  size="large"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  sx={{
+                    mt: 2,
+                    backgroundColor:'#ff9800',
+                    py: 1.5,
+                    fontSize: '1rem',
+                    '&:disabled': {
+                      background: '#e0e0e0',
+                      color: '#9e9e9e'
+                    }
+                  }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <CircularProgress size={24} color="inherit" sx={{ mr: 2 }} />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Apply Now"
+                  )}
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
+          </Box>
+        </Drawer>
+
         {/* Brand header with animation */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -265,58 +595,114 @@ const BrandDetails = () => {
           transition={{ duration: 0.5 }}
         >
           <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} alignItems={isMobile ? 'flex-start' : 'center'} justifyContent="space-between" mb={3} gap={2}>
-            <Box display="flex" alignItems="center" gap={3}>
+            <Box display="flex" alignItems="center" gap={3} flexDirection={isMobile ? 'column' : 'row'} width="100%">
               <Box position="relative">
                 <Avatar
                   src={selectedBrand.uploads?.brandLogo}
                   alt={selectedBrand.brandDetails?.brandName}
                   sx={{
-                    width: isMobile ? 50 : 70,
-                    height: isMobile ? 50 : 70,
+                    width: isMobile ? 100 : 70,
+                    height: isMobile ? 100 : 70,
                     objectFit: "contain",
                   }}
                 />
               </Box>
-              <Box>
+              
+              <Box width="100%">
                 <Typography
                   variant={isMobile ? "h6" : "h5"}
                   sx={{
                     fontWeight: 600,
+                    mb: 1,
                     background: "linear-gradient(45deg, #000 30%, #000 90%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
+                    textAlign: isMobile ? 'center' : 'left',
                   }}
                 >
                   {selectedBrand.brandDetails?.brandName}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body1" color="text.secondary">
                   {selectedBrand.brandDetails?.tagLine}
                 </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1, mt: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Established Year: {selectedBrand.franchiseDetails?.establishedYear || 'N/A'}
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: isMobile ?1 : 6, mt: 1 }}>
+                  <Typography>
+                    Established Year:  <label variant="body1" color="text.secondary">{selectedBrand.franchiseDetails?.establishedYear || 'N/A'}</label>
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Franchise Since: {selectedBrand.franchiseDetails?.franchiseSinceYear || 'N/A'}
+                  <Typography >
+                    Franchise Since:  <label variant="body1" color="text.secondary">{selectedBrand.franchiseDetails?.franchiseSinceYear || 'N/A'}</label>
                   </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1, mt: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Category: {[selectedBrand.franchiseDetails?.brandCategories?.child].filter(Boolean).join(" , ") || 'N/A'}
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: isMobile ? 1.3 : 5, mt: 1 }}>
+                  <Typography>
+
+<Chip 
+  label={
+    <Typography variant="body2" color="black">
+      Category: {[selectedBrand.franchiseDetails?.brandCategories?.child].filter(Boolean).join(" , ") || 'N/A'}
+    </Typography>
+  } 
+  variant="outlined" 
+  sx={{ borderRadius: '8px', py: 1, px: 2,backgroundColor: '#7ad03a' }} 
+/>
+
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Area: {selectedBrand.franchiseDetails?.fico[0]?.areaRequired || 'N/A'}
+                  <Typography >
+                    <Chip 
+                      label={
+                        <Typography variant="body2" color="black">
+                          Area: {selectedBrand.franchiseDetails?.fico[0]?.areaRequired || 'N/A'}
+                        </Typography>
+                      } 
+                      variant="outlined"
+                      sx={{ borderRadius: '8px', py: 1, px: 2,backgroundColor: '#7ad03a' }} 
+                    />
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Investment: {selectedBrand.franchiseDetails?.fico[0]?.investmentRange || 'N/A'}
+                  <Typography >
+                    <Chip 
+                      label={
+                        <Typography variant="body2" color="black">
+                          Investment: {selectedBrand.franchiseDetails?.fico[0]?.investmentRange || 'N/A'}
+                        </Typography>
+                      } 
+                      variant="outlined"
+                      sx={{ borderRadius: '8px', py: 1, px: 2 ,backgroundColor: '#7ad03a'}} 
+                    />
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Outlets: {getOutletRange(selectedBrand.franchiseDetails?.totalOutlets)}
+                  <Typography >
+                    <Chip 
+                      label={
+                        <Typography variant="body2" color="black">
+                          Outlets: {getOutletRange(selectedBrand.franchiseDetails?.totalOutlets)}
+                        </Typography>
+                      } 
+                      variant="outlined"  
+                      sx={{ borderRadius: '8px', py: 1, px: 2,backgroundColor: '#7ad03a' }} 
+                    />  
                   </Typography>
+                   
                 </Box>
               </Box>
             </Box>
+            {/* Contact Button */}
+      <Button 
+        variant="contained" 
+        // fullWidth
+        size="medium"
+        startIcon={<Phone />}
+        sx={{
+          // px: 1.5,
+          // mb: 1,
+          bgcolor: '#ff9800',
+          '&:hover': {
+            bgcolor: '#e65100',
+          }
+        }}
+      >
+        VIEW CONTACT
+      </Button>
           </Box>
+          
         </motion.div>
 
         <Divider sx={{ my: 3 }} />
@@ -327,11 +713,11 @@ const BrandDetails = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          <Grid container spacing={3}>
+          <Grid  display={isMobile ? 'block' : 'flex'}  flexDirection={isMobile ? 'column' : 'row'}  gap={4} spacing={3}>
             <Grid item xs={12} md={8}>
               <Box
                 sx={{
-                  width: isMobile ? '48vh' : '100vh',
+                  width: isMobile ? '49vh' : '100vh',
                   height: isMobile ? 250 : 416,
                   borderRadius: 2,
                   overflow: 'hidden',
@@ -361,7 +747,7 @@ const BrandDetails = () => {
               </Box>
             </Grid>
             
-            <Grid item xs={12} md={4}>
+            <Grid >
               <Box
                 sx={{
                   display: 'grid',
@@ -379,7 +765,7 @@ const BrandDetails = () => {
                   >
                     <Box
                       sx={{
-                        width: isMobile ? '25vh' : '100%',
+                        width: isMobile ? '25vh' : '32vh',
                         height: getImageBoxSize(),
                         overflow: 'hidden',
                         borderRadius: 2,
@@ -459,7 +845,7 @@ const BrandDetails = () => {
 
         <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 4 }}>
           {/* Overview tab */}
-          <Box sx={{maxWidth: isMobile ? '100%' : 800}}>
+          <Box sx={{maxWidth: isMobile ? '100%' : 1200}}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
               <OverviewTab
                 brand={selectedBrand}
@@ -468,224 +854,8 @@ const BrandDetails = () => {
             </motion.div>
           </Box>
 
-          {/* Application Form */}
-          <Box sx={{ 
-            width: isMobile ? '100%' : 400,
-            height: isMobile ? '100%' : 900,
-            // flexShrink: 0,
-            p: 3,
-            borderRadius: 2,
-            background: "#fff",
-            boxShadow: 2,
-            border: "1px solid #eee",
-          }}>
-            <Typography variant="h6" fontWeight={700} sx={{ 
-              mb: 3,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2
-            }}>
-              Instant Franchise Application
-            </Typography>
-            
-            <form onSubmit={handleSubmit}>
-              <Grid  spacing={2}  sx={{ display: 'flex', flexDirection: 'column', gap: 2}}>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Full Name"
-                    name="fullName"
-                    value={formData.fullName || userData?.firstName || ""}
-                    onChange={handleChange}
-                    required
-                    variant="outlined"
-                    size="medium"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    name="investorEmail"
-                    value={formData.investorEmail || userData?.email || ""}
-                    onChange={handleChange}
-                    required
-                    variant="outlined"
-                    size="medium"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Mobile Number"
-                    name="mobileNumber"
-                    value={formData.mobileNumber || userData?.mobileNumber || ""}
-                    onChange={handleChange}
-                    required
-                    variant="outlined"
-                    size="medium"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="State"
-                    name="State"
-                    value={formData.location}
-                    onChange={handleChange}
-                    required
-                    variant="outlined"
-                    size="medium"
-                  >
-                    {expansionLocations.map((loc, i) => (
-                      <MenuItem key={i} value={loc}>
-                        {loc}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="District"
-                    name="District"
-                    value={formData.location}
-                    onChange={handleChange}
-                    required
-                    variant="outlined"
-                    size="medium"
-                  >
-                    {expansionLocations.map((loc, i) => (
-                      <MenuItem key={i} value={loc}>
-                        {loc}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="City"
-                    name="City"
-                    value={formData.location}
-                    onChange={handleChange}
-                    required
-                    variant="outlined"
-                    size="medium"
-                  >
-                    {expansionLocations.map((loc, i) => (
-                      <MenuItem key={i} value={loc}>
-                        {loc}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="Investment Range"
-                    name="investmentRange"
-                    value={formData.investmentRange}
-                    onChange={handleChange}
-                    required
-                    variant="outlined"
-                    size="medium"
-                  >
-                    {investmentRanges.map((range, i) => (
-                      <MenuItem key={i} value={range}>
-                        {range}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="Plan to Invest"
-                    name="planToInvest"
-                    value={formData.planToInvest}
-                    onChange={handleChange}
-                    required
-                    variant="outlined"
-                    size="medium"
-                  >
-                    {investmentTimings.map((option, i) => (
-                      <MenuItem key={i} value={option}>
-                        {option}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="Ready to Invest"
-                    name="readyToInvest"
-                    value={formData.readyToInvest}
-                    onChange={handleChange}
-                    required
-                    variant="outlined"
-                    size="medium"
-                  >
-                    {readyToInvestOptions.map((option, i) => (
-                      <MenuItem key={i} value={option}>
-                        {option}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    type="submit"
-                    fullWidth
-                    size="large"
-                    variant="contained"
-                    
-                    disabled={isSubmitting}
-                    sx={{
-                      mt: 2,
-                      backgroundColor:'#ff9800',
-                      py: 1.5,
-                      fontSize: '1rem',
-                      '&:disabled': {
-                        background: '#e0e0e0',
-                        color: '#9e9e9e'
-                      }
-                    }}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <CircularProgress size={24} color="inherit" sx={{ mr: 2 }} />
-                        Submitting...
-                      </>
-                    ) : (
-                      "Apply Now"
-                    )}
-                  </Button>
-                </Grid>
-              </Grid>
-            </form>
-            
-            <Box sx={{ 
-              mt: 3,
-              p: 2,
-              borderRadius: '8px',
-              bgcolor: 'rgba(102, 126, 234, 0.05)',
-              borderLeft: `4px solid #667eea`
-            }}>
-              <Typography variant="body2">
-                <strong>Note:</strong> Our team will contact you within 24 hours to discuss the franchise opportunity in detail.
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-
+     
+ </Box>
         {/* Image Modal */}
         <Dialog
           open={imageModalOpen}
@@ -814,7 +984,10 @@ const BrandDetails = () => {
         </Dialog>
 
         <ShareDialogActions anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
-         <Box  sx={{
+
+         {!isMobile && (
+          <Box  sx={{
+          mt: 4,
             // position: isMobile ? 'relative' : 'sticky',
             top: isMobile ? 0 : 100,
             mb: isMobile ? 4 : 0,
@@ -829,207 +1002,216 @@ const BrandDetails = () => {
               // color: colors.dark,
               display: 'flex',
               alignItems: 'center',
-              gap: 2
+              gap: 2,
+              color:'#ff9800',
             }}>
               {/* <ContactMail sx={{ color: colors.primary }} /> */}
               Instant Franchise Application
             </Typography>
-            
-            <form onSubmit={handleSubmit}>
-                         <Grid  spacing={2}  sx={{ display: 'Grid',gridTemplateColumns: 'repeat(3, 1fr)', gap: 2}}>
-                           <Grid item xs={12}>
-                             <TextField
-                               fullWidth
-                               label="Full Name"
-                               name="fullName"
-                               value={formData.fullName || userData?.firstName || ""}
-                               onChange={handleChange}
-                               required
-                               variant="outlined"
-                               size="medium"
-                             />
-                           </Grid>
-                           <Grid item xs={12}>
-                             <TextField
-                               fullWidth
-                               label="Email"
-                               name="investorEmail"
-                               value={formData.investorEmail || userData?.email || ""}
-                               onChange={handleChange}
-                               required
-                               variant="outlined"
-                               size="medium"
-                             />
-                           </Grid>
-                           <Grid item xs={12}>
-                             <TextField
-                               fullWidth
-                               label="Mobile Number"
-                               name="mobileNumber"
-                               value={formData.mobileNumber || userData?.mobileNumber || ""}
-                               onChange={handleChange}
-                               required
-                               variant="outlined"
-                               size="medium"
-                             />
-                           </Grid>
-                           <Grid item xs={12}>
-                             <TextField
-                               select
-                               fullWidth
-                               label="State"
-                               name="State"
-                               value={formData.location}
-                               onChange={handleChange}
-                               required
-                               variant="outlined"
-                               size="medium"
-                             >
-                               {expansionLocations.map((loc, i) => (
-                                 <MenuItem key={i} value={loc}>
-                                   {loc}
-                                 </MenuItem>
-                               ))}
-                             </TextField>
-                           </Grid>
-                           <Grid item xs={12}>
-                             <TextField
-                               select
-                               fullWidth
-                               label="District"
-                               name="District"
-                               value={formData.location}
-                               onChange={handleChange}
-                               required
-                               variant="outlined"
-                               size="medium"
-                             >
-                               {expansionLocations.map((loc, i) => (
-                                 <MenuItem key={i} value={loc}>
-                                   {loc}
-                                 </MenuItem>
-                               ))}
-                             </TextField>
-                           </Grid>
-                           <Grid item xs={12}>
-                             <TextField
-                               select
-                               fullWidth
-                               label="City"
-                               name="City"
-                               value={formData.location}
-                               onChange={handleChange}
-                               required
-                               variant="outlined"
-                               size="medium"
-                             >
-                               {expansionLocations.map((loc, i) => (
-                                 <MenuItem key={i} value={loc}>
-                                   {loc}
-                                 </MenuItem>
-                               ))}
-                             </TextField>
-                           </Grid>
-                           <Grid item xs={12}>
-                             <TextField
-                               select
-                               fullWidth
-                               label="Investment Range"
-                               name="investmentRange"
-                               value={formData.investmentRange}
-                               onChange={handleChange}
-                               required
-                               variant="outlined"
-                               size="medium"
-                             >
-                               {investmentRanges.map((range, i) => (
-                                 <MenuItem key={i} value={range}>
-                                   {range}
-                                 </MenuItem>
-                               ))}
-                             </TextField>
-                           </Grid>
-                           <Grid item xs={12}>
-                             <TextField
-                               select
-                               fullWidth
-                               label="Plan to Invest"
-                               name="planToInvest"
-                               value={formData.planToInvest}
-                               onChange={handleChange}
-                               required
-                               variant="outlined"
-                               size="medium"
-                             >
-                               {investmentTimings.map((option, i) => (
-                                 <MenuItem key={i} value={option}>
-                                   {option}
-                                 </MenuItem>
-                               ))}
-                             </TextField>
-                           </Grid>
-                           <Grid item xs={12}>
-                             <TextField
-                               select
-                               fullWidth
-                               label="Ready to Invest"
-                               name="readyToInvest"
-                               value={formData.readyToInvest}
-                               onChange={handleChange}
-                               required
-                               variant="outlined"
-                               size="medium"
-                             >
-                               {readyToInvestOptions.map((option, i) => (
-                                 <MenuItem key={i} value={option}>
-                                   {option}
-                                 </MenuItem>
-                               ))}
-                             </TextField>
-                           </Grid>
-                           <Grid item xs={12}>
-                             <Button
-                               type="submit"
-                               fullWidth
-                               size="large"
-                               variant="contained"
-                               disabled={isSubmitting}
-                               sx={{
-                                 mt: 2,
-                                 backgroundColor: "#ff9800",
-                                 py: 1.5,
-                                 fontSize: '1rem',
-                                 '&:disabled': {
-                                   background: '#e0e0e0',
-                                   color: '#9e9e9e'
-                                 }
-                               }}
-                             >
-                               {isSubmitting ? (
-                                 <>
-                                   <CircularProgress size={24} color="inherit" sx={{ mr: 2 }} />
-                                   Submitting...
-                                 </>
-                               ) : (
-                                 "Apply Now"
-                               )}
-                             </Button>
-                           </Grid>
-                         </Grid>
-                       </form>
+             <form onSubmit={handleSubmit}>
+            <Grid spacing={2} sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2}}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Full Name"
+                  name="fullName"
+                  value={formData.fullName || userData?.firstName || ""}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="investorEmail"
+                  value={formData.investorEmail || userData?.email || ""}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Mobile Number"
+                  name="mobileNumber"
+                  value={formData.mobileNumber || userData?.mobileNumber || ""}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                />
+              </Grid>
+              
+              {/* State Dropdown */}
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="State"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                >
+                  {locationData.states.map((state, i) => (
+                    <MenuItem key={i} value={state}>
+                      {state}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              
+              {/* District Dropdown */}
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="District"
+                  name="district"
+                  value={formData.district}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                  disabled={!formData.state}
+                >
+                  {locationData.districts.map((district, i) => (
+                    <MenuItem key={i} value={district}>
+                      {district}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              
+              {/* City Dropdown */}
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="City"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                  disabled={!formData.district}
+                >
+                  {locationData.cities.map((city, i) => (
+                    <MenuItem key={i} value={city}>
+                      {city}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Investment Range"
+                  name="investmentRange"
+                  value={formData.investmentRange}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                >
+                  {investmentRanges.map((range, i) => (
+                    <MenuItem key={i} value={range}>
+                      {range}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Plan to Invest"
+                  name="planToInvest"
+                  value={formData.planToInvest}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                >
+                  {investmentTimings.map((option, i) => (
+                    <MenuItem key={i} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Ready to Invest"
+                  name="readyToInvest"
+                  value={formData.readyToInvest}
+                  onChange={handleChange}
+                  required
+                  variant="outlined"
+                  size="medium"
+                >
+                  {readyToInvestOptions.map((option, i) => (
+                    <MenuItem key={i} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+            </Grid>
+<Box display="flex" justifyContent="center" mt={2}>
+  <Button
+    type="submit"
+    size="large"
+    variant="contained"
+    disabled={isSubmitting}
+    sx={{
+      backgroundColor: '#ff9800',
+      py: 1.5,
+      fontSize: '1rem',
+      px: 4, // optional: makes the button look wider
+      '&:disabled': {
+        background: '#e0e0e0',
+        color: '#9e9e9e'
+      }
+    }}
+  >
+    {isSubmitting ? (
+      <>
+        <CircularProgress size={24} color="inherit" sx={{ mr: 2 }} />
+        Submitting...
+      </>
+    ) : (
+      "Apply Now"
+    )}
+  </Button>
+</Box>
+          </form>
                        
                        <Box sx={{ 
                          mt: 3,
                          p: 2,
                          borderRadius: '8px',
                          bgcolor: 'rgba(102, 126, 234, 0.05)',
-                         borderLeft: `4px solid #667eea`
+                         borderLeft: `4px solidrgb(84, 241, 12)`
                        }}>
                          <Typography variant="body2">
                            <strong>Note:</strong> Our team will contact you within 24 hours to discuss the franchise opportunity in detail.
                          </Typography>
                        </Box>
           </Box>
+          )}
       </Box>
      
       <Footer />
