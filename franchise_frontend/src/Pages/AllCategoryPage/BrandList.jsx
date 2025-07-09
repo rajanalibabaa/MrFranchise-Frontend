@@ -382,8 +382,7 @@ function BrandList() {
           </Box>
         </Box>
       </Drawer>
-
-      <BrandDetail />
+            <BrandDetail />
       <BrandComparison
         open={comparisonOpen}
         onClose={() => setComparisonOpen(false)}

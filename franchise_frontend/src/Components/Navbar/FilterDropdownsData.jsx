@@ -77,7 +77,7 @@ dispatch(fetchBrands());
           p: 2,
           borderRadius: 2,
           alignItems: "center",
-                    backgroundColor: "#fff",
+         backgroundColor: "#fff",
 
         }}
       >
