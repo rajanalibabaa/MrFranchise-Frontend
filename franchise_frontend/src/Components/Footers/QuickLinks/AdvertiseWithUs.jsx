@@ -86,7 +86,7 @@ const AdvertiseWithUs = () => {
         >
           <Typography
             variant="h3"
-            mt={5}
+            mt={2}
             align="center"
             fontWeight="bold"
             color="#ffba00"
@@ -96,7 +96,7 @@ const AdvertiseWithUs = () => {
           <Typography
             variant="h6"
             align="center"
-            color="#8e8e8e"
+            color="#7ad03a"
             mb={3}
             fontWeight={300}
           >

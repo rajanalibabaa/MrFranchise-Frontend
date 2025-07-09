@@ -404,7 +404,6 @@ const HomeBannerSec = () => {
     );
   };
   const currentText = bannerTexts[bannerIndex];
-  // const { text, highlight } = currentText.subtitle;
   return (
     <>
  <Navbar/>
@@ -429,6 +428,7 @@ const HomeBannerSec = () => {
           overflow: "hidden",
           color: "white",
           minHeight: isMobile ? "95vh" : "40vh",
+                    maxHeight: isMobile ? "95vh" : "40vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -450,22 +450,20 @@ const HomeBannerSec = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            // background: 'radial-gradient(circle at 20% 50%, transparent 0%, rgba(0,0,0,0.7) 100%)',
             zIndex: 0,
           },
         }}
       >
-        
-        <Container
+      <Container
           // maxWidth="lg"
           sx={{
             position: "relative",
             zIndex: 2,
             textAlign: isMobile ? "center" : "center",
-            
+            maxHeight:"100%"
           }}
         >
-            <motion.div
+            <motion.div 
            key={bannerIndex}
     initial={{ opacity: 0, x: 80 }}
       animate={{ opacity: 1, x: 0 }}
@@ -475,7 +473,7 @@ const HomeBannerSec = () => {
             {/* <motion.div variants={pageConfig.animations.item}> */}
               <Typography
                 mb={3}
-                component='span'
+                // component='span'
                 // maxWidth={isMobile ? "100%" : "100%"}
                 // sx={{
                 //   fontWeight: 200,
@@ -496,6 +494,8 @@ const HomeBannerSec = () => {
                     fontSize: isMobile ? "2rem" : "2.2rem",
                     fontWeight: 900,
                     px: 1,
+                    minHeight:"80%",
+                    maxHeight:"100%"
                   }}
                 >
                   {currentText.title.text}
@@ -513,14 +513,13 @@ const HomeBannerSec = () => {
                   color: "rgba(255,255,255,0.9)",
                   fontWeight: 300,
                   mb: 3,
-                  maxWidth: "800px",
+                  maxWidth: "900px",
                   mx: "auto",
                   lineHeight: 1,
                   fontSize: isMobile ? "1.1rem" : "1.1rem",
                   textShadow: "0 2px 4px rgba(0,0,0,0.5)",
                 }}
                 component={motion.div}
-                // animate={pageConfig.animations.pulse}
               >
                 {
                   currentText.subtitle.text.split(
@@ -546,11 +545,17 @@ const HomeBannerSec = () => {
                 }
               </Typography>
             </motion.div>
-      
-          
-              <FilterDropdowns />
-         
-         
+<Box
+  sx={{
+    mt: 4,
+    display: "flex",
+    justifyContent: "center",
+    width: "100%",
+    overflow:"hidden"
+  }}
+>
+  <FilterDropdowns />
+</Box>
         </Container>
       </Box>
 

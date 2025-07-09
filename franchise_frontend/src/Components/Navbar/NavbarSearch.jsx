@@ -41,7 +41,7 @@ const [selectedChild, setSelectedChild] = useState('');
   const handleTabChange = (_, newValue) => setTab(newValue);
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md" sx={{top:{xs:"-20%",sm:"-50%",lg:"-100px" }}}>
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md" sx={{top:{xs:"-20%",sm:"-50%",xl:"-40%" }}}>
       <DialogContent sx={{ position: 'relative', p: 3 }}>
         {/* Close Button */}
         <IconButton
