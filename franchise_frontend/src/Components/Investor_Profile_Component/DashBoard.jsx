@@ -57,10 +57,10 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
         setLoading(true);
         
         const endpoints = [
-          `http://localhost:5000/api/v1/like/get-favbrands/${investorUUID}`,
-          `http://localhost:5000/api/v1/view/getAllViewBrandByID/${investorUUID}`,
-          `http://localhost:5000/api/v1/instantapply/getInstaApplyById/${investorUUID}`,
-          `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`
+          `https://franchise-backend-wgp6.onrender.com/api/v1/like/get-favbrands/${investorUUID}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/view/getAllViewBrandByID/${investorUUID}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/getInstaApplyById/${investorUUID}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`
         ];
 
         const requests = endpoints.map(endpoint => 
@@ -118,7 +118,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       setStats(prev => ({ ...prev, totalLikes: prev.totalLikes - 1 }));
 
       await axios.delete(
-        `http://localhost:5000/api/v1/like/delete-favbrand/${investorUUID}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -144,7 +144,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       setStats(prev => ({ ...prev, totalViews: prev.totalViews - 1 }));
 
       await axios.delete(
-        `http://localhost:5000/api/v1/view/deleteViewBrandByID/${investorUUID}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/view/deleteViewBrandByID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
