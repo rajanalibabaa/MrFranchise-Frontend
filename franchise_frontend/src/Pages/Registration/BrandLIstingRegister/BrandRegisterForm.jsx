@@ -415,9 +415,9 @@ const BrandRegisterForm = () => {
           businessPlan: formData.uploads.businessPlan,
         };
 
-        Object.entries(fileFields).forEach(([fieldName, files]) => {
+          Object.entries(fileFields).forEach(([fieldName, files]) => {
           if (files && files.length > 0) {
-            files.forEach((file) => {
+            files.forEach((file,) => {
               formDataSend.append(fieldName, file);
             });
           }

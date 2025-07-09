@@ -75,6 +75,7 @@ const FilePreviewImage = styled("img")({
   borderRadius: 4,
 });
 
+
 const Uploads = ({
   data = {},
   errors = {},
@@ -82,7 +83,7 @@ const Uploads = ({
   gstNumber,
   pancardNumber,
   onGstNumberChange,
-  awardText = [], // Receive awardText from parent
+  awardText = [],
   onAwardTextChange,
   onPancardNumberChange,
 }) => {
@@ -156,6 +157,7 @@ const Uploads = ({
       text: e.target.value,
     }));
   };
+  
   const handleAwardFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -209,20 +211,17 @@ const Uploads = ({
             }
             placement="right-start"
             arrow
-            enterTouchDelay={0} // makes it responsive on mobile too
+            enterTouchDelay={0}
           >
             <IconButton
               size="small"
               sx={{
-                // p: 0.8,
                 color: "warning.main",
-                // backgroundColor: 'info.light',
                 "&:hover": {
                   backgroundColor: "info.main",
                   color: "white",
                 },
                 marginLeft: "5px",
-                // borderRadius: '50%',
               }}
             >
               <InfoOutlined fontSize="medium" />
@@ -241,7 +240,6 @@ const Uploads = ({
                 component="label"
                 color="success"
                 variant="outlined"
-                // fullWidth
                 startIcon={<CloudUpload />}
               >
                 Upload Logo
@@ -255,8 +253,8 @@ const Uploads = ({
                   })}
                 />
               </UploadButton>
-              <Typography variant="caption">
-                (Accepted formats: JPEG, PNG up to 2MB )
+              <Typography variant="caption" color={errors.brandLogo ? "error" : "textSecondary"}>
+                {errors.brandLogo || "(Accepted formats: JPEG, PNG up to 2MB)"}
               </Typography>
 
               {safeData.brandLogo?.length > 0 && (
@@ -290,7 +288,6 @@ const Uploads = ({
                 component="label"
                 variant="outlined"
                 color="success"
-                // fullWidth
                 startIcon={<VideoCameraBack />}
               >
                 Upload Video
@@ -304,9 +301,8 @@ const Uploads = ({
                   })}
                 />
               </UploadButton>
-              <Typography variant="caption">
-                {" "}
-                Accepted formats: MP4, Quicktime Video ( up to 25MB )
+              <Typography variant="caption" color={errors.franchisePromotionVideo ? "error" : "textSecondary"}>
+                {errors.franchisePromotionVideo || "Accepted formats: MP4, Quicktime Video (up to 25MB)"}
               </Typography>
               {safeData.franchisePromotionVideo?.length > 0 && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -347,20 +343,17 @@ const Uploads = ({
             }
             placement="right-start"
             arrow
-            enterTouchDelay={0} // makes it responsive on mobile too
+            enterTouchDelay={0}
           >
             <IconButton
               size="small"
               sx={{
-                // p: 0.8,
                 color: "warning.main",
-                // backgroundColor: 'info.light',
                 "&:hover": {
                   backgroundColor: "info.main",
                   color: "white",
                 },
                 marginLeft: "5px",
-                // borderRadius: '50%',
               }}
             >
               <InfoOutlined fontSize="medium" />
@@ -409,9 +402,8 @@ const Uploads = ({
                 })}
               />
             </UploadButton>
-            <Typography variant="caption">
-              {" "}
-              Accepted formats: PDF, JPEG, PNG ( up to 1MB )
+            <Typography variant="caption" color={errors.pancard ? "error" : "textSecondary"}>
+              {errors.pancard || "Accepted formats: PDF, JPEG, PNG (up to 1MB)"}
             </Typography>
             {safeData.pancard?.length > 0 && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -472,9 +464,8 @@ const Uploads = ({
                 })}
               />
             </UploadButton>
-            <Typography variant="caption">
-              {" "}
-              Accepted formats: PDF, JPEG, PNG ( up to 1MB )
+            <Typography variant="caption" color={errors.gstCertificate ? "error" : "textSecondary"}>
+              {errors.gstCertificate || "Accepted formats: PDF, JPEG, PNG (up to 1MB)"}
             </Typography>
 
             {safeData.gstCertificate?.length > 0 && (
@@ -507,25 +498,22 @@ const Uploads = ({
             title={
               <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
                 <strong>Brand Images</strong> <br />
-                Accepted formats: JPEG, PNG ( up to 1MB )
+                Accepted formats: JPEG, PNG (up to 1MB)
               </span>
             }
             placement="right-start"
             arrow
-            enterTouchDelay={0} // makes it responsive on mobile too
+            enterTouchDelay={0}
           >
             <IconButton
               size="small"
               sx={{
-                // p: 0.8,
                 color: "warning.main",
-                // backgroundColor: 'info.light',
                 "&:hover": {
                   backgroundColor: "info.main",
                   color: "white",
                 },
                 marginLeft: "5px",
-                // borderRadius: '50%',
               }}
             >
               <InfoOutlined fontSize="medium" />
@@ -556,9 +544,8 @@ const Uploads = ({
                   })}
                 />
               </UploadButton>
-              <Typography variant="caption">
-                {" "}
-                Accepted formats: JPEG, PNG ( up to total 5MB )
+              <Typography variant="caption" color={errors.exteriorOutlet || errors.exteriorOutletCount ? "error" : "textSecondary"}>
+                {errors.exteriorOutlet || errors.exteriorOutletCount || "Accepted formats: JPEG, PNG (up to total 5MB)"}
               </Typography>
 
               {safeData.exteriorOutlet?.length > 0 && (
@@ -638,9 +625,8 @@ const Uploads = ({
                   })}
                 />
               </UploadButton>
-              <Typography variant="caption">
-                {" "}
-                Accepted formats: JPEG, PNG ( up to total 5MB )
+              <Typography variant="caption" color={errors.interiorOutlet || errors.interiorOutletCount ? "error" : "textSecondary"}>
+                {errors.interiorOutlet || errors.interiorOutletCount || "Accepted formats: JPEG, PNG (up to total 5MB)"}
               </Typography>
 
               {safeData.interiorOutlet?.length > 0 && (
@@ -704,7 +690,7 @@ const Uploads = ({
       <StyledPaper>
         <SectionTitle variant="h6">Awards & Recognitions</SectionTitle>
 
-        <Grid  display={"flex"} spacing={2}>
+        <Grid display={"flex"} spacing={2}>
           <Grid item xs={12} md={6}>
             <TextField
               label="Award Description"
@@ -718,7 +704,6 @@ const Uploads = ({
             <Button
               component="label"
               variant="outlined"
-               
               startIcon={<CloudUpload />}
             >
               Upload Document
@@ -795,20 +780,17 @@ const Uploads = ({
             }
             placement="right-start"
             arrow
-            enterTouchDelay={0} // makes it responsive on mobile too
+            enterTouchDelay={0}
           >
             <IconButton
               size="small"
               sx={{
-                // p: 0.8,
                 color: "warning.main",
-                // backgroundColor: 'info.light',
                 "&:hover": {
                   backgroundColor: "info.main",
                   color: "white",
                 },
                 marginLeft: "5px",
-                // borderRadius: '50%',
               }}
             >
               <InfoOutlined fontSize="medium" />
@@ -839,6 +821,9 @@ const Uploads = ({
             })}
           />
         </UploadButton>
+        <Typography variant="caption" color={errors.businessPlan ? "error" : "textSecondary"}>
+          {errors.businessPlan || "Accepted formats: PDF, DOC, DOCX (up to 10MB)"}
+        </Typography>
 
         {safeData.businessPlan?.length > 0 && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}>
@@ -862,3 +847,4 @@ const Uploads = ({
 };
 
 export default Uploads;
+// export { validateUploadsDetails };
