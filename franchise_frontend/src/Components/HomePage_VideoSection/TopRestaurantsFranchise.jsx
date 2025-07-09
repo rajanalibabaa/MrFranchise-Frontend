@@ -65,13 +65,13 @@ const BrandCard = React.memo(
     const observerRef = useRef();
 
     const brandId = brand.uuid;
-    const franchiseModels = brand.franchiseDetails?.modelsOfFranchise || [];
-    const firstModel = franchiseModels[0] || {};
-    const categories = brand.personalDetails?.brandCategories || [];
+    const franchiseModels = brand.franchiseDetails?.fico[0] || [];
+    const firstModel = franchiseModels || {};
+    const categories =  brand.franchiseDetails?.brandCategories || {};
     const videoUrl =
-      brand?.brandDetails?.brandPromotionVideo?.[0] ||
-      brand?.brandDetails?.franchisePromotionVideo?.[0];
+      brand?.uploads?.franchisePromotionVideo?.[0]; 
     const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
+    const brandName = brand.brandDetails.brandName || "Brand"
 
     useEffect(() => {
       observerRef.current = new IntersectionObserver(
@@ -135,7 +135,7 @@ const BrandCard = React.memo(
                 component="video"
                 loading="lazy"
                 src={videoUrl}
-                alt={brand.personalDetails?.brandName || "Brand"}
+                alt={brandName|| "Brand"}
                 sx={{
                   position: "absolute",
                   top: 0,
@@ -181,7 +181,7 @@ const BrandCard = React.memo(
                 }}
               >
                 <Avatar
-                  src={brand?.brandDetails?.brandLogo?.[0]}
+                  src={brand?.uploads?.brandLogo?.[0]}
                   sx={{
                     width: 50,
                     height: 50,
@@ -199,7 +199,7 @@ const BrandCard = React.memo(
                     flex: 1,
                   }}
                 >
-                  {brand.personalDetails?.brandName}
+                  {brandName}
                 </Typography>
                 <IconButton
                   onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
@@ -219,13 +219,12 @@ const BrandCard = React.memo(
                 </IconButton>
               </Box>
 
-              {categories.length > 0 && (
+              {categories && (
                 <Box sx={{ mb: 2 }}>
                   <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-                    {categories.slice(0, 3).map((category, index) => (
+                    
                       <Chip
-                        key={index}
-                        label={category.child}
+                        label={categories.child}
                         size="small"
                         sx={{
                           bgcolor: "rgba(255, 152, 0, 0.1)",
@@ -234,7 +233,7 @@ const BrandCard = React.memo(
                           mb: 1,
                         }}
                       />
-                    ))}
+                    
                   </Stack>
                 </Box>
               )}
@@ -332,12 +331,9 @@ const TopRestaurantsFranchise = () => {
   // Filter brands that belong to Beverage Franchise subcategory and all its child categories
   const beverageBrands = useMemo(() => {
     return brands.filter((brand) => {
-      const categories = brand.personalDetails?.brandCategories || [];
-      return categories.some((cat) => {
-        // Check if the subcategory is "Beverage Franchises"
-        // OR if the parent category is "Food & Beverages" and subcategory is related to beverages
-        return cat.child === "Multi Cuisine Restaurants";
-      });
+      const categories = brand.franchiseDetails?.brandCategories || [];
+      return categories.child === "Multi Cuisine Restaurants";
+
     });
   }, [brands]);
 
@@ -350,7 +346,7 @@ const TopRestaurantsFranchise = () => {
   const initializeData = useCallback(() => {
     try {
       if (!beverageBrands || beverageBrands.length === 0) {
-        setError("No beverage franchises found.");
+        // setError("No beverage franchises found.");
       } else {
         setError(null);
       }
@@ -432,7 +428,7 @@ const TopRestaurantsFranchise = () => {
       sx={{
         py: isMobile ? 1 : 2,
         px: isMobile ? 0 : 2,
-        maxWidth: isMobile ? "100%" : 1400,
+        maxWidth: isMobile ? "100%" : 1300,
         mx: "auto",
         mb: isMobile ? 0 : 2,
       }}

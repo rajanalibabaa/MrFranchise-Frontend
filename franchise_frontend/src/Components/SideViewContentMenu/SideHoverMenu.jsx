@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Drawer from "@mui/material/Drawer";
 import {
   Box,
@@ -22,16 +22,91 @@ import {
   Grow,
   Slide
 } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
 import { useDispatch, useSelector } from "react-redux";
-// import {
-//   openBrandDialog,
-//   closeBrandDialog,
-// } from "../../Redux/Slices/brandSlice";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+
+// Brand data cache
+const brandDataCache = {
+  data: null,
+  timestamp: null,
+  CACHE_DURATION: 30 * 60 * 1000, // 30 minutes cache
+  isStale() {
+    return !this.timestamp || (Date.now() - this.timestamp) > this.CACHE_DURATION;
+  }
+};
+
+
+// Memoized brand card component to prevent unnecessary re-renders
+const BrandCard = React.memo(({ brand, handleBrandClick, isMobile }) => (
+  <motion.div whileHover={{ y: -5 }} transition={{ duration: 0.2 }}>
+    <Paper
+      onClick={() => handleBrandClick(brand)}
+      elevation={1}
+      sx={{
+        width: 100,
+        height: 150,
+        display: 'flex',
+        justifyContent: 'flex-start',
+        flexDirection: 'column',
+        alignItems: 'center',
+        p: isMobile ? 1 : 2,
+        borderRadius: 3,
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        border: '1px solid transparent',
+        '&:hover': {
+          transform: 'translateY(-5px)',
+          boxShadow: (theme) => theme.shadows[4],
+          borderColor: (theme) => theme.palette.primary.light,
+        },
+      }}
+    >
+      <Box
+        sx={{
+          width: isMobile ? 50 : 90,
+          height: isMobile ? 50 : 90,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '50%',
+        }}
+      >
+        <Avatar
+          src={brand.uploads?.brandLogo || ""}
+          alt={brand.brandDetails?.brandName || "B"}
+          sx={{
+            width: '100%',
+            height: '100%',
+            fontSize: isMobile ? 32 : 36,
+          }}
+        >
+          {brand.brandDetails?.brandName?.[0] || "B"}
+        </Avatar>
+      </Box>
+      <Typography
+        fontWeight="bold"
+        textAlign="center"
+        noWrap
+        sx={{ 
+          width: '100%', 
+          fontSize: isMobile ? '0.85rem' : '1rem',
+          color: 'text.primary',
+          whiteSpace: 'normal',
+          wordBreak: 'break-word',
+          lineHeight: 1.2,
+          mb: 0.5,
+        }}
+      >
+        {brand.brandDetails?.brandName}
+      </Typography>
+    </Paper>
+  </motion.div>
+));
 
 const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
   const [activeCategory, setActiveCategory] = useState(null);
@@ -41,137 +116,287 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [mobileTabValue, setMobileTabValue] = useState(0);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const navigate = useNavigate();
+ const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+   // Optimized brand data fetching with caching
+  const fetchBrandDetails = useCallback(async () => {
+    // Return cached data if it's fresh
+    if (!brandDataCache.isStale() && brandDataCache.data) {
+      setInitialLoadComplete(true);
+      return brandDataCache.data;
+    }
 
-  const fetchBrandDetails = async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await axios.get(
         "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
+          params: {
+            fields: "brandDetails.brandName,uploads.brandLogo,franchiseDetails.brandCategories",
+            limit: 1000 // Adjust based on your typical dataset size
+          }
         }
       );
-      setBrandsData(response.data.data);
+      
+      // Update cache
+      brandDataCache.data = response.data.data;
+      brandDataCache.timestamp = Date.now();
+      
+      setInitialLoadComplete(true);
+      return response.data.data;
     } catch (error) {
       setError("Failed to load brands. Please try again later.");
       console.error("Error fetching brands:", error);
+      throw error;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const dispatch = useDispatch();
-  const { openDialog, selectedBrand } = useSelector((state) => state.brands);
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-
+  // Prefetch brand data when component mounts
   useEffect(() => {
-    if (hoverCategory !== null && brandsData.length === 0) {
-      fetchBrandDetails();
-    }
-  }, [hoverCategory]);
+    let isMounted = true;
+    
+    const prefetchData = async () => {
+      try {
+        const data = await fetchBrandDetails();
+        if (isMounted) {
+          // Pre-build the childToBrandsMap for faster filtering
+          buildChildToBrandsMap(data);
+        }
+      } catch (error) {
+        console.error("Prefetch error:", error);
+      }
+    };
 
-  const handleSubChildHover = (children) => {
-    const childName = typeof children === "string" ? children : children.name;
-    const filtered = brandsData.filter((brand) => {
-      const categories = brand.personalDetails?.brandCategories || [];
-      return categories.some((cat) => cat.child === childName);
+    // Use requestIdleCallback or setTimeout to avoid blocking main thread
+    const prefetchId = window.requestIdleCallback 
+      ? window.requestIdleCallback(() => prefetchData())
+      : setTimeout(prefetchData, 500);
+
+    return () => {
+      isMounted = false;
+      window.requestIdleCallback 
+        ? window.cancelIdleCallback(prefetchId)
+        : clearTimeout(prefetchId);
+    };
+  }, [fetchBrandDetails]);
+
+  // Optimized child-to-brands mapping
+  const [childToBrandsMap, setChildToBrandsMap] = useState({});
+
+  const buildChildToBrandsMap = useCallback((brandsData) => {
+    const map = {};
+    brandsData.forEach((brand) => {
+      const brandCats = brand.franchiseDetails?.brandCategories;
+      if (!brandCats) return;
+      
+      const catArray = Array.isArray(brandCats) ? brandCats : [brandCats];
+      catArray.forEach((cat) => {
+        if (cat.child) {
+          if (!map[cat.child]) map[cat.child] = [];
+          map[cat.child].push(brand);
+        }
+      });
     });
-    setFilteredBrands(filtered);
-  };
+    setChildToBrandsMap(map);
+  }, []);
 
-  const handleBrandClick = (brand) => {
-    dispatch(openBrandDialog(brand));
-  };
+  // Optimized brand filtering
+  const handleSubChildHover = useCallback((children) => {
+    setLoading(true); // Show loader while filtering
+    const childName = typeof children === "string" ? children : children.name;
 
-  const handleMobileTabChange = (event, newValue) => {
+    // First try to get from pre-built map
+    if (childToBrandsMap[childName]) {
+      setFilteredBrands(childToBrandsMap[childName]);
+      setLoading(false);
+      return;
+    }
+
+    // Fallback to filtering if map not available
+    if (!brandDataCache.data) {
+      setFilteredBrands([]);
+      setLoading(false);
+      return;
+    }
+
+    // Simulate async filtering for loader effect
+    setTimeout(() => {
+      const filtered = brandDataCache.data.filter((brand) => {
+        const brandCats = brand.franchiseDetails?.brandCategories;
+        if (!brandCats) return false;
+
+        const catArray = Array.isArray(brandCats) ? brandCats : [brandCats];
+        return catArray.some((cat) => {
+          const brandMainCat = cat.main;
+          const brandSubCat = cat.sub;
+          const brandChildCat = cat.child;
+
+          return (
+            activeCategory !== null &&
+            categories[activeCategory].name === brandMainCat &&
+            activeSubCategory !== null &&
+            activeSubCategory.name === brandSubCat &&
+            brandChildCat === childName
+          );
+        });
+      });
+
+      setFilteredBrands(filtered);
+      setLoading(false);
+    }, 400); // 400ms delay for loader effect
+  }, [childToBrandsMap, activeCategory, activeSubCategory]);
+
+  const handleBrandClick = useCallback((brand) => {
+    // dispatch(openBrandDialog(brand));
+  }, []);
+
+  const handleMobileTabChange = useCallback((event, newValue) => {
     setMobileTabValue(newValue);
-  };
+  }, []);
 
-  const getMobileTabContent = () => {
-    switch (mobileTabValue) {
-      case 0: // Categories
-        return (
-          <Box sx={{ p: 2 }}>
-            {categories.map((category, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+  // Memoized mobile tab content
+  const getMobileTabContent = useMemo(() => {
+    const tabContents = [
+      // Categories Tab
+      (
+        <Box sx={{ p: 2 }}>
+          {categories.map((category, index) => (
+            <motion.div key={index} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Box
+                onClick={() => {
+                  setActiveCategory(index);
+                  setActiveSubCategory(null);
+                  setMobileTabValue(1);
+                }}
+                sx={{
+                  cursor: "pointer",
+                  py: 1.5,
+                  px: 1.5,
+                  borderRadius: 2,
+                  mb: 1,
+                  color: activeCategory === index ? "white" : "text.primary",
+                  bgcolor: activeCategory === index ? "primary.main" : "background.paper",
+                  fontWeight: "medium",
+                  transition: "all 0.3s ease",
+                  boxShadow: theme.shadows[1],
+                  "&:hover": {
+                    bgcolor: activeCategory === index ? "primary.dark" : "action.hover",
+                  },
+                }}
               >
+                <Typography variant="subtitle1">{category.name}</Typography>
+              </Box>
+            </motion.div>
+          ))}
+        </Box>
+      ),
+      // Subcategories Tab
+      (
+        <Box sx={{ p: 2 }}>
+          <motion.div whileHover={{ x: -5 }} whileTap={{ scale: 0.98 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                mb: 2,
+                cursor: "pointer",
+                p: 1,
+                borderRadius: 1,
+                "&:hover": { bgcolor: "action.hover" },
+              }}
+              onClick={() => setMobileTabValue(0)}
+            >
+              <IconButton size="small" sx={{ mr: 1 }}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+              <Typography variant="body2" color="text.secondary">
+                Back to Categories
+              </Typography>
+            </Box>
+          </motion.div>
+          {activeCategory !== null && categories[activeCategory].children?.map((subCategory, idx) => (
+            <Grow in={true} timeout={(idx + 1) * 150} key={idx}>
+              <motion.div whileHover={{ scale: 1.02 }}>
                 <Box
                   onClick={() => {
-                    setActiveCategory(index);
-                    setActiveSubCategory(null);
-                    setMobileTabValue(1);
+                    setActiveSubCategory(subCategory);
+                    setMobileTabValue(2);
                   }}
                   sx={{
                     cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
                     py: 1.5,
                     px: 1.5,
                     borderRadius: 2,
+                    gap: 1.5,
                     mb: 1,
-                    color: activeCategory === index ? "white" : "text.primary",
-                    bgcolor: activeCategory === index ? "primary.main" : "background.paper",
-                    fontWeight: "medium",
-                    transition: "all 0.3s ease",
+                    bgcolor: activeSubCategory?.name === subCategory.name ? "primary.light" : "background.paper",
+                    color: activeSubCategory?.name === subCategory.name ? "primary.contrastText" : "text.primary",
                     boxShadow: theme.shadows[1],
+                    transition: "all 0.3s ease",
                     "&:hover": {
-                      bgcolor: activeCategory === index ? "primary.dark" : "action.hover",
+                      bgcolor: activeSubCategory?.name === subCategory.name ? "primary.main" : "action.hover",
                     },
                   }}
                 >
-                  <Typography variant="subtitle1">
-                    {category.name}
+                  {subCategory.icon && (
+                    <Box
+                      component={subCategory.icon}
+                      sx={{
+                        fontSize: 22,
+                        color: activeSubCategory?.name === subCategory.name ? "primary.contrastText" : "primary.main",
+                      }}
+                    />
+                  )}
+                  <Typography fontWeight={activeSubCategory?.name === subCategory.name ? "bold" : "medium"}>
+                    {subCategory.name}
                   </Typography>
                 </Box>
               </motion.div>
-            ))}
-          </Box>
-        );
-      case 1: // Subcategories
-        return (
-          <Box sx={{ p: 2 }}>
-            <motion.div
-              whileHover={{ x: -5 }}
-              whileTap={{ scale: 0.98 }}
+            </Grow>
+          ))}
+        </Box>
+      ),
+      // Child Categories Tab
+      (
+        <Box sx={{ p: 2 }}>
+          <motion.div whileHover={{ x: -5 }} whileTap={{ scale: 0.98 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                mb: 2,
+                cursor: "pointer",
+                p: 1,
+                borderRadius: 1,
+                "&:hover": { bgcolor: "action.hover" },
+              }}
+              onClick={() => setMobileTabValue(1)}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  mb: 2,
-                  cursor: "pointer",
-                  p: 1,
-                  borderRadius: 1,
-                  "&:hover": {
-                    bgcolor: "action.hover",
-                  },
-                }}
-                onClick={() => setMobileTabValue(0)}
-              >
-                <IconButton size="small" sx={{ mr: 1 }}>
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-                <Typography variant="body2" color="text.secondary">
-                  Back to Categories
-                </Typography>
-              </Box>
-            </motion.div>
-            {activeCategory !== null && categories[activeCategory].children?.map((subCategory, idx) => (
-              <Grow in={true} timeout={(idx + 1) * 150} key={idx}>
+              <IconButton size="small" sx={{ mr: 1 }}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+              <Typography variant="body2" color="text.secondary">
+                Back to Subcategories
+              </Typography>
+            </Box>
+          </motion.div>
+          {activeSubCategory?.children?.map((children, idx) => {
+            const name = typeof children === "string" ? children : children.name;
+            const Icon = typeof children === "object" ? children.icon : null;
+            return (
+              <Slide in={true} direction="up" timeout={(idx + 1) * 100} key={idx}>
                 <motion.div whileHover={{ scale: 1.02 }}>
                   <Box
-                    onClick={() => {
-                      setActiveSubCategory(subCategory);
-                      setMobileTabValue(2);
-                    }}
+                    onClick={() => handleSubChildHover(children)}
                     sx={{
                       cursor: "pointer",
                       display: "flex",
@@ -181,111 +406,168 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                       borderRadius: 2,
                       gap: 1.5,
                       mb: 1,
-                      bgcolor: activeSubCategory?.name === subCategory.name ? "primary.light" : "background.paper",
-                      color: activeSubCategory?.name === subCategory.name ? "primary.contrastText" : "text.primary",
+                      bgcolor: "background.paper",
                       boxShadow: theme.shadows[1],
                       transition: "all 0.3s ease",
                       "&:hover": {
-                        bgcolor: activeSubCategory?.name === subCategory.name ? "primary.main" : "action.hover",
+                        bgcolor: "action.hover",
+                        boxShadow: theme.shadows[2],
                       },
                     }}
                   >
-                    {subCategory.icon && (
+                    {Icon && (
                       <Box
-                        component={subCategory.icon}
-                        sx={{
-                          fontSize: 22,
-                          color: activeSubCategory?.name === subCategory.name ? "primary.contrastText" : "primary.main",
-                        }}
+                        component={Icon}
+                        sx={{ fontSize: 20, color: "primary.main" }}
                       />
                     )}
-                    <Typography
-                      fontWeight={activeSubCategory?.name === subCategory.name ? "bold" : "medium"}
-                    >
-                      {subCategory.name}
-                    </Typography>
+                    <Typography fontWeight="medium">{name}</Typography>
                   </Box>
                 </motion.div>
-              </Grow>
-            ))}
-          </Box>
-        );
-      case 2: // Child Categories
-        return (
-          <Box sx={{ p: 2 }}>
-            <motion.div
-              whileHover={{ x: -5 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  mb: 2,
-                  cursor: "pointer",
-                  p: 1,
-                  borderRadius: 1,
-                  "&:hover": {
-                    bgcolor: "action.hover",
-                  },
-                }}
-                onClick={() => setMobileTabValue(1)}
-              >
-                <IconButton size="small" sx={{ mr: 1 }}>
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-                <Typography variant="body2" color="text.secondary">
-                  Back to Subcategories
-                </Typography>
-              </Box>
-            </motion.div>
-            {activeSubCategory?.children?.map((children, idx) => {
-              const name = typeof children === "string" ? children : children.name;
-              const Icon = typeof children === "object" ? children.icon : null;
-              return (
-                <Slide in={true} direction="up" timeout={(idx + 1) * 100} key={idx}>
-                  <motion.div whileHover={{ scale: 1.02 }}>
-                    <Box
-                      onClick={() => handleSubChildHover(children)}
-                      sx={{
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        py: 1.5,
-                        px: 1.5,
-                        borderRadius: 2,
-                        gap: 1.5,
-                        mb: 1,
-                        bgcolor: "background.paper",
-                        boxShadow: theme.shadows[1],
-                        transition: "all 0.3s ease",
-                        "&:hover": {
-                          bgcolor: "action.hover",
-                          boxShadow: theme.shadows[2],
-                        },
-                      }}
-                    >
-                      {Icon && (
-                        <Box
-                          component={Icon}
-                          sx={{
-                            fontSize: 20,
-                            color: "primary.main",
-                          }}
-                        />
-                      )}
-                      <Typography fontWeight="medium">{name}</Typography>
-                    </Box>
-                  </motion.div>
-                </Slide>
-              );
-            })}
-          </Box>
-        );
-      default:
-        return null;
+              </Slide>
+            );
+          })}
+        </Box>
+      )
+    ];
+    
+    return () => tabContents[mobileTabValue] || null;
+  }, [mobileTabValue, activeCategory, activeSubCategory, handleSubChildHover]);
+
+  // Optimized brands grid rendering
+  const renderBrandsGrid = useMemo(() => {
+    if (loading) {
+      return (
+           <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "60vh",
+          width: "100%",
+        }}
+      >
+        <CircularProgress color="primary" size={48} thickness={4} />
+      </Box>
+      );
     }
-  };
+
+    if (error) {
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+            color: "error.main",
+            textAlign: "center",
+            p: 3,
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Oops! Something went wrong
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            {error}
+          </Typography>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Chip
+              label="Retry"
+              onClick={fetchBrandDetails}
+              color="primary"
+              sx={{ 
+                px: 3,
+                py: 1,
+                fontSize: '0.9rem',
+                fontWeight: 'bold'
+              }}
+            />
+          </motion.div>
+        </Box>
+      );
+    }
+
+    if (filteredBrands.length > 0) {
+      return (
+        <>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 3,
+              pt: isMobile ? 1 : 0,
+            }}
+          >
+            <Typography 
+              variant="h5" 
+              fontWeight="bold"
+              sx={{
+                background: "linear-gradient(to right, #6a11cb 0%, #2575fc 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Popular Brands
+            </Typography>
+            <Chip
+              label={`${filteredBrands.length} brands`}
+              size="small"
+              color="primary"
+              variant="outlined"
+              sx={{ fontWeight: 'bold' }}
+            />
+          </Box>
+          <Grid container spacing={isMobile ? 1 : 2}>
+            {filteredBrands.slice(0, isMobile ? 8 : 12).map((brand, index) => (
+              <Grid item xs={12} sm={6} md={3} key={brand._id || index}>
+                <BrandCard 
+                  brand={brand} 
+                  handleBrandClick={handleBrandClick} 
+                  isMobile={isMobile} 
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </>
+      );
+    }
+
+    return (
+      <Fade in={true}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+            color: "text.secondary",
+            textAlign: "center",
+            p: 3,
+          }}
+        >
+          <img 
+            src="/images/no-brands.svg" 
+            alt="No brands found" 
+            style={{ 
+              width: isMobile ? 150 : 200,
+              opacity: 0.7,
+              marginBottom: 16
+            }}
+          />
+          <Typography variant="h6" gutterBottom>
+            No brands found
+          </Typography>
+          <Typography variant="body2">
+            {isMobile ? "Select a category to see brands" : "Select a subcategory to see related brands"}
+          </Typography>
+        </Box>
+      </Fade>
+    );
+  }, [loading, error, filteredBrands, isMobile, handleBrandClick]);
 
   return (
     <Drawer
@@ -294,18 +576,16 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
       onClose={onHoverLeave}
       PaperProps={{
         sx: {
-           height: isMobile ? "85vh" : isTablet ? "65vh" : 500,
-    background: "rgba(255,255,255,0.7)",
-    backdropFilter: "blur(12px)",
-    boxShadow: "0 8px 32px 0 rgba(60,72,88,0.18)",
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    border: "1.5px solid rgba(255,255,255,0.25)",
+          height: isMobile ? "85vh" : isTablet ? "65vh" : 500,
+          background: "rgba(255,255,255,0.7)",
+          backdropFilter: "blur(12px)",
+          boxShadow: "0 8px 32px 0 rgba(60,72,88,0.18)",
+          borderBottomLeftRadius: 24,
+          borderBottomRightRadius: 24,
+          border: "1.5px solid rgba(255,255,255,0.25)",
         },
       }}
-      SlideProps={{
-        timeout: 300,
-      }}
+      SlideProps={{ timeout: 300 }}
     >
       <Box
         onMouseLeave={onHoverLeave}
@@ -322,10 +602,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
             position="static" 
             color="inherit"
             elevation={0}
-            sx={{
-              background: "#ff9800",
-              color: "white",
-            }}
+            sx={{ background: "#ff9800", color: "white" }}
           >
             <Tabs
               value={mobileTabValue}
@@ -334,10 +611,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
               indicatorColor="secondary"
               textColor="inherit"
               sx={{
-                "& .MuiTabs-indicator": {
-                  height: 4,
-                  backgroundColor: "white",
-                },
+                "& .MuiTabs-indicator": { height: 4, backgroundColor: "white" },
               }}
             >
               <Tab 
@@ -387,20 +661,6 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                 background: "linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%)",
               }}
             >
-              {/* <Typography 
-                variant="h6" 
-                fontWeight="bold" 
-                mb={2} 
-                color="primary"
-                sx={{
-                  background: "#FF9800",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                Top Categories
-              </Typography> */}
-              {/* <Divider sx={{ mb: 2 }} /> */}
               {categories.map((category, index) => (
                 <motion.div
                   key={index}
@@ -448,12 +708,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                   background: "linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%)",
                 }}
               >
-                <Typography 
-                  variant="h6" 
-                  fontWeight="bold" 
-                  mb={2} 
-                  color="text.secondary"
-                >
+                <Typography variant="h6" fontWeight="bold" mb={2} color="text.secondary">
                   {categories[activeCategory].name}
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
@@ -513,12 +768,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                   background: "linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%)",
                 }}
               >
-                <Typography 
-                  variant="h6" 
-                  fontWeight="bold" 
-                  mb={2} 
-                  color="text.secondary"
-                >
+                <Typography variant="h6" fontWeight="bold" mb={2} color="text.secondary">
                   {activeSubCategory.name}
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
@@ -551,10 +801,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                           {Icon && (
                             <Box
                               component={Icon}
-                              sx={{
-                                fontSize: 20,
-                                color: "primary.main",
-                              }}
+                              sx={{ fontSize: 20, color: "primary.main" }}
                             />
                           )}
                           <Typography fontWeight="medium">{name}</Typography>
@@ -586,217 +833,11 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
             borderTop: isMobile ? `1px solid ${theme.palette.divider}` : "none",
           }}
         >
-          {loading ? (
-            <Grid container spacing={isMobile ? 1 : 2}>
-              {[...Array(8)].map((_, idx) => (
-                <Grid item xs={6} sm={4} md={3} key={idx}>
-                  <Skeleton 
-                    variant="rectangular" 
-                    height={isMobile ? 140 : 180} 
-                    sx={{ 
-                      borderRadius: 2,
-                      bgcolor: 'grey.100'
-                    }} 
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          ) : error ? (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100%",
-                color: "error.main",
-                textAlign: "center",
-                p: 3,
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                Oops! Something went wrong
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                {error}
-              </Typography>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Chip
-                  label="Retry"
-                  onClick={fetchBrandDetails}
-                  color="primary"
-                  sx={{ 
-                    px: 3,
-                    py: 1,
-                    fontSize: '0.9rem',
-                    fontWeight: 'bold'
-                  }}
-                />
-              </motion.div>
-            </Box>
-          ) : filteredBrands.length > 0 ? (
-            <>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  mb: 3,
-                  pt: isMobile ? 1 : 0,
-                }}
-              >
-                <Typography 
-                  variant="h5" 
-                  fontWeight="bold"
-                  sx={{
-                    background: "linear-gradient(to right, #6a11cb 0%, #2575fc 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  Popular Brands
-                </Typography>
-                <Chip
-                  label={`${filteredBrands.length} brands`}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                  sx={{ fontWeight: 'bold' }}
-                />
-              </Box>
-              <Grid container spacing={isMobile ? 1 : 2}>
-                {filteredBrands.slice(0, isMobile ? 8 : 12).map((brand, index) => (
-                  <Grid item xs={12} sm={6} md={3} key={brand._id || index}>
-                    <motion.div
-                      whileHover={{ y: -5 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Paper
-                        onClick={() => handleBrandClick(brand)}
-                        elevation={1}
-                        sx={{
-                          width:100,
-                          height: 150,
-                          display: 'flex',
-                          justifyContent:'flex-start',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          p: isMobile ? 1 : 2,
-                          borderRadius: 3,
-                          cursor: 'pointer',
-                          transition: 'all 0.3s ease',
-                          border: '1px solid transparent',
-                          '&:hover': {
-                            transform: 'translateY(-5px)',
-                            boxShadow: theme.shadows[4],
-                            borderColor: theme.palette.primary.light,
-                          },
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: isMobile ? 50 : 90,
-                            height: isMobile ? 50 : 90,
-                            // mb: 1.5,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            // bgcolor: 'primary.light',
-                            borderRadius: '50%',
-                            // p: 1,
-                          }}
-                        >
-                          <Avatar
-                            src={brand.brandDetails?.brandLogo || ""}
-                            alt={brand.personalDetails?.brandName || "B"}
-                            sx={{
-                              width: '100%',
-                              height: '100%',
-                              fontSize: isMobile ? 32 : 36,
-                              // bgcolor: 'primary.main',
-                            }}
-                          >
-                            {brand.personalDetails?.brandName
-                              ? brand.personalDetails.brandName[0]
-                              : "B"}
-                          </Avatar>
-                        </Box>
-                        <Typography
-                          fontWeight="bold"
-                          textAlign="center"
-                          noWrap
-                          sx={{ 
-                            width: '100%', 
-                            fontSize: isMobile ? '0.85rem' : '1rem',
-                            color: 'text.primary',
-                            whiteSpace:'normal',
-                            wordBreak: 'break-word',
-                            lineHeight: 1.2,
-                            mb: 0.5,
-                          }}
-                        >
-                          {brand.personalDetails?.brandName}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          textAlign="center"
-                          noWrap
-                          sx={{ 
-                            width: '100%', 
-                            fontSize: isMobile ? '0.75rem' : '0.875rem',
-                            // mt: 0.5
-                            whiteSpace:'normal',
-                            wordBreak: 'break-word',
-                          }}
-                        >
-                          {brand.personalDetails?.companyName}
-                        </Typography>
-                      </Paper>
-                    </motion.div>
-                  </Grid>
-                ))}
-              </Grid>
-            </>
-          ) : (
-            <Fade in={true}>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "100%",
-                  color: "text.secondary",
-                  textAlign: "center",
-                  p: 3,
-                }}
-              >
-                <img 
-                  src="/images/no-brands.svg" 
-                  alt="No brands found" 
-                  style={{ 
-                    width: isMobile ? 150 : 200,
-                    opacity: 0.7,
-                    marginBottom: 16
-                  }}
-                />
-                <Typography variant="h6" gutterBottom>
-                  No brands found
-                </Typography>
-                <Typography variant="body2">
-                  {isMobile ? "Select a category to see brands" : "Select a subcategory to see related brands"}
-                </Typography>
-              </Box>
-            </Fade>
-          )}
+          {renderBrandsGrid}
         </Box>
-
-        {/* Brand Details Dialog */}
-      
       </Box>
     </Drawer>
   );
 };
 
-export default SideViewContent;
+export default React.memo(SideViewContent);

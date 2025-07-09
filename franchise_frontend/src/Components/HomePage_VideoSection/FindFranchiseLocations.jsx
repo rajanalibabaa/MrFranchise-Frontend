@@ -57,6 +57,9 @@ const TopInvestVdo2 = React.memo(() => {
   // Redux state
   const { data: brands = [], loading, error } = useSelector((state) => state.brands);
 
+
+  // console.log("brand === :",brands)
+
   // Memoized values
   const CARD_DIMENSIONS = useMemo(() => ({
     width: isMobile ? 300 : isTablet ? 320 : 320,
@@ -389,7 +392,7 @@ const TopInvestVdo2 = React.memo(() => {
   return (
     <Box sx={{
       p: isMobile ? 2 : 4,
-      maxWidth: 1400,
+      maxWidth: 1300,
       mx: "auto",
       overflow: "hidden",
     }}>

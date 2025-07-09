@@ -51,6 +51,7 @@ import Otherindustries from "./Components/Footers/QuickLinks/Otherindustries.jsx
 import GlobalLoader from './Components/GLobalLoader.jsx';
 import Blogs from './Components/Footers/QuickLinks/Blogs.jsx';
 import BrandDetailsPage from './Pages/AllCategoryPage/BrandDetailsPage.jsx';
+import NavbarSearch from './Components/Navbar/NavbarSearch.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -102,12 +103,15 @@ function App() {
           <Route path="/" element={<HomeBannerSec />} />
           {/* <Route path="/brandview" element={<BrandViewPage />} /> */}
           <Route path="/investor-register" element={<InvestorRegister />} />
+          <Route Path="/navbarsearch" element={<NavbarSearch/>}/>
           {/* <Route path="/brand-register" element={<BrandRegister />} /> */}
           <Route path="/loginpage" element={<LoginPage />} />
           <Route path="/registerhandleuser" element={<RegisterHandleUser />} />
           <Route path="/brandlistingform" element={<BrandRegisterForm />} />
           <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
-          <Route path="/brandviewpage" element={<BrandCategroyViewPage />} />
+          <Route path="/brandviewpage" element={<BrandCategroyViewPage />} >
+          
+          </Route>
 
           <Route path="/investordashboard" element={<ProfilePage />}>
             <Route index element={<DashBoard />} />
@@ -150,6 +154,7 @@ function App() {
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
           <Route path="/otherindustries" element={<Otherindustries/>}/>
           <Route path="/blogs" element={<Blogs />} />
+          
           <Route path="/brands/:brandId" element={<BrandDetailsPage />} />
           
         </Routes>
