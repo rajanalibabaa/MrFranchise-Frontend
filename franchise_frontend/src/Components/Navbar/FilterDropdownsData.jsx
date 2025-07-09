@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -10,10 +10,10 @@ import {
   CircularProgress,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useDispatch, useSelector } from "react-redux";
+// import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setFilters,fetchBrands } from "../../Redux/Slices/brandSlice";
-import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice";
+import { useBrands, filterBrands } from "../../Hooks/Fetchbrands";
+// import { useFilters } from "../../hooks/useFilters"; // New hook for filter state management
 
 const investmentRangeOptions = [
   { label: "All Ranges", value: "" },
@@ -30,39 +30,57 @@ const investmentRangeOptions = [
 ];
 const FilterDropdowns = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const {
-    subCategories = [],
-    states = [],
-    filters,
-    loading,
-  } = useSelector((state) => state.brands);
+  // const dispatch = useDispatch();
+    // Use custom hook for filter state management
+// Extract unique subcategories and states from brands data
 
-  useEffect(()=>{
-dispatch(fetchBrands());
-  },[])
+const { data: brands, isLoading, error } = useBrands();
+  const [filters, setFilters] = useState({});
+
+  
+  const subCategories = React.useMemo(() => {
+    if (!brands) return [];
+    const set = new Set();
+    brands.forEach(brand => {
+      const sub = brand.franchiseDetails?.brandCategories?.sub;
+      if (sub) set.add(sub);
+    });
+    return Array.from(set).map(sub => ({ id: sub, name: sub }));
+  }, [brands]);
+
+  const states = React.useMemo(() => {
+    if (!brands) return [];
+    const set = new Set();
+    brands.forEach(brand => {
+      const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
+      locations.forEach(loc => {
+        if (loc.state) set.add(loc.state);
+      });
+    });
+    return Array.from(set);
+  }, [brands]);
+
+  const filteredBrands = filterBrands(brands, filters);
 
   const handleFilterChange = (name, value) => {
-    dispatch(setFilters({ [name]: value }));
+    setFilters(prev => ({ ...prev, [name]: value }));
   };
-
   const handleFindBrands = async () => {
     try {
-      // dispatch(showLoading());
-      // Assuming fetchBrands returns a promise and throws on error
-      await dispatch(fetchBrands()).unwrap();
-      navigate("/brandviewpage", {
-        state: { filters },
-      });
-      // dispatch(hideLoading());
-    } catch (error) {
-      // Optionally handle error (e.g., show a message)
-      // Keep loading if needed, or hide if you want to stop spinner on error
-      // dispatch(hideLoading());
-      console.log("Error fetching brands:", error);
+      // Refetch with current filters
+      await refetchBrands();
       
+      navigate("/brandviewpage", {
+        state: { 
+          filters,
+          brands // Pass the filtered brands directly
+        },
+      });
+    } catch (error) {
+      console.log("Error fetching brands:", error);
     }
   };
+
 
   // console.log("filters :",filters)
 
@@ -139,7 +157,7 @@ dispatch(fetchBrands());
 
         <Button
           variant="contained"
-          disabled={loading}
+          disabled={isLoading}
           onClick={handleFindBrands}
           startIcon={<SearchIcon />}
           sx={{
@@ -152,7 +170,7 @@ dispatch(fetchBrands());
             },
           }}
         >
-          {loading ? <CircularProgress size={24} /> : "Find Brands"}
+          {isLoading ? <CircularProgress size={24} /> : "Find Brands"}
         </Button>
       </Box>
     </Box>
