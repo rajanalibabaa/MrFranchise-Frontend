@@ -31,6 +31,7 @@ import {
 } from "../../Redux/Slices/brandSlice";
 // import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
+import { postView } from "../../Utils/function/view";
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -72,6 +73,9 @@ function TopBrandVdoCards() {
       setShowLogin(true);
       return;
     }
+
+    console.log("brandid :",brandId)
+    console.log("isLiked :",isLiked)
 
     try {
       await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
@@ -146,8 +150,9 @@ function TopBrandVdoCards() {
   };
 
   const handleApply = (brand) => {
+    postView(brand.uuid)
     dispatch(openBrandDialog(brand));
-    navigate(`/brands/${brand.uuid}`)
+    // navigate(`/brands/${brand.uuid}`)
   };
 
   if (brandsLoading && brands.length === 0) {

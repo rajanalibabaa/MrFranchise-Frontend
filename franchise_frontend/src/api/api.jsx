@@ -1,4 +1,4 @@
-const url = "http://localhost:5000/api/v1";
+const url = "https://franchise-backend-wgp6.onrender.com/api/v1";
 
 export const api = {
     viewApi: {

@@ -30,6 +30,7 @@ import {
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
+import { postView } from "../../Utils/function/view";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -384,6 +385,8 @@ const TopCafeFranchises = () => {
   }, [dispatch]);
 
   const handleApply = useCallback((brand) => {
+    
+    postView(brand.uuid)
    dispatch(openBrandDialog(brand));
    }, [dispatch]);
 

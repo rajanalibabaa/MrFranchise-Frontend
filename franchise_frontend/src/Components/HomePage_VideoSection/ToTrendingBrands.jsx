@@ -1,69 +1,63 @@
 import { Typography, Box, Button, Card, Avatar, IconButton, Stack, CircularProgress } from '@mui/material';
 import { motion } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { openBrandDialog } from "../../Redux/Slices/brandSlice";
-// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
-
+import { postView } from '../../Utils/function/view';
+import { fetchBrands, toggleLikeBrand } from "../../Redux/Slices/brandSlice";
+import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
+import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 const TopInvestVdocardround = () => {
-  const [brands, setBrands] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [likedBrands, setLikedBrands] = useState({});
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  
+  // Get brands data from Redux store
+  const { data: brands = [], loading, error } = useSelector((state) => state.brands);
+  const [likeProcessing, setLikeProcessing] = useState({});
+  const [showLogin, setShowLogin] = useState(false);
   const [visibleBrands, setVisibleBrands] = useState(15);
 
-  
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-
+  // Fetch brands when component mounts
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5000/api/v1/homepage/getAllnewRegisterBrands",
-          { headers: { "Content-Type": "application/json" } }
-        );
+    dispatch(fetchBrands());
+  }, [dispatch]);
 
-        if (response.data?.data?.length) {
-          setBrands(response.data.data);
-          setError(null);
-        } else {
-          setBrands([]);
-          setError("No brands found.");
-        }
-      } catch (err) {
-        setError("Failed to fetch brands.");
-        setBrands([]);
-        console.error("Error fetching brands:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const toggleLike = useCallback(async (brandId, isLiked) => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setShowLogin(true);
+      return;
+    }
+    try {
+      await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
+    } catch (error) {
+      console.error("Like operation failed:", error);
+    }
+  }, [dispatch]);
 
-    fetchData();
-  }, []);
+  const handleLikeClick = useCallback(async (brandId, isLiked) => {
+    if (likeProcessing[brandId]) return;
 
-  const handleLike = (brandId) => {
-    setLikedBrands(prev => ({
-      ...prev,
-      [brandId]: !prev[brandId]
-    }));
-  };
+    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+    try {
+      await toggleLike(brandId, isLiked);
+    } finally {
+      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
+    }
+  }, [likeProcessing, toggleLike]);
 
   const handleShowMore = () => {
     setVisibleBrands(prev => prev + 10);
   };
 
-
-  const handleApply = (brand) => {
-      dispatch(openBrandDialog(brand));
-      console.log("Apply", brand);
-    };
+  const handleApply = useCallback((brand) => {
+    postView(brand.uuid);
+    dispatch(openBrandDialog(brand));
+  }, [dispatch]);
 
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -78,7 +72,7 @@ const TopInvestVdocardround = () => {
   );
 
   return (
-    <Box component="section" sx={{  maxWidth: 1300, mx: "auto" }}>
+    <Box component="section" sx={{ maxWidth: 1300, mx: "auto" }}>
       <Typography variant="h5" sx={{ 
         mb: 2, 
         fontWeight: 800,
@@ -128,14 +122,17 @@ const TopInvestVdocardround = () => {
                   top: 4,
                   right: 4,
                   zIndex: 2,
-                  color: likedBrands[brand.uuid] ? '#ff5252' : 'rgba(0,0,0,0.2)',
+                  color: brand?.isLiked ? '#ff5252' : 'rgba(0,0,0,0.2)',
                   '&:hover': {
                     color: '#ff5252'
                   }
                 }}
-                onClick={() => handleLike(brand.uuid)}
+                onClick={() => handleLikeClick(brand.uuid, brand?.isLiked)}
+                disabled={likeProcessing[brand.uuid]}
               >
-                {likedBrands[brand.uuid] ? (
+                {likeProcessing[brand.uuid] ? (
+                  <CircularProgress size={24} />
+                ) : brand?.isLiked ? (
                   <FavoriteIcon fontSize="small" />
                 ) : (
                   <FavoriteBorderIcon fontSize="small" />
@@ -170,7 +167,8 @@ const TopInvestVdocardround = () => {
               >
                 {brand.brandDetails?.brandName}
               </Typography>
- {/* Category Chips */}
+              
+              {/* Category Chips */}
               <Box sx={{ 
                 display: 'flex',
                 justifyContent: 'center',
@@ -179,21 +177,18 @@ const TopInvestVdocardround = () => {
                 mt: 0.5,
                 mb: 1
               }}>
-               {brand?.franchiseDetails?.brandCategories?.child
-}
+                {brand?.franchiseDetails?.brandCategories?.child}
               </Box>
+              
               {/* Investment */}
-              <Stack direction="column"  spacing={0.5} sx={{ mb: 0.5 }}>
-                {/* <MonetizationOnIcon sx={{ color: '#f29724', fontSize: 16 }} /> */}
+              <Stack direction="column" spacing={0.5} sx={{ mb: 0.5 }}>
                 <Typography variant="caption" fontWeight={500}>
-                 Investment: {brand.franchiseDetails?.fico?.[0]?.investmentRange || 'N/A'}
+                  Investment: {brand.franchiseDetails?.fico?.[0]?.investmentRange || 'N/A'}
                 </Typography>
                 <Typography variant="body2" fontWeight={500}>
-                Area:  {brand.franchiseDetails?.fico?.[0]?.areaRequired || 'N/A'} sq.ft
+                  Area: {brand.franchiseDetails?.fico?.[0]?.areaRequired || 'N/A'} sq.ft
                 </Typography>
               </Stack>
-
-             
 
               {/* View Button */}
               <Button
@@ -243,9 +238,11 @@ const TopInvestVdocardround = () => {
           </Button>
         </Box>
       )}
-      {/* <BrandDetailsDialog /> */}
+      {showLogin && (
+        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+      )}
     </Box>
   );
 };
 
-export default TopInvestVdocardround;
+export default React.memo(TopInvestVdocardround);

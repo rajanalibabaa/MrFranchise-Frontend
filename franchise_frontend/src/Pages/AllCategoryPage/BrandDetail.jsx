@@ -199,7 +199,7 @@ const toggleDrawer = (open) => (event) => {
   //     if (!investorUUID || !AccessToken) return;
   //     try {
   //       const response = await axios.get(
-  //         `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+  //         `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
   //         {
   //           headers: {
   //             "Content-Type": "application/json",
@@ -265,7 +265,7 @@ const toggleDrawer = (open) => (event) => {
       }
 
       const response = await axios.post(
-        `http://localhost:5000/api/v1/instantapply/postApplication`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication`,
         payload,
         {
           headers: {

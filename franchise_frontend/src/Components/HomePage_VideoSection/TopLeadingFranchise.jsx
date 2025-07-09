@@ -32,6 +32,7 @@ import {
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
+import { postView } from "../../Utils/function/view";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -372,8 +373,9 @@ const TopLeadingFranchise = () => {
   }, [dispatch]);
 
   const handleApply = useCallback((brand) => {
+    postView(brand.uuid)
     dispatch(openBrandDialog(brand));
-    navigate(`/brands/${brand.uuid}`);
+    // navigate(`/brands/${brand.uuid}`);
   }, [dispatch]);
 
   const handleMouseEnter = useCallback(() => {
