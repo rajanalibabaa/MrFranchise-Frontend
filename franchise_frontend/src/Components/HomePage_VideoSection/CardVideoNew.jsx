@@ -78,6 +78,7 @@ const CardsRow = () => (
         <CardMedia
           component="video"
           src={card.videoUrl}
+          loading='lazy'
           autoPlay
           loop
           muted

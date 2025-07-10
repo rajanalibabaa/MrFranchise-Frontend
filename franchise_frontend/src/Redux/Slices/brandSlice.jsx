@@ -89,6 +89,7 @@ export const fetchBrands = createAsyncThunk(
             headers: {
               "Content-Type": "application/json",
             },
+           
           }
         );
       }
@@ -101,6 +102,25 @@ export const fetchBrands = createAsyncThunk(
       return response.data.data;
     } catch (err) {
       return rejectWithValue(err.message || "Failed to fetch brands");
+    }
+  }
+);
+
+export const fetchBrandById = createAsyncThunk(
+  "brands/fetchBrandById",
+  async (brandId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingById/${brandId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data.data;
+    } catch (err) {
+      return rejectWithValue(err.message || "Failed to fetch brand");
     }
   }
 );
@@ -179,6 +199,15 @@ const brandSlice = createSlice({
     openBrandDialog: (state, action) => {
       state.openDialog = true;
       state.selectedBrand = action.payload;
+      console.log("action.payload :",action.payload.uuid)
+      const newWindow = window.open(`/brands/${action.payload.uuid}?`, '_blank');
+  localStorage.setItem(`brand-${action.payload.uuid}`, JSON.stringify(action.payload));
+ 
+  if (newWindow) {
+    newWindow.onbeforeunload = () => {
+      localStorage.removeItem(`brand-${action.payload.uuid}`);
+    };
+  }
     },
     closeBrandDialog: (state) => {
       state.openDialog = false;

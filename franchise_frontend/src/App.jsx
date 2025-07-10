@@ -107,7 +107,9 @@ function App() {
           <Route path="/registerhandleuser" element={<RegisterHandleUser />} />
           <Route path="/brandlistingform" element={<BrandRegisterForm />} />
           <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
-          <Route path="/brandviewpage" element={<BrandCategroyViewPage />} />
+          <Route path="/brandviewpage" element={<BrandCategroyViewPage />} >
+          
+          </Route>
 
           <Route path="/investordashboard" element={<ProfilePage />}>
             <Route index element={<DashBoard />} />
@@ -150,6 +152,7 @@ function App() {
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
           <Route path="/otherindustries" element={<Otherindustries/>}/>
           <Route path="/blogs" element={<Blogs />} />
+          
           <Route path="/brands/:brandId" element={<BrandDetailsPage />} />
           
         </Routes>

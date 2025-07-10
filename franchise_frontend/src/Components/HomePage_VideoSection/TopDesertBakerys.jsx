@@ -57,12 +57,17 @@ const BrandCard = React.memo(({
   const [isVisible, setIsVisible] = useState(false);
   const observerRef = useRef();
 
-  const brandId = brand.uuid;
-  const franchiseModels = brand.franchiseDetails?.modelsOfFranchise || [];
-  const firstModel = franchiseModels[0] || {};
-  const categories = brand.personalDetails?.brandCategories || [];
-  const videoUrl = brand?.brandDetails?.brandPromotionVideo?.[0] || 
-                  brand?.brandDetails?.franchisePromotionVideo?.[0];
+  // const brandId = brand.uuid;
+  // const franchiseModels = brand.franchiseDetails?.fico?.[0] || [];
+  // const firstModel = franchiseModels[0] || {};
+  // const categories = brand.personalDetails?.brandCategories || [];
+  // const videoUrl = brand?.brandDetails?.brandPromotionVideo?.[0]
+  // const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
+   const brandId = brand.uuid;
+  const franchiseModels = brand.franchiseDetails?.fico?.[0] || {};
+  const firstModel = franchiseModels || {};
+  const categories = brand.franchiseDetails?.brandCategories || {};
+  const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
 
   useEffect(() => {
@@ -173,7 +178,7 @@ const BrandCard = React.memo(({
               }}
             >
               <Avatar
-                src={brand?.brandDetails?.brandLogo?.[0]}
+                src={brand?.uploads?.brandLogo?.[0]}
                 sx={{
                   width: 50,
                   height: 50,
@@ -323,14 +328,15 @@ const TopDesertBakerys = () => {
 // Filter brands that belong to Beverage Franchise subcategory and all its child categories
 const beverageBrands = useMemo(() => {
   return brands.filter(brand => {
-    const categories = brand.personalDetails?.brandCategories || [];
-    return categories.some(cat => {
+    const categories = brand.franchiseDetails?.brandCategories || [];
+    // return categories.some(cat => {
       // Check if the subcategory is "Beverage Franchises" 
       // OR if the parent category is "Food & Beverages" and subcategory is related to beverages
       return (
-         cat.sub === "Dessert & Bakery" 
+         categories.sub === "Dessert & Bakery" 
+        //  categories.sub === "Food Franchises" 
       );
-    });
+    // });
   });
 }, [brands]);
 
@@ -343,7 +349,7 @@ const beverageBrands = useMemo(() => {
   const initializeData = useCallback(() => {
     try {
       if (!beverageBrands || beverageBrands.length === 0) {
-        setError("No beverage franchises found.");
+        // setError("Loading...");
       } else {
         setError(null);
       }
@@ -412,7 +418,11 @@ const beverageBrands = useMemo(() => {
   }
 
   return (
-    <Box
+    
+
+    <>
+      {beverageBrands.length > 0 && (
+        <Box
       sx={{
         py: isMobile ? 1 : 2,
         px: isMobile ? 0 : 2,
@@ -510,6 +520,8 @@ const beverageBrands = useMemo(() => {
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}
     </Box>
+      )}
+    </>
   );
 };
 

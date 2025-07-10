@@ -29,8 +29,7 @@ import {
   openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
-// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
-import { showLoading,hideLoading } from "../../Redux/Slices/loadingSlice";
+import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -58,11 +57,9 @@ const BrandCard = React.memo(({
   const observerRef = useRef();
 
   const brandId = brand.uuid;
-  const franchiseModels = brand.franchiseDetails?.modelsOfFranchise || [];
-  const firstModel = franchiseModels[0] || {};
-  const categories = brand.personalDetails?.brandCategories || [];
-  const videoUrl = brand?.brandDetails?.brandPromotionVideo?.[0] || 
-                  brand?.brandDetails?.franchisePromotionVideo?.[0];
+  const franchiseModel = brand.franchiseDetails?.fico?.[0] || {};
+  const category = brand.franchiseDetails?.brandCategories || {};
+  const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
 
   useEffect(() => {
@@ -126,8 +123,9 @@ const BrandCard = React.memo(({
             <CardMedia
               component="video"
               loading="lazy"
+              poster={brand?.uploads?.brandLogo?.[0] || ""}
               src={videoUrl}
-              alt={brand.personalDetails?.brandName || "Brand"}
+              alt={brand.brandDetails?.brandName || "Brand"}
               sx={{
                 position: "absolute",
                 top: 0,
@@ -173,7 +171,7 @@ const BrandCard = React.memo(({
               }}
             >
               <Avatar
-                src={brand?.brandDetails?.brandLogo?.[0]}
+                src={brand?.uploads?.brandLogo?.[0]}
                 sx={{
                   width: 50,
                   height: 50,
@@ -191,7 +189,7 @@ const BrandCard = React.memo(({
                   flex: 1,
                 }}
               >
-                {brand.personalDetails?.brandName}
+                {brand.brandDetails?.brandName}
               </Typography>
               <IconButton
                 onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
@@ -211,22 +209,19 @@ const BrandCard = React.memo(({
               </IconButton>
             </Box>
 
-            {categories.length > 0 && (
+            {category.child && (
               <Box sx={{ mb: 2 }}>
-                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-                  {categories.slice(0, 3).map((category, index) => (
-                    <Chip
-                      key={index}
-                      label={category.child}
-                      size="small"
-                      sx={{
-                        bgcolor: "rgba(255, 152, 0, 0.1)",
-                        color: "orange.dark",
-                        fontWeight: 500,
-                        mb: 1,
-                      }}
-                    />
-                  ))}
+                <Stack direction="row" spacing={1}>
+                  <Chip
+                    label={category.child}
+                    size="small"
+                    sx={{
+                      bgcolor: "rgba(255, 152, 0, 0.1)",
+                      color: "orange.dark",
+                      fontWeight: 500,
+                      mb: 1,
+                    }}
+                  />
                 </Stack>
               </Box>
             )}
@@ -242,7 +237,7 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  Franchise Type : {firstModel.franchiseType || "N/A"}
+                  Franchise Type : {franchiseModel.franchiseType || "N/A"}
                 </Typography>
               </Box>
 
@@ -256,7 +251,7 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  Investment : {firstModel.investmentRange || "Not specified"}
+                  Investment : {franchiseModel.investmentRange || "Not specified"}
                 </Typography>
               </Box>
               <Box display="flex" alignItems="center">
@@ -269,7 +264,7 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  Area : {firstModel.investmentRange || "Not specified"}
+                  Area : {franchiseModel.areaRequired || "Not specified"}
                 </Typography>
               </Box>
             </Stack>
@@ -319,22 +314,22 @@ const TopCafeFranchises = () => {
   const dispatch = useDispatch();
   const { data: brands = [] } = useSelector((state) => state.brands);
 
-  // Filter brands that belong to Beverage Franchise subcategory
-// Filter brands that belong to Beverage Franchise subcategory and all its child categories
-const beverageBrands = useMemo(() => {
-  return brands.filter(brand => {
-    const categories = brand.personalDetails?.brandCategories || [];
-    return categories.some(cat => {
-      // Check if the subcategory is "Beverage Franchises" 
-      // OR if the parent category is "Food & Beverages" and subcategory is related to beverages
+  // Filter brands that belong to Coffee & Tea Cafes category
+  const coffeeTeaBrands = useMemo(() => {
+    return brands.filter(brand => {
+      const category = brand.franchiseDetails?.brandCategories || {};
+      const categoryName = category.child?.toLowerCase();
+      const subCategory = category.sub?.toLowerCase();
+      
       return (
-        // cat.sub === "Beverage Franchises" 
-        cat.child === "Coffee & Tea Cafes"
-       
+        categoryName?.includes("coffee") ||
+        categoryName?.includes("tea") ||
+        categoryName?.includes("cafe") ||
+        subCategory?.includes("beverage") ||
+        subCategory === "beverage franchises"
       );
     });
-  });
-}, [brands]);
+  }, [brands]);
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -344,8 +339,8 @@ const beverageBrands = useMemo(() => {
 
   const initializeData = useCallback(() => {
     try {
-      if (!beverageBrands || beverageBrands.length === 0) {
-        setError("No beverage franchises found.");
+      if (!coffeeTeaBrands || coffeeTeaBrands.length === 0) {
+        setError("loading...");
       } else {
         setError(null);
       }
@@ -355,7 +350,7 @@ const beverageBrands = useMemo(() => {
     } finally {
       setLoading(false);
     }
-  }, [beverageBrands]);
+  }, [coffeeTeaBrands]);
 
   useEffect(() => {
     initializeData();
@@ -386,8 +381,17 @@ const beverageBrands = useMemo(() => {
   }, [dispatch]);
 
   const handleApply = useCallback((brand) => {
-    dispatch(openBrandDialog(brand));
-  }, [dispatch]);
+    // dispatch(openBrandDialog(brand));
+      const newWindow = window.open(`/brands/${brand.uuid}?`, '_blank');
+  localStorage.setItem(`brand-${brand.uuid}`, JSON.stringify(brand));
+ 
+  if (newWindow) {
+    newWindow.onbeforeunload = () => {
+      localStorage.removeItem(`brand-${brand.uuid}`);
+    };
+  }
+ 
+  }, []);
 
   const handleMouseEnter = useCallback(() => {
     isPaused.current = true;
@@ -414,7 +418,9 @@ const beverageBrands = useMemo(() => {
   }
 
   return (
-    <Box
+    <>
+    {coffeeTeaBrands.length > 0 && (
+      <Box
       sx={{
         py: isMobile ? 1 : 2,
         px: isMobile ? 0 : 2,
@@ -451,7 +457,7 @@ const beverageBrands = useMemo(() => {
             },
           }}
         >
-          Top Cafe Franchises
+          Top Coffee & Tea Cafes
         </Typography>
 
         <Button
@@ -467,14 +473,13 @@ const beverageBrands = useMemo(() => {
               backgroundColor: "transparent",
             },
           }}
-         onClick={async () => {
-  dispatch(showLoading());
-  navigate("/brandviewpage");
-  setTimeout(() => {
-    dispatch(hideLoading());
-  }, 2000);
-}}
-
+          onClick={async () => {
+            dispatch(showLoading());
+            navigate("/brandviewpage");
+            setTimeout(() => {
+              dispatch(hideLoading());
+            }, 2000);
+          }}
         >
           View More
         </Button>
@@ -496,7 +501,7 @@ const beverageBrands = useMemo(() => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {beverageBrands.map((brand) => (
+        {coffeeTeaBrands.map((brand) => (
           <BrandCard 
             key={brand.uuid}
             brand={brand}
@@ -510,11 +515,12 @@ const beverageBrands = useMemo(() => {
           />
         ))}
       </Box>
-      {/* <BrandDetailsDialog /> */}
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}
     </Box>
+    )}
+    </>
   );
 };
 

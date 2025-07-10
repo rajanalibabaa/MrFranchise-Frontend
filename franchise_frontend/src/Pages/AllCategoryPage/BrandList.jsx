@@ -769,7 +769,7 @@ function BrandList() {
       </Box>
 
 
-      {/* Mobile Filters Drawer */}
+      {/* Mobile Filters Drawer 
       {/* <Drawer
         anchor="left"
         open={mobileFiltersOpen}
@@ -822,6 +822,7 @@ function BrandList() {
         </Box>
       </Drawer>
 <<<<<<< HEAD
+<<<<<<< HEAD
           <BrandDetail />
               <BrandComparison
                 open={comparisonOpen}
@@ -836,10 +837,14 @@ function BrandList() {
         brand={selectedBrand}
       /> */}
 >>>>>>> 7b664a8e613f507b2c8c20f43efe671518ee0fd4
+=======
+          <BrandDetail />
+              
+              */}
+>>>>>>> f0a51b3f660234c702ec586f6bcd6d0c752169ec
     </Container>
 
-    
   );
 }
 
-export default BrandList;
+export default BrandList

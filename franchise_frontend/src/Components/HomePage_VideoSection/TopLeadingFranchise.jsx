@@ -31,7 +31,6 @@ import {
   openBrandDialog,
   toggleLikeBrand,
 } from "../../Redux/Slices/brandSlice";
-// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 
 const CARD_DIMENSIONS = {
