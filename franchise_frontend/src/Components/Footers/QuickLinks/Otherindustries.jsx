@@ -189,7 +189,7 @@ const Otherindustries = () => {
             and ongoing guidance to help you succeed in your entrepreneurial
             journey.
           </Typography></Box>
-         <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+         {/* <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
   <Button
     variant="contained"
     sx={{
@@ -205,7 +205,7 @@ const Otherindustries = () => {
   >
     Learn More
   </Button>
-</Box>
+</Box> */}
         </Grid>
 
         {/* Right Side - Form */}
