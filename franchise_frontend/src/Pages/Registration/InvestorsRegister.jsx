@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useForm, useWatch, Controller } from "react-hook-form";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
@@ -102,7 +103,7 @@ const propertyCountry = watch("propertyCountry");
 const propertyState = watch("propertyState");
 // const propertyDistrict = watch("propertyDistrict");
 
-  //Domestic country 
+  //Domestic country
   const [indiaData, setIndiaData] = useState([]);
   const [preferredStates, setPreferredStates] = useState([]);
   const [preferredCities, setPreferredCities] = useState([]);
@@ -469,7 +470,7 @@ useEffect(() => {
   });
  const handleAddPreference = () => {
    const propertyType = watch("propertyType");
-       const isOwnProperty = propertyType === "own Property";
+  const isOwnProperty = propertyType === "Own Property";
 
     const pref = {
       category: selectedCategories,
@@ -495,11 +496,12 @@ useEffect(() => {
     !pref.preferredDistrict ||
     !pref.preferredCity ||
     !pref.propertyType ||
-    (isOwnProperty && (
-      !pref.propertySize ||
-      !pref.propertyCountry ||
-      !pref.propertyState ||
-      !pref.propertyCity
+    !pref.propertyType ||
+  (isOwnProperty && (
+    !pref.propertySize ||
+    !pref.propertyCountry ||
+    !pref.propertyState ||
+    !pref.propertyCity
     )))
      {
       showSnackbar("Please fill all preference fields before adding.", "error");
@@ -530,7 +532,7 @@ useEffect(() => {
       "propertyType",
       "propertySize",
       "investmentRange",  
-      "investmentAmount",   
+      "investmentAmount",  
       "category",
       "propertyCountry",
     "propertyState",
@@ -575,13 +577,13 @@ alert('Add Multiple preferences to get more offers from us!','info')
 
     setPreferences(preferences.filter((_, i) => i !== idx));
   }
-  
+ 
  
 
   // OTP related states
   const [otpModal, setOtpModal] = useState({
-    open: false, 
-    type: null, 
+    open: false,
+    type: null,
     otp: "",
     loading: false,
     verified: false,
@@ -627,7 +629,7 @@ alert('Add Multiple preferences to get more offers from us!','info')
 
       if (!exists) {
         const updatedCategories = [...prev, newCategory];
-        setValue("category", updatedCategories); 
+        setValue("category", updatedCategories);
         return updatedCategories;
       }
       return prev;
@@ -733,7 +735,7 @@ useEffect(() => {
 }, [watch]);
 
  const onSubmit = async (data) => {
-  
+ 
   if (!preferences.length) {
     showSnackbar("Please add at least one preference before submitting.", "error");
     return;
@@ -795,14 +797,14 @@ useEffect(() => {
             preferredDistrict: pref.preferredDistrict,
             preferredCity: pref.preferredCity,
           }),
-      locationType: pref.locationType, 
+      locationType: pref.locationType,
     };
   }),
 
       // category: selectedCategories,
       // investmentRange: data.investmentRange || "",
       // investmentAmount: data.investmentAmount || "",
-      
+     
       // propertyType: data.propertyType || "",
       // ...(data.propertyType === "Own Property" && {
       //   propertySize: data.propertySize || "",
@@ -816,8 +818,9 @@ useEffect(() => {
     try {
       dispatch(showLoading());
       const response = await axios.post(
-        "http://localhost:5000/api/v1/investor/createInvestor",
+       
         // "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
+        "http://localhost:5000/api/v1/investor/createInvestor",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -853,7 +856,7 @@ dispatch(hideLoading());
           "An unexpected error occurred. Please try again.",
           "error"
         );
-      
+     
       }
   localStorage.removeItem(FORM_DATA_KEY);
     } catch (error) {
@@ -881,7 +884,7 @@ dispatch(hideLoading());
     );
 
   }
-  
+ 
 }
   };
   // Make sure to also save preferences to localStorage
@@ -1004,13 +1007,13 @@ useEffect(() => {
 
   return (
     <>
-    <Box 
-    sx={{ 
-    position: "fixed", 
-    top: 0, 
-    left: 0, 
-    width: "100%", 
-    zIndex: 1000 
+    <Box
+    sx={{
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    zIndex: 1000
   }}>
       <Navbar />
     </Box>
@@ -1018,8 +1021,8 @@ useEffect(() => {
         variant="h3"
         gutterBottom
         fontWeight="bold"
-        sx={{ 
-          color: "#7ad03a", 
+        sx={{
+          color: "#7ad03a",
           mb: -3,
           mt: {xs:12, md: 15, lg: 15, sm: 20},
           textAlign: 'center',
@@ -1055,7 +1058,7 @@ flexDirection: isMobile ? "column" : "row",
     </Box> */}
     <form onSubmit={handleSubmit(onSubmit)}>
       {/* Personal Details Section */}
-    
+   
         <Typography
           variant="h5"
           sx={{
@@ -1248,7 +1251,7 @@ flexDirection: isMobile ? "column" : "row",
                 alignItems:"flex-start"
               }}
             >
-          
+         
 
            <Grid size={4} mt={1}>
     <Controller
@@ -1317,7 +1320,7 @@ flexDirection: isMobile ? "column" : "row",
                       borderRadius: '8px',
                       mt: 1
                     },
-                  
+                 
                     // resize: 'vertical',
                   }}
                 />
@@ -1560,7 +1563,7 @@ flexDirection: isMobile ? "column" : "row",
           <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 500, mb: 1 }}>
             Investment Categories
           </Typography>
-          
+         
          <Grid
                        container
                        spacing={2}
@@ -1575,7 +1578,7 @@ flexDirection: isMobile ? "column" : "row",
               <InputLabel>Industry</InputLabel>
               <Select
                 value={selectedMainCategory || ''}
-                
+               
                 onChange={(e) => {
                   setSelectedMainCategory(e.target.value);
                   setSelectedSubCategory('');
@@ -1606,7 +1609,7 @@ flexDirection: isMobile ? "column" : "row",
                 sx={{ borderRadius: '8px' }}
               >
                 <MenuItem value="">Select Main category</MenuItem>
-                {selectedMainCategory && 
+                {selectedMainCategory &&
                   categories.find(c => c.name === selectedMainCategory)?.children?.map((sub, index) => (
                     <MenuItem key={index} value={sub.name}>
                       {sub.name}
@@ -1651,7 +1654,7 @@ flexDirection: isMobile ? "column" : "row",
         sx={{ borderRadius: '8px' }}
       >
                 <MenuItem value="">Select Sub Category</MenuItem>
-                {selectedMainCategory && selectedSubCategory && 
+                {selectedMainCategory && selectedSubCategory &&
                   categories.find(c => c.name === selectedMainCategory)
                     ?.children?.find(s => s.name === selectedSubCategory)
                     ?.children?.map((child, index) => (
@@ -1666,7 +1669,7 @@ flexDirection: isMobile ? "column" : "row",
             {/* Add Category Button */}
             {/* <Button
               variant="contained"
-              
+             
               disabled={!selectedChild}
               onClick={() => {
                 if (selectedMainCategory && selectedSubCategory && selectedChild) {
@@ -1675,23 +1678,23 @@ flexDirection: isMobile ? "column" : "row",
                     sub: selectedSubCategory,
                     child: selectedChild
                   };
-                  
+                 
                   setSelectedCategories(prev => {
-                    const exists = prev.some(c => 
-                      c.main === newCategory.main && 
-                      c.sub === newCategory.sub && 
+                    const exists = prev.some(c =>
+                      c.main === newCategory.main &&
+                      c.sub === newCategory.sub &&
                       c.child === newCategory.child
                     );
                     return exists ? prev : [...prev, newCategory];
                   });
-                  
+                 
                   // Reset selections
                   setSelectedMainCategory('');
                   setSelectedSubCategory('');
                   setSelectedChild('');
                 }
               }}
-              sx={{ 
+              sx={{
                 height: '56px',
                 borderRadius: '8px',
                 minWidth: '170px',
@@ -1704,10 +1707,10 @@ flexDirection: isMobile ? "column" : "row",
 
           {/* Display Selected Categories */}
           {/* {selectedCategories.length > 0 && (
-            <Box sx={{ 
-              mt: 2, 
-              display: 'flex', 
-              flexWrap: 'wrap', 
+            <Box sx={{
+              mt: 2,
+              display: 'flex',
+              flexWrap: 'wrap',
               gap: 1,
               p: 2,
               backgroundColor: 'background.paper',
@@ -1722,7 +1725,7 @@ flexDirection: isMobile ? "column" : "row",
                   onDelete={() => {
                     setSelectedCategories(selectedCategories.filter((_, i) => i !== index));
                   }}
-                  sx={{ 
+                  sx={{
                     backgroundColor: '#7ad03a',
                     color: 'primary.contrastText',
                     '& .MuiChip-deleteIcon': {
@@ -1737,7 +1740,7 @@ flexDirection: isMobile ? "column" : "row",
 
        
         <Grid spacing={3}>
-          
+         
 
           {/* Investment Amount - Only shown if range is selected */}
           {/* {selectedRange && ( */}
@@ -2133,10 +2136,10 @@ flexDirection: isMobile ? "column" : "row",
                 )}
               />
             </Grid>
-            
+           
           )}
         </Grid>
-        
+       
       {watch("propertyType") === "Own Property" && (
   <Grid container spacing={2} sx={{
     display: "grid",
@@ -2240,8 +2243,8 @@ flexDirection: isMobile ? "column" : "row",
 
         {/* Add Preference Button */}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 ,mr:{xs:"40px", sm:"55px"}}}>
-          <Button 
-        
+          <Button
+       
             onClick={handleAddPreference}
             sx={{
               borderRadius: '8px',
@@ -2298,8 +2301,8 @@ WebkitOverflowScrolling: 'touch',
     <TableCell sx={{ color: 'primary.contrastText' }}>Preferred State</TableCell>
     <TableCell sx={{ color: 'primary.contrastText' }}>Preferred District</TableCell>
     <TableCell sx={{ color: 'primary.contrastText' }}>Preferred City</TableCell>
-    <TableCell sx={{ color: 'primary.contrastText' }}>Property Country</TableCell> 
-    <TableCell sx={{ color: 'primary.contrastText' }}>Property State</TableCell>   
+    <TableCell sx={{ color: 'primary.contrastText' }}>Property Country</TableCell>
+    <TableCell sx={{ color: 'primary.contrastText' }}>Property State</TableCell>  
     <TableCell sx={{ color: 'primary.contrastText' }}>Property City</TableCell>    
     <TableCell sx={{ color: 'primary.contrastText' }}>Investment Amount</TableCell>
     <TableCell sx={{ color: 'primary.contrastText' }}>Property Type</TableCell>
@@ -2353,12 +2356,12 @@ WebkitOverflowScrolling: 'touch',
       <TableCell>
         <Typography>{pref.propertyType}</Typography>
       </TableCell>
-              
+             
               <TableCell>
                 {/* <Typography variant="subtitle2" fontWeight="bold">Size:</Typography> */}
                 <Typography>
-                  {pref.propertyType === 'Own Property' 
-                    ? pref.propertySize 
+                  {pref.propertyType === 'Own Property'
+                    ? pref.propertySize
                     : 'N/A'}
                 </Typography>
               </TableCell>
@@ -2391,13 +2394,13 @@ WebkitOverflowScrolling: 'touch',
 )}
 
       {/* Terms and Submit Section */}
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         mt: 4,
         p: 3,
-        
+       
       }}>
         <FormControlLabel
           control={
@@ -2405,9 +2408,9 @@ WebkitOverflowScrolling: 'touch',
               name="terms"
               control={control}
               render={({ field }) => (
-                <Checkbox 
-                  {...field} 
-                  color="primary" 
+                <Checkbox
+                  {...field}
+                  color="primary"
                   checked={field.value || false}
                 />
               )}
@@ -2416,9 +2419,9 @@ WebkitOverflowScrolling: 'touch',
           label={
             <Typography variant="body2">
               I agree to the{" "}
-              <Link 
-                component={RouterLink} 
-                to="/termsandconditions" 
+              <Link
+                component={RouterLink}
+                to="/termsandconditions"
                 color="primary"
                 sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
               >
@@ -2488,8 +2491,8 @@ WebkitOverflowScrolling: 'touch',
     </Dialog>
 
     {/* OTP Verification Modal */}
-    <Dialog 
-      open={otpModal.open} 
+    <Dialog
+      open={otpModal.open}
       onClose={closeOtpModal}
       PaperProps={{
         sx: {
@@ -2536,7 +2539,7 @@ WebkitOverflowScrolling: 'touch',
         />
       </DialogContent>
       <DialogActions sx={{ justifyContent: 'center', gap: 2, px: 3, pb: 3 }}>
-        <Button 
+        <Button
           onClick={closeOtpModal}
           variant="outlined"
           sx={{ borderRadius: '8px', px: 3 }}
@@ -2571,7 +2574,7 @@ WebkitOverflowScrolling: 'touch',
       <Alert
         onClose={handleCloseSnackbar}
         severity={snackbar.severity}
-        sx={{ 
+        sx={{
           width: "100%",
           borderRadius: '12px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
@@ -2597,7 +2600,7 @@ WebkitOverflowScrolling: 'touch',
         onClose={() => setShowWhatsappSnackbar(false)}
         severity="info"
         icon={<WhatsApp fontSize="inherit" />}
-        sx={{ 
+        sx={{
           width: '100%',
           borderRadius: '12px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
