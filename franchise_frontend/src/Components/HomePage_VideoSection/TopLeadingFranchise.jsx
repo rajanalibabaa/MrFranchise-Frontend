@@ -26,12 +26,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-import {
-  fetchBrands,
-  openBrandDialog,
-  toggleLikeBrand,
-} from "../../Redux/Slices/brandSlice";
-import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
+import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import { postView } from "../../Utils/function/view";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -313,14 +309,12 @@ const TopLeadingFranchise = () => {
   const containerRef = useRef(null);
   const isPaused = useRef(false);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
   
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { data: brands = [] } = useSelector((state) => state.brands);
+const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
+  const toggleLike = useToggleLike();
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -328,53 +322,46 @@ const TopLeadingFranchise = () => {
     return CARD_DIMENSIONS.desktop;
   }, [isMobile, isTablet]);
 
-  const initializeData = useCallback(() => {
-    try {
-      if (!brands || brands.length === 0) {
-        setError("No brands found.");
-      } else {
-        setError(null);
-      }
-    } catch (err) {
-      setError("Failed to process brands data.");
-      console.error("Error processing brands:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [brands]);
+  // const initializeData = useCallback(() => {
+  //   try {
+  //     if (!brands || brands.length === 0) {
+  //       setError("No brands found.");
+  //     } else {
+  //       setError(null);
+  //     }
+  //   } catch (err) {
+  //     setError("Failed to process brands data.");
+  //     console.error("Error processing brands:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [brands]);
 
-  useEffect(() => {
-    initializeData();
-  }, [initializeData]);
+  // useEffect(() => {
+  //   initializeData();
+  // }, [initializeData]);
 
-  const handleLikeClick = useCallback(async (brandId, isLiked) => {
+ const handleLikeClick = useCallback(async (brandId, isLiked) => {
     if (likeProcessing[brandId]) return;
-
-    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
-    try {
-      await toggleLike(brandId, isLiked);
-    } finally {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-    }
-  }, [likeProcessing]);
-
-  const toggleLike = useCallback(async (brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       setShowLogin(true);
       return;
     }
+    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
     try {
-      await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
+      await toggleLike.mutateAsync({ brandId, isLiked });
     } catch (error) {
       console.error("Like operation failed:", error);
+    } finally {
+      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
     }
-  }, [dispatch]);
+  }, [likeProcessing, toggleLike]);
 
-  const handleApply = useCallback((brand) => {
-    dispatch(openBrandDialog(brand));
-    navigate(`/brands/${brand.uuid}`);
-  }, [dispatch]);
+   const handleApply = useCallback((brand) => {
+    postView(brand.uuid);
+    openBrandDialog(brand);
+  }, []);
 
   const handleMouseEnter = useCallback(() => {
     isPaused.current = true;
@@ -384,7 +371,7 @@ const TopLeadingFranchise = () => {
     isPaused.current = false;
   }, []);
 
-  if (loading) {
+  if (brandsLoading) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <CircularProgress />
@@ -395,7 +382,7 @@ const TopLeadingFranchise = () => {
   if (error) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
-        <Typography color="error">{error}</Typography>
+        <Typography color="error">{error.message || "Failed to load brands."}</Typography>
       </Box>
     );
   }
@@ -454,14 +441,9 @@ const TopLeadingFranchise = () => {
               backgroundColor: "transparent",
             },
           }}
-          onClick={() => 
-            { dispatch(showLoading());
-              navigate("/brandviewpage")
-              setTimeout(() => {
-                dispatch(hideLoading());
-              }, 2000);
-            }    
-          }
+          onClick={() => {
+            navigate("/brandviewpage");
+          }}
         >
           View More
         </Button>
