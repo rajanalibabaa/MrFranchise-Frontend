@@ -41,9 +41,9 @@ import {
   FavoriteBorder,
   BookmarkBorder,
   Share,
-  Person, 
-  Language, 
-  Instagram
+  Person,
+  Language,
+  Instagram,
 } from "@mui/icons-material";
 import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
@@ -652,63 +652,77 @@ const BrandDetails = () => {
           </Box>
         </Drawer>
 
-        <Dialog open={openContactModal} onClose={handleCloseContact} fullWidth maxWidth="sm">
-  <DialogTitle
-    sx={{
-      fontWeight: 600,
-      background: "linear-gradient(45deg, #000 30%, #000 90%)",
-      WebkitBackgroundClip: "text",
-      WebkitTextFillColor: "transparent",
-    }}
-  >
-    Contact Details
-  </DialogTitle>
+        <Dialog
+          open={openContactModal}
+          onClose={handleCloseContact}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle
+            sx={{
+              fontWeight: 600,
+              background: "linear-gradient(45deg, #000 30%, #000 90%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Contact Details
+          </DialogTitle>
 
-  <DialogContent dividers>
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <DialogContent dividers>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Typography>
+                <strong>Manager Name:</strong>{" "}
+                {selectedBrand.brandDetails?.ceoName || "N/A"}
+              </Typography>
 
-      <Typography>
-        <strong>Manager Name:</strong>{" "}
-        {selectedBrand.brandDetails?.ceoName || "N/A"}
-      </Typography>
+              <Typography>
+                <strong>Mobile Number:</strong>{" "}
+                {selectedBrand.brandDetails?.ceoMobile || "N/A"}
+              </Typography>
 
-      <Typography>
-        <strong>Mobile Number:</strong>{" "}
-        {selectedBrand.brandDetails?.ceoMobile || "N/A"}
-      </Typography>
+              <Typography>
+                <strong>Website:</strong>{" "}
+                {selectedBrand.brandDetails?.website ? (
+                  <a
+                    href={selectedBrand.brandDetails.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {selectedBrand.brandDetails.website}
+                  </a>
+                ) : (
+                  "N/A"
+                )}
+              </Typography>
 
-      <Typography>
-        <strong>Website:</strong>{" "}
-        {selectedBrand.brandDetails?.website ? (
-          <a href={selectedBrand.brandDetails.website} target="_blank" rel="noopener noreferrer">
-            {selectedBrand.brandDetails.website}
-          </a>
-        ) : (
-          "N/A"
-        )}
-      </Typography>
+              <Typography>
+                <strong>Instagram:</strong>{" "}
+                {selectedBrand.brandDetails?.instagram ? (
+                  <a
+                    href={selectedBrand.brandDetails.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {selectedBrand.brandDetails.instagram}
+                  </a>
+                ) : (
+                  "N/A"
+                )}
+              </Typography>
+            </Box>
+          </DialogContent>
 
-      <Typography>
-        <strong>Instagram:</strong>{" "}
-        {selectedBrand.brandDetails?.instagram ? (
-          <a href={selectedBrand.brandDetails.instagram} target="_blank" rel="noopener noreferrer">
-            {selectedBrand.brandDetails.instagram}
-          </a>
-        ) : (
-          "N/A"
-        )}
-      </Typography>
-
-    </Box>
-  </DialogContent>
-
-  <DialogActions>
-    <Button onClick={handleCloseContact} variant="contained" color="error">
-      Close
-    </Button>
-  </DialogActions>
-</Dialog>
-
+          <DialogActions>
+            <Button
+              onClick={handleCloseContact}
+              variant="contained"
+              color="error"
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {/* Brand header with animation */}
         <motion.div
