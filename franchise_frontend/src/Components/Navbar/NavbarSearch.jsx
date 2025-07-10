@@ -27,16 +27,16 @@ const NavbarSearch = ({ open, handleClose }) => {
   const [tab, setTab] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Get filter options from Redux store
+  // Get filter options from Redux store with default empty arrays
   const {
-    categories,
-    subCategories,
-    childCategories,
-    states,
-    districts,
-    cities,
-    investmentRanges
-  } = useSelector((state) => state.brands);
+    categories = [],
+    subCategories = [],
+    childCategories = [],
+    states = [],
+    districts = [],
+    cities = [],
+    investmentRanges = []
+  } = useSelector((state) => state.brands) || {};
 
   // Category filters
   const [selectedMainCategory, setSelectedMainCategory] = useState('');
@@ -120,22 +120,22 @@ const NavbarSearch = ({ open, handleClose }) => {
 
   // Get filtered districts based on selected state
   const filteredDistricts = selectedState 
-    ? districts.filter(d => d.state === selectedState).map(d => d.district)
+    ? (districts || []).filter(d => d.state === selectedState).map(d => d.district)
     : [];
 
   // Get filtered cities based on selected district
   const filteredCities = selectedDistrict 
-    ? cities.filter(c => c.district === selectedDistrict).map(c => c.city)
+    ? (cities || []).filter(c => c.district === selectedDistrict).map(c => c.city)
     : [];
 
   // Get filtered subcategories based on selected main category
   const filteredSubCategories = selectedMainCategory
-    ? subCategories.filter(sub => sub.parentCategory === selectedMainCategory)
+    ? (subCategories || []).filter(sub => sub.parentCategory === selectedMainCategory)
     : [];
 
   // Get filtered child categories based on selected subcategory
   const filteredChildCategories = selectedSubCategory
-    ? childCategories.filter(child => child.parentSubCategory === selectedSubCategory)
+    ? (childCategories || []).filter(child => child.parentSubCategory === selectedSubCategory)
     : [];
 
   return (
@@ -209,7 +209,7 @@ const NavbarSearch = ({ open, handleClose }) => {
                 label="Industry"
               >
                 <MenuItem value="">Select Industry</MenuItem>
-                {categories.map((category) => (
+                {(categories || []).map((category) => (
                   <MenuItem key={category.id} value={category.name}>
                     {category.name}
                   </MenuItem>
@@ -268,7 +268,7 @@ const NavbarSearch = ({ open, handleClose }) => {
                 label="State"
               >
                 <MenuItem value="">Select State</MenuItem>
-                {states.map((state) => (
+                {(states || []).map((state) => (
                   <MenuItem key={state} value={state}>
                     {state}
                   </MenuItem>
@@ -323,7 +323,7 @@ const NavbarSearch = ({ open, handleClose }) => {
                 label="Investment Range"
               >
                 <MenuItem value="">Select Investment Amount</MenuItem>
-                {investmentRanges.map((range) => (
+                {(investmentRanges || []).map((range) => (
                   <MenuItem key={range} value={range}>
                     {range}
                   </MenuItem>
