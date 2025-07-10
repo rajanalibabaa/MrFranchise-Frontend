@@ -286,30 +286,17 @@ export const fastFilterBrands = (brands, filters) => {
 };
 
 export const openBrandDialog = (brand) => {
-  // Use sessionStorage instead of localStorage for automatic cleanup
-  const storageKey = `brand-${brand.uuid}`;
-  try {
-    sessionStorage.setItem(storageKey, JSON.stringify(brand));
-    
-    const newWindow = window.open(`/brands/${brand.uuid}`, '_blank');
-    
-    if (newWindow) {
-      // Add cleanup handler
-      const cleanup = () => sessionStorage.removeItem(storageKey);
-      newWindow.addEventListener('beforeunload', cleanup);
-      
-      // Fallback cleanup if window is closed without beforeunload
-      setTimeout(() => {
-        if (newWindow.closed) {
-          cleanup();
-        }
-      }, 1000);
-    }
-    
-    return newWindow;
-  } catch (e) {
-    console.error('Failed to open brand dialog:', e);
-    // Fallback to regular navigation if popup is blocked
-    window.location.href = `/brands/${brand.uuid}`;
+const brandSlug = brand.brandDetails?.brandName
+  ?.toLowerCase()
+  ?.replace(/\s+/g, '-')           // Replace spaces with hyphens
+  ?.replace(/[^a-z0-9\-]/g, '')    // Remove special characters
+  ?.substring(0, 50);              // Optional: limit length
+ const newWindow = window.open(`/brands/${brand.uuid}?--${brandSlug}`, '_blank');
+  localStorage.setItem(`brand-${brand.uuid}`, JSON.stringify(brand));
+
+  if (newWindow) {
+    newWindow.onbeforeunload = () => {
+      localStorage.removeItem(`brand-${brand.uuid}`);
+    };
   }
 };
