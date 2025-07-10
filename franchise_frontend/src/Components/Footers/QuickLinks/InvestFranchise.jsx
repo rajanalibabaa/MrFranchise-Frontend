@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Paper, Button, Divider, Grid } from "@mui/material";
+import { Box, Typography, Paper, Button, Divider, Grid, useTheme, useMediaQuery } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 import {Link} from '@mui/material';
 import { motion } from "framer-motion";
@@ -29,6 +29,10 @@ const Section = ({ title, children, sx = {}, titleColor = "#ffba00" }) => (
 
 
 const InvestFranchise = () => {
+   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
   return (
     <Box sx={{ fontFamily: FONT_FAMILY, background: "#f9fafb", minHeight: "100vh" }}>
       <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 10 }}>
@@ -44,7 +48,7 @@ const InvestFranchise = () => {
           <Typography
             align="center"
             color="#ffba00"
-            variant="h4"
+            variant={ isMobile ? "h5" : "h3"}
             fontWeight={700}
             sx={{ fontFamily: FONT_FAMILY, mb: 1, }}
           >
