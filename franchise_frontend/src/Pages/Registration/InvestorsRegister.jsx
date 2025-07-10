@@ -469,7 +469,7 @@ useEffect(() => {
   });
  const handleAddPreference = () => {
    const propertyType = watch("propertyType");
-       const isOwnProperty = propertyType === "own Property";
+  const isOwnProperty = propertyType === "Own Property";
 
     const pref = {
       category: selectedCategories,
@@ -495,11 +495,12 @@ useEffect(() => {
     !pref.preferredDistrict ||
     !pref.preferredCity ||
     !pref.propertyType ||
-    (isOwnProperty && (
-      !pref.propertySize ||
-      !pref.propertyCountry ||
-      !pref.propertyState ||
-      !pref.propertyCity
+    !pref.propertyType ||
+  (isOwnProperty && ( 
+    !pref.propertySize ||
+    !pref.propertyCountry ||
+    !pref.propertyState ||
+    !pref.propertyCity
     )))
      {
       showSnackbar("Please fill all preference fields before adding.", "error");
@@ -816,8 +817,9 @@ useEffect(() => {
     try {
       dispatch(showLoading());
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
+        
         // "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
+        "http://localhost:5000/api/v1/investor/createInvestor",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -2090,7 +2092,7 @@ flexDirection: isMobile ? "column" : "row",
                     error={!!errors.propertySize}
                     helperText={errors.propertySize?.message || " "}
                     sx={{
-                      '& .MuiOutlinedInput-root': {
+                      '& .MuiOutlinedInput-root': { 
                         borderRadius: '8px',
                       }
                     }}
