@@ -19,10 +19,10 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import { setFilters } from '../../Redux/Slices/brandSlice'; // Adjust the import path as needed
+// import { setFilters } from '../../Redux/Slices/brandSlice'; // Adjust the import path as needed
 
 const NavbarSearch = ({ open, handleClose }) => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const navigate = useNavigate();
   const [tab, setTab] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
