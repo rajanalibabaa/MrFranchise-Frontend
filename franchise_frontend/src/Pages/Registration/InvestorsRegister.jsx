@@ -55,6 +55,7 @@ import { InfoOutlined } from "@mui/icons-material";
 import FlagIcon from '@mui/icons-material/Flag';
 import Navbar from "../../Components/Navbar/NavBar";
 import Footer from "../../Components/Footers/Footer";
+import { API_BASE_URL } from "../../Api/api";
 
 
 const InvestorRegister = () => {
@@ -673,7 +674,7 @@ alert('Add Multiple preferences to get more offers from us!','info')
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otpverify/verify-otp",
+        `${ API_BASE_URL}/otpverify/verify-otp`,
         {
           identifier:
             type === "email"
@@ -820,7 +821,7 @@ useEffect(() => {
       const response = await axios.post(
        
         // "https://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
-        "http://localhost:5000/api/v1/investor/createInvestor",
+        `${ API_BASE_URL}/investor/createInvestor`,
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
