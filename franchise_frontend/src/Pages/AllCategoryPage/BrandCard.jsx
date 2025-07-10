@@ -20,7 +20,7 @@ import {
 } from '@mui/icons-material';
 import LoginPage from '../LoginPage/LoginPage';
 // import { openBrandDialog } from '../../Redux/Slices/brandSlice.jsx';
-import brandData from './BrandDetailsPage.jsx';
+// import brandData from './BrandDetailsPage.jsx';
 import {openBrandDialog} from "../../Hooks/Fetchbrands.jsx"
 import {postView} from '../../Utils/function/view.jsx'
 const BrandCard = ({

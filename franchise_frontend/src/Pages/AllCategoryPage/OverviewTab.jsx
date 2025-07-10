@@ -1163,55 +1163,129 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
       : [];
 
     const category = brand.franchiseDetails?.brandCategories || {};
-    const formattedChips = locations.map((loc, index) => ({
-      key: `${loc.state}-${loc.district}-${loc.city}-${index}`,
-      label: `${loc.city} - ${loc.district} - ${loc.state} - ${
-        category.main || ""
-      } - ${category.sub || ""} - ${category.child || ""}`,
+    const formattedChipsState = locations.map((loc, index) => ({
+      key: `${loc.state}-${index}`,
+      label: ` ${category.child || ""} franchise in-${loc.state}`,
     }));
-
+    const formattedChipsDistrict = locations.map((loc, index) => ({
+      key: `${loc.district}-${index}`,
+      label: ` ${category.child || ""} franchise in-${loc.district}`,
+    }));
+    const formattedChipsCity = locations.map((loc, index) => ({
+      key: `${loc.city}-${index}`,
+      label: ` ${category.child || ""} franchise in-${loc.city}`,
+    }));
+ 
     return (
       <Box
-        sx={{
-          border: "1px solid #e0e0e0",
-          borderRadius: "8px",
-          p: 1,
-          height: "150px", // Fixed height
-          overflowY: "auto", // Scrollable content
-        }}
-      >
-        {formattedChips.length > 0 ? (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            {formattedChips.map((chip) => (
-              <Typography
-                key={chip.key}
-                variant="caption"
-                sx={{
-                  display: "inline-block",
-                  // p: '4px 8px',
-                  // bgcolor: 'rgba(63, 81, 181, 0.1)',
-                  borderRadius: "4px",
-                  color: colors.dark,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {chip.label}
-              </Typography>
-            ))}
-          </Box>
-        ) : (
+  sx={{
+    border: "1px solid #e0e0e0",
+    borderRadius: "8px",
+    p: 2,
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",  // 👉 Creates 3 equal columns
+    gap: 2,
+    height: "90px",
+    overflowY: "auto",
+  }}
+>
+  {/* State Column */}
+  <Box>
+    {formattedChipsState.length > 0 ? (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        {formattedChipsState.map((chip) => (
           <Typography
-            variant="body2"
+            key={chip.key}
+            variant="caption"
             sx={{
-              color: "text.secondary",
-              textAlign: "center",
-              mt: 2,
+              borderRadius: "4px",
+              color: colors.dark,
+              whiteSpace: "nowrap",
             }}
           >
-            No locations available
+            {chip.label}
           </Typography>
-        )}
+        ))}
       </Box>
+    ) : (
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          textAlign: "center",
+          mt: 2,
+        }}
+      >
+        No locations available
+      </Typography>
+    )}
+  </Box>
+
+  {/* District Column */}
+  <Box>
+    {formattedChipsDistrict.length > 0 ? (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        {formattedChipsDistrict.map((chip) => (
+          <Typography
+            key={chip.key}
+            variant="caption"
+            sx={{
+              borderRadius: "4px",
+              color: colors.dark,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {chip.label}
+          </Typography>
+        ))}
+      </Box>
+    ) : (
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          textAlign: "center",
+          mt: 2,
+        }}
+      >
+        No locations available
+      </Typography>
+    )}
+  </Box>
+
+  {/* City Column */}
+  <Box>
+    {formattedChipsCity.length > 0 ? (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        {formattedChipsCity.map((chip) => (
+          <Typography
+            key={chip.key}
+            variant="caption"
+            sx={{
+              borderRadius: "4px",
+              color: colors.dark,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {chip.label}
+          </Typography>
+        ))}
+      </Box>
+    ) : (
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          textAlign: "center",
+          mt: 2,
+        }}
+      >
+        No locations available
+      </Typography>
+    )}
+  </Box>
+</Box>
+
     );
   };
 

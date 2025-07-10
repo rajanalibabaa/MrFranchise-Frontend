@@ -280,7 +280,7 @@ const BrandDetails = () => {
         }
 
         const response = await axios.post(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication`,
+          `https://localhost:5173/api/v1/instantapply/postApplication`,
           payload,
           {
             headers: {
