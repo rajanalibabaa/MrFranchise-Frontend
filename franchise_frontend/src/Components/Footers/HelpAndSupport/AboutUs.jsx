@@ -69,6 +69,7 @@ const AboutUs = () => {
                 fontFamily: FONT_FAMILY,
                 letterSpacing: 1,
                 mb: 2,
+                mt:1,
                 textShadow: "0 2px 8px rgba(255,186,0,0.08)"
               }}
             >

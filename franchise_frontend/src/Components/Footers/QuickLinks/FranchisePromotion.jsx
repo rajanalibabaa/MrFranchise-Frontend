@@ -100,9 +100,8 @@ const FranchisePromotion = () => {
             color: "#ff9800",
             textAlign: "center",
             letterSpacing: 1,
-            fontSize:{xs:23},
+            fontSize:{xs:23, sm:30},
             mb: 2,
-            fontSize:30,
             fontWeight:"bold",
             textShadow: "0 2px 12px #fffbe7"
           }}
