@@ -1,5 +1,7 @@
 import React from "react";
 import { Box, Typography, Paper, Button, Divider, Grid } from "@mui/material";
+import { Link as RouterLink } from 'react-router-dom';
+import {Link} from '@mui/material';
 import { motion } from "framer-motion";
 import Navbar from "../../Navbar/NavBar";
 import Footer from "../Footer";
@@ -70,7 +72,15 @@ const InvestFranchise = () => {
   >
         <Typography sx={{ fontFamily: FONT_FAMILY, mb: 3, fontSize: "1.1rem", color: "#333" }}>
           Franchise investment is one of the smartest, lowest-risk ways to enter
-          entrepreneurship — and MrFranchise.in is your trusted gateway to
+          entrepreneurship — and <Link
+              component={RouterLink}
+              to="/"
+              underline="hover"
+              color="black"
+              fontWeight="bold"
+            >
+              MrFranchise.in
+            </Link>{" "}.in is your trusted gateway to
           verified, high-potential franchise opportunities across Tamil Nadu and
           beyond. Whether you're a first-time investor, an NRI looking for
           income-based opportunities, or a professional planning to exit the 9–5

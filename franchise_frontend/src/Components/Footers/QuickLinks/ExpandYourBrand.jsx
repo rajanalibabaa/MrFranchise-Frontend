@@ -1,10 +1,12 @@
 import React from "react";
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Box,
   Typography,
   Grid,
   Container,
   Card,
+  Link,         
   CardContent,
   Button
 } from "@mui/material";
@@ -195,7 +197,15 @@ const ExpandYourBrand = () => {
             Are you running a successful business and ready to take it to the next level?
           </Typography>
           <Typography variant="body1" color="text.secondary" mt={1}>
-            At MrFranchise.in, we specialize in helping business owners expand their brand through franchising — strategically, professionally, and profitably. Whether you own a local outlet, a regional chain, or an emerging startup, we help you structure your model, position your brand, and attract serious investors across Tamil Nadu and beyond.
+            At <Link
+              component={RouterLink}
+              to="/"
+              underline="hover"
+              color="black"
+              fontWeight="bold"
+            >
+              MrFranchise.in
+            </Link>{" "}, we specialize in helping business owners expand their brand through franchising — strategically, professionally, and profitably. Whether you own a local outlet, a regional chain, or an emerging startup, we help you structure your model, position your brand, and attract serious investors across Tamil Nadu and beyond.
           </Typography>
         </Box>
 
