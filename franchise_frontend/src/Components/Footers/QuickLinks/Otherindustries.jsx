@@ -12,7 +12,7 @@ import {
   AccordionDetails,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
+import Navbar from "../../Navbar/NavBar";
 const Otherindustries = () => {
   const [formData, setFormData] = useState({
     name: "",
