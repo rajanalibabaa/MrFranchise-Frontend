@@ -73,70 +73,136 @@ function BrandList() {
 
   // Memoize filter options to prevent recalculation on every render
  // Updated filterOptions memoization
+// const filterOptions = useMemo(() => {
+//   if (!brands.length) return {};
+
+//   // Add unique keys to all array operations
+//   const availableCategories = [...new Set(
+//     brands.map(brand => brand.franchiseDetails?.brandCategories?.main)
+//   )].filter(Boolean);
+
+//   const availableSubCategories = [...new Set(
+//     brands.map(brand => brand.franchiseDetails?.brandCategories?.sub)
+//   )].filter(Boolean);
+
+//   const availableChildCategories = [...new Set(
+//     brands.map(brand => brand.franchiseDetails?.brandCategories?.child)
+//   )].filter(Boolean);
+
+//   const availableModelTypes = [...new Set(
+//     brands.flatMap(brand => 
+//       brand.franchiseDetails?.fico?.map(item => item.franchiseType) || []
+//     )
+//   )].filter(Boolean);
+
+//   const availableInvestmentRanges = [...new Set(
+//     brands.flatMap(brand => 
+//       brand.franchiseDetails?.fico?.map(item => item.investmentRange) || []
+//     )
+//   )].filter(Boolean);
+
+//   const locationData = brands.flatMap(brand => 
+//     brand.expansionLocationData?.expansionLocations.domestic?.locations || []
+//   );
+
+//   const availableStates = [...new Set(
+//     locationData.map(loc => loc.state)
+//   )].filter(Boolean);
+
+//   const availableDistricts = locationData.flatMap(loc => 
+//     loc.districts?.map(district => ({
+//       key: `${loc.state}-${district.district}`,
+//       district: district.district,
+//       state: loc.state
+//     })) || []
+//   ).filter(item => item.district);
+
+//   const availableCities = locationData.flatMap(loc => 
+//     loc.districts?.flatMap(district => 
+//       district.cities?.map(city => ({
+//         key: `${loc.state}-${district.district}-${city}`,
+//         city,
+//         district: district.district,
+//         state: loc.state
+//       })) || []
+//     ) || []
+//   ).filter(item => item.city);
+
+//   return {
+//     availableCategories,
+//     availableSubCategories,
+//     availableChildCategories,
+//     availableModelTypes,
+//     availableInvestmentRanges,
+//     availableStates,
+//     availableDistricts,
+//     availableCities
+//   };
+// }, [brands]);
+// Memoize filter options more efficiently
 const filterOptions = useMemo(() => {
   if (!brands.length) return {};
 
-  // Add unique keys to all array operations
-  const availableCategories = [...new Set(
-    brands.map(brand => brand.franchiseDetails?.brandCategories?.main)
-  )].filter(Boolean);
+  // Extract all unique values in a single pass through brands array
+  const categories = new Set();
+  const subCategories = new Set();
+  const childCategories = new Set();
+  const modelTypes = new Set();
+  const investmentRanges = new Set();
+  const states = new Set();
+  const districts = [];
+  const cities = [];
 
-  const availableSubCategories = [...new Set(
-    brands.map(brand => brand.franchiseDetails?.brandCategories?.sub)
-  )].filter(Boolean);
+  brands.forEach(brand => {
+    // Categories
+    if (brand.franchiseDetails?.brandCategories?.main) {
+      categories.add(brand.franchiseDetails.brandCategories.main);
+    }
+    if (brand.franchiseDetails?.brandCategories?.sub) {
+      subCategories.add(brand.franchiseDetails.brandCategories.sub);
+    }
+    if (brand.franchiseDetails?.brandCategories?.child) {
+      childCategories.add(brand.franchiseDetails.brandCategories.child);
+    }
 
-  const availableChildCategories = [...new Set(
-    brands.map(brand => brand.franchiseDetails?.brandCategories?.child)
-  )].filter(Boolean);
+    // FICO details
+    brand.franchiseDetails?.fico?.forEach(item => {
+      if (item.franchiseType) modelTypes.add(item.franchiseType);
+      if (item.investmentRange) investmentRanges.add(item.investmentRange);
+    });
 
-  const availableModelTypes = [...new Set(
-    brands.flatMap(brand => 
-      brand.franchiseDetails?.fico?.map(item => item.franchiseType) || []
-    )
-  )].filter(Boolean);
-
-  const availableInvestmentRanges = [...new Set(
-    brands.flatMap(brand => 
-      brand.franchiseDetails?.fico?.map(item => item.investmentRange) || []
-    )
-  )].filter(Boolean);
-
-  const locationData = brands.flatMap(brand => 
-    brand.expansionLocationData?.expansionLocations.domestic?.locations || []
-  );
-
-  const availableStates = [...new Set(
-    locationData.map(loc => loc.state)
-  )].filter(Boolean);
-
-  const availableDistricts = locationData.flatMap(loc => 
-    loc.districts?.map(district => ({
-      key: `${loc.state}-${district.district}`,
-      district: district.district,
-      state: loc.state
-    })) || []
-  ).filter(item => item.district);
-
-  const availableCities = locationData.flatMap(loc => 
-    loc.districts?.flatMap(district => 
-      district.cities?.map(city => ({
-        key: `${loc.state}-${district.district}-${city}`,
-        city,
-        district: district.district,
-        state: loc.state
-      })) || []
-    ) || []
-  ).filter(item => item.city);
+    // Location data
+    brand.expansionLocationData?.expansionLocations.domestic?.locations?.forEach(loc => {
+      if (loc.state) states.add(loc.state);
+      
+      loc.districts?.forEach(district => {
+        if (district.district) {
+          districts.push({
+            state: loc.state,
+            district: district.district
+          });
+        }
+        
+        district.cities?.forEach(city => {
+          cities.push({
+            state: loc.state,
+            district: district.district,
+            city
+          });
+        });
+      });
+    });
+  });
 
   return {
-    availableCategories,
-    availableSubCategories,
-    availableChildCategories,
-    availableModelTypes,
-    availableInvestmentRanges,
-    availableStates,
-    availableDistricts,
-    availableCities
+    availableCategories: Array.from(categories),
+    availableSubCategories: Array.from(subCategories),
+    availableChildCategories: Array.from(childCategories),
+    availableModelTypes: Array.from(modelTypes),
+    availableInvestmentRanges: Array.from(investmentRanges),
+    availableStates: Array.from(states),
+    availableDistricts: districts,
+    availableCities: cities
   };
 }, [brands]);
 
@@ -192,9 +258,32 @@ const filterOptions = useMemo(() => {
     }
   }, [recordViewMutation]);
 
-  const handleFilterChange = useCallback((name, value) => {
-    setFilters(prev => ({ ...prev, [name]: value }));
-  }, []);
+  // const handleFilterChange = useCallback((name, value) => {
+  //   setFilters(prev => ({ ...prev, [name]: value }));
+  // }, []);
+
+  // Optimized filter change handler
+const handleFilterChange = useCallback((name, value) => {
+  setFilters(prev => {
+    // Special handling for location filters to reset dependent filters
+    if (name === 'selectedState') {
+      return { 
+        ...prev, 
+        [name]: value,
+        selectedDistrict: '',
+        selectedCity: '' 
+      };
+    }
+    if (name === 'selectedDistrict') {
+      return { 
+        ...prev, 
+        [name]: value,
+        selectedCity: '' 
+      };
+    }
+    return { ...prev, [name]: value };
+  });
+}, []);
 
   const handleClearFilters = useCallback(() => {
     setFilters({
@@ -333,17 +422,30 @@ const filterOptions = useMemo(() => {
               },
             }}
           >
-            <Suspense fallback={<FilterPanelSkeleton />}>
-              <FilterPanel
-                filters={filters}
-                handleFilterChange={handleFilterChange}
-                handleClearFilters={handleClearFilters}
-                activeFilterCount={activeFilterCount}
-                {...filterOptions}
-                filteredBrands={filteredBrands}
-                brands={brands}
-              />
-            </Suspense>
+<Suspense fallback={<FilterPanelSkeleton />}>
+  <FilterPanel
+    key="filter-panel" // Add key to force remount when brands change
+    filters={filters}
+    onFilterChange={handleFilterChange}
+    onClearFilters={handleClearFilters}
+    activeFilterCount={activeFilterCount}
+    // Only pass necessary data
+    categories={filterOptions.availableCategories}
+    subCategories={filterOptions.availableSubCategories}
+    childCategories={filterOptions.availableChildCategories}
+    modelTypes={filterOptions.availableModelTypes}
+    investmentRanges={filterOptions.availableInvestmentRanges}
+    locationData={{
+      states: filterOptions.availableStates,
+      districts: filterOptions.availableDistricts,
+      cities: filterOptions.availableCities
+    }}
+    resultStats={{
+      showing: filteredBrands.length,
+      total: brands.length
+    }}
+  />
+</Suspense>
           </Box>
         )}
 
