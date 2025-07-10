@@ -304,7 +304,6 @@ const HomeBannerSec = () => {
       </Box>
     );
   };
-
   return (
     <>
  <Navbar/>
@@ -329,6 +328,7 @@ const HomeBannerSec = () => {
           overflow: "hidden",
           color: "white",
           minHeight: isMobile ? "95vh" : "40vh",
+                    maxHeight: isMobile ? "95vh" : "40vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -350,7 +350,6 @@ const HomeBannerSec = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            // background: 'radial-gradient(circle at 20% 50%, transparent 0%, rgba(0,0,0,0.7) 100%)',
             zIndex: 0,
           },
         }}

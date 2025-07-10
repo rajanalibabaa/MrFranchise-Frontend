@@ -38,13 +38,14 @@ import Navbar from "../../Navbar/NavBar";
 import Footer from "../Footer";
 
 const SectionDivider = ({ icon, label }) => (
-  <Box sx={{ display: "flex", alignItems: "center", mb: 4, mt: 6 }}>
+  <Box sx={{ display: "flex", alignItems: "center", flexDirection:"column", textAlign:"center",mb: 4, mt: 6 }}>
     <Divider sx={{ flexGrow: 1, borderColor: "#7ad03a" }} />
     <Box
       sx={{
         mx: 2,
         display: "flex",
         alignItems: "center",
+        justifyContent:"center",
         color: "inherit",
       }}
     >
@@ -55,7 +56,7 @@ const SectionDivider = ({ icon, label }) => (
       {/* Label text with dark color */}
       <Typography
         variant="h5"
-        sx={{ ml: 1, fontWeight: 600, color: "#ffba00" }}
+        sx={{ ml: 1, fontWeight:{xs:500, sm: 600}, color: "#ffba00" }}
       >
         {label}
       </Typography>
@@ -86,19 +87,30 @@ const AdvertiseWithUs = () => {
         >
           <Typography
             variant="h3"
-            mt={5}
+            mt={2}
+            mb={2}
             align="center"
             fontWeight="bold"
             color="#ffba00"
+            sx={{
+              fontSize:{
+                xs:"2.3rem"
+              }
+            }}
           >
             Advertise with MrFranchise.in
           </Typography>
           <Typography
             variant="h6"
             align="center"
-            color="#8e8e8e"
-            mb={3}
+            color="#7ad03a"
+            mb={5}
             fontWeight={300}
+            sx={{
+              fontSize:{
+                xs:"1.3rem"
+              }
+            }}
           >
             Reach Business Owners · Engage Serious Investors · Grow Your Brand
           </Typography>
@@ -112,10 +124,10 @@ const AdvertiseWithUs = () => {
         >
           {/* Free Listing Card */}
          <Grid
-  item
   xs={12}
   md={4}
-  sx={{ display: "flex", height: "80%", justifyContent: "center" }}
+
+  sx={{ display: "flex", height: "80%", justifyContent: "center" ,}}
 >
   <Box
     component={motion.div}
@@ -134,6 +146,7 @@ const AdvertiseWithUs = () => {
       sx={{
         textAlign: "center",
         p: 2,
+        //  mb:{xs:"30px"},
         flex: 1,
         display: "flex",
         flexDirection: "column",
@@ -406,11 +419,12 @@ const AdvertiseWithUs = () => {
           component={motion.div}
           variants={fadeInVariant}
           initial="hidden"
+        
           whileInView="visible"
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.4 }}
         >
-          <SectionDivider
+          <SectionDivider sx={{xs:{display:"flex", alignItems:"center"}}}
             icon={<CheckCircleOutline />}
             label="Why Advertise on MrFranchise.in?"
           />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -14,213 +14,241 @@ import {
   FormControlLabel,
   Checkbox,
   InputAdornment,
-} from "@mui/material";
-import { Clear as ClearIcon, Search as SearchIcon } from "@mui/icons-material";
+  CircularProgress
+} from '@mui/material';
+import { Clear as ClearIcon, Search as SearchIcon } from '@mui/icons-material';
 
 const FilterPanel = React.memo(({
   filters,
-  handleFilterChange,
-  handleClearFilters,
+  onFilterChange,
+  onClearFilters,
   activeFilterCount,
-  availableSubCategories = [],
-  availableChildCategories = [],
-  availableModelTypes = [],
-  availableStates = [],
-  availableDistricts = [],
-  availableCities = [],
-  availableInvestmentRanges = [],
-  filteredBrands = [],
-  brands = [],
+  categories = [],
+  subCategories = [],
+  childCategories = [],
+  modelTypes = [],
+  investmentRanges = [],
+  locationData = {},
+  resultStats = {},
+  isLoading = false
 }) => {
-  const [selectedSubCategory, setSelectedSubCategory] = useState(filters.selectedSubCategory || "");
-  const [selectedChildCategories, setSelectedChildCategories] = useState(filters.selectedChildCategory || []);
-  const [searchTermState, setSearchTermState] = useState("");
-  const [searchTermDistrict, setSearchTermDistrict] = useState("");
-  const [searchTermCity, setSearchTermCity] = useState("");
+  const [searchTerms, setSearchTerms] = useState({
+    subCategory: '',
+    modelType: '',
+    investmentRange: '',
+    state: '',
+    district: '',
+    city: ''
+  });
 
-  // Memoize filtered data to prevent unnecessary recalculations
-  const filteredChildCategories = useMemo(() => {
-    if (!selectedSubCategory) return [];
-    return availableChildCategories.filter(
-      (child) => child?.parentSubCategory === selectedSubCategory
+  // Memoized filtered options
+  const filteredSubCategories = useMemo(() => {
+    const term = searchTerms.subCategory.toLowerCase();
+    return subCategories.filter(sub => 
+      sub.toLowerCase().includes(term)
     );
-  }, [selectedSubCategory, availableChildCategories]);
+  }, [subCategories, searchTerms.subCategory]);
 
-  const filteredDistricts = useMemo(() => {
-    if (!filters.selectedState) return availableDistricts;
-    return availableDistricts.filter(
-      (district) => district.state === filters.selectedState
+  const filteredModelTypes = useMemo(() => {
+    const term = searchTerms.modelType.toLowerCase();
+    return modelTypes.filter(type => 
+      type.toLowerCase().includes(term)
     );
-  }, [filters.selectedState, availableDistricts]);
+  }, [modelTypes, searchTerms.modelType]);
 
-  const filteredCities = useMemo(() => {
-    if (!filters.selectedDistrict) return availableCities;
-    return availableCities.filter(
-      (city) => city.district === filters.selectedDistrict
+  const filteredInvestmentRanges = useMemo(() => {
+    const term = searchTerms.investmentRange.toLowerCase();
+    return investmentRanges.filter(range => 
+      range.toLowerCase().includes(term)
     );
-  }, [filters.selectedDistrict, availableCities]);
+  }, [investmentRanges, searchTerms.investmentRange]);
 
   const filteredStates = useMemo(() => {
-    if (!searchTermState) return availableStates;
-    const term = searchTermState.toLowerCase();
-    return availableStates.filter(state => 
+    const term = searchTerms.state.toLowerCase();
+    return locationData.states?.filter(state => 
       state.toLowerCase().includes(term)
-    )
-  }, [searchTermState, availableStates]);
+    ) || [];
+  }, [locationData.states, searchTerms.state]);
 
-  const filteredDistrictsForSearch = useMemo(() => {
-    if (!searchTermDistrict) return filteredDistricts;
-    const term = searchTermDistrict.toLowerCase();
-    return filteredDistricts.filter(district => 
-      district.district.toLowerCase().includes(term)
+  const filteredDistricts = useMemo(() => {
+    if (!filters.selectedState) return locationData.districts || [];
+    const term = searchTerms.district.toLowerCase();
+    return locationData.districts.filter(d => 
+      d.state === filters.selectedState && 
+      d.district.toLowerCase().includes(term)
     );
-  }, [searchTermDistrict, filteredDistricts]);
+  }, [filters.selectedState, locationData.districts, searchTerms.district]);
 
-  const filteredCitiesForSearch = useMemo(() => {
-    if (!searchTermCity) return filteredCities;
-    const term = searchTermCity.toLowerCase();
-    return filteredCities.filter(city => 
-      city.city.toLowerCase().includes(term)
+  const filteredCities = useMemo(() => {
+    if (!filters.selectedDistrict) return locationData.cities || [];
+    const term = searchTerms.city.toLowerCase();
+    return locationData.cities.filter(c => 
+      c.district === filters.selectedDistrict && 
+      c.city.toLowerCase().includes(term)
     );
-  }, [searchTermCity, filteredCities]);
+  }, [filters.selectedDistrict, locationData.cities, searchTerms.city]);
 
-  // Event handlers with useCallback to prevent unnecessary recreations
-  const handleSubCategoryChange = useCallback((event) => {
-    const value = event.target.value;
-    setSelectedSubCategory(value);
-    setSelectedChildCategories([]);
-    handleFilterChange("selectedSubCategory", value);
-    handleFilterChange("selectedChildCategory", []);
-  }, [handleFilterChange]);
+  const handleSearchChange = (field, value) => {
+    setSearchTerms(prev => ({ ...prev, [field]: value }));
+  };
 
-  const handleChildCategoryChange = useCallback((event) => {
-    const { value, checked } = event.target;
-    setSelectedChildCategories(prev => 
-      checked ? [...prev, value] : prev.filter(item => item !== value)
-    )
-  }, []);
+  const handleSubCategoryChange = (value) => {
+    onFilterChange('selectedSubCategory', value);
+    onFilterChange('selectedChildCategory', []);
+  };
 
-  // Sync child categories with filter change
-  useEffect(() => {
-    handleFilterChange("selectedChildCategory", selectedChildCategories);
-  }, [selectedChildCategories, handleFilterChange]);
+  const handleChildCategoryToggle = (value, checked) => {
+    const newSelection = checked
+      ? [...(filters.selectedChildCategory || []), value]
+      : (filters.selectedChildCategory || []).filter(item => item !== value);
+    onFilterChange('selectedChildCategory', newSelection);
+  };
 
-  // Sync local state with Redux filters
-  useEffect(() => {
-    setSelectedSubCategory(filters.selectedSubCategory || "");
-    setSelectedChildCategories(filters.selectedChildCategory || []);
-  }, [filters.selectedSubCategory, filters.selectedChildCategory]);
+  // Loading state
+  if (isLoading) {
+    return (
+      <Box sx={{ p: 2 }}>
+        {[...Array(6)].map((_, i) => (
+          <Box key={`skeleton-${i}`} sx={{ mb: 3 }}>
+            <Skeleton variant="text" width="40%" height={30} />
+            <Skeleton variant="rectangular" height={56} />
+          </Box>
+        ))}
+      </Box>
+    );
+  }
 
   return (
-    <Box
-      sx={{
-        pr: 2,
-        height: "calc(100vh - 120px)",
-        overflowY: "auto",
-        "&::-webkit-scrollbar": {
-          width: "6px",
-        },
-        "&::-webkit-scrollbar-track": {
-          background: "#f1f1f1",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          background: "lightgrey",
-          borderRadius: "3px",
-        },
-        "&::-webkit-scrollbar-thumb:hover": {
-          background: "#fb8c00",
-        },
-      }}
-    >
+    <Box sx={{ pr: 2, height: 'calc(100vh - 120px)', overflowY: 'auto' }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h6">Filters</Typography>
         <Button
           size="small"
-          onClick={handleClearFilters}
+          onClick={onClearFilters}
           disabled={activeFilterCount === 0}
           startIcon={<ClearIcon />}
-          sx={{ color: "#ff9800" }}
+          sx={{ color: '#ff9800' }}
         >
           Clear
         </Button>
       </Box>
 
+      {/* Search Input */}
       <TextField
         fullWidth
         variant="outlined"
         placeholder="Search brands..."
-        value={filters.searchTerm}
-        onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
+        value={filters.searchTerm || ''}
+        onChange={(e) => onFilterChange('searchTerm', e.target.value)}
         InputProps={{
-          startAdornment: <SearchIcon sx={{ mr: 1, color: "#ff9800" }} />,
+          startAdornment: <SearchIcon sx={{ mr: 1, color: '#ff9800' }} />,
         }}
         sx={{ mb: 3 }}
       />
-      
-      {/* Sub Category Radio Buttons */}
-      <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
+
+      {/* Sub Category Filter */}
+      <Typography gutterBottom sx={{ color: '#4caf50', fontWeight: 'bold' }}>
         Sub Category
       </Typography>
-      <FormControl component="fieldset" fullWidth sx={{ mb: 2 }}>
-        <RadioGroup
-          value={selectedSubCategory}
-          onChange={handleSubCategoryChange}
-        >
+      <TextField
+        fullWidth
+        size="small"
+        variant="outlined"
+        placeholder="Search sub categories..."
+        value={searchTerms.subCategory}
+        onChange={(e) => handleSearchChange('subCategory', e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon fontSize="small" />
+            </InputAdornment>
+          ),
+        }}
+        sx={{ mb: 1 }}
+      />
+      <RadioGroup
+        value={filters.selectedSubCategory || ''}
+        onChange={(e) => handleSubCategoryChange(e.target.value)}
+      >
+        <FormControlLabel
+          value=""
+          control={<Radio color="primary" />}
+          label="All Sub Categories"
+        />
+        {filteredSubCategories.map((subCategory) => (
           <FormControlLabel
-            value=""
+            key={`subcat-${subCategory}`}
+            value={subCategory}
             control={<Radio color="primary" />}
-            label="All Sub Categories"
+            label={subCategory}
           />
-          {availableSubCategories.map((subCategory) => (
-            <FormControlLabel
-              key={subCategory.id}
-              value={subCategory.id}
-              control={<Radio color="primary" />}
-              label={subCategory.name}
-            />
-          ))}
-        </RadioGroup>
-      </FormControl>
+        ))}
+      </RadioGroup>
 
-      {/* Child Categories Checkboxes */}
-      {selectedSubCategory && filteredChildCategories.length > 0 && (
+      {/* Child Categories (only shown when a subcategory is selected) */}
+      {filters.selectedSubCategory && childCategories.length > 0 && (
         <>
           <Divider sx={{ my: 2 }} />
-          <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
+          <Typography gutterBottom sx={{ color: '#4caf50', fontWeight: 'bold' }}>
             Child Categories
           </Typography>
-          <Box sx={{ maxHeight: 200, overflow: "auto" }}>
-            {filteredChildCategories.map((childCategory) => (
-              <FormControlLabel
-                key={childCategory.id}
-                control={
-                  <Checkbox
-                    checked={selectedChildCategories.includes(childCategory.id)}
-                    onChange={handleChildCategoryChange}
-                    value={childCategory.id}
-                    color="primary"
-                  />
-                }
-                label={childCategory.name}
-                sx={{ display: "block", ml: 1 }}
-              />
-            ))}
+          <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
+            {childCategories
+              .filter(child => child.parentSubCategory === filters.selectedSubCategory)
+              .map((childCategory) => (
+                <FormControlLabel
+                  key={`childcat-${childCategory.id}`}
+                  control={
+                    <Checkbox
+                      checked={(filters.selectedChildCategory || []).includes(childCategory.id)}
+                      onChange={(e) => handleChildCategoryToggle(childCategory.id, e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label={childCategory.name}
+                  sx={{ display: 'block', ml: 1 }}
+                />
+              ))}
           </Box>
         </>
       )}
 
-      {/* Model Type Select */}
+      {/* Model Type Filter */}
       <Divider sx={{ my: 2 }} />
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>Model Type</InputLabel>
         <Select
-          value={filters.selectedModelType || ""}
-          onChange={(e) => handleFilterChange("selectedModelType", e.target.value)}
+          value={filters.selectedModelType || ''}
+          onChange={(e) => onFilterChange('selectedModelType', e.target.value)}
           label="Model Type"
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: 300,
+              },
+            },
+          }}
         >
           <MenuItem value="">All Model Types</MenuItem>
-          {availableModelTypes.map((type) => (
-            <MenuItem key={type} value={type}>
+          <Box px={2} pb={1}>
+            <TextField
+              fullWidth
+              size="small"
+              variant="outlined"
+              placeholder="Search model types..."
+              value={searchTerms.modelType}
+              onChange={(e) => handleSearchChange('modelType', e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+          {filteredModelTypes.map((type) => (
+            <MenuItem key={`modeltype-${type}`} value={type}>
               {type}
             </MenuItem>
           ))}
@@ -229,22 +257,16 @@ const FilterPanel = React.memo(({
 
       {/* Location Filters */}
       <Divider sx={{ my: 2 }} />
-      <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
+      <Typography gutterBottom sx={{ color: '#4caf50', fontWeight: 'bold' }}>
         Location
       </Typography>
       
-      {/* State Select with Search */}
+      {/* State Filter */}
       <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>State</InputLabel>
         <Select
-          value={filters.selectedState || ""}
-          onChange={(e) => {
-            handleFilterChange("selectedState", e.target.value);
-            handleFilterChange("selectedDistrict", "");
-            handleFilterChange("selectedCity", "");
-            setSearchTermDistrict("");
-            setSearchTermCity("");
-          }}
+          value={filters.selectedState || ''}
+          onChange={(e) => onFilterChange('selectedState', e.target.value)}
           label="State"
           MenuProps={{
             PaperProps: {
@@ -254,17 +276,15 @@ const FilterPanel = React.memo(({
             },
           }}
         >
-          <MenuItem value="">
-            <em>All States</em>
-          </MenuItem>
+          <MenuItem value="">All States</MenuItem>
           <Box px={2} pb={1}>
             <TextField
               fullWidth
               size="small"
               variant="outlined"
               placeholder="Search states..."
-              value={searchTermState}
-              onChange={(e) => setSearchTermState(e.target.value)}
+              value={searchTerms.state}
+              onChange={(e) => handleSearchChange('state', e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -275,23 +295,19 @@ const FilterPanel = React.memo(({
             />
           </Box>
           {filteredStates.map((state) => (
-            <MenuItem key={state} value={state}>
+            <MenuItem key={`state-${state}`} value={state}>
               {state}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
 
-      {/* District Select with Search */}
+      {/* District Filter */}
       <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>District</InputLabel>
         <Select
-          value={filters.selectedDistrict || ""}
-          onChange={(e) => {
-            handleFilterChange("selectedDistrict", e.target.value);
-            handleFilterChange("selectedCity", "");
-            setSearchTermCity("");
-          }}
+          value={filters.selectedDistrict || ''}
+          onChange={(e) => onFilterChange('selectedDistrict', e.target.value)}
           label="District"
           disabled={!filters.selectedState}
           MenuProps={{
@@ -302,17 +318,15 @@ const FilterPanel = React.memo(({
             },
           }}
         >
-          <MenuItem value="">
-            <em>All Districts</em>
-          </MenuItem>
+          <MenuItem value="">All Districts</MenuItem>
           <Box px={2} pb={1}>
             <TextField
               fullWidth
               size="small"
               variant="outlined"
               placeholder="Search districts..."
-              value={searchTermDistrict}
-              onChange={(e) => setSearchTermDistrict(e.target.value)}
+              value={searchTerms.district}
+              onChange={(e) => handleSearchChange('district', e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -322,20 +336,23 @@ const FilterPanel = React.memo(({
               }}
             />
           </Box>
-          {filteredDistrictsForSearch.map((district) => (
-            <MenuItem key={district.district} value={district.district}>
+          {filteredDistricts.map((district) => (
+            <MenuItem 
+              key={`district-${district.state}-${district.district}`}
+              value={district.district}
+            >
               {district.district}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
 
-      {/* City Select with Search */}
+      {/* City Filter */}
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>City</InputLabel>
         <Select
-          value={filters.selectedCity || ""}
-          onChange={(e) => handleFilterChange("selectedCity", e.target.value)}
+          value={filters.selectedCity || ''}
+          onChange={(e) => onFilterChange('selectedCity', e.target.value)}
           label="City"
           disabled={!filters.selectedDistrict}
           MenuProps={{
@@ -346,17 +363,15 @@ const FilterPanel = React.memo(({
             },
           }}
         >
-          <MenuItem value="">
-            <em>All Cities</em>
-          </MenuItem>
+          <MenuItem value="">All Cities</MenuItem>
           <Box px={2} pb={1}>
             <TextField
               fullWidth
               size="small"
               variant="outlined"
               placeholder="Search cities..."
-              value={searchTermCity}
-              onChange={(e) => setSearchTermCity(e.target.value)}
+              value={searchTerms.city}
+              onChange={(e) => handleSearchChange('city', e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -366,29 +381,56 @@ const FilterPanel = React.memo(({
               }}
             />
           </Box>
-          {filteredCitiesForSearch.map((city) => (
-            <MenuItem key={city.city} value={city.city}>
+          {filteredCities.map((city) => (
+            <MenuItem 
+              key={`city-${city.district}-${city.city}`}
+              value={city.city}
+            >
               {city.city}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
 
-      {/* Investment Range */}
+      {/* Investment Range Filter */}
       <Divider sx={{ my: 2 }} />
-      <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
+      <Typography gutterBottom sx={{ color: '#4caf50', fontWeight: 'bold' }}>
         Investment Range
       </Typography>
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>Investment Range</InputLabel>
         <Select
-          value={filters.selectedInvestmentRange || ""}
-          onChange={(e) => handleFilterChange("selectedInvestmentRange", e.target.value)}
+          value={filters.selectedInvestmentRange || ''}
+          onChange={(e) => onFilterChange('selectedInvestmentRange', e.target.value)}
           label="Investment Range"
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: 300,
+              },
+            },
+          }}
         >
           <MenuItem value="">All Ranges</MenuItem>
-          {availableInvestmentRanges.map((range) => (
-            <MenuItem key={range} value={range}>
+          <Box px={2} pb={1}>
+            <TextField
+              fullWidth
+              size="small"
+              variant="outlined"
+              placeholder="Search investment ranges..."
+              value={searchTerms.investmentRange}
+              onChange={(e) => handleSearchChange('investmentRange', e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+          {filteredInvestmentRanges.map((range) => (
+            <MenuItem key={`range-${range}`} value={range}>
               {range}
             </MenuItem>
           ))}
@@ -397,8 +439,8 @@ const FilterPanel = React.memo(({
 
       {/* Results Count */}
       <Divider sx={{ my: 2 }} />
-      <Typography variant="body2" sx={{ color: "#4caf50", textAlign: "center" }}>
-        Showing {filteredBrands.length} of {brands.length} brands
+      <Typography variant="body2" sx={{ color: '#4caf50', textAlign: 'center' }}>
+        Showing {resultStats.showing} of {resultStats.total} brands
       </Typography>
     </Box>
   );

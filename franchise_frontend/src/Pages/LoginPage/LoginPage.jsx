@@ -114,7 +114,7 @@ function LoginPage({ open, onClose }) {
     }
   }, [otpRequestPayload, validateForm]);
 
-  const handleVerifyOtp = useCallback(async () => {
+const handleVerifyOtp = useCallback(async () => {
     if (!formData.otp) {
       setErrors((prev) => ({ ...prev, otp: "OTP is required" }));
       return;
@@ -140,6 +140,7 @@ function LoginPage({ open, onClose }) {
           })
         );
 
+        // Set auto logout timer
         const logoutTimestamp = localStorage.getItem("logoutTimestamp");
         const parsedLogoutTime = parseInt(logoutTimestamp, 10);
         const now = Date.now();
@@ -147,14 +148,17 @@ function LoginPage({ open, onClose }) {
         setTimeout(() => {
           dispatch(logout());
           navigate("/");
+          window.location.reload(); // Refresh on auto logout
         }, exitTime);
 
+        // Show success message
         setSnackbar({
           open: true,
           message: "Login successful! Redirecting...",
           severity: "success",
         });
 
+        // Handle post-login actions
         setTimeout(() => {
           onClose();
           setFormData({ username: "", otp: "" });
@@ -163,6 +167,13 @@ function LoginPage({ open, onClose }) {
           setTimer(30);
           setErrors({});
           navigate("/");
+          
+          // Refresh the window after navigation
+          window.location.reload(); // Full page refresh
+          
+          // Alternative: Soft refresh (if you don't want full reload)
+          // window.dispatchEvent(new Event('appRefresh')); 
+          // Then listen for this event in components that need to update
         }, 1000);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
@@ -173,7 +184,6 @@ function LoginPage({ open, onClose }) {
       setIsLoading(false);
     }
   }, [otpVerifyPayload, formData.otp, dispatch, navigate, onClose]);
-
   const handleSubmit = useCallback(
     (e) => {
       e.preventDefault();
