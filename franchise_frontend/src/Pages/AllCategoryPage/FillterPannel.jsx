@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import {
   Box,
   Typography,
@@ -14,8 +14,16 @@ import {
   FormControlLabel,
   Checkbox,
   InputAdornment,
+  CircularProgress,
+  Skeleton
 } from "@mui/material";
 import { Clear as ClearIcon, Search as SearchIcon } from "@mui/icons-material";
+
+// Lazy load heavy components
+// const LazySelect = React.lazy(() => import('LazySelect'));
+// <Suspense fallback={<div>Loading...</div>}>
+//   <LazySelect {...props} />
+// </Suspense>
 
 const FilterPanel = React.memo(({
   filters,
@@ -31,12 +39,16 @@ const FilterPanel = React.memo(({
   availableInvestmentRanges = [],
   filteredBrands = [],
   brands = [],
+  isLoading = false
 }) => {
   const [selectedSubCategory, setSelectedSubCategory] = useState(filters.selectedSubCategory || "");
   const [selectedChildCategories, setSelectedChildCategories] = useState(filters.selectedChildCategory || []);
   const [searchTermState, setSearchTermState] = useState("");
   const [searchTermDistrict, setSearchTermDistrict] = useState("");
   const [searchTermCity, setSearchTermCity] = useState("");
+  const [searchTermSubCategory, setSearchTermSubCategory] = useState("");
+  const [searchTermModelType, setSearchTermModelType] = useState("");
+  const [searchTermInvestmentRange, setSearchTermInvestmentRange] = useState("");
 
   // Memoize filtered data to prevent unnecessary recalculations
   const filteredChildCategories = useMemo(() => {
@@ -65,7 +77,7 @@ const FilterPanel = React.memo(({
     const term = searchTermState.toLowerCase();
     return availableStates.filter(state => 
       state.toLowerCase().includes(term)
-    )
+    );
   }, [searchTermState, availableStates]);
 
   const filteredDistrictsForSearch = useMemo(() => {
@@ -84,6 +96,30 @@ const FilterPanel = React.memo(({
     );
   }, [searchTermCity, filteredCities]);
 
+  const filteredSubCategories = useMemo(() => {
+    if (!searchTermSubCategory) return availableSubCategories;
+    const term = searchTermSubCategory.toLowerCase();
+    return availableSubCategories.filter(sub => 
+      sub.name.toLowerCase().includes(term)
+    );
+  }, [searchTermSubCategory, availableSubCategories]);
+
+  const filteredModelTypes = useMemo(() => {
+    if (!searchTermModelType) return availableModelTypes;
+    const term = searchTermModelType.toLowerCase();
+    return availableModelTypes.filter(type => 
+      type.toLowerCase().includes(term)
+    );
+  }, [searchTermModelType, availableModelTypes]);
+
+  const filteredInvestmentRanges = useMemo(() => {
+    if (!searchTermInvestmentRange) return availableInvestmentRanges;
+    const term = searchTermInvestmentRange.toLowerCase();
+    return availableInvestmentRanges.filter(range => 
+      range.toLowerCase().includes(term)
+    );
+  }, [searchTermInvestmentRange, availableInvestmentRanges]);
+
   // Event handlers with useCallback to prevent unnecessary recreations
   const handleSubCategoryChange = useCallback((event) => {
     const value = event.target.value;
@@ -97,7 +133,7 @@ const FilterPanel = React.memo(({
     const { value, checked } = event.target;
     setSelectedChildCategories(prev => 
       checked ? [...prev, value] : prev.filter(item => item !== value)
-    )
+    );
   }, []);
 
   // Sync child categories with filter change
@@ -110,6 +146,20 @@ const FilterPanel = React.memo(({
     setSelectedSubCategory(filters.selectedSubCategory || "");
     setSelectedChildCategories(filters.selectedChildCategory || []);
   }, [filters.selectedSubCategory, filters.selectedChildCategory]);
+
+  // Loading skeleton for better UX
+  if (isLoading) {
+    return (
+      <Box sx={{ pr: 2 }}>
+        {Array(6).fill().map((_, i) => (
+          <Box key={i} sx={{ mb: 3 }}>
+            <Skeleton variant="text" width="40%" height={30} />
+            <Skeleton variant="rectangular" height={56} />
+          </Box>
+        ))}
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -157,11 +207,27 @@ const FilterPanel = React.memo(({
         sx={{ mb: 3 }}
       />
       
-      {/* Sub Category Radio Buttons */}
+      {/* Sub Category Radio Buttons with Search */}
       <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
         Sub Category
       </Typography>
       <FormControl component="fieldset" fullWidth sx={{ mb: 2 }}>
+        <TextField
+          fullWidth
+          size="small"
+          variant="outlined"
+          placeholder="Search sub categories..."
+          value={searchTermSubCategory}
+          onChange={(e) => setSearchTermSubCategory(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ mb: 1 }}
+        />
         <RadioGroup
           value={selectedSubCategory}
           onChange={handleSubCategoryChange}
@@ -170,15 +236,18 @@ const FilterPanel = React.memo(({
             value=""
             control={<Radio color="primary" />}
             label="All Sub Categories"
+            key="all-sub-categories"
           />
-          {availableSubCategories.map((subCategory) => (
-            <FormControlLabel
-              key={subCategory.id}
-              value={subCategory.id}
-              control={<Radio color="primary" />}
-              label={subCategory.name}
-            />
-          ))}
+          <Suspense fallback={<CircularProgress size={20} />}>
+            {filteredSubCategories.map((subCategory) => (
+              <FormControlLabel
+                key={`subcat-${subCategory.id} || ${subCategory.name}`}
+                value={subCategory.id}
+                control={<Radio color="primary" />}
+                label={subCategory.name}
+              />
+            ))}
+          </Suspense>
         </RadioGroup>
       </FormControl>
 
@@ -190,26 +259,28 @@ const FilterPanel = React.memo(({
             Child Categories
           </Typography>
           <Box sx={{ maxHeight: 200, overflow: "auto" }}>
-            {filteredChildCategories.map((childCategory) => (
-              <FormControlLabel
-                key={childCategory.id}
-                control={
-                  <Checkbox
-                    checked={selectedChildCategories.includes(childCategory.id)}
-                    onChange={handleChildCategoryChange}
-                    value={childCategory.id}
-                    color="primary"
-                  />
-                }
-                label={childCategory.name}
-                sx={{ display: "block", ml: 1 }}
-              />
-            ))}
+            <Suspense fallback={<CircularProgress size={20} />}>
+              {filteredChildCategories.map((childCategory) => (
+                <FormControlLabel
+                  key={`childcat-${childCategory.id}`}
+                  control={
+                    <Checkbox
+                      checked={selectedChildCategories.includes(childCategory.id)}
+                      onChange={handleChildCategoryChange}
+                      value={childCategory.id}
+                      color="primary"
+                    />
+                  }
+                  label={childCategory.name}
+                  sx={{ display: "block", ml: 1 }}
+                />
+              ))}
+            </Suspense>
           </Box>
         </>
       )}
 
-      {/* Model Type Select */}
+      {/* Model Type Select with Search */}
       <Divider sx={{ my: 2 }} />
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>Model Type</InputLabel>
@@ -217,13 +288,39 @@ const FilterPanel = React.memo(({
           value={filters.selectedModelType || ""}
           onChange={(e) => handleFilterChange("selectedModelType", e.target.value)}
           label="Model Type"
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: 300,
+              },
+            },
+          }}
         >
           <MenuItem value="">All Model Types</MenuItem>
-          {availableModelTypes.map((type) => (
-            <MenuItem key={type} value={type}>
-              {type}
-            </MenuItem>
-          ))}
+          <Box px={2} pb={1}>
+            <TextField
+              fullWidth
+              size="small"
+              variant="outlined"
+              placeholder="Search model types..."
+              value={searchTermModelType}
+              onChange={(e) => setSearchTermModelType(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+          <Suspense fallback={<CircularProgress size={20} />}>
+            {filteredModelTypes.map((type) => (
+              <MenuItem key={`modeltype-${type}`} value={type}>
+    {type}
+  </MenuItem>
+            ))}
+          </Suspense>
         </Select>
       </FormControl>
 
@@ -255,7 +352,7 @@ const FilterPanel = React.memo(({
           }}
         >
           <MenuItem value="">
-            <em>All States</em>
+            {/* <em>All States</em> */}
           </MenuItem>
           <Box px={2} pb={1}>
             <TextField
@@ -274,11 +371,13 @@ const FilterPanel = React.memo(({
               }}
             />
           </Box>
-          {filteredStates.map((state) => (
-            <MenuItem key={state} value={state}>
-              {state}
-            </MenuItem>
-          ))}
+          <Suspense fallback={<CircularProgress size={20} />}>
+            {filteredStates.map((state) => (
+               <MenuItem key={`state-${state}`} value={state}>
+    {state}
+  </MenuItem>
+            ))}
+          </Suspense>
         </Select>
       </FormControl>
 
@@ -303,7 +402,7 @@ const FilterPanel = React.memo(({
           }}
         >
           <MenuItem value="">
-            <em>All Districts</em>
+            {/* <em>All Districts</em> */}
           </MenuItem>
           <Box px={2} pb={1}>
             <TextField
@@ -322,11 +421,16 @@ const FilterPanel = React.memo(({
               }}
             />
           </Box>
-          {filteredDistrictsForSearch.map((district) => (
-            <MenuItem key={district.district} value={district.district}>
-              {district.district}
-            </MenuItem>
-          ))}
+          <Suspense fallback={<CircularProgress size={20} />}>
+            {filteredDistrictsForSearch.map((district) => (
+           <MenuItem 
+    key={`district-${district.state}-${district.district}`}
+    value={district.district}
+  >
+    {district.district}
+  </MenuItem>
+            ))}
+          </Suspense>
         </Select>
       </FormControl>
 
@@ -347,7 +451,7 @@ const FilterPanel = React.memo(({
           }}
         >
           <MenuItem value="">
-            <em>All Cities</em>
+            {/* <em>All Cities</em> */}
           </MenuItem>
           <Box px={2} pb={1}>
             <TextField
@@ -366,15 +470,20 @@ const FilterPanel = React.memo(({
               }}
             />
           </Box>
-          {filteredCitiesForSearch.map((city) => (
-            <MenuItem key={city.city} value={city.city}>
-              {city.city}
-            </MenuItem>
-          ))}
+          <Suspense fallback={<CircularProgress size={20} />}>
+            {filteredCitiesForSearch.map((city) => (
+              <MenuItem 
+    key={`city-${city.district}-${city.city}`}
+    value={city.city}
+  >
+    {city.city}
+  </MenuItem>
+            ))}
+          </Suspense>
         </Select>
       </FormControl>
 
-      {/* Investment Range */}
+      {/* Investment Range with Search */}
       <Divider sx={{ my: 2 }} />
       <Typography gutterBottom sx={{ color: "#4caf50", fontWeight: "bold" }}>
         Investment Range
@@ -385,13 +494,39 @@ const FilterPanel = React.memo(({
           value={filters.selectedInvestmentRange || ""}
           onChange={(e) => handleFilterChange("selectedInvestmentRange", e.target.value)}
           label="Investment Range"
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: 300,
+              },
+            },
+          }}
         >
           <MenuItem value="">All Ranges</MenuItem>
-          {availableInvestmentRanges.map((range) => (
-            <MenuItem key={range} value={range}>
-              {range}
-            </MenuItem>
-          ))}
+          <Box px={2} pb={1}>
+            <TextField
+              fullWidth
+              size="small"
+              variant="outlined"
+              placeholder="Search investment ranges..."
+              value={searchTermInvestmentRange}
+              onChange={(e) => setSearchTermInvestmentRange(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+          <Suspense fallback={<CircularProgress size={20} />}>
+            {filteredInvestmentRanges.map((range) => (
+              <MenuItem key={`range-${range}`} value={range}>
+    {range}
+  </MenuItem>
+            ))}
+          </Suspense>
         </Select>
       </FormControl>
 

@@ -1,21 +1,72 @@
-// hooks/useBrands.js
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import{fetchBrands,fetchBrandById,recordBrandView,toggleBrandLike} from "../Api/Brands";
+import { fetchBrands, fetchBrandById, recordBrandView, toggleBrandLike } from "../Api/Brands";
 
-export const useBrands = () => {
+// Cache configuration
+const CACHE_TIME = 10 * 60 * 1000; // 10 minutes
+const STALE_TIME = 5 * 60 * 1000; // 5 minutes
+
+// Predefined selectors for optimized data access
+const brandSelectors = {
+  basicInfo: (brand) => ({
+    uuid: brand.uuid,
+    brandName: brand.brandDetails?.brandName,
+    logo: brand.brandDetails?.logo,
+    isLiked: brand.isLiked
+  }),
+  forFiltering: (brand) => ({
+    uuid: brand.uuid,
+    brandName: brand.brandDetails?.brandName,
+    categories: brand.franchiseDetails?.brandCategories,
+    locations: brand.expansionLocationData?.expansionLocations?.domestic?.locations || [],
+    investmentRanges: brand.franchiseDetails?.fico?.map(f => f.investmentRange) || []
+  }),
+  forListing: (brand) => ({
+    ...brandSelectors.basicInfo(brand),
+    description: brand.brandDetails?.description,
+    companyName: brand.brandDetails?.companyName,
+    investmentRange: brand.franchiseDetails?.fico?.[0]?.investmentRange
+  })
+};
+
+export const useBrands = (options = {}) => {
   return useQuery({
     queryKey: ["brands"],
     queryFn: fetchBrands,
-    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    staleTime: STALE_TIME,
+    cacheTime: CACHE_TIME,
+    select: (data) => {
+      // Apply selector if provided in options
+      if (options.selector) {
+        return data.map(options.selector);
+      }
+      return data;
+    },
+    ...options
   });
 };
 
-export const useBrand = (brandId) => {
+export const useBrand = (brandId, options = {}) => {
   return useQuery({
     queryKey: ["brand", brandId],
     queryFn: () => fetchBrandById(brandId),
-    enabled: !!brandId, // Only fetch if brandId exists
-    staleTime: 5 * 60 * 1000,
+    enabled: !!brandId,
+    staleTime: STALE_TIME,
+    cacheTime: CACHE_TIME,
+    ...options
+  });
+};
+
+export const useBrandsForFiltering = () => {
+  return useBrands({
+    selector: brandSelectors.forFiltering,
+    // Keep fresh data for filtering
+    staleTime: 2 * 60 * 1000 // 2 minutes
+  });
+};
+
+export const useBrandsForListing = () => {
+  return useBrands({
+    selector: brandSelectors.forListing
   });
 };
 
@@ -23,15 +74,12 @@ export const useToggleLike = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: api.toggleBrandLike,
+    mutationFn: toggleBrandLike,
     onMutate: async ({ brandId, isLiked }) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries(["brands"]);
       
-      // Snapshot previous value
       const previousBrands = queryClient.getQueryData(["brands"]);
       
-      // Optimistically update
       queryClient.setQueryData(["brands"], (old) => 
         old?.map(brand => 
           brand.uuid === brandId ? { ...brand, isLiked: !isLiked } : brand
@@ -41,13 +89,11 @@ export const useToggleLike = () => {
       return { previousBrands };
     },
     onError: (err, variables, context) => {
-      // Rollback on error
       if (context?.previousBrands) {
         queryClient.setQueryData(["brands"], context.previousBrands);
       }
     },
     onSettled: () => {
-      // Refresh data
       queryClient.invalidateQueries(["brands"]);
     }
   });
@@ -59,11 +105,12 @@ export const useRecordView = () => {
   });
 };
 
-// Filter function (same as your Redux version)
+// Optimized filter function using early returns and memoized selectors
 export const filterBrands = (brands, filters) => {
-  if (!brands) return [];
- return brands.filter(brand => {
-    // Search term filter
+  if (!brands || !Array.isArray(brands)) return [];
+  
+  return brands.filter(brand => {
+    // Search term filter (if present)
     if (filters.searchTerm) {
       const term = filters.searchTerm.toLowerCase();
       const brandName = brand.brandDetails?.brandName?.toLowerCase() || "";
@@ -77,7 +124,7 @@ export const filterBrands = (brands, filters) => {
       }
     }
     
-    // Category filters
+    // Category filters with early return
     if (filters.selectedCategory && 
         brand.franchiseDetails?.brandCategories?.main !== filters.selectedCategory) {
       return false;
@@ -95,65 +142,174 @@ export const filterBrands = (brands, filters) => {
     
     // Model type filter
     if (filters.selectedModelType) {
-      const fico = brand.franchiseDetails?.fico || [];
-      if (!fico.some(item => item.franchiseType === filters.selectedModelType)) {
-        return false;
-      }
+      const hasModelType = brand.franchiseDetails?.fico?.some(
+        item => item.franchiseType === filters.selectedModelType
+      );
+      if (!hasModelType) return false;
     }
     
-    // Location filters
+    // Location filters with optimized checking
     if (filters.selectedState || filters.selectedDistrict || filters.selectedCity) {
-      const domesticLocations = brand.expansionLocationData?.expansionLocations.domestic?.locations || [];
-      let hasMatchingLocation = false;
-      
-      for (const location of domesticLocations) {
+      const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
+      const hasLocation = locations.some(location => {
         // Check state match
         if (filters.selectedState && location.state !== filters.selectedState) {
-          continue;
+          return false;
         }
         
-        // If no district or city filter, any location in the state matches
-        if (!filters.selectedDistrict && !filters.selectedCity) {
-          hasMatchingLocation = true;
-          break;
+        // Check districts if needed
+        if (filters.selectedDistrict || filters.selectedCity) {
+          const districts = location.districts || [];
+          return districts.some(districtObj => {
+            // Check district match
+            if (filters.selectedDistrict && districtObj.district !== filters.selectedDistrict) {
+              return false;
+            }
+            
+            // Check city if needed
+            if (filters.selectedCity) {
+              const cities = districtObj.cities || [];
+              return cities.includes(filters.selectedCity);
+            }
+            
+            return true;
+          });
         }
         
-        // Check districts in this location
-        const districts = location.districts || [];
-        for (const districtObj of districts) {
-          // Check district match
-          if (filters.selectedDistrict && districtObj.district !== filters.selectedDistrict) {
-            continue;
-          }
-          
-          // If no city filter, any district in the state matches
-          if (!filters.selectedCity) {
-            hasMatchingLocation = true;
-            break;
-          }
-          
-          // Check cities in this district
-          const cities = districtObj.cities || [];
-          if (cities.includes(filters.selectedCity)) {
-            hasMatchingLocation = true;
-            break;
-          }
-        }
-        
-        if (hasMatchingLocation) break;
-      }
+        return true;
+      });
       
-      if (!hasMatchingLocation) return false;
+      if (!hasLocation) return false;
     }
     
     // Investment range filter
     if (filters.selectedInvestmentRange) {
-      const fico = brand.franchiseDetails?.fico || [];
-      if (!fico.some(item => item.investmentRange === filters.selectedInvestmentRange)) {
-        return false;
-      }
+      const hasInvestmentRange = brand.franchiseDetails?.fico?.some(
+        item => item.investmentRange === filters.selectedInvestmentRange
+      );
+      if (!hasInvestmentRange) return false;
     }
     
     return true;
   });
+};
+
+// Optimized version for large datasets
+export const fastFilterBrands = (brands, filters) => {
+  if (!brands || !Array.isArray(brands)) return [];
+  
+  // Convert filters to more efficient format
+  const {
+    searchTerm,
+    selectedCategory,
+    selectedSubCategory,
+    selectedChildCategory = [],
+    selectedModelType,
+    selectedState,
+    selectedDistrict,
+    selectedCity,
+    selectedInvestmentRange
+  } = filters;
+  
+  const searchTermLower = searchTerm?.toLowerCase();
+  
+  return brands.filter(brand => {
+    // Early exit if no match
+    if (searchTermLower) {
+      const brandName = brand.brandDetails?.brandName?.toLowerCase() || "";
+      if (!brandName.includes(searchTermLower)) {
+        const description = brand.brandDetails?.description?.toLowerCase() || "";
+        const companyName = brand.brandDetails?.companyName?.toLowerCase() || "";
+        if (!description.includes(searchTermLower) && !companyName.includes(searchTermLower)) {
+          return false;
+        }
+      }
+    }
+    
+    if (selectedCategory && brand.franchiseDetails?.brandCategories?.main !== selectedCategory) {
+      return false;
+    }
+    
+    if (selectedSubCategory && brand.franchiseDetails?.brandCategories?.sub !== selectedSubCategory) {
+      return false;
+    }
+    
+    if (selectedChildCategory.length > 0 && 
+        !selectedChildCategory.includes(brand.franchiseDetails?.brandCategories?.child)) {
+      return false;
+    }
+    
+    if (selectedModelType && 
+        !brand.franchiseDetails?.fico?.some(f => f.franchiseType === selectedModelType)) {
+      return false;
+    }
+    
+    if (selectedState || selectedDistrict || selectedCity) {
+      let hasLocation = false;
+      const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
+      
+      for (const location of locations) {
+        if (selectedState && location.state !== selectedState) continue;
+        
+        if (selectedDistrict || selectedCity) {
+          const districts = location.districts || [];
+          for (const district of districts) {
+            if (selectedDistrict && district.district !== selectedDistrict) continue;
+            
+            if (selectedCity) {
+              if (district.cities?.includes(selectedCity)) {
+                hasLocation = true;
+                break;
+              }
+            } else {
+              hasLocation = true;
+              break;
+            }
+          }
+        } else {
+          hasLocation = true;
+        }
+        
+        if (hasLocation) break;
+      }
+      
+      if (!hasLocation) return false;
+    }
+    
+    if (selectedInvestmentRange && 
+        !brand.franchiseDetails?.fico?.some(f => f.investmentRange === selectedInvestmentRange)) {
+      return false;
+    }
+    
+    return true;
+  });
+};
+
+export const openBrandDialog = (brand) => {
+  // Use sessionStorage instead of localStorage for automatic cleanup
+  const storageKey = `brand-${brand.uuid}`;
+  try {
+    sessionStorage.setItem(storageKey, JSON.stringify(brand));
+    
+    const newWindow = window.open(`/brands/${brand.uuid}`, '_blank');
+    
+    if (newWindow) {
+      // Add cleanup handler
+      const cleanup = () => sessionStorage.removeItem(storageKey);
+      newWindow.addEventListener('beforeunload', cleanup);
+      
+      // Fallback cleanup if window is closed without beforeunload
+      setTimeout(() => {
+        if (newWindow.closed) {
+          cleanup();
+        }
+      }, 1000);
+    }
+    
+    return newWindow;
+  } catch (e) {
+    console.error('Failed to open brand dialog:', e);
+    // Fallback to regular navigation if popup is blocked
+    window.location.href = `/brands/${brand.uuid}`;
+  }
 };
