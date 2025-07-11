@@ -1,24 +1,31 @@
 // api/brands.js
 import axios from "axios"
-// import {API_BASE_URL} from "./api";
+import { api } from "./api";
+import {API_BASE_URL} from "./api";
 
 const getAuthHeader = () => {
   const token = localStorage.getItem("accessToken");
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID")
+
+console.log("ID :",id)
 export const fetchBrands = async () => {
   const headers = {
     "Content-Type": "application/json",
     ...getAuthHeader()
   };
   
-  const url =  
-    // ? `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`
-     `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing`;
+  let url = `${api.allBrandsApi.get.defaultBrands}`
+
+    if (id) {
+      url = `${api.allBrandsApi.get.likeAndUnlikeBrands}/${id}`
+    }
+    
     
   const response = await axios.get(url, { headers });
-  console.log("Fetched Brands:", response.data.data);
+  console.log("Fetched Brands   ooo:", response.data.data);
   return response.data.data;
 };
 
