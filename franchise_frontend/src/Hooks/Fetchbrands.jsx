@@ -41,6 +41,9 @@ export const useBrands = (options = {}) => {
       }
       return data;
     },
+    onError: (error) => {
+      console.error("Failed to fetch brand:", error);
+    },
     ...options
   });
 };
@@ -52,6 +55,7 @@ export const useBrand = (brandId, options = {}) => {
     enabled: !!brandId,
     staleTime: STALE_TIME,
     cacheTime: CACHE_TIME,
+    
     ...options
   });
 };
