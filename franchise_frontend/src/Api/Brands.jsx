@@ -10,7 +10,6 @@ const getAuthHeader = () => {
 
 const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID")
 
-console.log("ID :",id)
 export const fetchBrands = async () => {
   const headers = {
     "Content-Type": "application/json",
@@ -46,7 +45,7 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
 
   if (!isLiked) {
     await axios.post(
-      `https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands`,
+      `${api.likeApi.post}`,
       { branduuid: brandId },
       { headers }
     );
