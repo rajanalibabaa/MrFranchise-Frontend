@@ -1,5 +1,5 @@
 import axios from "axios";
-import { api } from "../../api/api";
+import { api } from "../../Api/api.jsx";
 
 const token = localStorage.getItem("accessToken");
 const id = localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID");

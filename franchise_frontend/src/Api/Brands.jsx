@@ -31,7 +31,7 @@ export const fetchBrands = async () => {
 
 export const fetchBrandById = async (brandId) => {
   const response = await axios.get(
-    `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingById/${brandId}`,
+    `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingByUUID/${brandId}`,
     { headers: { "Content-Type": "application/json" } }
   );
   return response.data.data;

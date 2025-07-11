@@ -213,18 +213,18 @@ const brandSlice = createSlice({
       };
       state.filteredData = state.data;
     },
-    openBrandDialog: (state, action) => {
-      state.openDialog = true;
-      state.selectedBrand = action.payload;
-      const newWindow = window.open(`/brands/${action.payload.uuid}?`, '_blank');
-      localStorage.setItem(`brand-${action.payload.uuid}`, JSON.stringify(action.payload));
-     viewID = action.payload.uuid
-      if (newWindow) {
-        newWindow.onbeforeunload = () => {
-          localStorage.removeItem(`brand-${action.payload.uuid}`);
-        };
-      }
-    },
+    // openBrandDialog: (state, action) => {
+    //   state.openDialog = true;
+    //   state.selectedBrand = action.payload;
+    //   const newWindow = window.open(`/brands/${action.payload.uuid}?`, '_blank');
+    //   localStorage.setItem(`brand-${action.payload.uuid}`, JSON.stringify(action.payload));
+    //  viewID = action.payload.uuid
+    //   if (newWindow) {
+    //     newWindow.onbeforeunload = () => {
+    //       localStorage.removeItem(`brand-${action.payload.uuid}`);
+    //     };
+    //   }
+    // },
     closeBrandDialog: (state) => {
       state.openDialog = false;
       state.selectedBrand = null;

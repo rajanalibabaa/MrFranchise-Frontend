@@ -35,15 +35,14 @@ import {
   ArrowForward,
   Phone,
 } from "@mui/icons-material";
-import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
-import { fetchBrands } from "../../Redux/Slices/brandSlice.jsx";
+import { useBrand } from "../../Hooks/Fetchbrands.jsx";
 import axios from "axios";
 import OverviewTab from "./OverviewTab.jsx";
 import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 
-const BrandDetails = () => {
+const BrandDetails = ({ brandData }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -74,10 +73,11 @@ const BrandDetails = () => {
     readyToInvest: "",
   });
 
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+  
   const { uuid } = useParams();
-  const { selectedBrand } = useSelector((state) => state.brands);
+  // const { selectedBrand } = useSelector((state) => state.brands);
+  const selectedBrand = brandData || {};
+ 
 
   // Get investor data from localStorage with caching
   const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
@@ -123,7 +123,9 @@ const BrandDetails = () => {
     
     const fetchBrand = async () => {
       try {
-        await dispatch(fetchBrands(uuid)).unwrap();
+        await useBrand(uuid).unwrap();
+        // If brand is not found, redirect to brands page
+
       } catch (error) {
         console.error("Failed to fetch brand details:", error);
       }
@@ -132,7 +134,7 @@ const BrandDetails = () => {
     fetchBrand();
     
     return () => controller.abort();
-  }, [uuid, dispatch]);
+  }, [uuid,]);
 
   // Fetch investor data on mount if logged in (with caching)
   useEffect(() => {
