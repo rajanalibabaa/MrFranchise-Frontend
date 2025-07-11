@@ -31,7 +31,7 @@ export const fetchBrands = async () => {
 
 export const fetchBrandById = async (brandId) => {
   const response = await axios.get(
-    `http://localhost:5000/api/v1/brandlisting/getBrandListingById/${brandId}`,
+    `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingById/${brandId}`,
     { headers: { "Content-Type": "application/json" } }
   );
   return response.data.data;
@@ -46,7 +46,7 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
 
   if (!isLiked) {
     await axios.post(
-      `http://localhost:5000/api/v1/like/post-favbrands`,
+      `https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands`,
       { branduuid: brandId },
       { headers }
     );
@@ -62,7 +62,7 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
 export const recordBrandView = async (brandID) => {
   const id = localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID");
   const response = await axios.post(
-    `http://localhost:5000/api/v1/view/postViewBrands/${id}`,
+    `https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
     { brandID },
     { headers: { ...getAuthHeader(), "Content-Type": "application/json" } }
   );
