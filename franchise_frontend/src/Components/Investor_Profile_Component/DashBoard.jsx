@@ -27,6 +27,7 @@ import { useSelector, useDispatch } from "react-redux";
 // import { openBrandDialog } from "../../Redux/Slices/brandSlice.jsx";
 // import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog.jsx";
 import img from "../../assets/images/brandLogo.jpg";
+import { api } from "../../Api/api";
 
 const Dashboard = ({ selectedSection, sectionContent }) => {
   const theme = useTheme();
@@ -49,64 +50,112 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
+  console.log(investorUUID)
+
+  
   useEffect(() => {
-    if (!investorUUID || !AccessToken) return;
+  if (!investorUUID || !AccessToken) {
+    console.warn("Missing investorUUID or AccessToken");
+    return;
+  }
 
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        const endpoints = [
-          `https://franchise-backend-wgp6.onrender.com/api/v1/like/get-favbrands/${investorUUID}`,
-          `https://franchise-backend-wgp6.onrender.com/api/v1/view/getAllViewBrandByID/${investorUUID}`,
-          `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/getInstaApplyById/${investorUUID}`,
-          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`
-        ];
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      const endpoints = [
+        `${api.likeApi.get}/${investorUUID}`,
+        `${api.viewApi.get.getAllViewBrandByID}/${investorUUID}`,
+        `${api.instantApplyApi.get.getInstaApplyById}/${investorUUID}`,
+        `${api.user.get.investor}/${investorUUID}`
+      ];
 
-        const requests = endpoints.map(endpoint => 
-          axios.get(endpoint, {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${AccessToken}`,
+      const requests = endpoints.map((endpoint, index) => 
+        axios.get(endpoint, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+          timeout: 10000
+        })
+        .then(response => {
+          // Handle user endpoint differently (returns object not array)
+          if (index === 3) { // user endpoint is 4th in array
+            return {
+              ...response,
+              data: {
+                ...response.data,
+                data: response.data.data || null // Keep as object/null for user data
+              }
+            };
+          }
+          // For other endpoints (likes, views, applications)
+          return {
+            ...response,
+            data: {
+              ...response.data,
+              data: Array.isArray(response.data?.data) ? response.data.data : []
             }
-          })
-        );
+          };
+        })
+        .catch(error => {
+          if (error.response?.status === 404) {
+            return { 
+              data: { 
+                data: index === 3 ? null : [] // null for user, [] for others
+              } 
+            };
+          }
+          return { data: { data: index === 3 ? null : [] } };
+        })
+      );
 
-        const [likedRes, viewedRes, appliedRes, userRes] = await Promise.all(requests);
+      const [likedRes, viewedRes, appliedRes, userRes] = await Promise.all(requests);
 
-        // Process responses
-        const likedData = likedRes.data?.data || [];
-        const viewedData = viewedRes.data?.data || [];
-        const appliedData = appliedRes.data?.data || [];
-        
-        setLikedBrands(likedData);
-        setViewedBrands(viewedData);
-        setAppliedBrands(appliedData);
-        setUserData(userRes.data?.data || null);
+      // Process responses
+      const likedData = likedRes?.data?.data || [];
+      const viewedData = viewedRes?.data?.data || [];
+      const appliedData = appliedRes?.data?.data || [];
+      const userData = userRes?.data?.data || null;
 
-        // Initialize liked states
-        const initialLiked = {};
-        likedData.forEach(item => {
-          initialLiked[item.uuid] = true;
-        });
-        setLikedStates(initialLiked);
+      // Update state
+      setLikedBrands(likedData);
+      setViewedBrands(viewedData);
+      setAppliedBrands(appliedData);
+      setUserData(userData);
 
-        // Update stats
-        setStats({
-          totalViews: viewedData.length,
-          totalLikes: likedData.length,
-          totalApplications: appliedData.length
-        });
+      // Initialize liked states
+      const initialLiked = {};
+      likedData.forEach(item => item?.uuid && (initialLiked[item.uuid] = true));
+      setLikedStates(initialLiked);
 
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      // Update stats
+      setStats({
+        totalViews: viewedData.length,
+        totalLikes: likedData.length,
+        totalApplications: appliedData.length
+      });
 
-    fetchData();
-  }, [investorUUID, AccessToken]);
+    } catch (error) {
+      console.error("Error in fetchData:", error);
+      // Reset states on error
+      setLikedBrands([]);
+      setViewedBrands([]);
+      setAppliedBrands([]);
+      setUserData(null);
+      setStats({
+        totalViews: 0,
+        totalLikes: 0,
+        totalApplications: 0
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, [investorUUID, AccessToken]);
+
 
   const toggleLike = async (brandId) => {
     try {
@@ -118,7 +167,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       setStats(prev => ({ ...prev, totalLikes: prev.totalLikes - 1 }));
 
       await axios.delete(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${investorUUID}`,
+        `${api.likeApi.delete}/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -144,7 +193,7 @@ const Dashboard = ({ selectedSection, sectionContent }) => {
       setStats(prev => ({ ...prev, totalViews: prev.totalViews - 1 }));
 
       await axios.delete(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/view/deleteViewBrandByID/${investorUUID}`,
+        `${api.viewApi.delete}/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -326,8 +375,8 @@ const renderStatCard = (icon, title, value, color) => {
           <CardMedia
             component="img"
             height="160"
-            image={item.brandDetails?.brandLogo?.[0] || img}
-            alt={item.personalDetails?.brandName || "Brand Image"}
+            image={item.uploads?.brandLogo?.[0] || img}
+            alt={item.brandDetails?.brandName || "Brand Image"}
             sx={{ objectFit: 'cover' }}
           />
           
@@ -368,7 +417,7 @@ const renderStatCard = (icon, title, value, color) => {
 
         <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
           <Typography gutterBottom variant="h6" component="div" fontWeight={600} noWrap>
-            {item.personalDetails?.brandName || "Unnamed Brand"}
+            {item.brandDetails?.brandName || "Unnamed Brand"}
           </Typography>
           
           {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (

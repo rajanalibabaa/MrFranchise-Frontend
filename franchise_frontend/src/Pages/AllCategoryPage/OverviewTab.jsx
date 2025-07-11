@@ -252,7 +252,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
       const id = investorUUID || brandUUID;
 
       const response = await axios.post(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication/${id}`,
+        `http://localhost:5000/api/v1/instantapply/postApplication/${id}`,
         payload,
         {
           headers: {
