@@ -49,7 +49,7 @@ const FeedBack = () => {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/feedback/createFeedback",
+        "http://localhost:5000/api/feedback/createFeedback",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
