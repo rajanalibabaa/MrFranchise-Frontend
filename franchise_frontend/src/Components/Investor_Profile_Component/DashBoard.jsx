@@ -359,7 +359,7 @@ const renderBrandCard = (item, type) => {
       width: '200px',
       height: '100%',
       display: "flex",
-      flexDirection: "column",
+       flexDirection: "column",
       
       borderRadius: 3,
       overflow: 'hidden',
