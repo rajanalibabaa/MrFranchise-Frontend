@@ -22,8 +22,8 @@ export const getApiBaseUrl = async () => {
 };
 
 // Option 2: Use static API based on environment (simple & fast)
-export const API_BASE_URL = 
-  import.meta.env.MODE === "development" ? LOCAL_API : RENDER_API;
+export const API_BASE_URL = "https://franchise-backend-wgp6.onrender.com/api/v1";
+  // import.meta.env.MODE === "development" ? LOCAL_API : RENDER_API;
 
 
 
