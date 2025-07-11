@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
@@ -20,8 +20,6 @@ import {
   DialogActions,
   useTheme,
   useMediaQuery,
-  Stack,
-  Chip,
   TableContainer,
   Table,
   TableHead,
@@ -31,30 +29,17 @@ import {
 } from "@mui/material";
 import {
   Close,
-  Description as DescriptionIcon,
-  CheckCircleOutline,
-  Business as BusinessIcon,
+  Description,
+  Business,
   ArrowBack,
   ArrowForward,
   Phone,
-  Email,
-  FavoriteBorder,
-  BookmarkBorder,
-  Share,
-  Person,
-  Language,
-  Instagram,
 } from "@mui/icons-material";
 import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
-import {
-  closeBrandDialog,
-  fetchBrands,
-} from "../../Redux/Slices/brandSlice.jsx";
+import { fetchBrands } from "../../Redux/Slices/brandSlice.jsx";
 import axios from "axios";
-import ShareDialogActions from "./ShareDialogActions.jsx";
 import OverviewTab from "./OverviewTab.jsx";
-import { ShieldCloseIcon } from "lucide-react";
 import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 
@@ -63,27 +48,19 @@ const BrandDetails = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
-  const [selectedMedia, setSelectedMedia] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // State management
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [userData, setUserData] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openContactModal, setOpenContactModal] = useState(false);
-
-  const handleOpenContact = () => setOpenContactModal(true);
-  const handleCloseContact = () => setOpenContactModal(false);
-
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { uuid } = useParams();
-  const { selectedBrand } = useSelector((state) => state.brands);
-
-  const investorUUID = localStorage.getItem("investorUUID");
-  const AccessToken = localStorage.getItem("accessToken");
+  const [userData, setUserData] = useState(null);
+  const [locationData, setLocationData] = useState({
+    states: [],
+    districts: [],
+    cities: [],
+  });
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -97,53 +74,81 @@ const BrandDetails = () => {
     readyToInvest: "",
   });
 
-  const [locationData, setLocationData] = useState({
-    states: [],
-    districts: [],
-    cities: [],
-  });
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { uuid } = useParams();
+  const { selectedBrand } = useSelector((state) => state.brands);
 
-  const toggleDrawer = (open) => (event) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
+  // Get investor data from localStorage with caching
+  const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
+  const AccessToken = useMemo(() => localStorage.getItem("accessToken"), []);
+
+  // Memoized API calls
+  const fetchInvestorDetails = useCallback(async () => {
+    if (!investorUUID || !AccessToken) return;
+    
+    try {
+      const response = await axios.get(
+        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+          signal: AbortSignal.timeout(5000) // Add timeout
+        }
+      );
+      
+      if (response.data?.data) {
+        setUserData(response.data.data);
+        setFormData(prev => ({
+          ...prev,
+          fullName: response.data.data.firstName || "",
+          investorEmail: response.data.data.email || "",
+          mobileNumber: response.data.data.mobileNumber || "",
+        }));
+      }
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        console.error("Failed to fetch investor details:", error);
+      }
     }
-    setDrawerOpen(open);
-  };
+  }, [investorUUID, AccessToken]);
 
-  const investmentRanges = React.useMemo(
-    () => [
-      ...new Set(
-        selectedBrand?.franchiseDetails?.fico?.map((m) => m.investmentRange) ||
-          []
-      ),
-    ],
-    [selectedBrand]
-  );
+  // Fetch brand data with error handling
+  useEffect(() => {
+    if (!uuid) return;
 
-  const investmentTimings = React.useMemo(
-    () => ["Immediately", "1 - 3 Months", "3 - 6 Months", "6 + Months"],
-    []
-  );
+    const controller = new AbortController();
+    
+    const fetchBrand = async () => {
+      try {
+        await dispatch(fetchBrands(uuid)).unwrap();
+      } catch (error) {
+        console.error("Failed to fetch brand details:", error);
+      }
+    };
 
-  const readyToInvestOptions = React.useMemo(
-    () => ["Own Investment", "Going To Loan", "Need Loan Assistance"],
-    []
-  );
+    fetchBrand();
+    
+    return () => controller.abort();
+  }, [uuid, dispatch]);
+
+  // Fetch investor data on mount if logged in (with caching)
+  useEffect(() => {
+    if (investorUUID && AccessToken) {
+      const controller = new AbortController();
+      fetchInvestorDetails();
+      return () => controller.abort();
+    }
+  }, [fetchInvestorDetails, investorUUID, AccessToken]);
 
   // Extract location data from brand
   useEffect(() => {
-    if (
-      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
-        ?.locations
-    ) {
-      const locations =
-        selectedBrand.expansionLocationData.expansionLocations.domestic
-          .locations;
-      const states = locations.map((loc) => loc.state).filter(Boolean);
-      setLocationData((prev) => ({
+    if (selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
+      const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
+      const states = [...new Set(locations.map((loc) => loc.state).filter(Boolean))];
+      setLocationData(prev => ({
         ...prev,
         states,
         districts: [],
@@ -154,22 +159,16 @@ const BrandDetails = () => {
 
   // Update districts when state changes
   useEffect(() => {
-    if (
-      formData.state &&
-      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
-        ?.locations
-    ) {
-      const locations =
-        selectedBrand.expansionLocationData.expansionLocations.domestic
-          .locations;
+    if (formData.state && selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
+      const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
       const stateObj = locations.find((loc) => loc.state === formData.state);
-      const districts = stateObj?.districts?.map((d) => d.district) || [];
-      setLocationData((prev) => ({
+      const districts = [...new Set(stateObj?.districts?.map((d) => d.district) || [])];
+      setLocationData(prev => ({
         ...prev,
         districts,
         cities: [],
       }));
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         district: "",
         city: "",
@@ -179,135 +178,136 @@ const BrandDetails = () => {
 
   // Update cities when district changes
   useEffect(() => {
-    if (
-      formData.state &&
-      formData.district &&
-      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
-        ?.locations
-    ) {
-      const locations =
-        selectedBrand.expansionLocationData.expansionLocations.domestic
-          .locations;
+    if (formData.state && formData.district && selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
+      const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
       const stateObj = locations.find((loc) => loc.state === formData.state);
-      const districtObj = stateObj?.districts?.find(
-        (d) => d.district === formData.district
-      );
-      const cities = districtObj?.cities || [];
-      setLocationData((prev) => ({
+      const districtObj = stateObj?.districts?.find((d) => d.district === formData.district);
+      const cities = [...new Set(districtObj?.cities || [])];
+      setLocationData(prev => ({
         ...prev,
         cities,
       }));
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         city: "",
       }));
     }
   }, [formData.district, formData.state, selectedBrand]);
 
-  // Media data
-  const allVideos = React.useMemo(
+  // Memoized derived data for better performance
+  const investmentRanges = useMemo(() => [
+    ...new Set(selectedBrand?.franchiseDetails?.fico?.map((m) => m.investmentRange) || [])
+  ], [selectedBrand]);
+
+  const investmentTimings = useMemo(() => 
+    ["Immediately", "1 - 3 Months", "3 - 6 Months", "6 + Months"],
+    []
+  );
+
+  const readyToInvestOptions = useMemo(() => 
+    ["Own Investment", "Going To Loan", "Need Loan Assistance"],
+    []
+  );
+
+  const allVideos = useMemo(
     () => selectedBrand?.uploads?.franchisePromotionVideo || [],
     [selectedBrand]
   );
 
-  const allImages = React.useMemo(
+  const allImages = useMemo(
     () => [
-      ...(selectedBrand?.uploads?.brandLogo
-        ? [selectedBrand.uploads.brandLogo]
-        : []),
+      ...(selectedBrand?.uploads?.brandLogo ? [selectedBrand.uploads.brandLogo] : []),
       ...(selectedBrand?.uploads?.exteriorOutlet || []),
       ...(selectedBrand?.uploads?.interiorOutlet || []),
     ],
     [selectedBrand]
   );
 
-  // Image box sizes based on screen size
-  const getImageBoxSize = () => {
+  const getImageBoxSize = useCallback(() => {
     if (isMobile) return 100;
     if (isTablet) return 150;
     return 204;
-  };
+  }, [isMobile, isTablet]);
 
-  // Fetch brand data
-  useEffect(() => {
-    if (uuid) {
-      dispatch(fetchBrands(uuid));
+  const getOutletRange = useCallback((value) => {
+    const numericValue = Number(value);
+    if (isNaN(numericValue)) return "N/A";
+    if (numericValue < 10) return "Below 10";
+    const lower = Math.floor(numericValue / 10) * 10;
+    const upper = lower + 10;
+    return `${lower} - ${upper}`;
+  }, []);
+
+  // Optimized event handlers
+  const handleOpenContact = useCallback(() => setOpenContactModal(true), []);
+  const handleCloseContact = useCallback(() => setOpenContactModal(false), []);
+
+  const toggleDrawer = useCallback((open) => (event) => {
+    if (event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) {
+      return;
     }
-  }, [uuid, dispatch]);
+    setDrawerOpen(open);
+  }, []);
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   }, []);
 
-  const handleSubmit = useCallback(
-    async (e) => {
-      e.preventDefault();
-      setIsSubmitting(true);
+  const handleSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
-      try {
-        const payload = {
-          ...formData,
-          state: formData.state || "",
-          district: formData.district || "",
-          city: formData.city || "",
-          brandId: selectedBrand?.uuid,
-          brandName: selectedBrand?.brandDetails?.brandName || "",
-        };
+    try {
+      const payload = {
+        ...formData,
+        state: formData.state || "",
+        district: formData.district || "",
+        city: formData.city || "",
+        brandId: selectedBrand?.uuid,
+        brandName: selectedBrand?.brandDetails?.brandName || "",
+      };
 
-        console.log("Payload to submit:", payload);
+      const id = investorUUID || localStorage.getItem("brandUUID");
 
-        const id = investorUUID || localStorage.getItem("brandUUID");
-
-        if (!id) {
-          alert("User not logged in or missing ID. Please login again.");
-          return;
-        }
-
-        if (
-          !payload.fullName ||
-          !payload.investorEmail ||
-          !payload.mobileNumber ||
-          !payload.state ||
-          !payload.district ||
-          !payload.city ||
-          !payload.investmentRange ||
-          !payload.planToInvest ||
-          !payload.readyToInvest
-        ) {
-          alert("Please fill all required fields.");
-          return;
-        }
-
-        const response = await axios.post(
-          `https://localhost:5173/api/v1/instantapply/postApplication`,
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (response.data) {
-          setSubmitSuccess(true);
-        }
-      } catch (error) {
-        console.log(
-          "Submission error:",
-          error?.response?.data || error.message
-        );
-        alert("❌Failed to submit application.");
-      } finally {
-        setIsSubmitting(false);
+      if (!id) {
+        alert("User not logged in or missing ID. Please login again.");
+        return;
       }
-    },
-    [formData, selectedBrand, investorUUID]
-  );
 
-  const handleShareClick = useCallback((event) => {
-    setAnchorEl(event.currentTarget);
-  }, []);
+      // Validate required fields
+      const requiredFields = [
+        'fullName', 'investorEmail', 'mobileNumber', 'state', 
+        'district', 'city', 'investmentRange', 'planToInvest', 'readyToInvest'
+      ];
+      
+      const missingFields = requiredFields.filter(field => !payload[field]);
+      
+      if (missingFields.length > 0) {
+        alert(`Please fill all required fields: ${missingFields.join(', ')}`);
+        return;
+      }
+
+      const response = await axios.post(
+        `https://localhost:5173/api/v1/instantapply/postApplication`,
+        payload,
+        { 
+          headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(10000) // Add timeout
+        }
+      );
+
+      if (response.data) {
+        setSubmitSuccess(true);
+        setDrawerOpen(false);
+      }
+    } catch (error) {
+      console.error("Submission error:", error?.response?.data || error.message);
+      alert("❌Failed to submit application. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [formData, selectedBrand, investorUUID]);
 
   const handleImageOpen = useCallback((index) => {
     setCurrentImageIndex(index);
@@ -315,27 +315,26 @@ const BrandDetails = () => {
   }, []);
 
   const handlePrevImage = useCallback(() => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? allImages.length - 1 : prev - 1
-    );
+    setCurrentImageIndex(prev => (prev === 0 ? allImages.length - 1 : prev - 1));
   }, [allImages.length]);
 
   const handleNextImage = useCallback(() => {
-    setCurrentImageIndex((prev) =>
-      prev === allImages.length - 1 ? 0 : prev + 1
-    );
+    setCurrentImageIndex(prev => (prev === allImages.length - 1 ? 0 : prev + 1));
   }, [allImages.length]);
 
-  if (!selectedBrand) return null;
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
-  const getOutletRange = (value) => {
-    const numericValue = Number(value);
-    if (isNaN(numericValue) || numericValue === null) return "N/A";
-    if (numericValue < 10) return "Below 10";
-    const lower = Math.floor(numericValue / 10) * 10;
-    const upper = lower + 10;
-    return `${lower} - ${upper}`;
-  };
+  if (!selectedBrand) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
 
   return (
     <>
@@ -388,11 +387,15 @@ const BrandDetails = () => {
           onClose={toggleDrawer(false)}
           PaperProps={{
             sx: {
-              borderTopLeftRadius: isMobile || isTablet ? 16 : 0,
-              borderTopRightRadius: isMobile || isTablet ? 16 : 0,
-              maxHeight: isMobile || isTablet ? "80vh" : "100vh",
-              width: isMobile || isTablet ? "100%" : 500,
+              borderTopLeftRadius: isMobile || isTablet ? 16 : 16,
+              borderTopRightRadius: isMobile || isTablet ? 16 : 16,
+              borderTopBottomRadius: isMobile || isTablet ? 16 : 16,
+              borderBottomLeftRadius: isMobile || isTablet ? 16 : 16,
+              borderBottomRightRadius: isMobile || isTablet ? 16 : 16,
+              maxHeight: isMobile || isTablet ? "80vh" : "93vh",
+              width: isMobile || isTablet ? "100%" : 430,
               overflow: "auto",
+              mt: isMobile || isTablet ? 0 : 3,
             },
           }}
         >
@@ -406,7 +409,7 @@ const BrandDetails = () => {
               }}
             >
               <Typography variant="h6" fontWeight={700} color="#ff9800">
-                Apply for Franchise
+                Apply for  Franchise
               </Typography>
               <IconButton onClick={toggleDrawer(false)}>
                 <Close />
@@ -431,7 +434,7 @@ const BrandDetails = () => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size="small"
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -443,7 +446,7 @@ const BrandDetails = () => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size="small"
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -457,7 +460,7 @@ const BrandDetails = () => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size="small"
                   />
                 </Grid>
 
@@ -472,7 +475,7 @@ const BrandDetails = () => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size="small"
                   >
                     {locationData.states.map((state, i) => (
                       <MenuItem key={i} value={state}>
@@ -493,7 +496,7 @@ const BrandDetails = () => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size="small"
                     disabled={!formData.state}
                   >
                     {locationData.districts.map((district, i) => (
@@ -515,7 +518,7 @@ const BrandDetails = () => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size="small"
                     disabled={!formData.district}
                   >
                     {locationData.cities.map((city, i) => (
@@ -536,7 +539,7 @@ const BrandDetails = () => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size="small"
                   >
                     {investmentRanges.map((range, i) => (
                       <MenuItem key={i} value={range}>
@@ -555,7 +558,7 @@ const BrandDetails = () => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size="small"
                   >
                     {investmentTimings.map((option, i) => (
                       <MenuItem key={i} value={option}>
@@ -574,7 +577,7 @@ const BrandDetails = () => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size="small"
                   >
                     {readyToInvestOptions.map((option, i) => (
                       <MenuItem key={i} value={option}>
@@ -1022,7 +1025,7 @@ const BrandDetails = () => {
             >
               <OverviewTab
                 brand={selectedBrand}
-                setIsModalOpen={setIsModalOpen}
+                // setIsModalOpen={setIsModalOpen}
               />
             </motion.div>
           </Box>
@@ -1424,3 +1427,4 @@ const BrandDetails = () => {
 };
 
 export default React.memo(BrandDetails);
+

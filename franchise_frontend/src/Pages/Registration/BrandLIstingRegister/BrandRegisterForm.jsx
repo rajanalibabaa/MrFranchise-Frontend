@@ -355,6 +355,7 @@ const BrandRegisterForm = () => {
             officeMobile: formData.brandDetails.officeMobile,
             headOfficeAddress: formData.brandDetails.headOfficeAddress,
             state: formData.brandDetails.state,
+            district: formData.brandDetails.district,
             city: formData.brandDetails.city,
             pincode: formData.brandDetails.pincode,
             website: formData.brandDetails.website,

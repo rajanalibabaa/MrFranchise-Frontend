@@ -7,45 +7,23 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Paper,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  TextField,
-  MenuItem,
-  CircularProgress,
+ 
   IconButton,
   Grid,
   Divider,
   TableHead,
-  Fab,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Card,
   CardContent,
   Fade,
-  Grow,
   Slide,
   Zoom,
-  useScrollTrigger,
   styled,
   Chip,
 } from "@mui/material";
 import {
   Description as DescriptionIcon,
   Business,
-  AccountTree,
-  Close,
-  CheckCircleOutline,
-  KeyboardArrowUp,
-  ExpandMore,
-  ContactMail,
-  Schedule,
-  LocationOn,
-  AttachMoney,
-  ArrowBackIosNew,
   ArrowBack,
   Place,
   LocationCity,
@@ -1322,7 +1300,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
                   <Table
                     stickyHeader
                     sx={{
-                      width: 2300,
+                      width: 2000,
                       tableLayout: "fixed", // this makes columns distribute evenly
                     }}
                   >
@@ -1482,6 +1460,28 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
                   "& strong": { color: colors.primary },
                 }}
               />
+              <Typography>
+   {hasData(
+                          brand.franchiseDetails?.uniqueSellingPoints
+                        ) && (
+                          <>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: colors.dark, fontWeight: 600 }}
+                            >
+                              Unique Selling Points:
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: colors.dark }}
+                            >
+                              {brand.franchiseDetails.uniqueSellingPoints.join(
+                                ", "
+                              )}
+                            </Typography>
+                          </>
+                        )}
+              </Typography>
             </Box>
           )}
 
@@ -1556,26 +1556,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
                           </>
                         )}
 
-                        {hasData(
-                          brand.franchiseDetails?.uniqueSellingPoints
-                        ) && (
-                          <>
-                            <Typography
-                              variant="body2"
-                              sx={{ color: colors.dark, fontWeight: 600 }}
-                            >
-                              Unique Selling Points:
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{ color: colors.dark }}
-                            >
-                              {brand.franchiseDetails.uniqueSellingPoints.join(
-                                ", "
-                              )}
-                            </Typography>
-                          </>
-                        )}
+                     
 
                         <Typography
                           variant="body2"
@@ -1606,7 +1587,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
                 variant="h6"
                 sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}
               >
-                Current Outlets (Domestic)
+                Current Outlets (India)
               </Typography>
               <ExpansionLocationGrid
                 data={
@@ -1646,7 +1627,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
                 variant="h6"
                 sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}
               >
-                Expansion Locations (Domestic)
+                Expansion Locations (India)
               </Typography>
               <ExpansionLocationGrid
                 data={brand.expansionLocationData.expansionLocations.domestic}
