@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import {
   Box,
   Typography,
@@ -15,40 +15,53 @@ import Footer from "../../Components/Footers/Footer.jsx";
 import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 
+// Higher-order component for Suspense
+const withSuspense = (Component) => (props) => (
+  <Suspense fallback={
+    <Box sx={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      height: '300px',
+      backgroundColor: '#fffaf7'
+    }}>
+      <CircularProgress color="secondary" />
+    </Box>
+  }>
+    <Component {...props} />
+  </Suspense>
+);
 
-// Dynamic Components - Import all your video sections
+// Dynamic Components with Suspense
 const dynamicComponents = {
-  TopBrandThreevdocards: React.lazy(() =>
+  TopBrandThreevdocards: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")
-  ), //first video section0
-  TopCafeBrandsFranchise: React.lazy(() =>
+  )),
+  TopCafeBrandsFranchise: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
-  ), //3rd video section
-  TopFoodFranchise: React.lazy(() =>
+  )),
+  TopFoodFranchise: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopFoodFranchise.jsx")
-  ), //top food franchise section
-  TopBeverageFranchise: React.lazy(() =>
+  )),
+  TopBeverageFranchise: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopBeverageFranchise.jsx")
-  ), //top beverage franchise section
-  TopDesertBakeryFranchise: React.lazy(() =>
+  )),
+  TopDesertBakeryFranchise: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopDesertBakerys.jsx")
-  ),
-  TopLeadingFranchise: React.lazy(() =>
+  )),
+  TopLeadingFranchise: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopLeadingFranchise.jsx")
-  ), //second video section top leading industries
-  TopRestaurantsFranchise: React.lazy(() =>
+  )),
+  TopRestaurantsFranchise: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopRestaurantsFranchise.jsx")
-  ), //Top restaurant investment section
-  FindFranchiseLocations: React.lazy(() =>
+  )),
+  FindFranchiseLocations: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/FindFranchiseLocations.jsx")
-  ), //location cards
-  ToTrendingBrands: React.lazy(() =>
+  )),
+  ToTrendingBrands: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
-  ), //last video section
+  )),
 };
-
-
-
 
 // Configuration object for the entire page
 const pageConfig = {
@@ -321,37 +334,34 @@ const HomeBannerSec = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  // const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const controls = useAnimation();
   const dispatch = useDispatch();
+
   useEffect(() => {
     const navEntries = performance.getEntriesByType("navigation");
     const isReload = navEntries[0]?.type === "reload";
     const popupShown = sessionStorage.getItem("popup-shown");
 
-    dispatch(showLoading  ())
-   setTimeout(() => {
+    dispatch(showLoading());
+    setTimeout(() => {
       if (!popupShown || isReload) {
-      setIsPopupOpen(true);
-      sessionStorage.setItem("popup-shown", "true");
-    }
-    // controls.start("visible");
-    dispatch(hideLoading())
-   }, 1000);
+        setIsPopupOpen(true);
+        sessionStorage.setItem("popup-shown", "true");
+      }
+      dispatch(hideLoading());
+    }, 1000);
   }, [controls, dispatch]);
+
   // Rotate text every 2 minutes
   useEffect(() => {
     const interval = setInterval(() => {
       setBannerIndex((prev) => (prev + 1) % bannerTexts.length);
-    }, 1000);
+    }, 120000); // 2 minutes
     return () => clearInterval(interval);
   }, []);
 
-
   const handlePopupClose = () => setIsPopupOpen(false);
 
-
-  // Render a dynamic section component
   const renderSection = (sectionConfig, index) => {
     const DynamicComponent = dynamicComponents[sectionConfig.component];
 
@@ -361,9 +371,9 @@ const HomeBannerSec = () => {
         sx={{
           py: 1,
           px: 2,
-          // backgroundColor: sectionConfig.background,
           position: "relative",
           overflow: "hidden",
+          backgroundColor: sectionConfig.background || '#fffaf7',
           ...(sectionConfig.backgroundImage && {
             backgroundImage: `linear-gradient(${sectionConfig.background}), url(${sectionConfig.backgroundImage})`,
             backgroundSize: "cover",
@@ -386,38 +396,34 @@ const HomeBannerSec = () => {
         )}
 
         <Container maxWidth="xl" sx={{ position: "relative", zIndex: 1 }}>
-          <React.Suspense fallback={<CircularProgress />}>
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.8,
-                delay: sectionConfig.animationDelay,
-              }}
-              viewport={{ once: true, margin: "-100px" }}
-            >
-              <DynamicComponent />
-            </motion.div>
-          </React.Suspense>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.8,
+              delay: index * 0.1,
+            }}
+            viewport={{ once: true, margin: "-100px" }}
+          >
+            <DynamicComponent />
+          </motion.div>
         </Container>
       </Box>
     );
   };
+
   const currentText = bannerTexts[bannerIndex];
-  // const { text, highlight } = currentText.subtitle;
+
   return (
     <>
- <Navbar/>
-      {
-        !localStorage.getItem("accessToken") && (
-          <PopupModal open={isPopupOpen} onClose={handlePopupClose} />
-        )
-      }
+      <Navbar />
+      {!localStorage.getItem("accessToken") && (
+        <PopupModal open={isPopupOpen} onClose={handlePopupClose} />
+      )}
 
       {/* Hero Banner */}
       <Box
         mt={0}
-        // maxWidth={"xl"}
         sx={{
           background: `linear-gradient(${pageConfig.heroBanner.overlayColor}), url(${pageConfig.heroBanner.backgroundImage})`,
           backgroundSize: "cover",
@@ -450,107 +456,87 @@ const HomeBannerSec = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            // background: 'radial-gradient(circle at 20% 50%, transparent 0%, rgba(0,0,0,0.7) 100%)',
             zIndex: 0,
           },
         }}
       >
-        
         <Container
-          // maxWidth="lg"
           sx={{
             position: "relative",
             zIndex: 2,
             textAlign: isMobile ? "center" : "center",
-            
           }}
         >
-            <motion.div
-           key={bannerIndex}
-    initial={{ opacity: 0, x: 80 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -80 }}
-    transition={{ duration: 0.6, type: "spring", bounce: 0.2 }}
-  >
-            {/* <motion.div variants={pageConfig.animations.item}> */}
-              <Typography
-                mb={3}
-                component='span'
-                // maxWidth={isMobile ? "100%" : "100%"}
-                // sx={{
-                //   fontWeight: 200,
-                //   textAlign: "center",
-                //   color: "white",
-                //   mb: 1,
-                //   lineHeight: 1,
-                //   fontSize: isMobile ? "2rem" : "3rem",
-                // }}
-              >
-                <Box
-                  sx={{
-                    background: "linear-gradient(45deg,#ff9800,white,rgb(155, 249, 33))",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    textShadow: "none",
-                    display: "inline",
-                    fontSize: isMobile ? "2rem" : "2.2rem",
-                    fontWeight: 900,
-                    px: 1,
-                  }}
-                >
-                  {currentText.title.text}
-                </Box>
-               
-              </Typography>
-            </motion.div>
-
-            <motion.div variants={pageConfig.animations.item}>
-              <Typography
-                variant={isMobile ? "h6" : "subtitle2"}
-                mt={3}
+          <motion.div
+            key={bannerIndex}
+            initial={{ opacity: 0, x: 80 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -80 }}
+            transition={{ duration: 0.6, type: "spring", bounce: 0.2 }}
+          >
+            <Typography
+              mb={3}
+              component='span'
+            >
+              <Box
                 sx={{
-                  textAlign: "center",
-                  color: "rgba(255,255,255,0.9)",
-                  fontWeight: 300,
-                  mb: 3,
-                  maxWidth: "800px",
-                  mx: "auto",
-                  lineHeight: 1,
-                  fontSize: isMobile ? "1.1rem" : "1.1rem",
-                  textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                  background: currentText.title.gradient,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  textShadow: "none",
+                  display: "inline",
+                  fontSize: isMobile ? "2rem" : "2.2rem",
+                  fontWeight: 900,
+                  px: 1,
                 }}
-                component={motion.div}
-                // animate={pageConfig.animations.pulse}
               >
-                {
-                  currentText.subtitle.text.split(
-                    currentText.subtitle.highlight.text
-                  )[0]
-                }
-                <Typography
-                  variant="outlined"
-                  sx={{
-                    fontWeight:
-                      currentText.subtitle.highlight.fontWeight,
-                    color: currentText.subtitle.highlight.color,
-                    display: "inline",
-                  }}
-                  component="span"
-                >
-                  {currentText.subtitle.highlight.text}
-                </Typography>
-                {
-                  currentText.subtitle.text.split(
+                {currentText.title.text}
+              </Box>
+            </Typography>
+          </motion.div>
+
+          <motion.div variants={pageConfig.animations.item}>
+            <Typography
+              variant={isMobile ? "h6" : "subtitle2"}
+              mt={3}
+              sx={{
+                textAlign: "center",
+                color: "rgba(255,255,255,0.9)",
+                fontWeight: 300,
+                mb: 3,
+                maxWidth: "800px",
+                mx: "auto",
+                lineHeight: 1,
+                fontSize: isMobile ? "1.1rem" : "1.1rem",
+                textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+              }}
+              component={motion.div}
+            >
+              {
+                currentText.subtitle.text.split(
                   currentText.subtitle.highlight.text
-                  )[1]
-                }
+                )[0]
+              }
+              <Typography
+                variant="outlined"
+                sx={{
+                  fontWeight: currentText.subtitle.highlight.fontWeight,
+                  color: currentText.subtitle.highlight.color,
+                  display: "inline",
+                }}
+                component="span"
+              >
+                {currentText.subtitle.highlight.text}
               </Typography>
-            </motion.div>
+              {
+                currentText.subtitle.text.split(
+                currentText.subtitle.highlight.text
+                )[1]
+              }
+            </Typography>
+          </motion.div>
       
-          
-              <FilterDropdowns />
-         
-         
+          <FilterDropdowns />
         </Container>
       </Box>
 
