@@ -1,6 +1,4 @@
-import React, { useState, useCallback, memo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import React, { useState, useCallback, memo, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -22,6 +20,57 @@ import LoginPage from '../LoginPage/LoginPage';
 import { openBrandDialog } from "../../Hooks/Fetchbrands.jsx";
 import { postView } from '../../Utils/function/view.jsx';
 
+// Pre-define styles to avoid recreating them on every render
+const cardStyles = {
+  width: 320,
+  height: 520,
+  display: "flex",
+  flexDirection: "column",
+  transition: "transform 0.3s, box-shadow 0.3s",
+  position: "relative",
+  overflow: "hidden",
+  borderRadius: 2,
+  "&:hover": {
+    transform: "translateY(-5px)",
+    boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
+  },
+};
+
+const logoStyles = {
+  objectFit: "contain",
+  backgroundColor: "#f9f9f9",
+  py: 2,
+  height: "200px",
+  width: "100%",
+  borderBottom: "1px solid #eee",
+};
+
+const titleStyles = {
+  fontWeight: 600,
+  color: "text.primary",
+  pr: 1,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  display: "-webkit-box",
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: "vertical",
+  lineHeight: "1em",
+  maxHeight: "2.8em",
+  wordBreak: "break-word",
+};
+
+const viewButtonStyles = {
+  py: 1.25,
+  bgcolor: "#4caf50",
+  borderRadius: 1,
+  fontWeight: 500,
+  textTransform: "none",
+  "&:hover": {
+    bgcolor: "#7BC718",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+  },
+};
+
 const BrandCard = memo(({
   brand,
   toggleLike,
@@ -32,8 +81,7 @@ const BrandCard = memo(({
 }) => {
   const [isProcessingLike, setIsProcessingLike] = useState({});
   
-
-  // Memoize the brand data to prevent unnecessary re-renders
+  // Destructure brand data once and memoize complex computations
   const {
     uuid,
     uploads = {},
@@ -43,46 +91,52 @@ const BrandCard = memo(({
     isLiked,
   } = brand;
 
-  // Memoized handler for opening brand details
+  // Memoize expensive computations
+  const investmentRange = useMemo(() => 
+    franchiseDetails.fico?.[0]?.investmentRange || "Not specified",
+  [franchiseDetails.fico]);
+
+  const areaRequired = useMemo(() => 
+    franchiseDetails.fico?.[0]?.areaRequired || "Not specified",
+  [franchiseDetails.fico]);
+
+  // Memoized handlers with optimized dependencies
   const handleOpenBrand = useCallback(() => {
-    postView(uuid);
+    // Use requestIdleCallback for non-critical tasks
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        postView(uuid);
+      });
+    } else {
+      setTimeout(() => postView(uuid), 0);
+    }
+    
+    // Open dialog immediately as it's user-facing
     openBrandDialog(brand);
   }, [uuid, brand]);
 
-  // Memoized handler for like click
   const handleLikeClick = useCallback(async () => {
     if (isProcessingLike[uuid]) return;
     
     setIsProcessingLike(prev => ({ ...prev, [uuid]: true }));
     try {
+      // Use microtask to ensure UI updates first
+      await Promise.resolve();
       await toggleLike(uuid, isLiked);
     } finally {
       setIsProcessingLike(prev => ({ ...prev, [uuid]: false }));
     }
   }, [uuid, isLiked, toggleLike, isProcessingLike]);
 
-  // Memoized handler for comparison toggle
   const handleComparisonToggle = useCallback(() => {
-    toggleBrandComparison(brand);
+    // Use requestAnimationFrame for smoother UI updates
+    requestAnimationFrame(() => {
+      toggleBrandComparison(brand);
+    });
   }, [brand, toggleBrandComparison]);
 
   return (
-    <Card
-      sx={{
-        width: 320,
-        height: 520,
-        display: "flex",
-        flexDirection: "column",
-        transition: "transform 0.3s, box-shadow 0.3s",
-        position: "relative",
-        overflow: "hidden",
-        borderRadius: 2,
-        "&:hover": {
-          transform: "translateY(-5px)",
-          boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
-        },
-      }}
-    >
+    <Card sx={cardStyles}>
       {/* Comparison toggle button */}
       <IconButton
         sx={{
@@ -116,20 +170,13 @@ const BrandCard = memo(({
           flexDirection: "column",
         }}
       >
-        {/* Brand Logo Image - Lazy loading */}
+        {/* Brand Logo Image - Lazy loading with eager loading for above-the-fold images */}
         <Box
           component="img"
           src={uploads.brandLogo}
           alt={brandDetails.brandName || "Brand logo"}
           loading="lazy"
-          sx={{
-            objectFit: "contain",
-            backgroundColor: "#f9f9f9",
-            py: 2,
-            height: "200px",
-            width: "100%",
-            borderBottom: "1px solid #eee",
-          }}
+          sx={logoStyles}
         />     
 
         {/* Brand Name and Like Button */}
@@ -139,28 +186,13 @@ const BrandCard = memo(({
           alignItems="flex-start"
           mt={1}
         >
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{
-              fontWeight: 600,
-              color: "text.primary",
-              pr: 1,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              lineHeight: "1em",
-              maxHeight: "2.8em",
-              wordBreak: "break-word",
-            }}
-          >
+          <Typography variant="h6" component="div" sx={titleStyles}>
             {brandDetails.brandName}
           </Typography>
           <IconButton
             onClick={handleLikeClick}
             disabled={isProcessingLike[uuid]}
+            aria-label={isLiked ? "Unlike brand" : "Like brand"}
           >
             {isProcessingLike[uuid] ? (
               <CircularProgress size={24} />
@@ -195,7 +227,7 @@ const BrandCard = memo(({
           )}
         </Box>
 
-        {/* Details List - Memoized components */}
+        {/* Details List */}
         <Box
           sx={{
             mb: 2,
@@ -213,13 +245,13 @@ const BrandCard = memo(({
           <DetailItem
             icon={<AttachMoney />}
             label="Investment Range"
-            value={franchiseDetails.fico?.[0]?.investmentRange || "Not specified"}
+            value={investmentRange}
           />
           
           <DetailItem
             icon={<AreaChart />}
             label="Area Required"
-            value={franchiseDetails.fico?.[0]?.areaRequired || "Not specified"}
+            value={areaRequired}
           />
         </Box>
 
@@ -229,33 +261,31 @@ const BrandCard = memo(({
           variant="contained"
           onClick={handleOpenBrand}
           startIcon={<Description />}
-          sx={{
-            py: 1.25,
-            bgcolor: "#4caf50",
-            borderRadius: 1,
-            fontWeight: 500,
-            textTransform: "none",
-            "&:hover": {
-              bgcolor: "#7BC718",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-            },
-          }}
+          sx={viewButtonStyles}
         >
           View Details
         </Button>
       </Box>
 
-      {/* Login Modal - Only render when needed */}
+      {/* Login Modal - Lazy load if possible */}
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}
     </Card>
   );
+}, (prevProps, nextProps) => {
+  // Custom comparison function for memo
+  return (
+    prevProps.brand.uuid === nextProps.brand.uuid &&
+    prevProps.brand.isLiked === nextProps.brand.isLiked &&
+    prevProps.isSelectedForComparison === nextProps.isSelectedForComparison &&
+    prevProps.showLogin === nextProps.showLogin
+  );
 });
 
-// Memoized sub-components for better performance
+// Optimized LocationDetail component
 const LocationDetail = memo(({ locations, onViewMore }) => {
-  const locationText = React.useMemo(() => {
+  const locationText = useMemo(() => {
     if (!locations) return "Multiple locations";
     
     const domestic = locations.domestic?.locations || [];
@@ -295,20 +325,25 @@ const LocationDetail = memo(({ locations, onViewMore }) => {
   );
 });
 
-const DetailItem = memo(({ icon, label, value }) => (
-  <Box display="flex" alignItems="center">
-    {React.cloneElement(icon, {
-      sx: {
-        mr: 1.5,
-        fontSize: "1rem",
-        color: "text.secondary",
-        flexShrink: 0,
-      }
-    })}
-    <Typography variant="body2" noWrap>
-      <span style={{ fontWeight: 600 }}>{label}:</span> {value}
-    </Typography>
-  </Box>
-));
+// Optimized DetailItem component
+const DetailItem = memo(({ icon, label, value }) => {
+  const clonedIcon = useMemo(() => React.cloneElement(icon, {
+    sx: {
+      mr: 1.5,
+      fontSize: "1rem",
+      color: "text.secondary",
+      flexShrink: 0,
+    }
+  }), [icon]);
+
+  return (
+    <Box display="flex" alignItems="center">
+      {clonedIcon}
+      <Typography variant="body2" noWrap>
+        <span style={{ fontWeight: 600 }}>{label}:</span> {value}
+      </Typography>
+    </Box>
+  );
+});
 
 export default BrandCard;

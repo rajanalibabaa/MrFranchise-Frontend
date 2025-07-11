@@ -46,7 +46,7 @@ const BrandDetails = ({ brandData }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-
+const navigate = useNavigate();
   // State management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -274,6 +274,7 @@ const BrandDetails = ({ brandData }) => {
 
       if (!id) {
         alert("User not logged in or missing ID. Please login again.");
+        navigate("/registerhandleuser");
         return;
       }
 

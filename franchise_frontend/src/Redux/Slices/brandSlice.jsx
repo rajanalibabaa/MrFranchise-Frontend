@@ -65,36 +65,36 @@ export const Likeshow = async () => {
   }
 };
 
-export const fetchBrands = createAsyncThunk(
-  "brands/fetchBrands",
-  async (_, { rejectWithValue }) => {
-    try {
-      let response;
+// export const fetchBrands = createAsyncThunk(
+//   "brands/fetchBrands",
+//   async (_, { rejectWithValue }) => {
+//     try {
+//       let response;
 
-      if (!token) {
-        response = await axios.get(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      }
-      if (token) {
-        response = await Likeshow();
+//       if (!token) {
+//         response = await axios.get(
+//           "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+//           {
+//             headers: {
+//               "Content-Type": "application/json",
+//             },
+//           }
+//         );
+//       }
+//       if (token) {
+//         response = await Likeshow();
         
-      }
+//       }
 
-      console.log("response.data.data :",response.data.data)
+//       console.log("response.data.data :",response.data.data)
       
 
-      return response.data.data;
-    } catch (err) {
-      return rejectWithValue(err.message || "Failed to fetch brands");
-    }
-  }
-);
+//       return response.data.data;
+//     } catch (err) {
+//       return rejectWithValue(err.message || "Failed to fetch brands");
+//     }
+//   }
+// );
 
 export const fetchBrandById = createAsyncThunk(
   "brands/fetchBrandById",
@@ -245,127 +245,127 @@ const brandSlice = createSlice({
         const { brandID } = action.payload || {};
         state.brandID = brandID;
       })
-      .addCase(fetchBrands.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchBrands.fulfilled, (state, action) => {
-        state.loading = false;
-        state.data = action.payload || [];
-        state.filteredData = applyFiltersToBrands(action.payload, state.filters);
+      // .addCase(fetchBrands.pending, (state) => {
+      //   state.loading = true;
+      //   state.error = null;
+      // })
+      // .addCase(fetchBrands.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   state.data = action.payload || [];
+      //   state.filteredData = applyFiltersToBrands(action.payload, state.filters);
 
-        // Extract unique values for filters
-        const categoryMap = {};
-        const subCategoryMap = {};
-        const childCategoryMap = {};
-        const stateSet = new Set();
-        const districtSet = new Set();
-        const citySet = new Set();
-        const modelTypeSet = new Set();
-        const investmentRangeSet = new Set();
+      //   // Extract unique values for filters
+      //   const categoryMap = {};
+      //   const subCategoryMap = {};
+      //   const childCategoryMap = {};
+      //   const stateSet = new Set();
+      //   const districtSet = new Set();
+      //   const citySet = new Set();
+      //   const modelTypeSet = new Set();
+      //   const investmentRangeSet = new Set();
 
-        // Temporary arrays to hold location data with relationships
-        const districtsWithState = [];
-        const citiesWithDistrict = [];
+      //   // Temporary arrays to hold location data with relationships
+      //   const districtsWithState = [];
+      //   const citiesWithDistrict = [];
 
-        action.payload.forEach((brand) => {
-          // Categories
-          const brandCategories = brand.franchiseDetails?.brandCategories;
-          if (brandCategories) {
-            if (brandCategories.main && !categoryMap[brandCategories.main]) {
-              categoryMap[brandCategories.main] = {
-                id: brandCategories.main,
-                name: brandCategories.main,
-              };
-            }
-            if (brandCategories.sub && !subCategoryMap[brandCategories.sub]) {
-              subCategoryMap[brandCategories.sub] = {
-                id: brandCategories.sub,
-                name: brandCategories.sub,
-                parentCategory: brandCategories.main,
-              };
-            }
-            if (brandCategories.child && !childCategoryMap[brandCategories.child]) {
-              childCategoryMap[brandCategories.child] = {
-                id: brandCategories.child,
-                name: brandCategories.child,
-                parentSubCategory: brandCategories.sub,
-              };
-            }
-          }
+      //   action.payload.forEach((brand) => {
+      //     // Categories
+      //     const brandCategories = brand.franchiseDetails?.brandCategories;
+      //     if (brandCategories) {
+      //       if (brandCategories.main && !categoryMap[brandCategories.main]) {
+      //         categoryMap[brandCategories.main] = {
+      //           id: brandCategories.main,
+      //           name: brandCategories.main,
+      //         };
+      //       }
+      //       if (brandCategories.sub && !subCategoryMap[brandCategories.sub]) {
+      //         subCategoryMap[brandCategories.sub] = {
+      //           id: brandCategories.sub,
+      //           name: brandCategories.sub,
+      //           parentCategory: brandCategories.main,
+      //         };
+      //       }
+      //       if (brandCategories.child && !childCategoryMap[brandCategories.child]) {
+      //         childCategoryMap[brandCategories.child] = {
+      //           id: brandCategories.child,
+      //           name: brandCategories.child,
+      //           parentSubCategory: brandCategories.sub,
+      //         };
+      //       }
+      //     }
 
-          // Process expansion locations
-          const domesticLocations = brand.expansionLocationData?.expansionLocations.domestic?.locations || [];
-          domesticLocations.forEach(location => {
-            if (location.state) {
-              stateSet.add(location.state);
+      //     // Process expansion locations
+      //     const domesticLocations = brand.expansionLocationData?.expansionLocations.domestic?.locations || [];
+      //     domesticLocations.forEach(location => {
+      //       if (location.state) {
+      //         stateSet.add(location.state);
               
-              // Process districts for this state
-              if (location.districts) {
-                location.districts.forEach(districtObj => {
-                  if (districtObj.district) {
-                    districtSet.add(districtObj.district);
-                    districtsWithState.push({
-                      district: districtObj.district,
-                      state: location.state
-                    });
+      //         // Process districts for this state
+      //         if (location.districts) {
+      //           location.districts.forEach(districtObj => {
+      //             if (districtObj.district) {
+      //               districtSet.add(districtObj.district);
+      //               districtsWithState.push({
+      //                 district: districtObj.district,
+      //                 state: location.state
+      //               });
                     
-                    // Process cities for this district
-                    if (districtObj.cities) {
-                      districtObj.cities.forEach(city => {
-                        if (city) {
-                          citySet.add(city);
-                          citiesWithDistrict.push({
-                            city: city,
-                            district: districtObj.district
-                          });
-                        }
-                      });
-                    }
-                  }
-                });
-              }
-            }
-          });
+      //               // Process cities for this district
+      //               if (districtObj.cities) {
+      //                 districtObj.cities.forEach(city => {
+      //                   if (city) {
+      //                     citySet.add(city);
+      //                     citiesWithDistrict.push({
+      //                       city: city,
+      //                       district: districtObj.district
+      //                     });
+      //                   }
+      //                 });
+      //               }
+      //             }
+      //           });
+      //         }
+      //       }
+      //     });
 
-          // Extract model types and investment ranges
-          const fico = brand.franchiseDetails?.fico || [];
-          fico.forEach(item => {
-            if (item.franchiseType) modelTypeSet.add(item.franchiseType);
-            if (item.investmentRange) investmentRangeSet.add(item.investmentRange);
-          });
-        });
+      //     // Extract model types and investment ranges
+      //     const fico = brand.franchiseDetails?.fico || [];
+      //     fico.forEach(item => {
+      //       if (item.franchiseType) modelTypeSet.add(item.franchiseType);
+      //       if (item.investmentRange) investmentRangeSet.add(item.investmentRange);
+      //     });
+      //   });
 
-        state.categories = Object.values(categoryMap);
-        state.subCategories = Object.values(subCategoryMap);
-        state.childCategories = Object.values(childCategoryMap);
+      //   state.categories = Object.values(categoryMap);
+      //   state.subCategories = Object.values(subCategoryMap);
+      //   state.childCategories = Object.values(childCategoryMap);
         
-        // Location data with relationships
-        state.states = Array.from(stateSet).sort();
-        state.districts = districtsWithState;
-        state.cities = citiesWithDistrict;
+      //   // Location data with relationships
+      //   state.states = Array.from(stateSet).sort();
+      //   state.districts = districtsWithState;
+      //   state.cities = citiesWithDistrict;
         
-        state.modelTypes = Array.from(modelTypeSet).sort();
-        state.investmentRanges = Array.from(investmentRangeSet).sort((a, b) => {
-          const order = [
-            "Below - Rs.50 ",
-            "Rs.2L-5L",
-            "Rs.5L-10L",
-            "Rs.10L-20L",
-            "Rs.20L-30L",
-            "Rs.30L-50L",
-            "Rs.50L-1Cr",
-            "Rs.1Cr-2Cr",
-            "Rs.2Cr-5Cr",
-            "Rs.5Cr-above"
-          ];
-          return order.indexOf(a) - order.indexOf(b);
-        });
-      })
-      .addCase(fetchBrands.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
+      //   state.modelTypes = Array.from(modelTypeSet).sort();
+      //   state.investmentRanges = Array.from(investmentRangeSet).sort((a, b) => {
+      //     const order = [
+      //       "Below - Rs.50 ",
+      //       "Rs.2L-5L",
+      //       "Rs.5L-10L",
+      //       "Rs.10L-20L",
+      //       "Rs.20L-30L",
+      //       "Rs.30L-50L",
+      //       "Rs.50L-1Cr",
+      //       "Rs.1Cr-2Cr",
+      //       "Rs.2Cr-5Cr",
+      //       "Rs.5Cr-above"
+      //     ];
+      //     return order.indexOf(a) - order.indexOf(b);
+      //   });
+      // })
+      // .addCase(fetchBrands.rejected, (state, action) => {
+      //   state.loading = false;
+      //   state.error = action.payload;
+      // });
   },
 });
 

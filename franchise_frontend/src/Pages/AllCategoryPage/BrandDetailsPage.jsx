@@ -51,7 +51,7 @@ function BrandDetailsPage() {
         alignItems: 'center', 
         height: '100vh' 
       }}>
-        <CircularProgress />
+        <CircularProgress color="secondary"   />
       </div>
     );
   }

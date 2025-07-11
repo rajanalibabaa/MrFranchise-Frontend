@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo, lazy, Suspense } from "react";
 import {
   Box,
   Typography,
@@ -8,7 +8,6 @@ import {
   TableRow,
   TableCell,
   Button,
- 
   IconButton,
   Grid,
   Divider,
@@ -21,17 +20,17 @@ import {
   styled,
   Chip,
 } from "@mui/material";
-import {
-  Description as DescriptionIcon,
-  Business,
-  ArrowBack,
-  Place,
-  LocationCity,
-  LocationOff,
-  Map,
-  FiberManualRecord,
-} from "@mui/icons-material";
-import axios from "axios";
+
+const DescriptionIcon = lazy(() => import('@mui/icons-material/Description'));
+const Business = lazy(() => import('@mui/icons-material/Business'));
+const ArrowBack = lazy(() => import('@mui/icons-material/ArrowBack'));
+const Place = lazy(() => import('@mui/icons-material/Place'));
+const LocationCity = lazy(() => import('@mui/icons-material/LocationCity'));
+const LocationOff = lazy(() => import('@mui/icons-material/LocationOff'));
+const Map = lazy(() => import('@mui/icons-material/Map'));
+const FiberManualRecord = lazy(() => import('@mui/icons-material/FiberManualRecord'));
+const Public = lazy(() => import('@mui/icons-material/Public'));
+
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { keyframes } from "@emotion/react";
@@ -48,12 +47,7 @@ const colors = {
   light: "#f5f5f5",
 };
 
-// Animation keyframes
-const pulse = keyframes`
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-`;
+
 
 const float = keyframes`
   0% { transform: translateY(0px); }
@@ -70,21 +64,9 @@ const AnimatedCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-const GradientButton = styled(Button)(({ theme }) => ({
-  background: `linear-gradient(45deg, ${colors.secondary} 0%, ${colors.warning} 100%)`,
-  color: "white",
-  fontWeight: 600,
-  padding: "10px 24px",
-  borderRadius: "50px",
-  boxShadow: "0 4px 15px rgba(255, 152, 0, 0.4)",
-  transition: "all 0.3s ease",
-  "&:hover": {
-    transform: "translateY(-2px)",
-    boxShadow: "0 6px 20px rgba(255, 152, 0, 0.6)",
-  },
-}));
 
-const SectionHeader = styled(Typography)(({ theme }) => ({
+
+const SectionHeader = styled(Typography)({
   position: "relative",
   paddingBottom: "10px",
   marginBottom: "30px",
@@ -98,61 +80,14 @@ const SectionHeader = styled(Typography)(({ theme }) => ({
     background: `linear-gradient(90deg, ${colors.secondary}, ${colors.primary})`,
     borderRadius: "2px",
   },
-}));
+});
 
-const OverviewTab = ({ brand, setIsModalOpen }) => {
+const OverviewTab = ({ brand }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const overviewRef = useRef(null);
-  const [isModalOpen, setIsLocalModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
   const [selectedModel, setSelectedModel] = useState(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    investorEmail: "",
-    mobileNumber: "",
-    investmentRange: "",
-    location: "",
-    planToInvest: "",
-    readyToInvest: "",
-  });
-  const [userData, setUserData] = useState(null);
-
-  const investorUUID = localStorage.getItem("investorUUID");
-  const AccessToken = localStorage.getItem("accessToken");
-
-  useEffect(() => {
-    const fetchInvestorDetails = async () => {
-      if (!investorUUID || !AccessToken) return;
-      try {
-        const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${AccessToken}`,
-            },
-          }
-        );
-        setUserData(response.data.data);
-        const investor = response.data?.data;
-        if (investor) {
-          setFormData((prev) => ({
-            ...prev,
-            fullName: investor.firstName || "",
-            investorEmail: investor.email || "",
-            mobileNumber: investor.mobileNumber || "",
-          }));
-        }
-      } catch (error) {
-        console.error("Failed to fetch investor details:", error);
-      }
-    };
-
-    fetchInvestorDetails();
-  }, [investorUUID, AccessToken]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -165,101 +100,6 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
-  const investmentRanges = [
-    ...new Set(
-      brand?.franchiseDetails?.fico?.map((m) => m.investmentRange) || []
-    ),
-  ];
-
-  const expansionLocations =
-    brand.expansionLocationData?.expansionLocations?.domestic?.cities || [];
-
-  const investmentTimings = [
-    "Immediately",
-    "1-3 months",
-    "3-6 months",
-    "6+ months",
-  ];
-
-  const readyToInvestOptions = [
-    "Own Investment",
-    "Going To Loan",
-    "Need Loan Assistance",
-  ];
-
-  const handleModelSelect = (model) => {
-    setSelectedModel(model);
-    setFormData((prev) => ({
-      ...prev,
-      investmentRange: model.investmentRange || prev.investmentRange,
-    }));
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const payload = {
-        ...formData,
-        brandId: brand?.uuid,
-        brandName: brand.brandDetails?.brandName || "",
-        brandEmail: brand.brandDetails?.email || "",
-      };
-
-      const token = localStorage.getItem("accessToken");
-      const investorUUID = localStorage.getItem("investorUUID");
-      const brandUUID = localStorage.getItem("brandUUID");
-
-      const id = investorUUID || brandUUID;
-
-      const response = await axios.post(
-        `http://localhost:5000/api/v1/instantapply/postApplication/${id}`,
-        payload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data) {
-        setSubmitSuccess(true);
-        setFormData({
-          fullName: "",
-          location: "",
-          investmentRange: "",
-          planToInvest: "",
-          readyToInvest: "",
-          investorEmail: "",
-          mobileNumber: "",
-        });
-      }
-    } catch (error) {
-      console.error("Submission error:", error);
-      alert("❌Failed to submit application.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const ExpansionLocationGrid = ({ data }) => {
     const [expandedState, setExpandedState] = useState(0);
     const [expandedDistrict, setExpandedDistrict] = useState(
@@ -1347,7 +1187,7 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
                           <TableRow
                             hover
                             selected={selectedModel?._id === model._id}
-                            onClick={() => handleModelSelect(model)}
+                            // onClick={() => handleModelSelect(model)}
                             sx={{
                               "&:hover": {
                                 backgroundColor: "rgba(0, 0, 0, 0.04)",
@@ -1897,30 +1737,9 @@ const OverviewTab = ({ brand, setIsModalOpen }) => {
         </Box>
       ))}
 
-      {/* Back to Top Button
-      {showBackToTop && (
-        <Zoom in={showBackToTop}>
-          <Fab
-            onClick={scrollToTop}
-            sx={{
-              position: 'fixed',
-              bottom: 32,
-              right: 32,
-              bgcolor: colors.secondary,
-              color: 'white',
-              '&:hover': {
-                bgcolor: '#fb8c00',
-                transform: 'scale(1.1)'
-              },
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <KeyboardArrowUp />
-          </Fab>
-        </Zoom>
-      )} */}
+     
     </Box>
   );
 };
 
-export default OverviewTab;
+export default React.memo(OverviewTab); // Use React.memo to optimize OverviewTab;
