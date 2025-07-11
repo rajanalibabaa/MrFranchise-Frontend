@@ -22,8 +22,7 @@ import LoginPage from '../LoginPage/LoginPage';
 import { openBrandDialog } from '../../Redux/Slices/brandSlice.jsx';
 import brandData from './BrandDetailsPage.jsx';
 
-
-
+import {postView} from '../../Utils/function/view.jsx'
 const BrandCard = ({
   brand,
  
@@ -41,8 +40,8 @@ const dispatch = useDispatch()
 
 const handleOpenBrand = (brand) => {
   
-
-  const newWindow = window.open(`/brands/${brand.uuid}?`, '_blank');
+postView(brand.uuid)
+  const newWindow = window.open(`/brands/${brand.uuid}?$`, '_blank');
   localStorage.setItem(`brand-${brand.uuid}`, JSON.stringify(brand));
 
   if (newWindow) {

@@ -28,16 +28,9 @@ import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import Business from "@mui/icons-material/Business";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-import {
-  fetchBrands,
-  openBrandDialog,
-  toggleLikeBrand,
-} from "../../Redux/Slices/brandSlice";
-// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
-import { showLoading , hideLoading} from "../../Redux/Slices/loadingSlice";
-
+import { postView } from "../../Utils/function/view";
+import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
@@ -71,6 +64,7 @@ const BrandCard = React.memo(
     const videoUrl =
       brand?.uploads?.franchisePromotionVideo?.[0]; 
     const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
+    const brandName = brand.brandDetails.brandName || "Brand"
 
     useEffect(() => {
       observerRef.current = new IntersectionObserver(
@@ -133,8 +127,9 @@ const BrandCard = React.memo(
               <CardMedia
                 component="video"
                 loading="lazy"
+                poster={brand?.uploads?.brandLogo?.[0] || ""}
                 src={videoUrl}
-                alt={brand.personalDetails?.brandName || "Brand"}
+                alt={brandName|| "Brand"}
                 sx={{
                   position: "absolute",
                   top: 0,
@@ -198,7 +193,7 @@ const BrandCard = React.memo(
                     flex: 1,
                   }}
                 >
-                  {brand.personalDetails?.brandName}
+                  {brandName}
                 </Typography>
                 <IconButton
                   onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
@@ -218,13 +213,12 @@ const BrandCard = React.memo(
                 </IconButton>
               </Box>
 
-              {categories.length > 0 && (
+              {categories && (
                 <Box sx={{ mb: 2 }}>
                   <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-                    {categories.slice(0, 3).map((category, index) => (
+                    
                       <Chip
-                        key={index}
-                        label={category.child}
+                        label={categories.child}
                         size="small"
                         sx={{
                           bgcolor: "rgba(255, 152, 0, 0.1)",
@@ -233,7 +227,7 @@ const BrandCard = React.memo(
                           mb: 1,
                         }}
                       />
-                    ))}
+                    
                   </Stack>
                 </Box>
               )}
@@ -318,15 +312,12 @@ const TopRestaurantsFranchise = () => {
   const containerRef = useRef(null);
   const isPaused = useRef(false);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { data: brands = [] } = useSelector((state) => state.brands);
-
+  const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
+  const toggleLike = useToggleLike();
   // Filter brands that belong to Beverage Franchise subcategory
   // Filter brands that belong to Beverage Franchise subcategory and all its child categories
   const beverageBrands = useMemo(() => {
@@ -343,61 +334,46 @@ const TopRestaurantsFranchise = () => {
     return CARD_DIMENSIONS.desktop;
   }, [isMobile, isTablet]);
 
-  const initializeData = useCallback(() => {
-    try {
-      if (!beverageBrands || beverageBrands.length === 0) {
-        // setError("No beverage franchises found.");
-      } else {
-        setError(null);
-      }
-    } catch (err) {
-      setError("Failed to process brands data.");
-      console.error("Error processing brands:", err);
-    } finally {
-      setLoading(false);
+  // const initializeData = useCallback(() => {
+  //   try {
+  //     if (!beverageBrands || beverageBrands.length === 0) {
+  //       // setError("No beverage franchises found.");
+  //     } else {
+  //       setError(null);
+  //     }
+  //   } catch (err) {
+  //     setError("Failed to process brands data.");
+  //     console.error("Error processing brands:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [beverageBrands]);
+
+  // useEffect(() => {
+  //   initializeData();
+  // }, [initializeData]);
+
+ const handleLikeClick = useCallback(async (brandId, isLiked) => {
+    if (likeProcessing[brandId]) return;
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setShowLogin(true);
+      return;
     }
-  }, [beverageBrands]);
+    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+    try {
+      await toggleLike.mutateAsync({ brandId, isLiked });
+    } catch (error) {
+      console.error("Like operation failed:", error);
+    } finally {
+      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
+    }
+  }, [likeProcessing, toggleLike]);
 
-  useEffect(() => {
-    initializeData();
-  }, [initializeData]);
-
-  const handleLikeClick = useCallback(
-    async (brandId, isLiked) => {
-      if (likeProcessing[brandId]) return;
-
-      setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-      try {
-        await toggleLike(brandId, isLiked);
-      } finally {
-        setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
-      }
-    },
-    [likeProcessing]
-  );
-
-  const toggleLike = useCallback(
-    async (brandId, isLiked) => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        setShowLogin(true);
-        return;
-      }
-      try {
-        await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
-      } catch (error) {
-        console.error("Like operation failed:", error);
-      }
-    },
-    [dispatch]
-  );
-
-  const handleApply = useCallback(
-    (brand) => {
-      dispatch(openBrandDialog(brand));
-    },
-    [dispatch]
-  );
+    const handleApply = useCallback((brand) => {
+    postView(brand.uuid);
+    openBrandDialog(brand);
+  }, []);
 
   const handleMouseEnter = useCallback(() => {
     isPaused.current = true;
@@ -407,7 +383,7 @@ const TopRestaurantsFranchise = () => {
     isPaused.current = false;
   }, []);
 
-  if (loading) {
+  if (brandsLoading) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <CircularProgress />
@@ -418,7 +394,7 @@ const TopRestaurantsFranchise = () => {
   if (error) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
-        <Typography color="error">{error}</Typography>
+        <Typography color="error">{error.message || "Failed to load brands."}</Typography>
       </Box>
     );
   }
@@ -428,7 +404,7 @@ const TopRestaurantsFranchise = () => {
       sx={{
         py: isMobile ? 1 : 2,
         px: isMobile ? 0 : 2,
-        maxWidth: isMobile ? "100%" : 1400,
+        maxWidth: isMobile ? "100%" : 1300,
         mx: "auto",
         mb: isMobile ? 0 : 2,
       }}
@@ -478,11 +454,8 @@ const TopRestaurantsFranchise = () => {
             },
           }}
           onClick={() => {
-            dispatch(showLoading());
              navigate("/brandviewpage");
-            setTimeout(() => {
-              dispatch(hideLoading());
-            }, 2000);
+           
           }}
         >
           View More

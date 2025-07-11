@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -15,158 +15,16 @@ import Footer from "../../Components/Footers/Footer.jsx";
 import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 
-
-// Dynamic Components - Import all your video sections
-const dynamicComponents = {
-  TopBrandThreevdocards: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")
-  ), //first video section0
-  TopCafeBrandsFranchise: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
-  ), //3rd video section
-  TopFoodFranchise: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/TopFoodFranchise.jsx")
-  ), //top food franchise section
-  TopBeverageFranchise: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/TopBeverageFranchise.jsx")
-  ), //top beverage franchise section
-  TopDesertBakeryFranchise: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/TopDesertBakerys.jsx")
-  ),
-  TopLeadingFranchise: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/TopLeadingFranchise.jsx")
-  ), //second video section top leading industries
-  TopRestaurantsFranchise: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/TopRestaurantsFranchise.jsx")
-  ), //Top restaurant investment section
-  FindFranchiseLocations: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/FindFranchiseLocations.jsx")
-  ), //location cards
-  ToTrendingBrands: React.lazy(() =>
-    import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
-  ), //last video section
-};
-
-
-
-
-// Configuration object for the entire page
-const pageConfig = {
-  heroBanner: {
-    backgroundImage:
-      "https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
-    overlayColor: "rgba(0, 0, 0, 0.3)",
-    title: {
-      text: "Welcome To Our MrFranchise Network",
-      gradient:
-        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" },
-    },
-    subtitle: {
-      text: "World's most comprehensive franchise platform with 1000+ opportunities waiting for you...",
-      highlight: {
-        text: "1000+ opportunities",
-        color: "#ff9800",
-        fontWeight: "bold",
-      },
-    },
-  },
-
-  // Section Configuration
-  sections: [
-    {
-      component: "TopBrandThreevdocards",
-      background: "white",
-      backgroundOpacity: 0.1,
-    },
-    {
-      component: "TopCafeBrandsFranchise",
-      background: "#fffaf7",
-      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    },
-    {
-      component: "TopFoodFranchise",
-      background: "#fffaf7",
-      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    },
-    {
-      component: "TopBeverageFranchise",
-      background: "#fffaf7",
-      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    },
-    {
-      component: "TopDesertBakeryFranchise",
-      background: "#fffaf7",
-      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    },
-    {
-      component: "TopLeadingFranchise",
-      background: "white",
-      dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-    },
-    {
-      component: "TopRestaurantsFranchise",
-      background: "white",
-      dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-    },
-    {
-      component: "FindFranchiseLocations",
-      background: "#fffaf7",
-      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    },
-    {
-      component: "ToTrendingBrands",
-      title: "Trending Brands",
-      dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-    },
-  ],
-
-  // Global Animation Settings
-  animations: {
-    banner: {
-      hidden: { opacity: 0 },
-      visible: {
-        opacity: 1,
-        transition: {
-          when: "beforeChildren",
-          staggerChildren: 0.3,
-        },
-      },
-    },
-    item: {
-      hidden: { y: 20, opacity: 0 },
-      visible: {
-        y: 0,
-        opacity: 1,
-        transition: {
-          type: "spring",
-          damping: 10,
-          stiffness: 100,
-        },
-      },
-    },
-    pulse: {
-      scale: [1, 1.02, 1],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: "easeInOut",
-      },
-    },
-  },
-};
-
-// Array of banner texts (3 contents)
+// Optimized banner texts (reduced from 10 to 4)
 const bannerTexts = [
   {
     title: {
       text: "1000+ Food Brands One Platform Endless Possibilities",
-      gradient:
-        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+      gradient: "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
-          text: "Discover A Universe Of F&B Franchise Opportunities From Quick Service Restaurants To Gourmet Cafes All Under On Powerful Portal",
+      text: "Discover A Universe Of F&B Franchise Opportunities From Quick Service Restaurants To Gourmet Cafes All Under On Powerful Portal",
       highlight: {
         text: "F&B franchise opportunities",
         color: "#ff9800",
@@ -176,24 +34,8 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "Turn Your Investment Into A Tasteful Venture",
-      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
-    },
-    subtitle: {
-      text: "Explore Curated Restaurant And Cafe Franchises With Proven Models Designed For ROI Stability And Low Opertational Hassle",
-      highlight: {
-        text: "proven models",
-        color: "#ff9800",
-        fontWeight: "bold"
-      }
-    }
-  },
-  {
-    title: {
       text: "India's #1 F&B Franchise Marketplace Your Food Business Starts Here",
-     gradient:
-        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+      gradient: "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
@@ -208,61 +50,14 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "Serve Success Hot - Choose the Right F&B Franchise Today",
-       gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
-    },
-    subtitle: {
-      text: "Invest in hot-selling food concepts with hight demand, fast scalability, and support from trusted brands.",
-      highlight: {
-        text: "F&B Franchise",
-        color: "#ff9800",
-        fontWeight: "bold"
-      }
-    }
-  },
-  {
-    title: {
-      text: "From Local Taste to Global Plates - Start Your Food Business Now",
-       gradient:
-        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
-    },
-    subtitle: {
-      text: "Franchise options available in street food, bakeries, ice cream parlors, multicusine restaurants, and more.",
-      highlight: {
-        text: "Food Business",
-        color: "#ff9800",
-        fontWeight: "bold"
-      }
-    }
-  },
-  {
-    title: {
       text: "Low Investment . High Appetite for Growth",
-     gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
+      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
       text: "Start from just ₹5 Lakhs with multiple profitable options in cafes, cloud kitchens, and food trucks.",
       highlight: {
         text: "Low Investment",
-        color: "#ff9800",
-        fontWeight: "bold"
-      }
-    }
-  },
-  {
-    title: {
-      text: "Franchise a Restaurant. Own a Cafe Lead a Cloud Kitchen",
-       gradient:
-        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
-    },
-    subtitle: {
-      text: "Find franchise businesses across every food format to suit your budget, location, and business dream.",
-      highlight: {
-        text: "franchise businesses",
         color: "#ff9800",
         fontWeight: "bold"
       }
@@ -283,118 +78,224 @@ const bannerTexts = [
       }
     }
   },
-  {
-    title: {
-      text: "No Experience? No Problem! Proven Food Franchise Models Await You",
-      gradient:
-        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
-    },
-    subtitle: {
-      text: "Get full training, support, marketing tools, and setup assistance with our zero-hassle franchise options.",
-      highlight: {
-        text: "zero-hassle",
-        color: "#ff9800",
-        fontWeight: "bold"
-      }
-    }
-  },
-  {
-    title: {
-      text: "Your Food Franchise Future Starts At foodandbeverage MrFranchise.in",
-      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
-      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
-    },
-    subtitle: {
-      text: "The one-stop portal for serious F&B investors looking to explore, compare, and close franchise deals.",
-      highlight: {
-        text: "franchise deals",
-        color: "#ff9800",
-        fontWeight: "bold"
-      }
-    }
-  },
 ];
+
+// Optimized dynamic imports with preloading
+const dynamicComponents = {
+  TopBrandThreevdocards: React.lazy(() => 
+    import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")
+  ),
+  TopCafeBrandsFranchise: React.lazy(() => 
+    import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
+  ),
+  TopFoodFranchise: React.lazy(() => 
+    import("../../Components/HomePage_VideoSection/TopFoodFranchise.jsx")
+  ),
+  TopBeverageFranchise: React.lazy(() => 
+    import("../../Components/HomePage_VideoSection/TopBeverageFranchise.jsx")
+  ),
+  TopDesertBakeryFranchise: React.lazy(() => 
+    import("../../Components/HomePage_VideoSection/TopDesertBakerys.jsx")
+  ),
+  TopLeadingFranchise: React.lazy(() => 
+    import("../../Components/HomePage_VideoSection/TopLeadingFranchise.jsx")
+  ),
+  TopRestaurantsFranchise: React.lazy(() => 
+    import("../../Components/HomePage_VideoSection/TopRestaurantsFranchise.jsx")
+  ),
+  FindFranchiseLocations: React.lazy(() => 
+    import("../../Components/HomePage_VideoSection/FindFranchiseLocations.jsx")
+  ),
+  ToTrendingBrands: React.lazy(() => 
+    import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
+  ),
+};
+
+// Optimized page config with simplified animations
+const pageConfig = {
+  heroBanner: {
+    backgroundImage: "https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+    overlayColor: "rgba(0, 0, 0, 0.3)",
+  },
+  sections: [
+    { component: "TopBrandThreevdocards", background: "white" },
+    { component: "TopCafeBrandsFranchise", background: "#fffaf7" },
+    { component: "TopFoodFranchise", background: "#fffaf7" },
+    { component: "TopBeverageFranchise", background: "#fffaf7" },
+    { component: "TopDesertBakeryFranchise", background: "#fffaf7" },
+    { component: "TopLeadingFranchise", background: "white" },
+    { component: "TopRestaurantsFranchise", background: "white" },
+    { component: "FindFranchiseLocations", background: "#fffaf7" },
+    { component: "ToTrendingBrands", title: "Trending Brands" },
+  ],
+  animations: {
+    item: {
+      hidden: { opacity: 0 },
+      visible: { opacity: 1 },
+      transition: { duration: 0.3 }
+    }
+  }
+};
+
+// Memoized components to prevent unnecessary re-renders
+const HeroBanner = React.memo(({ currentText, isMobile }) => {
+  return (
+    <Box
+      sx={{
+        position: "relative",
+        zIndex: 2,
+        textAlign: "center",
+        px: 2,
+        py: isMobile ? 6 : 10,
+        maxHeight: isMobile ? "50vh" : "20vh",
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <motion.div
+        key={currentText.title.text}
+        initial={{ opacity: 0, x: 80 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        style={{ minHeight: isMobile ? '60px' : '40px' }}
+      >
+        <Typography component="span" mb={3}>
+          <Box
+            sx={{
+              background: currentText.title.gradient,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              fontSize: isMobile ? "2rem" : "2rem",
+              fontWeight: 900,
+              px: 2,
+              lineHeight: 1.2,
+              maxWidth: "100%",
+            }}
+          >
+            {currentText.title.text}
+          </Box>
+        </Typography>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        style={{ minHeight: isMobile ? '50px' : '70px' }}
+      >
+        <Typography
+          variant={isMobile ? "h6" : "subtitle1"}
+          mt={3}
+          sx={{
+            textAlign: "center",
+            color: "rgba(255,255,255,0.9)",
+            fontWeight: 300,
+            mb: 3,
+            maxWidth: "800px",
+            mx: "auto",
+            lineHeight: 1.4,
+            fontSize: isMobile ? "1rem" : "1.2rem",
+            textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+          }}
+        >
+          {currentText.subtitle.text.split(currentText.subtitle.highlight.text)[0]}
+          <Typography
+            component="span"
+            sx={{
+              fontWeight: currentText.subtitle.highlight.fontWeight || 600,
+              color: currentText.subtitle.highlight.color || '#ff9800',
+              display: "inline",
+            }}
+          >
+            {currentText.subtitle.highlight.text}
+          </Typography>
+          {currentText.subtitle.text.split(currentText.subtitle.highlight.text)[1]}
+        </Typography>
+      </motion.div>
+    </Box>
+  );
+});
 
 const HomeBannerSec = () => {
   const theme = useTheme();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  // const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-  const controls = useAnimation();
   const dispatch = useDispatch();
-  useEffect(() => {
-    const navEntries = performance.getEntriesByType("navigation");
-    const isReload = navEntries[0]?.type === "reload";
-    const popupShown = sessionStorage.getItem("popup-shown");
 
-    dispatch(showLoading  ())
-   setTimeout(() => {
-      if (!popupShown || isReload) {
-      setIsPopupOpen(true);
-      sessionStorage.setItem("popup-shown", "true");
-    }
-    // controls.start("visible");
-    dispatch(hideLoading())
-   }, 1000);
-  }, [controls, dispatch]);
-  // Rotate text every 2 minutes
+  // Preload critical resources
+  useEffect(() => {
+    const preloadResources = async () => {
+      try {
+        dispatch(showLoading());
+        
+        // Preload hero image
+        const img = new Image();
+        img.src = pageConfig.heroBanner.backgroundImage;
+        
+        // Preload critical components
+        await Promise.all([
+          import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards"),
+          import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
+        ]);
+        
+        // Check for popup
+        const navEntries = performance.getEntriesByType("navigation");
+        const isReload = navEntries[0]?.type === "reload";
+        const popupShown = sessionStorage.getItem("popup-shown");
+        
+        if (!popupShown || isReload) {
+          setIsPopupOpen(true);
+          sessionStorage.setItem("popup-shown", "true");
+        }
+        
+        dispatch(hideLoading());
+      } catch (error) {
+        console.error("Preload error:", error);
+        dispatch(hideLoading());
+      }
+    };
+    
+    preloadResources();
+  }, [dispatch]);
+
+  // Rotate text every 10 seconds (reduced from every second)
   useEffect(() => {
     const interval = setInterval(() => {
       setBannerIndex((prev) => (prev + 1) % bannerTexts.length);
-    }, 1000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
-
   const handlePopupClose = () => setIsPopupOpen(false);
 
+  // Memoize current text to prevent unnecessary re-renders
+  const currentText = useMemo(() => bannerTexts[bannerIndex], [bannerIndex]);
 
-  // Render a dynamic section component
+  // Optimized section renderer
   const renderSection = (sectionConfig, index) => {
     const DynamicComponent = dynamicComponents[sectionConfig.component];
-
+    
     return (
       <Box
-        key={index}
+        key={`${sectionConfig.component}-${index}`}
         sx={{
           py: 1,
           px: 2,
           backgroundColor: sectionConfig.background,
           position: "relative",
           overflow: "hidden",
-          ...(sectionConfig.backgroundImage && {
-            backgroundImage: `linear-gradient(${sectionConfig.background}), url(${sectionConfig.backgroundImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }),
         }}
       >
-        {sectionConfig.backgroundImage && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              opacity: sectionConfig.backgroundOpacity || 0.1,
-              zIndex: 0,
-            }}
-          />
-        )}
-
         <Container maxWidth="xl" sx={{ position: "relative", zIndex: 1 }}>
-          <React.Suspense fallback={<CircularProgress />}>
+          <React.Suspense fallback={<Box minHeight="300px" display="flex" justifyContent="center" alignItems="center"><CircularProgress /></Box>}>
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.8,
-                delay: sectionConfig.animationDelay,
-              }}
+              initial="hidden"
+              whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
+              variants={pageConfig.animations.item}
             >
               <DynamicComponent />
             </motion.div>
@@ -403,8 +304,6 @@ const HomeBannerSec = () => {
       </Box>
     );
   };
-  const currentText = bannerTexts[bannerIndex];
-  // const { text, highlight } = currentText.subtitle;
   return (
     <>
  <Navbar/>
@@ -428,7 +327,8 @@ const HomeBannerSec = () => {
           position: "relative",
           overflow: "hidden",
           color: "white",
-          minHeight: isMobile ? "80vh" : "40vh",
+          minHeight: isMobile ? "95vh" : "40vh",
+                    maxHeight: isMobile ? "95vh" : "40vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -450,108 +350,92 @@ const HomeBannerSec = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            // background: 'radial-gradient(circle at 20% 50%, transparent 0%, rgba(0,0,0,0.7) 100%)',
             zIndex: 0,
           },
         }}
       >
         
-        <Container
-          // maxWidth="lg"
-          sx={{
-            position: "relative",
-            zIndex: 2,
-            textAlign: isMobile ? "center" : "center",
-            
-          }}
-        >
-            <motion.div
-           key={bannerIndex}
+       <Box
+  sx={{
+    position: "relative",
+    zIndex: 2,
+    textAlign: "center",
+    px: 2,
+    py: isMobile ? 6 : 10,
+    maxHeight: isMobile ? "50vh" : "20vh", // Fixed overall height
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }}
+>
+  <motion.div
+    key={bannerIndex}
     initial={{ opacity: 0, x: 80 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -80 }}
+    animate={{ opacity: 1, x: 0 }}
+    exit={{ opacity: 0, x: -80 }}
     transition={{ duration: 0.6, type: "spring", bounce: 0.2 }}
+    style={{ minHeight: isMobile ? '60px' : '40px' }}  // Fixes jumping during animation
   >
-            {/* <motion.div variants={pageConfig.animations.item}> */}
-              <Typography
-                mb={3}
-                component='span'
-                // maxWidth={isMobile ? "100%" : "100%"}
-                // sx={{
-                //   fontWeight: 200,
-                //   textAlign: "center",
-                //   color: "white",
-                //   mb: 1,
-                //   lineHeight: 1,
-                //   fontSize: isMobile ? "2rem" : "3rem",
-                // }}
-              >
-                <Box
-                  sx={{
-                    background: "linear-gradient(45deg,#ff9800,white,rgb(155, 249, 33))",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    textShadow: "none",
-                    display: "inline",
-                    fontSize: isMobile ? "2rem" : "2.2rem",
-                    fontWeight: 900,
-                    px: 1,
-                  }}
-                >
-                  {currentText.title.text}
-                </Box>
-               
-              </Typography>
-            </motion.div>
+    <Typography component="span" mb={3}>
+      <Box
+        sx={{
+          background: "linear-gradient(45deg, #ff9800, white, rgb(155, 249, 33))",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          textShadow: "none",
+          fontSize: isMobile ? "2rem" : "2rem",  // Slightly bigger for desktop
+          fontWeight: 900,
+          px: 2,
+          lineHeight: 1.2,
+          maxWidth: "100%",
+          whiteSpace: 'nowrap',   // Prevents multi-line jump (optional)
+        }}
+      >
+        {currentText.title.text || "Default Title"}
+      </Box>
+    </Typography>
+  </motion.div>
 
-            <motion.div variants={pageConfig.animations.item}>
-              <Typography
-                variant={isMobile ? "h6" : "subtitle2"}
-                mt={3}
-                sx={{
-                  textAlign: "center",
-                  color: "rgba(255,255,255,0.9)",
-                  fontWeight: 300,
-                  mb: 3,
-                  maxWidth: "800px",
-                  mx: "auto",
-                  lineHeight: 1,
-                  fontSize: isMobile ? "1.1rem" : "1.1rem",
-                  textShadow: "0 2px 4px rgba(0,0,0,0.5)",
-                }}
-                component={motion.div}
-                // animate={pageConfig.animations.pulse}
-              >
-                {
-                  currentText.subtitle.text.split(
-                    currentText.subtitle.highlight.text
-                  )[0]
-                }
-                <Typography
-                  variant="outlined"
-                  sx={{
-                    fontWeight:
-                      currentText.subtitle.highlight.fontWeight,
-                    color: currentText.subtitle.highlight.color,
-                    display: "inline",
-                  }}
-                  component="span"
-                >
-                  {currentText.subtitle.highlight.text}
-                </Typography>
-                {
-                  currentText.subtitle.text.split(
-                  currentText.subtitle.highlight.text
-                  )[1]
-                }
-              </Typography>
-            </motion.div>
-      
-          
-              <FilterDropdowns />
-         
-         
-        </Container>
+  <motion.div
+    variants={pageConfig.animations.item}
+    style={{ minHeight: isMobile ? '50px' : '70px' }}  // Prevents subtitle jumping
+  >
+    <Typography
+      variant={isMobile ? "h6" : "subtitle1"}
+      mt={3}
+      sx={{
+        textAlign: "center",
+        color: "rgba(255,255,255,0.9)",
+        fontWeight: 300,
+        mb: 3,
+        maxWidth: "800px",
+        mx: "auto",
+        lineHeight: 1.4,
+        fontSize: isMobile ? "1rem" : "1.2rem",
+        textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+      }}
+    >
+      {currentText.subtitle.text.split(currentText.subtitle.highlight.text)[0]}
+      <Typography
+        component="span"
+        sx={{
+          fontWeight: currentText.subtitle.highlight.fontWeight || 600,
+          color: currentText.subtitle.highlight.color || '#ff9800',
+          display: "inline",
+        }}
+      >
+        {currentText.subtitle.highlight.text || "Highlight"}
+      </Typography>
+      {currentText.subtitle.text.split(currentText.subtitle.highlight.text)[1]}
+    </Typography>
+  </motion.div>
+
+  <Box sx={{ mt: isMobile ? 4 : 6, minHeight: isMobile ? '60px' : '80px', width: '100%', maxWidth: '800px' }}>
+    <FilterDropdowns />
+  </Box>
+</Box>
+
       </Box>
 
       {/* Render all sections from config */}
@@ -565,4 +449,4 @@ const HomeBannerSec = () => {
   );
 };
 
-export default HomeBannerSec;
+export default React.memo(HomeBannerSec);

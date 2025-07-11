@@ -1,30 +1,43 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import Navbar from "../../Components/Navbar/NavBar";
-import Footer from "../../Components/Footers/Footer";
-// import BrandList from './AllCategoryBrandDetail.jsx'
-import BrandListNew from "./BrandList.jsx";
-import { Box } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 
-function BrandCategroyViewPage() {
+// Lazy load the BrandList component
+const BrandListNew = lazy(() => import("./BrandList.jsx"));
+
+function BrandCategoryViewPage() {
   return (
     <>
-      {/* Fixed Navbar */}
-        <Navbar />
-  
-      {/* Scrollable Content below the fixed Navbar */}
+      {/* Navbar with memoization to prevent unnecessary re-renders */}
+      <Navbar />
+
+      {/* Scrollable Content with optimized loading */}
       <Box
+        component="main"
         sx={{
-          mt: "12px", // Adjust this value based on your Navbar height (e.g. 64px) // Full viewport height minus Navbar
-          // overflowY: "auto",
+          mt: "12px",
+          minHeight: "calc(100vh - 64px)", // Adjust based on your navbar height
+          position: "relative"
         }}
       >
-        <BrandListNew />
+        <Suspense fallback={
+          <Box 
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '200px'
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        }>
+          <BrandListNew />
+        </Suspense>
       </Box>
-      <Box></Box>
-
-      {/* {/* <BrandList /> */}
     </>
   );
 }
 
-export default BrandCategroyViewPage;
+// Memoize the component to prevent unnecessary re-renders
+export default React.memo(BrandCategoryViewPage);

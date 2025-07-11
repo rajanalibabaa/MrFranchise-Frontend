@@ -423,7 +423,6 @@ const BrandRegisterForm = () => {
         });
 
         const response = await axios.post(
-          // "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
@@ -1046,7 +1045,7 @@ const BrandRegisterForm = () => {
       return (
         <Accordion defaultExpanded sx={{ mb: 3 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="subtitle1" fontWeight="bold">
+            <Typography variant="subtitle1" fontWeight="bold" color="#5bb949">
               Expansion & Location Details
             </Typography>
           </AccordionSummary>
@@ -1069,7 +1068,7 @@ const BrandRegisterForm = () => {
                 <Grid container spacing={2}>
                   {/* Domestic Locations Summary */}
                   <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 2, height: "100%" }}>
+                    <Paper sx={{ p: 2, height: "110px" }}>
                       <Typography variant="subtitle2" gutterBottom>
                         Domestic Locations
                       </Typography>
@@ -1096,7 +1095,7 @@ const BrandRegisterForm = () => {
 
                   {/* International Locations Summary */}
                   <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 2, height: "100%" }}>
+                    <Paper sx={{ p: 2, height: "110px"}}>
                       <Typography variant="subtitle2" gutterBottom>
                         International Locations
                       </Typography>
@@ -1133,7 +1132,7 @@ const BrandRegisterForm = () => {
                 <Grid container spacing={2}>
                   {/* Domestic Expansion Summary */}
                   <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 2, height: "100%" }}>
+                    <Paper sx={{ p: 2, height: "110px" }}>
                       <Typography variant="subtitle2" gutterBottom>
                         Domestic Expansion
                       </Typography>
@@ -1160,7 +1159,7 @@ const BrandRegisterForm = () => {
 
                   {/* International Expansion Summary */}
                   <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 2, height: "100%" }}>
+                    <Paper sx={{ p: 2, height: "110px" }}>
                       <Typography variant="subtitle2" gutterBottom>
                         International Expansion
                       </Typography>
@@ -1195,7 +1194,7 @@ const BrandRegisterForm = () => {
     const renderBrandDetails = () => (
       <Accordion defaultExpanded sx={{ mb: 3 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1" fontWeight="bold">
+          <Typography variant="subtitle1" fontWeight="bold" color="#5bb949">
             Brand Details
           </Typography>
         </AccordionSummary>
@@ -1254,7 +1253,7 @@ const BrandRegisterForm = () => {
     const renderFranchiseDetails = () => (
       <Accordion defaultExpanded sx={{ mb: 3 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1" fontWeight="bold">
+          <Typography variant="subtitle1" fontWeight="bold" color="#5bb949">
             Franchise Details
           </Typography>
         </AccordionSummary>
@@ -1384,7 +1383,7 @@ const BrandRegisterForm = () => {
     const renderUploads = () => (
       <Accordion defaultExpanded sx={{ mb: 2 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1" fontWeight="bold">
+          <Typography variant="subtitle1" fontWeight="bold" color="#5bb949">
             Uploads
           </Typography>
         </AccordionSummary>
@@ -1769,6 +1768,7 @@ const BrandRegisterForm = () => {
               top: 0,
               backgroundColor: "background.paper",
               zIndex: 1,
+              color:"#f9a505"
             }}
           >
             Form Data Preview
@@ -1785,7 +1785,7 @@ const BrandRegisterForm = () => {
               zIndex: 1,
             }}
           >
-            <Button onClick={handlePreviewClose} variant="contained">
+            <Button onClick={handlePreviewClose} variant="contained" color="error">
               Close
             </Button>
           </DialogActions>

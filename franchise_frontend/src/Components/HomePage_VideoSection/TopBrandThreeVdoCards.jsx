@@ -24,14 +24,15 @@ import PauseCircle from "@mui/icons-material/PauseCircle";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  openBrandDialog,
-  toggleLikeBrand,
-} from "../../Redux/Slices/brandSlice";
+// import { useDispatch, useSelector } from "react-redux";
+// import {
+//   openBrandDialog,
+//   toggleLikeBrand,
+// } from "../../Redux/Slices/brandSlice";
 // import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-
+import { postView } from "../../Utils/function/view";
+import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -45,12 +46,11 @@ function TopBrandVdoCards() {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   // Get brands and loading state from Redux
-  const { data: brands = [], loading: brandsLoading } = useSelector(
-    (state) => state.brands
-  );
+  const { data: brands = [], loading: brandsLoading } = useBrands();
+const toggleLike = useToggleLike();
 
   // Fixed card sizes with better aspect ratios
   const CARD_SIZES = {
@@ -73,8 +73,11 @@ function TopBrandVdoCards() {
       return;
     }
 
+    console.log("brandid :",brandId)
+    console.log("isLiked :",isLiked)
+
     try {
-      await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
+      await toggleLike.mutateAsync({ brandId, isLiked });
     } catch (error) {
       console.error("Like operation failed:", error);
     }
@@ -146,8 +149,9 @@ function TopBrandVdoCards() {
   };
 
   const handleApply = (brand) => {
-    dispatch(openBrandDialog(brand));
-    navigate(`/brands/${brand.uuid}`)
+    postView(brand.uuid)
+    openBrandDialog(brand)
+    // navigate(`/brands/${brand.uuid}`)
   };
 
   if (brandsLoading && brands.length === 0) {

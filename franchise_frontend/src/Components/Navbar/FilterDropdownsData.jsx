@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -10,11 +10,10 @@ import {
   CircularProgress,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setFilters,fetchBrands } from "../../Redux/Slices/brandSlice";
-import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice";
+import { useBrands } from "../../Hooks/Fetchbrands";
 
+// Memoize investment range options to prevent recreation on every render
 const investmentRangeOptions = [
   { label: "All Ranges", value: "" },
   { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
@@ -28,39 +27,105 @@ const investmentRangeOptions = [
   { label: "Rs.2Cr-5Cr", value: "Rs.2Cr-5Cr" },
   { label: "Rs.5Cr-above", value: "Rs.5Cr-above" },
 ];
+
 const FilterDropdowns = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const {
-    categories = [],
-    states = [],
-    filters,
-    loading,
-  } = useSelector((state) => state.brands);
+  const [filters, setFilters] = useState({
+    selectedSubCategory: "",
+    selectedState: "",
+    selectedInvestmentRange: ""
+  });
+  
+  // Fetch brands data with caching and error handling
+  const { 
+    data: brands = [], 
+    isLoading, 
+    error 
+  } = useBrands();
 
-  useEffect(()=>{
-dispatch(fetchBrands());
-  },[])
+  // Memoize derived data to avoid recalculating on every render
+  const { subCategories, states } = useMemo(() => {
+    const subCategoriesSet = new Set();
+    const statesSet = new Set();
+
+    if (brands && brands.length > 0) {
+      brands.forEach(brand => {
+        // Extract subcategories
+        const sub = brand.franchiseDetails?.brandCategories?.sub;
+        if (sub) subCategoriesSet.add(sub);
+        
+        // Extract states
+        const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
+        locations.forEach(loc => {
+          if (loc.state) statesSet.add(loc.state);
+        });
+      });
+    }
+
+    return {
+      subCategories: Array.from(subCategoriesSet).filter(sub => !!sub).map(sub => ({ id: sub, name: sub })),
+      states: Array.from(statesSet).filter(Boolean)
+    };
+  }, [brands]);
+
+  // Filter brands based on current filters
+  const filteredBrands = useMemo(() => {
+    if (!brands || brands.length === 0) return [];
+    
+    return brands.filter(brand => {
+      // Filter by subcategory if selected
+      if (filters.selectedSubCategory && 
+          brand.franchiseDetails?.brandCategories?.sub !== filters.selectedSubCategory) {
+        return false;
+      }
+      
+      // Filter by state if selected
+      if (filters.selectedState) {
+        const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
+        const hasState = locations.some(loc => loc.state === filters.selectedState);
+        if (!hasState) return false;
+      }
+      
+      // Filter by investment range if selected
+      if (filters.selectedInvestmentRange) {
+        const investment = brand.franchiseDetails?.investmentRange;
+        if (investment !== filters.selectedInvestmentRange) return false;
+      }
+      
+      return true;
+    });
+  }, [brands, filters]);
 
   const handleFilterChange = (name, value) => {
-    dispatch(setFilters({ [name]: value }));
+    setFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFindBrands = async () => {
-    try {
-      dispatch(showLoading());
-      // Assuming fetchBrands returns a promise and throws on error
-      await dispatch(fetchBrands()).unwrap();
-      navigate("/brandviewpage", {
-        state: { filters },
-      });
-      dispatch(hideLoading());
-    } catch (error) {
-      // Optionally handle error (e.g., show a message)
-      // Keep loading if needed, or hide if you want to stop spinner on error
-      // dispatch(hideLoading());
-    }
+  const handleFindBrands = () => {
+    // Navigate with filtered brands and current filters
+    navigate("/brandviewpage", {
+      state: { 
+        filters,
+        brands: filteredBrands 
+      },
+    });
   };
+
+  // Show loading or error states
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" p={4}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box p={4}>
+        <Typography color="error">Error loading brands. Please try again later.</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -73,22 +138,19 @@ dispatch(fetchBrands());
           p: 2,
           borderRadius: 2,
           alignItems: "center",
-                    backgroundColor: "#fff",
-
+          backgroundColor: "#fff",
         }}
       >
-        {/* Category Filter - Updated to match your data structure */}
-        <FormControl fullWidth sx={{ minWidth: 180, }}>
+        {/* Category Filter */}
+        <FormControl fullWidth sx={{ minWidth: 180 }}>
           <InputLabel>Category</InputLabel>
           <Select
-            value={filters.selectedCategory || ""}
-            onChange={(e) =>
-              handleFilterChange("selectedCategory", e.target.value)
-            }
+            value={filters.selectedSubCategory}
+            onChange={(e) => handleFilterChange("selectedSubCategory", e.target.value)}
             label="Category"
           >
             <MenuItem value="">All Categories</MenuItem>
-            {categories.map((category) => (
+            {subCategories.map((category) => (
               <MenuItem key={category.id} value={category.id}>
                 {category.name}
               </MenuItem>
@@ -100,15 +162,13 @@ dispatch(fetchBrands());
         <FormControl fullWidth sx={{ minWidth: 180 }}>
           <InputLabel>Location</InputLabel>
           <Select
-            value={filters.selectedState || ""}
-            onChange={(e) =>
-              handleFilterChange("selectedState", e.target.value)
-            }
+            value={filters.selectedState}
+            onChange={(e) => handleFilterChange("selectedState", e.target.value)}
             label="Location"
           >
             <MenuItem value="">All Locations</MenuItem>
-            {states.map((state, idx) => (
-              <MenuItem key={idx} value={state}>
+            {states.map((state) => (
+              <MenuItem key={state} value={state}>
                 {state}
               </MenuItem>
             ))}
@@ -119,10 +179,8 @@ dispatch(fetchBrands());
         <FormControl fullWidth sx={{ minWidth: 180 }}>
           <InputLabel>Investment Range</InputLabel>
           <Select
-            value={filters.selectedInvestmentRange || ""}
-            onChange={(e) =>
-              handleFilterChange("selectedInvestmentRange", e.target.value)
-            }
+            value={filters.selectedInvestmentRange}
+            onChange={(e) => handleFilterChange("selectedInvestmentRange", e.target.value)}
             label="Investment Range"
           >
             {investmentRangeOptions.map((option) => (
@@ -135,7 +193,6 @@ dispatch(fetchBrands());
 
         <Button
           variant="contained"
-          disabled={loading}
           onClick={handleFindBrands}
           startIcon={<SearchIcon />}
           sx={{
@@ -148,7 +205,7 @@ dispatch(fetchBrands());
             },
           }}
         >
-          {loading ? <CircularProgress size={24} /> : "Find Brands"}
+          Find Brands
         </Button>
       </Box>
     </Box>

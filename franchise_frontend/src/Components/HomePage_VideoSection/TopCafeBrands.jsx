@@ -22,14 +22,17 @@ import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import Business from "@mui/icons-material/Business";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+// import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-import {
-  fetchBrands,
-  openBrandDialog,
-  toggleLikeBrand,
-} from "../../Redux/Slices/brandSlice";
-import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
+// import {
+//   fetchBrands,
+//   openBrandDialog,
+//   toggleLikeBrand,
+// } from "../../Redux/Slices/brandSlice";
+// import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
+import { postView } from "../../Utils/function/view";
+import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -56,10 +59,13 @@ const BrandCard = React.memo(({
   const [isVisible, setIsVisible] = useState(false);
   const observerRef = useRef();
 
-  const brandId = brand.uuid;
-  const franchiseModel = brand.franchiseDetails?.fico?.[0] || {};
-  const category = brand.franchiseDetails?.brandCategories || {};
+
+  const brandId = brand?.uuid || '';
+  const franchiseModel = brand?.franchiseDetails?.fico?.[0] || {};
+  const category = brand?.franchiseDetails?.brandCategories || {};
   const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
+  const brandLogo = brand?.uploads?.brandLogo?.[0] || '';
+  const brandName = brand?.brandDetails?.brandName || 'Brand';
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
 
   useEffect(() => {
@@ -123,9 +129,9 @@ const BrandCard = React.memo(({
             <CardMedia
               component="video"
               loading="lazy"
-              poster={brand?.uploads?.brandLogo?.[0] || ""}
+              poster={brandLogo}
               src={videoUrl}
-              alt={brand.brandDetails?.brandName || "Brand"}
+              alt={brandName}
               sx={{
                 position: "absolute",
                 top: 0,
@@ -171,7 +177,7 @@ const BrandCard = React.memo(({
               }}
             >
               <Avatar
-                src={brand?.uploads?.brandLogo?.[0]}
+                src={brandLogo}
                 sx={{
                   width: 50,
                   height: 50,
@@ -189,18 +195,18 @@ const BrandCard = React.memo(({
                   flex: 1,
                 }}
               >
-                {brand.brandDetails?.brandName}
+                {brandName}
               </Typography>
               <IconButton
-                onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
-                disabled={likeProcessing[brand.uuid]}
+                onClick={() => handleLikeClick(brandId, brand?.isLiked)}
+                disabled={likeProcessing[brandId]}
               >
-                {likeProcessing[brand.uuid] ? (
+                {likeProcessing[brandId] ? (
                   <CircularProgress size={24} />
                 ) : (
                   <Favorite
                     sx={{
-                      color: brand.isLiked
+                      color: brand?.isLiked
                         ? "#f44336"
                         : "rgba(0, 0, 0, 0.23)",
                     }}
@@ -209,7 +215,7 @@ const BrandCard = React.memo(({
               </IconButton>
             </Box>
 
-            {category.child && (
+            {category?.child && (
               <Box sx={{ mb: 2 }}>
                 <Stack direction="row" spacing={1}>
                   <Chip
@@ -237,7 +243,7 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  Franchise Type : {franchiseModel.franchiseType || "N/A"}
+                  Franchise Type : {franchiseModel?.franchiseType || "N/A"}
                 </Typography>
               </Box>
 
@@ -251,7 +257,7 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  Investment : {franchiseModel.investmentRange || "Not specified"}
+                  Investment : {franchiseModel?.investmentRange || "Not specified"}
                 </Typography>
               </Box>
               <Box display="flex" alignItems="center">
@@ -264,7 +270,7 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  Area : {franchiseModel.areaRequired || "Not specified"}
+                  Area : {franchiseModel?.areaRequired || "Not specified"}
                 </Typography>
               </Box>
             </Stack>
@@ -305,27 +311,28 @@ const TopCafeFranchises = () => {
   const containerRef = useRef(null);
   const isPaused = useRef(false);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
   
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { data: brands = [] } = useSelector((state) => state.brands);
+
+  // REACT-QUERY HOOKS
+  const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
+  const toggleLike = useToggleLike();
 
   // Filter brands that belong to Coffee & Tea Cafes category
   const coffeeTeaBrands = useMemo(() => {
     return brands.filter(brand => {
-      const category = brand.franchiseDetails?.brandCategories || {};
-      const categoryName = category.child?.toLowerCase();
-      const subCategory = category.sub?.toLowerCase();
+      const category = brand?.franchiseDetails?.brandCategories || {};
+      const categoryName = category?.child?.toLowerCase() || '';
+      const subCategory = category?.sub?.toLowerCase() || '';
       
       return (
-        categoryName?.includes("coffee") ||
-        categoryName?.includes("tea") ||
-        categoryName?.includes("cafe") ||
-        subCategory?.includes("beverage") ||
+        categoryName.includes("coffee") ||
+        categoryName.includes("tea") ||
+        categoryName.includes("cafe") ||
+        subCategory.includes("beverage") ||
         subCategory === "beverage franchises"
       );
     });
@@ -337,61 +344,47 @@ const TopCafeFranchises = () => {
     return CARD_DIMENSIONS.desktop;
   }, [isMobile, isTablet]);
 
-  const initializeData = useCallback(() => {
-    try {
-      if (!coffeeTeaBrands || coffeeTeaBrands.length === 0) {
-        setError("loading...");
-      } else {
-        setError(null);
-      }
-    } catch (err) {
-      setError("Failed to process brands data.");
-      console.error("Error processing brands:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [coffeeTeaBrands]);
+  // const initializeData = useCallback(() => {
+  //   try {
+  //     if (!coffeeTeaBrands || coffeeTeaBrands.length === 0) {
+  //       setError("loading...");
+  //     } else {
+  //       setError(null);
+  //     }
+  //   } catch (err) {
+  //     setError("Failed to process brands data.");
+  //     console.error("Error processing brands:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [coffeeTeaBrands]);
 
-  useEffect(() => {
-    initializeData();
-  }, [initializeData]);
+  // useEffect(() => {
+  //   initializeData();
+  // }, [initializeData]);
 
-  const handleLikeClick = useCallback(async (brandId, isLiked) => {
+   const handleLikeClick = useCallback(async (brandId, isLiked) => {
     if (likeProcessing[brandId]) return;
-
-    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
-    try {
-      await toggleLike(brandId, isLiked);
-    } finally {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-    }
-  }, [likeProcessing]);
-
-  const toggleLike = useCallback(async (brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       setShowLogin(true);
       return;
     }
+    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
     try {
-      await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
+      await toggleLike.mutateAsync({ brandId, isLiked });
     } catch (error) {
       console.error("Like operation failed:", error);
+    } finally {
+      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
     }
-  }, [dispatch]);
+  }, [likeProcessing, toggleLike]);
 
   const handleApply = useCallback((brand) => {
-    // dispatch(openBrandDialog(brand));
-      const newWindow = window.open(`/brands/${brand.uuid}?`, '_blank');
-  localStorage.setItem(`brand-${brand.uuid}`, JSON.stringify(brand));
- 
-  if (newWindow) {
-    newWindow.onbeforeunload = () => {
-      localStorage.removeItem(`brand-${brand.uuid}`);
-    };
-  }
- 
-  }, []);
+    
+    postView(brand.uuid)
+   openBrandDialog(brand);
+   }, [openBrandDialog]);
 
   const handleMouseEnter = useCallback(() => {
     isPaused.current = true;
@@ -401,7 +394,7 @@ const TopCafeFranchises = () => {
     isPaused.current = false;
   }, []);
 
-  if (loading) {
+  if (brandsLoading) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <CircularProgress />
@@ -412,114 +405,112 @@ const TopCafeFranchises = () => {
   if (error) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
-        <Typography color="error">{error}</Typography>
+        <Typography color="error">{error.message || "Failed to load brands."}</Typography>
       </Box>
     );
   }
 
   return (
     <>
-    {coffeeTeaBrands.length > 0 && (
-      <Box
-      sx={{
-        py: isMobile ? 1 : 2,
-        px: isMobile ? 0 : 2,
-        maxWidth: isMobile ? "100%" : 1400,
-        mx: "auto",
-        mb: isMobile ? 0 : 2,
-      }}
-      ref={containerRef}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 1,
-        }}
-      >
-        <Typography
-          variant={isMobile ? "body1" : "h5"}
-          fontWeight="bold"
+      {coffeeTeaBrands.length > 0 && (
+        <Box
           sx={{
-            color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-            mb: 1,
-            textAlign: "left",
-            position: "relative",
-            "&:after": {
-              content: '""',
-              display: "block",
-              width: "80px",
-              height: "4px",
-              background: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-              mt: 1,
-              borderRadius: 2,
-            },
+            py: isMobile ? 1 : 2,
+            px: isMobile ? 0 : 2,
+            maxWidth: isMobile ? "100%" : 1400,
+            mx: "auto",
+            mb: isMobile ? 0 : 2,
           }}
+          ref={containerRef}
         >
-          Top Coffee & Tea Cafes
-        </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 1,
+            }}
+          >
+            <Typography
+              variant={isMobile ? "body1" : "h5"}
+              fontWeight="bold"
+              sx={{
+                color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                mb: 1,
+                textAlign: "left",
+                position: "relative",
+                "&:after": {
+                  content: '""',
+                  display: "block",
+                  width: "80px",
+                  height: "4px",
+                  background: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                  mt: 1,
+                  borderRadius: 2,
+                },
+              }}
+            >
+              Top Coffee & Tea Cafes
+            </Typography>
 
-        <Button
-          variant="text"
-          size="small"
-          endIcon={<ArrowRight />}
-          sx={{
-            textTransform: "none",
-            fontSize: isMobile ? 14 : 16,
-            color: theme.palette.text.secondary,
-            "&:hover": {
-              color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-              backgroundColor: "transparent",
-            },
-          }}
-          onClick={async () => {
-            dispatch(showLoading());
-            navigate("/brandviewpage");
-            setTimeout(() => {
-              dispatch(hideLoading());
-            }, 2000);
-          }}
-        >
-          View More
-        </Button>
-      </Box>
+            <Button
+              variant="text"
+              size="small"
+              endIcon={<ArrowRight />}
+              sx={{
+                textTransform: "none",
+                fontSize: isMobile ? 14 : 16,
+                color: theme.palette.text.secondary,
+                "&:hover": {
+                  color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                  backgroundColor: "transparent",
+                },
+              }}
+              onClick={async () => {
+                // dispatch(showLoading());
+                navigate("/brandviewpage");
+               // dispatch(hideLoading());
+              }}
+            >
+              View More
+            </Button>
+          </Box>
 
-      <Box
-        component={motion.div}
-        initial="initial"
-        animate="animate"
-        sx={{
-          display: "flex",
-          gap: isMobile ? 2 : 3,
-          borderRadius: 3,
-          p: 1,
-          overflowX: "auto",
-          scrollbarWidth: "none",
-          "&::-webkit-scrollbar": { display: "none" },
-        }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {coffeeTeaBrands.map((brand) => (
-          <BrandCard 
-            key={brand.uuid}
-            brand={brand}
-            handleApply={handleApply}
-            handleLikeClick={handleLikeClick}
-            likeProcessing={likeProcessing}
-            dimensions={dimensions}
-            theme={theme}
-            isMobile={isMobile}
-            isTablet={isTablet}
-          />
-        ))}
-      </Box>
-      {showLogin && (
-        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+          <Box
+            component={motion.div}
+            initial="initial"
+            animate="animate"
+            sx={{
+              display: "flex",
+              gap: isMobile ? 2 : 3,
+              borderRadius: 3,
+              p: 1,
+              overflowX: "auto",
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            {coffeeTeaBrands.map((brand) => (
+              <BrandCard 
+                key={brand?.uuid}
+                brand={brand}
+                handleApply={handleApply}
+                handleLikeClick={handleLikeClick}
+                likeProcessing={likeProcessing}
+                dimensions={dimensions}
+                theme={theme}
+                isMobile={isMobile}
+                isTablet={isTablet}
+              />
+            ))}
+          </Box>
+          {showLogin && (
+            <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+          )}
+        </Box>
       )}
-    </Box>
-    )}
     </>
   );
 };
