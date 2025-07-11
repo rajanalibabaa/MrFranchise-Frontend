@@ -344,7 +344,7 @@ function Navbar() {
             }}>
 
               <motion.div >
-    <IconButton sx={{backgroundColor:"white", "&:hover": { backgroundColor: "white" }}}
+    <IconButton 
       onClick={() => setSearchOpen(true)}  >
       <Search  size={25}  />
       <Typography sx={{display:{xs:"none", sm:"flex"}}}>Search</Typography>

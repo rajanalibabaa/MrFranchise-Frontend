@@ -558,7 +558,7 @@ const renderStatCard = (icon, title, value, color) => {
         </Box>
       </Card>
 
-      <BrandDetailsDialog />
+      {/* <BrandDetailsDialog /> */}
     </Box>
   );
 };

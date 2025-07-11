@@ -24,13 +24,8 @@ import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-import {
-  fetchBrands,
-  openBrandDialog,
-  toggleLikeBrand,
-} from "../../Redux/Slices/brandSlice";
-// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
-import { showLoading , hideLoading} from "../../Redux/Slices/loadingSlice";
+import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+
 import { postView } from "../../Utils/function/view";
 
 const CARD_DIMENSIONS = {
@@ -134,6 +129,7 @@ const BrandCard = React.memo(({
             <CardMedia
               component="video"
               loading="lazy"
+              poster={brand?.uploads?.brandLogo?.[0] || ""}
               src={videoUrl}
               alt={brand.personalDetails?.brandName || "Brand"}
               sx={{
@@ -333,15 +329,13 @@ const TopDesertBakerys = () => {
   const containerRef = useRef(null);
   const isPaused = useRef(false);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
   
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { data: brands = [] } = useSelector((state) => state.brands);
-
+  const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
+  const toggleLike = useToggleLike();
   // Filter brands that belong to Beverage Franchise subcategory
 // Filter brands that belong to Beverage Franchise subcategory and all its child categories
 const beverageBrands = useMemo(() => {
@@ -364,53 +358,45 @@ const beverageBrands = useMemo(() => {
     return CARD_DIMENSIONS.desktop;
   }, [isMobile, isTablet]);
 
-  const initializeData = useCallback(() => {
-    try {
-      if (!beverageBrands || beverageBrands.length === 0) {
-        // setError("Loading...");
-      } else {
-        setError(null);
-      }
-    } catch (err) {
-      setError("Failed to process brands data.");
-      console.error("Error processing brands:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [beverageBrands]);
+  // const initializeData = useCallback(() => {
+  //   try {
+  //     if (!beverageBrands || beverageBrands.length === 0) {
+  //       // setError("Loading...");
+  //     } else {
+  //       setError(null);
+  //     }
+  //   } catch (err) {
+  //     setError("Failed to process brands data.");
+  //     console.error("Error processing brands:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [beverageBrands]);
 
-  useEffect(() => {
-    initializeData();
-  }, [initializeData]);
-
-  const handleLikeClick = useCallback(async (brandId, isLiked) => {
+  // useEffect(() => {
+  //   initializeData();
+  // }, [initializeData]);
+const handleLikeClick = useCallback(async (brandId, isLiked) => {
     if (likeProcessing[brandId]) return;
-
-    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
-    try {
-      await toggleLike(brandId, isLiked);
-    } finally {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-    }
-  }, [likeProcessing]);
-
-  const toggleLike = useCallback(async (brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       setShowLogin(true);
       return;
     }
+    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
     try {
-      await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
+      await toggleLike.mutateAsync({ brandId, isLiked });
     } catch (error) {
       console.error("Like operation failed:", error);
+    } finally {
+      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
     }
-  }, [dispatch]);
+  }, [likeProcessing, toggleLike]);
 
-  const handleApply = useCallback((brand) => {
-    postView(brand.uuid)
-    dispatch(openBrandDialog(brand));
-  }, [dispatch]);
+   const handleApply = useCallback((brand) => {
+    postView(brand.uuid);
+    openBrandDialog(brand);
+  }, []);
 
   const handleMouseEnter = useCallback(() => {
     isPaused.current = true;
@@ -420,7 +406,7 @@ const beverageBrands = useMemo(() => {
     isPaused.current = false;
   }, []);
 
-  if (loading) {
+  if (brandsLoading) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <CircularProgress />
@@ -430,8 +416,8 @@ const beverageBrands = useMemo(() => {
 
   if (error) {
     return (
-      <Box sx={{ textAlign: "center", p: 4 }}>
-        <Typography color="error">{error}</Typography>
+     <Box sx={{ textAlign: "center", p: 4 }}>
+        <Typography color="error">{error.message || "Failed to load brands."}</Typography>
       </Box>
     );
   }
@@ -495,9 +481,7 @@ const beverageBrands = useMemo(() => {
             },
           }}
           onClick={() =>
-            {dispatch(showLoading());
                navigate("/brandviewpage")
-               dispatch(hideLoading());}
           }
         >
           View More

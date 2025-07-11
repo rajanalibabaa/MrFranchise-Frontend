@@ -1,9 +1,12 @@
 import React from "react";
-import { Box, Typography, Paper, Button, Divider, Grid } from "@mui/material";
+import { Box, Typography, Paper, Button, Divider, Grid, useTheme, useMediaQuery } from "@mui/material";
+import { Link as RouterLink } from 'react-router-dom';
+import {Link} from '@mui/material';
 import { motion } from "framer-motion";
 import Navbar from "../../Navbar/NavBar";
 import Footer from "../Footer";
-
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
 // Set your preferred font family here
 const FONT_FAMILY = "'Poppins', 'Roboto', 'Arial', sans-serif";
 
@@ -26,12 +29,16 @@ const Section = ({ title, children, sx = {}, titleColor = "#ffba00" }) => (
 
 
 const InvestFranchise = () => {
+   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
   return (
     <Box sx={{ fontFamily: FONT_FAMILY, background: "#f9fafb", minHeight: "100vh" }}>
       <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 10 }}>
         <Navbar />
       </Box>
-      <Box p={4} maxWidth="lg" mx="auto" marginTop={12}>
+<Box p={4} maxWidth="lg" mx="auto" sx={{ mt: { xs: 6, md: 12,sm:15 } }}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -41,18 +48,20 @@ const InvestFranchise = () => {
           <Typography
             align="center"
             color="#ffba00"
-            variant="h4"
+            variant={ isMobile ? "h5" : "h3"}
             fontWeight={700}
-            sx={{ fontFamily: FONT_FAMILY, mb: 1 }}
+            sx={{ fontFamily: FONT_FAMILY, mb: 1, }}
           >
             Invest in a Franchise
           </Typography>
           <Typography
             align="center"
             variant="h6"
-            color="text.secondary"
+            color="#7ad03a"
             marginBottom={4}
-            sx={{ fontFamily: FONT_FAMILY }}
+            sx={{ fontFamily: FONT_FAMILY,    fontWeight:500
+
+ }}
           >
             Own a Business. Back a Brand. Grow with Confidence.
           </Typography>
@@ -67,7 +76,15 @@ const InvestFranchise = () => {
   >
         <Typography sx={{ fontFamily: FONT_FAMILY, mb: 3, fontSize: "1.1rem", color: "#333" }}>
           Franchise investment is one of the smartest, lowest-risk ways to enter
-          entrepreneurship — and MrFranchise.in is your trusted gateway to
+          entrepreneurship — and <Link
+              component={RouterLink}
+              to="/"
+              underline="hover"
+              color="black"
+              fontWeight="bold"
+            >
+              MrFranchise.in
+            </Link>{" "}.in is your trusted gateway to
           verified, high-potential franchise opportunities across Tamil Nadu and
           beyond. Whether you're a first-time investor, an NRI looking for
           income-based opportunities, or a professional planning to exit the 9–5
@@ -220,18 +237,59 @@ const InvestFranchise = () => {
             gap={2}
             flexWrap="wrap"
           >
-            <Button variant="contained" sx={{ background: "#ffba00", color: "#fff", fontWeight: 700, fontFamily: FONT_FAMILY }}>
+            <Button variant="contained" sx={{  fontWeight: 700, fontFamily: FONT_FAMILY ,background: "linear-gradient(90deg, #ff9800 60%, #ffd54f 100%)",
+                  color: "#fff", "&:hover": {
+                    background: "linear-gradient(90deg, #ffd54f 60%, #ff9800 100%)"
+                  }}}>
               Explore Listings Now
             </Button>
-            {/* <Button variant="outlined" sx={{ borderColor: "#ffba00", color: "#ffba00", fontWeight: 700, fontFamily: FONT_FAMILY }}>
-              Book an Investor Consultation
-            </Button> */}
           </Box>
 
           <Box mt={3}>
-            <Typography sx={{ fontFamily: FONT_FAMILY }}>📞 Call: +91 98413 23388</Typography>
-            <Typography sx={{ fontFamily: FONT_FAMILY }}>📧 Email: ceo@MrFranchise.in</Typography>
-          </Box>
+<Grid>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                startIcon={<PhoneIcon />}
+                sx={{
+                  // boxShadow: "0 2px 8px #1976d233",
+                  fontWeight: 700,
+                  px: 3,
+                  mb:3,
+                  borderRadius: 3,
+                                  background: "linear-gradient(90deg, #ff9800 60%, #ffd54f 100%)",
+                  color: "#fff",
+                  "&:hover": {
+                    background: "linear-gradient(90deg, #ffd54f 60%, #ff9800 100%)"
+
+                  }
+                }}
+                href="tel:+919841323388"
+              >
+                Call Now: +91 98413 23388
+              </Button>
+            </Grid><Grid >
+              <Button
+                variant="outlined"
+                size="large"
+                startIcon={<EmailIcon />}
+                sx={{
+                  fontWeight: 700,
+                  px: 3,
+                  borderRadius: 3,
+                  borderColor: "#ff9800",
+                 background: "linear-gradient(90deg, #ff9800 60%, #ffd54f 100%)",
+                  color: "#fff",
+                  "&:hover": {
+                    background: "linear-gradient(90deg, #ffd54f 60%, #ff9800 100%)"
+                  }
+                }}
+                href="mailto:ceo@MrFranchise.in"
+              >
+                Email: ceo@MrFranchise.in
+              </Button>
+            </Grid>          </Box>
         </Box>
         </motion.div>
       </Box>

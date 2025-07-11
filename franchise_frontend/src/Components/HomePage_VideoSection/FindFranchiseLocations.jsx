@@ -26,12 +26,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchBrands,
-  openBrandDialog,
-  toggleLikeBrand,
-} from "../../Redux/Slices/brandSlice";
+import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 // Animation variants for cards
@@ -44,7 +39,6 @@ const TopInvestVdo2 = React.memo(() => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   // State management
@@ -55,8 +49,8 @@ const TopInvestVdo2 = React.memo(() => {
   const isPaused = useRef(false);
 
   // Redux state
-  const { data: brands = [], loading, error } = useSelector((state) => state.brands);
-
+const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
+  const toggleLike = useToggleLike();
 
   // console.log("brand === :",brands)
 
@@ -71,19 +65,20 @@ const TopInvestVdo2 = React.memo(() => {
   // Handle like/unlike action
   const handleLikeClick = useCallback(async (brandId, isLiked) => {
     if (likeProcessing[brandId]) return;
-
-    setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        setShowLogin(true);
-        return;
-      }
-      await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
-    } finally {
-      setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setShowLogin(true);
+      return;
     }
-  }, [dispatch, likeProcessing]);
+    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+    try {
+      await toggleLike.mutateAsync({ brandId, isLiked });
+    } catch (error) {
+      console.error("Like operation failed:", error);
+    } finally {
+      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
+    }
+  }, [likeProcessing, toggleLike]);
 
   // Filter brands to only include those with expansion locations
   const brandsWithExpansion = useMemo(() => {
@@ -109,29 +104,29 @@ const TopInvestVdo2 = React.memo(() => {
   }, [brandsWithExpansion, selectedLocation]);
 
   // Initialize locations data
-  useEffect(() => {
-    const initializeData = async () => {
-      try {
-        if (brandsWithExpansion.length > 0) {
-          const locationsSet = new Set();
+  // useEffect(() => {
+  //   const initializeData = async () => {
+  //     try {
+  //       if (brandsWithExpansion.length > 0) {
+  //         const locationsSet = new Set();
           
-          brandsWithExpansion.forEach((brand) => {
-            const personalLocations = brand?.personalDetails?.expansionLocation?.map(loc => loc.city) || [];
-            const brandLocations = brand?.brandDetails?.expansionLocations || [];
+  //         brandsWithExpansion.forEach((brand) => {
+  //           const personalLocations = brand?.personalDetails?.expansionLocation?.map(loc => loc.city) || [];
+  //           const brandLocations = brand?.brandDetails?.expansionLocations || [];
             
-            personalLocations.forEach(loc => locationsSet.add(loc));
-            brandLocations.forEach(loc => locationsSet.add(loc));
-          });
+  //           personalLocations.forEach(loc => locationsSet.add(loc));
+  //           brandLocations.forEach(loc => locationsSet.add(loc));
+  //         });
 
-          setAllLocations(["All Locations", ...Array.from(locationsSet).sort()]);
-        }
-      } catch (err) {
-        console.error("Initialization error:", err);
-      }
-    };
+  //         setAllLocations(["All Locations", ...Array.from(locationsSet).sort()]);
+  //       }
+  //     } catch (err) {
+  //       console.error("Initialization error:", err);
+  //     }
+  //   };
 
-    initializeData();
-  }, [brandsWithExpansion]);
+  //   initializeData();
+  // }, [brandsWithExpansion]);
 
   // Brand card component
   const BrandCard = React.memo(({ brand }) => {
@@ -345,7 +340,7 @@ const TopInvestVdo2 = React.memo(() => {
 
             <Button
               variant="contained"
-              onClick={() => dispatch(openBrandDialog(brand))}
+              onClick={() => openBrandDialog(brand)}
               fullWidth
               size={isMobile ? "small" : "medium"}
               sx={{
@@ -372,7 +367,7 @@ const TopInvestVdo2 = React.memo(() => {
   });
 
   // Render loading state
-  if (loading) {
+  if (brandsLoading) {
     return (
       <Box sx={{ p: 4, textAlign: "center" }}>
         <CircularProgress />
@@ -383,8 +378,8 @@ const TopInvestVdo2 = React.memo(() => {
   // Render error state
   if (error) {
     return (
-      <Box sx={{ p: 4, textAlign: "center", color: "error.main" }}>
-        <Typography variant="body1">{error}</Typography>
+     <Box sx={{ textAlign: "center", p: 4 }}>
+        <Typography color="error">{error.message || "Failed to load brands."}</Typography>
       </Box>
     );
   }
@@ -484,7 +479,7 @@ const TopInvestVdo2 = React.memo(() => {
         ))}
       </Box>
 
-      {filteredBrands.length === 0 && !loading && (
+      {filteredBrands.length === 0 && !brandsLoading && (
         <Box sx={{ p: 4, textAlign: "center" }}>
           <Typography variant="body1" color="text.secondary">
             No franchise opportunities found for the selected location.

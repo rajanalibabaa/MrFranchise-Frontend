@@ -4,47 +4,41 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { openBrandDialog } from "../../Redux/Slices/brandSlice";
+// import { useDispatch, useSelector } from "react-redux";
+// import { openBrandDialog } from "../../Redux/Slices/brandSlice";
 import { postView } from '../../Utils/function/view';
-import { fetchBrands, toggleLikeBrand } from "../../Redux/Slices/brandSlice";
-import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
+// import { fetchBrands, toggleLikeBrand } from "../../Redux/Slices/brandSlice";
+// import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-
+import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 const TopInvestVdocardround = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const navigate = useNavigate();
   
   // Get brands data from Redux store
-  const { data: brands = [], loading, error } = useSelector((state) => state.brands);
+  const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
+  const toggleLike = useToggleLike();
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
   const [visibleBrands, setVisibleBrands] = useState(15);
 
-  // Fetch brands when component mounts
-  useEffect(() => {
-    dispatch(fetchBrands());
-  }, [dispatch]);
+  // // Fetch brands when component mounts
+  // useEffect(() => {
+  //   dispatch(fetchBrands());
+  // }, [dispatch]);
 
-  const toggleLike = useCallback(async (brandId, isLiked) => {
+ const handleLikeClick = useCallback(async (brandId, isLiked) => {
+    if (likeProcessing[brandId]) return;
     const token = localStorage.getItem("accessToken");
     if (!token) {
       setShowLogin(true);
       return;
     }
-    try {
-      await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
-    } catch (error) {
-      console.error("Like operation failed:", error);
-    }
-  }, [dispatch]);
-
-  const handleLikeClick = useCallback(async (brandId, isLiked) => {
-    if (likeProcessing[brandId]) return;
-
     setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
     try {
-      await toggleLike(brandId, isLiked);
+      await toggleLike.mutateAsync({ brandId, isLiked });
+    } catch (error) {
+      console.error("Like operation failed:", error);
     } finally {
       setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
     }
@@ -54,12 +48,12 @@ const TopInvestVdocardround = () => {
     setVisibleBrands(prev => prev + 10);
   };
 
-  const handleApply = useCallback((brand) => {
+    const handleApply = useCallback((brand) => {
     postView(brand.uuid);
-    dispatch(openBrandDialog(brand));
-  }, [dispatch]);
+    openBrandDialog(brand);
+  }, []);
 
-  if (loading) return (
+  if (brandsLoading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
       <CircularProgress size={60} thickness={4} sx={{ color: '#f29724' }} />
     </Box>
@@ -67,8 +61,8 @@ const TopInvestVdocardround = () => {
 
   if (error) return (
     <Box sx={{ textAlign: "center", p: 4 }}>
-      <Typography color="error">{error}</Typography>
-    </Box>
+        <Typography color="error">{error.message || "Failed to load brands."}</Typography>
+      </Box>
   );
 
   return (

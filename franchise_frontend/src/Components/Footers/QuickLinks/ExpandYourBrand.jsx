@@ -1,12 +1,16 @@
 import React from "react";
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Box,
   Typography,
   Grid,
   Container,
   Card,
+  Link,         
   CardContent,
-  Button
+  Button,
+  useTheme,
+  useMediaQuery
 } from "@mui/material";
 import BusinessIcon from '@mui/icons-material/Business';
 import  ExpandBrand from "../../../assets/Images/ExpandBusiness.jpg";
@@ -17,6 +21,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import Navbar from '../../Navbar/NavBar';
 import Footer from '../Footer';
+
 
 // Inject custom styles for the page
 const customStyle = `
@@ -31,7 +36,7 @@ const customStyle = `
 }
 .expand-bg {
   min-height: 100vh;
-  background: linear-gradient(120deg, #fffbe7 0%, #ffe0b2 40%, #e3f2fd 100%);
+  // background: linear-gradient(120deg, #fffbe7 0%, #ffe0b2 40%, #e3f2fd 100%);
   background-size: 200% 200%;
   animation: gradientMove 12s ease-in-out infinite;
 }
@@ -45,7 +50,7 @@ const customStyle = `
   animation: fadeInUp 0.8s;
 }
 .section-box:hover {
-  box-shadow: 0 12px 48px #ffe08299;
+  // box-shadow: 0 12px 48px #ffe08299;
   transform: translateY(-6px) scale(1.02);
 }
 .section-title {
@@ -85,6 +90,8 @@ const customStyle = `
   }
 }
 `;
+
+
 if (!document.head.querySelector('style[data-expand-custom]')) {
   const styleTag = document.createElement("style");
   styleTag.setAttribute("data-expand-custom", "true");
@@ -95,8 +102,8 @@ if (!document.head.querySelector('style[data-expand-custom]')) {
 // Section component with ul/li, no map
 const Section = ({ title, icon, items, image, description }) => (
   image ? (
-    <Grid container spacing={3} alignItems="center" className="section-box" sx={{ mb: 4 }}>
-      <Grid item xs={12} md={5}>
+    <Grid container spacing={3} alignItems="center" className="section-box" sx={{ mb: 2 }}>
+      <Grid  xs={12} md={5}>
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
           <img
             src={image}
@@ -105,6 +112,7 @@ const Section = ({ title, icon, items, image, description }) => (
               maxWidth: "100%",
               maxHeight: 300,
               mr:3,
+             marginLeft:16,
               borderRadius: 16,
               boxShadow: "0 4px 24px #ffe08255",
               objectFit: "contain",
@@ -113,8 +121,8 @@ const Section = ({ title, icon, items, image, description }) => (
           />
         </Box>
       </Grid>
-      <Grid item xs={12} md={7}>
-        <span className="section-title">
+      <Grid  xs={12} md={7} >
+        <span className="section-title" >
           {icon}
           <Box ml={1}>{title}</Box>
         </span>
@@ -151,29 +159,35 @@ const Section = ({ title, icon, items, image, description }) => (
 );
 
 const ExpandYourBrand = () => {
+   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  // const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
   return (
     <Box className="expand-bg">
       <Box sx={{ position: 'fixed', top: 0, width: '100%', zIndex: 10 }}>
         <Navbar />
       </Box>
 
-      <Container sx={{ py: 5 }}>
+      <Container sx={{ py: 2 }}>
         {/* Header */}
         <Box
           textAlign="center"
-          mt={10}
-          mb={6}
+          // mt={2}
+          mb={3}
           sx={{
             animation: "fadeInUp 1s",
             borderRadius: 4,
             px: { xs: 2, md: 6 },
             py: { xs: 3, md: 4 },
+            mt: {xs:5, sm:15, lg:5}
+
             // background: "rgba(255,255,255,0.98)",
-            boxShadow: "0 4px 32px #ffe08255"
+            // boxShadow: "0 4px 32px #ffe08255"
           }}
         >
           <Typography
-            variant="h4"
+            variant={isMobile ? "h5" : "h3"}
             fontWeight="bold"
             gutterBottom
             color="#ff9800"
@@ -182,9 +196,9 @@ const ExpandYourBrand = () => {
             Expand Your Brand
           </Typography>
           <Typography
-            variant="h5"
+            variant={isMobile ? "h6" : "h4"}
             gutterBottom
-            sx={{ color: "#585252", fontWeight: 600, letterSpacing: 0.5 }}
+            sx={{ color: "#7ad03a", fontWeight: 600, letterSpacing: 0.5 }}
           >
             Transform Your Business into a Scalable Franchise with MrFranchise.in
           </Typography>
@@ -192,7 +206,15 @@ const ExpandYourBrand = () => {
             Are you running a successful business and ready to take it to the next level?
           </Typography>
           <Typography variant="body1" color="text.secondary" mt={1}>
-            At MrFranchise.in, we specialize in helping business owners expand their brand through franchising — strategically, professionally, and profitably. Whether you own a local outlet, a regional chain, or an emerging startup, we help you structure your model, position your brand, and attract serious investors across Tamil Nadu and beyond.
+            At <Link
+              component={RouterLink}
+              to="/"
+              underline="hover"
+              color="black"
+              fontWeight="bold"
+            >
+              MrFranchise.in
+            </Link>{" "}, we specialize in helping business owners expand their brand through franchising — strategically, professionally, and profitably. Whether you own a local outlet, a regional chain, or an emerging startup, we help you structure your model, position your brand, and attract serious investors across Tamil Nadu and beyond.
           </Typography>
         </Box>
 
@@ -224,9 +246,10 @@ const ExpandYourBrand = () => {
 
         {/* What We Do */}
         <Typography
-          variant="h6"
+          variant="h5"
           textAlign="center"
           fontWeight="bold"
+          color="#7ad03a"
           gutterBottom
           sx={{
             mb: 2,
@@ -242,9 +265,9 @@ const ExpandYourBrand = () => {
           As your franchise consulting partner, we provide an end-to-end solution:
         </Typography>
 
-       <Grid container spacing={2}>
+       <Grid container spacing={2} sx={{alignItems: "center", display: "flex", justifyContent: "center"}} alignItems="stretch">
           {/* First row - 3 sections */}
-          <Grid item xs={12} md={4} sx={{alignItems: "center", display: "flex", justifyContent: "center"}}>
+          <Grid  xs={12} sm={8} md={4} >
             <Section
               title="1. Strategic Franchise Planning"
               items={[
@@ -255,7 +278,7 @@ const ExpandYourBrand = () => {
               ]}
             />
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid  xs={12} md={4}>
             <Section
               title="2. Legal & Financial Documentation"
               items={[
@@ -266,7 +289,7 @@ const ExpandYourBrand = () => {
               ]}
             />
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid  xs={12} md={4}>
             <Section
               title="3. Franchise Kit & Investor Pitch Deck"
               items={[
@@ -279,9 +302,9 @@ const ExpandYourBrand = () => {
           </Grid>
           
           {/* Second row - 2 centered sections */}
-          <Grid item xs={12}>
+          <Grid  xs={12}>
             <Grid container justifyContent="center" spacing={4}>
-              <Grid item xs={12} md={6} lg={5}>
+              <Grid  xs={12} md={6} lg={5}>
                 <Section
                   title="4. Brand Promotion & Investor Outreach"
                   items={[
@@ -292,7 +315,7 @@ const ExpandYourBrand = () => {
                   ]}
                 />
               </Grid>
-              <Grid item xs={12} md={6} lg={5}>
+              <Grid  xs={12} md={6} lg={5}>
                 <Section
                   title="5. Franchisee Screening & Growth Support"
                   items={[
@@ -313,13 +336,13 @@ const ExpandYourBrand = () => {
           sx={{
             borderRadius: 3,
             mb: 4,
-            background: "linear-gradient(90deg, #fffde7 60%, #e3f2fd 100%)",
-            boxShadow: "0 2px 12px #ffe08233",
+            background: "linear-gradient(90deg, #fffde7 60%, #e8f5e9 100%)",
+            boxShadow: "0 2px 12px #aed58133",
             animation: "fadeInUp 1.3s"
           }}
         >
           <CardContent>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom color="#7ad03a">
               🧑‍💼 Led by Experts, Built for Scale
             </Typography>
             <Typography variant="body1" color="text.secondary">
@@ -349,20 +372,22 @@ const ExpandYourBrand = () => {
           </Typography>
 
           <Grid container spacing={2} justifyContent="center">
-            <Grid item>
+            <Grid>
               <Button
                 variant="contained"
                 color="primary"
                 size="large"
                 startIcon={<PhoneIcon />}
                 sx={{
-                  boxShadow: "0 2px 8px #1976d233",
+                  // boxShadow: "0 2px 8px #1976d233",
                   fontWeight: 700,
                   px: 3,
                   borderRadius: 3,
+                                  background: "linear-gradient(90deg, #ff9800 60%, #ffd54f 100%)",
+                  color: "#fff",
                   "&:hover": {
-                    transform: "scale(1.05)",
-                    boxShadow: "0 6px 24px #1976d244"
+                    background: "linear-gradient(90deg, #ffd54f 60%, #ff9800 100%)"
+
                   }
                 }}
                 href="tel:+919841323388"
@@ -370,7 +395,7 @@ const ExpandYourBrand = () => {
                 Call Now: +91 98413 23388
               </Button>
             </Grid>
-            <Grid item>
+            <Grid >
               <Button
                 variant="outlined"
                 size="large"
@@ -391,7 +416,7 @@ const ExpandYourBrand = () => {
                 Email: ceo@MrFranchise.in
               </Button>
             </Grid>
-            <Grid item>
+            <Grid >
               <Button
                 variant="contained"
                 color="secondary"

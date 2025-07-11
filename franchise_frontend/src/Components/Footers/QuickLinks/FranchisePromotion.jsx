@@ -20,7 +20,7 @@ const animatedBg = keyframes`
 
 const sectionBg = {
   minHeight: "100vh",
-  background: "linear-gradient(120deg, #fffbe7, #e3f2fd, #ffe0b2, #c8e6c9)",
+  // background: "linear-gradient(120deg, #fffbe7, #e3f2fd, #ffe0b2, #c8e6c9)",
   backgroundSize: "300% 300%",
   animation: `${animatedBg} 12s ease-in-out infinite`,
   position: "relative",
@@ -87,7 +87,7 @@ const FranchisePromotion = () => {
         sx={{
           py: { xs: 2, sm: 4 },
           borderRadius: 4,
-          mt: { xs: 10, sm: 12, md: 15 },
+          mt: { xs: 10, sm: 16, md: 15,lg:12 },
           mb: { xs: 2, sm: 4, md: 6 },
           position: "relative",
           zIndex: 2
@@ -100,7 +100,9 @@ const FranchisePromotion = () => {
             color: "#ff9800",
             textAlign: "center",
             letterSpacing: 1,
+            fontSize:{xs:23, sm:30},
             mb: 2,
+            fontWeight:"bold",
             textShadow: "0 2px 12px #fffbe7"
           }}
         >
@@ -108,14 +110,15 @@ const FranchisePromotion = () => {
         </Typography>
         <Typography
           variant="subtitle1"
-          sx={{ color: "black", textAlign: "center", mb: 2, fontSize: { xs: 16, sm: 18, md: 20 } }}
+          sx={{color:"#7ad03a"
+, textAlign: "center", mb: 2, fontSize: { xs: 16, sm: 18, md: 20 } }}
         >
           Built for Food & Beverage Brands. Powered by{" "}
           <Box
             component="a"
             href="/"
             sx={{
-              color: "black",
+              color: "#7ad03a",
               fontWeight: "bold",
               textDecoration: "none",
               cursor: "pointer",
@@ -134,19 +137,21 @@ const FranchisePromotion = () => {
         <Grid
           container
           spacing={{ xs: 4, sm: 6, md: 8 }}
-          sx={{ position: "relative", zIndex: 2 }}
+          justifyContent="center"
         >
           {/* Starter */}
           <Grid
-            item
             xs={12}
             md={6}
             sx={{
-              ml: { md: "auto" },
-              pr: { md: 8 },
-              position: "relative",
+              
+              // ml: { md: "auto" },
+              // pr: { md: 8 },
+              // position: "relative",
               display: "flex",
-              alignItems:"stretch"
+             justifyContent:"center",
+                            marginBottom:5,
+
             }}
           >
             <Box
@@ -165,10 +170,12 @@ const FranchisePromotion = () => {
                 color="#2e7d32"
                 sx={{
                   background: "#388e3c",
-                  width:"50%",
+                  width:"90%",
+                  maxWidth:420,
                   alignSelf: "center",
                   color: "#fff",
                   mb: 2,
+                  
                   fontWeight: 700,
                   fontSize: 16
                 }}
@@ -243,7 +250,9 @@ const FranchisePromotion = () => {
               mr: { md: "auto" },
               pl: { md: 8 },
               position: "relative",
-              display: "flex"
+              display: "flex",
+                                          marginBottom:5,
+
             }}
           >
             <Box
@@ -264,7 +273,8 @@ const FranchisePromotion = () => {
                   background: "#ff9800",
                   color: "#fff",
                   fontWeight: 700,
-                   width:"50%",
+                   width:"90%",
+                   maxWidth:420,
                   alignSelf: "center",
                   fontSize: 16
                 }}
@@ -345,7 +355,9 @@ const FranchisePromotion = () => {
               ml: { md: "auto" },
               pr: { md: 8 },
               position: "relative",
-              display: "flex"
+              display: "flex",
+                                          marginBottom:5,
+
             }}
           >
             <Box
@@ -366,7 +378,8 @@ const FranchisePromotion = () => {
                   background: "#f57c00",
                   color: "#fff",
                   fontWeight: 700,
-                   width:"50%",
+                   width:"90%",
+                   maxWidth:420,
                   alignSelf: "center",
                   fontSize: 16
                 }}
@@ -447,7 +460,9 @@ const FranchisePromotion = () => {
               mr: { md: "auto" },
               pl: { md: 8 },
               position: "relative",
-              display: "flex"
+              display: "flex",
+                                          marginBottom:5,
+
             }}
           >
             <Box
@@ -468,7 +483,8 @@ const FranchisePromotion = () => {
                   background: "#388e3c",
                   color: "#fff",
                   fontWeight: 700,
-                   width:"50%",
+                   width:"90%",
+                   maxWidth: 420,
                   alignSelf: "center",
                   fontSize: 16
                 }}
