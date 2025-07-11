@@ -257,6 +257,12 @@ const BrandDetails = () => {
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+ const id = investorUUID || localStorage.getItem("brandUUID");
+
+      if (!id) {
+        alert("User not logged in or missing ID. Please login again.");
+        return;
+      }
 
     try {
       const payload = {
@@ -266,15 +272,10 @@ const BrandDetails = () => {
         city: formData.city || "",
         brandId: selectedBrand?.uuid,
         brandName: selectedBrand?.brandDetails?.brandName || "",
+        applyId : id || ""
       };
 
-      const id = investorUUID || localStorage.getItem("brandUUID");
-
-      if (!id) {
-        alert("User not logged in or missing ID. Please login again.");
-        return;
-      }
-
+     
       // Validate required fields
       const requiredFields = [
         'fullName', 'investorEmail', 'mobileNumber', 'state', 
@@ -288,8 +289,10 @@ const BrandDetails = () => {
         return;
       }
 
+      console.log("payload :",payload)
+
       const response = await axios.post(
-        `https://localhost:5173/api/v1/instantapply/postApplication`,
+       "https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication",
         payload,
         { 
           headers: { "Content-Type": "application/json" },
