@@ -194,7 +194,7 @@ const ManageProfile = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -260,7 +260,7 @@ const ManageProfile = () => {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otp/existingEmailOTP",
+        "http://localhost:5000/api/v1/otp/existingEmailOTP",
         { email: investorData.email },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -305,7 +305,7 @@ const ManageProfile = () => {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otp/verifyExistingEmailOTP",
+        "http://localhost:5000/api/v1/otp/verifyExistingEmailOTP",
         {
           email: investorData.email,
           verifyOTP: otp,
@@ -631,7 +631,7 @@ const ManageProfile = () => {
 
     try {
       const response = await axios.patch(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/updateInvestor/${investorUUID}`,
+        `http://localhost:5000/api/v1/investor/updateInvestor/${investorUUID}`,
         formData,
         {
           headers: {
@@ -945,7 +945,7 @@ const ManageProfile = () => {
       setSnackbarOpen(false);
       
       const response = await axios.patch(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/deleteInvestorProfileImage/${investorUUID}`,
+        `http://localhost:5000/api/v1/investor/deleteInvestorProfileImage/${investorUUID}`,
         { removeProfileImage: true },
         {
           headers: {

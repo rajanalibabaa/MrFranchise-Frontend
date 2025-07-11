@@ -121,7 +121,7 @@ function BrandList() {
 
     if (!AccessToken) {
       response = await axios.get(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+        "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
         {
           headers: {
             "Content-Type": "application/json",
@@ -130,7 +130,7 @@ function BrandList() {
       );
     } else {
       response = await axios.get(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
+        `http://localhost:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -284,7 +284,7 @@ function BrandList() {
 
     console.log(brand.uuid)
 
-    const viewResponse = await axios.post(`https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${Id}`,
+    const viewResponse = await axios.post(`http://localhost:5000/api/v1/view/postViewBrands/${Id}`,
       {viewedID:brand.uuid},
       {
           headers: {
@@ -509,7 +509,7 @@ const toggleLike = async (brandId) => {
     if (updatedLikedStatus) {
       // Add to favorites
       await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
+        "http://localhost:5000/api/v1/like/post-favbrands",
         { branduuid: brandId },
         {
           headers: {
@@ -522,7 +522,7 @@ const toggleLike = async (brandId) => {
     } else {
       // Remove from favorites
       const unlike = await axios.delete(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${Id}`,
+        `http://localhost:5000/api/v1/like/delete-favbrand/${Id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -803,7 +803,7 @@ const closePopup = () => {
             };
 
             const response = await axios.post(
-                "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createInstaApply",
+                "http://localhost:5000/api/v1/brandlisting/createInstaApply",
                 payload,
                 {
                     headers: {
@@ -1737,7 +1737,7 @@ const closePopup = () => {
         console.log(payload);
 
         const response = await axios.post(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createInstaApply",
+          "http://localhost:5000/api/v1/brandlisting/createInstaApply",
           payload,
           {
             headers: {
