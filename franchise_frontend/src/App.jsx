@@ -32,7 +32,6 @@ import { Provider, useDispatch } from 'react-redux';
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
 import BrandSearchus from './Components/BrandProfile_Component/BrandSearches.jsx';
 import BrandRegisterForm from './Pages/Registration/BrandLIstingRegister/BrandRegisterForm.jsx';
-import AboutUs from './Components/Footers/HelpAndSupport/AboutUs.jsx';
 import ContactUs from './Components/Footers/HelpAndSupport/ContactUs.jsx';
 import FAQs from './Components/Footers/HelpAndSupport/FAQs.jsx';
 import Help from './Components/Footers/HelpAndSupport/Help.jsx';
@@ -52,6 +51,7 @@ import GlobalLoader from './Components/GLobalLoader.jsx';
 import Blogs from './Components/Footers/QuickLinks/Blogs.jsx';
 import BrandDetailsPage from './Pages/AllCategoryPage/BrandDetailsPage.jsx';
 import NavbarSearch from './Components/Navbar/NavbarSearch.jsx';
+import AboutUs from './Components/Footers/HelpAndSupport/AboutUs.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -140,7 +140,7 @@ function App() {
           <Route path="/brandsearchview" element={<BrandCategroyViewPage />} />
 
           {/* {Footer paths} */}
-          
+          <Route path='/aboutus' element ={<AboutUs/>}/>
           <Route path="/contactus" element={<ContactUs />} />
           <Route path="/faq" element={<FAQs />} />
           <Route path="/help" element={<Help />} />

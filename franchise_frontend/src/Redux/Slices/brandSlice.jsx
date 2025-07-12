@@ -83,7 +83,11 @@ export const fetchBrands = createAsyncThunk(
       }
       if (token) {
         response = await Likeshow();
+        
       }
+
+      console.log("response.data.data :",response.data.data)
+      
 
       return response.data.data;
     } catch (err) {
@@ -131,6 +135,33 @@ export const viewApi = createAsyncThunk(
     }
   }
 );
+
+
+let viewID = null
+
+if (viewID) {
+
+  console.log("viewID :",viewID)
+  console.log("id :",viewID)
+  console.log("token :",token)
+  try {
+      const res = await axios.post(
+        `https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            data: { viewID },
+          },
+        }
+      );
+      console.log (res.data.data);
+
+      viewID = null
+    } catch (error) {
+      console.log(error);
+    }
+}
 
 
 const brandSlice = createSlice({
@@ -187,7 +218,7 @@ const brandSlice = createSlice({
       state.selectedBrand = action.payload;
       const newWindow = window.open(`/brands/${action.payload.uuid}?`, '_blank');
       localStorage.setItem(`brand-${action.payload.uuid}`, JSON.stringify(action.payload));
-     
+     viewID = action.payload.uuid
       if (newWindow) {
         newWindow.onbeforeunload = () => {
           localStorage.removeItem(`brand-${action.payload.uuid}`);

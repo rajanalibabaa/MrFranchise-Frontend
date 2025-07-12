@@ -50,7 +50,7 @@ const AboutUs = () => {
         <Navbar />
       </Box>
 
-      <Box sx={{ pt: 20, pb: 8, background: '#fdfaf4' }}>
+      <Box sx={{ mt: 15, pb: 8, backgroundColor:"white" }}>
         <Container>
           {/* Main Heading */}
           <motion.div
@@ -69,6 +69,7 @@ const AboutUs = () => {
                 fontFamily: FONT_FAMILY,
                 letterSpacing: 1,
                 mb: 2,
+                
                 textShadow: "0 2px 8px rgba(255,186,0,0.08)"
               }}
             >
@@ -87,7 +88,15 @@ const AboutUs = () => {
             viewport={{ once: true, amount: 0.2 }}
           >
             <Typography variant="body1" paragraph>
-              MrFranchise.in is a leading franchise consulting and brand
+             <Link
+                           component={RouterLink}
+                           to="/"
+                           underline="hover"
+                           color="black"
+                           fontWeight="bold"
+                         >
+                           MrFranchise.in
+                         </Link>{" "} is a leading franchise consulting and brand
               expansion platform based in Chennai, specializing in transforming
               high-potential businesses into scalable franchise models. Established under the
               leadership of Suresh Muthuvel, an experienced business

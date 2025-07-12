@@ -25,20 +25,13 @@ import {
 import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
-import { useDispatch, useSelector } from "react-redux";
+// import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useBrands } from "../../Hooks/Fetchbrands";
 
-// Brand data cache
-const brandDataCache = {
-  data: null,
-  timestamp: null,
-  CACHE_DURATION: 30 * 60 * 1000, // 30 minutes cache
-  isStale() {
-    return !this.timestamp || (Date.now() - this.timestamp) > this.CACHE_DURATION;
-  }
-};
+
 
 
 // Memoized brand card component to prevent unnecessary re-renders
@@ -112,91 +105,102 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
   const [filteredBrands, setFilteredBrands] = useState([]);
-  const [brandsData, setBrandsData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [mobileTabValue, setMobileTabValue] = useState(0);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const navigate = useNavigate();
- const theme = useTheme();
+  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-   // Optimized brand data fetching with caching
-  const fetchBrandDetails = useCallback(async () => {
-    // Return cached data if it's fresh
-    if (!brandDataCache.isStale() && brandDataCache.data) {
-      setInitialLoadComplete(true);
-      return brandDataCache.data;
-    }
 
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
-        {
-          headers: { "Content-Type": "application/json" },
-          params: {
-            fields: "brandDetails.brandName,uploads.brandLogo,franchiseDetails.brandCategories",
-            limit: 1000 // Adjust based on your typical dataset size
-          }
-        }
-      );
-      
-      // Update cache
-      brandDataCache.data = response.data.data;
-      brandDataCache.timestamp = Date.now();
-      
-      setInitialLoadComplete(true);
-      return response.data.data;
-    } catch (error) {
-      setError("Failed to load brands. Please try again later.");
-      console.error("Error fetching brands:", error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+// Use the hook to fetch all brands (no redux)
+  // Use the brands hook with proper error handling
+// Defensive: always provide a default value
 
-  // Prefetch brand data when component mounts
-  useEffect(() => {
-    let isMounted = true;
+const { data, isLoading, error, refetch } = useBrands();
+const brandsData = data || [];
+console.log("side Brands:", brandsData);
+
+  //  // Optimized brand data fetching with caching
+  // const fetchBrandDetails = useCallback(async () => {
+  //   // Return cached data if it's fresh
+  //   if (!brandDataCache.isStale() && brandDataCache.data) {
+  //     setInitialLoadComplete(true);
+  //     return brandDataCache.data;
+  //   }
+
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const response = await axios.get(
+  //       "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+  //       {
+  //         headers: { "Content-Type": "application/json" },
+  //         params: {
+  //           fields: "brandDetails.brandName,uploads.brandLogo,franchiseDetails.brandCategories",
+  //           limit: 1000 // Adjust based on your typical dataset size
+  //         }
+  //       }
+  //     );
+      
+  //     // Update cache
+  //     brandDataCache.data = response.data.data;
+  //     brandDataCache.timestamp = Date.now();
+      
+  //     setInitialLoadComplete(true);
+  //     return response.data.data;
+  //   } catch (error) {
+  //     setError("Failed to load brands. Please try again later.");
+  //     console.error("Error fetching brands:", error);
+  //     throw error;
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, []);
+
+  // // Prefetch brand data when component mounts
+  // useEffect(() => {
+  //   let isMounted = true;
     
-    const prefetchData = async () => {
-      try {
-        const data = await fetchBrandDetails();
-        if (isMounted) {
-          // Pre-build the childToBrandsMap for faster filtering
-          buildChildToBrandsMap(data);
-        }
-      } catch (error) {
-        console.error("Prefetch error:", error);
-      }
-    };
+  //   const prefetchData = async () => {
+  //     try {
+  //       const data = await fetchBrandDetails();
+  //       if (isMounted) {
+  //         // Pre-build the childToBrandsMap for faster filtering
+  //         buildChildToBrandsMap(data);
+  //       }
+  //     } catch (error) {
+  //       console.error("Prefetch error:", error);
+  //     }
+  //   };
 
-    // Use requestIdleCallback or setTimeout to avoid blocking main thread
-    const prefetchId = window.requestIdleCallback 
-      ? window.requestIdleCallback(() => prefetchData())
-      : setTimeout(prefetchData, 500);
+  //   // Use requestIdleCallback or setTimeout to avoid blocking main thread
+  //   const prefetchId = window.requestIdleCallback 
+  //     ? window.requestIdleCallback(() => prefetchData())
+  //     : setTimeout(prefetchData, 500);
 
-    return () => {
-      isMounted = false;
-      window.requestIdleCallback 
-        ? window.cancelIdleCallback(prefetchId)
-        : clearTimeout(prefetchId);
-    };
-  }, [fetchBrandDetails]);
+  //   return () => {
+  //     isMounted = false;
+  //     window.requestIdleCallback 
+  //       ? window.cancelIdleCallback(prefetchId)
+  //       : clearTimeout(prefetchId);
+  //   };
+  // }, [fetchBrandDetails]);
 
   // Optimized child-to-brands mapping
-  const [childToBrandsMap, setChildToBrandsMap] = useState({});
+  // const [childToBrandsMap, setChildToBrandsMap] = useState({});
 
-  const buildChildToBrandsMap = useCallback((brandsData) => {
+ // Build child-to-brands map when data loads
+  const childToBrandsMap = useMemo(() => {
     const map = {};
+    if (!brandsData || brandsData.length === 0) return map;
+
     brandsData.forEach((brand) => {
       const brandCats = brand.franchiseDetails?.brandCategories;
       if (!brandCats) return;
-      
+
+      // Handle both array and single category cases
       const catArray = Array.isArray(brandCats) ? brandCats : [brandCats];
+      
       catArray.forEach((cat) => {
         if (cat.child) {
           if (!map[cat.child]) map[cat.child] = [];
@@ -204,54 +208,24 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
         }
       });
     });
-    setChildToBrandsMap(map);
-  }, []);
 
-  // Optimized brand filtering
-  const handleSubChildHover = useCallback((children) => {
-    setLoading(true); // Show loader while filtering
-    const childName = typeof children === "string" ? children : children.name;
+    return map;
+  }, [brandsData]);
 
-    // First try to get from pre-built map
-    if (childToBrandsMap[childName]) {
-      setFilteredBrands(childToBrandsMap[childName]);
-      setLoading(false);
-      return;
-    }
-
-    // Fallback to filtering if map not available
-    if (!brandDataCache.data) {
+  // Optimized brand filtering  
+ const handleSubChildHover = useCallback((children) => {
+    try {
+      const childName = typeof children === "string" ? children : children.name;
+      if (childToBrandsMap[childName]) {
+        setFilteredBrands(childToBrandsMap[childName]);
+      } else {
+        setFilteredBrands([]);
+      }
+    } catch (err) {
+      console.error("Error filtering brands:", err);
       setFilteredBrands([]);
-      setLoading(false);
-      return;
     }
-
-    // Simulate async filtering for loader effect
-    setTimeout(() => {
-      const filtered = brandDataCache.data.filter((brand) => {
-        const brandCats = brand.franchiseDetails?.brandCategories;
-        if (!brandCats) return false;
-
-        const catArray = Array.isArray(brandCats) ? brandCats : [brandCats];
-        return catArray.some((cat) => {
-          const brandMainCat = cat.main;
-          const brandSubCat = cat.sub;
-          const brandChildCat = cat.child;
-
-          return (
-            activeCategory !== null &&
-            categories[activeCategory].name === brandMainCat &&
-            activeSubCategory !== null &&
-            activeSubCategory.name === brandSubCat &&
-            brandChildCat === childName
-          );
-        });
-      });
-
-      setFilteredBrands(filtered);
-      setLoading(false);
-    }, 400); // 400ms delay for loader effect
-  }, [childToBrandsMap, activeCategory, activeSubCategory]);
+  }, [childToBrandsMap]);
 
   const handleBrandClick = useCallback((brand) => {
     // dispatch(openBrandDialog(brand));
@@ -436,7 +410,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
 
   // Optimized brands grid rendering
   const renderBrandsGrid = useMemo(() => {
-    if (loading) {
+    if (isLoading) {
       return (
            <Box
         sx={{
@@ -469,13 +443,13 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
           <Typography variant="h6" gutterBottom>
             Oops! Something went wrong
           </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            {error}
-          </Typography>
+         <Typography variant="body2" sx={{ mb: 2 }}>
+  {error?.message || String(error) || 'Failed to load brands. Please try again later.'}
+</Typography>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Chip
               label="Retry"
-              onClick={fetchBrandDetails}
+              onClick={refetch}
               color="primary"
               sx={{ 
                 px: 3,
@@ -567,7 +541,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
         </Box>
       </Fade>
     );
-  }, [loading, error, filteredBrands, isMobile, handleBrandClick]);
+  },  [isLoading, error, filteredBrands, isMobile, handleBrandClick, refetch]);
 
   return (
     <Drawer

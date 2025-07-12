@@ -23,14 +23,16 @@ import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import Business from "@mui/icons-material/Business";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+// import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-import {
-  fetchBrands,
-  openBrandDialog,
-  toggleLikeBrand,
-} from "../../Redux/Slices/brandSlice";
-import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
+// import {
+//   fetchBrands,
+//   openBrandDialog,
+//   toggleLikeBrand,
+// } from "../../Redux/Slices/brandSlice";
+// import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
+import { postView } from "../../Utils/function/view";
+import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -218,7 +220,7 @@ const BrandCard = React.memo(({
                     {brandName}
                   </Typography>
                 </Tooltip>
-                {tagLine && (
+                {/* {tagLine && (
                   <Tooltip title={tagLine} placement="top">
                     <Typography
                       variant="caption"
@@ -233,7 +235,7 @@ const BrandCard = React.memo(({
                       {tagLine}
                     </Typography>
                   </Tooltip>
-                )}
+                )} */}
               </Box>
               <IconButton
                 onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
@@ -258,7 +260,7 @@ const BrandCard = React.memo(({
             {(category.main || category.child) && (
               <Box sx={{ mb: 2 }}>
                 <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
-                  {category.main && (
+                  {/* {category.main && (
                     <Chip
                       label={category.main}
                       size="small"
@@ -269,7 +271,7 @@ const BrandCard = React.memo(({
                         mb: 1,
                       }}
                     />
-                  )}
+                  )} */}
                   {category.child && (
                     <Chip
                       label={category.child}
@@ -368,15 +370,13 @@ const TopFoodFranchises = () => {
   const containerRef = useRef(null);
   const isPaused = useRef(false);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
   
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { data: brands = [] } = useSelector((state) => state.brands);
 
+const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
+  const toggleLike = useToggleLike();
   // Filter food franchises
   const foodBrands = useMemo(() => {
     return brands.filter(brand => {
@@ -395,52 +395,46 @@ const TopFoodFranchises = () => {
     return CARD_DIMENSIONS.desktop;
   }, [isMobile, isTablet]);
 
-  const initializeData = useCallback(() => {
-    try {
-      if (!foodBrands || foodBrands.length === 0) {
-        setError("Loading...");
-      } else {
-        setError(null);
-      }
-    } catch (err) {
-      setError("Failed to process brands data.");
-      console.error("Error processing brands:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [foodBrands]);
+  // const initializeData = useCallback(() => {
+  //   try {
+  //     if (!foodBrands || foodBrands.length === 0) {
+  //       setError("Loading...");
+  //     } else {
+  //       setError(null);
+  //     }
+  //   } catch (err) {
+  //     setError("Failed to process brands data.");
+  //     console.error("Error processing brands:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [foodBrands]);
 
-  useEffect(() => {
-    initializeData();
-  }, [initializeData]);
+  // useEffect(() => {
+  //   initializeData();
+  // }, [initializeData]);
 
   const handleLikeClick = useCallback(async (brandId, isLiked) => {
     if (likeProcessing[brandId]) return;
-
-    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
-    try {
-      await toggleLike(brandId, isLiked);
-    } finally {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-    }
-  }, [likeProcessing]);
-
-  const toggleLike = useCallback(async (brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       setShowLogin(true);
       return;
     }
+    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
     try {
-      await dispatch(toggleLikeBrand({ brandId, isLiked })).unwrap();
+      await toggleLike.mutateAsync({ brandId, isLiked });
     } catch (error) {
       console.error("Like operation failed:", error);
+    } finally {
+      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
     }
-  }, [dispatch]);
+  }, [likeProcessing, toggleLike]);
 
-  const handleApply = useCallback((brand) => {
-    dispatch(openBrandDialog(brand));
-  }, [dispatch]);
+    const handleApply = useCallback((brand) => {
+    postView(brand.uuid);
+    openBrandDialog(brand);
+  }, []);
 
   const handleMouseEnter = useCallback(() => {
     isPaused.current = true;
@@ -450,7 +444,7 @@ const TopFoodFranchises = () => {
     isPaused.current = false;
   }, []);
 
-  if (loading) {
+  if (brandsLoading) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <CircularProgress />
@@ -461,7 +455,7 @@ const TopFoodFranchises = () => {
   if (error) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
-        <Typography color="error">{error}</Typography>
+        <Typography color="error">{error.message || "Failed to load brands."}</Typography>
       </Box>
     );
   }
@@ -525,11 +519,9 @@ const TopFoodFranchises = () => {
             },
           }}
           onClick={async () => {
-            dispatch(showLoading());
+            
             navigate("/brandviewpage");
-            setTimeout(() => {
-              dispatch(hideLoading());
-            }, 2000);
+            
           }}
         >
           View More
