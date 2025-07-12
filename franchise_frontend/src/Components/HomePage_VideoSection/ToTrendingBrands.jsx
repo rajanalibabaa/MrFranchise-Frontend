@@ -4,28 +4,17 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useNavigate } from "react-router-dom";
-// import { useDispatch, useSelector } from "react-redux";
-// import { openBrandDialog } from "../../Redux/Slices/brandSlice";
 import { postView } from '../../Utils/function/view';
-// import { fetchBrands, toggleLikeBrand } from "../../Redux/Slices/brandSlice";
-// import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 const TopInvestVdocardround = () => {
-  // const dispatch = useDispatch();
   const navigate = useNavigate();
   
-  // Get brands data from Redux store
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
-  const [visibleBrands, setVisibleBrands] = useState(15);
 
-  // // Fetch brands when component mounts
-  // useEffect(() => {
-  //   dispatch(fetchBrands());
-  // }, [dispatch]);
 
  const handleLikeClick = useCallback(async (brandId, isLiked) => {
     if (likeProcessing[brandId]) return;
@@ -44,9 +33,7 @@ const TopInvestVdocardround = () => {
     }
   }, [likeProcessing, toggleLike]);
 
-  const handleShowMore = () => {
-    setVisibleBrands(prev => prev + 10);
-  };
+ 
 
     const handleApply = useCallback((brand) => {
     postView(brand.uuid);
@@ -90,7 +77,7 @@ const TopInvestVdocardround = () => {
         gap: 5,
         mb: 6
       }}>
-        {brands.slice(0, visibleBrands).map((brand) => (
+        {brands.map((brand) => (
           <motion.div
             key={brand.uuid}
             whileHover={{ y: -5 }}
@@ -137,6 +124,8 @@ const TopInvestVdocardround = () => {
               <Avatar
                 src={brand.uploads?.brandLogo}
                 alt={brand.uploads?.brandName}
+                variant="square"
+                
                 loading="lazy"
                 sx={{
                   width: 70,
@@ -209,7 +198,7 @@ const TopInvestVdocardround = () => {
         ))}
       </Box>
 
-      {brands.length > visibleBrands && (
+      {/* {brands.length > visibleBrands && (
         <Box sx={{ textAlign: 'center', mt: 2 }}>
           <Button
             variant="contained"
@@ -231,7 +220,7 @@ const TopInvestVdocardround = () => {
             Show More Brands
           </Button>
         </Box>
-      )}
+      )} */}
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}

@@ -124,6 +124,7 @@ const Otherindustries = () => {
           position: "relative",
           color: "#fff",
           minHeight: "100vh",
+          mt:{xs:6, sm:15, lg:10},
           overflow: "hidden",
    textAlign:{xs:"center"}
       }}
@@ -154,7 +155,7 @@ const Otherindustries = () => {
             alignItems: "center",
             justifyContent: "center",
             textAlign: isMobile || isTablet ? "center" : "left",
-            px: { xs: 2, sm: 4, md: 8 },
+            px: { xs: 2, sm: 4, md: 8, },
             py: { xs: 4, sm: 6, md: 8 },
         }}
       >
@@ -272,21 +273,32 @@ const Otherindustries = () => {
               
                   />
                 </Grid>
-                <Grid  xs={12} sx={{width:"100%"}} >
-                  <TextField
-                    label="Mobile Number"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    error={errors.phone}
-                    helperText={
-                      errors.phone && "10-digit phone number is required"
-                    }
-                    required
-                    variant="outlined"
-                    fullWidth
-                  />
-                </Grid>
+               <Grid xs={12} sx={{ width: "100%" }}>
+  <TextField
+    label="Mobile Number"
+    name="phone"
+    value={formData.phone}
+    onChange={(e) => {
+      const value = e.target.value;
+      if (/^\d{0,10}$/.test(value)) {
+        handleChange(e); 
+      }
+    }}
+    error={errors.phone}
+    helperText={
+      errors.phone && "10-digit phone number is required"
+    }
+    required
+    variant="outlined"
+    fullWidth
+    inputProps={{
+      maxLength: 10, 
+      inputMode: 'numeric', 
+      pattern: '[0-9]*',
+    }}
+  />
+</Grid>
+
                 <Grid  xs={12} sx={{width:"100%"}}>
                   <FormControl
                     required

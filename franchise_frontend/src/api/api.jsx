@@ -1,7 +1,8 @@
 
+export const API_BASE_URL =  "https://franchise-backend-wgp6.onrender.com/api/v1";
 
-// Option 2: Use static API based on environment (simple & fast)
-export const API_BASE_URL = "https://franchise-backend-wgp6.onrender.com/api/v1";
+
+
 
 
   // API Endpoints
@@ -22,6 +23,7 @@ export const api = {
     },
     delete: `${API_BASE_URL}/view/deleteViewBrandByID`
   },
+  
   likeApi: {
     post: `${API_BASE_URL}/like/post-favbrands`,
     get: `${API_BASE_URL}/like/get-favbrands`,
