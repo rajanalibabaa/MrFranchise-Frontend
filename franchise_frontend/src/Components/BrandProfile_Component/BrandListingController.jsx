@@ -306,26 +306,7 @@ const ProfileSection = () => {
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
-      <Box sx={{ width: 250, p: 3, borderRight: '1px solid #ccc' }}>
-        <Typography variant="h6" gutterBottom>Choose Section</Typography>
-        <FormControl fullWidth>
-          <InputLabel id="section-label">Section</InputLabel>
-          <Select
-            labelId="section-label"
-            value={selectedSection}
-            onChange={handleChange}
-            label="Section"
-          >
-            <MenuItem value="personalDetails">Personal Details</MenuItem>
-            <MenuItem value="franchiseDetails">Franchise Details</MenuItem>
-            <MenuItem value="brandDetails">Brand Details</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
-      <Box sx={{ flexGrow: 1, p: 4 }}>
-        {loading ? <Typography>Loading...</Typography> : renderContent()}
-      </Box>
+    
     </Box>
   );
 };

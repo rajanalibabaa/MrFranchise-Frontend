@@ -3,7 +3,6 @@ import { Route, Routes } from "react-router-dom"
 import InvestorRegister from './Pages/Registration/InvestorsRegister';
 // import BrandRegister from './Pages/Registration/BrandRegister';
 import LoginPage from "./Pages/LoginPage/LoginPage";
-
 import "./App.css";
 // import Nprogress from 'nprogress';
 import HomeBannerSec from "./Pages/HomePages/HomeBannerSec";
@@ -52,6 +51,10 @@ import Blogs from './Components/Footers/QuickLinks/Blogs.jsx';
 import BrandDetailsPage from './Pages/AllCategoryPage/BrandDetailsPage.jsx';
 import NavbarSearch from './Components/Navbar/NavbarSearch.jsx';
 import AboutUs from './Components/Footers/HelpAndSupport/AboutUs.jsx';
+import BrandDetailsControl from './Components/BrandProfile_Component/BrandControl/BrandDetailsControl.jsx';
+import FranchiseDetailsControl from './Components/BrandProfile_Component/BrandControl/FranchiseDetailsControl.jsx';
+import ExpansionLocationControl from './Components/BrandProfile_Component/BrandControl/ExpansionLocationControl.jsx';
+import UploadsControl from './Components/BrandProfile_Component/BrandControl/UploadsControl.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -127,6 +130,10 @@ function App() {
           <Route path="/brandDashboard" element={<Sidebar />}>
             <Route index element={<BrandDashBoard />} />
             <Route path="brandDashboard" element={<BrandDashBoard />} />
+            <Route path='branddetailcontrol' element={<BrandDetailsControl/>}/>
+            <Route path='franchisedetailcontrol' element={<FranchiseDetailsControl/>}/>
+            <Route path='expansionlocationcontrol' element={<ExpansionLocationControl/>}/>
+            <Route path='uploadcontrol' element={<UploadsControl/>}/>
             <Route path="brandaddvedios" element={<BrandAddVedios />} />
             <Route path="brandfeedback" element={<BrandFeedBack />} />
             <Route path="brandcomplaint" element={<BrandComplaint />} />
@@ -162,5 +169,4 @@ function App() {
     </>
   );
 }
-
 export default App;
