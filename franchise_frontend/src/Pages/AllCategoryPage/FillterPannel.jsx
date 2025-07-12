@@ -151,6 +151,12 @@ const FilterPanel = React.memo(({
     onFilterChange('selectedSubCategory', value);
     onFilterChange('selectedChildCategory', []);
   }, [onFilterChange]);
+// Safe result stats calculation
+  const safeResultStats = useMemo(() => ({
+    showing: resultStats?.showing || 0,
+    total: resultStats?.total || 0
+  }), [resultStats]);
+
 
   const handleChildCategoryToggle = useCallback((value) => (e) => {
     const checked = e.target.checked;
@@ -557,18 +563,18 @@ const FilterPanel = React.memo(({
       {/* Results Count */}
       <Divider sx={{ my: 2 }} />
       <Typography variant="body2" sx={{ color: '#4caf50', textAlign: 'center' }}>
-        Showing {resultStats.showing || 0} of {resultStats.total || 0} brands
+        Showing {safeResultStats.showing || 0} of {safeResultStats.total || 0} brands
       </Typography>
     </Box>
   );
 }, (prevProps, nextProps) => {
   // Custom comparison function for React.memo
   return (
-    prevProps.filters === nextProps.filters &&
+   prevProps.filters === nextProps.filters &&
     prevProps.isLoading === nextProps.isLoading &&
     prevProps.activeFilterCount === nextProps.activeFilterCount &&
-    prevProps.resultStats.showing === nextProps.resultStats.showing &&
-    prevProps.resultStats.total === nextProps.resultStats.total &&
+    prevProps.resultStats?.showing === nextProps.resultStats?.showing &&
+    prevProps.resultStats?.total === nextProps.resultStats?.total &&
     prevProps.subCategories === nextProps.subCategories &&
     prevProps.childCategories === nextProps.childCategories &&
     prevProps.modelTypes === nextProps.modelTypes &&

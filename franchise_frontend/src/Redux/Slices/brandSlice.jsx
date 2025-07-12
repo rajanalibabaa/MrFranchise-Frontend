@@ -22,13 +22,13 @@ export const toggleLikeBrand = createAsyncThunk(
       const brandID = brandId;
       if (!isLiked) {
         await axios.post(
-          "https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
+          "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
           { branduuid: brandId },
           config
         );
       } else if (isLiked) {
         const res = await axios.delete(
-          `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${id}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export const toggleLikeBrand = createAsyncThunk(
 export const Likeshow = async () => {
   try {
     const response = await axios.get(
-      `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
+      `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -65,43 +65,43 @@ export const Likeshow = async () => {
   }
 };
 
-// export const fetchBrands = createAsyncThunk(
-//   "brands/fetchBrands",
-//   async (_, { rejectWithValue }) => {
-//     try {
-//       let response;
+export const fetchBrands = createAsyncThunk(
+  "brands/fetchBrands",
+  async (_, { rejectWithValue }) => {
+    try {
+      let response;
 
-//       if (!token) {
-//         response = await axios.get(
-//           "https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
-//           {
-//             headers: {
-//               "Content-Type": "application/json",
-//             },
-//           }
-//         );
-//       }
-//       if (token) {
-//         response = await Likeshow();
+      if (!token) {
+        response = await axios.get(
+          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+      if (token) {
+        response = await Likeshow();
         
-//       }
+      }
 
-//       console.log("response.data.data :",response.data.data)
+      console.log("response.data.data :",response.data.data)
       
 
-//       return response.data.data;
-//     } catch (err) {
-//       return rejectWithValue(err.message || "Failed to fetch brands");
-//     }
-//   }
-// );
+      return response.data.data;
+    } catch (err) {
+      return rejectWithValue(err.message || "Failed to fetch brands");
+    }
+  }
+);
 
 export const fetchBrandById = createAsyncThunk(
   "brands/fetchBrandById",
   async (brandId, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingById/${brandId}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingById/${brandId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -120,7 +120,7 @@ export const viewApi = createAsyncThunk(
   async (brandID, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -146,7 +146,7 @@ if (viewID) {
   console.log("token :",token)
   try {
       const res = await axios.post(
-        `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -469,6 +469,11 @@ const applyFiltersToBrands = (brands, filters) => {
   });
 };
 
-export const { setFilters, clearFilters, openBrandDialog, closeBrandDialog } =
+export const {fetchAllFilterData,
+  
+  setFilters,
+  clearFilters,
+  openBrandDialog,
+  closeBrandDialog } =
   brandSlice.actions;
 export default brandSlice.reducer;

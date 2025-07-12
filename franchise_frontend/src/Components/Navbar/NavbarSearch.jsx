@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -19,49 +19,59 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-// import { setFilters } from '../../Redux/Slices/brandSlice'; // Adjust the import path as needed
+import { setFilters, fetchBrands } from '../../Redux/Slices/brandSlice';
 
 const NavbarSearch = ({ open, handleClose }) => {
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const [tab, setTab] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Get filter options from Redux store with default empty arrays
+
+  useEffect(() => {
+    dispatch(fetchBrands());
+  }, [dispatch]);
+
+  // Get all filter options from Redux store
+  const brandState = useSelector((state) => state.brands) || {};
   const {
     categories = [],
-    subCategories = [],
-    childCategories = [],
     states = [],
     districts = [],
     cities = [],
     investmentRanges = []
-  } = useSelector((state) => state.brands) || {};
+  } = brandState;
 
-  // Category filters
+  const [searchTerms, setSearchTerms] = useState({
+    state: '',
+    district: '',
+    city: '',
+    investment: ''
+  });
+
   const [selectedMainCategory, setSelectedMainCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
   const [selectedChildCategory, setSelectedChildCategory] = useState('');
-  
-  // Location filters
+
   const [selectedState, setSelectedState] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  
-  // Investment filters
+
   const [selectedInvestmentRange, setSelectedInvestmentRange] = useState('');
 
   const handleTabChange = (_, newValue) => setTab(newValue);
 
+  const handleSearchChange = (key, value) => {
+    setSearchTerms(prev => ({ ...prev, [key]: value }));
+  };
+
   const handleExplore = () => {
     let filters = {};
-    
     if (tab === 0) {
-      // Category tab filters
       filters = {
         searchTerm,
         selectedCategory: selectedMainCategory,
-        selectedSubCategory: selectedSubCategory,
+        selectedSubCategory,
         selectedChildCategory: selectedChildCategory ? [selectedChildCategory] : [],
         selectedModelType: "",
         selectedState: "",
@@ -70,7 +80,6 @@ const NavbarSearch = ({ open, handleClose }) => {
         selectedInvestmentRange: ""
       };
     } else if (tab === 1) {
-      // Location tab filters
       filters = {
         searchTerm,
         selectedCategory: "",
@@ -83,7 +92,6 @@ const NavbarSearch = ({ open, handleClose }) => {
         selectedInvestmentRange: ""
       };
     } else if (tab === 2) {
-      // Investment tab filters
       filters = {
         searchTerm,
         selectedCategory: "",
@@ -97,13 +105,8 @@ const NavbarSearch = ({ open, handleClose }) => {
       };
     }
 
-    // Apply filters to Redux store
     dispatch(setFilters(filters));
-    
-    // Navigate to brand view page
     navigate('/brandViewPage');
-    
-    // Close the dialog
     handleClose();
   };
 
@@ -116,30 +119,91 @@ const NavbarSearch = ({ open, handleClose }) => {
     setSelectedDistrict('');
     setSelectedCity('');
     setSelectedInvestmentRange('');
+    setSearchTerms({
+      state: '',
+      district: '',
+      city: '',
+      investment: ''
+    });
   };
 
-  // Get filtered districts based on selected state
-  const filteredDistricts = selectedState 
-    ? (districts || []).filter(d => d.state === selectedState).map(d => d.district)
-    : [];
+  // Filtered states
+  const filteredStates = useMemo(() => {
+    if (!states || states.length === 0) return [];
+    const term = searchTerms.state.toLowerCase();
+    return states.filter(state => 
+      state.toLowerCase().includes(term)
+    );
+  }, [states, searchTerms.state]);
 
-  // Get filtered cities based on selected district
-  const filteredCities = selectedDistrict 
-    ? (cities || []).filter(c => c.district === selectedDistrict).map(c => c.city)
-    : [];
+  // Filtered districts
+  const filteredDistricts = useMemo(() => {
+    if (!districts || districts.length === 0) return [];
+    if (!selectedState) return districts.map(d => d.district);
 
-  // Get filtered subcategories based on selected main category
-  const filteredSubCategories = selectedMainCategory
-    ? (subCategories || []).filter(sub => sub.parentCategory === selectedMainCategory)
-    : [];
+    const term = searchTerms.district.toLowerCase();
+    return districts
+      .filter(d => d.state === selectedState)
+      .map(d => d.district)
+      .filter(district => 
+        district.toLowerCase().includes(term)
+      );
+  }, [selectedState, districts, searchTerms.district]);
 
-  // Get filtered child categories based on selected subcategory
-  const filteredChildCategories = selectedSubCategory
-    ? (childCategories || []).filter(child => child.parentSubCategory === selectedSubCategory)
-    : [];
+  // Filtered cities
+  const filteredCities = useMemo(() => {
+    if (!cities || cities.length === 0) return [];
+    if (!selectedDistrict) return cities.map(c => c.city);
+
+    const term = searchTerms.city.toLowerCase();
+    return cities
+      .filter(c => c.district === selectedDistrict)
+      .map(c => c.city)
+      .filter(city => 
+        city.toLowerCase().includes(term)
+      );
+  }, [selectedDistrict, cities, searchTerms.city]);
+
+  // Filtered investment ranges
+  const filteredInvestmentRanges = useMemo(() => {
+    if (!investmentRanges || investmentRanges.length === 0) return [];
+    const term = searchTerms.investment.toLowerCase();
+    return investmentRanges.filter(range => 
+      range.toLowerCase().includes(term)
+    );
+  }, [investmentRanges, searchTerms.investment]);
+
+  // Get MAIN categories (level 1)
+  const mainCategories = useMemo(() => {
+    return categories.filter(cat => cat.level === 1);
+  }, [categories]);
+
+  // Get SUB categories based on selected main category (level 2)
+  const subCategories = useMemo(() => {
+    if (!selectedMainCategory) return [];
+    return categories.filter(cat => 
+      cat.level === 2 && 
+      cat.parent === selectedMainCategory
+    );
+  }, [selectedMainCategory, categories]);
+
+  // Get CHILD categories based on selected sub category (level 3)
+  const childCategories = useMemo(() => {
+    if (!selectedSubCategory) return [];
+    return categories.filter(cat => 
+      cat.level === 3 && 
+      cat.parent === selectedSubCategory
+    );
+  }, [selectedSubCategory, categories]);
+
+  useEffect(() => {
+    console.log("✅ Main categories:", mainCategories);
+    console.log("✅ Sub categories:", subCategories);
+    console.log("✅ Child categories:", childCategories);
+  }, [mainCategories, subCategories, childCategories]);
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md" sx={{ top: { xs: "-20%", sm: "-50%", lg: "-100px" } }}>
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md" sx={{ top: { xs: "-20%", sm: "-50%", lg: "-300px" } }}>
       <DialogContent sx={{ position: 'relative', p: 3 }}>
         {/* Close Button */}
         <IconButton
@@ -161,7 +225,9 @@ const NavbarSearch = ({ open, handleClose }) => {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton sx={{ bgcolor: 'rgb(104, 159, 56)', color: 'white', "&:hover": { backgroundColor: "#7ad03a" } }}>
+                  <IconButton 
+                    sx={{ bgcolor: 'rgb(104, 159, 56)', color: 'white', "&:hover": { backgroundColor: "#7ad03a" } }}
+                  >
                     <SearchIcon />
                   </IconButton>
                 </InputAdornment>
@@ -209,8 +275,8 @@ const NavbarSearch = ({ open, handleClose }) => {
                 label="Industry"
               >
                 <MenuItem value="">Select Industry</MenuItem>
-                {(categories || []).map((category) => (
-                  <MenuItem key={category.id} value={category.name}>
+                {mainCategories.map((category) => (
+                  <MenuItem key={`cat-${category.id}`} value={category.name}>
                     {category.name}
                   </MenuItem>
                 ))}
@@ -228,8 +294,8 @@ const NavbarSearch = ({ open, handleClose }) => {
                 label="Main Category"
               >
                 <MenuItem value="">Select Main Category</MenuItem>
-                {filteredSubCategories.map((sub) => (
-                  <MenuItem key={sub.id} value={sub.name}>
+                {subCategories.map((sub) => (
+                  <MenuItem key={`sub-${sub.id}`} value={sub.name}>
                     {sub.name}
                   </MenuItem>
                 ))}
@@ -244,8 +310,8 @@ const NavbarSearch = ({ open, handleClose }) => {
                 label="Sub Category"
               >
                 <MenuItem value="">Select Sub Category</MenuItem>
-                {filteredChildCategories.map((child) => (
-                  <MenuItem key={child.id} value={child.name}>
+                {childCategories.map((child) => (
+                  <MenuItem key={`child-${child.id}`} value={child.name}>
                     {child.name}
                   </MenuItem>
                 ))}
@@ -256,6 +322,7 @@ const NavbarSearch = ({ open, handleClose }) => {
 
         {tab === 1 && (
           <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center" mb={3}>
+            {/* State Filter */}
             <FormControl sx={{ minWidth: 200 }}>
               <InputLabel>State</InputLabel>
               <Select
@@ -266,16 +333,41 @@ const NavbarSearch = ({ open, handleClose }) => {
                   setSelectedCity('');
                 }}
                 label="State"
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 300,
+                    },
+                  },
+                }}
               >
-                <MenuItem value="">Select State</MenuItem>
-                {(states || []).map((state) => (
-                  <MenuItem key={state} value={state}>
+                <MenuItem value="">All States</MenuItem>
+                <Box px={2} pb={1}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    placeholder="Search states..."
+                    value={searchTerms.state}
+                    onChange={(e) => handleSearchChange('state', e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+                {filteredStates.map((state, index) => (
+                  <MenuItem key={`state-${index}`} value={state}>
                     {state}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
+            {/* District Filter */}
             <FormControl sx={{ minWidth: 200 }} disabled={!selectedState}>
               <InputLabel>District</InputLabel>
               <Select
@@ -285,26 +377,75 @@ const NavbarSearch = ({ open, handleClose }) => {
                   setSelectedCity('');
                 }}
                 label="District"
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 300,
+                    },
+                  },
+                }}
               >
-                <MenuItem value="">Select District</MenuItem>
-                {filteredDistricts.map((district) => (
-                  <MenuItem key={district} value={district}>
+                <MenuItem value="">All Districts</MenuItem>
+                <Box px={2} pb={1}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    placeholder="Search districts..."
+                    value={searchTerms.district}
+                    onChange={(e) => handleSearchChange('district', e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+                {filteredDistricts.map((district, index) => (
+                  <MenuItem key={`district-${index}`} value={district}>
                     {district}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
+            {/* City Filter */}
             <FormControl sx={{ minWidth: 200 }} disabled={!selectedDistrict}>
               <InputLabel>City</InputLabel>
               <Select
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
                 label="City"
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 300,
+                    },
+                  },
+                }}
               >
-                <MenuItem value="">Select City</MenuItem>
-                {filteredCities.map((city) => (
-                  <MenuItem key={city} value={city}>
+                <MenuItem value="">All Cities</MenuItem>
+                <Box px={2} pb={1}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    placeholder="Search cities..."
+                    value={searchTerms.city}
+                    onChange={(e) => handleSearchChange('city', e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+                {filteredCities.map((city, index) => (
+                  <MenuItem key={`city-${index}`} value={city}>
                     {city}
                   </MenuItem>
                 ))}
@@ -321,10 +462,34 @@ const NavbarSearch = ({ open, handleClose }) => {
                 value={selectedInvestmentRange}
                 onChange={(e) => setSelectedInvestmentRange(e.target.value)}
                 label="Investment Range"
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 300,
+                    },
+                  },
+                }}
               >
-                <MenuItem value="">Select Investment Amount</MenuItem>
-                {(investmentRanges || []).map((range) => (
-                  <MenuItem key={range} value={range}>
+                <MenuItem value="">Select Investment Range</MenuItem>
+                <Box px={2} pb={1}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    placeholder="Search investment ranges..."
+                    value={searchTerms.investment}
+                    onChange={(e) => handleSearchChange('investment', e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+                {filteredInvestmentRanges.map((range, index) => (
+                  <MenuItem key={`range-${index}`} value={range}>
                     {range}
                   </MenuItem>
                 ))}
@@ -340,7 +505,7 @@ const NavbarSearch = ({ open, handleClose }) => {
             onClick={handleExplore}
             sx={{
               backgroundColor: 'rgb(104, 159, 56)',
-              '&:hover': { backgroundColor: '#7ad03a' },
+              '&:hover': { backgroundColor: "#7ad03a" },
               textTransform: 'none'
             }}
           >
