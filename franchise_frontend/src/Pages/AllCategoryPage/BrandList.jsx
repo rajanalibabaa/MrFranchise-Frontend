@@ -604,7 +604,9 @@ const handleFilterChange = useCallback((name, value) => {
           </Box>
         </Box>
       </Drawer>
-      
+
+         
+              
       <Suspense fallback={null}>
         <BrandDetail />
       </Suspense>

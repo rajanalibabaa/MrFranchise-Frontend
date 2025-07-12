@@ -89,7 +89,7 @@ const navigate = useNavigate();
     
     try {
       const response = await axios.get(
-        `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -261,9 +261,8 @@ const navigate = useNavigate();
     setIsSubmitting(true);
  const id = investorUUID || localStorage.getItem("brandUUID");
 
-         if (!id) {
+      if (!id) {
         alert("User not logged in or missing ID. Please login again.");
-        navigate("/registerhandleuser");
         return;
       }
 
@@ -278,9 +277,13 @@ const navigate = useNavigate();
         applyId : id || ""
       };
 
-      // const id = investorUUID || localStorage.getItem("brandUUID");
+      const id = investorUUID || localStorage.getItem("brandUUID");
 
-
+      if (!id) {
+        alert("User not logged in or missing ID. Please login again.");
+        navigate("/registerhandleuser");
+        return;
+      }
 
       // Validate required fields
       const requiredFields = [
@@ -298,7 +301,7 @@ const navigate = useNavigate();
       console.log("payload :",payload)
 
       const response = await axios.post(
-       "https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication",
+       "https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication",
         payload,
         { 
           headers: { "Content-Type": "application/json" },
@@ -310,13 +313,11 @@ const navigate = useNavigate();
         setSubmitSuccess(true);
         setDrawerOpen(false);
       }
-         
     } catch (error) {
       console.error("Submission error:", error?.response?.data || error.message);
       alert("❌Failed to submit application. Please try again.");
     } finally {
       setIsSubmitting(false);
-      alert("Applied brands Data successfully.");
     }
   }, [formData, selectedBrand, investorUUID]);
 
