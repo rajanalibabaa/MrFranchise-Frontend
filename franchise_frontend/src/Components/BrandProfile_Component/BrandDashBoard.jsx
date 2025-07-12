@@ -1,4 +1,3 @@
-// Same imports...
 import React, { useEffect, useState } from 'react';
 import {
   Box,
@@ -42,16 +41,16 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
       try {
         setLoading(true);
         const [brandRes, viewsRes, likedRes, applyRes] = await Promise.all([
-          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingByUUID/${brandUUID}`, {
+          axios.get(`https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingByUUID/${brandUUID}`, {
             headers: { Authorization: `Bearer ${token}` }, withCredentials: true
           }),
-          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/view/getAllViewBrands/${brandUUID}`, {
+          axios.get(`https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/view/getAllViewBrands/${brandUUID}`, {
             headers: { Authorization: `Bearer ${token}` }, withCredentials: true
           }),
-          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/like/getBrandLikedByAll/${brandUUID}`, {
+          axios.get(`https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/like/getBrandLikedByAll/${brandUUID}`, {
             headers: { Authorization: `Bearer ${token}` }, withCredentials: true
           }),
-          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/getAllInstaApply/${brandUUID}`, {
+          axios.get(`https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/instantapply/getAllInstaApply/${brandUUID}`, {
             headers: { Authorization: `Bearer ${token}` }, withCredentials: true
           }),
         ]);
@@ -85,7 +84,7 @@ const renderUserCard = (view, name, imageSrc, type = 'user') => (
     md={4}
     lg={3}
     key={view._id || name}
-    sx={{ mb: 2 }} // Adds vertical gap between rows
+    sx={{ mb: 2 }} 
   >
     <Card
       elevation={3}
@@ -306,10 +305,10 @@ const renderTabContent = () => {
                 }}
               >
                 {[0, 1, 2, 3].map((index) => {
-                  const labels = ['Your Enquiries', 'Total Views', 'Total Likes', 'Brand Enquiries'];
+                  const labels = ['Exclusive Enquiries', 'Total Views', 'Total Likes', 'Brand Leads'];
                   const icons = [<PersonIcon />, <VisibilityIcon />, <ThumbUpIcon />, <MailOutlineIcon />];
                   const counts = [23, totalViews, likedData.length, applyData.length];
-                  const colors = ['#1976d2', '#ef6c00', '#d81b60', '#388e3c'];
+                  const colors = ['#ff9800', '#ff9800', '#ff9800', '#ff9800'];
 
                   const isSelected = tabValue === index;
 

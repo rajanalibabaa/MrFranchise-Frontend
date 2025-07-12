@@ -24,12 +24,6 @@ import PauseCircle from "@mui/icons-material/PauseCircle";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
-// import { useDispatch, useSelector } from "react-redux";
-// import {
-//   openBrandDialog,
-//   toggleLikeBrand,
-// } from "../../Redux/Slices/brandSlice";
-// import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { postView } from "../../Utils/function/view";
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
@@ -46,13 +40,9 @@ function TopBrandVdoCards() {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
-  // const dispatch = useDispatch();
-
-  // Get brands and loading state from Redux
   const { data: brands = [], loading: brandsLoading } = useBrands();
 const toggleLike = useToggleLike();
 
-  // Fixed card sizes with better aspect ratios
   const CARD_SIZES = {
     main: {
       width: isMobile ? "100%" : isTablet ? "100%" : "68%",
@@ -179,9 +169,7 @@ const toggleLike = useToggleLike();
           boxShadow: 1,
         }}
       >
-        <Typography variant="h6" color="text.secondary">
-          No featured brands available
-        </Typography>
+        <CircularProgress color="warning"  />
       </Box>
     );
   }
@@ -238,52 +226,6 @@ const toggleLike = useToggleLike();
         >
           Premium Franchise Brands
         </Typography>
-
-        {/* {!isMobile && (
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Button
-              variant="outlined"
-              onClick={handlePrev}
-              startIcon={<ChevronLeft />}
-              sx={{
-                textTransform: "none",
-                color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                borderColor:
-                  theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                "&:hover": {
-                  borderColor:
-                    theme.palette.mode === "dark" ? "#ff9800" : "#e65100",
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? "rgba(255, 167, 38, 0.08)"
-                      : "rgba(245, 124, 0, 0.08)",
-                },
-              }}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleNext}
-              endIcon={<ChevronRight />}
-              sx={{
-                textTransform: "none",
-                background:
-                  theme.palette.mode === "dark"
-                    ? "linear-gradient(45deg, #ffb74d, #ff9800)"
-                    : "linear-gradient(45deg, #f57c00, #ff9800)",
-                "&:hover": {
-                  background:
-                    theme.palette.mode === "dark"
-                      ? "linear-gradient(45deg, #ff9800, #ffb74d)"
-                      : "linear-gradient(45deg, #ff9800, #f57c00)",
-                },
-              }}
-            >
-              Next Brand
-            </Button>
-          </Box>
-        )} */}
       </Box>
 
       {/* Brands slider */}
@@ -398,16 +340,6 @@ const toggleLike = useToggleLike();
                         endIcon={<ChevronRight />}
                         sx={{
                           textTransform: "none",
-                          // background:
-                          //   theme.palette.mode === "dark"
-                          //     ? "linear-gradient(45deg, #ffb74d, #ff9800)"
-                          //     : "linear-gradient(45deg, #f57c00, #ff9800)",
-                          // "&:hover": {
-                          //   background:
-                          //     theme.palette.mode === "dark"
-                          //       ? "linear-gradient(45deg, #ff9800, #ffb74d)"
-                          //       : "linear-gradient(45deg, #ff9800, #f57c00)",
-                          // },
                           color:
                             theme.palette.mode === "dark" ? "#fff" : "#fff",
                           borderColor:

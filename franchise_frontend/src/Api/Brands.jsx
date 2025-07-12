@@ -1,69 +1,82 @@
 // api/brands.js
 import axios from "axios"
-import { api } from "./api";
-import {API_BASE_URL} from "./api";
+import { api, API_BASE_URL } from "./api";
 
-const getAuthHeader = () => {
+// Create a single axios instance with default headers
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json"
+  }
+});
+
+// Add request interceptor to inject auth token
+apiClient.interceptors.request.use(config => {
   const token = localStorage.getItem("accessToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID")
+const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
 
 export const fetchBrands = async () => {
-  const headers = {
-    "Content-Type": "application/json",
-    ...getAuthHeader()
-  };
+  const url = id 
+    ? `${api.allBrandsApi.get.likeAndUnlikeBrands}/${id}`
+    : api.allBrandsApi.get.defaultBrands;
   
-  let url = `${api.allBrandsApi.get.defaultBrands}`
-
-    if (id) {
-      url = `${api.allBrandsApi.get.likeAndUnlikeBrands}/${id}`
-    }
-    
-    
-  const response = await axios.get(url, { headers });
-  console.log("Fetched Brands   ooo:", response.data.data);
-  return response.data.data;
+  try {
+    const response = await apiClient.get(url);
+    console.log("Fetched Brands:", response.data.data);
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching brands:", error);
+    throw error;
+  }
 };
 
 export const fetchBrandById = async (brandId) => {
-  const response = await axios.get(
-    `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingByUUID/${brandId}`,
-    { headers: { "Content-Type": "application/json" } }
-  );
-  return response.data.data;
+  try {
+    const response = await apiClient.get(
+      `/brandlisting/getBrandListingByUUID/${brandId}`
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching brand by ID:", error);
+    throw error;
+  }
 };
 
 export const toggleBrandLike = async ({ brandId, isLiked }) => {
-  const id = localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID");
-  const headers = {
-    "Content-Type": "application/json",
-    ...getAuthHeader()
-  };
-
-  if (!isLiked) {
-    await axios.post(
-      `${api.likeApi.post}`,
-      { branduuid: brandId },
-      { headers }
-    );
-  } else {
-    await axios.delete(
-      `${API_BASE_URL}/like/delete-favbrand/${id}`,
-      { headers, data: { brandID: brandId } }
-    );
+  const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
+  
+  try {
+    if (!isLiked) {
+      await apiClient.post(api.likeApi.post, { branduuid: brandId });
+    } else {
+      await apiClient.delete(`/like/delete-favbrand/${id}`, { 
+        data: { brandID: brandId } 
+      });
+    }
+    return { brandId, isLiked: !isLiked };
+  } catch (error) {
+    console.error("Error toggling brand like:", error);
+    throw error;
   }
-  return { brandId, isLiked: !isLiked };
 };
 
 export const recordBrandView = async (brandID) => {
-  const id = localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID");
-  const response = await axios.post(
-    `https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
-    { brandID },
-    { headers: { ...getAuthHeader(), "Content-Type": "application/json" } }
-  );
-  return response.data.data;
+  const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
+  
+  try {
+    const response = await apiClient.post(
+      `/api/v1/view/postViewBrands/${id}`,
+      { brandID }
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error("Error recording brand view:", error);
+    throw error;
+  }
 };

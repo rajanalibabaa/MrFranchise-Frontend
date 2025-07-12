@@ -110,9 +110,9 @@ function Navbar() {
     setlogoutLoading(true)
     try {
       const response = await axios.post(
-        // `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
-        // `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
-        `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
+        // `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
+        // `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
+        `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
         {},
         {
           headers: {
@@ -224,7 +224,6 @@ function Navbar() {
             left: 0,
             right: 0,
             height: '4px',
-            // background: 'linear-gradient(90deg, #ff9800, #ff5722, #ff9800)',
             backgroundSize: '200% 100%',
             animation: 'gradient 3s ease infinite',
           },
@@ -270,9 +269,9 @@ function Navbar() {
                 sx={{ 
                   fontSize: isMobile ? '0.75rem' : '0.875rem',
                   textTransform: 'none',
-                  color: '#ff9800',
+                  color: 'black',
                   '&:hover': {
-                    color: 'black',
+                    color: '#ff9800',
                     backgroundColor: 'rgba(255, 255, 255, 0.1)'
                   }
                 }}

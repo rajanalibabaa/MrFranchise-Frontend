@@ -14,10 +14,8 @@ import {
   Snackbar,
   IconButton,
   MenuItem,
-  Stack,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
-import Zoom from '@mui/material/Zoom';
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -77,6 +75,12 @@ const ManageProfile = () => {
   const [isImageRemoved, setIsImageRemoved] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Location suggestion states
+  const [stateSuggestions, setStateSuggestions] = useState([]);
+  const [districtSuggestions, setDistrictSuggestions] = useState([]);
+  const [citySuggestions, setCitySuggestions] = useState([]);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
 
   // Navigation and Redux
   const navigate = useNavigate();
@@ -87,6 +91,14 @@ const ManageProfile = () => {
   const formatNumber = useCallback((num) => {
     if (!num) return "";
     return num.replace(/^(\+91)?/, "").trim();
+  }, []);
+
+  // Filter suggestions helper
+  const filterSuggestions = useCallback((input, data) => {
+    if (!input || !data) return [];
+    return data.filter(item => 
+      item.toLowerCase().includes(input.toLowerCase())
+    ).slice(0, 5);
   }, []);
 
   // Handle avatar file change
@@ -149,6 +161,7 @@ const ManageProfile = () => {
       preferredCity: ""
     };
     setInvestorData({ ...investorData, preferences: newPrefs });
+    setStateSuggestions([]);
   };
 
   // District change handler
@@ -160,6 +173,7 @@ const ManageProfile = () => {
       preferredCity: ""
     };
     setInvestorData({ ...investorData, preferences: newPrefs });
+    setDistrictSuggestions([]);
   };
 
   // Data fetching
@@ -180,6 +194,7 @@ const ManageProfile = () => {
         });
       }
     };
+
     fetchStates();
   }, []);
 
@@ -203,8 +218,6 @@ const ManageProfile = () => {
           }
         );
 
-        
-        console.log("response.data?.data :",response.data?.data)
         if (response.data?.data) {
           const data = response.data.data;
           const formattedData = {
@@ -214,10 +227,34 @@ const ManageProfile = () => {
             occupation: data.occupation || "",
             preferences: data.preferences?.map((pref) => ({
               ...pref,
-              category: Array.isArray(pref.category) ? pref.category : [],
+              _id: pref._id || `pref-${Date.now()}`,
+              category: Array.isArray(pref.category) ? pref.category : [{ main: "", sub: "", child: "" }],
               locationType: pref.locationType === "international" ? "International" : "Domestic",
-              propertyPreferred: Array.isArray(pref.propertyPreferred) ? pref.propertyPreferred : []
-            })) || [],
+              propertyPreferred: Array.isArray(pref.propertyPreferred) ? pref.propertyPreferred : [{
+                propertyType: "",
+                propertySize: "",
+                propertyCountry: "",
+                propertyState: "",
+                propertyCity: ""
+              }]
+            })) || [{
+              investmentRange: "",
+              investmentAmount: "",
+              locationType: "Domestic",
+              preferredCountry: "",
+              preferredState: "",
+              preferredDistrict: "",
+              preferredCity: "",
+              category: [{ main: "", sub: "", child: "" }],
+              propertyPreferred: [{
+                propertyType: "",
+                propertySize: "",
+                propertyCountry: "",
+                propertyState: "",
+                propertyCity: ""
+              }],
+              _id: `pref-${Date.now()}`
+            }],
             investorID: data.inveterID || ""
           };
           setInvestorData(formattedData);
@@ -451,34 +488,66 @@ const ManageProfile = () => {
           break;
         }
         
-        if (!pref.preferredState) {
-          setSnackbar({
-            open: true,
-            message: "Preferred state is required for all preferences",
-            severity: "error",
-          });
-          isValid = false;
-          break;
-        }
-        
-        if (!pref.preferredDistrict) {
-          setSnackbar({
-            open: true,
-            message: "Preferred district is required for all preferences",
-            severity: "error",
-          });
-          isValid = false;
-          break;
-        }
-        
-        if (!pref.preferredCity) {
-          setSnackbar({
-            open: true,
-            message: "Preferred city is required for all preferences",
-            severity: "error",
-          });
-          isValid = false;
-          break;
+        if (pref.locationType === "Domestic") {
+          if (!pref.preferredState) {
+            setSnackbar({
+              open: true,
+              message: "Preferred state is required for domestic preferences",
+              severity: "error",
+            });
+            isValid = false;
+            break;
+          }
+          
+          if (!pref.preferredDistrict) {
+            setSnackbar({
+              open: true,
+              message: "Preferred district is required for domestic preferences",
+              severity: "error",
+            });
+            isValid = false;
+            break;
+          }
+          
+          if (!pref.preferredCity) {
+            setSnackbar({
+              open: true,
+              message: "Preferred city is required for domestic preferences",
+              severity: "error",
+            });
+            isValid = false;
+            break;
+          }
+        } else if (pref.locationType === "International") {
+          if (!pref.preferredCountry) {
+            setSnackbar({
+              open: true,
+              message: "Preferred country is required for international preferences",
+              severity: "error",
+            });
+            isValid = false;
+            break;
+          }
+          
+          if (!pref.preferredState) {
+            setSnackbar({
+              open: true,
+              message: "Preferred state/province is required for international preferences",
+              severity: "error",
+            });
+            isValid = false;
+            break;
+          }
+          
+          if (!pref.preferredCity) {
+            setSnackbar({
+              open: true,
+              message: "Preferred city is required for international preferences",
+              severity: "error",
+            });
+            isValid = false;
+            break;
+          }
         }
         
         if (!pref.category || pref.category.length === 0) {
@@ -504,27 +573,35 @@ const ManageProfile = () => {
         }
 
         // Validate property preferences
-        if (pref.propertyPreferred && pref.propertyPreferred.length > 0) {
-          for (const prop of pref.propertyPreferred) {
-            if (!prop.propertyType) {
-              setSnackbar({
-                open: true,
-                message: "Property type is required for all property preferences",
-                severity: "error",
-              });
-              isValid = false;
-              break;
-            }
-            
-            if (prop.propertyType === "Own Property" && !prop.propertySize) {
-              setSnackbar({
-                open: true,
-                message: "Property size is required when property type is Own Property",
-                severity: "error",
-              });
-              isValid = false;
-              break;
-            }
+        if (!pref.propertyPreferred || pref.propertyPreferred.length === 0) {
+          setSnackbar({
+            open: true,
+            message: "At least one property preference is required",
+            severity: "error",
+          });
+          isValid = false;
+          break;
+        }
+
+        for (const prop of pref.propertyPreferred) {
+          if (!prop.propertyType) {
+            setSnackbar({
+              open: true,
+              message: "Property type is required for all property preferences",
+              severity: "error",
+            });
+            isValid = false;
+            break;
+          }
+          
+          if (prop.propertyType === "Own Property" && !prop.propertySize) {
+            setSnackbar({
+              open: true,
+              message: "Property size is required when property type is Own Property",
+              severity: "error",
+            });
+            isValid = false;
+            break;
           }
         }
       }
@@ -693,6 +770,18 @@ const ManageProfile = () => {
   const handlePreferenceChange = (index, key, value) => {
     const newPrefs = [...(investorData.preferences || [])];
     newPrefs[index] = { ...newPrefs[index], [key]: value };
+    
+    // Reset location fields when location type changes
+    if (key === "locationType") {
+      newPrefs[index] = {
+        ...newPrefs[index],
+        preferredCountry: "",
+        preferredState: "",
+        preferredDistrict: "",
+        preferredCity: ""
+      };
+    }
+    
     setInvestorData({ ...investorData, preferences: newPrefs });
   };
 
@@ -700,23 +789,6 @@ const ManageProfile = () => {
     const newPrefs = [...(investorData.preferences || [])];
     const newCategories = [...(newPrefs[prefIndex].category || [])];
     newCategories[catIndex] = { ...newCategories[catIndex], [key]: value };
-    newPrefs[prefIndex].category = newCategories;
-    setInvestorData({ ...investorData, preferences: newPrefs });
-  };
-
-  const addCategory = (prefIndex) => {
-    const newPrefs = [...(investorData.preferences || [])];
-    newPrefs[prefIndex].category = [
-      ...(newPrefs[prefIndex].category || []),
-      { main: "", sub: "", child: "" },
-    ];
-    setInvestorData({ ...investorData, preferences: newPrefs });
-  };
-
-  const removeCategory = (prefIndex, catIndex) => {
-    const newPrefs = [...(investorData.preferences || [])];
-    const newCategories = [...(newPrefs[prefIndex].category || [])];
-    newCategories.splice(catIndex, 1);
     newPrefs[prefIndex].category = newCategories;
     setInvestorData({ ...investorData, preferences: newPrefs });
   };
@@ -730,41 +802,25 @@ const ManageProfile = () => {
     setInvestorData({ ...investorData, preferences: newPrefs });
   };
 
-  const addPropertyPreference = (prefIndex) => {
-    const newPrefs = [...(investorData.preferences || [])];
-    if (!newPrefs[prefIndex].propertyPreferred) {
-      newPrefs[prefIndex].propertyPreferred = [];
-    }
-    newPrefs[prefIndex].propertyPreferred.push({
-      propertyType: "",
-      propertySize: "",
-      country: newPrefs[prefIndex].locationType === "International" ? investorData.country : "India",
-      state: newPrefs[prefIndex].preferredState,
-      city: newPrefs[prefIndex].preferredCity
-    });
-    setInvestorData({ ...investorData, preferences: newPrefs });
-  };
-
-  const removePropertyPreference = (prefIndex, propIndex) => {
-    const newPrefs = [...(investorData.preferences || [])];
-    const newProps = [...(newPrefs[prefIndex].propertyPreferred || [])];
-    newProps.splice(propIndex, 1);
-    newPrefs[prefIndex].propertyPreferred = newProps;
-    setInvestorData({ ...investorData, preferences: newPrefs });
-  };
-
   const addPreference = () => {
     const newPrefs = [...(investorData.preferences || [])];
     newPrefs.push({
       investmentRange: "",
       investmentAmount: "",
       locationType: "Domestic",
+      preferredCountry: "",
       preferredState: "",
       preferredDistrict: "",
       preferredCity: "",
       category: [{ main: "", sub: "", child: "" }],
-      propertyPreferred: [],
-      _id: Date.now().toString(),
+      propertyPreferred: [{
+        propertyType: "",
+        propertySize: "",
+        propertyCountry: "",
+        propertyState: "",
+        propertyCity: ""
+      }],
+      _id: `pref-${Date.now()}`
     });
     setInvestorData({ ...investorData, preferences: newPrefs });
   };
@@ -781,6 +837,67 @@ const ManageProfile = () => {
         severity: "error",
       });
     }
+  };
+
+  // Render international location fields
+  const renderInternationalLocationFields = (pref, prefIndex) => {
+    return (
+      <>
+        <TextField
+          size="small"
+          label="Preferred Country"
+          value={pref.preferredCountry || ""}
+          onChange={(e) =>
+            handlePreferenceChange(
+              prefIndex,
+              "preferredCountry",
+              e.target.value
+            )
+          }
+          disabled={!editMode}
+          fullWidth
+          required
+          error={editMode && !pref.preferredCountry}
+          helperText={editMode && !pref.preferredCountry ? "This field is required" : ""}
+        />
+
+        <TextField
+          size="small"
+          label="Preferred State/Province"
+          value={pref.preferredState || ""}
+          onChange={(e) =>
+            handlePreferenceChange(
+              prefIndex,
+              "preferredState",
+              e.target.value
+            )
+          }
+          disabled={!editMode}
+          fullWidth
+          required
+          error={editMode && !pref.preferredState}
+          helperText={editMode && !pref.preferredState ? "This field is required" : ""}
+        />
+
+        <TextField
+          size="small"
+          label="Preferred City"
+          value={pref.preferredCity || ""}
+          onChange={(e) =>
+            handlePreferenceChange(
+              prefIndex,
+              "preferredCity",
+              e.target.value
+            )
+          }
+          disabled={!editMode}
+          fullWidth
+          required
+          error={editMode && !pref.preferredCity}
+          helperText={editMode && !pref.preferredCity ? "This field is required" : ""}
+        />
+      </>
+    );
   };
 
   // Render helpers
@@ -1214,7 +1331,7 @@ const ManageProfile = () => {
 
             {(investorData.preferences || []).map((pref, prefIndex) => (
               <Paper
-                key={pref._id || prefIndex}
+                key={pref._id}
                 elevation={2}
                 sx={{ 
                   p: 2, 
@@ -1325,78 +1442,189 @@ const ManageProfile = () => {
                     <MenuItem value="International">International</MenuItem>
                   </TextField>
 
-                  {/* Location Selection */}
-                  <TextField
-                    size="small"
-                    label="Preferred State"
-                    value={pref?.preferredState || ""}
-                    onChange={(e) => handleStateChange(prefIndex, e.target.value)}
-                    disabled={!editMode || indiaData.length === 0}
-                    select
-                    fullWidth
-                    required
-                    error={editMode && !pref.preferredState}
-                    helperText={editMode && !pref.preferredState ? "This field is required" : ""}
-                  >
-                    <MenuItem value="">Select State</MenuItem>
-                    {indiaData.map((state) => (
-                      <MenuItem key={state.name} value={state.name}>
-                        {state.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                  {/* Location Selection - Domestic */}
+                  {pref.locationType === "Domestic" && (
+                    <>
+                      <TextField
+                        size="small"
+                        label="Preferred State"
+                        value={pref?.preferredState || ""}
+                        onChange={(e) => {
+                          handlePreferenceChange(prefIndex, "preferredState", e.target.value);
+                          setStateSuggestions(filterSuggestions(e.target.value, indiaData.map(state => state.name)));
+                          setActiveSuggestionIndex(-1);
+                        }}
+                        onFocus={() => {
+                          if (pref?.preferredState) {
+                            setStateSuggestions(filterSuggestions(pref.preferredState, indiaData.map(state => state.name)));
+                          }
+                        }}
+                        onBlur={() => setTimeout(() => setStateSuggestions([]), 200)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            setActiveSuggestionIndex(prev => 
+                              Math.min(prev + 1, stateSuggestions.length - 1)
+                            );
+                          } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            setActiveSuggestionIndex(prev => Math.max(prev - 1, -1));
+                          } else if (e.key === 'Enter' && activeSuggestionIndex >= 0) {
+                            e.preventDefault();
+                            handlePreferenceChange(prefIndex, "preferredState", stateSuggestions[activeSuggestionIndex]);
+                            setStateSuggestions([]);
+                          }
+                        }}
+                        disabled={!editMode || indiaData.length === 0}
+                        fullWidth
+                        required
+                        error={editMode && !pref.preferredState}
+                        helperText={editMode && !pref.preferredState ? "This field is required" : ""}
+                      />
 
-                  <TextField
-                    size="small"
-                    label="Preferred District"
-                    value={pref.preferredDistrict || ""}
-                    onChange={(e) => handleDistrictChange(prefIndex, e.target.value)}
-                    disabled={!editMode || !pref.preferredState}
-                    select
-                    fullWidth
-                    required
-                    error={editMode && !pref.preferredDistrict}
-                    helperText={editMode && !pref.preferredDistrict ? "This field is required" : ""}
-                  >
-                    <MenuItem value="">Select District</MenuItem>
-                    {pref.preferredState &&
-                      getDistrictsForState(pref.preferredState).map((district) => (
-                        <MenuItem key={district} value={district}>
-                          {district}
-                        </MenuItem>
-                      ))}
-                  </TextField>
+                      {/* State Suggestions */}
+                      {stateSuggestions.length > 0 && (
+                        <Paper elevation={3} sx={{ mt: 0.5, maxHeight: 200, overflow: 'auto' }}>
+                          {stateSuggestions.map((state, index) => (
+                            <MenuItem
+                              key={state}
+                              selected={index === activeSuggestionIndex}
+                              onClick={() => {
+                                handlePreferenceChange(prefIndex, "preferredState", state);
+                                setStateSuggestions([]);
+                              }}
+                              sx={{ fontSize: '0.875rem' }}
+                            >
+                              {state}
+                            </MenuItem>
+                          ))}
+                        </Paper>
+                      )}
 
-                  <TextField
-                    size="small"
-                    label="Preferred City"
-                    value={pref.preferredCity || ""}
-                    onChange={(e) =>
-                      handlePreferenceChange(
-                        prefIndex,
-                        "preferredCity",
-                        e.target.value
-                      )
-                    }
-                    disabled={!editMode || !pref.preferredDistrict}
-                    select
-                    fullWidth
-                    required
-                    error={editMode && !pref.preferredCity}
-                    helperText={editMode && !pref.preferredCity ? "This field is required" : ""}
-                  >
-                    <MenuItem value="">Select City</MenuItem>
-                    {pref.preferredState &&
-                      pref.preferredDistrict &&
-                      getCitiesForDistrict(
-                        pref.preferredState,
-                        pref.preferredDistrict
-                      ).map((city) => (
-                        <MenuItem key={city} value={city}>
-                          {city}
-                        </MenuItem>
-                      ))}
-                  </TextField>
+                      <TextField
+                        size="small"
+                        label="Preferred District"
+                        value={pref.preferredDistrict || ""}
+                        onChange={(e) => {
+                          handlePreferenceChange(prefIndex, "preferredDistrict", e.target.value);
+                          const districts = getDistrictsForState(pref.preferredState);
+                          setDistrictSuggestions(filterSuggestions(e.target.value, districts));
+                          setActiveSuggestionIndex(-1);
+                        }}
+                        onFocus={() => {
+                          if (pref?.preferredDistrict && pref.preferredState) {
+                            const districts = getDistrictsForState(pref.preferredState);
+                            setDistrictSuggestions(filterSuggestions(pref.preferredDistrict, districts));
+                          }
+                        }}
+                        onBlur={() => setTimeout(() => setDistrictSuggestions([]), 200)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            setActiveSuggestionIndex(prev => 
+                              Math.min(prev + 1, districtSuggestions.length - 1)
+                            );
+                          } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            setActiveSuggestionIndex(prev => Math.max(prev - 1, -1));
+                          } else if (e.key === 'Enter' && activeSuggestionIndex >= 0) {
+                            e.preventDefault();
+                            handlePreferenceChange(prefIndex, "preferredDistrict", districtSuggestions[activeSuggestionIndex]);
+                            setDistrictSuggestions([]);
+                          }
+                        }}
+                        disabled={!editMode || !pref.preferredState}
+                        fullWidth
+                        required
+                        error={editMode && !pref.preferredDistrict}
+                        helperText={editMode && !pref.preferredDistrict ? "This field is required" : ""}
+                        sx={{ mt: 2 }}
+                      />
+
+                      {/* District Suggestions */}
+                      {districtSuggestions.length > 0 && (
+                        <Paper elevation={3} sx={{ mt: 0.5, maxHeight: 200, overflow: 'auto' }}>
+                          {districtSuggestions.map((district, index) => (
+                            <MenuItem
+                              key={district}
+                              selected={index === activeSuggestionIndex}
+                              onClick={() => {
+                                handlePreferenceChange(prefIndex, "preferredDistrict", district);
+                                setDistrictSuggestions([]);
+                              }}
+                              sx={{ fontSize: '0.875rem' }}
+                            >
+                              {district}
+                            </MenuItem>
+                          ))}
+                        </Paper>
+                      )}
+
+                      <TextField
+                        size="small"
+                        label="Preferred City"
+                        value={pref.preferredCity || ""}
+                        onChange={(e) => {
+                          handlePreferenceChange(prefIndex, "preferredCity", e.target.value);
+                          const cities = getCitiesForDistrict(pref.preferredState, pref.preferredDistrict);
+                          setCitySuggestions(filterSuggestions(e.target.value, cities));
+                          setActiveSuggestionIndex(-1);
+                        }}
+                        onFocus={() => {
+                          if (pref?.preferredCity && pref.preferredState && pref.preferredDistrict) {
+                            const cities = getCitiesForDistrict(pref.preferredState, pref.preferredDistrict);
+                            setCitySuggestions(filterSuggestions(pref.preferredCity, cities));
+                          }
+                        }}
+                        onBlur={() => setTimeout(() => setCitySuggestions([]), 200)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            setActiveSuggestionIndex(prev => 
+                              Math.min(prev + 1, citySuggestions.length - 1)
+                            );
+                          } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            setActiveSuggestionIndex(prev => Math.max(prev - 1, -1));
+                          } else if (e.key === 'Enter' && activeSuggestionIndex >= 0) {
+                            e.preventDefault();
+                            handlePreferenceChange(prefIndex, "preferredCity", citySuggestions[activeSuggestionIndex]);
+                            setCitySuggestions([]);
+                          }
+                        }}
+                        disabled={!editMode || !pref.preferredDistrict}
+                        fullWidth
+                        required
+                        error={editMode && !pref.preferredCity}
+                        helperText={editMode && !pref.preferredCity ? "This field is required" : ""}
+                        sx={{ mt: 2 }}
+                      />
+
+                      {/* City Suggestions */}
+                      {citySuggestions.length > 0 && (
+                        <Paper elevation={3} sx={{ mt: 0.5, maxHeight: 200, overflow: 'auto' }}>
+                          {citySuggestions.map((city, index) => (
+                            <MenuItem
+                              key={city}
+                              selected={index === activeSuggestionIndex}
+                              onClick={() => {
+                                handlePreferenceChange(prefIndex, "preferredCity", city);
+                                setCitySuggestions([]);
+                              }}
+                              sx={{ fontSize: '0.875rem' }}
+                            >
+                              {city}
+                            </MenuItem>
+                          ))}
+                        </Paper>
+                      )}
+                    </>
+                  )}
+
+                  {/* Location Selection - International */}
+                  {pref.locationType === "International" && (
+                    renderInternationalLocationFields(pref, prefIndex)
+                  )}
 
                   {/* Category Selection */}
                   <Box mt={1}>
@@ -1495,17 +1723,6 @@ const ManageProfile = () => {
                                   </MenuItem>
                                 ))}
                               </TextField>
-
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() =>
-                                  removeCategory(prefIndex, catIndex)
-                                }
-                                disabled={isSubmitting}
-                              >
-                                <DeleteIcon />
-                              </IconButton>
                             </>
                           ) : (
                             <>
@@ -1545,18 +1762,6 @@ const ManageProfile = () => {
                       );
                     })}
 
-                    {editMode && (
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<AddIcon />}
-                        onClick={() => addCategory(prefIndex)}
-                        sx={{ mt: 1 }}
-                        disabled={isSubmitting}
-                      >
-                        Add Category
-                      </Button>
-                    )}
                   </Box>
 
                   {/* Property Preferences */}
@@ -1567,20 +1772,6 @@ const ManageProfile = () => {
 
                     {(pref.propertyPreferred || []).map((prop, propIndex) => (
                       <Box key={propIndex} mb={2} sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                          <Typography variant="subtitle2">Property #{propIndex + 1}</Typography>
-                          {editMode && (
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() => removePropertyPreference(prefIndex, propIndex)}
-                              disabled={isSubmitting}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          )}
-                        </Box>
-
                         <Box display="flex" flexDirection="column" gap={1}>
                           {/* Property Type */}
                           <TextField
@@ -1645,28 +1836,28 @@ const ManageProfile = () => {
                           <TextField
                             size="small"
                             label="Country"
-                            value={prop.country || ""}
+                            value={prop.propertyCountry || ""}
                             onChange={(e) =>
                               handlePropertyPreferenceChange(
                                 prefIndex,
                                 propIndex,
-                                "country",
+                                "propertyCountry",
                                 e.target.value
                               )
                             }
-                            disabled={!editMode || pref.locationType !== "International"}
+                            disabled={!editMode}
                             required
                           />
 
                           <TextField
                             size="small"
                             label="State"
-                            value={prop.state || ""}
+                            value={prop.propertyState || ""}
                             onChange={(e) =>
                               handlePropertyPreferenceChange(
                                 prefIndex,
                                 propIndex,
-                                "state",
+                                "propertyState",
                                 e.target.value
                               )
                             }
@@ -1677,12 +1868,12 @@ const ManageProfile = () => {
                           <TextField
                             size="small"
                             label="City"
-                            value={prop.city || ""}
+                            value={prop.propertyCity || ""}
                             onChange={(e) =>
                               handlePropertyPreferenceChange(
                                 prefIndex,
                                 propIndex,
-                                "city",
+                                "propertyCity",
                                 e.target.value
                               )
                             }
@@ -1692,19 +1883,6 @@ const ManageProfile = () => {
                         </Box>
                       </Box>
                     ))}
-
-                    {editMode && (
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<AddIcon />}
-                        onClick={() => addPropertyPreference(prefIndex)}
-                        sx={{ mt: 1 }}
-                        disabled={isSubmitting}
-                      >
-                        Add Property Preference
-                      </Button>
-                    )}
                   </Box>
                 </Box>
               </Paper>
@@ -1712,14 +1890,10 @@ const ManageProfile = () => {
 
             {editMode && (
               <Button
-                variant="contained"
+                variant="outlined"
                 startIcon={<AddIcon />}
                 onClick={addPreference}
-                sx={{ 
-                  mt: 2, 
-                  borderRadius: 2, 
-                  textTransform: "none",
-                }}
+                sx={{ mt: 2 }}
                 disabled={isSubmitting}
               >
                 Add Preference

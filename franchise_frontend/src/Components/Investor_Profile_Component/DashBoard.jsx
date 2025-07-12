@@ -26,7 +26,7 @@ import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import img from "../../assets/images/brandLogo.jpg";
 import { api } from "../../Api/api";
-import { openBrandDialog } from "../../Redux/Slices/brandSlice";
+import { openBrandDialog } from "../../Hooks/Fetchbrands";
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -359,7 +359,7 @@ const renderBrandCard = (item, type) => {
       width: '200px',
       height: '100%',
       display: "flex",
-      flexDirection: "column",
+       flexDirection: "column",
       
       borderRadius: 3,
       overflow: 'hidden',
