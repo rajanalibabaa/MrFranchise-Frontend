@@ -47,6 +47,7 @@ export const api = {
     },
     delete: `${API_BASE_URL}/view/deleteViewBrandByID`
   },
+  
   likeApi: {
     post: `${API_BASE_URL}/like/post-favbrands`,
     get: `${API_BASE_URL}/like/get-favbrands`,
