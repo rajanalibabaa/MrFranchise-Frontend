@@ -52,7 +52,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!investorUUID || !AccessToken) {
-      setError("Missing authentication credentials");
+      setError("Go to home page ...");
       setLoading(false);
       return;
     }
@@ -589,7 +589,7 @@ const renderBrandCard = (item, type) => {
           textAlign: 'center'
         }}>
           <Typography variant="h6" color="error" sx={{ mb: 2 }}>
-            Error loading data
+            Please Login ...
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {error}

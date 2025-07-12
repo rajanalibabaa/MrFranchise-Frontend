@@ -28,6 +28,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
 import { TbPhotoEdit } from "react-icons/tb";
+import { api } from "../../Api/api";
 
 const ManageProfile = () => {
   // State management
@@ -194,7 +195,7 @@ const ManageProfile = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          `${api.user.get.investor}/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
