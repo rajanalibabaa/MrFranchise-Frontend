@@ -521,7 +521,7 @@ const handleFilterChange = useCallback((name, value) => {
             </Box>
           ) : (
             <>
-              <Typography variant="h4" component="h1" sx={{ color: "#4caf50", mb: 2 }}>
+              <Typography variant="h4"  sx={{ color: "#4caf50", mb: 2 }}>
                 Available Franchise Brands
               </Typography>
               <Typography variant="body1" sx={{ color: "black", mb: 3 }}>

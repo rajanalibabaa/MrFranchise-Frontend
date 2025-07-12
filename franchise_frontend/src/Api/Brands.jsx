@@ -1,11 +1,14 @@
 // api/brands.js
 import axios from "axios"
-// import {API_BASE_URL} from "./api";
+import { api } from "./api";
+import {API_BASE_URL} from "./api";
 
 const getAuthHeader = () => {
   const token = localStorage.getItem("accessToken");
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
+
+const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID")
 
 export const fetchBrands = async () => {
   const headers = {
@@ -13,18 +16,21 @@ export const fetchBrands = async () => {
     ...getAuthHeader()
   };
   
-  const url =  
-    // ? `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`
-     `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing`;
+  let url = `${api.allBrandsApi.get.defaultBrands}`
+
+    if (id) {
+      url = `${api.allBrandsApi.get.likeAndUnlikeBrands}/${id}`
+    }
+    
     
   const response = await axios.get(url, { headers });
-  console.log("Fetched Brands:", response.data.data);
+  console.log("Fetched Brands   ooo:", response.data.data);
   return response.data.data;
 };
 
 export const fetchBrandById = async (brandId) => {
   const response = await axios.get(
-    `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingById/${brandId}`,
+    `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingByUUID/${brandId}`,
     { headers: { "Content-Type": "application/json" } }
   );
   return response.data.data;
@@ -39,7 +45,7 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
 
   if (!isLiked) {
     await axios.post(
-      `https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands`,
+      `${api.likeApi.post}`,
       { branduuid: brandId },
       { headers }
     );
