@@ -155,7 +155,7 @@ const ComplaintContent = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/complaint/createComplaint",
+        "https://franchise-backend-wgp6.onrender.com/api/complaint/createComplaint",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );

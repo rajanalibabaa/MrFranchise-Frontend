@@ -9,7 +9,8 @@ import {
   useTheme,
   styled,
   Paper,
-  useMediaQuery
+  useMediaQuery,
+  Container
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -21,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../../Components/Footers/Footer";
 import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
+import Navbar from "../../Components/Navbar/NavBar";
 
 const InvestorDashboard = () => {
   const navigate = useNavigate();
@@ -94,8 +96,9 @@ const InvestorDashboard = () => {
 
   return (
     <>
+    <Navbar/>
       <Box sx={{ 
-        mt: 8,
+        // mt: 8,
         display: "flex", 
         minHeight: "calc(100vh - 64px)",
         backgroundColor: colors.creamWhite
@@ -132,11 +135,8 @@ const InvestorDashboard = () => {
               <NavItem 
                 button 
                 onClick={() => {
-                  dispatch(showLoading());
                   navigate("/investordashboard/manageProfile");
-                  setTimeout(() => {
-                    dispatch(hideLoading());
-                  }, 5000);
+                  
                 }}
                 className={location.pathname === '/investordashboard/manageProfile' ? 'active' : ''}
               >
@@ -184,7 +184,7 @@ const InvestorDashboard = () => {
                 )}
               </NavItem>
               
-              <NavItem 
+              {/* <NavItem 
                 button 
                 component={RouterLink} 
                 to="/investordashboard/settings"
@@ -207,13 +207,13 @@ const InvestorDashboard = () => {
                     }}
                   />
                 )}
-              </NavItem>
+              </NavItem> */}
             </List>
           </Box>
         </GlassSidebar>
 
         {/* Main Content */}
-        <Box sx={{ 
+        <Container sx={{ 
           flexGrow: 1, 
           overflowY: "auto",
           p: isMobile ? 2 : 4,
@@ -231,7 +231,7 @@ const InvestorDashboard = () => {
           }}>
             <Outlet />
           </Box>
-        </Box>
+        </Container>
       </Box>
       <Footer />
     </>

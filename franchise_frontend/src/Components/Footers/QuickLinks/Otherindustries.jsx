@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link as RouterLink } from 'react-router-dom';
+import axios from "axios";
 import {
   Box,
   TextField,
   Select,
   MenuItem,
+  Link,
   InputLabel,
   FormControl,
   Button,
   Typography,
+  useTheme,
+  useMediaQuery,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -15,8 +20,12 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Navbar from "../../Navbar/NavBar";
+import Footer from "../Footer";
 
 const Otherindustries = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); 
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md")); 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -41,6 +50,7 @@ const Otherindustries = () => {
       setErrors((prev) => ({ ...prev, [name]: false }));
     }
   };
+  
 
   const validateForm = () => {
     const newErrors = {
@@ -54,11 +64,36 @@ const Otherindustries = () => {
     return !Object.values(newErrors).some((err) => err);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      console.log("Form submitted:", formData);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log("Form submitted:", formData);
+  if (validateForm()) {
+    try {
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        mobileNumber: formData.phone,    
+        registerAs: formData.userType,    
+        category: formData.category,
+        message: formData.message,
+      };
+
+      console.log("Payload:", payload);
+
+      const response = await axios.post(
+        "https://franchise-backend-wgp6.onrender.com/api/v1/otherindustries/recievingOtherIndustriesData",
+        payload,  
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Server response:", response.data);
       alert("Registration form submitted successfully!");
+
+      // Reset form
       setFormData({
         name: "",
         email: "",
@@ -67,31 +102,43 @@ const Otherindustries = () => {
         category: "",
         message: "",
       });
+    } catch (error) {
+      console.error("Submission error:", error);
+      alert("Something went wrong. Please try again later.");
     }
-  };
+  }
+};
 
   return (
+    <Box>
+      <Box sx={{ position: 'fixed', top: 0, width: '100%', zIndex: 10 }}>
+              <Navbar />
+            </Box>
     <Box
       sx={{
-        mt: "3%",
-        fontFamily: "sans-serif",
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        position: "relative",
-        color: "#fff",
-        minHeight: "100vh",
-        overflow: "hidden",
+       fontFamily: "sans-serif",
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          position: "relative",
+          color: "#fff",
+          minHeight: "100vh",
+          overflow: "hidden",
+   textAlign:{xs:"center"}
       }}
     >
       {/* Overlay */}
       <Box
         sx={{
-          position: "absolute",
-          inset: 0,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          zIndex: 0,
+         position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            zIndex: 0,
+
         }}
       />
 
@@ -99,10 +146,16 @@ const Otherindustries = () => {
       <Grid
         container
         sx={{
-          position: "relative",
-          zIndex: 1,
-          height: "calc(100vh - 80px)",
-          overflow: "hidden",
+        position: "relative",
+            zIndex: 1,
+            minHeight: "calc(100vh - 80px)",
+            display: "flex",
+            flexDirection: isMobile || isTablet ? "column" : "row",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: isMobile || isTablet ? "center" : "left",
+            px: { xs: 2, sm: 4, md: 8 },
+            py: { xs: 4, sm: 6, md: 8 },
         }}
       >
         {/* Left Side - Text Content */}
@@ -111,38 +164,48 @@ const Otherindustries = () => {
           xs={12}
           md={6}
           sx={{
-            p: 5,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            overflowY: "auto",
+           display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: { xs: 4, md: 0 }
           }}
         >
-          <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
-            Mr Franchise Business Opportunities
+          <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold", fontSize: { xs: 24, md: 32,sm:32 }, color:"#e69500"  }}>
+           <Link
+              component={RouterLink}
+              to="/"
+              underline="hover"
+              color="#e69500"
+              fontWeight="bold"
+            >
+              MrFranchise.in
+            </Link>{" "} Business Opportunities
           </Typography>
-          <Typography sx={{ mb: 4, maxWidth: 500, lineHeight: 1.6 }}>
+           <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <Typography sx={{ mb: 4, maxWidth: 500, lineHeight: 1.6, textAlign:"center" , fontSize:{xs:18}}}>
             Join established business systems with comprehensive support. Our
             partners offer turnkey operations with training, marketing tools,
             and ongoing guidance to help you succeed in your entrepreneurial
             journey.
-          </Typography>
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#ffa500",
-              color: "#fff",
-              px: 3,
-              py: 1,
-              fontWeight: "bold",
-              "&:hover": {
-                backgroundColor: "#e69500",
-              },
-              alignSelf: "flex-start",
-            }}
-          >
-            Learn More
-          </Button>
+          </Typography></Box>
+         {/* <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+  <Button
+    variant="contained"
+    sx={{
+     backgroundColor: "#ffa500",
+                  color: "#fff",
+                  px: 4,
+                  py: 1,
+                  fontWeight: "bold",
+                  "&:hover": {
+                    backgroundColor: "#e69500",
+      },
+    }}
+  >
+    Learn More
+  </Button>
+</Box> */}
         </Grid>
 
         {/* Right Side - Form */}
@@ -151,26 +214,27 @@ const Otherindustries = () => {
           xs={12}
           md={6}
           sx={{
-            p: 5,
-            display: "flex",
-            alignItems: "center",
-            overflowY: "auto",
+            padding: { xs: 2, md: 5 },
+              display: "flex",
+              alignItems: "center",
           }}
         >
           <Box
             sx={{
-              backgroundColor: "rgba(255,255,255,0.9)",
-              p: 4,
-              borderRadius: 2,
-              width: "100%",
-              maxWidth: 500,
-              boxShadow: 5,
+             backgroundColor: "rgba(255,255,255,0.95)",
+                padding: { xs: 2, sm: 3, md: 4 },
+                borderRadius: "8px",
+                width: "100%",
+                maxWidth: "500px",
             }}
           >
             <Typography
               variant="h5"
               align="center"
-              sx={{ mb: 3, color: "#333" }}
+              sx={{ 
+                marginBottom: "20px",
+                color: "#333",
+                fontSize: "24px" }}
             >
               Contact With Us
             </Typography>
@@ -239,8 +303,8 @@ const Otherindustries = () => {
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      <MenuItem value="investor">Investor</MenuItem>
-                      <MenuItem value="brand">Brand</MenuItem>
+                      <MenuItem value="Investor">Investor</MenuItem>
+                       <MenuItem value="Brand">Brand</MenuItem>
                     </Select>
                     {errors.userType && (
                       <Typography
@@ -269,14 +333,10 @@ const Otherindustries = () => {
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      <MenuItem value="Food & Beverage">
-                        Food & Beverage
-                      </MenuItem>
-                      <MenuItem value="Retail">Retail</MenuItem>
-                      <MenuItem value="Education">Education</MenuItem>
-                      <MenuItem value="Health & Wellness">
-                        Health & Wellness
-                      </MenuItem>
+                     <MenuItem value="Food & Beverage">Food & Beverage</MenuItem>
+<MenuItem value="Retail">Retail</MenuItem>
+<MenuItem value="Education">Education</MenuItem>
+<MenuItem value="Health & Wellness">Health & Wellness</MenuItem>
                     </Select>
                     {errors.category && (
                       <Typography
@@ -419,6 +479,10 @@ const Otherindustries = () => {
           </Accordion>
         </Box>
       </Box>
+    </Box>
+    <Box>
+      <Footer/>
+    </Box>
     </Box>
   );
 };
