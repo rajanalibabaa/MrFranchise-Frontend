@@ -132,7 +132,7 @@ console.log("side Brands:", brandsData);
   //   setError(null);
   //   try {
   //     const response = await axios.get(
-  //       "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+  //       "https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
   //       {
   //         headers: { "Content-Type": "application/json" },
   //         params: {

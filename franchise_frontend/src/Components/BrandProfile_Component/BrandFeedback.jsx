@@ -53,7 +53,7 @@ const BrandFeedBack = () => {
 
         try {
             const response = await axios.post(
-                "https://franchise-backend-wgp6.onrender.com/api/feedback/createFeedback",
+                "https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/feedback/createFeedback",
                 formattedData,
                 {
                     headers: {
