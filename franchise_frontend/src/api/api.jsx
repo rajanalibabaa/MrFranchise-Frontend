@@ -1,5 +1,5 @@
-const LOCAL_API = "https://franchise-backend-wgp6.onrender.com/api/v1";
-const RENDER_API = "https://franchise-backend-wgp6.onrender.com/api/v1";
+const LOCAL_API = "http://localhost:5000/api/v1";
+const RENDER_API = "http://localhost:5000/api/v1";
 
 // Option 1: Ping localhost, fallback to Render (recommended for production)
 export const getApiBaseUrl = async () => {
@@ -22,7 +22,7 @@ export const getApiBaseUrl = async () => {
 };
 
 // Option 2: Use static API based on environment (simple & fast)
-export const API_BASE_URL = "https://franchise-backend-wgp6.onrender.com/api/v1";
+export const API_BASE_URL = "http://localhost:5000/api/v1";
   // import.meta.env.MODE === "development" ? LOCAL_API : RENDER_API;
 
 

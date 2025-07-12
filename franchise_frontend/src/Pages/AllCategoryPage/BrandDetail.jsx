@@ -89,7 +89,7 @@ const navigate = useNavigate();
     
     try {
       const response = await axios.get(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -301,7 +301,7 @@ const navigate = useNavigate();
       console.log("payload :",payload)
 
       const response = await axios.post(
-       "https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication",
+       "http://localhost:5000/api/v1/instantapply/postApplication",
         payload,
         { 
           headers: { "Content-Type": "application/json" },

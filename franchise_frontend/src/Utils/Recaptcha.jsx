@@ -17,7 +17,7 @@ const CaptchaOnly = () => {
     setStatus(null);
 
     try {
-      const response = await fetch('https://franchise-backend-wgp6.onrender.com/api/v1/verify-captcha', {
+      const response = await fetch('http://localhost:5000/api/v1/verify-captcha', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: captchaValue }),

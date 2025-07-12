@@ -26,7 +26,7 @@ import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import img from "../../assets/images/brandLogo.jpg";
 import { api } from "../../Api/api";
-import { openBrandDialog } from "../../Redux/Slices/brandSlice";
+import { openBrandDialog } from "../../Hooks/Fetchbrands";
 
 const Dashboard = () => {
   const theme = useTheme();

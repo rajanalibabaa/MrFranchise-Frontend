@@ -22,13 +22,13 @@ export const toggleLikeBrand = createAsyncThunk(
       const brandID = brandId;
       if (!isLiked) {
         await axios.post(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
+          "http://localhost:5000/api/v1/like/post-favbrands",
           { branduuid: brandId },
           config
         );
       } else if (isLiked) {
         const res = await axios.delete(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${id}`,
+          `http://localhost:5000/api/v1/like/delete-favbrand/${id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export const toggleLikeBrand = createAsyncThunk(
 export const Likeshow = async () => {
   try {
     const response = await axios.get(
-      `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
+      `http://localhost:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +73,7 @@ export const Likeshow = async () => {
 
 //       if (!token) {
 //         response = await axios.get(
-//           "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+//           "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
 //           {
 //             headers: {
 //               "Content-Type": "application/json",
@@ -101,7 +101,7 @@ export const fetchBrandById = createAsyncThunk(
   async (brandId, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingById/${brandId}`,
+        `http://localhost:5000/api/v1/brandlisting/getBrandListingById/${brandId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -120,7 +120,7 @@ export const viewApi = createAsyncThunk(
   async (brandID, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
+        `http://localhost:5000/api/v1/view/postViewBrands/${id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -146,7 +146,7 @@ if (viewID) {
   console.log("token :",token)
   try {
       const res = await axios.post(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/view/postViewBrands/${id}`,
+        `http://localhost:5000/api/v1/view/postViewBrands/${id}`,
         {
           headers: {
             "Content-Type": "application/json",
