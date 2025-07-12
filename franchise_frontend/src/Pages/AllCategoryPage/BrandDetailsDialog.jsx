@@ -87,7 +87,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
       if (!investorUUID || !AccessToken) return;
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -209,7 +209,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
       console.log("Submitting with id:", id, "payload:", payload);
 
       const response = await axios.post(
-        `http://localhost:5000/api/v1/instantapply/postApplication/${id}`,
+        `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication/${id}`,
         payload,
         {
           headers: {

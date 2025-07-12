@@ -820,7 +820,7 @@ useEffect(() => {
       dispatch(showLoading());
       const response = await axios.post(
        
-        "http://localhost:5000/api/v1/investor/createInvestor",
+        "https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/investor/createInvestor",
         // `${ API_BASE_URL}/investor/createInvestor`,
         formattedData,
         { headers: { "Content-Type": "application/json" } }

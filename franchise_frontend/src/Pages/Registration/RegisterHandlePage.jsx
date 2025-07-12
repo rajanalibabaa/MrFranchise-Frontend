@@ -51,7 +51,7 @@ function RegisterHandleUser({boolean = true}) {
   };
   const handleSocialLogin = (provider) => {
     setIsSubmitting(true);
-    window.location.href = `http://localhost:5000/api/v1/auth/${provider}`;
+    window.location.href = `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/auth/${provider}`;
   };
 
   return (
