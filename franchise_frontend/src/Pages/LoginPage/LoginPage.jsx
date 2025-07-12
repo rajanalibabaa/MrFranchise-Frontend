@@ -21,7 +21,7 @@ import { useDispatch } from "react-redux";
 import { setUUIDandTOKEN, logout } from "../../Redux/Slices/AuthSlice/authSlice";
 import CloseIcon from "@mui/icons-material/Close";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
-
+import { API_BASE_URL } from "../../Api/api";
 function LoginPage({ open, onClose }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -89,7 +89,7 @@ function LoginPage({ open, onClose }) {
      setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin",
+        `https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin`,
         otpRequestPayload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -123,7 +123,7 @@ const handleVerifyOtp = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/login/",
+        `https://franchise-backend-wgp6.onrender.com/api/v1/login/`,
         otpVerifyPayload,
         { headers: { "Content-Type": "application/json" } }
       );

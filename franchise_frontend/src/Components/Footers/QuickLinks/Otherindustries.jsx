@@ -1,19 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link as RouterLink } from 'react-router-dom';
+import axios from "axios";
 import {
+  Box,
   TextField,
   Select,
   MenuItem,
+  Link,
   InputLabel,
   FormControl,
   Button,
   Typography,
+  useTheme,
+  useMediaQuery,
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Grid,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Navbar from "../../Navbar/NavBar";
+import Footer from "../Footer";
+
 const Otherindustries = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); 
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md")); 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -38,6 +50,7 @@ const Otherindustries = () => {
       setErrors((prev) => ({ ...prev, [name]: false }));
     }
   };
+  
 
   const validateForm = () => {
     const newErrors = {
@@ -51,11 +64,36 @@ const Otherindustries = () => {
     return !Object.values(newErrors).some((err) => err);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      console.log("Form submitted:", formData);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log("Form submitted:", formData);
+  if (validateForm()) {
+    try {
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        mobileNumber: formData.phone,    
+        registerAs: formData.userType,    
+        category: formData.category,
+        message: formData.message,
+      };
+
+      console.log("Payload:", payload);
+
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/otherindustries/recievingOtherIndustriesData",
+        payload,  
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Server response:", response.data);
       alert("Registration form submitted successfully!");
+
+      // Reset form
       setFormData({
         name: "",
         email: "",
@@ -64,302 +102,313 @@ const Otherindustries = () => {
         category: "",
         message: "",
       });
+    } catch (error) {
+      console.error("Submission error:", error);
+      alert("Something went wrong. Please try again later.");
     }
-  };
+  }
+};
 
   return (
-    <div
-      style={{
-        maxWidth: "full",
-        margin: "0 auto",
-        fontFamily: "sans-serif",
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        position: "relative",
-        color: "#fff",
-        minHeight: "100vh",
-        overflow: "hidden",
-        marginTop:"3%"
+    <Box>
+      <Box sx={{ position: 'fixed', top: 0, width: '100%', zIndex: 10 }}>
+              <Navbar />
+            </Box>
+    <Box
+      sx={{
+       fontFamily: "sans-serif",
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          position: "relative",
+          color: "#fff",
+          minHeight: "100vh",
+          overflow: "hidden",
+   textAlign:{xs:"center"}
       }}
     >
       {/* Overlay */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          zIndex: 0,
-        }}
-      ></div>
+      <Box
+        sx={{
+         position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            zIndex: 0,
 
-      {/* Main Content - Compact Layout */}
-      <div
-        style={{
-          display: "flex",
-          position: "relative",
-          zIndex: 1,
-          height: "calc(100vh - 80px)",
-          overflow: "hidden",
+        }}
+      />
+
+      {/* Main Content */}
+      <Grid
+        container
+        sx={{
+        position: "relative",
+            zIndex: 1,
+            minHeight: "calc(100vh - 80px)",
+            display: "flex",
+            flexDirection: isMobile || isTablet ? "column" : "row",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: isMobile || isTablet ? "center" : "left",
+            px: { xs: 2, sm: 4, md: 8 },
+            py: { xs: 4, sm: 6, md: 8 },
         }}
       >
         {/* Left Side - Text Content */}
-        <div
-          style={{
-            flex: 1,
-            padding: "40px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            overflowY: "auto",
-            maxHeight: "100%",
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+           display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: { xs: 4, md: 0 }
           }}
         >
-          <h2
-            style={{
-              fontSize: "32px",
-              marginBottom: "20px",
-              fontWeight: "bold",
-            }}
-          >
-            Mr Franchise Business Opportunities
-          </h2>
-
-          <p
-            style={{
-              fontSize: "16px",
-              lineHeight: "1.6",
-              marginBottom: "30px",
-              maxWidth: "500px",
-            }}
-          >
-            Join established business systems with comprehensive support. Our partners offer 
-  turnkey operations with training, marketing tools, and ongoing guidance to help 
-  you succeed in your entrepreneurial journey.
-          </p>
-
-          <Button
-            variant="contained"
-            style={{
-              backgroundColor: "#ffa500",
-              color: "#fff",
-              padding: "10px 25px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              alignSelf: "flex-start",
-              ":hover": {
-                backgroundColor: "#e69500",
-              },
-            }}
-          >
-            Learn More
-          </Button>
-        </div>
+          <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold", fontSize: { xs: 24, md: 32,sm:32 }, color:"#e69500"  }}>
+           <Link
+              component={RouterLink}
+              to="/"
+              underline="hover"
+              color="#e69500"
+              fontWeight="bold"
+            >
+              MrFranchise.in
+            </Link>{" "} Business Opportunities
+          </Typography>
+           <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <Typography sx={{ mb: 4, maxWidth: 500, lineHeight: 1.6, textAlign:"center" , fontSize:{xs:18}}}>
+            Join established business systems with comprehensive support. Our
+            partners offer turnkey operations with training, marketing tools,
+            and ongoing guidance to help you succeed in your entrepreneurial
+            journey.
+          </Typography></Box>
+         {/* <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+  <Button
+    variant="contained"
+    sx={{
+     backgroundColor: "#ffa500",
+                  color: "#fff",
+                  px: 4,
+                  py: 1,
+                  fontWeight: "bold",
+                  "&:hover": {
+                    backgroundColor: "#e69500",
+      },
+    }}
+  >
+    Learn More
+  </Button>
+</Box> */}
+        </Grid>
 
         {/* Right Side - Form */}
-        <div
-          style={{
-            flex: 1,
-            padding: "40px",
-            display: "flex",
-            alignItems: "center",
-            overflowY: "auto",
-            maxHeight: "100%",
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+            padding: { xs: 2, md: 5 },
+              display: "flex",
+              alignItems: "center",
           }}
         >
-          <div
-            style={{
-              backgroundColor: "rgba(255,255,255,0.9)",
-              padding: "30px",
-              borderRadius: "8px",
-              width: "100%",
-              maxWidth: "500px",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+          <Box
+            sx={{
+             backgroundColor: "rgba(255,255,255,0.95)",
+                padding: { xs: 2, sm: 3, md: 4 },
+                borderRadius: "8px",
+                width: "100%",
+                maxWidth: "500px",
             }}
           >
-            <h2
-              style={{
-                textAlign: "center",
+            <Typography
+              variant="h5"
+              align="center"
+              sx={{ 
                 marginBottom: "20px",
                 color: "#333",
-                fontSize: "24px",
-              }}
+                fontSize: "24px" }}
             >
               Contact With Us
-            </h2>
+            </Typography>
 
             <form onSubmit={handleSubmit}>
-              <div
-                style={{
-                  display: "grid",
-                  gap: "15px",
-                }}
-              >
-                <TextField
-                  label="Full Name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  error={errors.name}
-                  helperText={errors.name && "Name is required"}
-                  required
-                  variant="outlined"
-                  fullWidth
-                  size="small"
-                />
-                <TextField
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  error={errors.email}
-                  helperText={errors.email && "Valid email is required"}
-                  required
-                  variant="outlined"
-                  fullWidth
-                  size="small"
-                />
-                <TextField
-                  label="Mobile Number"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  error={errors.phone}
-                  helperText={
-                    errors.phone && "10-digit phone number is required"
-                  }
-                  required
-                  variant="outlined"
-                  fullWidth
-                  size="small"
-                />
-                <FormControl
-                  required
-                  error={errors.userType}
-                  variant="outlined"
-                  fullWidth
-                  size="small"
-                >
-                  <InputLabel>Register As</InputLabel>
-                  <Select
-                    name="userType"
-                    value={formData.userType}
+              <Grid container spacing={2}>
+                <Grid  xs={12} sx={{width:"100%"}}>
+                  <TextField
+                    label="Full Name"
+                    name="name"
+                    value={formData.name}
                     onChange={handleChange}
-                    label="Register As"
-                  >
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    <MenuItem value="investor">Investor</MenuItem>
-                    <MenuItem value="brand">Brand</MenuItem>
-                  </Select>
-                  {errors.userType && (
-                    <span style={{ color: "red", fontSize: "12px" }}>
-                      Please select a type
-                    </span>
-                  )}
-                </FormControl>
-
-                <FormControl
-                  required
-                  error={errors.category}
-                  variant="outlined"
-                  fullWidth
-                  size="small"
-                >
-                  <InputLabel>Category</InputLabel>
-                  <Select
-                    name="category"
-                    value={formData.category}
+                    error={errors.name}
+                    helperText={errors.name && "Name is required"}
+                    required
+                    variant="outlined"
+                    fullWidth
+                   
+                    // size="small"
+                  />
+                </Grid>
+                <Grid  xs={12} sx={{width:"100%"}}>
+                  <TextField
+                    label="Email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
                     onChange={handleChange}
-                    label="Category"
+                    error={errors.email}
+                    helperText={errors.email && "Valid email is required"}
+                    required
+                    variant="outlined"
+                    fullWidth
+                    
+              
+                  />
+                </Grid>
+                <Grid  xs={12} sx={{width:"100%"}} >
+                  <TextField
+                    label="Mobile Number"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    error={errors.phone}
+                    helperText={
+                      errors.phone && "10-digit phone number is required"
+                    }
+                    required
+                    variant="outlined"
+                    fullWidth
+                  />
+                </Grid>
+                <Grid  xs={12} sx={{width:"100%"}}>
+                  <FormControl
+                    required
+                    error={errors.userType}
+                    fullWidth
                   >
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    <MenuItem value="Food & Beverage">Food & Beverage</MenuItem>
-                    <MenuItem value="Retail">Retail</MenuItem>
-                    <MenuItem value="Education">Education</MenuItem>
-                    <MenuItem value="Health & Wellness">
-                      Health & Wellness
-                    </MenuItem>
-                  </Select>
-                  {errors.category && (
-                    <span style={{ color: "red", fontSize: "12px" }}>
-                      Please select a category
-                    </span>
-                  )}
-                </FormControl>
+                    <InputLabel>Register As</InputLabel>
+                    <Select
+                      name="userType"
+                      value={formData.userType}
+                      onChange={handleChange}
+                      label="Register As"
+                    >
+                      <MenuItem value="">
+                        <em>None</em>
+                      </MenuItem>
+                      <MenuItem value="Investor">Investor</MenuItem>
+                       <MenuItem value="Brand">Brand</MenuItem>
+                    </Select>
+                    {errors.userType && (
+                      <Typography
+                        variant="caption"
+                        color="error"
+                        sx={{ mt: 0.5 }}
+                      >
+                        Please select a type
+                      </Typography>
+                    )}
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sx={{width:"100%"}}>
+                  <FormControl
+                    required
+                    error={errors.category}
+                    fullWidth
+                  >
+                    <InputLabel>Category</InputLabel>
+                    <Select
+                      name="category"
+                      value={formData.category}
+                      onChange={handleChange}
+                      label="Category"
+                    >
+                      <MenuItem value="">
+                        <em>None</em>
+                      </MenuItem>
+                     <MenuItem value="Food & Beverage">Food & Beverage</MenuItem>
+<MenuItem value="Retail">Retail</MenuItem>
+<MenuItem value="Education">Education</MenuItem>
+<MenuItem value="Health & Wellness">Health & Wellness</MenuItem>
+                    </Select>
+                    {errors.category && (
+                      <Typography
+                        variant="caption"
+                        color="error"
+                        sx={{ mt: 0.5 }}
+                      >
+                        Please select a category
+                      </Typography>
+                    )}
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sx={{width:"100%"}}>
+                  <TextField
+                    label="Message (Optional)"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    multiline
+                    rows={2}
+                    variant="outlined"
+                    fullWidth
+                  />
+                </Grid>
+              </Grid>
 
-                <TextField
-                  label="Message (Optional)"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  multiline
-                  rows={2}
-                  variant="outlined"
-                  fullWidth
-                  size="small"
-                />
-              </div>
-
-              <div style={{ textAlign: "center", marginTop: "25px" }}>
+              <Box sx={{ textAlign: "center", mt: 4 }}>
                 <Button
                   type="submit"
                   variant="contained"
-                  size="medium"
-                  style={{
+                  sx={{
                     backgroundColor: "#ffa500",
                     color: "#fff",
-                    padding: "10px 30px",
-                    fontSize: "14px",
+                    px: 4,
+                    py: 1,
                     fontWeight: "bold",
-                    ":hover": {
+                    "&:hover": {
                       backgroundColor: "#e69500",
                     },
                   }}
                 >
                   Submit
                 </Button>
-              </div>
+              </Box>
             </form>
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Grid>
+      </Grid>
 
       {/* FAQ Section */}
-      <div
-        style={{
+      <Box
+        sx={{
           position: "relative",
           zIndex: 1,
-          padding: "60px",
+          px: 4,
+          py: 8,
           backgroundColor: "rgba(0,0,0,0.7)",
         }}
       >
         <Typography
           variant="h4"
           align="center"
-          gutterBottom
-          style={{
-            fontWeight: 600,
-            color: "#fff",
-            marginBottom: "40px",
-          }}
+          sx={{ fontWeight: 600, color: "#fff", mb: 5 }}
         >
           Why Register With Us?
         </Typography>
 
-        <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        <Box maxWidth="1000px" mx="auto">
           <Accordion
-            style={{
-              borderRadius: "8px",
-              marginBottom: "16px",
+            sx={{
+              borderRadius: 2,
+              mb: 2,
               backgroundColor: "rgba(255,255,255,0.1)",
               color: "#fff",
               "&:hover": {
@@ -367,36 +416,24 @@ const Otherindustries = () => {
               },
             }}
           >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon style={{ color: "#fff" }} />}
-            >
-              <Typography variant="h6" style={{ fontWeight: 500 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: "#fff" }} />}>
+              <Typography variant="h6" sx={{ fontWeight: 500 }}>
                 Why Register as an Investor?
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <ul
-                style={{
-                  paddingLeft: "18px",
-                  margin: 0,
-                  lineHeight: "1.8",
-                  color: "#eee",
-                }}
-              >
+              <ul style={{ paddingLeft: 18, margin: 0, lineHeight: 1.8 }}>
                 <li>
-                  <strong>Premium Franchise Access:</strong> First look at top
-                  brands.
+                  <strong>Premium Franchise Access:</strong> First look at top brands.
                 </li>
                 <li>
-                  <strong>Financial Insights:</strong> In-depth data for
-                  informed choices.
+                  <strong>Financial Insights:</strong> In-depth data for informed choices.
                 </li>
                 <li>
                   <strong>Expert Support:</strong> End-to-end investment help.
                 </li>
                 <li>
-                  <strong>Exclusive Networking:</strong> Events with other
-                  investors.
+                  <strong>Exclusive Networking:</strong> Events with other investors.
                 </li>
                 <li>
                   <strong>Lower Risk:</strong> Vetted and supported ventures.
@@ -406,8 +443,8 @@ const Otherindustries = () => {
           </Accordion>
 
           <Accordion
-            style={{
-              borderRadius: "8px",
+            sx={{
+              borderRadius: 2,
               backgroundColor: "rgba(255,255,255,0.1)",
               color: "#fff",
               "&:hover": {
@@ -415,47 +452,38 @@ const Otherindustries = () => {
               },
             }}
           >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon style={{ color: "#fff" }} />}
-            >
-              <Typography variant="h6" style={{ fontWeight: 500 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: "#fff" }} />}>
+              <Typography variant="h6" sx={{ fontWeight: 500 }}>
                 Why Register as a Brand?
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <ul
-                style={{
-                  paddingLeft: "18px",
-                  margin: 0,
-                  lineHeight: "1.8",
-                  color: "#eee",
-                }}
-              >
+              <ul style={{ paddingLeft: 18, margin: 0, lineHeight: 1.8 }}>
                 <li>
                   <strong>Vetted Leads:</strong> Get investor interest easily.
                 </li>
                 <li>
-                  <strong>Brand Visibility:</strong> Gain traction on our
-                  platform.
+                  <strong>Brand Visibility:</strong> Gain traction on our platform.
                 </li>
                 <li>
-                  <strong>Growth Strategy:</strong> Expert franchise development
-                  help.
+                  <strong>Growth Strategy:</strong> Expert franchise development help.
                 </li>
                 <li>
-                  <strong>Quality Leads:</strong> Save time with filtered
-                  investors.
+                  <strong>Quality Leads:</strong> Save time with filtered investors.
                 </li>
                 <li>
-                  <strong>Regional Expansion:</strong> Targeted market growth
-                  support.
+                  <strong>Regional Expansion:</strong> Targeted market growth support.
                 </li>
               </ul>
             </AccordionDetails>
           </Accordion>
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
+    <Box>
+      <Footer/>
+    </Box>
+    </Box>
   );
 };
 

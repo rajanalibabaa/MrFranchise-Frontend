@@ -1,24 +1,8 @@
-import React, {  useRef, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import {
-  Typography,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardMedia,
-  CircularProgress,
-  IconButton,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Avatar,
-  Chip,
-  Grid,
-  Stack,
-  Paper,
-  useMediaQuery,
-  useTheme,
+  Typography, Box, Button, Card, CardContent, CardMedia, CircularProgress, IconButton,
+  FormControl, InputLabel, Select, MenuItem, Avatar, Chip, Grid, Stack, Paper,
+  useMediaQuery, useTheme
 } from "@mui/material";
 import { motion } from "framer-motion";
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -26,7 +10,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import { useNavigate } from "react-router-dom";
-import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import { useBrands, useToggleLike, openBrandDialog } from "../../Hooks/Fetchbrands";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 // Animation variants for cards
@@ -42,8 +26,8 @@ const TopInvestVdo2 = React.memo(() => {
   const navigate = useNavigate();
 
   // State management
-  const [selectedLocation, setSelectedLocation] = useState("");
-  const [allLocations, setAllLocations] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState("All Locations");
+  const [allLocations, setAllLocations] = useState(["All Locations"]);
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
   const isPaused = useRef(false);
@@ -51,6 +35,29 @@ const TopInvestVdo2 = React.memo(() => {
   // Redux state
 const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
+
+  // collect all unique locations
+  useEffect(() => {
+    if (brands.length > 0) {
+      const locationsSet = new Set();
+      brands.forEach((brand) => {
+        const personal = brand?.personalDetails?.expansionLocation?.map(l => l.city) || [];
+        const brandLocs = brand?.brandDetails?.expansionLocations || [];
+        [...personal, ...brandLocs].forEach(loc => { if (loc) locationsSet.add(loc); });
+      });
+      setAllLocations(["All Locations", ...Array.from(locationsSet).sort()]);
+    }
+  }, [brands]);
+
+  // filter brands based on selected location
+  const filteredBrands = useMemo(() => {
+    if (selectedLocation === "All Locations") return brands;
+    return brands.filter((brand) => {
+      const personal = brand?.personalDetails?.expansionLocation?.map(l => l.city) || [];
+      const brandLocs = brand?.brandDetails?.expansionLocations || [];
+      return [...personal, ...brandLocs].includes(selectedLocation);
+    });
+  }, [brands, selectedLocation]);
 
   // console.log("brand === :",brands)
 
@@ -80,28 +87,14 @@ const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
     }
   }, [likeProcessing, toggleLike]);
 
-  // Filter brands to only include those with expansion locations
-  const brandsWithExpansion = useMemo(() => {
-    return brands.filter(brand => {
-      const hasPersonalExpansion = brand?.personalDetails?.expansionLocation?.length > 0;
-      const hasBrandExpansion = brand?.brandDetails?.expansionLocations?.length > 0;
-      return hasPersonalExpansion || hasBrandExpansion;
-    });
-  }, [brands]);
 
-  // Filter brands by selected location
-  const filteredBrands = useMemo(() => {
-    if (!selectedLocation || selectedLocation === "All Locations") {
-      return brandsWithExpansion;
-    }
-    
-    return brandsWithExpansion.filter((brand) => {
-      const personalLocations = brand?.personalDetails?.expansionLocation?.map(loc => loc.city) || [];
-      const brandLocations = brand?.brandDetails?.expansionLocations || [];
-      const allBrandLocations = [...personalLocations, ...brandLocations];
-      return allBrandLocations.includes(selectedLocation);
-    });
-  }, [brandsWithExpansion, selectedLocation]);
+
+
+
+
+  ////////
+
+ 
 
   // Initialize locations data
   // useEffect(() => {
@@ -142,12 +135,12 @@ const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
     const videoUrl = brandDetails?.brandPromotionVideo?.[0] || 
                     brandDetails?.franchisePromotionVideo?.[0];
     const category = personalDetails?.brandCategories?.[0]?.child || "No category";
-    
+    //  const logo = brandDetails?.brandLogo?.[0];
     // Get all expansion locations for display
     const personalLocations = personalDetails?.expansionLocation?.map(loc => loc.city) || [];
     const brandLocations = brandDetails?.expansionLocations || [];
-    const allLocations = [...personalLocations, ...brandLocations];
-    const displayLocation = allLocations.length > 0 ? allLocations[0] : "N/A";
+    const allLocs = [...personalLocations, ...brandLocations];
+    const displayLocation = allLocs[0] || "N/A";
 
     return (
       <motion.div
@@ -452,9 +445,9 @@ const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
             </Select>
           </FormControl>
 
-          <Typography variant="body1" color="text.secondary">
+          {/* <Typography variant="body1" color="text.secondary">
             {filteredBrands.length} {filteredBrands.length === 1 ? "Opportunity" : "Opportunities"} Available
-          </Typography>
+          </Typography> */}
         </Box>
       </Box>
 
@@ -493,3 +486,7 @@ const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
 });
 
 export default TopInvestVdo2;
+
+
+
+

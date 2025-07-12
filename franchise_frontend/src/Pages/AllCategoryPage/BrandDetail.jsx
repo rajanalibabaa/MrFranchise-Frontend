@@ -41,9 +41,9 @@ import {
   FavoriteBorder,
   BookmarkBorder,
   Share,
-  Person, 
-  Language, 
-  Instagram
+  Person,
+  Language,
+  Instagram,
 } from "@mui/icons-material";
 import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
@@ -72,7 +72,6 @@ const BrandDetails = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [userData, setUserData] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-
   const [openContactModal, setOpenContactModal] = useState(false);
 
   const handleOpenContact = () => setOpenContactModal(true);
@@ -236,38 +235,6 @@ const BrandDetails = () => {
     }
   }, [uuid, dispatch]);
 
-  // Fetch investor data
-  // useEffect(() => {
-  //   const fetchInvestorDetails = async () => {
-  //     if (!investorUUID || !AccessToken) return;
-  //     try {
-  //       const response = await axios.get(
-  //         `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
-  //         {
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: `Bearer ${AccessToken}`,
-  //           },
-  //         }
-  //       );
-  //       setUserData(response.data.data);
-  //       const investor = response.data?.data;
-  //       if (investor) {
-  //         setFormData(prev => ({
-  //           ...prev,
-  //           fullName: investor.firstName || "",
-  //           investorEmail: investor.email || "",
-  //           mobileNumber: investor.mobileNumber || "",
-  //         }));
-  //       }
-  //     } catch (error) {
-  //       console.error("Failed to fetch investor details:", error);
-  //     }
-  //   };
-
-  //   fetchInvestorDetails();
-  // }, [investorUUID, AccessToken]);
-
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -286,14 +253,11 @@ const BrandDetails = () => {
           city: formData.city || "",
           brandId: selectedBrand?.uuid,
           brandName: selectedBrand?.brandDetails?.brandName || "",
-          // brandEmail: selectedBrand.brandDetails?.email || "",
-          // brandLogo: selectedBrand.uploads?.brandLogo || "",
         };
 
         console.log("Payload to submit:", payload);
 
-        // const token = localStorage.getItem("accessToken");
-        // const id = investorUUID || localStorage.getItem("brandUUID");
+        const id = investorUUID || localStorage.getItem("brandUUID");
 
         if (!id) {
           alert("User not logged in or missing ID. Please login again.");
@@ -316,7 +280,7 @@ const BrandDetails = () => {
         }
 
         const response = await axios.post(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication`,
+          `https://localhost:5173/api/v1/instantapply/postApplication`,
           payload,
           {
             headers: {
@@ -338,7 +302,7 @@ const BrandDetails = () => {
         setIsSubmitting(false);
       }
     },
-    [formData, selectedBrand]
+    [formData, selectedBrand, investorUUID]
   );
 
   const handleShareClick = useCallback((event) => {
@@ -378,22 +342,22 @@ const BrandDetails = () => {
       <Navbar />
       <Box
         sx={{
-          width: "100%",
+          width: "90%",
           maxWidth: 1200,
-          // backgroundColor: '#fffef2',
           mx: "auto",
           my: 4,
           px: isMobile ? 2 : 4,
         }}
       >
+        {/* Floating Apply Now Button (Always Visible) */}
         <Box
           sx={{
             position: "fixed",
-            bottom: isMobile ? 0 : 300,
-            left: 0,
-            right: isMobile ? 0 : 10,
+            bottom: isMobile ? 35 : 310,
+            right: isMobile ? 0 : 20,
+            left: isMobile ? 0 : "auto",
             display: "flex",
-            justifyContent: isMobile ? "center" : "flex-end",
+            justifyContent: "center",
             zIndex: 1000,
           }}
         >
@@ -417,16 +381,17 @@ const BrandDetails = () => {
           </Button>
         </Box>
 
-        {/* Mobile Drawer for Application Form */}
+        {/* Mobile/Tablet Drawer (Bottom) */}
         <Drawer
-          anchor="right"
+          anchor={isMobile || isTablet ? "bottom" : "right"}
           open={drawerOpen}
           onClose={toggleDrawer(false)}
           PaperProps={{
             sx: {
-              // borderTopLeftRadius: 16,
-              // borderTopRightRadius: 16,
-              maxHeight: "100vh",
+              borderTopLeftRadius: isMobile || isTablet ? 16 : 0,
+              borderTopRightRadius: isMobile || isTablet ? 16 : 0,
+              maxHeight: isMobile || isTablet ? "80vh" : "100vh",
+              width: isMobile || isTablet ? "100%" : 500,
               overflow: "auto",
             },
           }}
@@ -449,7 +414,14 @@ const BrandDetails = () => {
             </Box>
 
             <form onSubmit={handleSubmit}>
-              <Grid spacing={2} sx={{ display: "grid", gap: 2 }}>
+            <Grid
+                spacing={2}
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(1, 1fr)",
+                  gap: 2,
+                }}
+              >           
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -652,63 +624,78 @@ const BrandDetails = () => {
           </Box>
         </Drawer>
 
-        <Dialog open={openContactModal} onClose={handleCloseContact} fullWidth maxWidth="sm">
-  <DialogTitle
-    sx={{
-      fontWeight: 600,
-      background: "linear-gradient(45deg, #000 30%, #000 90%)",
-      WebkitBackgroundClip: "text",
-      WebkitTextFillColor: "transparent",
-    }}
-  >
-    Contact Details
-  </DialogTitle>
+        {/* Contact Dialog */}
+        <Dialog
+          open={openContactModal}
+          onClose={handleCloseContact}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle
+            sx={{
+              fontWeight: 600,
+              background: "linear-gradient(45deg, #000 30%, #000 90%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Contact Details
+          </DialogTitle>
 
-  <DialogContent dividers>
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <DialogContent dividers>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Typography>
+                <strong>Manager Name:</strong>{" "}
+                {selectedBrand.brandDetails?.ceoName || "N/A"}
+              </Typography>
 
-      <Typography>
-        <strong>Manager Name:</strong>{" "}
-        {selectedBrand.brandDetails?.ceoName || "N/A"}
-      </Typography>
+              <Typography>
+                <strong>Mobile Number:</strong>{" "}
+                {selectedBrand.brandDetails?.ceoMobile || "N/A"}
+              </Typography>
 
-      <Typography>
-        <strong>Mobile Number:</strong>{" "}
-        {selectedBrand.brandDetails?.ceoMobile || "N/A"}
-      </Typography>
+              <Typography>
+                <strong>Website:</strong>{" "}
+                {selectedBrand.brandDetails?.website ? (
+                  <a
+                    href={selectedBrand.brandDetails.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {selectedBrand.brandDetails.website}
+                  </a>
+                ) : (
+                  "N/A"
+                )}
+              </Typography>
 
-      <Typography>
-        <strong>Website:</strong>{" "}
-        {selectedBrand.brandDetails?.website ? (
-          <a href={selectedBrand.brandDetails.website} target="_blank" rel="noopener noreferrer">
-            {selectedBrand.brandDetails.website}
-          </a>
-        ) : (
-          "N/A"
-        )}
-      </Typography>
+              <Typography>
+                <strong>Instagram:</strong>{" "}
+                {selectedBrand.brandDetails?.instagram ? (
+                  <a
+                    href={selectedBrand.brandDetails.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {selectedBrand.brandDetails.instagram}
+                  </a>
+                ) : (
+                  "N/A"
+                )}
+              </Typography>
+            </Box>
+          </DialogContent>
 
-      <Typography>
-        <strong>Instagram:</strong>{" "}
-        {selectedBrand.brandDetails?.instagram ? (
-          <a href={selectedBrand.brandDetails.instagram} target="_blank" rel="noopener noreferrer">
-            {selectedBrand.brandDetails.instagram}
-          </a>
-        ) : (
-          "N/A"
-        )}
-      </Typography>
-
-    </Box>
-  </DialogContent>
-
-  <DialogActions>
-    <Button onClick={handleCloseContact} variant="contained" color="error">
-      Close
-    </Button>
-  </DialogActions>
-</Dialog>
-
+          <DialogActions>
+            <Button
+              onClick={handleCloseContact}
+              variant="contained"
+              color="error"
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {/* Brand header with animation */}
         <motion.div
@@ -739,8 +726,8 @@ const BrandDetails = () => {
                   src={selectedBrand.uploads?.brandLogo}
                   alt={selectedBrand.brandDetails?.brandName}
                   sx={{
-                    width: isMobile ? 300 : 200,
-                    height: isMobile ? 300 : 200,
+                    width: isMobile ? 150 : 200,
+                    height: isMobile ? 150 : 200,
                     objectFit: "contain",
                   }}
                 />
@@ -751,7 +738,9 @@ const BrandDetails = () => {
                   <Box
                     display="flex"
                     alignItems="center"
-                    sx={{ gap: { md: 52 } }}
+                    justifyContent="space-between"
+                    flexDirection={isMobile ? "column" : "row"}
+                    gap={2}
                   >
                     <Box>
                       <Typography
@@ -800,12 +789,12 @@ const BrandDetails = () => {
                     <Box>
                       <Button
                         variant="contained"
-                        size="medium"
+                        size={isMobile ? "small" : "medium"}
                         startIcon={<Phone />}
                         onClick={handleOpenContact}
                         sx={{
-                          px: 1.5,
-                          py: 2,
+                          px: isMobile ? 1 : 1.5,
+                          py: isMobile ? 1 : 2,
                           bgcolor: "#ff9800",
                           "&:hover": {
                             bgcolor: "#e65100",
@@ -818,14 +807,14 @@ const BrandDetails = () => {
                   </Box>
                 </Box>
 
-                <TableContainer component={Paper} sx={{ mt: 2, width: "98%" }}>
+                <TableContainer component={Paper} sx={{ mt: 2, width: "100%" }}>
                   <Table>
                     <TableHead>
                       <TableRow
                         sx={{
                           backgroundColor: "#7ad03a",
                           "& td, & th": {
-                            padding: { md: "8px 12px", xs: "2px 8px" },
+                            padding: isMobile ? "4px 8px" : "8px 12px",
                           },
                         }}
                       >
@@ -868,7 +857,6 @@ const BrandDetails = () => {
                 </TableContainer>
               </Box>
             </Box>
-            {/* Contact Button */}
           </Box>
         </motion.div>
 
@@ -880,17 +868,16 @@ const BrandDetails = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          <Grid
-            display={isMobile ? "block" : "flex"}
+          <Box
+            display="flex"
             flexDirection={isMobile ? "column" : "row"}
             gap={4}
-            spacing={3}
           >
-            <Grid item xs={12} md={8}>
+            <Box flex={isMobile ? "none" : 2}>
               <Box
                 sx={{
-                  width: isMobile ? "49vh" : "100vh",
-                  height: isMobile ? 250 : 416,
+                  width: "100%",
+                  height: isMobile ? 200 : 416,
                   borderRadius: 2,
                   overflow: "hidden",
                 }}
@@ -916,13 +903,15 @@ const BrandDetails = () => {
                   </Typography>
                 )}
               </Box>
-            </Grid>
+            </Box>
 
-            <Grid>
+            <Box flex={1}>
               <Box
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gridTemplateColumns: isMobile
+                    ? "repeat(2, 1fr)"
+                    : "repeat(2, 1fr)",
                   gap: 1,
                 }}
               >
@@ -936,7 +925,7 @@ const BrandDetails = () => {
                   >
                     <Box
                       sx={{
-                        width: isMobile ? "25vh" : "32vh",
+                        width: "100%",
                         height: getImageBoxSize(),
                         overflow: "hidden",
                         borderRadius: 2,
@@ -1011,8 +1000,8 @@ const BrandDetails = () => {
                   </Box>
                 </motion.div>
               </Box>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </motion.div>
 
         <Divider sx={{ my: 5 }} />
@@ -1025,7 +1014,7 @@ const BrandDetails = () => {
           }}
         >
           {/* Overview tab */}
-          <Box sx={{ maxWidth: isMobile ? "100%" : 1200 }}>
+          <Box sx={{ width: "100%" }}>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1038,6 +1027,7 @@ const BrandDetails = () => {
             </motion.div>
           </Box>
         </Box>
+
         {/* Image Modal */}
         <Dialog
           open={imageModalOpen}
@@ -1181,15 +1171,11 @@ const BrandDetails = () => {
           </DialogActions>
         </Dialog>
 
-        <ShareDialogActions anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
-
-        {!isMobile && (
+         {/* Desktop Application Form */}
+        {!isMobile && !isTablet && (
           <Box
             sx={{
               mt: 4,
-              // position: isMobile ? 'relative' : 'sticky',
-              top: isMobile ? 0 : 100,
-              mb: isMobile ? 4 : 0,
               p: 4,
               borderRadius: "16px",
               background: "white",
@@ -1202,18 +1188,16 @@ const BrandDetails = () => {
               fontWeight={700}
               sx={{
                 mb: 3,
-                // color: colors.dark,
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
                 color: "#ff9800",
               }}
             >
-              {/* <ContactMail sx={{ color: colors.primary }} /> */}
               Instant Franchise Application
             </Typography>
             <form onSubmit={handleSubmit}>
-              <Grid
+               <Grid
                 spacing={2}
                 sx={{
                   display: "grid",
@@ -1221,7 +1205,7 @@ const BrandDetails = () => {
                   gap: 2,
                 }}
               >
-                <Grid item xs={12}>
+                <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
                     label="Full Name"
@@ -1233,7 +1217,7 @@ const BrandDetails = () => {
                     size="medium"
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
                     label="Email"
@@ -1245,7 +1229,7 @@ const BrandDetails = () => {
                     size="medium"
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
                     label="Mobile Number"
@@ -1261,7 +1245,7 @@ const BrandDetails = () => {
                 </Grid>
 
                 {/* State Dropdown */}
-                <Grid item xs={12}>
+                <Grid item xs={12} md={4}>
                   <TextField
                     select
                     fullWidth
@@ -1282,7 +1266,7 @@ const BrandDetails = () => {
                 </Grid>
 
                 {/* District Dropdown */}
-                <Grid item xs={12}>
+                <Grid item xs={12} md={4}>
                   <TextField
                     select
                     fullWidth
@@ -1304,7 +1288,7 @@ const BrandDetails = () => {
                 </Grid>
 
                 {/* City Dropdown */}
-                <Grid item xs={12}>
+                <Grid item xs={12} md={4}>
                   <TextField
                     select
                     fullWidth
@@ -1325,7 +1309,7 @@ const BrandDetails = () => {
                   </TextField>
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid item xs={12} md={4}>
                   <TextField
                     select
                     fullWidth
@@ -1344,7 +1328,7 @@ const BrandDetails = () => {
                     ))}
                   </TextField>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} md={4}>
                   <TextField
                     select
                     fullWidth
@@ -1363,7 +1347,7 @@ const BrandDetails = () => {
                     ))}
                   </TextField>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} md={4}>
                   <TextField
                     select
                     fullWidth
@@ -1393,7 +1377,7 @@ const BrandDetails = () => {
                     backgroundColor: "#ff9800",
                     py: 1.5,
                     fontSize: "1rem",
-                    px: 4, // optional: makes the button look wider
+                    px: 4,
                     "&:disabled": {
                       background: "#e0e0e0",
                       color: "#9e9e9e",
@@ -1422,7 +1406,7 @@ const BrandDetails = () => {
                 p: 2,
                 borderRadius: "8px",
                 bgcolor: "rgba(102, 126, 234, 0.05)",
-                borderLeft: `4px solidrgb(84, 241, 12)`,
+                borderLeft: `4px solid rgb(84, 241, 12)`,
               }}
             >
               <Typography variant="body2">
@@ -1431,7 +1415,7 @@ const BrandDetails = () => {
               </Typography>
             </Box>
           </Box>
-        )}
+        )}              
       </Box>
 
       <Footer />

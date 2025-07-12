@@ -1,12 +1,16 @@
 import React from "react";
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Box,
   Typography,
   Grid,
   Container,
   Card,
+  Link,         
   CardContent,
-  Button
+  Button,
+  useTheme,
+  useMediaQuery
 } from "@mui/material";
 import BusinessIcon from '@mui/icons-material/Business';
 import  ExpandBrand from "../../../assets/Images/ExpandBusiness.jpg";
@@ -17,6 +21,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import Navbar from '../../Navbar/NavBar';
 import Footer from '../Footer';
+
 
 // Inject custom styles for the page
 const customStyle = `
@@ -85,6 +90,8 @@ const customStyle = `
   }
 }
 `;
+
+
 if (!document.head.querySelector('style[data-expand-custom]')) {
   const styleTag = document.createElement("style");
   styleTag.setAttribute("data-expand-custom", "true");
@@ -152,17 +159,21 @@ const Section = ({ title, icon, items, image, description }) => (
 );
 
 const ExpandYourBrand = () => {
+   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  // const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
   return (
     <Box className="expand-bg">
       <Box sx={{ position: 'fixed', top: 0, width: '100%', zIndex: 10 }}>
         <Navbar />
       </Box>
 
-      <Container sx={{ py: 5 }}>
+      <Container sx={{ py: 2 }}>
         {/* Header */}
         <Box
           textAlign="center"
-          mt={5}
+          // mt={2}
           mb={3}
           sx={{
             animation: "fadeInUp 1s",
@@ -176,7 +187,7 @@ const ExpandYourBrand = () => {
           }}
         >
           <Typography
-            variant="h4"
+            variant={isMobile ? "h5" : "h3"}
             fontWeight="bold"
             gutterBottom
             color="#ff9800"
@@ -185,7 +196,7 @@ const ExpandYourBrand = () => {
             Expand Your Brand
           </Typography>
           <Typography
-            variant="h5"
+            variant={isMobile ? "h6" : "h4"}
             gutterBottom
             sx={{ color: "#7ad03a", fontWeight: 600, letterSpacing: 0.5 }}
           >
@@ -195,7 +206,15 @@ const ExpandYourBrand = () => {
             Are you running a successful business and ready to take it to the next level?
           </Typography>
           <Typography variant="body1" color="text.secondary" mt={1}>
-            At MrFranchise.in, we specialize in helping business owners expand their brand through franchising — strategically, professionally, and profitably. Whether you own a local outlet, a regional chain, or an emerging startup, we help you structure your model, position your brand, and attract serious investors across Tamil Nadu and beyond.
+            At <Link
+              component={RouterLink}
+              to="/"
+              underline="hover"
+              color="black"
+              fontWeight="bold"
+            >
+              MrFranchise.in
+            </Link>{" "}, we specialize in helping business owners expand their brand through franchising — strategically, professionally, and profitably. Whether you own a local outlet, a regional chain, or an emerging startup, we help you structure your model, position your brand, and attract serious investors across Tamil Nadu and beyond.
           </Typography>
         </Box>
 
