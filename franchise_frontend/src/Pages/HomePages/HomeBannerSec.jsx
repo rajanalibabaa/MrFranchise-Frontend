@@ -536,7 +536,7 @@ const HomeBannerSec = () => {
                 mb: 3,
                 maxWidth: "800px",
                 mx: "auto",
-                lineHeight: 1,
+                lineHeight: 1.5,
                 fontSize: isMobile ? "1.1rem" : "1.1rem",
                 textShadow: "0 2px 4px rgba(0,0,0,0.5)",
               }}
