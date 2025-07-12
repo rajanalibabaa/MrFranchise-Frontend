@@ -28,11 +28,24 @@ const BrandComparison = ({
 }) => {
   const [currentModelIndexes, setCurrentModelIndexes] = useState({});
   
+  // Enhanced nested value accessor
   const getNestedValue = (obj, path) => {
-    return path.split('.').reduce((o, p) => (o ? o[p] : null), obj);
+    try {
+      return path.split('.').reduce((o, p) => {
+        // Handle array indices like [0]
+        if (p.includes('[') && p.includes(']')) {
+          const prop = p.substring(0, p.indexOf('['));
+          const index = parseInt(p.substring(p.indexOf('[') + 1, p.indexOf(']')));
+          return o[prop] ? o[prop][index] : null;
+        }
+        return o ? o[p] : null;
+      }, obj) || "-";
+    } catch (e) {
+      return "-";
+    }
   };
 
-  // Initialize or update current model indexes when brands change
+  // Initialize current model indexes
   React.useEffect(() => {
     const indexes = {};
     selectedBrands.forEach(brand => {
@@ -47,7 +60,7 @@ const BrandComparison = ({
 
   const handleNextModel = (brandId) => {
     setCurrentModelIndexes(prev => {
-      const brandModels = selectedBrands.find(b => b.uuid === brandId)?.franchiseDetails?.modelsOfFranchise || [];
+      const brandModels = selectedBrands.find(b => b.uuid === brandId)?.franchiseDetails?.fico || [];
       const currentIndex = prev[brandId] || 0;
       return {
         ...prev,
@@ -58,7 +71,7 @@ const BrandComparison = ({
 
   const handlePrevModel = (brandId) => {
     setCurrentModelIndexes(prev => {
-      const brandModels = selectedBrands.find(b => b.uuid === brandId)?.franchiseDetails?.modelsOfFranchise || [];
+      const brandModels = selectedBrands.find(b => b.uuid === brandId)?.franchiseDetails?.fico || [];
       const currentIndex = prev[brandId] || 0;
       return {
         ...prev,
@@ -67,19 +80,19 @@ const BrandComparison = ({
     });
   };
 
-  // Main comparison fields
+  // Main comparison fields - updated paths
   const basicInfoFields = [
     { label: "Brand Name", field: "brandDetails.brandName" },
-    { label: "Company Name", field: "brandDetails.companyName" },
+    { label: "Company Name", field: "franchiseDetails.companyName" },
     { label: "Established Year", field: "franchiseDetails.establishedYear" },
     { label: "Total Outlets", field: "franchiseDetails.totalOutlets" },
     { label: "Company Owned Outlets", field: "franchiseDetails.companyOwnedOutlets" },
     { label: "Franchise Outlets", field: "franchiseDetails.franchiseOutlets" },
-    { label: "Agreement Period", field: "fico.agreementPeriod" },
+    { label: "Agreement Period", field: "franchiseDetails.fico[0].agreementPeriod" },
     { label: "Requirement Support", field: "franchiseDetails.trainingSupport" },
   ];
 
-  // Franchise model fields
+  // Franchise model fields - updated paths
   const franchiseModelFields = [
     { label: "Franchise Model", field: "franchiseModel" },
     { label: "Franchise Type", field: "franchiseType" },
@@ -89,10 +102,13 @@ const BrandComparison = ({
     { label: "Royalty Fee", field: "royaltyFee" },
     { label: "Break Even Period", field: "breakEven" },
     { label: "ROI", field: "roi" },
-    { label: "Exterior Cost", field: "exteriorCost" },
     { label: "Interior Cost", field: "interiorCost" },
     { label: "Other Costs", field: "otherCost" },
-    { label: "Property Type", field: "propertyType" },
+    { label: "Stock Investment", field:"stockInvestment"},
+    { label: "Pay Back Period", field:"payBackPeriod"},
+    { label: "Require Working Captial", field:"requireWorkingCapital"},
+    { label: "Margin On Sales", field:"marginOnSales"},
+    { label: "Agreement Period", field:"agreementPeriod"}
   ];
 
   return (
@@ -122,7 +138,7 @@ const BrandComparison = ({
                     <TableCell key={brand.uuid} align="center" sx={{ width: `${80/selectedBrands.length}%` }}>
                       <Box display="flex" flexDirection="column" alignItems="center">
                         <Avatar
-                          src={brand.uploads?.brandLogo}
+                          src={brand.uploads?.brandLogo?.[0] || ""}
                           alt={brand.brandDetails?.brandName}
                           sx={{ 
                             width: 80, 
@@ -136,7 +152,7 @@ const BrandComparison = ({
                           variant="rounded"
                         />
                         <Typography variant="subtitle1" sx={{ fontWeight: "bold", color: "#4caf50" }}>
-                          {brand.brandDetails?.brandName}
+                          {brand.brandDetails?.brandName || "-"}
                         </Typography>
                         <Chip
                           label="Remove"
@@ -163,22 +179,29 @@ const BrandComparison = ({
                     <TableCell component="th" scope="row" sx={{ bgcolor: "#f9f9f9", fontWeight: "bold" }}>
                       <Typography variant="subtitle2">{field.label}</Typography>
                     </TableCell>
-                    {selectedBrands.map((brand) => (
-                      <TableCell 
-                        key={`${brand.uuid}-${field.field}`} 
-                        align="center"
-                        sx={{ 
-                          borderLeft: "1px solid #e0e0e0",
-                          bgcolor: field.label === "Brand Name" ? "#f5f5f5" : "white"
-                        }}
-                      >
-                        {getNestedValue(brand, field.field) || "-"}
-                      </TableCell>
-                    ))}
+                    {selectedBrands.map((brand) => {
+                      let value = getNestedValue(brand, field.field);
+                      
+                      // Special handling for Requirement Support
+                      if (field.label === "Requirement Support" && Array.isArray(value)) {
+                        value = value.join(", ");
+                      }
+                      
+                      return (
+                        <TableCell
+                          key={`${brand.uuid}-${field.field}`}
+                          align="center"
+                          sx={{
+                            borderLeft: "1px solid #e0e0e0",
+                            bgcolor: field.label === "Brand Name" ? "#f5f5f5" : "white"
+                          }}
+                        >
+                          {value}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))}
-
-
 
                 {/* Franchise Model Navigation */}
                 <TableRow hover>
@@ -186,7 +209,7 @@ const BrandComparison = ({
                     <Typography variant="subtitle2">Franchise Model</Typography>
                   </TableCell>
                   {selectedBrands.map((brand) => {
-                    const models = brand.franchiseDetails?.modelsOfFranchise || [];
+                    const models = brand.franchiseDetails?.fico || [];
                     const currentIndex = currentModelIndexes[brand.uuid] || 0;
                     const currentModel = models[currentIndex];
                     
@@ -252,7 +275,7 @@ const BrandComparison = ({
                       <Typography variant="subtitle2">{field.label}</Typography>
                     </TableCell>
                     {selectedBrands.map((brand) => {
-                      const models = brand.franchiseDetails?.modelsOfFranchise || [];
+                      const models = brand.franchiseDetails?.fico || [];
                       const currentIndex = currentModelIndexes[brand.uuid] || 0;
                       const currentModel = models[currentIndex];
                       
@@ -266,14 +289,15 @@ const BrandComparison = ({
                           }}
                         >
                           {currentModel ? (
-                            <Typography 
-                              sx={{ 
-                                color: field.label.includes("Fee") || field.label.includes("Cost") ? "#ff9800" : "inherit",
-                                fontWeight: field.label.includes("Investment") ? "bold" : "normal"
-                              }}
-                            >
-                              {currentModel[field.field] || "-"}
-                            </Typography>
+                           <Typography 
+  sx={{ 
+    color: field?.label?.includes("Fee") || field?.label?.includes("Cost") ? "#ff9800" : "inherit",
+    fontWeight: field?.label?.includes("Investment") ? "bold" : "normal"
+  }}
+>
+  {currentModel?.[field.field] ?? "-"}
+</Typography>
+
                           ) : "-"}
                         </TableCell>
                       );

@@ -469,6 +469,11 @@ const applyFiltersToBrands = (brands, filters) => {
   });
 };
 
-export const { setFilters, clearFilters, openBrandDialog, closeBrandDialog } =
+export const {fetchAllFilterData,
+  
+  setFilters,
+  clearFilters,
+  openBrandDialog,
+  closeBrandDialog } =
   brandSlice.actions;
 export default brandSlice.reducer;
