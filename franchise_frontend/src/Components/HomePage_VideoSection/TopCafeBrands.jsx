@@ -378,7 +378,7 @@ const TopCafeFranchises = () => {
     } finally {
       setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
     }
-  }, [likeProcessing, toggleLike]);
+  }, [likeProcessing, toggleLike]); 
 
   const handleApply = useCallback((brand) => {
     

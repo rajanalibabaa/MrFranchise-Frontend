@@ -28,7 +28,7 @@ function BrandComplaint() {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/complaint/createComplaint",
+        "https://franchise-backend-wgp6.onrender.com/api/complaint/createComplaint",
         formattedData,
         {
           headers: {

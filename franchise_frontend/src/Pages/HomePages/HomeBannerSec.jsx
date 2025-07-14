@@ -37,9 +37,9 @@ const dynamicComponents = {
   TopBrandThreevdocards: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")
   )),
-//   ViewerBrands: withSuspense(React.lazy(() =>
-//     import("../../Components/HomePage_VideoSection/ViewerBrands.jsx")
-// )),
+  ViewerBrands: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/ViewerBrands.jsx")
+)),
   TopCafeBrandsFranchise: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
   )),
@@ -95,11 +95,11 @@ const pageConfig = {
       background: "white",
       backgroundOpacity: 0.1,
     },
-    // {
-    //   component: "ViewerBrands",
-    //   background: "#fffaf7",
-    //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    // },
+    {
+      component: "ViewerBrands",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    },
     {
       component: "TopCafeBrandsFranchise",
       background: "#fffaf7",
@@ -514,7 +514,7 @@ const HomeBannerSec = () => {
                 mb: 3,
                 maxWidth: "800px",
                 mx: "auto",
-                lineHeight: 1,
+                lineHeight: 1.5,
                 fontSize: isMobile ? "1.1rem" : "1.1rem",
                 textShadow: "0 2px 4px rgba(0,0,0,0.5)",
               }}

@@ -15,7 +15,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import illustration from "../../assets/Images/Login_illustration.jpg";
+import illustration from "../../assets/Images/LoginImage.png";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setUUIDandTOKEN, logout } from "../../Redux/Slices/AuthSlice/authSlice";
@@ -88,7 +88,7 @@ function LoginPage({ open, onClose }) {
      setIsLoading(true);
     try {
       const response = await axios.post(
-        `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/login/generateOTPforLogin`,
         otpRequestPayload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -122,7 +122,7 @@ const handleVerifyOtp = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `https://franchise-backend-wgp6.onrender.comhttps://franchise-backend-wgp6.onrender.com/api/v1/login/`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/login/`,
         otpVerifyPayload,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -210,17 +210,18 @@ const handleVerifyOtp = useCallback(async () => {
         >
           <Typography variant="h5" component={"span"}>Login</Typography>
           <IconButton onClick={onClose}>
-            <CloseIcon />
+            <CloseIcon sx={{ color: "red",fontSize: 30 }} />
           </IconButton>
         </DialogTitle>
 
         <DialogContent sx={{ p: 0 }}>
-          <Grid container sx={{ minHeight: "65vh" }}>
-            <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center", alignItems: "center", bgcolor: "white" }}>
-              <Box component="img" src={illustration} alt="Login" sx={{ width: "100%", maxWidth: 400, borderRadius: 2 }} />
-            </Grid>
+          <Grid display={"flex"} sx={{ minHeight: "65vh" }}>
+              <Box ml={4} sx={{ display: "flex", alignItems: "center", justifyContent: "center",p:4}}>
+                <img src={illustration} alt="Login" style={{ maxWidth: "100%", height: "65vh" }} />
+                </Box>
+            
 
-            <Grid item xs={12} md={6} sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 4 }}>
+            <Grid ml={2} xs={12} md={6} sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 4 }}>
               <Box sx={{ width: "100%", maxWidth: 400 }}>
                 <Typography variant="h4" textAlign="center" fontWeight="bold" gutterBottom>
                   Welcome Back!

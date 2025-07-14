@@ -209,7 +209,7 @@ const ManageProfile = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -708,7 +708,7 @@ const ManageProfile = () => {
 
     try {
       const response = await axios.patch(
-        `http://localhost:5000/api/v1/investor/updateInvestor/${investorUUID}`,
+        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/updateInvestor/${investorUUID}`,
         formData,
         {
           headers: {
