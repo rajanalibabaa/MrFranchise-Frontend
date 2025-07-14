@@ -36,6 +36,7 @@ import {
   Phone,
   Share,
   Favorite,
+  ShareOutlined
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useBrand } from "../../Hooks/Fetchbrands.jsx";
@@ -43,6 +44,9 @@ import axios from "axios";
 import OverviewTab from "./OverviewTab.jsx";
 import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
+// import { useToggleLike } from '../../Hooks/Fetchbrands';
+import { useToggleLike } from '../../Hooks/Fetchbrands.jsx';
+
 
 const BrandDetails = ({ brandData }) => {
   const theme = useTheme();
@@ -63,6 +67,11 @@ const navigate = useNavigate();
     cities: [],
   });
 
+const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
+  const [isProcessingLike, setIsProcessingLike] = useState(false);
+  
+  const { mutate: toggleLike } = useToggleLike();
+
   const [formData, setFormData] = useState({
     fullName: "",
     investorEmail: "",
@@ -75,6 +84,8 @@ const navigate = useNavigate();
     readyToInvest: "",
   });
 
+
+  
   
   const { uuid } = useParams();
   // const { selectedBrand } = useSelector((state) => state.brands);
@@ -84,6 +95,31 @@ const navigate = useNavigate();
   // Get investor data from localStorage with caching
   const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
   const AccessToken = useMemo(() => localStorage.getItem("accessToken"), []);
+
+
+    const handleLikeClick = useCallback(() => {
+      if (isProcessingLike) return;
+      
+      setIsProcessingLike(true);
+      const newLikeStatus = !localIsLiked;
+      
+      // Optimistic update
+      setLocalIsLiked(newLikeStatus);
+      
+      toggleLike(
+        { brandId: uuid, isLiked: !newLikeStatus },
+        {
+          onError: () => {
+            // Revert on error
+            setLocalIsLiked(!newLikeStatus);
+          },
+          onSettled: () => {
+            setIsProcessingLike(false);
+          }
+        }
+      );
+    }, [uuid, localIsLiked, isProcessingLike, toggleLike]);
+
 
   // Memoized API calls
   const fetchInvestorDetails = useCallback(async () => {
@@ -843,7 +879,28 @@ const maskEmail = (email) => {
                         </Typography>
                       </Box>
                     </Box>
-                    <Box >
+
+                     <IconButton
+                                onClick={handleLikeClick}
+                                disabled={isProcessingLike}
+                                aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
+                              >
+                                {isProcessingLike ? (
+                                  <CircularProgress size={24} />
+                                ) : (
+                                  <Favorite
+                                    sx={{
+                                      color: localIsLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
+                                    }}
+                                  />
+                                )}
+                              </IconButton>
+                       <IconButton
+                                // onClick={handleShareButton}
+                              >
+                                  <ShareOutlined />
+                              </IconButton>
+                    <Box>
                       <Button
                         variant="contained"
                         size={isMobile ? "small" : "medium"}

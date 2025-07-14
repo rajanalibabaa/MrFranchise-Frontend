@@ -20,6 +20,7 @@ import {
 import LoginPage from '../LoginPage/LoginPage';
 import { openBrandDialog } from "../../Hooks/Fetchbrands.jsx";
 import { postView } from '../../Utils/function/view.jsx';
+import { useToggleLike } from '../../Hooks/Fetchbrands';
 
 const cardStyles = {
   width: 320,
@@ -73,14 +74,16 @@ const viewButtonStyles = {
 
 const BrandCard = memo(({
   brand,
-  onToggleLike,
   showLogin,
   onShowLogin,
   isSelectedForComparison,
   onToggleBrandComparison,
   maxComparisonReached,
 }) => {
-  const [isProcessingLike, setIsProcessingLike] = useState({});
+  const [localIsLiked, setLocalIsLiked] = useState(brand.isLiked);
+  const [isProcessingLike, setIsProcessingLike] = useState(false);
+  
+  const { mutate: toggleLike } = useToggleLike();
   
   const {
     uuid,
@@ -88,7 +91,6 @@ const BrandCard = memo(({
     brandDetails = {},
     franchiseDetails = {},
     expansionLocationData = {},
-    isLiked,
   } = brand;
 
   const investmentRange = useMemo(() => 
@@ -110,17 +112,28 @@ const BrandCard = memo(({
     openBrandDialog(brand);
   }, [uuid, brand]);
 
-  const handleLikeClick = useCallback(async () => {
-    if (isProcessingLike[uuid]) return;
+  const handleLikeClick = useCallback(() => {
+    if (isProcessingLike) return;
     
-    setIsProcessingLike(prev => ({ ...prev, [uuid]: true }));
-    try {
-      await Promise.resolve();
-      await onToggleLike(uuid, isLiked);
-    } finally {
-      setIsProcessingLike(prev => ({ ...prev, [uuid]: false }));
-    }
-  }, [uuid, isLiked, onToggleLike, isProcessingLike]);
+    setIsProcessingLike(true);
+    const newLikeStatus = !localIsLiked;
+    
+    // Optimistic update
+    setLocalIsLiked(newLikeStatus);
+    
+    toggleLike(
+      { brandId: uuid, isLiked: !newLikeStatus },
+      {
+        onError: () => {
+          // Revert on error
+          setLocalIsLiked(!newLikeStatus);
+        },
+        onSettled: () => {
+          setIsProcessingLike(false);
+        }
+      }
+    );
+  }, [uuid, localIsLiked, isProcessingLike, toggleLike]);
 
   const handleComparisonToggle = useCallback(() => {
     if (maxComparisonReached && !isSelectedForComparison) {
@@ -195,15 +208,15 @@ const BrandCard = memo(({
           </Typography>
           <IconButton
             onClick={handleLikeClick}
-            disabled={isProcessingLike[uuid]}
-            aria-label={isLiked ? "Unlike brand" : "Like brand"}
+            disabled={isProcessingLike}
+            aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
           >
-            {isProcessingLike[uuid] ? (
+            {isProcessingLike ? (
               <CircularProgress size={24} />
             ) : (
               <Favorite
                 sx={{
-                  color: isLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
+                  color: localIsLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
                 }}
               />
             )}
