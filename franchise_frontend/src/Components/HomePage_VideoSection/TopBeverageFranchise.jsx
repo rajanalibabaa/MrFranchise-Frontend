@@ -23,7 +23,6 @@ import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import Business from "@mui/icons-material/Business";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 import { postView } from "../../Utils/function/view";
@@ -295,7 +294,8 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  <strong>Model:</strong> {modelType} | <strong>Type:</strong> {franchiseType}
+                   <strong>Franchise Type :</strong> {franchiseType}
+                   {/* <strong>Model:</strong> {modelType} | */}
                 </Typography>
               </Box>
 
@@ -309,7 +309,8 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  <strong>Investment:</strong> {investmentRange} | <strong>Fee:</strong> {franchiseFee}
+                  <strong>Investment:</strong> {investmentRange} 
+                  {/* | <strong>Fee:</strong> {franchiseFee} */}
                 </Typography>
               </Box>
 
@@ -323,7 +324,8 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  <strong>Area:</strong> {areaRequired} | <strong>ROI:</strong> {roi}% in {payBackPeriod}
+                  <strong>Area:</strong> {areaRequired} 
+                  {/* | <strong>ROI:</strong> {roi}% in {payBackPeriod} */}
                 </Typography>
               </Box>
             </Stack>
@@ -464,7 +466,7 @@ const TopBeverageFranchises = () => {
       sx={{
         py: isMobile ? 1 : 2,
         px: isMobile ? 0 : 2,
-        maxWidth: isMobile ? "100%" : 1300,
+        maxWidth: isMobile ? "100%" : 1400,
         mx: "auto",
         mb: isMobile ? 0 : 2,
       }}

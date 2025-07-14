@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -13,8 +13,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import { useBrands } from "../../Hooks/Fetchbrands";
 
-// Memoize investment range options to prevent recreation on every render
-const investmentRangeOptions = [
+// Constants moved outside component to prevent recreation
+const INVESTMENT_RANGE_OPTIONS = [
   { label: "All Ranges", value: "" },
   { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
   { label: "Rs.2L-5L", value: "Rs.2L-5L" },
@@ -36,79 +36,52 @@ const FilterDropdowns = () => {
     selectedInvestmentRange: ""
   });
   
-  // Fetch brands data with caching and error handling
   const { 
     data: brands = [], 
     isLoading, 
     error 
   } = useBrands();
 
-  // Memoize derived data to avoid recalculating on every render
+  // Extract unique subcategories and states from brands data
   const { subCategories, states } = useMemo(() => {
+    if (!brands || brands.length === 0) return { subCategories: [], states: [] };
+
     const subCategoriesSet = new Set();
     const statesSet = new Set();
 
-    if (brands && brands.length > 0) {
-      brands.forEach(brand => {
-        // Extract subcategories
-        const sub = brand.franchiseDetails?.brandCategories?.sub;
-        if (sub) subCategoriesSet.add(sub);
-        
-        // Extract states
-        const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
-        locations.forEach(loc => {
-          if (loc.state) statesSet.add(loc.state);
-        });
+    brands.forEach(brand => {
+      // Process subcategories
+      const subCategory = brand.franchiseDetails?.brandCategories?.sub;
+      if (subCategory) subCategoriesSet.add(subCategory);
+      
+      // Process states
+      const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
+      locations.forEach(loc => {
+        if (loc.state) statesSet.add(loc.state);
       });
-    }
+    });
 
     return {
-      subCategories: Array.from(subCategoriesSet).filter(sub => !!sub).map(sub => ({ id: sub, name: sub })),
-      states: Array.from(statesSet).filter(Boolean)
+      subCategories: Array.from(subCategoriesSet).map(sub => ({ id: sub, name: sub })),
+      states: Array.from(statesSet)
     };
   }, [brands]);
 
-  // Filter brands based on current filters
-  const filteredBrands = useMemo(() => {
-    if (!brands || brands.length === 0) return [];
-    
-    return brands.filter(brand => {
-      // Filter by subcategory if selected
-      if (filters.selectedSubCategory && 
-          brand.franchiseDetails?.brandCategories?.sub !== filters.selectedSubCategory) {
-        return false;
-      }
-      
-      // Filter by state if selected
-      if (filters.selectedState) {
-        const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
-        const hasState = locations.some(loc => loc.state === filters.selectedState);
-        if (!hasState) return false;
-      }
-      
-      // Filter by investment range if selected
-      if (filters.selectedInvestmentRange) {
-        const investment = brand.franchiseDetails?.investmentRange;
-        if (investment !== filters.selectedInvestmentRange) return false;
-      }
-      
-      return true;
-    });
-  }, [brands, filters]);
-
-  const handleFilterChange = (name, value) => {
+  const handleFilterChange = useCallback((name, value) => {
     setFilters(prev => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handleFindBrands = () => {
-    // Navigate with filtered brands and current filters
+  const handleFindBrands = useCallback(() => {
+    // Only navigate when the button is clicked
     navigate("/brandviewpage", {
       state: { 
         filters,
-        brands: filteredBrands 
+        // Don't pre-filter here - let the destination page handle filtering
+        // to avoid processing large datasets during navigation
+        brands 
       },
     });
-  };
+  }, [navigate, filters, brands]);
 
   // Show loading or error states
   if (isLoading) {
@@ -183,7 +156,7 @@ const FilterDropdowns = () => {
             onChange={(e) => handleFilterChange("selectedInvestmentRange", e.target.value)}
             label="Investment Range"
           >
-            {investmentRangeOptions.map((option) => (
+            {INVESTMENT_RANGE_OPTIONS.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
               </MenuItem>
@@ -212,4 +185,4 @@ const FilterDropdowns = () => {
   );
 };
 
-export default FilterDropdowns;
+export default React.memo(FilterDropdowns);

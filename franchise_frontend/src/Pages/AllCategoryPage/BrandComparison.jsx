@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -24,15 +24,25 @@ const BrandComparison = ({
   open,
   onClose,
   selectedBrands,
-  removeFromComparison,
+  onRemoveFromComparison,
 }) => {
   const [currentModelIndexes, setCurrentModelIndexes] = useState({});
   
-  // Enhanced nested value accessor
+  useEffect(() => {
+    const indexes = {};
+    selectedBrands.forEach(brand => {
+      if (brand.uuid && !(brand.uuid in currentModelIndexes)) {
+        indexes[brand.uuid] = 0;
+      }
+    });
+    if (Object.keys(indexes).length > 0) {
+      setCurrentModelIndexes(prev => ({ ...prev, ...indexes }));
+    }
+  }, [selectedBrands]);
+
   const getNestedValue = (obj, path) => {
     try {
       return path.split('.').reduce((o, p) => {
-        // Handle array indices like [0]
         if (p.includes('[') && p.includes(']')) {
           const prop = p.substring(0, p.indexOf('['));
           const index = parseInt(p.substring(p.indexOf('[') + 1, p.indexOf(']')));
@@ -44,19 +54,6 @@ const BrandComparison = ({
       return "-";
     }
   };
-
-  // Initialize current model indexes
-  React.useEffect(() => {
-    const indexes = {};
-    selectedBrands.forEach(brand => {
-      if (brand.uuid && !(brand.uuid in currentModelIndexes)) {
-        indexes[brand.uuid] = 0;
-      }
-    });
-    if (Object.keys(indexes).length > 0) {
-      setCurrentModelIndexes(prev => ({ ...prev, ...indexes }));
-    }
-  }, [selectedBrands]);
 
   const handleNextModel = (brandId) => {
     setCurrentModelIndexes(prev => {
@@ -80,7 +77,6 @@ const BrandComparison = ({
     });
   };
 
-  // Main comparison fields - updated paths
   const basicInfoFields = [
     { label: "Brand Name", field: "brandDetails.brandName" },
     { label: "Company Name", field: "franchiseDetails.companyName" },
@@ -92,7 +88,6 @@ const BrandComparison = ({
     { label: "Requirement Support", field: "franchiseDetails.trainingSupport" },
   ];
 
-  // Franchise model fields - updated paths
   const franchiseModelFields = [
     { label: "Franchise Model", field: "franchiseModel" },
     { label: "Franchise Type", field: "franchiseType" },
@@ -112,10 +107,22 @@ const BrandComparison = ({
   ];
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth scroll="paper">
-      <DialogTitle sx={{ bgcolor: "", color: "Black" }}>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="lg" 
+      fullWidth 
+      scroll="paper"
+      sx={{
+        '& .MuiDialog-paper': {
+          minHeight: '80vh',
+          maxHeight: '90vh',
+        }
+      }}
+    >
+      <DialogTitle sx={{ bgcolor: "#f5f5f5", color: "Black", position: 'sticky', top: 0, zIndex: 1 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">Brand Comparison</Typography>
+          <Typography variant="h6">Brand Comparison ({selectedBrands.length})</Typography>
           <IconButton onClick={onClose} sx={{ color: "black" }}>
             <Close />
           </IconButton>
@@ -129,8 +136,8 @@ const BrandComparison = ({
             </Typography>
           </Box>
         ) : (
-          <TableContainer component={Paper}>
-            <Table size="small" sx={{ minWidth: 650 }}>
+          <TableContainer component={Paper} sx={{ maxHeight: 'calc(90vh - 150px)' }}>
+            <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow sx={{ bgcolor: "#f5f5f5" }}>
                   <TableCell sx={{ fontWeight: "bold", width: "200px" }}>Feature</TableCell>
@@ -138,7 +145,7 @@ const BrandComparison = ({
                     <TableCell key={brand.uuid} align="center" sx={{ width: `${80/selectedBrands.length}%` }}>
                       <Box display="flex" flexDirection="column" alignItems="center">
                         <Avatar
-                          src={brand.uploads?.brandLogo?.[0] || ""}
+                          src={brand.uploads?.brandLogo || ""}
                           alt={brand.brandDetails?.brandName}
                           sx={{ 
                             width: 80, 
@@ -149,7 +156,6 @@ const BrandComparison = ({
                             bgcolor: "white",
                             p: 0.5
                           }}
-                          variant="rounded"
                         />
                         <Typography variant="subtitle1" sx={{ fontWeight: "bold", color: "#4caf50" }}>
                           {brand.brandDetails?.brandName || "-"}
@@ -157,7 +163,7 @@ const BrandComparison = ({
                         <Chip
                           label="Remove"
                           size="small"
-                          onClick={() => removeFromComparison(brand.uuid)}
+                          onClick={() => onRemoveFromComparison(brand.uuid)}
                           sx={{ 
                             mt: 1, 
                             bgcolor: "#F2211D", 
@@ -173,7 +179,6 @@ const BrandComparison = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {/* Basic Information Rows */}
                 {basicInfoFields.map((field) => (
                   <TableRow key={field.label} hover>
                     <TableCell component="th" scope="row" sx={{ bgcolor: "#f9f9f9", fontWeight: "bold" }}>
@@ -182,7 +187,6 @@ const BrandComparison = ({
                     {selectedBrands.map((brand) => {
                       let value = getNestedValue(brand, field.field);
                       
-                      // Special handling for Requirement Support
                       if (field.label === "Requirement Support" && Array.isArray(value)) {
                         value = value.join(", ");
                       }
@@ -203,7 +207,6 @@ const BrandComparison = ({
                   </TableRow>
                 ))}
 
-                {/* Franchise Model Navigation */}
                 <TableRow hover>
                   <TableCell component="th" scope="row" sx={{ bgcolor: "#f9f9f9", fontWeight: "bold" }}>
                     <Typography variant="subtitle2">Franchise Model</Typography>
@@ -268,7 +271,6 @@ const BrandComparison = ({
                   })}
                 </TableRow>
 
-                {/* Franchise Model Details */}
                 {franchiseModelFields.slice(1).map((field) => (
                   <TableRow key={field.label} hover>
                     <TableCell component="th" scope="row" sx={{ bgcolor: "#f9f9f9", fontWeight: "bold" }}>
@@ -289,15 +291,14 @@ const BrandComparison = ({
                           }}
                         >
                           {currentModel ? (
-                           <Typography 
-  sx={{ 
-    color: field?.label?.includes("Fee") || field?.label?.includes("Cost") ? "#ff9800" : "inherit",
-    fontWeight: field?.label?.includes("Investment") ? "bold" : "normal"
-  }}
->
-  {currentModel?.[field.field] ?? "-"}
-</Typography>
-
+                            <Typography 
+                              sx={{ 
+                                color: field?.label?.includes("Fee") || field?.label?.includes("Cost") ? "#ff9800" : "inherit",
+                                fontWeight: field?.label?.includes("Investment") ? "bold" : "normal"
+                              }}
+                            >
+                              {currentModel?.[field.field] ?? "-"}
+                            </Typography>
                           ) : "-"}
                         </TableCell>
                       );
@@ -309,7 +310,7 @@ const BrandComparison = ({
           </TableContainer>
         )}
       </DialogContent>
-      <DialogActions sx={{ bgcolor: "#f5f5f5" }}>
+      <DialogActions sx={{ bgcolor: "#f5f5f5", position: 'sticky', bottom: 0, zIndex: 1 }}>
         <Button 
           onClick={onClose} 
           sx={{ 

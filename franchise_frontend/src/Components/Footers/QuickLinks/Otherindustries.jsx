@@ -81,7 +81,7 @@ const Otherindustries = () => {
       console.log("Payload:", payload);
 
       const response = await axios.post(
-        "http://localhost:5000/api/v1/otherindustries/recievingOtherIndustriesData",
+        "https://franchise-backend-wgp6.onrender.com/api/v1/otherindustries/recievingOtherIndustriesData",
         payload,  
         {
           headers: {
@@ -190,7 +190,7 @@ const Otherindustries = () => {
             and ongoing guidance to help you succeed in your entrepreneurial
             journey.
           </Typography></Box>
-         <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+         {/* <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
   <Button
     variant="contained"
     sx={{
@@ -206,7 +206,7 @@ const Otherindustries = () => {
   >
     Learn More
   </Button>
-</Box>
+</Box> */}
         </Grid>
 
         {/* Right Side - Form */}

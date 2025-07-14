@@ -1,6 +1,4 @@
-import React, { useState ,} from 'react';
-import { useNavigate, } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import React, { useState, useCallback, memo, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -9,6 +7,7 @@ import {
   CircularProgress,
   IconButton,
   Typography,
+  Tooltip,
 } from '@mui/material';
 import {
   Compare,
@@ -19,102 +18,156 @@ import {
   Description,
 } from '@mui/icons-material';
 import LoginPage from '../LoginPage/LoginPage';
-import { openBrandDialog } from '../../Redux/Slices/brandSlice.jsx';
-import brandData from './BrandDetailsPage.jsx';
+import { openBrandDialog } from "../../Hooks/Fetchbrands.jsx";
+import { postView } from '../../Utils/function/view.jsx';
 
-import {postView} from '../../Utils/function/view.jsx'
-const BrandCard = ({
+const cardStyles = {
+  width: 320,
+  height: 520,
+  display: "flex",
+  flexDirection: "column",
+  transition: "transform 0.3s, box-shadow 0.3s",
+  position: "relative",
+  overflow: "hidden",
+  borderRadius: 2,
+  "&:hover": {
+    transform: "translateY(-5px)",
+    boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
+  },
+};
+
+const logoStyles = {
+  objectFit: "contain",
+  backgroundColor: "#f9f9f9",
+  py: 2,
+  height: "200px",
+  width: "100%",
+  borderBottom: "1px solid #eee",
+};
+
+const titleStyles = {
+  fontWeight: 600,
+  color: "text.primary",
+  pr: 1,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  display: "-webkit-box",
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: "vertical",
+  lineHeight: "1em",
+  maxHeight: "2.8em",
+  wordBreak: "break-word",
+};
+
+const viewButtonStyles = {
+  py: 1.25,
+  bgcolor: "#4caf50",
+  borderRadius: 1,
+  fontWeight: 500,
+  textTransform: "none",
+  "&:hover": {
+    bgcolor: "#7BC718",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+  },
+};
+
+const BrandCard = memo(({
   brand,
- 
-  toggleLike,
+  onToggleLike,
   showLogin,
-  setShowLogin,
+  onShowLogin,
   isSelectedForComparison,
-  toggleBrandComparison,
+  onToggleBrandComparison,
+  maxComparisonReached,
 }) => {
-const [isProcessingLike, setIsProcessingLike] = useState({});
-
-
-const navigate = useNavigate();
-const dispatch = useDispatch()
-
-const handleOpenBrand = (brand) => {
+  const [isProcessingLike, setIsProcessingLike] = useState({});
   
-postView(brand.uuid)
-  const newWindow = window.open(`/brands/${brand.uuid}?$`, '_blank');
-  localStorage.setItem(`brand-${brand.uuid}`, JSON.stringify(brand));
+  const {
+    uuid,
+    uploads = {},
+    brandDetails = {},
+    franchiseDetails = {},
+    expansionLocationData = {},
+    isLiked,
+  } = brand;
 
-  if (newWindow) {
-    newWindow.onbeforeunload = () => {
-      localStorage.removeItem(`brand-${brand.uuid}`);
-    };
-  }
+  const investmentRange = useMemo(() => 
+    franchiseDetails.fico?.[0]?.investmentRange || "Not specified",
+  [franchiseDetails.fico]);
 
-};
+  const areaRequired = useMemo(() => 
+    franchiseDetails.fico?.[0]?.areaRequired || "Not specified",
+  [franchiseDetails.fico]);
 
-const handleLikeClick = async (brandId, isLiked) => {
-  if (isProcessingLike[brandId]) return;
-  
-  setIsProcessingLike(prev => ({ ...prev, [brandId]: true }));
-  try {
-    await toggleLike(brandId, isLiked);
-  } finally {
-    setIsProcessingLike(prev => ({ ...prev, [brandId]: false }));
-  }
+  const handleOpenBrand = useCallback(() => {
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        postView(uuid);
+      });
+    } else {
+      setTimeout(() => postView(uuid), 0);
+    }
+    openBrandDialog(brand);
+  }, [uuid, brand]);
 
-  console.log("isLiked :", isLiked)
-  console.log("brandId :", brandId)
+  const handleLikeClick = useCallback(async () => {
+    if (isProcessingLike[uuid]) return;
+    
+    setIsProcessingLike(prev => ({ ...prev, [uuid]: true }));
+    try {
+      await Promise.resolve();
+      await onToggleLike(uuid, isLiked);
+    } finally {
+      setIsProcessingLike(prev => ({ ...prev, [uuid]: false }));
+    }
+  }, [uuid, isLiked, onToggleLike, isProcessingLike]);
 
-  
-};
+  const handleComparisonToggle = useCallback(() => {
+    if (maxComparisonReached && !isSelectedForComparison) {
+      return;
+    }
+    requestAnimationFrame(() => {
+      onToggleBrandComparison(brand);
+    });
+  }, [brand, onToggleBrandComparison, isSelectedForComparison, maxComparisonReached]);
 
   return (
-    <Card
-      sx={{
-        // overflow:"scroll",
-        width: 320, // Fixed width
-        height: 520, // Fixed height
-        display: "flex",
-        flexDirection: "column",
-        transition: "transform 0.3s, box-shadow 0.3s",
-        position: "relative",
-        overflow: "hidden",
-        borderRadius: 2,
-        "&:hover": {
-          transform: "translateY(-5px)",
-          boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
-        },
-      }}
-    >
-      {/* Comparison toggle button */}
-      <IconButton
-        sx={{
-          position: "absolute",
-          top: 8,
-          right: 8,
-          zIndex: 2,
-          backgroundColor: isSelectedForComparison
-            ? "rgba(76, 175, 80, 0.9)"
-            : "rgba(0,0,0,0.5)",
-          color: "white",
-          "&:hover": {
-            backgroundColor: isSelectedForComparison
-              ? "rgba(56, 142, 60, 0.9)"
-              : "rgba(0,0,0,0.7)",
-          },
-          width: 32,
-          height: 32,
-        }}
-        onClick={() => toggleBrandComparison(brand)}
+    <Card sx={cardStyles}>
+      <Tooltip 
+        title={maxComparisonReached && !isSelectedForComparison ? "Maximum 3 brands can be compared" : ""}
+        placement="top"
       >
-        <Compare fontSize="small" />
-      </IconButton>
+        <span>
+          <IconButton
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              zIndex: 2,
+              backgroundColor: isSelectedForComparison
+                ? "rgba(76, 175, 80, 0.9)"
+                : maxComparisonReached
+                  ? "rgba(244, 67, 54, 0.7)"
+                  : "rgba(0,0,0,0.5)",
+              color: "white",
+              "&:hover": {
+                backgroundColor: isSelectedForComparison
+                  ? "rgba(56, 142, 60, 0.9)"
+                  : maxComparisonReached
+                    ? "rgba(244, 67, 54, 0.9)"
+                    : "rgba(0,0,0,0.7)",
+              },
+              width: 32,
+              height: 32,
+            }}
+            onClick={handleComparisonToggle}
+            disabled={maxComparisonReached && !isSelectedForComparison}
+          >
+            <Compare fontSize="small" />
+          </IconButton>
+        </span>
+      </Tooltip>
 
-      {/* Brand Logo Image */}
-   
-      
-
-      {/* Content Container */}
       <Box
         sx={{
           p: 2,
@@ -123,91 +176,60 @@ const handleLikeClick = async (brandId, isLiked) => {
           flexDirection: "column",
         }}
       >
+        <Box
+          component="img"
+          src={uploads.brandLogo}
+          alt={brandDetails.brandName || "Brand logo"}
+          loading="lazy"
+          sx={logoStyles}
+        />     
 
-      <Box
-        component="img"
-        src={brand.uploads?.brandLogo}
-        alt={brand.brandDetails?.brandName || "Brand logo"}
-        sx={{
-          objectFit: "contain",
-          backgroundColor: "#f9f9f9",
-          py: 2,
-          height: "200px" ,
-          width: "100%",
-          borderBottom: "1px solid #eee",
-        }}
-      />     
-
-        {/* Brand Name and Like Button */}
         <Box
           display="flex"
           justifyContent="space-between"
           alignItems="flex-start"
           mt={1}
         >
-         <Typography
-  variant="h6"
-  component="div"
-  sx={{
-    fontWeight: 600,
-    color: "text.primary",
-    pr: 1,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    display: "-webkit-box",
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: "vertical",
-    lineHeight: "1em", 
-    maxHeight: "2.8em",  
-    wordBreak: "break-word", 
-  }}
->
-  {brand.brandDetails?.brandName}
-</Typography>
+          <Typography variant="h6" component="div" sx={titleStyles}>
+            {brandDetails.brandName}
+          </Typography>
           <IconButton
-            onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
-            disabled={isProcessingLike[brand.uuid]}
+            onClick={handleLikeClick}
+            disabled={isProcessingLike[uuid]}
+            aria-label={isLiked ? "Unlike brand" : "Like brand"}
           >
-            {isProcessingLike[brand.uuid] ? (
+            {isProcessingLike[uuid] ? (
               <CircularProgress size={24} />
             ) : (
               <Favorite
                 sx={{
-                  color: brand.isLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
+                  color: isLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
                 }}
               />
             )}
           </IconButton>
         </Box>
 
-        {/* Categories */}
-       <Box sx={{ mb: 1, minHeight: 32 }}>
-  {brand.franchiseDetails?.brandCategories ? (
-    [  "child"].map((key, index) => (
-      brand.franchiseDetails.brandCategories[key] && (
-        <Chip
-          key={index}
-          label={brand.franchiseDetails.brandCategories[key]}
-          size="small"
-          sx={{
-            mr: 1,
-            mb: 1,
-            bgcolor: "rgba(255, 152, 0, 0.1)",
-            color: "orange.dark",
-            fontWeight: 500,
-          }}
-        />
-      )
-    ))
-  ) : (
-    <Typography variant="body2" color="text.secondary">
-      N/A
-    </Typography>
-  )}
-</Box>
+        <Box sx={{ mb: 1, minHeight: 32 }}>
+          {franchiseDetails.brandCategories?.child ? (
+            <Chip
+              label={franchiseDetails.brandCategories.child}
+              size="small"
+              sx={{
+                mr: 1,
+                mb: 1,
+                bgcolor: "rgba(255, 152, 0, 0.1)",
+                color: "orange.dark",
+                fontWeight: 500,
+              }}
+            />
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              N/A
+            </Typography>
+          )}
+        </Box>
 
-
-        {/* Details List */}
         <Box
           sx={{
             mb: 2,
@@ -217,104 +239,109 @@ const handleLikeClick = async (brandId, isLiked) => {
             },
           }}
         >
-          <Box display="flex" alignItems="center">
-  <LocationOn
-    sx={{
-      mr: 1.5,
-      fontSize: "1rem",
-      color: "text.secondary",
-      flexShrink: 0,
-    }}
-  />
-  <Typography variant="body2" noWrap>
-    <span style={{ fontWeight: 600 }}>Expansion Location:</span>
-    <br />
-    {brand?.expansionLocationData?.expansionLocations ? (
-      <>
-        {[
-          ...(brand.expansionLocationData.expansionLocations.domestic?.locations || []),
-          ...(brand.expansionLocationData.expansionLocations.international?.locations || []),
-        ]
-          .map((loc) => loc.state || loc.country) // Use 'state' for domestic, 'country' fallback for international
-          .filter(Boolean)
-          .slice(0, 1) // Show first 2 only
-          .join(", ")}
-
-        <Button
-          size="small"
-          sx={{ ml: 0.5, minWidth: 0, padding: 0 }}
-          onClick={() => handleOpenBrand(brand)}
-        >
-          ...more
-        </Button>
-      </>
-    ) : (
-      "Multiple locations"
-    )}
-  </Typography>
-</Box>
-
-
-          <Box display="flex" alignItems="center">
-            <AttachMoney
-              sx={{
-                mr: 1.5,
-                fontSize: "1rem",
-                color: "text.secondary",
-                flexShrink: 0,
-              }}
-            />
-            <Typography variant="body2" noWrap>
-              <span style={{ fontWeight: 600 }}>Investment Range:</span>{" "}
-              {brand.franchiseDetails?.fico?.[0]?.investmentRange || "Not specified"}
-            </Typography>
-          </Box>
-
-          <Box display="flex" alignItems="center">
-            <AreaChart
-              sx={{
-                mr: 1.5,
-                color: "text.secondary",
-                flexShrink: 0,
-              }}
-            />
-            <Typography variant="body2" noWrap>
-              <span style={{ fontWeight: 600 }}>Area Required:</span>{" "}
-            { brand.franchiseDetails?.fico?.[0]?.areaRequired || "Not specified"}
-            </Typography>
-          </Box>
+          <LocationDetail 
+            locations={expansionLocationData.expansionLocations} 
+            onViewMore={handleOpenBrand}
+          />
+          
+          <DetailItem
+            icon={<AttachMoney />}
+            label="Investment Range"
+            value={investmentRange}
+          />
+          
+          <DetailItem
+            icon={<AreaChart />}
+            label="Area Required"
+            value={areaRequired}
+          />
         </Box>
 
-        {/* View Details Button */}
-        
         <Button
           fullWidth
           variant="contained"
-          
-          onClick={() => handleOpenBrand(brand)}
+          onClick={handleOpenBrand}
           startIcon={<Description />}
-          sx={{
-            py: 1.25,
-            bgcolor: "#4caf50",
-            borderRadius: 1,
-            fontWeight: 500,
-            textTransform: "none",
-            "&:hover": {
-              bgcolor: "#7BC718",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-            },
-          }}
+          sx={viewButtonStyles}
         >
           View Details
         </Button>
       </Box>
 
-      {/* Login Modal */}
       {showLogin && (
-        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+        <LoginPage open={showLogin} onClose={() => onShowLogin(false)} />
       )}
     </Card>
   );
-};
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.brand.uuid === nextProps.brand.uuid &&
+    prevProps.brand.isLiked === nextProps.brand.isLiked &&
+    prevProps.isSelectedForComparison === nextProps.isSelectedForComparison &&
+    prevProps.showLogin === nextProps.showLogin &&
+    prevProps.maxComparisonReached === nextProps.maxComparisonReached
+  );
+});
 
-export default BrandCard
+const LocationDetail = memo(({ locations, onViewMore }) => {
+  const locationText = useMemo(() => {
+    if (!locations) return "Multiple locations";
+    
+    const domestic = locations.domestic?.locations || [];
+    const international = locations.international?.locations || [];
+    const allLocations = [...domestic, ...international];
+    
+    return allLocations.length > 0 
+      ? allLocations.map(loc => loc.state || loc.country).filter(Boolean).join(", ")
+      : "Multiple locations";
+  }, [locations]);
+
+  return (
+    <Box display="flex" alignItems="center">
+      <LocationOn
+        sx={{
+          mr: 1.5,
+          fontSize: "1rem",
+          color: "text.secondary",
+          flexShrink: 0,
+        }}
+      />
+      <Typography variant="body2" noWrap>
+        <span style={{ fontWeight: 600 }}>Expansion Location:</span>
+        <br />
+        {locationText}
+        {locations && (
+          <Button
+            size="small"
+            sx={{ ml: 0.5, minWidth: 0, padding: 0 }}
+            onClick={onViewMore}
+          >
+            ...more
+          </Button>
+        )}
+      </Typography>
+    </Box>
+  );
+});
+
+const DetailItem = memo(({ icon, label, value }) => {
+  const clonedIcon = useMemo(() => React.cloneElement(icon, {
+    sx: {
+      mr: 1.5,
+      fontSize: "1rem",
+      color: "text.secondary",
+      flexShrink: 0,
+    }
+  }), [icon]);
+
+  return (
+    <Box display="flex" alignItems="center">
+      {clonedIcon}
+      <Typography variant="body2" noWrap>
+        <span style={{ fontWeight: 600 }}>{label}:</span> {value}
+      </Typography>
+    </Box>
+  );
+});
+
+export default BrandCard;

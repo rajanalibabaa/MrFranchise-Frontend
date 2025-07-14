@@ -1,5 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
@@ -19,27 +18,74 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import { setFilters, fetchBrands } from '../../Redux/Slices/brandSlice';
+import { useBrandsForFiltering } from '../..//Hooks/Fetchbrands';
 
 const NavbarSearch = ({ open, handleClose }) => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const [tab, setTab] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    dispatch(fetchBrands());
-  }, [dispatch]);
+  // Get all filter options using React Query
+  const { data: brands = [] } = useBrandsForFiltering();
 
-  // Get all filter options from Redux store
-  const brandState = useSelector((state) => state.brands) || {};
-  const {
-    categories = [],
-    states = [],
-    districts = [],
-    cities = [],
-    investmentRanges = []
-  } = brandState;
+  // Extract filter options from brands data
+  const filterOptions = useMemo(() => {
+    const categories = new Set();
+    const states = new Set();
+    const districts = new Map(); // { state: [districts] }
+    const cities = new Map(); // { district: [cities] }
+    const investmentRanges = new Set();
+
+    brands.forEach(brand => {
+      // Categories
+      const mainCat = brand.categories?.main;
+      const subCat = brand.categories?.sub;
+      const childCat = brand.categories?.child;
+      
+      if (mainCat) categories.add(mainCat);
+      if (subCat) categories.add(subCat);
+      if (childCat) categories.add(childCat);
+
+      // Locations
+      brand.locations?.forEach(location => {
+        if (location.state) {
+          states.add(location.state);
+          
+          location.districts?.forEach(district => {
+            if (district.district) {
+              const stateDistricts = districts.get(location.state) || new Set();
+              stateDistricts.add(district.district);
+              districts.set(location.state, stateDistricts);
+              
+              district.cities?.forEach(city => {
+                const districtCities = cities.get(district.district) || new Set();
+                districtCities.add(city);
+                cities.set(district.district, districtCities);
+              });
+            }
+          });
+        }
+      });
+
+      // Investment ranges
+      brand.investmentRanges?.forEach(range => {
+        if (range) investmentRanges.add(range);
+      });
+    });
+
+    return {
+      categories: Array.from(categories),
+      states: Array.from(states),
+      districts: Object.fromEntries(
+        Array.from(districts.entries()).map(([state, distSet]) => [state, Array.from(distSet)])
+      ),
+      cities: Object.fromEntries(
+        Array.from(cities.entries()).map(([district, citySet]) => [district, Array.from(citySet)])
+      ),
+      investmentRanges: Array.from(investmentRanges)
+    };
+  }, [brands]);
 
   const [searchTerms, setSearchTerms] = useState({
     state: '',
@@ -65,47 +111,32 @@ const NavbarSearch = ({ open, handleClose }) => {
   };
 
   const handleExplore = () => {
-    let filters = {};
-    if (tab === 0) {
-      filters = {
-        searchTerm,
+    const filters = {
+      searchTerm,
+      ...(tab === 0 && {
         selectedCategory: selectedMainCategory,
         selectedSubCategory,
-        selectedChildCategory: selectedChildCategory ? [selectedChildCategory] : [],
-        selectedModelType: "",
-        selectedState: "",
-        selectedDistrict: "",
-        selectedCity: "",
-        selectedInvestmentRange: ""
-      };
-    } else if (tab === 1) {
-      filters = {
-        searchTerm,
-        selectedCategory: "",
-        selectedSubCategory: "",
-        selectedChildCategory: [],
-        selectedModelType: "",
-        selectedState: selectedState,
-        selectedDistrict: selectedDistrict,
-        selectedCity: selectedCity,
-        selectedInvestmentRange: ""
-      };
-    } else if (tab === 2) {
-      filters = {
-        searchTerm,
-        selectedCategory: "",
-        selectedSubCategory: "",
-        selectedChildCategory: [],
-        selectedModelType: "",
-        selectedState: "",
-        selectedDistrict: "",
-        selectedCity: "",
-        selectedInvestmentRange: selectedInvestmentRange
-      };
-    }
+        selectedChildCategory: selectedChildCategory ? [selectedChildCategory] : []
+      }),
+      ...(tab === 1 && {
+        selectedState,
+        selectedDistrict,
+        selectedCity
+      }),
+      ...(tab === 2 && {
+        selectedInvestmentRange
+      })
+    };
 
-    dispatch(setFilters(filters));
-    navigate('/brandViewPage');
+    // Store filters in URL or local storage
+    const searchParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && (Array.isArray(value) ? value.length > 0 : true)) {
+        searchParams.set(key, Array.isArray(value) ? value.join(',') : value);
+      }
+    });
+
+    navigate(`/brandViewPage?${searchParams.toString()}`);
     handleClose();
   };
 
@@ -128,78 +159,68 @@ const NavbarSearch = ({ open, handleClose }) => {
 
   // Filtered states
   const filteredStates = useMemo(() => {
-    if (!states || states.length === 0) return [];
     const term = searchTerms.state.toLowerCase();
-    return states.filter(state => 
+    return filterOptions.states.filter(state => 
       state.toLowerCase().includes(term)
     );
-  }, [states, searchTerms.state]);
+  }, [filterOptions.states, searchTerms.state]);
 
   // Filtered districts
   const filteredDistricts = useMemo(() => {
-    if (!districts || districts.length === 0) return [];
-    if (!selectedState) return districts.map(d => d.district);
-
+    if (!selectedState) return [];
     const term = searchTerms.district.toLowerCase();
-    return districts
-      .filter(d => d.state === selectedState)
-      .map(d => d.district)
-      .filter(district => 
-        district.toLowerCase().includes(term)
-      );
-  }, [selectedState, districts, searchTerms.district]);
+    const stateDistricts = filterOptions.districts[selectedState] || [];
+    return stateDistricts.filter(district => 
+      district.toLowerCase().includes(term)
+    );
+  }, [selectedState, filterOptions.districts, searchTerms.district]);
 
   // Filtered cities
   const filteredCities = useMemo(() => {
-    if (!cities || cities.length === 0) return [];
-    if (!selectedDistrict) return cities.map(c => c.city);
-
+    if (!selectedDistrict) return [];
     const term = searchTerms.city.toLowerCase();
-    return cities
-      .filter(c => c.district === selectedDistrict)
-      .map(c => c.city)
-      .filter(city => 
-        city.toLowerCase().includes(term)
-      );
-  }, [selectedDistrict, cities, searchTerms.city]);
+    const districtCities = filterOptions.cities[selectedDistrict] || [];
+    return districtCities.filter(city => 
+      city.toLowerCase().includes(term)
+    );
+  }, [selectedDistrict, filterOptions.cities, searchTerms.city]);
 
   // Filtered investment ranges
   const filteredInvestmentRanges = useMemo(() => {
-    if (!investmentRanges || investmentRanges.length === 0) return [];
     const term = searchTerms.investment.toLowerCase();
-    return investmentRanges.filter(range => 
+    return filterOptions.investmentRanges.filter(range => 
       range.toLowerCase().includes(term)
     );
-  }, [investmentRanges, searchTerms.investment]);
+  }, [filterOptions.investmentRanges, searchTerms.investment]);
 
   // Get MAIN categories (level 1)
   const mainCategories = useMemo(() => {
-    return categories.filter(cat => cat.level === 1);
-  }, [categories]);
+    return filterOptions.categories.filter(cat => {
+      // This assumes level 1 categories don't have a parent
+      // Adjust based on your actual category structure
+      return !filterOptions.categories.some(otherCat => 
+        otherCat !== cat && otherCat.includes(cat)
+      );
+    });
+  }, [filterOptions.categories]);
 
   // Get SUB categories based on selected main category (level 2)
   const subCategories = useMemo(() => {
     if (!selectedMainCategory) return [];
-    return categories.filter(cat => 
-      cat.level === 2 && 
-      cat.parent === selectedMainCategory
+    return filterOptions.categories.filter(cat => 
+      cat !== selectedMainCategory && 
+      cat.startsWith(selectedMainCategory) // Adjust based on your category hierarchy
     );
-  }, [selectedMainCategory, categories]);
+  }, [selectedMainCategory, filterOptions.categories]);
 
   // Get CHILD categories based on selected sub category (level 3)
   const childCategories = useMemo(() => {
     if (!selectedSubCategory) return [];
-    return categories.filter(cat => 
-      cat.level === 3 && 
-      cat.parent === selectedSubCategory
+    return filterOptions.categories.filter(cat => 
+      cat !== selectedSubCategory && 
+      cat.startsWith(selectedSubCategory) // Adjust based on your category hierarchy
     );
-  }, [selectedSubCategory, categories]);
-
-  useEffect(() => {
-    console.log("✅ Main categories:", mainCategories);
-    console.log("✅ Sub categories:", subCategories);
-    console.log("✅ Child categories:", childCategories);
-  }, [mainCategories, subCategories, childCategories]);
+  }, [selectedSubCategory, filterOptions.categories]);
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md" sx={{ top: { xs: "-20%", sm: "-50%", lg: "-300px" } }}>
@@ -226,6 +247,7 @@ const NavbarSearch = ({ open, handleClose }) => {
                 <InputAdornment position="end">
                   <IconButton 
                     sx={{ bgcolor: 'rgb(104, 159, 56)', color: 'white', "&:hover": { backgroundColor: "#7ad03a" } }}
+                    onClick={handleExplore}
                   >
                     <SearchIcon />
                   </IconButton>
@@ -274,9 +296,9 @@ const NavbarSearch = ({ open, handleClose }) => {
                 label="Industry"
               >
                 <MenuItem value="">Select Industry</MenuItem>
-                {mainCategories.map((category) => (
-                  <MenuItem key={`cat-${category.id}`} value={category.name}>
-                    {category.name}
+                {mainCategories.map((category, index) => (
+                  <MenuItem key={`cat-${index}`} value={category}>
+                    {category}
                   </MenuItem>
                 ))}
               </Select>
@@ -293,9 +315,9 @@ const NavbarSearch = ({ open, handleClose }) => {
                 label="Main Category"
               >
                 <MenuItem value="">Select Main Category</MenuItem>
-                {subCategories.map((sub) => (
-                  <MenuItem key={`sub-${sub.id}`} value={sub.name}>
-                    {sub.name}
+                {subCategories.map((sub, index) => (
+                  <MenuItem key={`sub-${index}`} value={sub}>
+                    {sub}
                   </MenuItem>
                 ))}
               </Select>
@@ -309,9 +331,9 @@ const NavbarSearch = ({ open, handleClose }) => {
                 label="Sub Category"
               >
                 <MenuItem value="">Select Sub Category</MenuItem>
-                {childCategories.map((child) => (
-                  <MenuItem key={`child-${child.id}`} value={child.name}>
-                    {child.name}
+                {childCategories.map((child, index) => (
+                  <MenuItem key={`child-${index}`} value={child}>
+                    {child}
                   </MenuItem>
                 ))}
               </Select>

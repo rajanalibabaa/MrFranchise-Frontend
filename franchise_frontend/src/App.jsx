@@ -1,19 +1,14 @@
 import React, { useEffect } from 'react'
 import { Route, Routes } from "react-router-dom"
 import InvestorRegister from './Pages/Registration/InvestorsRegister';
-// import BrandRegister from './Pages/Registration/BrandRegister';
 import LoginPage from "./Pages/LoginPage/LoginPage";
 import "./App.css";
-// import Nprogress from 'nprogress';
 import HomeBannerSec from "./Pages/HomePages/HomeBannerSec";
 import RegisterHandleUser from "./Pages/Registration/RegisterHandlePage";
-// import BrandListingFormPage from './Pages/BrandListingForm/BrandListingFormPage';
 import SideViewContent from "./Components/SideViewContentMenu/SideHoverMenu";
 import ProfilePage from "./Pages/Profile_Pages/profilePage";
 import IconBreadcrumbs from "./Pages/Profile_Pages/IconBreadcrumbs";
 import ManageProfile from "../src/Components/Investor_Profile_Component/ManageProfile.jsx";
-// import ManageProfile from "../src/Components/Investor_Profile_Component/ManageProfile/ManageProfile.jsx";
-// import PostRequirement from '../src/Components/Investor_Profile_Component/PostRequirement.jsx';
 import ResponseManager from "./Components/Investor_Profile_Component/ResponseManager.jsx";
 import DashBoard from "../src/Components/Investor_Profile_Component/DashBoard.jsx";
 import FeedBack from "../src/Components/Investor_Profile_Component/FeedBack.jsx";
@@ -27,7 +22,6 @@ import BrandAddVedios from "./Components/BrandProfile_Component/BrandAddVedios";
 import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
 import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccount.jsx';
 import { Provider, useDispatch } from 'react-redux';
-// import store from './Redux/Store/Index.jsx';
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
 import BrandSearchus from './Components/BrandProfile_Component/BrandSearches.jsx';
 import BrandRegisterForm from './Pages/Registration/BrandLIstingRegister/BrandRegisterForm.jsx';
@@ -43,7 +37,6 @@ import InvestFranchise from './Components/Footers/QuickLinks/InvestFranchise.jsx
 import FranchisePromotion from './Components/Footers/QuickLinks/FranchisePromotion.jsx';
 import { logout } from './Redux/Slices/AuthSlice/authSlice.jsx';
 
-import Navbar from "./Components/Navbar/NavBar.jsx";
 import { Box } from "@mui/material";
 import Otherindustries from "./Components/Footers/QuickLinks/Otherindustries.jsx";
 import GlobalLoader from './Components/GLobalLoader.jsx';
@@ -104,10 +97,8 @@ function App() {
       </Box>
         <Routes>
           <Route path="/" element={<HomeBannerSec />} />
-          {/* <Route path="/brandview" element={<BrandViewPage />} /> */}
           <Route path="/investor-register" element={<InvestorRegister />} />
           <Route Path="/navbarsearch" element={<NavbarSearch/>}/>
-          {/* <Route path="/brand-register" element={<BrandRegister />} /> */}
           <Route path="/loginpage" element={<LoginPage />} />
           <Route path="/registerhandleuser" element={<RegisterHandleUser />} />
           <Route path="/brandlistingform" element={<BrandRegisterForm />} />
@@ -123,7 +114,6 @@ function App() {
             <Route path="feedBack" element={<FeedBack />} />
             <Route path="upgradeaccount" element={<Upgradeaccount />} />
             <Route path="manageProfile" element={<ManageProfile />} />
-            {/* <Route path="PostRequirement" element={<PostRequirement />} /> */}
             <Route path="respondemanager" element={<ResponseManager />} />
           </Route>
 
@@ -156,7 +146,6 @@ function App() {
 
           <Route path="/advertisewithus" element={<AdvertiseWithUs />} />
           <Route path="/expandyourbrand" element={<ExpandYourBrand />} />
-          {/* <Route path='/franchiseconsulting' element={<FranchiseConsulting/>}/> */}
           <Route path="/investfranchise" element={<InvestFranchise />} />
           <Route path="/franchisepromotion" element={<FranchisePromotion />} />
           <Route path="/otherindustries" element={<Otherindustries/>}/>

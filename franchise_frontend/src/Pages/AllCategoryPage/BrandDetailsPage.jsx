@@ -1,34 +1,61 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import BrandDetails from "./BrandDetail.jsx";
-import { openBrandDialog, closeBrandDialog } from "../../Redux/Slices/brandSlice.jsx";
+import { useBrand } from "../../Hooks/Fetchbrands.jsx";
+import { CircularProgress } from "@mui/material";
 
 function BrandDetailsPage() {
-  const dispatch = useDispatch();
   const { brandId } = useParams();
   const navigate = useNavigate();
-  const { data: brands } = useSelector((state) => state.brands);
+  const [fromSession, setFromSession] = useState(false);
+  const [checkedStorage, setCheckedStorage] = useState(false);
 
+  // ✅ Check if brandId is stored (just to track if it's opened from dialog)
   useEffect(() => {
-    
-    const storedBrand = localStorage.getItem(`brand-${brandId}`);
-    if (storedBrand) {
-      dispatch(openBrandDialog(JSON.parse(storedBrand)));
-      return;
+    const brandKey = `viewing-brand-id-${brandId}`;
+    const storedId = sessionStorage.getItem(brandKey);
+
+    if (storedId === brandId) {
+      setFromSession(true); // optional use
     }
 
-    // If not in localStorage, try to find it in Redux store
-    const brand = brands.find(b => b.uuid === brandId);
-    if (brand) {
-      dispatch(openBrandDialog(brand));
-    } else {
-      dispatch(closeBrandDialog());
-      navigate('/brands'); 
-    }
-  }, [brandId, brands, dispatch, navigate, location.state]);
+    setCheckedStorage(true);
+  }, [brandId]);
 
-  return <BrandDetails />;
+  // ✅ Fetch brand data only after session check
+  const {
+    data: brandData,
+    isLoading,
+    isError,
+    error
+  } = useBrand(brandId, {
+    enabled: checkedStorage,
+  });
+
+  // ✅ Redirect if nothing is found
+  useEffect(() => {
+    if (checkedStorage && !isLoading && !brandData && isError) {
+      console.error("Brand not found. Redirecting...", error);
+      navigate("/brandviewpage", { replace: true });
+    }
+  }, [checkedStorage, isLoading, brandData, isError, navigate, error]);
+
+  if (!checkedStorage || isLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh'
+      }}>
+        <CircularProgress color="secondary" />
+      </div>
+    );
+  }
+
+  if (!brandData) return null;
+
+  return <BrandDetails brandData={brandData} />;
 }
 
 export default BrandDetailsPage;
