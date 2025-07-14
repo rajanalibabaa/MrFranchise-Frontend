@@ -37,6 +37,9 @@ const dynamicComponents = {
   TopBrandThreevdocards: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")
   )),
+  LikedBrands: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/LikedBrands.jsx")
+  )),
   TopCafeBrandsFranchise: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
   )),
@@ -91,6 +94,11 @@ const pageConfig = {
       component: "TopBrandThreevdocards",
       background: "white",
       backgroundOpacity: 0.1,
+    },
+    {
+       component: "LikedBrands",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)"
     },
     {
       component: "TopCafeBrandsFranchise",

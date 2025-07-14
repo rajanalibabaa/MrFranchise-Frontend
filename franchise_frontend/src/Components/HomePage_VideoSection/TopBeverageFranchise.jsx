@@ -63,8 +63,8 @@ const BrandCard = React.memo(({
   const brandDetails = brand.brandDetails || {};
   const {
     brandName = "N/A",
-    tagLine = "",
-    companyName = "N/A",
+    // tagLine = "",
+    // companyName = "N/A",
   } = brandDetails;
 
   // Extract franchise details with fallbacks
@@ -72,11 +72,11 @@ const BrandCard = React.memo(({
     investmentRange = "Not specified",
     areaRequired = "Not specified",
     franchiseType = "N/A",
-    franchiseModel: modelType = "N/A",
-    franchiseFee = "N/A",
-    royaltyFee = "N/A",
-    roi = "N/A",
-    payBackPeriod = "N/A"
+    // franchiseModel: modelType = "N/A",
+    // franchiseFee = "N/A",
+    // royaltyFee = "N/A",
+    // roi = "N/A",
+    // payBackPeriod = "N/A"
   } = franchiseModel;
 
   useEffect(() => {
