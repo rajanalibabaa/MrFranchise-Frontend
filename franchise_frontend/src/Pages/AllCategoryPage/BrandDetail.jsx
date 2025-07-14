@@ -46,6 +46,7 @@ import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 // import { useToggleLike } from '../../Hooks/Fetchbrands';
 import { useToggleLike } from '../../Hooks/Fetchbrands.jsx';
+import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
 
 
 const BrandDetails = ({ brandData }) => {
@@ -1531,7 +1532,7 @@ const maskEmail = (email) => {
           </Box>
         )}              
       </Box>
-
+<ViewedBrands />
       <Footer />
     </>
   );

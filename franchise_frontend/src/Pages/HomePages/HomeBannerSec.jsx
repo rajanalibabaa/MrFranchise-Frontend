@@ -40,6 +40,9 @@ const dynamicComponents = {
   LikedBrands: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/LikedBrands.jsx")
   )),
+  ViewerBrands: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/ViewerBrands.jsx")
+)),
   TopCafeBrandsFranchise: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
   )),
@@ -98,7 +101,12 @@ const pageConfig = {
     {
        component: "LikedBrands",
       background: "#fffaf7",
-      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)"
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    },
+    {
+      component: "ViewerBrands",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     },
     {
       component: "TopCafeBrandsFranchise",
@@ -341,7 +349,6 @@ const HomeBannerSec = () => {
   const theme = useTheme();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const controls = useAnimation();
   const dispatch = useDispatch();
@@ -352,28 +359,13 @@ const HomeBannerSec = () => {
     const popupShown = sessionStorage.getItem("popup-shown");
 
     dispatch(showLoading());
-    
-    // Simulate data loading (replace with actual data loading logic)
-    const loadData = async () => {
-      try {
-        // Here you would typically fetch all necessary data
-        // For demonstration, we'll use a timeout
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        if (!popupShown || isReload) {
-          setIsPopupOpen(true);
-          sessionStorage.setItem("popup-shown", "true");
-        }
-        
-        setIsDataLoaded(true);
-        dispatch(hideLoading());
-      } catch (error) {
-        console.error("Error loading data:", error);
-        dispatch(hideLoading());
+    setTimeout(() => {
+      if (!popupShown || isReload) {
+        setIsPopupOpen(true);
+        sessionStorage.setItem("popup-shown", "true");
       }
-    };
-
-    loadData();
+      dispatch(hideLoading());
+    }, 1000);
   }, [controls, dispatch]);
 
   // Rotate text every 2 minutes
@@ -437,20 +429,6 @@ const HomeBannerSec = () => {
   };
 
   const currentText = bannerTexts[bannerIndex];
-
-  if (!isDataLoaded) {
-    return (
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        backgroundColor: '#fffaf7'
-      }}>
-        <CircularProgress color="secondary" size={60} />
-      </Box>
-    );
-  }
 
   return (
     <>
