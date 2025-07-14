@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -17,186 +17,109 @@ import {
   Typography,
   Avatar,
   Chip,
-  CircularProgress,
 } from "@mui/material";
 import { Close, ArrowBack, ArrowForward } from "@mui/icons-material";
 
-// Memoize the field configurations to prevent unnecessary re-renders
-const basicInfoFields = [
-  { label: "Brand Name", field: "brandDetails.brandName" },
-  { label: "Company Name", field: "brandDetails.companyName" },
-  { label: "Established Year", field: "franchiseDetails.establishedYear" },
-  { label: "Total Outlets", field: "franchiseDetails.totalOutlets" },
-  { label: "Company Owned Outlets", field: "franchiseDetails.companyOwnedOutlets" },
-  { label: "Franchise Outlets", field: "franchiseDetails.franchiseOutlets" },
-  { label: "Agreement Period", field: "fico.agreementPeriod" },
-  { label: "Requirement Support", field: "franchiseDetails.trainingSupport" },
-];
-
-const franchiseModelFields = [
-  { label: "Franchise Model", field: "franchiseModel" },
-  { label: "Franchise Type", field: "franchiseType" },
-  { label: "Area Required (sq.ft)", field: "areaRequired" },
-  { label: "Investment Range", field: "investmentRange" },
-  { label: "Franchise Fee", field: "franchiseFee" },
-  { label: "Royalty Fee", field: "royaltyFee" },
-  { label: "Break Even Period", field: "breakEven" },
-  { label: "ROI", field: "roi" },
-  { label: "Exterior Cost", field: "exteriorCost" },
-  { label: "Interior Cost", field: "interiorCost" },
-  { label: "Other Costs", field: "otherCost" },
-  { label: "Property Type", field: "propertyType" },
-];
-
-const BrandComparison = React.memo(({
+const BrandComparison = ({
   open,
   onClose,
   selectedBrands,
   removeFromComparison,
 }) => {
   const [currentModelIndexes, setCurrentModelIndexes] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  
+  // Enhanced nested value accessor
+  const getNestedValue = (obj, path) => {
+    try {
+      return path.split('.').reduce((o, p) => {
+        // Handle array indices like [0]
+        if (p.includes('[') && p.includes(']')) {
+          const prop = p.substring(0, p.indexOf('['));
+          const index = parseInt(p.substring(p.indexOf('[') + 1, p.indexOf(']')));
+          return o[prop] ? o[prop][index] : null;
+        }
+        return o ? o[p] : null;
+      }, obj) || "-";
+    } catch (e) {
+      return "-";
+    }
+  };
 
-  // Memoize the getNestedValue function
-  const getNestedValue = useCallback((obj, path) => {
-    return path.split('.').reduce((o, p) => (o ? o[p] : null), obj);
-  }, []);
-
-  // Initialize or update current model indexes when brands change
+  // Initialize current model indexes
   React.useEffect(() => {
     const indexes = {};
-    let needsUpdate = false;
-    
     selectedBrands.forEach(brand => {
       if (brand.uuid && !(brand.uuid in currentModelIndexes)) {
         indexes[brand.uuid] = 0;
-        needsUpdate = true;
       }
     });
-    
-    if (needsUpdate) {
+    if (Object.keys(indexes).length > 0) {
       setCurrentModelIndexes(prev => ({ ...prev, ...indexes }));
     }
-  }, [selectedBrands, currentModelIndexes]);
+  }, [selectedBrands]);
 
-  // Memoized handler for model navigation
-  const handleNextModel = useCallback((brandId) => {
+  const handleNextModel = (brandId) => {
     setCurrentModelIndexes(prev => {
-      const brand = selectedBrands.find(b => b.uuid === brandId);
-      const brandModels = brand?.franchiseDetails?.modelsOfFranchise || [];
+      const brandModels = selectedBrands.find(b => b.uuid === brandId)?.franchiseDetails?.fico || [];
       const currentIndex = prev[brandId] || 0;
       return {
         ...prev,
         [brandId]: (currentIndex + 1) % brandModels.length
       };
     });
-  }, [selectedBrands]);
+  };
 
-  const handlePrevModel = useCallback((brandId) => {
+  const handlePrevModel = (brandId) => {
     setCurrentModelIndexes(prev => {
-      const brand = selectedBrands.find(b => b.uuid === brandId);
-      const brandModels = brand?.franchiseDetails?.modelsOfFranchise || [];
+      const brandModels = selectedBrands.find(b => b.uuid === brandId)?.franchiseDetails?.fico || [];
       const currentIndex = prev[brandId] || 0;
       return {
         ...prev,
         [brandId]: (currentIndex - 1 + brandModels.length) % brandModels.length
       };
     });
-  }, [selectedBrands]);
+  };
 
-  // Memoize the table rows to prevent unnecessary re-renders
-  const renderBasicInfoRows = useMemo(() => (
-    basicInfoFields.map((field) => (
-      <TableRow key={field.label} hover>
-        <TableCell component="th" scope="row" sx={{ bgcolor: "#f9f9f9", fontWeight: "bold" }}>
-          <Typography variant="subtitle2">{field.label}</Typography>
-        </TableCell>
-        {selectedBrands.map((brand) => (
-          <TableCell 
-            key={`${brand.uuid}-${field.field}`} 
-            align="center"
-            sx={{ 
-              borderLeft: "1px solid #e0e0e0",
-              bgcolor: field.label === "Brand Name" ? "#f5f5f5" : "white"
-            }}
-          >
-            {getNestedValue(brand, field.field) || "-"}
-          </TableCell>
-        ))}
-      </TableRow>
-    ))
-  ), [selectedBrands, getNestedValue]);
+  // Main comparison fields - updated paths
+  const basicInfoFields = [
+    { label: "Brand Name", field: "brandDetails.brandName" },
+    { label: "Company Name", field: "franchiseDetails.companyName" },
+    { label: "Established Year", field: "franchiseDetails.establishedYear" },
+    { label: "Total Outlets", field: "franchiseDetails.totalOutlets" },
+    { label: "Company Owned Outlets", field: "franchiseDetails.companyOwnedOutlets" },
+    { label: "Franchise Outlets", field: "franchiseDetails.franchiseOutlets" },
+    { label: "Agreement Period", field: "franchiseDetails.fico[0].agreementPeriod" },
+    { label: "Requirement Support", field: "franchiseDetails.trainingSupport" },
+  ];
 
-  const renderFranchiseModelDetails = useMemo(() => (
-    franchiseModelFields.slice(1).map((field) => (
-      <TableRow key={field.label} hover>
-        <TableCell component="th" scope="row" sx={{ bgcolor: "#f9f9f9", fontWeight: "bold" }}>
-          <Typography variant="subtitle2">{field.label}</Typography>
-        </TableCell>
-        {selectedBrands.map((brand) => {
-          const models = brand.franchiseDetails?.modelsOfFranchise || [];
-          const currentIndex = currentModelIndexes[brand.uuid] || 0;
-          const currentModel = models[currentIndex];
-          
-          return (
-            <TableCell 
-              key={`${brand.uuid}-${field.field}`} 
-              align="center"
-              sx={{ 
-                borderLeft: "1px solid #e0e0e0",
-                bgcolor: "white"
-              }}
-            >
-              {currentModel ? (
-                <Typography 
-                  sx={{ 
-                    color: field.label.includes("Fee") || field.label.includes("Cost") ? "#ff9800" : "inherit",
-                    fontWeight: field.label.includes("Investment") ? "bold" : "normal"
-                  }}
-                >
-                  {currentModel[field.field] || "-"}
-                </Typography>
-              ) : "-"}
-            </TableCell>
-          );
-        })}
-      </TableRow>
-    ))
-  ), [selectedBrands, currentModelIndexes]);
+  // Franchise model fields - updated paths
+  const franchiseModelFields = [
+    { label: "Franchise Model", field: "franchiseModel" },
+    { label: "Franchise Type", field: "franchiseType" },
+    { label: "Area Required (sq.ft)", field: "areaRequired" },
+    { label: "Investment Range", field: "investmentRange" },
+    { label: "Franchise Fee", field: "franchiseFee" },
+    { label: "Royalty Fee", field: "royaltyFee" },
+    { label: "Break Even Period", field: "breakEven" },
+    { label: "ROI", field: "roi" },
+    { label: "Interior Cost", field: "interiorCost" },
+    { label: "Other Costs", field: "otherCost" },
+    { label: "Stock Investment", field:"stockInvestment"},
+    { label: "Pay Back Period", field:"payBackPeriod"},
+    { label: "Require Working Captial", field:"requireWorkingCapital"},
+    { label: "Margin On Sales", field:"marginOnSales"},
+    { label: "Agreement Period", field:"agreementPeriod"}
+  ];
 
-  // Virtualization would be better for very large tables, but for moderate sizes this is sufficient
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="lg" 
-      fullWidth 
-      scroll="paper"
-      TransitionProps={{
-        onEnter: () => setIsLoading(true),
-        onEntered: () => setIsLoading(false),
-        onExit: () => setIsLoading(false),
-      }}
-    >
-      <DialogTitle sx={{ bgcolor: "", color: "Black", position: 'relative' }}>
+    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth scroll="paper">
+      <DialogTitle sx={{ bgcolor: "", color: "Black" }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">Brand Comparison</Typography>
           <IconButton onClick={onClose} sx={{ color: "black" }}>
             <Close />
           </IconButton>
         </Box>
-        {isLoading && (
-          <CircularProgress 
-            size={24} 
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              marginTop: '-12px',
-              marginLeft: '-12px',
-            }}
-          />
-        )}
       </DialogTitle>
       <DialogContent dividers>
         {selectedBrands.length === 0 ? (
@@ -206,47 +129,16 @@ const BrandComparison = React.memo(({
             </Typography>
           </Box>
         ) : (
-          <TableContainer 
-            component={Paper} 
-            sx={{ 
-              maxHeight: 'calc(100vh - 200px)',
-              overflow: 'auto',
-              '&::-webkit-scrollbar': {
-                width: '8px',
-                height: '8px',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                backgroundColor: '#ff9800',
-                borderRadius: '4px',
-              },
-              '&::-webkit-scrollbar-track': {
-                backgroundColor: '#f5f5f5',
-              }
-            }}
-          >
-            <Table 
-              size="small" 
-              sx={{ minWidth: 650 }}
-              stickyHeader
-            >
+          <TableContainer component={Paper}>
+            <Table size="small" sx={{ minWidth: 650 }}>
               <TableHead>
                 <TableRow sx={{ bgcolor: "#f5f5f5" }}>
                   <TableCell sx={{ fontWeight: "bold", width: "200px" }}>Feature</TableCell>
                   {selectedBrands.map((brand) => (
-                    <TableCell 
-                      key={brand.uuid} 
-                      align="center" 
-                      sx={{ 
-                        width: `${80/selectedBrands.length}%`,
-                        position: 'sticky',
-                        top: 0,
-                        bgcolor: '#f5f5f5',
-                        zIndex: 1,
-                      }}
-                    >
+                    <TableCell key={brand.uuid} align="center" sx={{ width: `${80/selectedBrands.length}%` }}>
                       <Box display="flex" flexDirection="column" alignItems="center">
                         <Avatar
-                          src={brand.uploads?.brandLogo}
+                          src={brand.uploads?.brandLogo?.[0] || ""}
                           alt={brand.brandDetails?.brandName}
                           sx={{ 
                             width: 80, 
@@ -260,7 +152,7 @@ const BrandComparison = React.memo(({
                           variant="rounded"
                         />
                         <Typography variant="subtitle1" sx={{ fontWeight: "bold", color: "#4caf50" }}>
-                          {brand.brandDetails?.brandName}
+                          {brand.brandDetails?.brandName || "-"}
                         </Typography>
                         <Chip
                           label="Remove"
@@ -281,7 +173,35 @@ const BrandComparison = React.memo(({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {renderBasicInfoRows}
+                {/* Basic Information Rows */}
+                {basicInfoFields.map((field) => (
+                  <TableRow key={field.label} hover>
+                    <TableCell component="th" scope="row" sx={{ bgcolor: "#f9f9f9", fontWeight: "bold" }}>
+                      <Typography variant="subtitle2">{field.label}</Typography>
+                    </TableCell>
+                    {selectedBrands.map((brand) => {
+                      let value = getNestedValue(brand, field.field);
+                      
+                      // Special handling for Requirement Support
+                      if (field.label === "Requirement Support" && Array.isArray(value)) {
+                        value = value.join(", ");
+                      }
+                      
+                      return (
+                        <TableCell
+                          key={`${brand.uuid}-${field.field}`}
+                          align="center"
+                          sx={{
+                            borderLeft: "1px solid #e0e0e0",
+                            bgcolor: field.label === "Brand Name" ? "#f5f5f5" : "white"
+                          }}
+                        >
+                          {value}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
 
                 {/* Franchise Model Navigation */}
                 <TableRow hover>
@@ -289,7 +209,7 @@ const BrandComparison = React.memo(({
                     <Typography variant="subtitle2">Franchise Model</Typography>
                   </TableCell>
                   {selectedBrands.map((brand) => {
-                    const models = brand.franchiseDetails?.modelsOfFranchise || [];
+                    const models = brand.franchiseDetails?.fico || [];
                     const currentIndex = currentModelIndexes[brand.uuid] || 0;
                     const currentModel = models[currentIndex];
                     
@@ -348,7 +268,42 @@ const BrandComparison = React.memo(({
                   })}
                 </TableRow>
 
-                {renderFranchiseModelDetails}
+                {/* Franchise Model Details */}
+                {franchiseModelFields.slice(1).map((field) => (
+                  <TableRow key={field.label} hover>
+                    <TableCell component="th" scope="row" sx={{ bgcolor: "#f9f9f9", fontWeight: "bold" }}>
+                      <Typography variant="subtitle2">{field.label}</Typography>
+                    </TableCell>
+                    {selectedBrands.map((brand) => {
+                      const models = brand.franchiseDetails?.fico || [];
+                      const currentIndex = currentModelIndexes[brand.uuid] || 0;
+                      const currentModel = models[currentIndex];
+                      
+                      return (
+                        <TableCell 
+                          key={`${brand.uuid}-${field.field}`} 
+                          align="center"
+                          sx={{ 
+                            borderLeft: "1px solid #e0e0e0",
+                            bgcolor: "white"
+                          }}
+                        >
+                          {currentModel ? (
+                           <Typography 
+  sx={{ 
+    color: field?.label?.includes("Fee") || field?.label?.includes("Cost") ? "#ff9800" : "inherit",
+    fontWeight: field?.label?.includes("Investment") ? "bold" : "normal"
+  }}
+>
+  {currentModel?.[field.field] ?? "-"}
+</Typography>
+
+                          ) : "-"}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -370,6 +325,6 @@ const BrandComparison = React.memo(({
       </DialogActions>
     </Dialog>
   );
-});
+};
 
 export default BrandComparison;

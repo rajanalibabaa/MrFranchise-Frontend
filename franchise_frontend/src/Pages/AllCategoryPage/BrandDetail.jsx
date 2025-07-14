@@ -263,8 +263,6 @@ const navigate = useNavigate();
 
       if (!id) {
         alert("User not logged in or missing ID. Please login again.");
-        navigate("/registerhandleuser");
-
         return;
       }
 
@@ -279,13 +277,13 @@ const navigate = useNavigate();
         applyId : id || ""
       };
 
-      // const id = investorUUID || localStorage.getItem("brandUUID");
+      const id = investorUUID || localStorage.getItem("brandUUID");
 
-      // if (!id) {
-      //   alert("User not logged in or missing ID. Please login again.");
-      //   navigate("/registerhandleuser");
-      //   return;
-      // }
+      if (!id) {
+        alert("User not logged in or missing ID. Please login again.");
+        navigate("/registerhandleuser");
+        return;
+      }
 
       // Validate required fields
       const requiredFields = [
@@ -312,36 +310,16 @@ const navigate = useNavigate();
       );
 
       if (response.data) {
-       // Show success alert
-      alert("✅ Submitted successfully! Our team will contact you shortly.");
-      
-      // Close drawer/modal if open
-      setDrawerOpen(false);
-      
-      // Reset form
-      setFormData({
-        fullName: "",
-        investorEmail: "",
-        mobileNumber: "",
-        investmentRange: "",
-        state: "",
-        district: "",
-        city: "",
-        planToInvest: "",
-        readyToInvest: "",
-      });
-      
-      // Set success state
-      setSubmitSuccess(true);
+        setSubmitSuccess(true);
+        setDrawerOpen(false);
       }
-
     } catch (error) {
       console.error("Submission error:", error?.response?.data || error.message);
       alert("❌Failed to submit application. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, selectedBrand, investorUUID, navigate]);
+  }, [formData, selectedBrand, investorUUID]);
 
   const handleImageOpen = useCallback((index) => {
     setCurrentImageIndex(index);

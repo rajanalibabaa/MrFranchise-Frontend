@@ -7,58 +7,53 @@ import { CircularProgress } from "@mui/material";
 function BrandDetailsPage() {
   const { brandId } = useParams();
   const navigate = useNavigate();
-  const [localBrand, setLocalBrand] = useState(null);
-  
-  // Use the useBrand hook to fetch brand data if not in localStorage
-  const { 
-    data: fetchedBrand, 
-    isLoading, 
-    isError,
-    error 
-  } = useBrand(brandId, {
-    enabled: !localBrand, // Only fetch if we don't have local brand data
-  });
+  const [fromSession, setFromSession] = useState(false);
+  const [checkedStorage, setCheckedStorage] = useState(false);
 
+  // ✅ Check if brandId is stored (just to track if it's opened from dialog)
   useEffect(() => {
-    // Check localStorage first
-    const storedBrand = localStorage.getItem(`brand-${brandId}`);
-    if (storedBrand) {
-      try {
-        setLocalBrand(JSON.parse(storedBrand));
-      } catch (e) {
-        console.error("Failed to parse stored brand data", e);
-        localStorage.removeItem(`brand-${brandId}`);
-      }
+    const brandKey = `viewing-brand-id-${brandId}`;
+    const storedId = sessionStorage.getItem(brandKey);
+
+    if (storedId === brandId) {
+      setFromSession(true); // optional use
     }
+
+    setCheckedStorage(true);
   }, [brandId]);
 
+  // ✅ Fetch brand data only after session check
+  const {
+    data: brandData,
+    isLoading,
+    isError,
+    error
+  } = useBrand(brandId, {
+    enabled: checkedStorage,
+  });
+
+  // ✅ Redirect if nothing is found
   useEffect(() => {
-    // If no brand found and API call failed, redirect
-    if (isError || (!isLoading && !fetchedBrand && !localBrand)) {
-      console.error("Failed to load brand data", error);
-      navigate('/brands', { replace: true });
+    if (checkedStorage && !isLoading && !brandData && isError) {
+      console.error("Brand not found. Redirecting...", error);
+      navigate("/brandviewpage", { replace: true });
     }
-  }, [brandId, fetchedBrand, isLoading, isError, navigate, localBrand, error]);
+  }, [checkedStorage, isLoading, brandData, isError, navigate, error]);
 
-  // Decide which brand data to use
-  const brandData = localBrand || fetchedBrand;
-
-  if (isLoading && !localBrand) {
+  if (!checkedStorage || isLoading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh'
       }}>
-        <CircularProgress color="secondary"   />
+        <CircularProgress color="secondary" />
       </div>
     );
   }
 
-  if (!brandData) {
-    return null; // Redirect will happen in the effect
-  }
+  if (!brandData) return null;
 
   return <BrandDetails brandData={brandData} />;
 }

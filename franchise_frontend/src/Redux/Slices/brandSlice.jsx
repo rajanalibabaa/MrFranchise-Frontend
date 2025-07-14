@@ -65,36 +65,36 @@ export const Likeshow = async () => {
   }
 };
 
-// export const fetchBrands = createAsyncThunk(
-//   "brands/fetchBrands",
-//   async (_, { rejectWithValue }) => {
-//     try {
-//       let response;
+export const fetchBrands = createAsyncThunk(
+  "brands/fetchBrands",
+  async (_, { rejectWithValue }) => {
+    try {
+      let response;
 
-//       if (!token) {
-//         response = await axios.get(
-//           "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
-//           {
-//             headers: {
-//               "Content-Type": "application/json",
-//             },
-//           }
-//         );
-//       }
-//       if (token) {
-//         response = await Likeshow();
+      if (!token) {
+        response = await axios.get(
+          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+      if (token) {
+        response = await Likeshow();
         
-//       }
+      }
 
-//       console.log("response.data.data :",response.data.data)
+      console.log("response.data.data :",response.data.data)
       
 
-//       return response.data.data;
-//     } catch (err) {
-//       return rejectWithValue(err.message || "Failed to fetch brands");
-//     }
-//   }
-// );
+      return response.data.data;
+    } catch (err) {
+      return rejectWithValue(err.message || "Failed to fetch brands");
+    }
+  }
+);
 
 export const fetchBrandById = createAsyncThunk(
   "brands/fetchBrandById",
@@ -469,6 +469,11 @@ const applyFiltersToBrands = (brands, filters) => {
   });
 };
 
-export const { setFilters, clearFilters, openBrandDialog, closeBrandDialog } =
+export const {fetchAllFilterData,
+  
+  setFilters,
+  clearFilters,
+  openBrandDialog,
+  closeBrandDialog } =
   brandSlice.actions;
 export default brandSlice.reducer;

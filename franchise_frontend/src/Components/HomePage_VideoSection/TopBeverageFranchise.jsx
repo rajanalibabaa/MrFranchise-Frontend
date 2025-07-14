@@ -63,8 +63,8 @@ const BrandCard = React.memo(({
   const brandDetails = brand.brandDetails || {};
   const {
     brandName = "N/A",
-    tagLine = "",
-    companyName = "N/A",
+    // tagLine = "",
+    // companyName = "N/A",
   } = brandDetails;
 
   // Extract franchise details with fallbacks
@@ -72,11 +72,11 @@ const BrandCard = React.memo(({
     investmentRange = "Not specified",
     areaRequired = "Not specified",
     franchiseType = "N/A",
-    franchiseModel: modelType = "N/A",
-    franchiseFee = "N/A",
-    royaltyFee = "N/A",
-    roi = "N/A",
-    payBackPeriod = "N/A"
+    // franchiseModel: modelType = "N/A",
+    // franchiseFee = "N/A",
+    // royaltyFee = "N/A",
+    // roi = "N/A",
+    // payBackPeriod = "N/A"
   } = franchiseModel;
 
   useEffect(() => {
@@ -294,7 +294,8 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  <strong>Model:</strong> {modelType} | <strong>Type:</strong> {franchiseType}
+                   <strong>Franchise Type :</strong> {franchiseType}
+                   {/* <strong>Model:</strong> {modelType} | */}
                 </Typography>
               </Box>
 
@@ -308,7 +309,8 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  <strong>Investment:</strong> {investmentRange} | <strong>Fee:</strong> {franchiseFee}
+                  <strong>Investment:</strong> {investmentRange} 
+                  {/* | <strong>Fee:</strong> {franchiseFee} */}
                 </Typography>
               </Box>
 
@@ -322,7 +324,8 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  <strong>Area:</strong> {areaRequired} | <strong>ROI:</strong> {roi}% in {payBackPeriod}
+                  <strong>Area:</strong> {areaRequired} 
+                  {/* | <strong>ROI:</strong> {roi}% in {payBackPeriod} */}
                 </Typography>
               </Box>
             </Stack>
@@ -389,25 +392,6 @@ const TopBeverageFranchises = () => {
     return CARD_DIMENSIONS.desktop;
   }, [isMobile, isTablet]);
 
-  // const initializeData = useCallback(() => {
-  //   try {
-  //     if (!beverageBrands || beverageBrands.length === 0) {
-  //       setError("Loading...");
-  //     } else {
-  //       setError(null);
-  //     }
-  //   } catch (err) {
-  //     setError("Failed to process brands data.");
-  //     console.error("Error processing brands:", err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [beverageBrands]);
-
-  // useEffect(() => {
-  //   initializeData();
-  // }, [initializeData]);
-
  const handleLikeClick = useCallback(async (brandId, isLiked) => {
     if (likeProcessing[brandId]) return;
     const token = localStorage.getItem("accessToken");
@@ -463,7 +447,7 @@ const TopBeverageFranchises = () => {
       sx={{
         py: isMobile ? 1 : 2,
         px: isMobile ? 0 : 2,
-        maxWidth: isMobile ? "100%" : 1300,
+        maxWidth: isMobile ? "100%" : 1400,
         mx: "auto",
         mb: isMobile ? 0 : 2,
       }}
