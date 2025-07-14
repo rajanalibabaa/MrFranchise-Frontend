@@ -19,7 +19,7 @@ import BrandFeedBack from "./Components/BrandProfile_Component/BrandFeedback";
 import BrandComplaint from "./Components/BrandProfile_Component/BrandComplaint";
 import BrandAddVedios from "./Components/BrandProfile_Component/BrandAddVedios";
 
-import BrandListingController from './Components/BrandProfile_Component/BrandListingController.jsx';
+import BrandListingController from './Components/BrandProfile_Component/BrandDashboardController/BrandListingController.jsx';
 import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccount.jsx';
 import { Provider, useDispatch } from 'react-redux';
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
@@ -131,7 +131,7 @@ function App() {
             <Route
               path="/brandDashboard/brandlistingcontrol"
               element={<BrandListingController />}
-            />
+            />  
           </Route>
 
           <Route path="/brandsearchview" element={<BrandCategroyViewPage />} />

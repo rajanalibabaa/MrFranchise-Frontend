@@ -35,7 +35,6 @@ import {
 import { useState } from "react";
 import categories from "./BrandCategories";
 import { Editor } from "@tinymce/tinymce-react";
-
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Info, InfoOutlined, InfoOutlineRounded } from "@mui/icons-material";
 import { height } from "@mui/system";
@@ -403,7 +402,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
     setSelectedCategory(newCategory);
     onChange({ brandCategories: newCategory });
-  };a
+  };
 
   const handleSubCategoryChange = (e) => {
     const subCategory = e.target.value;
