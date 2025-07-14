@@ -7,6 +7,7 @@ import {
   CircularProgress,
   IconButton,
   Typography,
+  Tooltip,
 } from '@mui/material';
 import {
   Compare,
@@ -20,7 +21,6 @@ import LoginPage from '../LoginPage/LoginPage';
 import { openBrandDialog } from "../../Hooks/Fetchbrands.jsx";
 import { postView } from '../../Utils/function/view.jsx';
 
-// Pre-define styles to avoid recreating them on every render
 const cardStyles = {
   width: 320,
   height: 520,
@@ -73,15 +73,15 @@ const viewButtonStyles = {
 
 const BrandCard = memo(({
   brand,
-  toggleLike,
+  onToggleLike,
   showLogin,
-  setShowLogin,
+  onShowLogin,
   isSelectedForComparison,
-  toggleBrandComparison,
+  onToggleBrandComparison,
+  maxComparisonReached,
 }) => {
   const [isProcessingLike, setIsProcessingLike] = useState({});
   
-  // Destructure brand data once and memoize complex computations
   const {
     uuid,
     uploads = {},
@@ -91,7 +91,6 @@ const BrandCard = memo(({
     isLiked,
   } = brand;
 
-  // Memoize expensive computations
   const investmentRange = useMemo(() => 
     franchiseDetails.fico?.[0]?.investmentRange || "Not specified",
   [franchiseDetails.fico]);
@@ -100,9 +99,7 @@ const BrandCard = memo(({
     franchiseDetails.fico?.[0]?.areaRequired || "Not specified",
   [franchiseDetails.fico]);
 
-  // Memoized handlers with optimized dependencies
   const handleOpenBrand = useCallback(() => {
-    // Use requestIdleCallback for non-critical tasks
     if ('requestIdleCallback' in window) {
       requestIdleCallback(() => {
         postView(uuid);
@@ -110,8 +107,6 @@ const BrandCard = memo(({
     } else {
       setTimeout(() => postView(uuid), 0);
     }
-    
-    // Open dialog immediately as it's user-facing
     openBrandDialog(brand);
   }, [uuid, brand]);
 
@@ -120,48 +115,59 @@ const BrandCard = memo(({
     
     setIsProcessingLike(prev => ({ ...prev, [uuid]: true }));
     try {
-      // Use microtask to ensure UI updates first
       await Promise.resolve();
-      await toggleLike(uuid, isLiked);
+      await onToggleLike(uuid, isLiked);
     } finally {
       setIsProcessingLike(prev => ({ ...prev, [uuid]: false }));
     }
-  }, [uuid, isLiked, toggleLike, isProcessingLike]);
+  }, [uuid, isLiked, onToggleLike, isProcessingLike]);
 
   const handleComparisonToggle = useCallback(() => {
-    // Use requestAnimationFrame for smoother UI updates
+    if (maxComparisonReached && !isSelectedForComparison) {
+      return;
+    }
     requestAnimationFrame(() => {
-      toggleBrandComparison(brand);
+      onToggleBrandComparison(brand);
     });
-  }, [brand, toggleBrandComparison]);
+  }, [brand, onToggleBrandComparison, isSelectedForComparison, maxComparisonReached]);
 
   return (
     <Card sx={cardStyles}>
-      {/* Comparison toggle button */}
-      <IconButton
-        sx={{
-          position: "absolute",
-          top: 8,
-          right: 8,
-          zIndex: 2,
-          backgroundColor: isSelectedForComparison
-            ? "rgba(76, 175, 80, 0.9)"
-            : "rgba(0,0,0,0.5)",
-          color: "white",
-          "&:hover": {
-            backgroundColor: isSelectedForComparison
-              ? "rgba(56, 142, 60, 0.9)"
-              : "rgba(0,0,0,0.7)",
-          },
-          width: 32,
-          height: 32,
-        }}
-        onClick={handleComparisonToggle}
+      <Tooltip 
+        title={maxComparisonReached && !isSelectedForComparison ? "Maximum 3 brands can be compared" : ""}
+        placement="top"
       >
-        <Compare fontSize="small" />
-      </IconButton>
+        <span>
+          <IconButton
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              zIndex: 2,
+              backgroundColor: isSelectedForComparison
+                ? "rgba(76, 175, 80, 0.9)"
+                : maxComparisonReached
+                  ? "rgba(244, 67, 54, 0.7)"
+                  : "rgba(0,0,0,0.5)",
+              color: "white",
+              "&:hover": {
+                backgroundColor: isSelectedForComparison
+                  ? "rgba(56, 142, 60, 0.9)"
+                  : maxComparisonReached
+                    ? "rgba(244, 67, 54, 0.9)"
+                    : "rgba(0,0,0,0.7)",
+              },
+              width: 32,
+              height: 32,
+            }}
+            onClick={handleComparisonToggle}
+            disabled={maxComparisonReached && !isSelectedForComparison}
+          >
+            <Compare fontSize="small" />
+          </IconButton>
+        </span>
+      </Tooltip>
 
-      {/* Content Container */}
       <Box
         sx={{
           p: 2,
@@ -170,7 +176,6 @@ const BrandCard = memo(({
           flexDirection: "column",
         }}
       >
-        {/* Brand Logo Image - Lazy loading with eager loading for above-the-fold images */}
         <Box
           component="img"
           src={uploads.brandLogo}
@@ -179,7 +184,6 @@ const BrandCard = memo(({
           sx={logoStyles}
         />     
 
-        {/* Brand Name and Like Button */}
         <Box
           display="flex"
           justifyContent="space-between"
@@ -206,7 +210,6 @@ const BrandCard = memo(({
           </IconButton>
         </Box>
 
-        {/* Categories - Optimized rendering */}
         <Box sx={{ mb: 1, minHeight: 32 }}>
           {franchiseDetails.brandCategories?.child ? (
             <Chip
@@ -227,7 +230,6 @@ const BrandCard = memo(({
           )}
         </Box>
 
-        {/* Details List */}
         <Box
           sx={{
             mb: 2,
@@ -255,7 +257,6 @@ const BrandCard = memo(({
           />
         </Box>
 
-        {/* View Details Button */}
         <Button
           fullWidth
           variant="contained"
@@ -267,23 +268,21 @@ const BrandCard = memo(({
         </Button>
       </Box>
 
-      {/* Login Modal - Lazy load if possible */}
       {showLogin && (
-        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+        <LoginPage open={showLogin} onClose={() => onShowLogin(false)} />
       )}
     </Card>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison function for memo
   return (
     prevProps.brand.uuid === nextProps.brand.uuid &&
     prevProps.brand.isLiked === nextProps.brand.isLiked &&
     prevProps.isSelectedForComparison === nextProps.isSelectedForComparison &&
-    prevProps.showLogin === nextProps.showLogin
+    prevProps.showLogin === nextProps.showLogin &&
+    prevProps.maxComparisonReached === nextProps.maxComparisonReached
   );
 });
 
-// Optimized LocationDetail component
 const LocationDetail = memo(({ locations, onViewMore }) => {
   const locationText = useMemo(() => {
     if (!locations) return "Multiple locations";
@@ -325,7 +324,6 @@ const LocationDetail = memo(({ locations, onViewMore }) => {
   );
 });
 
-// Optimized DetailItem component
 const DetailItem = memo(({ icon, label, value }) => {
   const clonedIcon = useMemo(() => React.cloneElement(icon, {
     sx: {
