@@ -34,7 +34,7 @@ const apiCache = {
 };
 
 
-const BrandExpansionLocationControl = ({ data, onChange, errors }) => {
+const ExpansionLocationControl = ({ data, onChange, errors }) => {
   const { enqueueSnackbar } = useSnackbar();
 
   // Location type state
@@ -2366,4 +2366,4 @@ const BrandExpansionLocationControl = ({ data, onChange, errors }) => {
   );
 };
 
-export default BrandExpansionLocationControl;
+export default ExpansionLocationControl;

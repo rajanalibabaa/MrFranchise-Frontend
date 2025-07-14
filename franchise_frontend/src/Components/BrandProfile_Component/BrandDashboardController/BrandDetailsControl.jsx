@@ -64,33 +64,33 @@ const BrandDetailsControl = ({ data = {}, errors = {}, onChange }) => {
   //   },
   // });
 
-  const formData = {
-  fullName: "",
-  email: "",
-  mobileNumber: "",
-  whatsappNumber: "",
-  companyName: "",
-  brandName: "",
-  tagLine: "",
-  ceoMobile: "",
-  ceoEmail: "",
-  ceoName: "",
-  officeEmail: "",
-  officeMobile: "",
-  headOfficeAddress: "",
-  country: "",
-  state: "",
-  district: "",
-  city: "",
-  pincode: "",
-  website: "",
-  facebook: "",
-  instagram: "",
-  linkedin: "",
-  brandCategories: [],
-  expansionLocation: []
+  // const formData = {
+  // fullName: "",
+  // email: "",
+  // mobileNumber: "",
+  // whatsappNumber: "",
+  // companyName: "",
+  // brandName: "",
+  // tagLine: "",
+  // ceoMobile: "",
+  // ceoEmail: "",
+  // ceoName: "",
+  // officeEmail: "",
+  // officeMobile: "",
+  // headOfficeAddress: "",
+  // country: "",
+  // state: "",
+  // district: "",
+  // city: "",
+  // pincode: "",
+  // website: "",
+  // facebook: "",
+  // instagram: "",
+  // linkedin: "",
+  // brandCategories: [],
+  // expansionLocation: []
 
-  };
+  // };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -1112,7 +1112,7 @@ useEffect(() => {
             fullWidth
             label="Company Name"
             name="companyName"
-            value={formData.companyName || ""}
+            value={data.companyName || ""}
             onChange={handleChange}
             variant="outlined"
             size="medium"
@@ -1128,7 +1128,7 @@ useEffect(() => {
             fullWidth
             label="Brand Name"
             name="brandName"
-            value={formData.brandName || ""}
+            value={data.brandName || ""}
             onChange={handleChange}
             variant="outlined"
             size="medium"
@@ -1144,7 +1144,7 @@ useEffect(() => {
             fullWidth
             label="Tagline"
             name="tagLine"
-            value={formData.tagLine || ""}
+            value={data.tagLine || ""}
             onChange={handleChange}
             variant="outlined"
             size="medium"
