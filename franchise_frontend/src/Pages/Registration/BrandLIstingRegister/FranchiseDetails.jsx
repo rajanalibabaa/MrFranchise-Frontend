@@ -403,7 +403,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
     setSelectedCategory(newCategory);
     onChange({ brandCategories: newCategory });
-  };a
+  };
 
   const handleSubCategoryChange = (e) => {
     const subCategory = e.target.value;

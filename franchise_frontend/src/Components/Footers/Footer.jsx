@@ -223,7 +223,7 @@ function Footer() {
             >
               {[
                 { text: "About Us", href: "/aboutus" },
-                { text: "Contact Support", href: "/contactus" },
+                // { text: "Contact Support", href: "/contactus" },
                 { text: "FAQs", href: "/faq" },
                 { text: "Help Center", href: "/help" },
                 { text: "Terms & Conditions", href: "/termsandconditions" },

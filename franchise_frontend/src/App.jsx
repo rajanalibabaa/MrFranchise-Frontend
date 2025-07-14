@@ -44,10 +44,10 @@ import Blogs from './Components/Footers/QuickLinks/Blogs.jsx';
 import BrandDetailsPage from './Pages/AllCategoryPage/BrandDetailsPage.jsx';
 import NavbarSearch from './Components/Navbar/NavbarSearch.jsx';
 import AboutUs from './Components/Footers/HelpAndSupport/AboutUs.jsx';
-import BrandDetailsControl from './Components/BrandProfile_Component/BrandControl/BrandDetailsControl.jsx';
-import FranchiseDetailsControl from './Components/BrandProfile_Component/BrandControl/FranchiseDetailsControl.jsx';
-import ExpansionLocationControl from './Components/BrandProfile_Component/BrandControl/ExpansionLocationControl.jsx';
-import UploadsControl from './Components/BrandProfile_Component/BrandControl/UploadsControl.jsx';
+import BrandDetailsControl from './Components/BrandProfile_Component/BrandDashboardController/BrandDetailsControl.jsx';
+import FranchiseDetailsControl from './Components/BrandProfile_Component/BrandDashboardController/FranchiseDetailsControl.jsx';
+import ExpansionLocationControl from './Components/BrandProfile_Component/BrandDashboardController/ExpansionLocationControl.jsx';
+import UploadsControl from './Components/BrandProfile_Component/BrandDashboardController/UploadsControl.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -132,7 +132,7 @@ function App() {
               path="/brandDashboard/brandlistingcontrol"
               element={<BrandListingController />}
             />
-          </Route>
+          </Route> 
 
           <Route path="/brandsearchview" element={<BrandCategroyViewPage />} />
 

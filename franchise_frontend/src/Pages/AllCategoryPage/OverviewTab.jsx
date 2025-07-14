@@ -1330,7 +1330,7 @@ const OverviewTab = ({ brand }) => {
             brand.franchiseDetails?.aidFinancing ||
             hasData(brand.franchiseDetails?.uniqueSellingPoints)) && (
             <Grid container spacing={3} sx={{ mt: 2, mb: 3 }}>
-              <Grid item xs={12} md={6}>
+              <Grid  xs={12} md={6}>
                 <Zoom in={true} timeout={700}>
                   <AnimatedCard
                     sx={{
@@ -1509,7 +1509,7 @@ const OverviewTab = ({ brand }) => {
               brand.uploads.awards.length > 0 ? (
                 <Grid container spacing={2}>
                   {brand.uploads.awards.map((award, idx) => (
-                    <Grid item xs={12} sm={6} md={4} key={idx}>
+                    <Grid  xs={12} sm={6} md={4} key={idx}>
                       <Slide direction="up" in={true} timeout={idx * 200}>
                         <Box
                           sx={{
@@ -1602,7 +1602,7 @@ const OverviewTab = ({ brand }) => {
               </Typography>
               <Grid container spacing={2}>
                 {brand.uploads.businessPlan.map((doc, idx) => (
-                  <Grid item xs={12} sm={6} md={4} key={idx}>
+                  <Grid  xs={12} sm={6} md={4} key={idx}>
                     <Slide direction="up" in={true} timeout={idx * 200}>
                       <Box
                         sx={{
@@ -1708,7 +1708,8 @@ const OverviewTab = ({ brand }) => {
       {sections.map((section, index) => (
         <Box key={index} sx={{ mb: 6 }}>
           <SectionHeader
-            variant="h4"
+component="div"
+            variant="h5"
             sx={{
               display: "flex",
               alignItems: "center",
@@ -1729,7 +1730,7 @@ const OverviewTab = ({ brand }) => {
             >
               {section.icon}
             </Box>
-            <Typography variant="h5" fontWeight={700} color="#ff9800">
+            <Typography variant="h4" fontWeight={700} color="#ff9800">
               {section.title}
             </Typography>
           </SectionHeader>

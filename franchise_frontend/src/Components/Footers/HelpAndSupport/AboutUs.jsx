@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Navbar from '../../Navbar/NavBar';
 import Footer from '../Footer';
 import { Box, Container, Typography, List, ListItem, ListItemIcon, ListItemText, Grid, Card, CardContent, Link } from '@mui/material';
@@ -25,7 +25,7 @@ const fadeInUp = {
 };
 
 const AboutUs = () => {
-  const renderList = (items) => (
+  const renderList =  useMemo(()=> (items) => (
     <List>
       {items.map((item, index) => (
         <ListItem key={index}>
@@ -36,7 +36,7 @@ const AboutUs = () => {
         </ListItem>
       ))}
     </List>
-  );
+  ));
 
   return (
     <Box
@@ -332,4 +332,4 @@ const AboutUs = () => {
   );
 };
 
-export default AboutUs;
+export default React.memo(AboutUs); // Memoize AboutUs;
