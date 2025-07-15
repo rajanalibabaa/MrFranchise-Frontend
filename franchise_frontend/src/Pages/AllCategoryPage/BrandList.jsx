@@ -35,6 +35,7 @@ import {
   useRecordView,
 } from "../../Hooks/Fetchbrands";
 import { useLocation } from "react-router-dom";
+import LoginPage from "../LoginPage/LoginPage.jsx";
 
 // Lazy load heavy components
 
@@ -81,14 +82,16 @@ function BrandList() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const location = useLocation();
-  const [showLogin, setShowLogin] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const initialFilters = location.state?.filters || {};
 
   // React Query hooks
   const { data: brands = [], isLoading, error } = useBrands();
-  const toggleLikeMutation = useToggleLike();
-  const recordViewMutation = useRecordView();
+
+  const [likeProcessing, setLikeProcessing] = useState({});
+  const [showLogin, setShowLogin] = useState(false);
+
+  const toggleLike = useToggleLike();
 
   // State for filters and UI
   const [filters, setFilters] = useState(initialFilters);
@@ -96,6 +99,37 @@ function BrandList() {
   const [comparisonOpen, setComparisonOpen] = useState(false);
   const [selectedForComparison, setSelectedForComparison] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
+
+
+
+
+const handleLikeClick = useCallback(
+  async (brandId, isLiked) => {
+    if (likeProcessing[brandId]) return;
+    const token = localStorage.getItem("accessToken");
+    
+    if (!token) {
+      setShowLogin(true);
+      return;
+    }
+
+    setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
+    
+    try {
+      await toggleLike.mutateAsync({ brandId, isLiked });
+    } catch (error) {
+      console.error("Like operation failed:", error);
+      // Show error to user if needed
+      if (error.response?.data?.message) {
+        // You could show this in a snackbar/toast
+        console.error("Error details:", error.response.data.message);
+      }
+    } finally {
+      setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
+    }
+  },
+  [likeProcessing, toggleLike]
+);
 
   // Throttled scroll handler
   const handleScroll = useCallback(() => {
@@ -227,13 +261,12 @@ function BrandList() {
   const handleOpenBrand = useCallback(
     async (brand) => {
       try {
-        await recordViewMutation.mutateAsync(brand.uuid);
         openBrandDialog(brand);
       } catch (error) {
         console.error("Failed to record view:", error);
       }
     },
-    [recordViewMutation]
+    []
   );
 
   const handleFilterChange = useCallback((name, value) => {
@@ -272,21 +305,6 @@ function BrandList() {
     });
   }, []);
 
-  const toggleLike = useCallback(
-    async (brandId, isLiked) => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        setShowLogin(true);
-        return;
-      }
-      try {
-        await toggleLikeMutation.mutateAsync({ brandId, isLiked });
-      } catch (error) {
-        console.error("Like operation failed:", error);
-      }
-    },
-    [toggleLikeMutation]
-  );
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -509,6 +527,8 @@ function BrandList() {
                       <MemoizedBrandCard
                         brand={brand}
                         onOpenBrand={handleOpenBrand}
+                        handleLikeClick={handleLikeClick}
+                        likeProcessing={likeProcessing}
                         onToggleLike={toggleLike}
                         showLogin={showLogin}
                         onShowLogin={setShowLogin}
@@ -602,6 +622,11 @@ function BrandList() {
           onRemoveFromComparison={removeFromComparison}
         />
       </Suspense>
+
+        {showLogin && (
+              <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+            )}
+      
     </Container>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo, useMemo } from 'react';
+import React, { useState, useCallback, memo, useMemo } from "react";
 import {
   Box,
   Button,
@@ -8,7 +8,7 @@ import {
   IconButton,
   Typography,
   Tooltip,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Compare,
   Favorite,
@@ -16,11 +16,10 @@ import {
   AttachMoney,
   AreaChart,
   Description,
-} from '@mui/icons-material';
-import LoginPage from '../LoginPage/LoginPage';
+} from "@mui/icons-material";
+import LoginPage from "../LoginPage/LoginPage";
 import { openBrandDialog } from "../../Hooks/Fetchbrands.jsx";
-import { postView } from '../../Utils/function/view.jsx';
-import { useToggleLike } from '../../Hooks/Fetchbrands';
+import { postView } from "../../Utils/function/view.jsx";
 
 const cardStyles = {
   width: 320,
@@ -72,240 +71,247 @@ const viewButtonStyles = {
   },
 };
 
-const BrandCard = memo(({
-  brand,
-  showLogin,
-  onShowLogin,
-  isSelectedForComparison,
-  onToggleBrandComparison,
-  maxComparisonReached,
-}) => {
-  const [localIsLiked, setLocalIsLiked] = useState(brand.isLiked);
-  const [isProcessingLike, setIsProcessingLike] = useState(false);
-  
-  const { mutate: toggleLike } = useToggleLike();
-  
-  const {
-    uuid,
-    uploads = {},
-    brandDetails = {},
-    franchiseDetails = {},
-    expansionLocationData = {},
-  } = brand;
+const BrandCard = memo(
+  ({
+    brand,
+    handleLikeClick,
+    likeProcessing,
+    showLogin,
+    onShowLogin,
+    isSelectedForComparison,
+    onToggleBrandComparison,
+    maxComparisonReached,
+  }) => {
+    const [localIsLiked, setLocalIsLiked] = useState(brand.isLiked);
+    const [isProcessingLike, setIsProcessingLike] = useState(false);
 
-  const investmentRange = useMemo(() => 
-    franchiseDetails.fico?.[0]?.investmentRange || "Not specified",
-  [franchiseDetails.fico]);
+    const {
+      uuid,
+      uploads = {},
+      brandDetails = {},
+      franchiseDetails = {},
+      expansionLocationData = {},
+      isLiked,
+    } = brand;
 
-  const areaRequired = useMemo(() => 
-    franchiseDetails.fico?.[0]?.areaRequired || "Not specified",
-  [franchiseDetails.fico]);
-
-  const handleOpenBrand = useCallback(() => {
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(() => {
-        postView(uuid);
-      });
-    } else {
-      setTimeout(() => postView(uuid), 0);
-    }
-    openBrandDialog(brand);
-  }, [uuid, brand]);
-
-  const handleLikeClick = useCallback(() => {
-    if (isProcessingLike) return;
-    
-    setIsProcessingLike(true);
-    const newLikeStatus = !localIsLiked;
-    
-    // Optimistic update
-    setLocalIsLiked(newLikeStatus);
-    
-    toggleLike(
-      { brandId: uuid, isLiked: !newLikeStatus },
-      {
-        onError: () => {
-          // Revert on error
-          setLocalIsLiked(!newLikeStatus);
-        },
-        onSettled: () => {
-          setIsProcessingLike(false);
-        }
-      }
+    const investmentRange = useMemo(
+      () => franchiseDetails.fico?.[0]?.investmentRange || "Not specified",
+      [franchiseDetails.fico]
     );
-  }, [uuid, localIsLiked, isProcessingLike, toggleLike]);
 
-  const handleComparisonToggle = useCallback(() => {
-    if (maxComparisonReached && !isSelectedForComparison) {
-      return;
-    }
-    requestAnimationFrame(() => {
-      onToggleBrandComparison(brand);
-    });
-  }, [brand, onToggleBrandComparison, isSelectedForComparison, maxComparisonReached]);
+    const areaRequired = useMemo(
+      () => franchiseDetails.fico?.[0]?.areaRequired || "Not specified",
+      [franchiseDetails.fico]
+    );
 
-  return (
-    <Card sx={cardStyles}>
-      <Tooltip 
-        title={maxComparisonReached && !isSelectedForComparison ? "Maximum 3 brands can be compared" : ""}
-        placement="top"
-      >
-        <span>
-          <IconButton
-            sx={{
-              position: "absolute",
-              top: 8,
-              right: 8,
-              zIndex: 2,
-              backgroundColor: isSelectedForComparison
-                ? "rgba(76, 175, 80, 0.9)"
-                : maxComparisonReached
+    const handleOpenBrand = useCallback(() => {
+      console.log("Open brand dialog ============", brand);
+      if ("requestIdleCallback" in window) {
+        requestIdleCallback(() => {
+          postView(uuid);
+        });
+      } else {
+        setTimeout(() => postView(uuid), 0);
+      }
+      openBrandDialog(brand);
+    }, [uuid, brand]);
+
+    // const handleLikeClick = useCallback(async () => {
+    //   if (isProcessingLike[uuid]) return;
+
+    //   setIsProcessingLike(prev => ({ ...prev, [uuid]: true }));
+    //   try {
+    //     await Promise.resolve();
+    //     await onToggleLike(uuid, isLiked);
+    //   } finally {
+    //     setIsProcessingLike(prev => ({ ...prev, [uuid]: false }));
+    //   }
+    // }, [uuid, isLiked, onToggleLike, isProcessingLike]);
+
+    const handleComparisonToggle = useCallback(() => {
+      if (maxComparisonReached && !isSelectedForComparison) {
+        return;
+      }
+      requestAnimationFrame(() => {
+        onToggleBrandComparison(brand);
+      });
+    }, [brand, onToggleBrandComparison, isSelectedForComparison, maxComparisonReached]);
+
+    return (
+      <Card sx={cardStyles}>
+        <Tooltip
+          title={
+            maxComparisonReached && !isSelectedForComparison
+              ? "Maximum 3 brands can be compared"
+              : ""
+          }
+          placement="top"
+        >
+          <span>
+            <IconButton
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                zIndex: 2,
+                backgroundColor: isSelectedForComparison
+                  ? "rgba(76, 175, 80, 0.9)"
+                  : maxComparisonReached
                   ? "rgba(244, 67, 54, 0.7)"
                   : "rgba(0,0,0,0.5)",
-              color: "white",
-              "&:hover": {
-                backgroundColor: isSelectedForComparison
-                  ? "rgba(56, 142, 60, 0.9)"
-                  : maxComparisonReached
+                color: "white",
+                "&:hover": {
+                  backgroundColor: isSelectedForComparison
+                    ? "rgba(56, 142, 60, 0.9)"
+                    : maxComparisonReached
                     ? "rgba(244, 67, 54, 0.9)"
                     : "rgba(0,0,0,0.7)",
-              },
-              width: 32,
-              height: 32,
-            }}
-            onClick={handleComparisonToggle}
-            disabled={maxComparisonReached && !isSelectedForComparison}
-          >
-            <Compare fontSize="small" />
-          </IconButton>
-        </span>
-      </Tooltip>
-
-      <Box
-        sx={{
-          p: 2,
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <Box
-          component="img"
-          src={uploads.brandLogo}
-          alt={brandDetails.brandName || "Brand logo"}
-          loading="lazy"
-          sx={logoStyles}
-        />     
-
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="flex-start"
-          mt={1}
-        >
-          <Typography variant="h6" component="div" sx={titleStyles}>
-            {brandDetails.brandName}
-          </Typography>
-          <IconButton
-            onClick={handleLikeClick}
-            disabled={isProcessingLike}
-            aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
-          >
-            {isProcessingLike ? (
-              <CircularProgress size={24} />
-            ) : (
-              <Favorite
-                sx={{
-                  color: localIsLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
-                }}
-              />
-            )}
-          </IconButton>
-        </Box>
-
-        <Box sx={{ mb: 1, minHeight: 32 }}>
-          {franchiseDetails.brandCategories?.child ? (
-            <Chip
-              label={franchiseDetails.brandCategories.child}
-              size="small"
-              sx={{
-                mr: 1,
-                mb: 1,
-                bgcolor: "rgba(255, 152, 0, 0.1)",
-                color: "orange.dark",
-                fontWeight: 500,
+                },
+                width: 32,
+                height: 32,
               }}
-            />
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              N/A
-            </Typography>
-          )}
-        </Box>
+              onClick={handleComparisonToggle}
+              disabled={maxComparisonReached && !isSelectedForComparison}
+            >
+              <Compare fontSize="small" />
+            </IconButton>
+          </span>
+        </Tooltip>
 
         <Box
           sx={{
-            mb: 2,
+            p: 2,
             flexGrow: 1,
-            "& > *:not(:last-child)": {
-              mb: 1,
-            },
+            display: "flex",
+            flexDirection: "column",
           }}
         >
-          <LocationDetail 
-            locations={expansionLocationData.expansionLocations} 
-            onViewMore={handleOpenBrand}
+          <Box
+            component="img"
+            src={uploads.brandLogo}
+            alt={brandDetails.brandName || "Brand logo"}
+            loading="lazy"
+            sx={logoStyles}
           />
-          
-          <DetailItem
-            icon={<AttachMoney />}
-            label="Investment Range"
-            value={investmentRange}
-          />
-          
-          <DetailItem
-            icon={<AreaChart />}
-            label="Area Required"
-            value={areaRequired}
-          />
+
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="flex-start"
+            mt={1}
+          >
+            <Typography variant="h6" component="div" sx={titleStyles}>
+              {brandDetails.brandName}
+            </Typography>
+            <IconButton
+              onClick={() =>
+                handleLikeClick(brandDetails.uuid, brandDetails.isLiked)
+              }
+              disabled={likeProcessing[brandDetails.uuid]}
+              sx={{ ml: 1 }}
+            >
+              {likeProcessing[brandDetails.uuid] ? (
+                <CircularProgress size={24} />
+              ) : (
+                <Favorite
+                  sx={{
+                    color: brandDetails.isLiked
+                      ? "#f44336"
+                      : "rgba(0, 0, 0, 0.23)",
+                  }}
+                />
+              )}
+            </IconButton>
+          </Box>
+
+          <Box sx={{ mb: 1, minHeight: 32 }}>
+            {franchiseDetails.brandCategories?.child ? (
+              <Chip
+                label={franchiseDetails.brandCategories.child}
+                size="small"
+                sx={{
+                  mr: 1,
+                  mb: 1,
+                  bgcolor: "rgba(255, 152, 0, 0.1)",
+                  color: "orange.dark",
+                  fontWeight: 500,
+                }}
+              />
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                N/A
+              </Typography>
+            )}
+          </Box>
+
+          <Box
+            sx={{
+              mb: 2,
+              flexGrow: 1,
+              "& > *:not(:last-child)": {
+                mb: 1,
+              },
+            }}
+          >
+            <LocationDetail
+              locations={expansionLocationData.expansionLocations}
+              onViewMore={handleOpenBrand}
+            />
+
+            <DetailItem
+              icon={<AttachMoney />}
+              label="Investment Range"
+              value={investmentRange}
+            />
+
+            <DetailItem
+              icon={<AreaChart />}
+              label="Area Required"
+              value={areaRequired}
+            />
+          </Box>
+
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={handleOpenBrand}
+            startIcon={<Description />}
+            sx={viewButtonStyles}
+          >
+            View Details
+          </Button>
         </Box>
 
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={handleOpenBrand}
-          startIcon={<Description />}
-          sx={viewButtonStyles}
-        >
-          View Details
-        </Button>
-      </Box>
-
-      {showLogin && (
-        <LoginPage open={showLogin} onClose={() => onShowLogin(false)} />
-      )}
-    </Card>
-  );
-}, (prevProps, nextProps) => {
-  return (
-    prevProps.brand.uuid === nextProps.brand.uuid &&
-    prevProps.brand.isLiked === nextProps.brand.isLiked &&
-    prevProps.isSelectedForComparison === nextProps.isSelectedForComparison &&
-    prevProps.showLogin === nextProps.showLogin &&
-    prevProps.maxComparisonReached === nextProps.maxComparisonReached
-  );
-});
+        {showLogin && (
+          <LoginPage open={showLogin} onClose={() => onShowLogin(false)} />
+        )}
+      </Card>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.brand.uuid === nextProps.brand.uuid &&
+      prevProps.brand.isLiked === nextProps.brand.isLiked &&
+      prevProps.isSelectedForComparison === nextProps.isSelectedForComparison &&
+      prevProps.showLogin === nextProps.showLogin &&
+      prevProps.maxComparisonReached === nextProps.maxComparisonReached
+    );
+  }
+);
 
 const LocationDetail = memo(({ locations, onViewMore }) => {
   const locationText = useMemo(() => {
     if (!locations) return "Multiple locations";
-    
+
     const domestic = locations.domestic?.locations || [];
     const international = locations.international?.locations || [];
     const allLocations = [...domestic, ...international];
-    
-    return allLocations.length > 0 
-      ? allLocations.map(loc => loc.state || loc.country).filter(Boolean).join(", ")
+
+    return allLocations.length > 0
+      ? allLocations
+          .map((loc) => loc.state || loc.country)
+          .filter(Boolean)
+          .join(", ")
       : "Multiple locations";
   }, [locations]);
 
@@ -338,14 +344,18 @@ const LocationDetail = memo(({ locations, onViewMore }) => {
 });
 
 const DetailItem = memo(({ icon, label, value }) => {
-  const clonedIcon = useMemo(() => React.cloneElement(icon, {
-    sx: {
-      mr: 1.5,
-      fontSize: "1rem",
-      color: "text.secondary",
-      flexShrink: 0,
-    }
-  }), [icon]);
+  const clonedIcon = useMemo(
+    () =>
+      React.cloneElement(icon, {
+        sx: {
+          mr: 1.5,
+          fontSize: "1rem",
+          color: "text.secondary",
+          flexShrink: 0,
+        },
+      }),
+    [icon]
+  );
 
   return (
     <Box display="flex" alignItems="center">
