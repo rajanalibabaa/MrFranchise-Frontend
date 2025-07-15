@@ -1,17 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import BrandDetailsControl from './BrandDetailsControl';
-import { Box, Button, Snackbar, Alert, CircularProgress, Card, CardContent, CardHeader } from '@mui/material';
 import FranchiseDetailsControl from './FranchiseDetailsControl';
 import ExpansionLocationControl from './ExpansionLocationControl';
 import UploadsControl from './UploadsControl';
-
-// Helper function to flatten API data to form structure
+import {
+  Box,
+  Button,
+  Snackbar,
+  Alert,
+  CircularProgress,
+  Card,
+  CardContent,
+  CardHeader,
+   Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  TextField,
+   Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Typography,
+} from '@mui/material';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 const flattenBrandData = (brandDoc) => {
   if (!brandDoc) return {};
-  
   return {
-    // Brand Details
     fullName: brandDoc.brandDetails?.fullName || "",
     email: brandDoc.brandDetails?.email || "",
     mobileNumber: brandDoc.brandDetails?.mobileNumber || "",
@@ -36,8 +52,6 @@ const flattenBrandData = (brandDoc) => {
     linkedin: brandDoc.brandDetails?.linkedin || "",
     gstNumber: brandDoc.brandDetails?.gstNumber || "",
     pancardNumber: brandDoc.brandDetails?.pancardNumber || "",
-    
-    // Franchise Details
     brandCategories: brandDoc.franchiseDetails?.brandCategories || [],
     aidFinancing: brandDoc.franchiseDetails?.aidFinancing || "",
     brandDescription: brandDoc.franchiseDetails?.brandDescription || "",
@@ -51,13 +65,9 @@ const flattenBrandData = (brandDoc) => {
     fico: brandDoc.franchiseDetails?.fico || [],
     trainingSupport: brandDoc.franchiseDetails?.trainingSupport || [],
     uniqueSellingPoints: brandDoc.franchiseDetails?.uniqueSellingPoints || [],
-    
-    // Expansion Data
     currentOutletLocations: brandDoc.expansionLocationData?.currentOutletLocations || {},
     expansionLocations: brandDoc.expansionLocationData?.expansionLocations || {},
     isInternationalExpansion: brandDoc.expansionLocationData?.isInternationalExpansion || "No",
-    
-    // Uploads
     brandLogo: brandDoc.uploads?.brandLogo || [],
     exteriorOutlet: brandDoc.uploads?.exteriorOutlet || [],
     franchisePromotionVideo: brandDoc.uploads?.franchisePromotionVideo || [],
@@ -66,170 +76,105 @@ const flattenBrandData = (brandDoc) => {
     pancard: brandDoc.uploads?.pancard || [],
     businessPlan: brandDoc.uploads?.businessPlan || [],
     awards: brandDoc.uploads?.awards || [],
-    
-  
   };
 };
 
-// Helper function to unflatten form data to API structure
-const unflattenFormData = (formData) => {
-  return {
-    brandDetails: {
-      fullName: formData.fullName,
-      email: formData.email,
-      mobileNumber: formData.mobileNumber,
-      whatsappNumber: formData.whatsappNumber,
-      companyName: formData.companyName,
-      brandName: formData.brandName,
-      tagLine: formData.tagLine,
-      ceoName: formData.ceoName,
-      ceoEmail: formData.ceoEmail,
-      ceoMobile: formData.ceoMobile,
-      officeEmail: formData.officeEmail,
-      officeMobile: formData.officeMobile,
-      headOfficeAddress: formData.headOfficeAddress,
-      country: formData.country,
-      state: formData.state,
-      district: formData.district,
-      city: formData.city,
-      pincode: formData.pincode,
-      website: formData.website,
-      facebook: formData.facebook,
-      instagram: formData.instagram,
-      linkedin: formData.linkedin,
-      gstNumber: formData.gstNumber,
-      pancardNumber: formData.pancardNumber
-    },
-    franchiseDetails: {
-      brandCategories: formData.brandCategories,
-      aidFinancing: formData.aidFinancing,
-      brandDescription: formData.brandDescription,
-      companyOwnedOutlets: formData.companyOwnedOutlets,
-      consultationOrAssistance: formData.consultationOrAssistance,
-      establishedYear: formData.establishedYear,
-      franchiseDevelopment: formData.franchiseDevelopment,
-      franchiseOutlets: formData.franchiseOutlets,
-      franchiseSinceYear: formData.franchiseSinceYear,
-      totalOutlets: formData.totalOutlets,
-      fico: formData.fico,
-      trainingSupport: formData.trainingSupport,
-      uniqueSellingPoints: formData.uniqueSellingPoints
-    },
-    expansionLocationData: {
-      currentOutletLocations: formData.currentOutletLocations,
-      expansionLocations: formData.expansionLocations,
-      isInternationalExpansion: formData.isInternationalExpansion
-    },
-    uploads: {
-      brandLogo: formData.brandLogo,
-      exteriorOutlet: formData.exteriorOutlet,
-      franchisePromotionVideo: formData.franchisePromotionVideo,
-      gstCertificate: formData.gstCertificate,
-      interiorOutlet: formData.interiorOutlet,
-      pancard: formData.pancard,
-      businessPlan: formData.businessPlan,
-      awards: formData.awards
-    }
-   
-  };
-};
-
-const initialFormData = {
-  fullName: "",
-  email: "",
-  mobileNumber: "",
-  whatsappNumber: "",
-  companyName: "",
-  brandName: "",
-  tagLine: "",
-  ceoName: "",
-  ceoEmail: "",
-  ceoMobile: "",
-  officeEmail: "",
-  officeMobile: "",
-  headOfficeAddress: "",
-  country: "",
-  state: "",
-  district: "",
-  city: "",
-  pincode: "",
-  website: "",
-  facebook: "",
-  instagram: "",
-  linkedin: "",
-  gstNumber: "",
-  pancardNumber: "",
-  brandCategories: [],
-  aidFinancing: "",
-  brandDescription: "",
-  companyOwnedOutlets: "",
-  consultationOrAssistance: "",
-  establishedYear: "",
-  franchiseDevelopment: "",
-  franchiseOutlets: "",
-  franchiseSinceYear: "",
-  totalOutlets: "",
-  fico: [],
-  trainingSupport: [],
-  uniqueSellingPoints: [],
-  currentOutletLocations: {},
-  expansionLocations: {},
-  isInternationalExpansion: "No",
-  brandLogo: [],
-  exteriorOutlet: [],
-  franchisePromotionVideo: [],
-  gstCertificate: [],
-  interiorOutlet: [],
-  pancard: [],
-  businessPlan: [],
-  awards: [],
-
-};
+const unflattenFormData = (formData) => ({
+  brandDetails: {
+    fullName: formData.fullName,
+    email: formData.email,
+    mobileNumber: formData.mobileNumber,
+    whatsappNumber: formData.whatsappNumber,
+    companyName: formData.companyName,
+    brandName: formData.brandName,
+    tagLine: formData.tagLine,
+    ceoName: formData.ceoName,
+    ceoEmail: formData.ceoEmail,
+    ceoMobile: formData.ceoMobile,
+    officeEmail: formData.officeEmail,
+    officeMobile: formData.officeMobile,
+    headOfficeAddress: formData.headOfficeAddress,
+    country: formData.country,
+    state: formData.state,
+    district: formData.district,
+    city: formData.city,
+    pincode: formData.pincode,
+    website: formData.website,
+    facebook: formData.facebook,
+    instagram: formData.instagram,
+    linkedin: formData.linkedin,
+    gstNumber: formData.gstNumber,
+    pancardNumber: formData.pancardNumber
+  },
+  franchiseDetails: {
+    brandCategories: formData.brandCategories,
+    aidFinancing: formData.aidFinancing,
+    brandDescription: formData.brandDescription,
+    companyOwnedOutlets: formData.companyOwnedOutlets,
+    consultationOrAssistance: formData.consultationOrAssistance,
+    establishedYear: formData.establishedYear,
+    franchiseDevelopment: formData.franchiseDevelopment,
+    franchiseOutlets: formData.franchiseOutlets,
+    franchiseSinceYear: formData.franchiseSinceYear,
+    totalOutlets: formData.totalOutlets,
+    fico: formData.fico,
+    trainingSupport: formData.trainingSupport,
+    uniqueSellingPoints: formData.uniqueSellingPoints
+  },
+  expansionLocationData: {
+    currentOutletLocations: formData.currentOutletLocations,
+    expansionLocations: formData.expansionLocations,
+    isInternationalExpansion: formData.isInternationalExpansion
+  },
+  uploads: {
+    brandLogo: formData.brandLogo,
+    exteriorOutlet: formData.exteriorOutlet,
+    franchisePromotionVideo: formData.franchisePromotionVideo,
+    gstCertificate: formData.gstCertificate,
+    interiorOutlet: formData.interiorOutlet,
+    pancard: formData.pancard,
+    businessPlan: formData.businessPlan,
+    awards: formData.awards
+  }
+});
 
 const BrandListingController = () => {
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState({});
   const [originalData, setOriginalData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [saveStatus, setSaveStatus] = useState({ 
-    loading: false, 
-    success: false, 
-    error: '' 
-  });
+  const [saveStatus, setSaveStatus] = useState({ loading: false, success: false, error: '' });
+  const [isEditing, setIsEditing] = useState(false);
+  const [showOtpDialog, setShowOtpDialog] = useState(false);
+  const [expanded, setExpanded] = useState("panel1");
+  const [otp, setOtp] = useState('');
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpSendError, setOtpSendError] = useState('');
+  const [otpError, setOtpError] = useState('');
 
-  // Fetch brand data on mount
   useEffect(() => {
     const fetchBrandData = async () => {
       const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
-      // console.log("✅ UUID from localStorage:", uuid);
-
       if (!uuid) {
-        setError("No UUID found in localStorage.");
+        setError("No UUID found.");
         setLoading(false);
         return;
       }
-
       try {
         const response = await axios.get(
           `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${uuid}`
         );
-
-        // console.log("✅ Full API Response:", response.data);
-
         const brand = response.data.brandListing || response.data.data;
-
         if (response.data.success && brand) {
-          const flattenedData = flattenBrandData(brand);
-          // console.log("✅ Flattened form data:", flattenedData);
-          
+          const flatData = flattenBrandData(brand);
+          setFormData(flatData);
           setOriginalData(brand);
-          setFormData(flattenedData);
         } else {
           setError("No brand data found.");
         }
       } catch (err) {
-        // console.error("❌ Error fetching brand:", err);
-        setError(err.response?.data?.message || "Failed to load brand data.");
+        setError(err.response?.data?.message || "Error loading data.");
       } finally {
         setLoading(false);
       }
@@ -237,204 +182,281 @@ const BrandListingController = () => {
 
     fetchBrandData();
   }, []);
-
-  // Handle form field changes
-  const handleFormChange = (update) => {
-    setFormData(prev => ({
-      ...prev,
-      ...update
-    }));
+const handleFormChange = (field, value) => {
+  setFormData((prev) => ({
+    ...prev,
+    [field]: value,
+  }));
+};
+ const handleOtpChange = (e) => {
+    setOtp(e.target.value);
+    setOtpError('');
   };
 
-  // Save updated data to API
-  const handleSave = async () => {
-    const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
-    if (!uuid) {
-      setSaveStatus({ loading: false, success: false, error: "UUID not found." });
+  const handleCloseOtpDialog = () => {
+    setShowOtpDialog(false);
+    setOtp('');
+    setOtpError('');
+  };
+
+  
+const handleEditClick = () => {
+  if (!formData.email) {
+    setOtpSendError('No email found in profile');
+    return;
+  }
+
+  setOtpSending(true);
+  setOtpSendError('');
+  sendOtp(); 
+};
+
+ const sendOtp = async () => {
+  try {
+    const response = await axios.post(
+      'https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-email',
+      {
+        email: formData.email,
+        name: formData.fullName || 'User'
+      }
+    );
+
+    if (response.data.success) {
+      setShowOtpDialog(true); 
+    } else {
+      setOtpSendError(response.data.message || 'Failed to send OTP');
+    }
+  } catch (err) {
+    setOtpSendError(err.response?.data?.message || 'Error sending OTP');
+  } finally {
+    setOtpSending(false);
+  }
+};
+
+  const verifyOtp = async () => {
+    if (!otp || otp.length !== 6) {
+      setOtpError('Please enter a valid 6-digit OTP');
       return;
     }
+    
+    setOtpVerifying(true);
+    setOtpError('');
+    
+    try {
+      const response = await axios.post(
+        'https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/verify-otp-email',
+        {
+          email: formData.email,
+          otp: otp
+        }
+      );
+      
+      if (response.data.success) {
+        setIsEditing(true);
+        setShowOtpDialog(false);
+      } else {
+        setOtpError(response.data.message || 'Invalid OTP');
+      }
+    } catch (err) {
+      setOtpError(err.response?.data?.message || 'Verification failed');
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+  const handleSave = async () => {
+    const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
+    if (!uuid) return;
 
     setSaveStatus({ loading: true, success: false, error: '' });
 
     try {
-      // Convert flat form data back to API structure
       const apiData = unflattenFormData(formData);
-      // console.log("📤 Saving data to API:", apiData);
-
       const response = await axios.put(
         `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
         apiData
       );
-
-      // console.log("✅ Save response:", response.data);
-
       if (response.data.success) {
-        // Update original data with new response
         setOriginalData(response.data.brandListing || response.data.data);
         setSaveStatus({ loading: false, success: true, error: '' });
+        setIsEditing(false);
       } else {
-        throw new Error(response.data.message || "Failed to save changes");
+        throw new Error(response.data.message || "Failed to save.");
       }
     } catch (err) {
-      // console.error("❌ Save error:", err);
       setSaveStatus({
         loading: false,
         success: false,
-        error: err.response?.data?.message || "Failed to save changes"
+        error: err.response?.data?.message || "Save failed."
       });
     }
   };
+const handleAccordionChange = (panel) => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+  };
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" mt={4}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert severity="error" sx={{ mt: 2 }}>
-        {error}
-      </Alert>
-    );
-  }
-
+  if (loading) return <Box display="flex" justifyContent="center" mt={4}><CircularProgress /></Box>;
+  if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
+{otpSendError && (
+  <Alert severity="error" sx={{ mb: 2 }} onClose={() => setOtpSendError('')}>
+    {otpSendError}
+  </Alert>
+)}
   return (
-   <Box sx={{ p: 3 }}>
-    {/* Brand Details */}
-  <Card elevation={3} sx={{ p: 1, borderRadius: 3 }}>
-    <CardHeader
-      title="Brand Details"
-      sx={{ bgcolor: '#f5f5f5', borderBottom: '1px solid #ddd', mb: 2 }}
-      titleTypographyProps={{ variant: 'h6', fontWeight: 600 }}
+    
+   <Box>
+      {/* OTP Verification Dialog */}
+    <Dialog open={showOtpDialog} onClose={handleCloseOtpDialog}>
+  <DialogTitle>Verify OTP</DialogTitle>
+  <DialogContent>
+    <DialogContentText>
+      OTP has been sent to {formData.email}. Please enter it below:
+    </DialogContentText>
+    <TextField
+      autoFocus
+      margin="dense"
+      label="OTP"
+      type="text"
+      fullWidth
+      variant="outlined"
+      value={otp}
+      onChange={handleOtpChange}
+      error={!!otpError}
+      helperText={otpError}
     />
-
-    <CardContent>
-      <BrandDetailsControl 
-        data={formData} 
-        onChange={handleFormChange} 
-        errors={{}} 
-      />
-
-      <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          disabled={saveStatus.loading}
-          startIcon={saveStatus.loading ? <CircularProgress size={20} /> : null}
-          sx={{ bgcolor: '#ff9800', '&:hover': { bgcolor: '#f57c00' } }}
-        >
-          {saveStatus.loading ? 'Saving...' : 'Save Changes'}
-        </Button>
-      </Box>
-    </CardContent>
-  </Card>
-{/* Franchise Details */}
-   <Card elevation={3} sx={{ p: 2, borderRadius: 3 }}>
-    <CardHeader
-      title="Franchise Details"
-      sx={{ bgcolor: '#f5f5f5', borderBottom: '1px solid #ddd', mb: 2 }}
-      titleTypographyProps={{ variant: 'h6', fontWeight: 600 }}
-    />
-
-    <CardContent>
-      <FranchiseDetailsControl 
-        data={formData} 
-        onChange={handleFormChange} 
-        errors={{}} 
-      />
-
-      <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          disabled={saveStatus.loading}
-          startIcon={saveStatus.loading ? <CircularProgress size={20} /> : null}
-          sx={{ bgcolor: '#ff9800', '&:hover': { bgcolor: '#f57c00' } }}
-        >
-          {saveStatus.loading ? 'Saving...' : 'Save Changes'}
-        </Button>
-      </Box>
-    </CardContent>
-  </Card>
-{/* Expansion Location */}
- <Card elevation={3} sx={{ p: 2, borderRadius: 3 }}>
-    <CardHeader
-      title="Expansion Location"
-      sx={{ bgcolor: '#f5f5f5', borderBottom: '1px solid #ddd', mb: 2 }}
-      titleTypographyProps={{ variant: 'h6', fontWeight: 600 }}
-    />
-
-    <CardContent>
-      <ExpansionLocationControl
-        data={formData} 
-        onChange={handleFormChange} 
-        errors={{}} 
-      />
-
-      <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          disabled={saveStatus.loading}
-          startIcon={saveStatus.loading ? <CircularProgress size={20} /> : null}
-          sx={{ bgcolor: '#ff9800', '&:hover': { bgcolor: '#f57c00' } }}
-        >
-          {saveStatus.loading ? 'Saving...' : 'Save Changes'}
-        </Button>
-      </Box>
-    </CardContent>
-  </Card>
-  {/* Uploads */}
- <Card elevation={3} sx={{ p: 2, borderRadius: 3 }}>
-    <CardHeader
-      title="Uploads"
-      sx={{ bgcolor: '#f5f5f5', borderBottom: '1px solid #ddd', mb: 2 }}
-      titleTypographyProps={{ variant: 'h6', fontWeight: 600 }}
-    />
-
-    <CardContent>
-      <UploadsControl
-        data={formData} 
-        onChange={handleFormChange} 
-        errors={{}} 
-      />
-
-      <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          disabled={saveStatus.loading}
-          startIcon={saveStatus.loading ? <CircularProgress size={20} /> : null}
-          sx={{ bgcolor: '#ff9800', '&:hover': { bgcolor: '#f57c00' } }}
-        >
-          {saveStatus.loading ? 'Saving...' : 'Save Changes'}
-        </Button>
-      </Box>
-    </CardContent>
-  </Card>
-  
-  <Snackbar
-    open={saveStatus.success || !!saveStatus.error}
-    autoHideDuration={6000}
-    onClose={() => setSaveStatus(prev => ({ ...prev, success: false, error: '' }))}
-    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-  >
-    <Alert 
-      severity={saveStatus.success ? 'success' : 'error'} 
-      sx={{ width: '100%' }}
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleCloseOtpDialog} color="primary">
+      Cancel
+    </Button>
+    <Button 
+      onClick={sendOtp} 
+      disabled={otpSending}
+      color="primary"
     >
-      {saveStatus.success ? 'Changes saved successfully!' : saveStatus.error}
-    </Alert>
-  </Snackbar>
-</Box>
+      {otpSending ? <CircularProgress size={20} /> : "Resend OTP"}
+    </Button>
+    <Button 
+      onClick={verifyOtp} 
+      color="primary" 
+      variant="contained"
+      disabled={otpVerifying}
+    >
+      {otpVerifying ? <CircularProgress size={20} /> : "Verify"}
+    </Button>
+  </DialogActions>
+</Dialog>
+ {/* Edit / Save Buttons */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+        {!isEditing ? (
+         <Button variant="outlined" onClick={handleEditClick}>
+  Edit
+</Button>
+        ) : (
+          <>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSave}
+              disabled={saveStatus.loading}
+              startIcon={saveStatus.loading ? <CircularProgress size={20} /> : null}
+              sx={{ mr: 2 }}
+            >
+              {saveStatus.loading ? "Saving..." : "Save Changes"}
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => {
+                setFormData(flattenBrandData(originalData));
+                setIsEditing(false);
+              }}
+            >
+              Cancel
+            </Button>
+          </>
+        )}
+      </Box>
+    {/* Brand Details */}
+      <Accordion expanded={expanded === "panel1"} onChange={handleAccordionChange("panel1")}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography fontWeight="bold">Brand Details</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <CardContent>
+            <BrandDetailsControl
+              data={formData}
+              onChange={handleFormChange}
+              errors={{}}
+              isEditing={isEditing}
+            />
+          </CardContent>
+        </AccordionDetails>
+      </Accordion>
 
+      {/* Franchise Details */}
+      <Accordion expanded={expanded === "panel2"} onChange={handleAccordionChange("panel2")}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography fontWeight="bold">Franchise Details</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <CardContent>
+            <FranchiseDetailsControl
+              data={formData}
+              onChange={handleFormChange}
+              errors={{}}
+              isEditing={isEditing}
+            />
+          </CardContent>
+        </AccordionDetails>
+      </Accordion>
+
+      {/* Expansion Location */}
+      <Accordion expanded={expanded === "panel3"} onChange={handleAccordionChange("panel3")}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography fontWeight="bold">Expansion Location</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <CardContent>
+            <ExpansionLocationControl
+              data={formData}
+              onChange={handleFormChange}
+              errors={{}}
+              isEditing={isEditing}
+            />
+          </CardContent>
+        </AccordionDetails>
+      </Accordion>
+
+      {/* Uploads */}
+      <Accordion expanded={expanded === "panel4"} onChange={handleAccordionChange("panel4")}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography fontWeight="bold">Uploads</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <CardContent>
+            <UploadsControl
+              data={formData}
+              onChange={handleFormChange}
+              errors={{}}
+              isEditing={isEditing}
+            />
+          </CardContent>
+        </AccordionDetails>
+      </Accordion>
+     
+
+      {/* Snackbar Notification */}
+      <Snackbar
+        open={saveStatus.success || !!saveStatus.error}
+        autoHideDuration={6000}
+        onClose={() => setSaveStatus({ ...saveStatus, success: false, error: '' })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity={saveStatus.success ? 'success' : 'error'} sx={{ width: '100%' }}>
+          {saveStatus.success ? 'Changes saved successfully!' : saveStatus.error}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };
 
