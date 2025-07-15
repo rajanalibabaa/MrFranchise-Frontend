@@ -63,8 +63,8 @@ const BrandCard = React.memo(({
   const brandDetails = brand.brandDetails || {};
   const {
     brandName = "N/A",
-    tagLine = "",
-    companyName = "N/A",
+    // tagLine = "",
+    // companyName = "N/A",
   } = brandDetails;
 
   // Extract franchise details with fallbacks
@@ -72,11 +72,11 @@ const BrandCard = React.memo(({
     investmentRange = "Not specified",
     areaRequired = "Not specified",
     franchiseType = "N/A",
-    franchiseModel: modelType = "N/A",
-    franchiseFee = "N/A",
-    royaltyFee = "N/A",
-    roi = "N/A",
-    payBackPeriod = "N/A"
+    // franchiseModel: modelType = "N/A",
+    // franchiseFee = "N/A",
+    // royaltyFee = "N/A",
+    // roi = "N/A",
+    // payBackPeriod = "N/A"
   } = franchiseModel;
 
   useEffect(() => {
@@ -411,22 +411,34 @@ const TopBeverageFranchises = () => {
   //   initializeData();
   // }, [initializeData]);
 
- const handleLikeClick = useCallback(async (brandId, isLiked) => {
-    if (likeProcessing[brandId]) return;
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      setShowLogin(true);
-      return;
+ const handleLikeClick = useCallback((brandId, isLiked) => {
+  // Immediate UI update - no waiting for API response
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    setShowLogin(true);
+    return;
+  }
+
+  // Optimistically update the UI first
+  toggleLike.mutate(
+    { brandId, isLiked },
+    {
+      onMutate: () => {
+        // Local state to prevent double clicks
+        setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+      },
+      onError: (error) => {
+        console.error("Like operation failed:", error);
+        // Optionally show error feedback to user
+        toast.error("Failed to update like status");
+      },
+      onSettled: () => {
+        // Reset processing state when done
+        setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
+      }
     }
-    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
-    try {
-      await toggleLike.mutateAsync({ brandId, isLiked });
-    } catch (error) {
-      console.error("Like operation failed:", error);
-    } finally {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-    }
-  }, [likeProcessing, toggleLike]);
+  );
+}, [toggleLike]);
 
    const handleApply = useCallback((brand) => {
     postView(brand.uuid);

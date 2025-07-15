@@ -50,21 +50,32 @@ export const fetchBrandById = async (brandId) => {
 
 export const toggleBrandLike = async ({ brandId, isLiked }) => {
   const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
-  
+
   try {
+    if (!id || !brandId) {
+      throw new Error("Missing investorUUID or brandId");
+    }
+
     if (!isLiked) {
-      await apiClient.post(api.likeApi.post, { branduuid: brandId });
+      // Fix field name: use corre  ct case
+      await apiClient.post(api.likeApi.post, {
+        investorUUID: id,
+        brandUUID: brandId,
+      });
     } else {
-      await apiClient.delete(`/like/delete-favbrand/${id}`, { 
-        data: { brandID: brandId } 
+      // Fix field name: use correct case
+      await apiClient.delete(`/like/delete-favbrand/${id}`, {
+        data: { brandUUID: brandId },
       });
     }
+
     return { brandId, isLiked: !isLiked };
   } catch (error) {
-    console.error("Error toggling brand like:", error);
+    console.error("Error toggling brand like:", error?.response?.data || error.message);
     throw error;
   }
 };
+
 
 export const recordBrandView = async (brandID) => {
   const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");

@@ -34,7 +34,7 @@ function Footer() {
   const handleSubscribe = async () => {
     try {
       const res = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/subcribe/getsubscribe",
+        "https://mrfranchisebackend.mrfranchise.in/api/v1/subcribe/getsubscribe",
         { email },
         {
           headers: {
@@ -223,7 +223,7 @@ function Footer() {
             >
               {[
                 { text: "About Us", href: "/aboutus" },
-                { text: "Contact Support", href: "/contactus" },
+                // { text: "Contact Support", href: "/contactus" },
                 { text: "FAQs", href: "/faq" },
                 { text: "Help Center", href: "/help" },
                 { text: "Terms & Conditions", href: "/termsandconditions" },

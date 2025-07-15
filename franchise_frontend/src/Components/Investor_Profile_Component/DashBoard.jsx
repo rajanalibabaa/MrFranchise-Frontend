@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -41,115 +42,92 @@ const Dashboard = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [stats, setStats] = useState({
-    totalViews: 0,
-    totalLikes: 0,
-    totalApplications: 0
-  });
-
+  
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
-  useEffect(() => {
+  // Memoized stats calculation
+  const stats = useMemo(() => ({
+    totalViews: viewedBrands.length,
+    totalLikes: likedBrands.length,
+    totalApplications: appliedBrands.length
+  }), [viewedBrands, likedBrands, appliedBrands]);
+
+  // Data fetching optimized with useCallback
+  const fetchData = useCallback(async () => {
     if (!investorUUID || !AccessToken) {
-      setError("Missing authentication credentials");
+      setError("Go to home page ...");
       setLoading(false);
       return;
     }
 
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${AccessToken}`,
-          },
-          timeout: 10000
-        };
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AccessToken}`,
+        },
+        timeout: 10000
+      };
 
-        const endpoints = [
-          `${api.likeApi.get}/${investorUUID}`,
-          `${api.viewApi.get.getAllViewBrandByID}/${investorUUID}`,
-          `${api.instantApplyApi.get.getInstaApplyById}/${investorUUID}`,
-          `${api.user.get.investor}/${investorUUID}`
-        ];
+      // Parallel requests with Promise.all
+      const [likedRes, viewedRes, appliedRes, userRes] = await Promise.all([
+        axios.get(`${api.likeApi.get}/${investorUUID}`, config)
+          .then(res => res.data?.data || [])
+          .catch(() => []),
+        axios.get(`${api.viewApi.get.getAllViewBrandByID}/${investorUUID}`, config)
+          .then(res => res.data?.data || [])
+          .catch(() => []),
+        axios.get(`${api.instantApplyApi.get.getInstaApplyById}/${investorUUID}`, config)
+          .then(res => res.data?.data || [])
+          .catch(() => []),
+        axios.get(`${api.user.get.investor}/${investorUUID}`, config)
+          .then(res => res.data?.data || null)
+          .catch(() => null)
+      ]);
 
-        const [likedRes, viewedRes, appliedRes, userRes] = await Promise.all(
-          endpoints.map(endpoint => 
-            axios.get(endpoint, config)
-              .then(res => res.data?.data || null)
-              .catch(err => {
-                console.error(`Error fetching ${endpoint}:`, err);
-                return null;
-              })
-          )
-        );
+      setLikedBrands(likedRes);
+      setViewedBrands(viewedRes);
+      setAppliedBrands(appliedRes);
+      setUserData(userRes);
 
-        // Process responses with proper null checks
-        const likedData = Array.isArray(likedRes) ? likedRes : [];
-        const viewedData = Array.isArray(viewedRes) ? viewedRes : [];
-        const appliedData = Array.isArray(appliedRes) ? appliedRes : [];
-        const userData = userRes && typeof userRes === 'object' ? userRes : null;
+      // Initialize liked states
+      const initialLiked = {};
+      likedRes.forEach(item => {
+        if (item?.uuid) {
+          initialLiked[item.uuid] = true;
+        }
+      });
+      setLikedStates(initialLiked);
 
-        setLikedBrands(likedData);
-        setViewedBrands(viewedData);
-        setAppliedBrands(appliedData);
-        setUserData(userData);
+    } catch (error) {
+      console.error("Error in fetchData:", error);
+      setError("Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  }, [investorUUID, AccessToken]);
 
-        // Initialize liked states
-        const initialLiked = {};
-        likedData.forEach(item => {
-          if (item?.uuid) {
-            initialLiked[item.uuid] = true;
-          }
-        });
-        setLikedStates(initialLiked);
-
-        setStats({
-          totalViews: viewedData.length,
-          totalLikes: likedData.length,
-          totalApplications: appliedData.length
-        });
-
-      } catch (error) {
-        console.error("Error in fetchData:", error);
-        setError("Failed to load data");
-        setLikedBrands([]);
-        setViewedBrands([]);
-        setAppliedBrands([]);
-        setUserData(null);
-        setStats({
-          totalViews: 0,
-          totalLikes: 0,
-          totalApplications: 0
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  useEffect(() => {
     fetchData();
-  }, [investorUUID, AccessToken, dispatch]);
+  }, [fetchData]);
 
-  const toggleLike = async (brandId) => {
+  // Optimized toggleLike with useCallback
+  const toggleLike = useCallback(async (brandId) => {
     if (!investorUUID || !AccessToken || !brandId) return;
 
-    // Save the current state for potential rollback
-    const prevLikedStates = {...likedStates};
-    const prevLikedBrands = [...likedBrands];
-    const prevStats = {...stats};
+    // Optimistic update
+    setLikedStates(prev => {
+      const newState = {...prev};
+      delete newState[brandId];
+      return newState;
+    });
+    setLikedBrands(prev => prev.filter(item => item?.uuid !== brandId));
 
     try {
-      // Optimistic update
-      const newLikedStates = {...likedStates};
-      delete newLikedStates[brandId];
-      setLikedStates(newLikedStates);
-      setLikedBrands(prev => prev.filter(item => item?.uuid !== brandId));
-      setStats(prev => ({ ...prev, totalLikes: prev.totalLikes - 1 }));
-
       await axios.delete(
         `${api.likeApi.delete}/${investorUUID}`,
         {
@@ -167,19 +145,19 @@ const Dashboard = () => {
       console.error("Remove error:", error);
       setRemoveMsg("Failed to remove brand");
       // Revert optimistic update
-      setLikedStates(prevLikedStates);
-      setLikedBrands(prevLikedBrands);
-      setStats(prevStats);
+      setLikedStates(prev => ({...prev, [brandId]: true}));
+      fetchData(); // Refetch to ensure consistency
     }
-  };
+  }, [investorUUID, AccessToken, fetchData]);
 
-  const toggleViewClose = async (brandId) => {
+  // Optimized toggleViewClose with useCallback
+  const toggleViewClose = useCallback(async (brandId) => {
     if (!investorUUID || !AccessToken || !brandId) return;
 
-    try {
-      setViewedBrands(prev => prev.filter(item => item?.uuid !== brandId));
-      setStats(prev => ({ ...prev, totalViews: prev.totalViews - 1 }));
+    // Optimistic update
+    setViewedBrands(prev => prev.filter(item => item?.uuid !== brandId));
 
+    try {
       await axios.delete(
         `${api.viewApi.delete}/${investorUUID}`,
         {
@@ -192,16 +170,16 @@ const Dashboard = () => {
       );
     } catch (error) {
       console.error("Error removing viewed brand:", error);
+      fetchData(); // Refetch to ensure consistency
     }
-  };
+  }, [investorUUID, AccessToken, fetchData]);
 
-  const handleViewDetails = (brand) => {
-    console.log("View details for brand:", brand);
-    // Implement your dialog opening logic here
+  // Memoized handleViewDetails
+  const handleViewDetails = useCallback((brand) => {
     dispatch(openBrandDialog(brand));
-  };
+  }, [dispatch]);
 
-  const renderStatCard = (icon, title, value, color) => {
+  const renderStatCard = useCallback( (icon, title, value, color) => {
     const isSelected = 
       (icon.type === Business && tabValue === 0) ||
       (icon.type === Favorite && tabValue === 1) ||
@@ -337,9 +315,9 @@ const Dashboard = () => {
         </Box>
       </Card>
     );
-  };
+  } );
 
-const renderBrandCard = (item, type) => {
+const renderBrandCard = useCallback( (item, type) => {
   if (!item || typeof item !== 'object') return null;
   
   const brandId = item.uuid;
@@ -568,9 +546,9 @@ const renderBrandCard = (item, type) => {
 
     </Box>
   );
-};
+});
 
-  const renderTabContent = () => {
+  const renderTabContent = useMemo(() => {
     if (loading) {
       return (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
@@ -589,7 +567,7 @@ const renderBrandCard = (item, type) => {
           textAlign: 'center'
         }}>
           <Typography variant="h6" color="error" sx={{ mb: 2 }}>
-            Error loading data
+            Please Login ...
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {error}
@@ -636,10 +614,11 @@ const renderBrandCard = (item, type) => {
         </Typography>
       </Box>
     );
-  };
+  }, [loading, error, tabValue, viewedBrands, likedBrands, appliedBrands, renderBrandCard]);
+
 
   return (
-    <Box sx={{ 
+   <Box sx={{ 
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%)',
       p: { xs: 2, md: 4 }
@@ -671,12 +650,21 @@ const renderBrandCard = (item, type) => {
             <Typography variant="h5" fontWeight={600}>
               {userData?.firstName || 'Investor'} {userData?.lastName || ''}
             </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {userData?.inveterID || ''}
+            </Typography>
           </Box>
         </Box>
       </Box>
 
       {/* Stats Cards */}
-      <Box sx={{ display: 'flex', gap: 3, justifyContent: { xs: 'center', md: 'space-between' }, mt: 3 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 3, 
+        justifyContent: { xs: 'center', md: 'space-between' }, 
+        mt: 3,
+        flexWrap: 'wrap'
+      }}>
         {renderStatCard(<Business />, 'Viewed', stats.totalViews, '76, 175, 80')}
         {renderStatCard(<Favorite />, 'Liked', stats.totalLikes, '244, 67, 54')}
         {renderStatCard(<AssignmentTurnedIn />, 'Applied', stats.totalApplications, '33, 150, 243')}
@@ -709,7 +697,7 @@ const renderBrandCard = (item, type) => {
             </Box>
           )}
           
-          {renderTabContent()}
+          {renderTabContent}
         </Box>
       </Card>
     </Box>

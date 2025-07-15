@@ -1,6 +1,97 @@
-import React from 'react'
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+  CircularProgress,
+  IconButton,
+  useMediaQuery,
+  useTheme,
+  Chip,
+  Divider,
+  Avatar,
+  Stack,
+} from "@mui/material";
+import { motion } from "framer-motion";
+import Favorite from "@mui/icons-material/Favorite";
+import ArrowRight from "@mui/icons-material/ArrowRight";
+import MonetizationOn from "@mui/icons-material/MonetizationOn";
+import Business from "@mui/icons-material/Business";
+import AreaChart from "@mui/icons-material/AreaChart";
+import Close from "@mui/icons-material/Close";
+import { useNavigate } from "react-router-dom";
+import { postView } from "../../Utils/function/view";
+import { openBrandDialog } from "../../Hooks/Fetchbrands";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { api } from "../../Api/api";
+import img from "../../assets/images/brandLogo.jpg";
+import { useBrands } from "../../Hooks/Fetchbrands";
 
-const LikedBrands = () => {
+const CARD_DIMENSIONS = {
+  mobile: { width: 280, height: 520 },
+  tablet: { width: 320, height: 560 },
+  desktop: { width: 327, height: 500 },
+};
+
+const cardVariants = {
+  initial: { opacity: 0, y: 30 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+};
+
+const BrandCard = React.memo(({ 
+  brand, 
+  handleApply, 
+  handleLikeClick, 
+  likeProcessing, 
+  dimensions,
+  theme,
+  isMobile,
+  isTablet
+}) => {
+  const videoRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const observerRef = useRef();
+
+  const brandId = brand.uuid;
+  const franchiseModel = brand.franchiseDetails?.fico?.[0] || {};
+  const category = brand.franchiseDetails?.brandCategories || {};
+  const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
+  const brandLogo = brand?.uploads?.brandLogo?.[0] || img;
+  const brandName = brand.brandDetails?.brandName || "Unnamed Brand";
+  const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
+
+  const {
+    investmentRange = "Not specified",
+    areaRequired = "Not specified",
+    franchiseType = "N/A",
+  } = franchiseModel;
+
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observerRef.current.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (videoRef.current) {
+      observerRef.current.observe(videoRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
+
   return (
     <motion.div
       key={brandId}
@@ -41,7 +132,7 @@ const LikedBrands = () => {
             <CardMedia
               component="video"
               loading="lazy"
-              poster={brand?.uploads?.brandLogo?.[0] || ""}
+              poster={brandLogo}
               src={videoUrl}
               alt={brandName}
               sx={{
@@ -58,24 +149,53 @@ const LikedBrands = () => {
               preload="none"
             />
           ) : (
-            <Box
+            <CardMedia
+              component="img"
+              image={brandLogo}
+              alt={brandName}
               sx={{
                 position: "absolute",
                 top: 0,
                 left: 0,
                 width: "100%",
                 height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme.palette.grey[300],
+                objectFit: "cover",
+              }}
+            />
+          )}
+          
+          {/* Like button */}
+          <Box sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            zIndex: 2
+          }}>
+            <IconButton
+              onClick={() => handleLikeClick(brandId)}
+              disabled={likeProcessing[brandId]}
+              sx={{
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                p: 0.5,
+                '&:hover': { 
+                  backgroundColor: '#fff',
+                  transform: 'scale(1.1)'
+                },
+                transition: 'all 0.2s ease'
               }}
             >
-              <Typography variant="body2" color="text.secondary">
-                No media available
-              </Typography>
-            </Box>
-          )}
+              {likeProcessing[brandId] ? (
+                <CircularProgress size={24} />
+              ) : (
+                <Favorite 
+                  sx={{ 
+                    color: brand.isLiked ? '#f44336' : 'rgba(0, 0, 0, 0.54)',
+                    transition: 'all 0.3s ease'
+                  }} 
+                />
+              )}
+            </IconButton>
+          </Box>
         </Box>
 
         {/* Content Section */}
@@ -92,7 +212,7 @@ const LikedBrands = () => {
               }}
             >
               <Avatar
-                src={brand?.uploads?.brandLogo?.[0]}
+                src={brandLogo}
                 sx={{
                   width: 50,
                   height: 50,
@@ -101,71 +221,24 @@ const LikedBrands = () => {
                 }}
               />
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Tooltip title={brandName} placement="top">
-                  <Typography
-                    variant="h6"
-                    fontWeight={600}
-                    sx={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {brandName}
-                  </Typography>
-                </Tooltip>
-                {/* {tagLine && (
-                  <Tooltip title={tagLine} placement="top">
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {tagLine}
-                    </Typography>
-                  </Tooltip>
-                )} */}
+                <Typography
+                  variant="h6"
+                  fontWeight={600}
+                  sx={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {brandName}
+                </Typography>
               </Box>
-              <IconButton
-                onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
-                disabled={likeProcessing[brand.uuid]}
-                sx={{ ml: 1 }}
-              >
-                {likeProcessing[brand.uuid] ? (
-                  <CircularProgress size={24} />
-                ) : (
-                  <Favorite
-                    sx={{
-                      color: brand.isLiked
-                        ? "#f44336"
-                        : "rgba(0, 0, 0, 0.23)",
-                    }}
-                  />
-                )}
-              </IconButton>
             </Box>
 
             {/* Categories */}
             {(category.main || category.child) && (
               <Box sx={{ mb: 2 }}>
                 <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
-                  {/* {category.main && (
-                    <Chip
-                      label={category.main}
-                      size="small"
-                      sx={{
-                        bgcolor: "rgba(255, 152, 0, 0.1)",
-                        color: "orange.dark",
-                        fontWeight: 500,
-                        mb: 1,
-                      }}
-                    />
-                  )} */}
                   {category.child && (
                     <Chip
                       label={category.child}
@@ -194,7 +267,7 @@ const LikedBrands = () => {
                   }}
                 />
                 <Typography variant="body2">
-                  <strong>Model:</strong> {modelType} | <strong>Type:</strong> {franchiseType}
+                  <strong>Franchise Type:</strong> {franchiseType}
                 </Typography>
               </Box>
 
@@ -208,7 +281,7 @@ const LikedBrands = () => {
                   }}
                 />
                 <Typography variant="body2">
-                  <strong>Investment:</strong> {investmentRange} | <strong>Fee:</strong> {franchiseFee}
+                  <strong>Investment:</strong> {investmentRange}
                 </Typography>
               </Box>
 
@@ -222,7 +295,7 @@ const LikedBrands = () => {
                   }}
                 />
                 <Typography variant="body2">
-                  <strong>Area:</strong> {areaRequired} | <strong>ROI:</strong> {roi}% in {payBackPeriod}
+                  <strong>Area:</strong> {areaRequired}
                 </Typography>
               </Box>
             </Stack>
@@ -254,8 +327,255 @@ const LikedBrands = () => {
         </Box>
       </Card>
     </motion.div>
-  )
-}
+  );
+});
 
-export default LikedBrands
+const LikedBrands = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+  
+  const [likeProcessing, setLikeProcessing] = useState({});
+  const [removeMsg, setRemoveMsg] = useState("");
+  const [localLikedBrands, setLocalLikedBrands] = useState([]);
+  
+  const navigate = useNavigate();
+  const investorUUID = useSelector((state) => state.auth?.investorUUID);
+  const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
+  const { data: brands = [], isLoading, error, refetch } = useBrands();
+  
+  // Initialize local liked brands when brands data changes
+  useEffect(() => {
+    if (brands.length > 0) {
+      setLocalLikedBrands(brands.filter(brand => brand.isLiked === true));
+    }
+  }, [brands]);
+
+  const dimensions = useMemo(() => {
+    if (isMobile) return CARD_DIMENSIONS.mobile;
+    if (isTablet) return CARD_DIMENSIONS.tablet;
+    return CARD_DIMENSIONS.desktop;
+  }, [isMobile, isTablet]);
+
+  const handleLikeClick = useCallback(async (brandId) => {
+    if (likeProcessing[brandId] || !investorUUID || !AccessToken) return;
+    
+    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+
+    try {
+      await axios.delete(
+        `${api.likeApi.delete}/${investorUUID}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+          data: { brandID: brandId },
+        }
+      );
+      
+      // Update local state immediately for better UX
+      setLocalLikedBrands(prev => prev.filter(brand => brand.uuid !== brandId));
+      setRemoveMsg("Brand removed successfully");
+      
+      // Refetch data to ensure consistency with server
+      await refetch();
+      
+      setTimeout(() => setRemoveMsg(""), 3000);
+    } catch (error) {
+      console.error("Remove error:", error);
+      setRemoveMsg("Failed to remove brand");
+    } finally {
+      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
+    }
+  }, [likeProcessing, investorUUID, AccessToken, refetch]);
+
+  const handleApply = useCallback((brand) => {
+    postView(brand.uuid);
+    openBrandDialog(brand);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        py: 10,
+        textAlign: 'center'
+      }}>
+        <Typography variant="h6" color="error" sx={{ mb: 2 }}>
+          Error loading brands
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {error.message}
+        </Typography>
+      </Box>
+    );
+  }
+
+  // if (!investorUUID) {
+  //   return (
+  //     <Box sx={{ 
+  //       display: 'flex', 
+  //       flexDirection: 'column', 
+  //       alignItems: 'center', 
+  //       py: 10,
+  //       textAlign: 'center'
+  //     }}>
+  //       <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+  //         Please login to view your liked brands
+  //       </Typography>
+  //       <Button 
+  //         variant="contained" 
+  //         onClick={() => navigate('/login')}
+  //         sx={{ mt: 2 }}
+  //       >
+  //         Login
+  //       </Button>
+  //     </Box>
+  //   );
+  // }
+
+  const id = localStorage.getItem ("investorUUID") || localStorage.getItem ("brandUUID") ;
+  
+
+  return (
+    <>
+    {id && (
+      <Box sx={{ 
+      py: isMobile ? 1 : 2,
+      px: isMobile ? 0 : 2,
+      maxWidth: isMobile ? "100%" : 1400,
+      mx: "auto",
+      mb: isMobile ? 0 : 2,
+    }}>
+      {removeMsg && (
+        <Box sx={{ 
+          mb: 3,
+          p: 2,
+          borderRadius: 2,
+          backgroundColor: '#4caf50',
+          color: 'white',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <Typography>{removeMsg}</Typography>
+          <IconButton size="small" onClick={() => setRemoveMsg("")}>
+            <Close sx={{ color: 'white' }} />
+          </IconButton>
+        </Box>
+      )}
+      
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 1,
+        }}
+      >
+        <Typography
+          variant={isMobile ? "body1" : "h5"}
+          fontWeight="bold"
+          sx={{
+            color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+            mb: 1,
+            textAlign: "left",
+            position: "relative",
+            "&:after": {
+              content: '""',
+              display: "block",
+              width: "80px",
+              height: "4px",
+              background: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+              mt: 1,
+              borderRadius: 2,
+            },
+          }}
+        >
+          Liked Brands
+        </Typography>
+
+        <Button
+          variant="text"
+          size="small"
+          endIcon={<ArrowRight />}
+          sx={{
+            textTransform: "none",
+            fontSize: isMobile ? 14 : 16,
+            color: theme.palette.text.secondary,
+            "&:hover": {
+              color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+              backgroundColor: "transparent",
+            },
+          }}
+          onClick={() => navigate("/brandviewpage")}
+        >
+          View More
+        </Button>
+      </Box>
+
+      {localLikedBrands.length > 0 ? (
+        <Box
+          component={motion.div}
+          initial="initial"
+          animate="animate"
+          sx={{
+            display: "flex",
+            gap: isMobile ? 2 : 3,
+            borderRadius: 3,
+            p: 1,
+            overflowX: "auto",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
+        >
+          {localLikedBrands.map((brand) => (
+            <BrandCard 
+              key={brand.uuid}
+              brand={brand}
+              handleApply={handleApply}
+              handleLikeClick={handleLikeClick}
+              likeProcessing={likeProcessing}
+              dimensions={dimensions}
+              theme={theme}
+              isMobile={isMobile}
+              isTablet={isTablet}
+            />
+          ))}
+        </Box>
+      ) : (
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          py: 10,
+          textAlign: 'center'
+        }}>
+          <Favorite color="disabled" sx={{ fontSize: 60, mb: 2 }} />
+          <Typography variant="h6" color="text.secondary">
+            No liked brands yet
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Like brands to save them for later
+          </Typography>
+        </Box>
+      )}
+    </Box>
+    )}
+    </>
+  );
+};
+
+export default LikedBrands;

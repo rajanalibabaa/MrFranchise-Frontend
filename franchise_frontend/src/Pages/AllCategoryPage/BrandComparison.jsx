@@ -116,6 +116,7 @@ const BrandComparison = ({
       sx={{
         '& .MuiDialog-paper': {
           minHeight: '80vh',
+          height:'90vh',
           maxHeight: '90vh',
         }
       }}
@@ -136,7 +137,7 @@ const BrandComparison = ({
             </Typography>
           </Box>
         ) : (
-          <TableContainer component={Paper} sx={{ maxHeight: 'calc(90vh - 150px)' }}>
+          <TableContainer component={Paper} >
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow sx={{ bgcolor: "#f5f5f5" }}>
