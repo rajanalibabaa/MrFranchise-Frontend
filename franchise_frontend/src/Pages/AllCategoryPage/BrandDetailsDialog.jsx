@@ -87,7 +87,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
       if (!investorUUID || !AccessToken) return;
       try {
         const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -209,7 +209,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
       console.log("Submitting with id:", id, "payload:", payload);
 
       const response = await axios.post(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication/${id}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication/${id}`,
         payload,
         {
           headers: {

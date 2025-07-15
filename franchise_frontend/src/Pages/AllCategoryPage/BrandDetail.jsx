@@ -128,7 +128,7 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
     
     try {
       const response = await axios.get(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",

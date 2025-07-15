@@ -372,7 +372,7 @@ const HomeBannerSec = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setBannerIndex((prev) => (prev + 1) % bannerTexts.length);
-    }, 120000); // 2 minutes
+    }, 1000); // 2 minutes
     return () => clearInterval(interval);
   }, []);
 

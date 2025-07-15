@@ -55,7 +55,7 @@ const FeedBack = () => {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/feedback/createFeedback",
+        "https://mrfranchisebackend.mrfranchise.in/api/feedback/createFeedback",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -155,7 +155,7 @@ const ComplaintContent = () => {
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/complaint/createComplaint",
+        "https://mrfranchisebackend.mrfranchise.in/api/complaint/createComplaint",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
