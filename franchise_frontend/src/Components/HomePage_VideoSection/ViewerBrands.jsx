@@ -294,7 +294,7 @@ const BrandCard = React.memo(({
   );
 });
 
-export const ViewerBrands = ({ title = "Recently Viewed Brands", maxItems = 6 }) => {
+export const ViewedBrands = ({ title = "Recently Viewed Brands", maxItems = 6 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
@@ -304,7 +304,7 @@ export const ViewerBrands = ({ title = "Recently Viewed Brands", maxItems = 6 })
 
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
-  const [ViewerBrands, setViewerBrands] = useState([]);
+  const [viewedBrands, setViewedBrands] = useState([]);
   
   // Fetch all brands with like status
   const { data: brands = [], isLoading: brandsLoading, error } = useQuery({
@@ -350,8 +350,8 @@ export const ViewerBrands = ({ title = "Recently Viewed Brands", maxItems = 6 })
   });
 
   // Get recently viewed brand IDs from sessionStorage
-  const getViewerBrands= useCallback(() => {
-    const ViewerBrandsWithTime = [];
+  const getViewedBrands = useCallback(() => {
+    const viewedBrandsWithTime = [];
     
     // Get all viewed brand IDs with their timestamps
     for (let i = 0; i < sessionStorage.length; i++) {
@@ -360,7 +360,7 @@ export const ViewerBrands = ({ title = "Recently Viewed Brands", maxItems = 6 })
         const brandId = sessionStorage.getItem(key);
         const timestampKey = `viewing-time-${brandId}`;
         const timestamp = sessionStorage.getItem(timestampKey) || Date.now();
-        ViewerBrandsWithTime.push({
+        viewedBrandsWithTime.push({
           brandId,
           timestamp: parseInt(timestamp, 10)
         });
@@ -368,12 +368,12 @@ export const ViewerBrands = ({ title = "Recently Viewed Brands", maxItems = 6 })
     }
     
     // Sort by timestamp (newest first)
-    ViewerBrandsWithTime.sort((a, b) => b.timestamp - a.timestamp);
+    viewedBrandsWithTime.sort((a, b) => b.timestamp - a.timestamp);
     
     // Get unique brand IDs in order (newest first)
     const uniqueBrandIds = [];
     const seenIds = new Set();
-    for (const item of ViewerBrandsWithTime) {
+    for (const item of viewedBrandsWithTime) {
       if (!seenIds.has(item.brandId)) {
         seenIds.add(item.brandId);
         uniqueBrandIds.push(item.brandId);
@@ -389,31 +389,31 @@ export const ViewerBrands = ({ title = "Recently Viewed Brands", maxItems = 6 })
   }, [brands, maxItems]);
 
   // Update viewed brands state
-  const updateViewerBrands = useCallback(() => {
-    const newViewerBrands = getViewerBrands();
-    setViewerBrands(newViewerBrands);
-  }, [getViewerBrands]);
+  const updateViewedBrands = useCallback(() => {
+    const newViewedBrands = getViewedBrands();
+    setViewedBrands(newViewedBrands);
+  }, [getViewedBrands]);
 
   // Initialize and watch for storage changes
   useEffect(() => {
     // Initial load
-    updateViewerBrands();
+    updateViewedBrands();
     
     const handleStorageChange = (e) => {
       if (e.key?.startsWith("viewing-brand-id-") || e.key?.startsWith("viewing-time-")) {
-        updateViewerBrands();
+        updateViewedBrands();
       }
     };
     
     // Listen to both storage events and custom events
     window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('sessionStorageUpdate', updateViewerBrands);
+    window.addEventListener('sessionStorageUpdate', updateViewedBrands);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('sessionStorageUpdate', updateViewerBrands);
+      window.removeEventListener('sessionStorageUpdate', updateViewedBrands);
     };
-  }, [updateViewerBrands]);
+  }, [updateViewedBrands]);
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -498,7 +498,7 @@ export const ViewerBrands = ({ title = "Recently Viewed Brands", maxItems = 6 })
     );
   }
 
-  if (ViewerBrands.length === 0) {
+  if (viewedBrands.length === 0) {
     return null; // Don't render if no viewed brands
   }
 
@@ -543,7 +543,7 @@ export const ViewerBrands = ({ title = "Recently Viewed Brands", maxItems = 6 })
           {title}
         </Typography>
 
-        {ViewerBrands.length > 3 && (
+        {viewedBrands.length > 3 && (
           <Button
             variant="text"
             size="small"
@@ -580,7 +580,7 @@ export const ViewerBrands = ({ title = "Recently Viewed Brands", maxItems = 6 })
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {ViewerBrands.map((brand) => (
+        {viewedBrands.map((brand) => (
           <BrandCard 
             key={brand?.uuid}
             brand={brand}
@@ -598,4 +598,4 @@ export const ViewerBrands = ({ title = "Recently Viewed Brands", maxItems = 6 })
   );
 };
 
-export default React.memo(ViewerBrands);
+export default React.memo(ViewedBrands);
