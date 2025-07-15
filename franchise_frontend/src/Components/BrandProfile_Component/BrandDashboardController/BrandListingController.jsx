@@ -50,8 +50,7 @@ const flattenBrandData = (brandDoc) => {
     facebook: brandDoc.brandDetails?.facebook || "",
     instagram: brandDoc.brandDetails?.instagram || "",
     linkedin: brandDoc.brandDetails?.linkedin || "",
-    gstNumber: brandDoc.brandDetails?.gstNumber || "",
-    pancardNumber: brandDoc.brandDetails?.pancardNumber || "",
+   
     brandCategories: brandDoc.franchiseDetails?.brandCategories || [],
     aidFinancing: brandDoc.franchiseDetails?.aidFinancing || "",
     brandDescription: brandDoc.franchiseDetails?.brandDescription || "",
@@ -75,7 +74,9 @@ const flattenBrandData = (brandDoc) => {
     interiorOutlet: brandDoc.uploads?.interiorOutlet || [],
     pancard: brandDoc.uploads?.pancard || [],
     businessPlan: brandDoc.uploads?.businessPlan || [],
-    awards: brandDoc.uploads?.awards || [],
+awards: brandDoc.uploads?.awards || [],
+gstNumber: brandDoc.brandDetails?.gstNumber || "",
+pancardNumber: brandDoc.brandDetails?.pancardNumber || "",
   };
 };
 
@@ -135,6 +136,7 @@ const unflattenFormData = (formData) => ({
     pancard: formData.pancard,
     businessPlan: formData.businessPlan,
     awards: formData.awards
+
   }
 });
 
@@ -152,6 +154,7 @@ const BrandListingController = () => {
   const [otpVerifying, setOtpVerifying] = useState(false);
   const [otpSendError, setOtpSendError] = useState('');
   const [otpError, setOtpError] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
 
   useEffect(() => {
     const fetchBrandData = async () => {
@@ -167,6 +170,7 @@ const BrandListingController = () => {
         );
         const brand = response.data.brandListing || response.data.data;
         if (response.data.success && brand) {
+          console.log("data id:",response.data.data);
           const flatData = flattenBrandData(brand);
           setFormData(flatData);
           setOriginalData(brand);
@@ -200,38 +204,47 @@ const handleFormChange = (field, value) => {
   };
 
   
-const handleEditClick = () => {
-  if (!formData.email) {
-    setOtpSendError('No email found in profile');
-    return;
-  }
-
-  setOtpSending(true);
-  setOtpSendError('');
-  sendOtp(); 
-};
-
- const sendOtp = async () => {
-  try {
-    const response = await axios.post(
-      'https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-email',
-      {
-        email: formData.email,
-        name: formData.fullName || 'User'
-      }
-    );
-
-    if (response.data.success) {
-      setShowOtpDialog(true); 
-    } else {
-      setOtpSendError(response.data.message || 'Failed to send OTP');
+ const handleEditClick = async () => {
+    if (!formData.email) {
+      setOtpSendError('No email found in profile');
+      return;
     }
-  } catch (err) {
-    setOtpSendError(err.response?.data?.message || 'Error sending OTP');
-  } finally {
-    setOtpSending(false);
-  }
-};
+
+    setShowOtpDialog(true);
+    setOtpSending(true);
+    setOtpSendError('');
+    setOtpSent(false); 
+    
+    try {
+      await sendOtp();
+      setOtpSent(true); 
+    } catch (err) {
+      setOtpSendError(err.message || 'Error sending OTP');
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+
+const sendOtp = async () => {
+    try {
+      const response = await axios.post(
+        'http://localhost:5000/api/v1/otpverify/send-otp-email', // Use same origin
+        {
+          email: formData.email,
+          name: formData.fullName || 'User',
+          uuid: uuid // Add UUID to request
+        }
+      );
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to send OTP');
+      }
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Error sending OTP');
+    }
+  };
+
 
   const verifyOtp = async () => {
     if (!otp || otp.length !== 6) {
@@ -244,10 +257,11 @@ const handleEditClick = () => {
     
     try {
       const response = await axios.post(
-        'https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/verify-otp-email',
+        'http://localhost:5000/api/v1/otpverify/verify-otp-email', // Use same origin
         {
           email: formData.email,
-          otp: otp
+          otp: otp,
+          uuid: uuid // Add UUID to request
         }
       );
       
@@ -263,6 +277,7 @@ const handleEditClick = () => {
       setOtpVerifying(false);
     }
   };
+
   const handleSave = async () => {
     const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
     if (!uuid) return;
@@ -290,62 +305,136 @@ const handleEditClick = () => {
       });
     }
   };
+
+  const handleDirectUpdate = async () => {
+  const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
+  if (!uuid) {
+    setSaveStatus({ loading: false, success: false, error: "UUID not found" });
+    return;
+  }
+
+  setSaveStatus({ loading: true, success: false, error: '' });
+
+  try {
+    const apiData = unflattenFormData(formData); 
+    const response = await axios.put(
+      `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
+      apiData
+    );
+
+    if (response.data.success) {
+      setOriginalData(response.data.brandListing || response.data.data); 
+      setSaveStatus({ loading: false, success: true, error: '' });
+    } else {
+      throw new Error(response.data.message || 'Update failed');
+    }
+  } catch (err) {
+    setSaveStatus({
+      loading: false,
+      success: false,
+      error: err.response?.data?.message || "Update failed",
+    });
+  }
+};
+
 const handleAccordionChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
 
-  if (loading) return <Box display="flex" justifyContent="center" mt={4}><CircularProgress /></Box>;
-  if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
-{otpSendError && (
-  <Alert severity="error" sx={{ mb: 2 }} onClose={() => setOtpSendError('')}>
-    {otpSendError}
-  </Alert>
-)}
+ if (loading) return <Box display="flex" justifyContent="center" mt={4}><CircularProgress /></Box>;
+if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
+
+// // {otpSendError && (
+// //   <Alert severity="error" sx={{ mb: 2 }} onClose={() => setOtpSendError('')}>
+// //     {otpSendError}
+// //   </Alert>
+// )}
   return (
     
    <Box>
       {/* OTP Verification Dialog */}
-    <Dialog open={showOtpDialog} onClose={handleCloseOtpDialog}>
+      {otpSendError && (
+  <Alert severity="error" sx={{ mb: 2 }} onClose={() => setOtpSendError('')}>
+    {otpSendError}
+  </Alert>
+)}
+
+  <Dialog open={showOtpDialog} onClose={handleCloseOtpDialog}>
   <DialogTitle>Verify OTP</DialogTitle>
-  <DialogContent>
-    <DialogContentText>
-      OTP has been sent to {formData.email}. Please enter it below:
-    </DialogContentText>
-    <TextField
-      autoFocus
-      margin="dense"
-      label="OTP"
-      type="text"
-      fullWidth
+ <DialogContent>
+  {otpSending && (
+    <Box textAlign="center" mb={2}>
+      <CircularProgress size={24} />
+      <DialogContentText sx={{ mt: 1 }}>
+        Sending OTP to {formData.email}...
+      </DialogContentText>
+    </Box>
+  )}
+
+  {otpSent && (
+    <Alert severity="success" sx={{ mb: 2 }}>
+      OTP has been sent to {formData.email}
+    </Alert>
+  )}
+
+  <TextField
+    autoFocus
+    margin="dense"
+    label="OTP *"
+    type="text"
+    fullWidth
+    variant="outlined"
+    value={otp}
+    onChange={handleOtpChange}
+    error={!!otpError}
+    helperText={otpError || "Enter 6-digit verification code"}
+    placeholder="Enter 6-digit code"
+    disabled={otpSending || otpVerifying}
+    inputProps={{ maxLength: 6 }}
+  />
+</DialogContent>
+
+  <DialogActions sx={{ px: 3, pb: 2 }}>
+    <Button 
+      onClick={handleCloseOtpDialog} 
+      disabled={otpVerifying}
       variant="outlined"
-      value={otp}
-      onChange={handleOtpChange}
-      error={!!otpError}
-      helperText={otpError}
-    />
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={handleCloseOtpDialog} color="primary">
+    >
       Cancel
     </Button>
     <Button 
-      onClick={sendOtp} 
-      disabled={otpSending}
-      color="primary"
+      onClick={async () => {
+        setOtpSending(true);
+        setOtpSendError('');
+        setOtpSent(false); 
+        try {
+          await sendOtp();
+          setOtpSent(true);
+        } catch (err) {
+          setOtpSendError(err.message);
+        } finally {
+          setOtpSending(false);
+        }
+      }}
+      disabled={otpSending || otpVerifying}
+      variant="outlined"
+      sx={{ ml: 'auto' }}
     >
-      {otpSending ? <CircularProgress size={20} /> : "Resend OTP"}
+      {otpSending ? <CircularProgress size={20} /> : 'Resend OTP'}
     </Button>
-    <Button 
-      onClick={verifyOtp} 
-      color="primary" 
+    <Button
+      onClick={verifyOtp}
+      color="primary"
       variant="contained"
-      disabled={otpVerifying}
+      disabled={!otp || otp.length !== 6 || otpSending || otpVerifying}
     >
-      {otpVerifying ? <CircularProgress size={20} /> : "Verify"}
+      {otpVerifying ? <CircularProgress size={20} /> : 'Verify'}
     </Button>
   </DialogActions>
 </Dialog>
+
  {/* Edit / Save Buttons */}
+ 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
         {!isEditing ? (
          <Button variant="outlined" onClick={handleEditClick}>
@@ -444,7 +533,27 @@ const handleAccordionChange = (panel) => (event, isExpanded) => {
         </AccordionDetails>
       </Accordion>
      
+<Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+  <Button
+    variant="contained"
+    color="secondary"
+    onClick={handleDirectUpdate}
+    disabled={saveStatus.loading}
+  >
+    {saveStatus.loading ? <CircularProgress size={20} /> : "Update"}
+  </Button>
+</Box>
 
+<Snackbar
+  open={saveStatus.success || !!saveStatus.error}
+  autoHideDuration={6000}
+  onClose={() => setSaveStatus({ ...saveStatus, success: false, error: '' })}
+  anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+>
+  <Alert severity={saveStatus.success ? 'success' : 'error'} sx={{ width: '100%' }}>
+    {saveStatus.success ? 'Changes saved successfully!' : saveStatus.error}
+  </Alert>
+</Snackbar>
       {/* Snackbar Notification */}
       <Snackbar
         open={saveStatus.success || !!saveStatus.error}
@@ -457,6 +566,7 @@ const handleAccordionChange = (panel) => (event, isExpanded) => {
         </Alert>
       </Snackbar>
     </Box>
+    
   );
 };
 

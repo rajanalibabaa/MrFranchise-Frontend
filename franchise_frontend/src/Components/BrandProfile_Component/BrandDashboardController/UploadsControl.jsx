@@ -250,7 +250,7 @@ const UploadsControl = ({
                   display: "flex",
                   flexDirection: "column",
                   // width: "100%", // Make it full width of the grid item
-                  width: { md: "568px" }, // Limit width on medium screens
+                  width: { md: "400px" }, // Limit width on medium screens
                 }}
               >
                 <UploadButton
@@ -279,23 +279,48 @@ const UploadsControl = ({
                 </Typography>
 
                 {safeData.brandLogo?.length > 0 && (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Chip
-                      label={safeData.brandLogo[0].name}
-                      onDelete={() => handleRemoveFile("brandLogo", 0)}
-                      deleteIcon={<CheckCircle fontSize="small" />}
-                      variant="outlined"
-                      color="success"
-                    />
-                    <IconButton
-                      onClick={() => handleRemoveFile("brandLogo", 0)}
-                      color="error"
-                      size="small"
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
-                  </Box>
-                )}
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    {typeof safeData.brandLogo[0] === "string" ? (
+      <>
+        <img
+          src={safeData.brandLogo[0]}
+          alt="Brand Logo"
+          style={{
+            height: 60,
+            borderRadius: 4,
+            border: "1px solid #ccc",
+            padding: 4,
+          }}
+        />
+        <IconButton
+          onClick={() => handleRemoveFile("brandLogo", 0)}
+          color="error"
+          size="small"
+        >
+          <Delete fontSize="small" />
+        </IconButton>
+      </>
+    ) : (
+      <>
+        <Chip
+          label={safeData.brandLogo[0].name}
+          onDelete={() => handleRemoveFile("brandLogo", 0)}
+          deleteIcon={<CheckCircle fontSize="small" />}
+          variant="outlined"
+          color="success"
+        />
+        <IconButton
+          onClick={() => handleRemoveFile("brandLogo", 0)}
+          color="error"
+          size="small"
+        >
+          <Delete fontSize="small" />
+        </IconButton>
+      </>
+    )}
+  </Box>
+)}
+
               </Box>
             </FormControl>
           </Grid>
@@ -311,7 +336,7 @@ const UploadsControl = ({
                   display: "flex",
                   flexDirection: "column",
                   // width: "100%", // Make it full width of the grid item
-                  width: { md: "568px" }, // Limit width on medium screens
+                  width: { md: "400px" }, // Limit width on medium screens
                 }}
               >
                 <UploadButton
@@ -340,28 +365,48 @@ const UploadsControl = ({
                   {errors.franchisePromotionVideo ||
                     "Accepted formats: MP4, Quicktime Video (up to 25MB)"}
                 </Typography>
-                {safeData.franchisePromotionVideo?.length > 0 && (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Chip
-                      label={safeData.franchisePromotionVideo[0].name}
-                      onDelete={() =>
-                        handleRemoveFile("franchisePromotionVideo", 0)
-                      }
-                      deleteIcon={<CheckCircle fontSize="small" />}
-                      variant="outlined"
-                      color="success"
-                    />
-                    <IconButton
-                      onClick={() =>
-                        handleRemoveFile("franchisePromotionVideo", 0)
-                      }
-                      color="error"
-                      size="small"
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
-                  </Box>
-                )}
+               {safeData.franchisePromotionVideo?.length > 0 && (
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+    {typeof safeData.franchisePromotionVideo[0] === "string" ? (
+      <>
+        <video
+          src={safeData.franchisePromotionVideo[0]}
+          controls
+          style={{ width: 200, borderRadius: 4 }}
+        />
+        <IconButton
+          onClick={() => handleRemoveFile("franchisePromotionVideo", 0)}
+          color="error"
+          size="small"
+        >
+          <Delete fontSize="small" />
+        </IconButton>
+      </>
+    ) : (
+      <>
+        <Chip
+          label={safeData.franchisePromotionVideo[0].name}
+          onDelete={() =>
+            handleRemoveFile("franchisePromotionVideo", 0)
+          }
+          deleteIcon={<CheckCircle fontSize="small" />}
+          variant="outlined"
+          color="success"
+        />
+        <IconButton
+          onClick={() =>
+            handleRemoveFile("franchisePromotionVideo", 0)
+          }
+          color="error"
+          size="small"
+        >
+          <Delete fontSize="small" />
+        </IconButton>
+      </>
+    )}
+  </Box>
+)}
+
               </Box>
             </FormControl>
           </Grid>
@@ -408,10 +453,9 @@ const UploadsControl = ({
             <TextField
               label="PAN Number"
               fullWidth
-              value={pancardNumber || ""}
-              onChange={(e) =>
-                onPancardNumberChange(e.target.value.toUpperCase())
-              }
+  value={data.pancardNumber || ""}
+                onChange={(e) =>
+onChange("pancardNumber", e.target.value.toUpperCase())              }
               error={!!errors.pancardNumber}
               helperText={errors.pancardNumber}
               sx={{ mb: 2 }}
@@ -449,24 +493,55 @@ const UploadsControl = ({
             >
               {errors.pancard || "Accepted formats: PDF, JPEG, PNG (up to 1MB)"}
             </Typography>
-            {safeData.pancard?.length > 0 && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Chip
-                  label={safeData.pancard[0].name}
-                  onDelete={() => handleRemoveFile("pancard", 0)}
-                  deleteIcon={<CheckCircle fontSize="small" />}
-                  variant="outlined"
-                  color="success"
-                />
-                <IconButton
-                  onClick={() => handleRemoveFile("pancard", 0)}
-                  color="error"
-                  size="small"
-                >
-                  <Delete fontSize="small" />
-                </IconButton>
-              </Box>
-            )}
+           {safeData.pancard?.length > 0 && (
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+    {typeof safeData.pancard[0] === "string" ? (
+      <>
+        {safeData.pancard[0].endsWith(".pdf") ? (
+          <Chip
+            label="PAN Card (PDF)"
+            onDelete={() => handleRemoveFile("pancard", 0)}
+            deleteIcon={<CheckCircle fontSize="small" />}
+            variant="outlined"
+            color="success"
+          />
+        ) : (
+          <Box
+            component="img"
+            src={safeData.pancard[0]}
+            alt="PAN Preview"
+            sx={{ width: 100, borderRadius: 1, border: "1px solid #ccc" }}
+          />
+        )}
+        <IconButton
+          onClick={() => handleRemoveFile("pancard", 0)}
+          color="error"
+          size="small"
+        >
+          <Delete fontSize="small" />
+        </IconButton>
+      </>
+    ) : (
+      <>
+        <Chip
+          label={safeData.pancard[0].name}
+          onDelete={() => handleRemoveFile("pancard", 0)}
+          deleteIcon={<CheckCircle fontSize="small" />}
+          variant="outlined"
+          color="success"
+        />
+        <IconButton
+          onClick={() => handleRemoveFile("pancard", 0)}
+          color="error"
+          size="small"
+        >
+          <Delete fontSize="small" />
+        </IconButton>
+      </>
+    )}
+  </Box>
+)}
+
           </Grid>
 
           {/* GST Details */}
@@ -474,8 +549,8 @@ const UploadsControl = ({
             <TextField
               label="GST Number"
               fullWidth
-              value={gstNumber || ""}
-              onChange={(e) => onGstNumberChange(e.target.value)}
+              value={data.gstNumber || ""}
+              onChange={(e) => onChange("gstNumber", e.target.value.toUpperCase())}
               error={!!errors.gstNumber}
               helperText={errors.gstNumber}
               sx={{ mb: 2 }}
@@ -516,24 +591,55 @@ const UploadsControl = ({
                 "Accepted formats: PDF, JPEG, PNG (up to 1MB)"}
             </Typography>
 
-            {safeData.gstCertificate?.length > 0 && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Chip
-                  label={safeData.gstCertificate[0].name}
-                  onDelete={() => handleRemoveFile("gstCertificate", 0)}
-                  deleteIcon={<CheckCircle fontSize="small" />}
-                  variant="outlined"
-                  color="success"
-                />
-                <IconButton
-                  onClick={() => handleRemoveFile("gstCertificate", 0)}
-                  color="error"
-                  size="small"
-                >
-                  <Delete fontSize="small" />
-                </IconButton>
-              </Box>
-            )}
+           {safeData.gstCertificate?.length > 0 && (
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+    {typeof safeData.gstCertificate[0] === "string" ? (
+      <>
+        {safeData.gstCertificate[0].endsWith(".pdf") ? (
+          <Chip
+            label="GST Certificate (PDF)"
+            onDelete={() => handleRemoveFile("gstCertificate", 0)}
+            deleteIcon={<CheckCircle fontSize="small" />}
+            variant="outlined"
+            color="success"
+          />
+        ) : (
+          <Box
+            component="img"
+            src={safeData.gstCertificate[0]}
+            alt="GST Certificate"
+            sx={{ width: 100, borderRadius: 1, border: "1px solid #ccc" }}
+          />
+        )}
+        <IconButton
+          onClick={() => handleRemoveFile("gstCertificate", 0)}
+          color="error"
+          size="small"
+        >
+          <Delete fontSize="small" />
+        </IconButton>
+      </>
+    ) : (
+      <>
+        <Chip
+          label={safeData.gstCertificate[0].name}
+          onDelete={() => handleRemoveFile("gstCertificate", 0)}
+          deleteIcon={<CheckCircle fontSize="small" />}
+          variant="outlined"
+          color="success"
+        />
+        <IconButton
+          onClick={() => handleRemoveFile("gstCertificate", 0)}
+          color="error"
+          size="small"
+        >
+          <Delete fontSize="small" />
+        </IconButton>
+      </>
+    )}
+  </Box>
+)}
+
           </Grid>
         </Grid>
       </StyledPaper>
@@ -645,19 +751,22 @@ const UploadsControl = ({
                             height: "100px",
                           }}
                         >
-                          {createObjectURL(file) && (
-                            <FilePreviewImage
-                              src={createObjectURL(file)}
-                              alt={`Exterior ${index + 1}`}
-                              loading="lazy"
-                              sx={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                                borderRadius: 1,
-                              }}
-                            />
-                          )}
+                         <FilePreviewImage
+  src={
+    typeof file === "string"
+      ? file
+      : createObjectURL(file)
+  }
+  alt={`Exterior ${index + 1}`}
+  loading="lazy"
+  sx={{
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    borderRadius: 1,
+  }}
+/>
+
                           <IconButton
                             onClick={() =>
                               handleRemoveFile("exteriorOutlet", index)
@@ -776,19 +885,18 @@ const UploadsControl = ({
                             height: "100px",
                           }}
                         >
-                          {createObjectURL(file) && (
-                            <FilePreviewImage
-                              src={createObjectURL(file)}
-                              alt={`Interior ${index + 1}`}
-                              loading="lazy"
-                              sx={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                                borderRadius: 1,
-                              }}
-                            />
-                          )}
+                         <FilePreviewImage
+  src={typeof file === "string" ? file : createObjectURL(file)}
+  alt={`Interior ${index + 1}`}
+  loading="lazy"
+  sx={{
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    borderRadius: 1,
+  }}
+/>
+
                           <IconButton
                             onClick={() =>
                               handleRemoveFile("interiorOutlet", index)
@@ -875,8 +983,8 @@ const UploadsControl = ({
           {/* Award Description Field */}
           <Grid item >
             <TextField
-              label="Award Description"
-              value={currentAward.text}
+             label="Award Description"
+  value={currentAward.text}
               onChange={handleAwardTextChange}
               
               sx={{width:{xs:"100%",md:900}}}
