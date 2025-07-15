@@ -22,34 +22,37 @@ import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import Business from "@mui/icons-material/Business";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchBrands, fetchBrandById, recordBrandView, toggleBrandLike } from "../../Api/Brands";
-
+import { useSelector } from "react-redux";
+import axios from "axios";
+import { api } from "../../Api/api";
+import { openBrandDialog } from "../../Hooks/Fetchbrands";
+ 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
   desktop: { width: 327, height: 500 },
 };
-
+ 
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
-
-const BrandCard = React.memo(({ 
-  brand, 
-  handleApply, 
-  handleLikeClick, 
-  likeProcessing, 
+ 
+const BrandCard = React.memo(({
+  brand,
+  handleViewDetails,
+  // handleToggleLike,
+  // likeProcessing,
   dimensions,
   theme,
   isMobile,
-  isTablet
+  isTablet,
+  // likedStates
 }) => {
   const videoRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
   const observerRef = useRef();
-
+ 
   const brandId = brand?.uuid || '';
   const franchiseModel = brand?.franchiseDetails?.fico?.[0] || {};
   const category = brand?.franchiseDetails?.brandCategories || {};
@@ -57,7 +60,8 @@ const BrandCard = React.memo(({
   const brandLogo = brand?.uploads?.brandLogo?.[0] || '';
   const brandName = brand?.brandDetails?.brandName || 'Brand';
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
-
+  // const isLiked = likedStates[brandId] || false;
+ 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
@@ -68,18 +72,18 @@ const BrandCard = React.memo(({
       },
       { threshold: 0.1 }
     );
-
+ 
     if (videoRef.current) {
       observerRef.current.observe(videoRef.current);
     }
-
+ 
     return () => {
       if (observerRef.current) {
         observerRef.current.disconnect();
       }
     };
   }, []);
-
+ 
   return (
     <motion.div
       key={brandId}
@@ -128,7 +132,7 @@ const BrandCard = React.memo(({
                 left: 0,
                 width: "100%",
                 height: "100%",
-                objectFit: "cover",
+                objectFit: "contain",
               }}
               controls
               muted
@@ -154,7 +158,7 @@ const BrandCard = React.memo(({
             </Box>
           )}
         </Box>
-
+ 
         <Box sx={{ display: "flex", flexDirection: "column" }}>
           <CardContent sx={{ pb: 1 }}>
             <Box
@@ -187,8 +191,8 @@ const BrandCard = React.memo(({
               >
                 {brandName}
               </Typography>
-              <IconButton
-                onClick={() => handleLikeClick(brandId, brand?.isLiked)}
+              {/* <IconButton
+                onClick={() => handleToggleLike(brandId)}
                 disabled={likeProcessing[brandId]}
               >
                 {likeProcessing[brandId] ? (
@@ -196,15 +200,15 @@ const BrandCard = React.memo(({
                 ) : (
                   <Favorite
                     sx={{
-                      color: brand?.isLiked
+                      color: isLiked
                         ? "#f44336"
                         : "rgba(0, 0, 0, 0.23)",
                     }}
                   />
                 )}
-              </IconButton>
+              </IconButton> */}
             </Box>
-
+ 
             {category?.child && (
               <Box sx={{ mb: 2 }}>
                 <Stack direction="row" spacing={1}>
@@ -221,7 +225,7 @@ const BrandCard = React.memo(({
                 </Stack>
               </Box>
             )}
-
+ 
             <Stack spacing={1} sx={{ mb: 2 }}>
               <Box display="flex" alignItems="center">
                 <Business
@@ -236,7 +240,7 @@ const BrandCard = React.memo(({
                   Franchise Type : {franchiseModel?.franchiseType || "N/A"}
                 </Typography>
               </Box>
-
+ 
               <Box display="flex" alignItems="center">
                 <MonetizationOn
                   sx={{
@@ -264,15 +268,15 @@ const BrandCard = React.memo(({
                 </Typography>
               </Box>
             </Stack>
-
+ 
             <Divider sx={{ my: 1 }} />
           </CardContent>
-
+ 
           <Box sx={{ px: 2, pb: 2 }}>
             <Button
               variant="contained"
               fullWidth
-              onClick={() => handleApply(brand)}
+              onClick={() => handleViewDetails(brand)}
               sx={{
                 backgroundColor: "#f29724",
                 "&:hover": {
@@ -293,217 +297,164 @@ const BrandCard = React.memo(({
     </motion.div>
   );
 });
-
-export const ViewedBrands = ({ title = "Recently Viewed Brands", maxItems = 6 }) => {
+ 
+const ViewBrands = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
   const containerRef = useRef(null);
   const isPaused = useRef(false);
+ 
+  // const [likeProcessing, setLikeProcessing] = useState({});
+  // const [likedStates, setLikedStates] = useState({});
+  const [brands, setBrands] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+ 
+  const investorUUID = useSelector((state) => state.auth?.investorUUID);
+  const AccessToken = useSelector((state) => state.auth?.AccessToken);
   const navigate = useNavigate();
-
-  const [likeProcessing, setLikeProcessing] = useState({});
-  const [showLogin, setShowLogin] = useState(false);
-  const [viewedBrands, setViewedBrands] = useState([]);
-  
-  // Fetch all brands with like status
-  const { data: brands = [], isLoading: brandsLoading, error } = useQuery({
-    queryKey: ["brands"],
-    queryFn: fetchBrands,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
-  });
-
-  // Mutation for toggling likes
-  const queryClient = useQueryClient();
-  const toggleLikeMutation = useMutation({
-    mutationFn: toggleBrandLike,
-    onMutate: async ({ brandId, isLiked }) => {
-      await queryClient.cancelQueries(["brands"]);
-      
-      const previousBrands = queryClient.getQueryData(["brands"]);
-      
-      // Optimistically update the brand like status
-      queryClient.setQueryData(["brands"], (old) => 
-        old?.map(brand => 
-          brand.uuid === brandId ? { ...brand, isLiked: !isLiked } : brand
-        )
-      );
-      
-      return { previousBrands };
-    },
-    onError: (err, variables, context) => {
-      // Rollback on error
-      if (context?.previousBrands) {
-        queryClient.setQueryData(["brands"], context.previousBrands);
-      }
-    },
-    onSettled: () => {
-      // Invalidate to ensure we have fresh data
-      queryClient.invalidateQueries(["brands"]);
-    }
-  });
-
-  // Mutation for recording views
-  const recordViewMutation = useMutation({
-    mutationFn: recordBrandView,
-  });
-
-  // Get recently viewed brand IDs from sessionStorage
-  const getViewedBrands = useCallback(() => {
-    const viewedBrandsWithTime = [];
-    
-    // Get all viewed brand IDs with their timestamps
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (key.startsWith("viewing-brand-id-")) {
-        const brandId = sessionStorage.getItem(key);
-        const timestampKey = `viewing-time-${brandId}`;
-        const timestamp = sessionStorage.getItem(timestampKey) || Date.now();
-        viewedBrandsWithTime.push({
-          brandId,
-          timestamp: parseInt(timestamp, 10)
-        });
-      }
-    }
-    
-    // Sort by timestamp (newest first)
-    viewedBrandsWithTime.sort((a, b) => b.timestamp - a.timestamp);
-    
-    // Get unique brand IDs in order (newest first)
-    const uniqueBrandIds = [];
-    const seenIds = new Set();
-    for (const item of viewedBrandsWithTime) {
-      if (!seenIds.has(item.brandId)) {
-        seenIds.add(item.brandId);
-        uniqueBrandIds.push(item.brandId);
-      }
-    }
-    
-    // Map to full brand objects
-    const brandMap = new Map(brands.map(brand => [brand.uuid, brand]));
-    return uniqueBrandIds
-      .map(id => brandMap.get(id))
-      .filter(brand => brand !== undefined)
-      .slice(0, maxItems);
-  }, [brands, maxItems]);
-
-  // Update viewed brands state
-  const updateViewedBrands = useCallback(() => {
-    const newViewedBrands = getViewedBrands();
-    setViewedBrands(newViewedBrands);
-  }, [getViewedBrands]);
-
-  // Initialize and watch for storage changes
-  useEffect(() => {
-    // Initial load
-    updateViewedBrands();
-    
-    const handleStorageChange = (e) => {
-      if (e.key?.startsWith("viewing-brand-id-") || e.key?.startsWith("viewing-time-")) {
-        updateViewedBrands();
-      }
-    };
-    
-    // Listen to both storage events and custom events
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('sessionStorageUpdate', updateViewedBrands);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('sessionStorageUpdate', updateViewedBrands);
-    };
-  }, [updateViewedBrands]);
-
+ 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
     return CARD_DIMENSIONS.desktop;
   }, [isMobile, isTablet]);
-
-  const handleLikeClick = useCallback(async (brandId, isLiked) => {
-    if (likeProcessing[brandId]) return;
-    
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      setShowLogin(true);
+ 
+  const fetchData = useCallback(async () => {
+    if (!investorUUID || !AccessToken) {
+   
+      setLoading(false);
       return;
     }
-    
-    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+ 
     try {
-      await toggleLikeMutation.mutateAsync({ brandId, isLiked });
+      setLoading(true);
+      setError(null);
+     
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AccessToken}`,
+        },
+        timeout: 10000
+      };
+ 
+      // Only fetch viewed brands since like functionality is commented out
+      const viewedRes = await axios.get(
+        `${api.viewApi.get.getAllViewBrandByID}/${investorUUID}`,
+        config
+      ).then(res => res.data?.data || [])
+       .catch(() => []);
+ 
+      setBrands(viewedRes);
+ 
+      // Initialize liked states - commented out
+      // const initialLiked = {};
+      // likedRes.forEach(item => {
+      //   if (item?.uuid) {
+      //     initialLiked[item.uuid] = true;
+      //   }
+      // });
+      // setLikedStates(initialLiked);
+ 
     } catch (error) {
-      console.error("Like operation failed:", error);
+      console.error("Error in fetchData:", error);
+      setError("Failed to load brands data");
     } finally {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
+      setLoading(false);
     }
-  }, [likeProcessing, toggleLikeMutation]);
-
-  const handleApply = useCallback((brand) => {
-    const brandId = brand.uuid;
-    const now = Date.now();
-    
-    // Record view when clicking on brand
-    recordViewMutation.mutate(brandId);
-    
-    // Store both the brand ID and the view timestamp
-    const brandKey = `viewing-brand-id-${brandId}`;
-    const timeKey = `viewing-time-${brandId}`;
-    sessionStorage.setItem(brandKey, brandId);
-    sessionStorage.setItem(timeKey, now.toString());
-    
-    // Trigger update immediately
-    window.dispatchEvent(new Event('sessionStorageUpdate'));
-
-    // Open brand details
-    const brandSlug = brand.brandDetails?.brandName
-      ?.toLowerCase()
-      ?.replace(/\s+/g, '-')
-      ?.replace(/[^a-z0-9\-]/g, '')
-      ?.substring(0, 50);
-
-    const newWindow = window.open(`/brands/${brandId}?--${brandSlug}`, '_blank');
-
-    if (newWindow) {
-      const interval = setInterval(() => {
-        if (newWindow.closed) {
-          clearInterval(interval);
-        }
-      }, 1000);
-    }
-  }, [recordViewMutation]);
-
+  }, [investorUUID, AccessToken]);
+ 
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+ 
+  // const toggleLike = useCallback(async (brandId) => {
+  //   if (!investorUUID || !AccessToken || !brandId) return;
+ 
+  //   // Optimistic update
+  //   setLikedStates(prev => ({
+  //     ...prev,
+  //     [brandId]: !prev[brandId]
+  //   }));
+  //   setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+ 
+  //   try {
+  //     if (likedStates[brandId]) {
+  //       // Unlike the brand
+  //       await axios.delete(
+  //         `${api.likeApi.delete}/${investorUUID}`,
+  //         {
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${AccessToken}`,
+  //           },
+  //           data: { brandID: brandId },
+  //         }
+  //       );
+  //     } else {
+  //       // Like the brand
+  //       await axios.post(
+  //         `${api.likeApi.post}/${investorUUID}`,
+  //         { brandID: brandId },
+  //         {
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${AccessToken}`,
+  //           }
+  //         }
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Like error:", error);
+  //     // Revert optimistic update
+  //     setLikedStates(prev => ({
+  //       ...prev,
+  //       [brandId]: !prev[brandId]
+  //     }));
+  //   } finally {
+  //     setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
+  //   }
+  // }, [investorUUID, AccessToken, likedStates]);
+ 
+  const handleViewDetails = useCallback((brand) => {
+    openBrandDialog(brand);
+  }, []);
+ 
   const handleMouseEnter = useCallback(() => {
     isPaused.current = true;
   }, []);
-
+ 
   const handleMouseLeave = useCallback(() => {
     isPaused.current = false;
   }, []);
-
-  if (brandsLoading) {
+ 
+  if (loading) {
     return (
-      <Box sx={{ textAlign: "center", p: 4 }}>
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: 200
+      }}>
         <CircularProgress />
       </Box>
     );
   }
-
+ 
   if (error) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
-        <Typography color="error">{error.message || "Failed to load brands."}</Typography>
+        <Typography color="error">{error}</Typography>
       </Box>
     );
   }
-
-  if (viewedBrands.length === 0) {
-    return null; // Don't render if no viewed brands
-  }
-
+    const id = localStorage.getItem ("investorUUID") || localStorage.getItem ("brandUUID") ;
   return (
-    <Box
+    <>
+    {id && (
+        <Box
       sx={{
         py: isMobile ? 1 : 2,
         px: isMobile ? 0 : 2,
@@ -540,62 +491,72 @@ export const ViewedBrands = ({ title = "Recently Viewed Brands", maxItems = 6 })
             },
           }}
         >
-          {title}
+        Viewed Brands
         </Typography>
-
-        {viewedBrands.length > 3 && (
-          <Button
-            variant="text"
-            size="small"
-            endIcon={<ArrowRight />}
-            sx={{
-              textTransform: "none",
-              fontSize: isMobile ? 14 : 16,
-              color: theme.palette.text.secondary,
-              "&:hover": {
-                color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                backgroundColor: "transparent",
-              },
-            }}
-            onClick={() => navigate("/brandviewpage")}
-          >
-            View More
-          </Button>
-        )}
+ 
+        <Button
+          variant="text"
+          size="small"
+          endIcon={<ArrowRight />}
+          sx={{
+            textTransform: "none",
+            fontSize: isMobile ? 14 : 16,
+            color: theme.palette.text.secondary,
+            "&:hover": {
+              color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+              backgroundColor: "transparent",
+            },
+          }}
+          onClick={() => navigate("/brandviewpage")}
+        >
+          View More
+        </Button>
       </Box>
-
-      <Box
-        component={motion.div}
-        initial="initial"
-        animate="animate"
-        sx={{
-          display: "flex",
-          gap: isMobile ? 2 : 3,
-          borderRadius: 3,
-          p: 1,
-          overflowX: "auto",
-          scrollbarWidth: "none",
-          "&::-webkit-scrollbar": { display: "none" },
-        }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {viewedBrands.map((brand) => (
-          <BrandCard 
-            key={brand?.uuid}
-            brand={brand}
-            handleApply={handleApply}
-            handleLikeClick={handleLikeClick}
-            likeProcessing={likeProcessing}
-            dimensions={dimensions}
-            theme={theme}
-            isMobile={isMobile}
-            isTablet={isTablet}
-          />
-        ))}
-      </Box>
+ 
+      {brands.length > 0 ? (
+        <Box
+          component={motion.div}
+          initial="initial"
+          animate="animate"
+          sx={{
+            display: "flex",
+            gap: isMobile ? 2 : 3,
+            borderRadius: 3,
+            p: 1,
+            overflowX: "auto",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          {brands.map((brand) => (
+            <BrandCard
+              key={brand?.uuid}
+              brand={brand}
+              handleViewDetails={handleViewDetails}
+              // handleToggleLike={toggleLike}
+              // likeProcessing={likeProcessing}
+              dimensions={dimensions}
+              theme={theme}
+              isMobile={isMobile}
+              isTablet={isTablet}
+              // likedStates={likedStates}
+            />
+          ))}
+        </Box>
+      ) : (
+        <Box sx={{ textAlign: "center", p: 4 }}>
+          <Typography variant="body1" color="text.secondary">
+            You haven't viewed any brands yet.
+          </Typography>
+        </Box>
+      )}
     </Box>
+    )}
+    </>
   );
 };
-
-export default React.memo(ViewedBrands);
+ 
+export default React.memo(ViewBrands);
+ 

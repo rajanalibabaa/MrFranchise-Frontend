@@ -164,7 +164,9 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
               </Typography>
               
               {/* Category Chips */}
-              <Box sx={{ 
+              <Typography
+              variant="caption"
+               sx={{ 
                 display: 'flex',
                 justifyContent: 'center',
                 flexWrap: 'wrap',
@@ -173,14 +175,14 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
                 mb: 1
               }}>
                 {brand?.franchiseDetails?.brandCategories?.child}
-              </Box>
+              </Typography>
               
               {/* Investment */}
               <Stack direction="column" spacing={0.5} sx={{ mb: 0.5 }}>
                 <Typography variant="caption" fontWeight={500}>
                   Investment: {brand.franchiseDetails?.fico?.[0]?.investmentRange || 'N/A'}
                 </Typography>
-                <Typography variant="body2" fontWeight={500}>
+                <Typography variant="caption" fontWeight={500}>
                   Area: {brand.franchiseDetails?.fico?.[0]?.areaRequired || 'N/A'} sq.ft
                 </Typography>
               </Stack>

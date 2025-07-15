@@ -392,6 +392,24 @@ const TopBeverageFranchises = () => {
     return CARD_DIMENSIONS.desktop;
   }, [isMobile, isTablet]);
 
+  // const initializeData = useCallback(() => {
+  //   try {
+  //     if (!beverageBrands || beverageBrands.length === 0) {
+  //       setError("Loading...");
+  //     } else {
+  //       setError(null);
+  //     }
+  //   } catch (err) {
+  //     setError("Failed to process brands data.");
+  //     console.error("Error processing brands:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [beverageBrands]);
+
+  // useEffect(() => {
+  //   initializeData();
+  // }, [initializeData]);
 
  const handleLikeClick = useCallback((brandId, isLiked) => {
   // Immediate UI update - no waiting for API response

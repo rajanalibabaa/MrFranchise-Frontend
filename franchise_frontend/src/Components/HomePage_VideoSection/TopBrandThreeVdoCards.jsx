@@ -100,7 +100,7 @@ const toggleLike = useToggleLike();
   const startAutoSlide = useCallback(() => {
     clearTimeout(timeoutRef.current);
     if (!isHovered && brands.length > 0) {
-      timeoutRef.current = setTimeout(() => handleNext(), 8000);
+      timeoutRef.current = setTimeout(() => handleNext(), 5000);
     }
   }, [isHovered, handleNext, brands]);
 
@@ -197,6 +197,19 @@ const toggleLike = useToggleLike();
       <strong>{label}:</strong>&nbsp;{value || "Not Specified"}
     </Typography>
   );
+
+  const formatInvestment = (range) => {
+  if (!range) return "N/A";
+  return `${range.replace(/-/g, " - ").replace(/(\d+)L/g, "$1 L")}`;
+};
+
+const formatArea = (area) => {
+  if (!area) return "N/A";
+  return area
+    .replace(/-/g, " - ")
+    .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") // comma formatting
+    .replace(/\s*Sq\.?\s*Ft\.?/i, "Sq. Ft.");
+};
 
   return (
     <Box
@@ -386,7 +399,7 @@ const toggleLike = useToggleLike();
                     style={{
                       width: "100%",
                       height: "100%",
-                      objectFit: "cover",
+                      objectFit: "contain",
                     }}
                     autoPlay
                     muted
@@ -482,17 +495,19 @@ const toggleLike = useToggleLike();
                       direction="column"
                       spacing={1}
                      
-                    ><Fact
+                    >
+<Fact
   label="Investment"
-  value={mainBrand.franchiseDetails?.fico?.[0]?.investmentRange}
+  value={formatInvestment(mainBrand.franchiseDetails?.fico?.[0]?.investmentRange)}
 />
-                     <Fact
+
+<Fact
   label="Area Required"
-  value={mainBrand.franchiseDetails?.fico?.[0]?.areaRequired}
+  value={formatArea(mainBrand.franchiseDetails?.fico?.[0]?.areaRequired)}
 />
                       <Fact
-                        label="Model Type"
-                         value={mainBrand.franchiseDetails?.fico?.[0]?.franchiseModel}
+                        label="Franchise Type"
+                         value={mainBrand.franchiseDetails?.fico?.[0]?.franchiseType}
 
                       />
                     </Stack>
@@ -652,7 +667,7 @@ const toggleLike = useToggleLike();
                       style={{
                         width: "100%",
                         height: "100%",
-                        objectFit: "cover",
+                        objectFit: "contain",
                       }}
                       autoPlay
                       muted

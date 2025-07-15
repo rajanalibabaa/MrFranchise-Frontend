@@ -228,7 +228,7 @@ const bannerTexts = [
     subtitle: {
       text: "From Startup Food kiosks To International Food Chains We Have Everything You Need To Start Your Food Franchise Journey",
       highlight: {
-        text: "food franchise journey",
+        // text: "food franchise journey",
         color: "#ff9800",
         lineHeight: "1.5",
         fontWeight: "bold"
@@ -365,7 +365,7 @@ const HomeBannerSec = () => {
         sessionStorage.setItem("popup-shown", "true");
       }
       dispatch(hideLoading());
-    }, 5000);
+    }, 2000);
   }, [controls, dispatch]);
 
   // Rotate text every 2 minutes

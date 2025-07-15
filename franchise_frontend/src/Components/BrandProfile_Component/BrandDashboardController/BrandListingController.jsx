@@ -163,7 +163,7 @@ const BrandListingController = () => {
       }
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${uuid}`
+          `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandListingByUUID/${uuid}`
         );
         const brand = response.data.brandListing || response.data.data;
         if (response.data.success && brand) {
@@ -272,7 +272,7 @@ const handleEditClick = () => {
     try {
       const apiData = unflattenFormData(formData);
       const response = await axios.put(
-        `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
         apiData
       );
       if (response.data.success) {
