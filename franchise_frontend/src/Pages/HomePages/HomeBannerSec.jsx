@@ -365,7 +365,7 @@ const HomeBannerSec = () => {
         sessionStorage.setItem("popup-shown", "true");
       }
       dispatch(hideLoading());
-    }, 1000);
+    }, 5000);
   }, [controls, dispatch]);
 
   // Rotate text every 2 minutes
@@ -389,7 +389,7 @@ const HomeBannerSec = () => {
           px: 2,
           position: "relative",
           overflow: "hidden",
-          backgroundColor: sectionConfig.background || '#fffaf7',
+          // backgroundColor: sectionConfig.background || '#fffaf7',
           ...(sectionConfig.backgroundImage && {
             backgroundImage: `linear-gradient(${sectionConfig.background}), url(${sectionConfig.backgroundImage})`,
             backgroundSize: "cover",

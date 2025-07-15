@@ -17,7 +17,6 @@ import BrandDashBoard from "./Components/BrandProfile_Component/BrandDashBoard";
 import Sidebar from "./Pages/BrandProfile_Pages/Sidebar_page";
 import BrandFeedBack from "./Components/BrandProfile_Component/BrandFeedback";
 import BrandComplaint from "./Components/BrandProfile_Component/BrandComplaint";
-import BrandAddVedios from "./Components/BrandProfile_Component/BrandAddVedios";
 
 import BrandListingController from './Components/BrandProfile_Component/BrandDashboardController/BrandListingController.jsx';
 import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccount.jsx';
@@ -124,7 +123,6 @@ function App() {
             <Route path='franchisedetailcontrol' element={<FranchiseDetailsControl/>}/>
             <Route path='expansionlocationcontrol' element={<ExpansionLocationControl/>}/>
             <Route path='uploadcontrol' element={<UploadsControl/>}/>
-            <Route path="brandaddvedios" element={<BrandAddVedios />} />
             <Route path="brandfeedback" element={<BrandFeedBack />} />
             <Route path="brandcomplaint" element={<BrandComplaint />} />
             <Route path="brandsearchus" element={<BrandSearchus />} />

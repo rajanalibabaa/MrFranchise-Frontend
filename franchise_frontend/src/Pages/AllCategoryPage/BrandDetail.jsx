@@ -44,14 +44,10 @@ import axios from "axios";
 import OverviewTab from "./OverviewTab.jsx";
 import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
-// import { useToggleLike } from '../../Hooks/Fetchbrands';
-import Favorite from "@mui/icons-material/Favorite";
-import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import LoginPage from "../../Pages/LoginPage/LoginPage.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
-// import { postView } from "../../Utils/function/view";
-import { useToggleLike } from '../../Hooks/Fetchbrands.jsx';
-import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
+import  ViewedBrands  from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
+import ShareDialogActions from "./ShareDialogActions.jsx";
 
 
 const BrandDetails = ({ brandData }) => {
@@ -69,7 +65,7 @@ const BrandDetails = ({ brandData }) => {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openContactModal, setOpenContactModal] = useState(false);
-
+const [anchorEl, setAnchorEl] = useState(null);
   const [userData, setUserData] = useState(null);
   const [locationData, setLocationData] = useState({
     states: [],
@@ -448,6 +444,10 @@ const maskEmail = (email) => {
   return `${visiblePart}${maskedPart}@${domain}`;
 };
 
+
+const handleOpenShareCLick = (event) => {
+  setAnchorEl(event.currentTarget);
+};
   return (
     <>
       <Navbar />
@@ -464,7 +464,7 @@ const maskEmail = (email) => {
         <Box
           sx={{
             position: "fixed",
-            bottom: isMobile ? 35 : 310,
+            bottom: isMobile ? 35 : 330,
             right: isMobile ? 0 : 20,
             left: isMobile ? 0 : "auto",
             display: "flex",
@@ -927,7 +927,10 @@ const maskEmail = (email) => {
                       </Box>
                     </Box>
 
-                    <IconButton
+                   
+                    <Box>
+                      <Box display="flex" justifyContent={"space-around"} gap={5}>
+                         <IconButton
                       onClick={() =>
                         handleLikeClick(
                           selectedBrand.uuid,
@@ -949,12 +952,12 @@ const maskEmail = (email) => {
                         />
                       )}
                     </IconButton>
-                    <IconButton
-                    // onClick={handleShareButton}
-                    >
-                      <ShareOutlinedIcon />
+                    <IconButton  onClick={handleOpenShareCLick}                  >
+                      <ShareOutlined/>
+
                     </IconButton>
-                    <Box>
+                      </Box>
+                      <Divider sx={{ my: 1 }} />
                       <Button
                         variant="contained"
                         size={isMobile ? "small" : "medium"}
@@ -1585,21 +1588,16 @@ const maskEmail = (email) => {
           </Box>
         )}
       </Box>
-<<<<<<< HEAD
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}
 
-=======
+                            <ShareDialogActions anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
+
 <ViewedBrands />
->>>>>>> 728511953fb65cd6ceba5f28825c2433ed4a33d2
       <Footer />
     </>
   );
 };
 
-<<<<<<< HEAD
 export default React.memo(BrandDetails);
-=======
-export default React.memo(BrandDetails);
->>>>>>> 728511953fb65cd6ceba5f28825c2433ed4a33d2

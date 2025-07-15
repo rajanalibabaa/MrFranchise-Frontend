@@ -205,7 +205,7 @@ const BrandCard = memo(
             </Typography>
             <IconButton
               onClick={() =>
-                handleLikeClick(brandDetails.uuid, brandDetails.isLiked)
+                handleLikeClick(uuid, isLiked)
               }
               disabled={likeProcessing[brandDetails.uuid]}
               sx={{ ml: 1 }}
