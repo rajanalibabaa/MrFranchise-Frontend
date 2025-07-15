@@ -42,28 +42,34 @@ const FilterDropdowns = () => {
     error 
   } = useBrands();
 
-  // Extract unique subcategories and states from brands data
+  // Memoize the extraction of unique subcategories and states
   const { subCategories, states } = useMemo(() => {
     if (!brands || brands.length === 0) return { subCategories: [], states: [] };
 
-    const subCategoriesSet = new Set();
+    const subCategoriesMap = new Map();
     const statesSet = new Set();
 
-    brands.forEach(brand => {
+    // Using for loop instead of forEach for better performance with large datasets
+    for (let i = 0; i < brands.length; i++) {
+      const brand = brands[i];
+      
       // Process subcategories
       const subCategory = brand.franchiseDetails?.brandCategories?.sub;
-      if (subCategory) subCategoriesSet.add(subCategory);
+      if (subCategory && !subCategoriesMap.has(subCategory)) {
+        subCategoriesMap.set(subCategory, { id: subCategory, name: subCategory });
+      }
       
       // Process states
       const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
-      locations.forEach(loc => {
+      for (let j = 0; j < locations.length; j++) {
+        const loc = locations[j];
         if (loc.state) statesSet.add(loc.state);
-      });
-    });
+      }
+    }
 
     return {
-      subCategories: Array.from(subCategoriesSet).map(sub => ({ id: sub, name: sub })),
-      states: Array.from(statesSet)
+      subCategories: Array.from(subCategoriesMap.values()),
+      states: Array.from(statesSet).sort() // Sort states alphabetically
     };
   }, [brands]);
 
@@ -72,16 +78,11 @@ const FilterDropdowns = () => {
   }, []);
 
   const handleFindBrands = useCallback(() => {
-    // Only navigate when the button is clicked
+    // Only pass filter criteria to the next page, not the entire brands data
     navigate("/brandviewpage", {
-      state: { 
-        filters,
-        // Don't pre-filter here - let the destination page handle filtering
-        // to avoid processing large datasets during navigation
-        brands 
-      },
+      state: { filters }
     });
-  }, [navigate, filters, brands]);
+  }, [navigate, filters]);
 
   // Show loading or error states
   if (isLoading) {
@@ -121,6 +122,13 @@ const FilterDropdowns = () => {
             value={filters.selectedSubCategory}
             onChange={(e) => handleFilterChange("selectedSubCategory", e.target.value)}
             label="Category"
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 300 // Limit dropdown height for performance
+                }
+              }
+            }}
           >
             <MenuItem value="">All Categories</MenuItem>
             {subCategories.map((category) => (
@@ -138,6 +146,13 @@ const FilterDropdowns = () => {
             value={filters.selectedState}
             onChange={(e) => handleFilterChange("selectedState", e.target.value)}
             label="Location"
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 300 // Limit dropdown height for performance
+                }
+              }
+            }}
           >
             <MenuItem value="">All Locations</MenuItem>
             {states.map((state) => (
@@ -177,8 +192,9 @@ const FilterDropdowns = () => {
               backgroundColor: "#558b2f",
             },
           }}
+          disabled={isLoading} // Disable button while loading
         >
-          Find Brands
+          {isLoading ? <CircularProgress size={24} /> : "Find Brands"}
         </Button>
       </Box>
     </Box>

@@ -74,34 +74,59 @@
     });
   };
 
-  export const useToggleLike = () => {
-    const queryClient = useQueryClient();
-    
-    return useMutation({
-      mutationFn: toggleBrandLike,
-      onMutate: async ({ brandId, isLiked }) => {
-        await queryClient.cancelQueries(["brands"]);
-        
-        const previousBrands = queryClient.getQueryData(["brands"]);
-        
-        queryClient.setQueryData(["brands"], (old) => 
-          old?.map(brand => 
-            brand.uuid === brandId ? { ...brand, isLiked: !isLiked } : brand
-          )
-        );
-        
-        return { previousBrands };
-      },
-      onError: (err, variables, context) => {
-        if (context?.previousBrands) {
-          queryClient.setQueryData(["brands"], context.previousBrands);
-        }
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries(["brands"]);
+ export const useToggleLike = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: toggleBrandLike,
+    onMutate: async ({ brandId, isLiked }) => {
+      // Cancel any outgoing refetches to avoid overwriting our optimistic update
+      await queryClient.cancelQueries(["brands"]);
+      
+      // Snapshot the previous value
+      const previousBrands = queryClient.getQueryData(["brands"]);
+      
+      // Optimistically update to the new value
+      queryClient.setQueryData(["brands"], (old) => 
+        old?.map(brand => 
+          brand.uuid === brandId ? { 
+            ...brand, 
+            isLiked: !isLiked,
+            // Add optimistic flag to track this update
+            _optimistic: true 
+          } : brand
+        )
+      );
+      
+      return { previousBrands, brandId, isLiked };
+    },
+    onError: (err, variables, context) => {
+      // Roll back to previous value on error
+      if (context?.previousBrands) {
+        queryClient.setQueryData(["brands"], context.previousBrands);
       }
-    });
-  };
+      
+      // Optionally show error feedback to user
+      toast.error("Failed to update like status");
+    },
+    onSuccess: (data, variables, context) => {
+      // Update with server data on success
+      queryClient.setQueryData(["brands"], (old) => 
+        old?.map(brand => 
+          brand.uuid === context?.brandId ? { 
+            ...brand, 
+            isLiked: !context.isLiked,
+            _optimistic: undefined // Remove optimistic flag
+          } : brand
+        )
+      );
+    },
+    // Use onSettled carefully - it might cause unnecessary refetches
+    // onSettled: () => {
+    //   queryClient.invalidateQueries(["brands"]);
+    // }
+  });
+};
 
   export const useRecordView = () => {
     return useMutation({

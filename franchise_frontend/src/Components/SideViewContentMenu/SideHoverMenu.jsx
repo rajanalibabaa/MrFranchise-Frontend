@@ -25,48 +25,50 @@ import {
 import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
-// import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useBrands } from "../../Hooks/Fetchbrands";
+import { useBrands,openBrandDialog,useBrand } from "../../Hooks/Fetchbrands";
 
 
 
 
 // Memoized brand card component to prevent unnecessary re-renders
+
 const BrandCard = React.memo(({ brand, handleBrandClick, isMobile }) => (
-  <motion.div whileHover={{ y: -5 }} transition={{ duration: 0.2 }}>
+  <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
     <Paper
       onClick={() => handleBrandClick(brand)}
-      elevation={1}
+      elevation={2}
       sx={{
-        width: 100,
-        height: 150,
+        width: isMobile ? 100 : 100,
+        height: isMobile ? 130 : 120,
         display: 'flex',
-        justifyContent: 'flex-start',
         flexDirection: 'column',
         alignItems: 'center',
-        p: isMobile ? 1 : 2,
-        borderRadius: 3,
+        justifyContent: 'center',
+        p: 1,
+        borderRadius: 2,
         cursor: 'pointer',
         transition: 'all 0.3s ease',
-        border: '1px solid transparent',
+        border: '1px solid #eee',
+        backgroundColor: '#fff',
         '&:hover': {
-          transform: 'translateY(-5px)',
-          boxShadow: (theme) => theme.shadows[4],
-          borderColor: (theme) => theme.palette.primary.light,
+          transform: 'translateY(-4px)',
+          boxShadow: '0 6px 20px rgba(0,0,0,0.08)',
+          borderColor: '#ff9800',
         },
       }}
     >
       <Box
         sx={{
-          width: isMobile ? 50 : 90,
-          height: isMobile ? 50 : 90,
+          width: isMobile ? 48 : 60,
+          height: isMobile ? 48 : 60,
+          borderRadius: '50%',
+          overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: '50%',
+          mb: 1,
         }}
       >
         <Avatar
@@ -75,31 +77,34 @@ const BrandCard = React.memo(({ brand, handleBrandClick, isMobile }) => (
           sx={{
             width: '100%',
             height: '100%',
-            fontSize: isMobile ? 32 : 36,
+            fontSize: isMobile ? 22 : 26,
+            bgcolor: '#ffe0b2',
+            color: '#ff6d00'
           }}
         >
           {brand.brandDetails?.brandName?.[0] || "B"}
         </Avatar>
       </Box>
       <Typography
-        fontWeight="bold"
+        fontWeight={600}
         textAlign="center"
         noWrap
-        sx={{ 
-          width: '100%', 
-          fontSize: isMobile ? '0.85rem' : '1rem',
+        sx={{
+          fontSize: isMobile ? '0.75rem' : '0.875rem',
+          maxWidth: '100%',
+          px: 1,
           color: 'text.primary',
           whiteSpace: 'normal',
           wordBreak: 'break-word',
-          lineHeight: 1.2,
-          mb: 0.5,
+          lineHeight: 1.3,
         }}
       >
-        {brand.brandDetails?.brandName}
+        {brand.brandDetails?.brandName || 'Unknown'}
       </Typography>
     </Paper>
   </motion.div>
 ));
+
 
 const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
   const [activeCategory, setActiveCategory] = useState(null);
@@ -112,83 +117,12 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
-// Use the hook to fetch all brands (no redux)
-  // Use the brands hook with proper error handling
-// Defensive: always provide a default value
+
 
 const { data, isLoading, error, refetch } = useBrands();
 const brandsData = data || [];
-console.log("side Brands:", brandsData);
 
-  //  // Optimized brand data fetching with caching
-  // const fetchBrandDetails = useCallback(async () => {
-  //   // Return cached data if it's fresh
-  //   if (!brandDataCache.isStale() && brandDataCache.data) {
-  //     setInitialLoadComplete(true);
-  //     return brandDataCache.data;
-  //   }
-
-  //   setLoading(true);
-  //   setError(null);
-  //   try {
-  //     const response = await axios.get(
-  //       "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
-  //       {
-  //         headers: { "Content-Type": "application/json" },
-  //         params: {
-  //           fields: "brandDetails.brandName,uploads.brandLogo,franchiseDetails.brandCategories",
-  //           limit: 1000 // Adjust based on your typical dataset size
-  //         }
-  //       }
-  //     );
-      
-  //     // Update cache
-  //     brandDataCache.data = response.data.data;
-  //     brandDataCache.timestamp = Date.now();
-      
-  //     setInitialLoadComplete(true);
-  //     return response.data.data;
-  //   } catch (error) {
-  //     setError("Failed to load brands. Please try again later.");
-  //     console.error("Error fetching brands:", error);
-  //     throw error;
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, []);
-
-  // // Prefetch brand data when component mounts
-  // useEffect(() => {
-  //   let isMounted = true;
-    
-  //   const prefetchData = async () => {
-  //     try {
-  //       const data = await fetchBrandDetails();
-  //       if (isMounted) {
-  //         // Pre-build the childToBrandsMap for faster filtering
-  //         buildChildToBrandsMap(data);
-  //       }
-  //     } catch (error) {
-  //       console.error("Prefetch error:", error);
-  //     }
-  //   };
-
-  //   // Use requestIdleCallback or setTimeout to avoid blocking main thread
-  //   const prefetchId = window.requestIdleCallback 
-  //     ? window.requestIdleCallback(() => prefetchData())
-  //     : setTimeout(prefetchData, 500);
-
-  //   return () => {
-  //     isMounted = false;
-  //     window.requestIdleCallback 
-  //       ? window.cancelIdleCallback(prefetchId)
-  //       : clearTimeout(prefetchId);
-  //   };
-  // }, [fetchBrandDetails]);
-
-  // Optimized child-to-brands mapping
-  // const [childToBrandsMap, setChildToBrandsMap] = useState({});
-
+  
  // Build child-to-brands map when data loads
   const childToBrandsMap = useMemo(() => {
     const map = {};
@@ -229,6 +163,7 @@ console.log("side Brands:", brandsData);
 
   const handleBrandClick = useCallback((brand) => {
     // dispatch(openBrandDialog(brand));
+    openBrandDialog(brand);
   }, []);
 
   const handleMobileTabChange = useCallback((event, newValue) => {
@@ -479,7 +414,7 @@ console.log("side Brands:", brandsData);
               variant="h5" 
               fontWeight="bold"
               sx={{
-                background: "linear-gradient(to right, #6a11cb 0%, #2575fc 100%)",
+                background: " #ff9800",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -487,9 +422,9 @@ console.log("side Brands:", brandsData);
               Popular Brands
             </Typography>
             <Chip
-              label={`${filteredBrands.length} brands`}
+              label={`${filteredBrands.length} -  brands`}
               size="small"
-              color="primary"
+              color="warning"
               variant="outlined"
               sx={{ fontWeight: 'bold' }}
             />

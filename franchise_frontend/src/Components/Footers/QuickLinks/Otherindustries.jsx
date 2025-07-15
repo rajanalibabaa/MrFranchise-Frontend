@@ -81,7 +81,7 @@ const Otherindustries = () => {
       console.log("Payload:", payload);
 
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/otherindustries/recievingOtherIndustriesData",
+        "https://mrfranchisebackend.mrfranchise.in/api/v1/otherindustries/recievingOtherIndustriesData",
         payload,  
         {
           headers: {

@@ -56,22 +56,34 @@ const toggleLike = useToggleLike();
     },
   };
 
-  const handleLikeClick = async (brandId, isLiked) => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      setShowLogin(true);
-      return;
-    }
+  const handleLikeClick = useCallback((brandId, isLiked) => {
+  // Immediate UI update - no waiting for API response
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    setShowLogin(true);
+    return;
+  }
 
-    console.log("brandid :",brandId)
-    console.log("isLiked :",isLiked)
-
-    try {
-      await toggleLike.mutateAsync({ brandId, isLiked });
-    } catch (error) {
-      console.error("Like operation failed:", error);
+  // Optimistically update the UI first
+  toggleLike.mutate(
+    { brandId, isLiked },
+    {
+      onMutate: () => {
+        // Local state to prevent double clicks
+        setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+      },
+      onError: (error) => {
+        console.error("Like operation failed:", error);
+        // Optionally show error feedback to user
+        toast.error("Failed to update like status");
+      },
+      onSettled: () => {
+        // Reset processing state when done
+        setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
+      }
     }
-  };
+  );
+}, [toggleLike]);
 
   const handleNext = useCallback(() => {
     if (brands.length > 0) {

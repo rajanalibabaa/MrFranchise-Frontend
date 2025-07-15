@@ -41,16 +41,16 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
       try {
         setLoading(true);
         const [brandRes, viewsRes, likedRes, applyRes] = await Promise.all([
-          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getBrandListingByUUID/${brandUUID}`, {
+          axios.get(`https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandListingByUUID/${brandUUID}`, {
             headers: { Authorization: `Bearer ${token}` }, withCredentials: true
           }),
-          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/view/getAllViewBrands/${brandUUID}`, {
+          axios.get(`https://mrfranchisebackend.mrfranchise.in/api/v1/view/getAllViewBrands/${brandUUID}`, {
             headers: { Authorization: `Bearer ${token}` }, withCredentials: true
           }),
-          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/like/getBrandLikedByAll/${brandUUID}`, {
+          axios.get(`https://mrfranchisebackend.mrfranchise.in/api/v1/like/getBrandLikedByAll/${brandUUID}`, {
             headers: { Authorization: `Bearer ${token}` }, withCredentials: true
           }),
-          axios.get(`https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/getAllInstaApply/${brandUUID}`, {
+          axios.get(`https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/getAllInstaApply/${brandUUID}`, {
             headers: { Authorization: `Bearer ${token}` }, withCredentials: true
           }),
         ]);

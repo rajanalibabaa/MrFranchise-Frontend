@@ -1,5 +1,5 @@
 
-export const API_BASE_URL =  "https://franchise-backend-wgp6.onrender.com/api/v1";
+export const API_BASE_URL =  "https://mrfranchisebackend.mrfranchise.in/api/v1";
 
 
 

@@ -34,6 +34,9 @@ import {
   ArrowBack,
   ArrowForward,
   Phone,
+  Share,
+  Favorite,
+  ShareOutlined
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useBrand } from "../../Hooks/Fetchbrands.jsx";
@@ -41,6 +44,10 @@ import axios from "axios";
 import OverviewTab from "./OverviewTab.jsx";
 import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
+// import { useToggleLike } from '../../Hooks/Fetchbrands';
+import { useToggleLike } from '../../Hooks/Fetchbrands.jsx';
+import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
+
 
 const BrandDetails = ({ brandData }) => {
   const theme = useTheme();
@@ -61,6 +68,11 @@ const navigate = useNavigate();
     cities: [],
   });
 
+const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
+  const [isProcessingLike, setIsProcessingLike] = useState(false);
+  
+  const { mutate: toggleLike } = useToggleLike();
+
   const [formData, setFormData] = useState({
     fullName: "",
     investorEmail: "",
@@ -73,6 +85,8 @@ const navigate = useNavigate();
     readyToInvest: "",
   });
 
+
+  
   
   const { uuid } = useParams();
   // const { selectedBrand } = useSelector((state) => state.brands);
@@ -83,13 +97,38 @@ const navigate = useNavigate();
   const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
   const AccessToken = useMemo(() => localStorage.getItem("accessToken"), []);
 
+
+    const handleLikeClick = useCallback(() => {
+      if (isProcessingLike) return;
+      
+      setIsProcessingLike(true);
+      const newLikeStatus = !localIsLiked;
+      
+      // Optimistic update
+      setLocalIsLiked(newLikeStatus);
+      
+      toggleLike(
+        { brandId: uuid, isLiked: !newLikeStatus },
+        {
+          onError: () => {
+            // Revert on error
+            setLocalIsLiked(!newLikeStatus);
+          },
+          onSettled: () => {
+            setIsProcessingLike(false);
+          }
+        }
+      );
+    }, [uuid, localIsLiked, isProcessingLike, toggleLike]);
+
+
   // Memoized API calls
   const fetchInvestorDetails = useCallback(async () => {
     if (!investorUUID || !AccessToken) return;
     
     try {
       const response = await axios.get(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -256,70 +295,78 @@ const navigate = useNavigate();
     setFormData(prev => ({ ...prev, [name]: value }));
   }, []);
 
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
- const id = investorUUID || localStorage.getItem("brandUUID");
+const handleSubmit = useCallback(async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+  
+  const id = investorUUID || localStorage.getItem("brandUUID");  // Single declaration
 
-      if (!id) {
-        alert("User not logged in or missing ID. Please login again.");
-        return;
-      }
+  if (!id) {
+    alert("User not logged in or missing ID. Please login again.");
+    navigate("/registerhandleuser");
+    return;
+  }
 
-    try {
-      const payload = {
-        ...formData,
-        state: formData.state || "",
-        district: formData.district || "",
-        city: formData.city || "",
-        brandId: selectedBrand?.uuid,
-        brandName: selectedBrand?.brandDetails?.brandName || "",
-        applyId : id || ""
-      };
+  try {
+    const payload = {
+      ...formData,
+      state: formData.state || "",
+      district: formData.district || "",
+      city: formData.city || "",
+      brandId: selectedBrand?.uuid,
+      brandName: selectedBrand?.brandDetails?.brandName || "",
+      applyId: id  // Use the already declared id
+    };
 
-      const id = investorUUID || localStorage.getItem("brandUUID");
-
-      if (!id) {
-        alert("User not logged in or missing ID. Please login again.");
-        navigate("/registerhandleuser");
-        return;
-      }
-
-      // Validate required fields
-      const requiredFields = [
-        'fullName', 'investorEmail', 'mobileNumber', 'state', 
-        'district', 'city', 'investmentRange', 'planToInvest', 'readyToInvest'
-      ];
-      
-      const missingFields = requiredFields.filter(field => !payload[field]);
-      
-      if (missingFields.length > 0) {
-        alert(`Please fill all required fields: ${missingFields.join(', ')}`);
-        return;
-      }
-
-      console.log("payload :",payload)
-
-      const response = await axios.post(
-       "https://franchise-backend-wgp6.onrender.com/api/v1/instantapply/postApplication",
-        payload,
-        { 
-          headers: { "Content-Type": "application/json" },
-          signal: AbortSignal.timeout(10000) // Add timeout
-        }
-      );
-
-      if (response.data) {
-        setSubmitSuccess(true);
-        setDrawerOpen(false);
-      }
-    } catch (error) {
-      console.error("Submission error:", error?.response?.data || error.message);
-      alert("❌Failed to submit application. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+    // Validate required fields
+    const requiredFields = [
+      'fullName', 'investorEmail', 'mobileNumber', 'state', 
+      'district', 'city', 'investmentRange', 'planToInvest', 'readyToInvest'
+    ];
+    
+    const missingFields = requiredFields.filter(field => !payload[field]);
+    
+    if (missingFields.length > 0) {
+      alert(`Please fill all required fields: ${missingFields.join(', ')}`);
+      return;
     }
-  }, [formData, selectedBrand, investorUUID]);
+
+    console.log("payload :", payload)
+
+    const response = await axios.post(
+      "http://localhost:5000/api/v1/instantapply/postApplication",
+      payload,
+      { 
+        headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(10000) // Add timeout
+      }
+    );
+
+    if (response.data) {
+      setSubmitSuccess(true);
+      alert("✅Success! Your application has been submitted.");
+      setDrawerOpen(false);
+       // ✅ Reset the form after successful submission
+  setFormData({
+   fullName: "",
+    investorEmail: "",
+    mobileNumber: "",
+    investmentRange: "",
+    state: "",
+    district: "",
+    city: "",
+    planToInvest: "",
+    readyToInvest: "",
+    // Add other fields if present in formData
+  });
+    }
+  } catch (error) {
+    console.error("Submission error:", error?.response?.data || error.message);
+    alert("❌Failed to submit application. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+}, [formData, selectedBrand, investorUUID, navigate]);
 
   const handleImageOpen = useCallback((index) => {
     setCurrentImageIndex(index);
@@ -347,6 +394,13 @@ const navigate = useNavigate();
     );
   }
 
+const maskEmail = (email) => {
+  const [name, domain] = email.split("@");
+  if (!name || !domain) return email;
+  const visiblePart = name.slice(0, 2);
+  const maskedPart = "*".repeat(name.length - 2);
+  return `${visiblePart}${maskedPart}@${domain}`;
+};
 
   return (
     <>
@@ -655,21 +709,46 @@ const navigate = useNavigate();
             }}
           >
             Contact Details
+
+            <IconButton
+              aria-label="close"
+              onClick={handleCloseContact} 
+              sx={{
+                position: "absolute",
+                top: 10,
+                right: 10,
+                color:'error.main'
+              }} 
+            >
+              <Close />
+            </IconButton>
           </DialogTitle>
 
           <DialogContent dividers>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Typography>
-                <strong>Manager Name:</strong>{" "}
-                {selectedBrand.brandDetails?.ceoName || "N/A"}
-              </Typography>
+            <Typography>
+  <strong>Manager Name:</strong>{" "}
+  {selectedBrand.brandDetails?.ceoName
+    ? `${selectedBrand.brandDetails.ceoName.slice(0, 2)}***`
+    : "N/A"}
+</Typography>
 
-              <Typography>
-                <strong>Mobile Number:</strong>{" "}
-                {selectedBrand.brandDetails?.ceoMobile || "N/A"}
-              </Typography>
+<Typography>
+  <strong>Mobile Number:</strong>{" "}
+  {selectedBrand.brandDetails?.ceoMobile
+    ? `${selectedBrand.brandDetails.ceoMobile.slice(0, 5)}*****`
+    : "N/A"}
+</Typography>
 
-              <Typography>
+<Typography>
+  <strong>Email:</strong>{" "}
+  {selectedBrand.brandDetails?.email
+    ? maskEmail(selectedBrand.brandDetails.email)
+    : "N/A"}
+</Typography>
+
+
+              {/* <Typography>
                 <strong>Website:</strong>{" "}
                 {selectedBrand.brandDetails?.website ? (
                   <a
@@ -697,17 +776,17 @@ const navigate = useNavigate();
                 ) : (
                   "N/A"
                 )}
-              </Typography>
+              </Typography> */}
             </Box>
           </DialogContent>
 
           <DialogActions>
             <Button
-              onClick={handleCloseContact}
+              // onClick={handleCloseContact}
               variant="contained"
-              color="error"
+              color="success"
             >
-              Close
+              view contact details
             </Button>
           </DialogActions>
         </Dialog>
@@ -801,6 +880,27 @@ const navigate = useNavigate();
                         </Typography>
                       </Box>
                     </Box>
+
+                     <IconButton
+                                onClick={handleLikeClick}
+                                disabled={isProcessingLike}
+                                aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
+                              >
+                                {isProcessingLike ? (
+                                  <CircularProgress size={24} />
+                                ) : (
+                                  <Favorite
+                                    sx={{
+                                      color: localIsLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
+                                    }}
+                                  />
+                                )}
+                              </IconButton>
+                       <IconButton
+                                // onClick={handleShareButton}
+                              >
+                                  <ShareOutlined />
+                              </IconButton>
                     <Box>
                       <Button
                         variant="contained"
@@ -1432,11 +1532,10 @@ const navigate = useNavigate();
           </Box>
         )}              
       </Box>
-
+<ViewedBrands />
       <Footer />
     </>
   );
 };
 
 export default React.memo(BrandDetails);
-
