@@ -45,15 +45,23 @@ import OverviewTab from "./OverviewTab.jsx";
 import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 // import { useToggleLike } from '../../Hooks/Fetchbrands';
+import Favorite from "@mui/icons-material/Favorite";
+import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
+import LoginPage from "../../Pages/LoginPage/LoginPage.jsx";
+import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
+// import { postView } from "../../Utils/function/view";
 import { useToggleLike } from '../../Hooks/Fetchbrands.jsx';
 import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
 
 
 const BrandDetails = ({ brandData }) => {
+
+
+  console.log("brandData brandData :",brandData)
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-const navigate = useNavigate();
+  const navigate = useNavigate();
   // State management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,6 +69,7 @@ const navigate = useNavigate();
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openContactModal, setOpenContactModal] = useState(false);
+
   const [userData, setUserData] = useState(null);
   const [locationData, setLocationData] = useState({
     states: [],
@@ -68,10 +77,10 @@ const navigate = useNavigate();
     cities: [],
   });
 
-const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
-  const [isProcessingLike, setIsProcessingLike] = useState(false);
-  
-  const { mutate: toggleLike } = useToggleLike();
+  const [likeProcessing, setLikeProcessing] = useState({});
+  const [showLogin, setShowLogin] = useState(false);
+
+  const toggleLike = useToggleLike();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -85,47 +94,38 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
     readyToInvest: "",
   });
 
-
-  
-  
   const { uuid } = useParams();
   // const { selectedBrand } = useSelector((state) => state.brands);
   const selectedBrand = brandData || {};
- 
 
   // Get investor data from localStorage with caching
   const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
   const AccessToken = useMemo(() => localStorage.getItem("accessToken"), []);
 
-
-    const handleLikeClick = useCallback(() => {
-      if (isProcessingLike) return;
-      
-      setIsProcessingLike(true);
-      const newLikeStatus = !localIsLiked;
-      
-      // Optimistic update
-      setLocalIsLiked(newLikeStatus);
-      
-      toggleLike(
-        { brandId: uuid, isLiked: !newLikeStatus },
-        {
-          onError: () => {
-            // Revert on error
-            setLocalIsLiked(!newLikeStatus);
-          },
-          onSettled: () => {
-            setIsProcessingLike(false);
-          }
-        }
-      );
-    }, [uuid, localIsLiked, isProcessingLike, toggleLike]);
-
+  const handleLikeClick = useCallback(
+    async (brandId, isLiked) => {
+      if (likeProcessing[brandId]) return;
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        setShowLogin(true);
+        return;
+      }
+      setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
+      try {
+        await toggleLike.mutateAsync({ brandId, isLiked });
+      } catch (error) {
+        console.error("Like operation failed:", error);
+      } finally {
+        setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
+      }
+    },
+    [likeProcessing, toggleLike]
+  );
 
   // Memoized API calls
   const fetchInvestorDetails = useCallback(async () => {
     if (!investorUUID || !AccessToken) return;
-    
+
     try {
       const response = await axios.get(
         `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
@@ -134,13 +134,13 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
             "Content-Type": "application/json",
             Authorization: `Bearer ${AccessToken}`,
           },
-          signal: AbortSignal.timeout(5000) // Add timeout
+          signal: AbortSignal.timeout(5000), // Add timeout
         }
       );
-      
+
       if (response.data?.data) {
         setUserData(response.data.data);
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           fullName: response.data.data.firstName || "",
           investorEmail: response.data.data.email || "",
@@ -159,21 +159,20 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
     if (!uuid) return;
 
     const controller = new AbortController();
-    
+
     const fetchBrand = async () => {
       try {
         await useBrand(uuid).unwrap();
         // If brand is not found, redirect to brands page
-
       } catch (error) {
         console.error("Failed to fetch brand details:", error);
       }
     };
 
     fetchBrand();
-    
+
     return () => controller.abort();
-  }, [uuid,]);
+  }, [uuid]);
 
   // Fetch investor data on mount if logged in (with caching)
   useEffect(() => {
@@ -186,10 +185,17 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
 
   // Extract location data from brand
   useEffect(() => {
-    if (selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
-      const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
-      const states = [...new Set(locations.map((loc) => loc.state).filter(Boolean))];
-      setLocationData(prev => ({
+    if (
+      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
+        ?.locations
+    ) {
+      const locations =
+        selectedBrand.expansionLocationData.expansionLocations.domestic
+          .locations;
+      const states = [
+        ...new Set(locations.map((loc) => loc.state).filter(Boolean)),
+      ];
+      setLocationData((prev) => ({
         ...prev,
         states,
         districts: [],
@@ -200,16 +206,24 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
 
   // Update districts when state changes
   useEffect(() => {
-    if (formData.state && selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
-      const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
+    if (
+      formData.state &&
+      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
+        ?.locations
+    ) {
+      const locations =
+        selectedBrand.expansionLocationData.expansionLocations.domestic
+          .locations;
       const stateObj = locations.find((loc) => loc.state === formData.state);
-      const districts = [...new Set(stateObj?.districts?.map((d) => d.district) || [])];
-      setLocationData(prev => ({
+      const districts = [
+        ...new Set(stateObj?.districts?.map((d) => d.district) || []),
+      ];
+      setLocationData((prev) => ({
         ...prev,
         districts,
         cities: [],
       }));
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         district: "",
         city: "",
@@ -219,16 +233,25 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
 
   // Update cities when district changes
   useEffect(() => {
-    if (formData.state && formData.district && selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
-      const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
+    if (
+      formData.state &&
+      formData.district &&
+      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
+        ?.locations
+    ) {
+      const locations =
+        selectedBrand.expansionLocationData.expansionLocations.domestic
+          .locations;
       const stateObj = locations.find((loc) => loc.state === formData.state);
-      const districtObj = stateObj?.districts?.find((d) => d.district === formData.district);
+      const districtObj = stateObj?.districts?.find(
+        (d) => d.district === formData.district
+      );
       const cities = [...new Set(districtObj?.cities || [])];
-      setLocationData(prev => ({
+      setLocationData((prev) => ({
         ...prev,
         cities,
       }));
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         city: "",
       }));
@@ -236,17 +259,23 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
   }, [formData.district, formData.state, selectedBrand]);
 
   // Memoized derived data for better performance
-  const investmentRanges = useMemo(() => [
-    ...new Set(selectedBrand?.franchiseDetails?.fico?.map((m) => m.investmentRange) || [])
-  ], [selectedBrand]);
+  const investmentRanges = useMemo(
+    () => [
+      ...new Set(
+        selectedBrand?.franchiseDetails?.fico?.map((m) => m.investmentRange) ||
+          []
+      ),
+    ],
+    [selectedBrand]
+  );
 
-  const investmentTimings = useMemo(() => 
-    ["Immediately", "1 - 3 Months", "3 - 6 Months", "6 + Months"],
+  const investmentTimings = useMemo(
+    () => ["Immediately", "1 - 3 Months", "3 - 6 Months", "6 + Months"],
     []
   );
 
-  const readyToInvestOptions = useMemo(() => 
-    ["Own Investment", "Going To Loan", "Need Loan Assistance"],
+  const readyToInvestOptions = useMemo(
+    () => ["Own Investment", "Going To Loan", "Need Loan Assistance"],
     []
   );
 
@@ -257,7 +286,9 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
 
   const allImages = useMemo(
     () => [
-      ...(selectedBrand?.uploads?.brandLogo ? [selectedBrand.uploads.brandLogo] : []),
+      ...(selectedBrand?.uploads?.brandLogo
+        ? [selectedBrand.uploads.brandLogo]
+        : []),
       ...(selectedBrand?.uploads?.exteriorOutlet || []),
       ...(selectedBrand?.uploads?.interiorOutlet || []),
     ],
@@ -283,16 +314,22 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
   const handleOpenContact = useCallback(() => setOpenContactModal(true), []);
   const handleCloseContact = useCallback(() => setOpenContactModal(false), []);
 
-  const toggleDrawer = useCallback((open) => (event) => {
-    if (event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) {
-      return;
-    }
-    setDrawerOpen(open);
-  }, []);
+  const toggleDrawer = useCallback(
+    (open) => (event) => {
+      if (
+        event.type === "keydown" &&
+        (event.key === "Tab" || event.key === "Shift")
+      ) {
+        return;
+      }
+      setDrawerOpen(open);
+    },
+    []
+  );
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   }, []);
 
 const handleSubmit = useCallback(async (e) => {
@@ -374,11 +411,15 @@ const handleSubmit = useCallback(async (e) => {
   }, []);
 
   const handlePrevImage = useCallback(() => {
-    setCurrentImageIndex(prev => (prev === 0 ? allImages.length - 1 : prev - 1));
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? allImages.length - 1 : prev - 1
+    );
   }, [allImages.length]);
 
   const handleNextImage = useCallback(() => {
-    setCurrentImageIndex(prev => (prev === allImages.length - 1 ? 0 : prev + 1));
+    setCurrentImageIndex((prev) =>
+      prev === allImages.length - 1 ? 0 : prev + 1
+    );
   }, [allImages.length]);
 
   // Scroll to top on component mount
@@ -388,7 +429,12 @@ const handleSubmit = useCallback(async (e) => {
 
   if (!selectedBrand) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="80vh"
+      >
         <CircularProgress />
       </Box>
     );
@@ -475,7 +521,7 @@ const maskEmail = (email) => {
               }}
             >
               <Typography variant="h6" fontWeight={700} color="#ff9800">
-                Apply for  Franchise
+                Apply for Franchise
               </Typography>
               <IconButton onClick={toggleDrawer(false)}>
                 <Close />
@@ -483,14 +529,14 @@ const maskEmail = (email) => {
             </Box>
 
             <form onSubmit={handleSubmit}>
-            <Grid
+              <Grid
                 spacing={2}
                 sx={{
                   display: "grid",
                   gridTemplateColumns: "repeat(1, 1fr)",
                   gap: 2,
                 }}
-              >           
+              >
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -881,26 +927,33 @@ const maskEmail = (email) => {
                       </Box>
                     </Box>
 
-                     <IconButton
-                                onClick={handleLikeClick}
-                                disabled={isProcessingLike}
-                                aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
-                              >
-                                {isProcessingLike ? (
-                                  <CircularProgress size={24} />
-                                ) : (
-                                  <Favorite
-                                    sx={{
-                                      color: localIsLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
-                                    }}
-                                  />
-                                )}
-                              </IconButton>
-                       <IconButton
-                                // onClick={handleShareButton}
-                              >
-                                  <ShareOutlined />
-                              </IconButton>
+                    <IconButton
+                      onClick={() =>
+                        handleLikeClick(
+                          selectedBrand.uuid,
+                          selectedBrand.isLiked
+                        )
+                      }
+                      disabled={likeProcessing[selectedBrand.uuid]}
+                      sx={{ ml: 1 }}
+                    >
+                      {likeProcessing[selectedBrand.uuid] ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        <Favorite
+                          sx={{
+                            color: selectedBrand.isLiked
+                              ? "#f44336"
+                              : "rgba(0, 0, 0, 0.23)",
+                          }}
+                        />
+                      )}
+                    </IconButton>
+                    <IconButton
+                    // onClick={handleShareButton}
+                    >
+                      <ShareOutlinedIcon />
+                    </IconButton>
                     <Box>
                       <Button
                         variant="contained"
@@ -1286,7 +1339,7 @@ const maskEmail = (email) => {
           </DialogActions>
         </Dialog>
 
-         {/* Desktop Application Form */}
+        {/* Desktop Application Form */}
         {!isMobile && !isTablet && (
           <Box
             sx={{
@@ -1312,7 +1365,7 @@ const maskEmail = (email) => {
               Instant Franchise Application
             </Typography>
             <form onSubmit={handleSubmit}>
-               <Grid
+              <Grid
                 spacing={2}
                 sx={{
                   display: "grid",
@@ -1530,12 +1583,23 @@ const maskEmail = (email) => {
               </Typography>
             </Box>
           </Box>
-        )}              
+        )}
       </Box>
+<<<<<<< HEAD
+      {showLogin && (
+        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+      )}
+
+=======
 <ViewedBrands />
+>>>>>>> 728511953fb65cd6ceba5f28825c2433ed4a33d2
       <Footer />
     </>
   );
 };
 
+<<<<<<< HEAD
 export default React.memo(BrandDetails);
+=======
+export default React.memo(BrandDetails);
+>>>>>>> 728511953fb65cd6ceba5f28825c2433ed4a33d2
