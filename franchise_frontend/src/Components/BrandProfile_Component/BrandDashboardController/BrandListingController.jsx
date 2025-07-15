@@ -304,7 +304,7 @@ const BrandListingController = () => {
   return (
    <Box sx={{ p: 3 }}>
     {/* Brand Details */}
-  <Card elevation={3} sx={{ p: 2, borderRadius: 3 }}>
+  <Card elevation={3} sx={{ p: 1, borderRadius: 3 }}>
     <CardHeader
       title="Brand Details"
       sx={{ bgcolor: '#f5f5f5', borderBottom: '1px solid #ddd', mb: 2 }}
