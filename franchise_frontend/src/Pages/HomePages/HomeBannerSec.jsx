@@ -40,7 +40,7 @@ const dynamicComponents = {
   LikedBrands: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/LikedBrands.jsx")
   )),
-  ViewedBrands: withSuspense(React.lazy(() =>
+  ViewerBrands: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/ViewerBrands.jsx")
 )),
   TopCafeBrandsFranchise: withSuspense(React.lazy(() =>
@@ -104,7 +104,7 @@ const pageConfig = {
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     },
     {
-      component: "ViewedBrands",
+      component: "ViewerBrands",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     },

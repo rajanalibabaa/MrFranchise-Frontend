@@ -54,7 +54,7 @@
 //       console.log("Sending cleaned data:", cleanData);
 
 //       const response = await axios.post(
-//         "https://franchise-backend-wgp6.onrender.com/api/post/createPostRequirement",
+//         "https://mrfranchisebackend.mrfranchise.in/api/post/createPostRequirement",
 //         cleanData,
 //         { headers: { "Content-Type": "application/json" } }
 //       );
