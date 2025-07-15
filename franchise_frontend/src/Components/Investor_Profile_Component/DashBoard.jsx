@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, memo } from "react";
 import {
   Box,
   Typography,
@@ -10,7 +9,6 @@ import {
   Grid,
   Button,
   IconButton,
-  Chip,
   CircularProgress
 } from "@mui/material";
 import {
@@ -18,8 +16,6 @@ import {
   Visibility,
   AssignmentTurnedIn,
   Close,
-  MonetizationOn,
-  LocationOn,
   Business
 } from "@mui/icons-material";
 import { useMediaQuery, useTheme } from '@mui/material';
@@ -28,6 +24,299 @@ import { useSelector, useDispatch } from "react-redux";
 import img from "../../assets/images/brandLogo.jpg";
 import { api } from "../../Api/api";
 import { openBrandDialog } from "../../Hooks/Fetchbrands";
+
+// Memoized StatCard component to prevent unnecessary re-renders
+const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
+  const theme = useTheme();
+  const isSm = useMediaQuery(theme.breakpoints.up('sm'));
+
+  return (
+    <Card
+      onClick={onClick}
+      sx={{
+        width: '100%',
+        maxWidth: { xs: '100%', sm: 240, md: 260 },
+        minHeight: { xs: 40, sm: 72 },
+        borderRadius: 2,
+        px: { xs: 1, sm: 1.5 },
+        py: 0,
+        display: 'flex',
+        alignItems: 'center',
+        gap: { xs: 1, sm: 1.5 },
+        bgcolor: isSelected ? `rgba(${color}, 0.25)` : `rgba(${color}, 0.05)`,
+        border: '1px solid',
+        borderColor: isSelected ? `rgba(${color}, 0.5)` : `rgba(${color}, 0.1)`,
+        transition: 'all 0.2s ease-out',
+        boxShadow: isSelected ? `0 4px 16px -2px rgba(${color}, 0.4)` : 'none',
+        cursor: 'pointer',
+        position: 'relative',
+        overflow: 'hidden',
+        '&:hover': {
+          transform: { xs: 'none', sm: 'translateY(-2px)' },
+          boxShadow: isSelected 
+            ? `0 4px 16px -2px rgba(${color}, 0.4)`
+            : { xs: 'none', sm: `0 4px 12px -2px rgba(${color}, 0.15)` },
+          bgcolor: isSelected 
+            ? `rgba(${color}, 0.25)`
+            : { xs: `rgba(${color}, 0.05)`, sm: `rgba(${color}, 0.08)` },
+          '& .stat-icon': {
+            transform: { xs: 'none', sm: 'scale(1.05)' }
+          }
+        },
+        '@media (hover: none)': {
+          '&:active': {
+            bgcolor: `rgba(${color}, 0.1)`
+          }
+        }
+      }}
+    >
+      <Box
+        className="stat-icon"
+        sx={{
+          flexShrink: 0,
+          p: { sm: 1 },
+          borderRadius: '50%',
+          bgcolor: isSelected ? `rgba(${color}, 0.3)` : `rgba(${color}, 0.1)`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'transform 0.2s ease-out',
+          boxShadow: `inset 0 0 0 1px rgba(${color}, ${isSelected ? '0.4' : '0.15'})`,
+          '& > svg': {
+            fontSize: { xs: '13px', sm: '15px', md: '22px' }
+          },
+          flexDirection: { xs: 'column', sm: 'row' },
+        }}
+      >
+        {React.cloneElement(icon, {
+          sx: {
+            color: isSelected ? `rgba(${color}, 1)` : `rgb(${color})`,
+            fontSize: { xs: '16px', sm: '10px', md: '22px' },
+            transition: 'color 0.2s ease-out'
+          }
+        })}
+      </Box>
+
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-end', sm: 'center' },
+          justifyContent: 'end',
+          gap: { xs: 0.5, sm: 1 }
+        }}
+      >
+        {isSm && (
+          <Typography
+            variant="body2"
+            noWrap
+            sx={{
+              fontWeight: isSelected ? 600 : 500,
+              fontSize: { xs: '0.7rem', sm: '0.8125rem' },
+              color: isSelected ? `rgba(${color}, 0.9)` : 'text.secondary',
+              lineHeight: 1.3,
+              transition: 'all 0.2s ease-out'
+            }}
+          >
+            {title}
+          </Typography>
+        )}
+
+        <Typography
+          variant="h6"
+          noWrap
+          sx={{
+            fontWeight: isSelected ? 700 : 600,
+            fontSize: { xs: '0.6rem', sm: '1rem', md: '1.125rem' },
+            lineHeight: 1.2,
+            background: isSelected 
+              ? `linear-gradient(75deg, rgba(${color}, 1) 0%, rgba(${color}, 0.8) 100%)`
+              : `linear-gradient(75deg, rgb(${color}) 0%, rgba(${color}, 0.9) 100%)`,
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            color: 'transparent',
+            '@media (hover: hover)': {
+              textShadow: isSelected 
+                ? `0 0 8px rgba(${color}, 0.4)`
+                : `0 0 6px rgba(${color}, 0.2)`
+            },
+            transition: 'all 0.2s ease-out'
+          }}
+        >
+          {value}
+        </Typography>
+      </Box>
+    </Card>
+  );
+});
+
+// Memoized BrandCard component
+const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, onToggleViewClose }) => {
+  if (!item || typeof item !== 'object') return null;
+  
+  const brandId = item.uuid;
+  const isLiked = likedStates[brandId];
+  const brandName = item.brandDetails?.brandName || "Unnamed Brand";
+  const brandLogo = item.uploads?.brandLogo?.[0] || img;
+
+  return (
+    <Box sx={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
+      <Card sx={{
+        width: '200px',
+        height: '100%',
+        display: "flex",
+        flexDirection: "column",
+        borderRadius: 3,
+        overflow: 'hidden',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+        border: '1px solid rgba(0,0,0,0.05)',
+        '&:hover': {
+          transform: 'translateY(-5px)',
+          boxShadow: '0 8px 25px rgba(255,107,0,0.15)',
+          borderColor: 'rgba(255,107,0,0.2)'
+        }
+      }}>
+        <Box sx={{ 
+          position: 'relative',
+          height: 140,
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '40%',
+            zIndex: 1
+          }
+        }}>
+          <CardMedia
+            component="img"
+            height="140"
+            image={brandLogo}
+            alt={brandName}
+            sx={{ 
+              objectFit: 'cover',
+              width: '100%',
+              height: '100%',
+              transition: 'transform 0.3s ease',
+              '&:hover': {
+                transform: 'scale(1.05)'
+              }
+            }}
+          />
+          
+          <Box sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            display: 'flex',
+            gap: 1,
+            zIndex: 2
+          }}>
+            {type === 'viewed' && (
+              <IconButton
+                size="small"
+                sx={{
+                  backgroundColor: 'rgba(255,255,255,0.9)',
+                  p: 0.5,
+                  '&:hover': { 
+                    backgroundColor: '#fff',
+                    transform: 'scale(1.1)',
+                    color: '#ff6d00'
+                  },
+                  transition: 'all 0.2s ease'
+                }}
+                onClick={() => onToggleViewClose(brandId)}
+              >
+                <Close fontSize="small" />
+              </IconButton>
+            )}
+            
+            {type === 'liked' && (
+              <IconButton
+                size="small"
+                sx={{
+                  backgroundColor: 'rgba(255,255,255,0.9)',
+                  p: 0.5,
+                  '&:hover': { 
+                    backgroundColor: '#fff',
+                    transform: 'scale(1.1)'
+                  },
+                  transition: 'all 0.2s ease'
+                }}
+                onClick={() => onToggleLike(brandId)}
+              >
+                <Favorite 
+                  fontSize="small" 
+                  sx={{ 
+                    fontSize: '1rem',
+                    color: isLiked ? '#ff3d00' : 'rgba(0,0,0,0.3)',
+                    transition: 'all 0.3s ease'
+                  }} 
+                />
+              </IconButton>
+            )}
+          </Box>
+        </Box>
+
+        <CardContent sx={{ 
+          flex: '1 1 auto',
+          p: 2.5,
+          display: 'flex',
+          flexDirection: 'column',
+          bgcolor: 'background.paper'
+        }}>
+          <Box sx={{ 
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            mb: 1.5
+          }}>
+            <Typography variant="caption" color="text.secondary">
+              {brandName}
+            </Typography>
+          </Box>
+        </CardContent>
+
+        <Box sx={{ 
+          p: 2,
+          pt: 0,
+          textAlign: 'center'
+        }}>
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={() => onViewDetails(item)}
+            sx={{
+              borderRadius: 2,
+              py: 1,
+              fontSize: '0.8rem',
+              textTransform: 'none',
+              fontWeight: 600,
+              letterSpacing: 0.5,
+              background: 'linear-gradient(135deg, #ff6d00 0%, #ff9100 100%)',
+              boxShadow: '0 2px 10px rgba(255,109,0,0.3)',
+              color: 'white',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #ff8500 0%, #ffa000 100%)',
+                boxShadow: '0 4px 14px rgba(255,109,0,0.4)',
+                transform: 'translateY(-1px)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            Explore Brand
+          </Button>
+        </Box>
+      </Card>
+    </Box>
+  );
+});
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -179,375 +468,6 @@ const Dashboard = () => {
     dispatch(openBrandDialog(brand));
   }, [dispatch]);
 
-  const renderStatCard = useCallback( (icon, title, value, color) => {
-    const isSelected = 
-      (icon.type === Business && tabValue === 0) ||
-      (icon.type === Favorite && tabValue === 1) ||
-      (icon.type === AssignmentTurnedIn && tabValue === 2);
-
-    return (
-      <Card
-        onClick={() => setTabValue(icon.type === Business ? 0 : icon.type === Favorite ? 1 : 2)}
-        sx={{
-          width: '100%',
-          maxWidth: { xs: '100%', sm: 240, md: 260 },
-          minHeight: { xs: 40, sm: 72 },
-          borderRadius: 2,
-          px: { xs: 1, sm: 1.5 },
-          py: 0,
-          display: 'flex',
-          alignItems: 'center',
-          gap: { xs: 1, sm: 1.5 },
-          bgcolor: isSelected ? `rgba(${color}, 0.25)` : `rgba(${color}, 0.05)`,
-          border: '1px solid',
-          borderColor: isSelected ? `rgba(${color}, 0.5)` : `rgba(${color}, 0.1)`,
-          transition: 'all 0.2s ease-out',
-          boxShadow: isSelected ? `0 4px 16px -2px rgba(${color}, 0.4)` : 'none',
-          cursor: 'pointer',
-          position: 'relative',
-          overflow: 'hidden',
-          '&:hover': {
-            transform: { xs: 'none', sm: 'translateY(-2px)' },
-            boxShadow: isSelected 
-              ? `0 4px 16px -2px rgba(${color}, 0.4)`
-              : { xs: 'none', sm: `0 4px 12px -2px rgba(${color}, 0.15)` },
-            bgcolor: isSelected 
-              ? `rgba(${color}, 0.25)`
-              : { xs: `rgba(${color}, 0.05)`, sm: `rgba(${color}, 0.08)` },
-            '& .stat-icon': {
-              transform: { xs: 'none', sm: 'scale(1.05)' }
-            }
-          },
-          '@media (hover: none)': {
-            '&:active': {
-              bgcolor: `rgba(${color}, 0.1)`
-            }
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: isSelected ? '3px' : '0px',
-            transition: 'height 0.2s ease-out'
-          }
-        }}
-      >
-        <Box
-          className="stat-icon"
-          sx={{
-            flexShrink: 0,
-            p: { sm: 1 },
-            borderRadius: '50%',
-            bgcolor: isSelected ? `rgba(${color}, 0.3)` : `rgba(${color}, 0.1)`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'transform 0.2s ease-out',
-            boxShadow: `inset 0 0 0 1px rgba(${color}, ${isSelected ? '0.4' : '0.15'})`,
-            '& > svg': {
-              fontSize: { xs: '13px', sm: '15px', md: '22px' }
-            },
-            flexDirection: { xs: 'column', sm: 'row' },
-          }}
-        >
-          {React.cloneElement(icon, {
-            sx: {
-              color: isSelected ? `rgba(${color}, 1)` : `rgb(${color})`,
-              fontSize: { xs: '16px', sm: '10px', md: '22px' },
-              transition: 'color 0.2s ease-out'
-            }
-          })}
-        </Box>
-
-        <Box
-          sx={{
-            flex: 1,
-            minWidth: 0,
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: { xs: 'flex-end', sm: 'center' },
-            justifyContent: 'end',
-            gap: { xs: 0.5, sm: 1 }
-          }}
-        >
-          {isSm && (
-            <Typography
-              variant="body2"
-              noWrap
-              sx={{
-                fontWeight: isSelected ? 600 : 500,
-                fontSize: { xs: '0.7rem', sm: '0.8125rem' },
-                color: isSelected ? `rgba(${color}, 0.9)` : 'text.secondary',
-                lineHeight: 1.3,
-                transition: 'all 0.2s ease-out'
-              }}
-            >
-              {title}
-            </Typography>
-          )}
-
-          <Typography
-            variant="h6"
-            noWrap
-            sx={{
-              fontWeight: isSelected ? 700 : 600,
-              fontSize: { xs: '0.6rem', sm: '1rem', md: '1.125rem' },
-              lineHeight: 1.2,
-              background: isSelected 
-                ? `linear-gradient(75deg, rgba(${color}, 1) 0%, rgba(${color}, 0.8) 100%)`
-                : `linear-gradient(75deg, rgb(${color}) 0%, rgba(${color}, 0.9) 100%)`,
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              color: 'transparent',
-              '@media (hover: hover)': {
-                textShadow: isSelected 
-                  ? `0 0 8px rgba(${color}, 0.4)`
-                  : `0 0 6px rgba(${color}, 0.2)`
-              },
-              transition: 'all 0.2s ease-out'
-            }}
-          >
-            {value}
-          </Typography>
-        </Box>
-      </Card>
-    );
-  } );
-
-const renderBrandCard = useCallback( (item, type) => {
-  if (!item || typeof item !== 'object') return null;
-  
-  const brandId = item.uuid;
-  const isLiked = likedStates[brandId];
-  const brandName = item.brandDetails?.brandName || "Unnamed Brand";
-  const brandLogo = item.uploads?.brandLogo?.[0] || img;
-  const franchiseModels = item.franchiseDetails?.fico || [];
-  const investmentRange = item.franchiseDetails?.fico || null;
-  
-  return (
-    <Box sx={{
-      display: "flex",
-      justifyContent:"center",
-      alignContent:"center"
-    }}>
-    <Card sx={{
-      width: '200px',
-      height: '100%',
-      display: "flex",
-       flexDirection: "column",
-      
-      borderRadius: 3,
-      overflow: 'hidden',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-      transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-      border: '1px solid rgba(0,0,0,0.05)',
-      '&:hover': {
-        transform: 'translateY(-5px)',
-        boxShadow: '0 8px 25px rgba(255,107,0,0.15)',
-        borderColor: 'rgba(255,107,0,0.2)'
-      }
-    }}>
-      {/* Image with orange gradient overlay */}
-      <Box sx={{ 
-        position: 'relative',
-        height: 140,
-        overflow: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '40%',
-          zIndex: 1
-        }
-      }}>
-        <CardMedia
-          component="img"
-          height="140"
-          image={brandLogo}
-          alt={brandName}
-          sx={{ 
-            objectFit: 'cover',
-            width: '100%',
-            height: '100%',
-            transition: 'transform 0.3s ease',
-            '&:hover': {
-              transform: 'scale(1.05)'
-            }
-          }}
-        />
-        
-        
-        {/* Action buttons */}
-        <Box sx={{
-          position: 'absolute',
-          top: 12,
-          right: 12,
-          display: 'flex',
-          gap: 1,
-          zIndex: 2
-        }}>
-          {type === 'viewed' && (
-            <IconButton
-              size="small"
-              sx={{
-                backgroundColor: 'rgba(255,255,255,0.9)',
-                p: 0.5,
-                '&:hover': { 
-                  backgroundColor: '#fff',
-                  transform: 'scale(1.1)',
-                  color: '#ff6d00'
-                },
-                transition: 'all 0.2s ease'
-              }}
-              onClick={() => toggleViewClose(brandId)}
-            >
-              <Close fontSize="small" />
-            </IconButton>
-          )}
-          
-          {type === 'liked' && (
-            <IconButton
-              size="small"
-              sx={{
-                backgroundColor: 'rgba(255,255,255,0.9)',
-                p: 0.5,
-                '&:hover': { 
-                  backgroundColor: '#fff',
-                  transform: 'scale(1.1)'
-                },
-                transition: 'all 0.2s ease'
-              }}
-              onClick={() => toggleLike(brandId)}
-            >
-              <Favorite 
-                fontSize="small" 
-                sx={{ 
-                  fontSize: '1rem',
-                  color: isLiked ? '#ff3d00' : 'rgba(0,0,0,0.3)',
-                  transition: 'all 0.3s ease'
-                }} 
-              />
-            </IconButton>
-          )}
-        </Box>
-      </Box>
-
-      {/* Content area */}
-      <CardContent sx={{ 
-        flex: '1 1 auto',
-        p: 2.5,
-        display: 'flex',
-        flexDirection: 'column',
-        bgcolor: 'background.paper'
-      }}>
-        {/* Details section with orange icons */}
-        <Box sx={{ 
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1.5,
-          mb: 1.5
-        }}>
-          <MonetizationOn sx={{ 
-            fontSize: 20,
-            color: '#ff6d00' 
-          }} />
-          <Typography variant="body2" color="text.secondary">
-            {investmentRange[0]?.investmentRange || 'N/A'}
-          </Typography>
-        </Box>
-        
-        <Box sx={{ 
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1.5,
-          mb: 2
-        }}>
-          <LocationOn sx={{ 
-            fontSize: 20,
-            color: '#ff6d00' 
-          }} />
-          <Typography variant="body2" color="text.secondary">
-            {item.brandDetails?.locations?.join(', ') || 'Multiple locations'}
-          </Typography>
-        </Box>
-        
-        {/* Franchise models chips with orange theme */}
-        <Box sx={{ 
-          mt: 'auto',
-          display: 'flex', 
-          flexWrap: 'wrap', 
-          gap: 1,
-          '& .MuiChip-root': {
-            borderRadius: 1,
-            height: 24,
-            fontSize: '0.65rem',
-            borderColor: '#ffb74d',
-            color: '#e65100',
-            '&:hover': {
-              backgroundColor: '#ffe0b2'
-            }
-          }
-        }}>
-          {franchiseModels.slice(0, 3).map((model, idx) => (
-            <Chip
-              key={`${model.franchiseModel}-${idx}`}
-              label={model.franchiseModel}
-              size="small"
-              variant="outlined"
-            />
-          ))}
-          {franchiseModels.length > 3 && (
-            <Chip
-              label={`+${franchiseModels.length - 3}`}
-              size="small"
-              variant="outlined"
-            />
-          )}
-        </Box>
-      </CardContent>
-
-      {/* Orange gradient button */}
-      <Box sx={{ 
-        p: 2,
-        pt: 0,
-        textAlign: 'center'
-      }}>
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={() => handleViewDetails(item)}
-          sx={{
-            borderRadius: 2,
-            py: 1,
-            fontSize: '0.8rem',
-            textTransform: 'none',
-            fontWeight: 600,
-            letterSpacing: 0.5,
-            background: 'linear-gradient(135deg, #ff6d00 0%, #ff9100 100%)',
-            boxShadow: '0 2px 10px rgba(255,109,0,0.3)',
-            color: 'white',
-            '&:hover': {
-              background: 'linear-gradient(135deg, #ff8500 0%, #ffa000 100%)',
-              boxShadow: '0 4px 14px rgba(255,109,0,0.4)',
-              transform: 'translateY(-1px)'
-            },
-            transition: 'all 0.3s ease'
-          }}
-        >
-          Explore Opportunity
-        </Button>
-      </Box>
-    </Card>
-
-    </Box>
-  );
-});
-
   const renderTabContent = useMemo(() => {
     if (loading) {
       return (
@@ -593,7 +513,14 @@ const renderBrandCard = useCallback( (item, type) => {
       <Grid container spacing={3}>
         {brands.map((item) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={item?.uuid || Math.random()}>
-            {renderBrandCard(item, tabValue === 0 ? 'viewed' : tabValue === 1 ? 'liked' : 'applied')}
+            <BrandCard 
+              item={item} 
+              type={tabValue === 0 ? 'viewed' : tabValue === 1 ? 'liked' : 'applied'}
+              likedStates={likedStates}
+              onViewDetails={handleViewDetails}
+              onToggleLike={toggleLike}
+              onToggleViewClose={toggleViewClose}
+            />
           </Grid>
         ))}
       </Grid>
@@ -614,13 +541,11 @@ const renderBrandCard = useCallback( (item, type) => {
         </Typography>
       </Box>
     );
-  }, [loading, error, tabValue, viewedBrands, likedBrands, appliedBrands, renderBrandCard]);
-
+  }, [loading, error, tabValue, viewedBrands, likedBrands, appliedBrands, likedStates, handleViewDetails, toggleLike, toggleViewClose]);
 
   return (
-   <Box sx={{ 
+    <Box sx={{ 
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%)',
       p: { xs: 2, md: 4 }
     }}>
       {/* Profile Section */}
@@ -665,9 +590,30 @@ const renderBrandCard = useCallback( (item, type) => {
         mt: 3,
         flexWrap: 'wrap'
       }}>
-        {renderStatCard(<Business />, 'Viewed', stats.totalViews, '76, 175, 80')}
-        {renderStatCard(<Favorite />, 'Liked', stats.totalLikes, '244, 67, 54')}
-        {renderStatCard(<AssignmentTurnedIn />, 'Applied', stats.totalApplications, '33, 150, 243')}
+        <StatCard 
+          icon={<Business />} 
+          title="Viewed" 
+          value={stats.totalViews} 
+          color="76, 175, 80"
+          isSelected={tabValue === 0}
+          onClick={() => setTabValue(0)}
+        />
+        <StatCard 
+          icon={<Favorite />} 
+          title="Liked" 
+          value={stats.totalLikes} 
+          color="244, 67, 54"
+          isSelected={tabValue === 1}
+          onClick={() => setTabValue(1)}
+        />
+        <StatCard 
+          icon={<AssignmentTurnedIn />} 
+          title="Applied" 
+          value={stats.totalApplications} 
+          color="33, 150, 243"
+          isSelected={tabValue === 2}
+          onClick={() => setTabValue(2)}
+        />
       </Box>
 
       {/* Main Content */}
