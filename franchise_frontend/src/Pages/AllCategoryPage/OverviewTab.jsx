@@ -960,152 +960,152 @@ const OverviewTab = ({ brand }) => {
     );
   };
 
-  const ExpansionLocationTags = ({ brand }) => {
-    const locations = Array.isArray(
-      brand.expansionLocationData?.expansionLocations?.domestic?.locations
-    )
-      ? brand.expansionLocationData.expansionLocations.domestic.locations.flatMap(
-          (loc) =>
-            Array.isArray(loc.districts)
-              ? loc.districts.flatMap((dist) =>
-                  Array.isArray(dist.cities)
-                    ? dist.cities.map((city) => ({
-                        city,
-                        district: dist.district,
-                        state: loc.state,
-                      }))
-                    : []
-                )
-              : []
-        )
-      : [];
+//   const ExpansionLocationTags = ({ brand }) => {
+//     const locations = Array.isArray(
+//       brand.expansionLocationData?.expansionLocations?.domestic?.locations
+//     )
+//       ? brand.expansionLocationData.expansionLocations.domestic.locations.flatMap(
+//           (loc) =>
+//             Array.isArray(loc.districts)
+//               ? loc.districts.flatMap((dist) =>
+//                   Array.isArray(dist.cities)
+//                     ? dist.cities.map((city) => ({
+//                         city,
+//                         district: dist.district,
+//                         state: loc.state,
+//                       }))
+//                     : []
+//                 )
+//               : []
+//         )
+//       : [];
 
-    const category = brand.franchiseDetails?.brandCategories || {};
-    const formattedChipsState = locations.map((loc, index) => ({
-      key: `${loc.state}-${index}`,
-      label: ` ${category.child || ""} franchise in-${loc.state}`,
-    }));
-    const formattedChipsDistrict = locations.map((loc, index) => ({
-      key: `${loc.district}-${index}`,
-      label: ` ${category.child || ""} franchise in-${loc.district}`,
-    }));
-    const formattedChipsCity = locations.map((loc, index) => ({
-      key: `${loc.city}-${index}`,
-      label: ` ${category.child || ""} franchise in-${loc.city}`,
-    }));
+//     const category = brand.franchiseDetails?.brandCategories || {};
+//     const formattedChipsState = locations.map((loc, index) => ({
+//       key: `${loc.state}-${index}`,
+//       label: ` ${category.child || ""} franchise in-${loc.state}`,
+//     }));
+//     const formattedChipsDistrict = locations.map((loc, index) => ({
+//       key: `${loc.district}-${index}`,
+//       label: ` ${category.child || ""} franchise in-${loc.district}`,
+//     }));
+//     const formattedChipsCity = locations.map((loc, index) => ({
+//       key: `${loc.city}-${index}`,
+//       label: ` ${category.child || ""} franchise in-${loc.city}`,
+//     }));
  
-    return (
-      <Box
-  sx={{
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
-    p: 2,
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",  // 👉 Creates 3 equal columns
-    gap: 2,
-    height: "90px",
-    overflowY: "auto",
-  }}
->
-  {/* State Column */}
-  <Box>
-    {formattedChipsState.length > 0 ? (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        {formattedChipsState.map((chip) => (
-          <Typography
-            key={chip.key}
-            variant="caption"
-            sx={{
-              borderRadius: "4px",
-              color: colors.dark,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {chip.label}
-          </Typography>
-        ))}
-      </Box>
-    ) : (
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          textAlign: "center",
-          mt: 2,
-        }}
-      >
-        No locations available
-      </Typography>
-    )}
-  </Box>
+//     return (
+//       <Box
+//   sx={{
+//     border: "1px solid #e0e0e0",
+//     borderRadius: "8px",
+//     p: 2,
+//     display: "grid",
+//     gridTemplateColumns: "repeat(3, 1fr)",  // 👉 Creates 3 equal columns
+//     gap: 2,
+//     height: "90px",
+//     overflowY: "auto",
+//   }}
+// >
+//   {/* State Column */}
+//   <Box>
+//     {formattedChipsState.length > 0 ? (
+//       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+//         {formattedChipsState.map((chip) => (
+//           <Typography
+//             key={chip.key}
+//             variant="caption"
+//             sx={{
+//               borderRadius: "4px",
+//               color: colors.dark,
+//               whiteSpace: "nowrap",
+//             }}
+//           >
+//             {chip.label}
+//           </Typography>
+//         ))}
+//       </Box>
+//     ) : (
+//       <Typography
+//         variant="body2"
+//         sx={{
+//           color: "text.secondary",
+//           textAlign: "center",
+//           mt: 2,
+//         }}
+//       >
+//         No locations available
+//       </Typography>
+//     )}
+//   </Box>
 
-  {/* District Column */}
-  <Box>
-    {formattedChipsDistrict.length > 0 ? (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        {formattedChipsDistrict.map((chip) => (
-          <Typography
-            key={chip.key}
-            variant="caption"
-            sx={{
-              borderRadius: "4px",
-              color: colors.dark,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {chip.label}
-          </Typography>
-        ))}
-      </Box>
-    ) : (
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          textAlign: "center",
-          mt: 2,
-        }}
-      >
-        No locations available
-      </Typography>
-    )}
-  </Box>
+//   {/* District Column */}
+//   <Box>
+//     {formattedChipsDistrict.length > 0 ? (
+//       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+//         {formattedChipsDistrict.map((chip) => (
+//           <Typography
+//             key={chip.key}
+//             variant="caption"
+//             sx={{
+//               borderRadius: "4px",
+//               color: colors.dark,
+//               whiteSpace: "nowrap",
+//             }}
+//           >
+//             {chip.label}
+//           </Typography>
+//         ))}
+//       </Box>
+//     ) : (
+//       <Typography
+//         variant="body2"
+//         sx={{
+//           color: "text.secondary",
+//           textAlign: "center",
+//           mt: 2,
+//         }}
+//       >
+//         No locations available
+//       </Typography>
+//     )}
+//   </Box>
 
-  {/* City Column */}
-  <Box>
-    {formattedChipsCity.length > 0 ? (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        {formattedChipsCity.map((chip) => (
-          <Typography
-            key={chip.key}
-            variant="caption"
-            sx={{
-              borderRadius: "4px",
-              color: colors.dark,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {chip.label}
-          </Typography>
-        ))}
-      </Box>
-    ) : (
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          textAlign: "center",
-          mt: 2,
-        }}
-      >
-        No locations available
-      </Typography>
-    )}
-  </Box>
-</Box>
+//   {/* City Column */}
+//   <Box>
+//     {formattedChipsCity.length > 0 ? (
+//       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+//         {formattedChipsCity.map((chip) => (
+//           <Typography
+//             key={chip.key}
+//             variant="caption"
+//             sx={{
+//               borderRadius: "4px",
+//               color: colors.dark,
+//               whiteSpace: "nowrap",
+//             }}
+//           >
+//             {chip.label}
+//           </Typography>
+//         ))}
+//       </Box>
+//     ) : (
+//       <Typography
+//         variant="body2"
+//         sx={{
+//           color: "text.secondary",
+//           textAlign: "center",
+//           mt: 2,
+//         }}
+//       >
+//         No locations available
+//       </Typography>
+//     )}
+//   </Box>
+// </Box>
 
-    );
-  };
+//     );
+//   };
 
   const hasData = (sectionData) => {
     if (Array.isArray(sectionData)) {
@@ -1683,21 +1683,7 @@ const OverviewTab = ({ brand }) => {
               supplied. Please read the terms & conditions on MrFranchise.in
             </Typography>
           </Box>
-          {/* Location Tags - Only show if data exists */}
-          {hasData(
-            brand.expansionLocationData?.expansionLocations?.domestic?.locations
-          ) && (
-            <>
-              <Divider sx={{ my: 3, borderColor: "rgba(0,0,0,0.1)" }} />
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: 700, mb: 2, color: colors.dark }}
-              >
-                Location Tags
-              </Typography>
-              <ExpansionLocationTags brand={brand} />
-            </>
-          )}
+        
         </Box>
       ),
     },

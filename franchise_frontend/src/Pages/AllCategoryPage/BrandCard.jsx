@@ -24,6 +24,7 @@ import { postView } from "../../Utils/function/view.jsx";
 const cardStyles = {
   width: 320,
   height: 520,
+  ml: 1.5,
   display: "flex",
   flexDirection: "column",
   transition: "transform 0.3s, box-shadow 0.3s",
@@ -105,7 +106,7 @@ const BrandCard = memo(
     );
 
     const handleOpenBrand = useCallback(() => {
-      console.log("Open brand dialog ============", brand);
+      // console.log("Open brand dialog ============", brand);
       if ("requestIdleCallback" in window) {
         requestIdleCallback(() => {
           postView(uuid);
@@ -152,7 +153,7 @@ const BrandCard = memo(
               sx={{
                 position: "absolute",
                 top: 8,
-                right: 8,
+                right: 2,
                 zIndex: 2,
                 backgroundColor: isSelectedForComparison
                   ? "rgba(76, 175, 80, 0.9)"

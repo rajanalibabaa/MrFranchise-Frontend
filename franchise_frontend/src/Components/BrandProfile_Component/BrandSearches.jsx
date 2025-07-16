@@ -59,7 +59,7 @@ const FeedBack = () => {
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log("Feedback submitted:", response.data);
+      // console.log("Feedback submitted:", response.data);
       setFeedbackText('');
       setSelectedTopic('');
       setValue(2);
@@ -159,7 +159,7 @@ const ComplaintContent = () => {
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log("Complaint submitted:", response.data);
+      // console.log("Complaint submitted:", response.data);
       alert("Complaint submitted successfully!");
       setSelectedTopic('');
       setComplaintText('');

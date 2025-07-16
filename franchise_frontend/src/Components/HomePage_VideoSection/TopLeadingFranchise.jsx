@@ -313,6 +313,7 @@ const TopLeadingFranchise = () => {
   const [showLogin, setShowLogin] = useState(false);
   
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
 
@@ -453,9 +454,10 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
               backgroundColor: "transparent",
             },
           }}
-          onClick={() => {
-            navigate("/brandviewpage");
-          }}
+          onClick={async () => {
+                dispatch(showLoading());
+                navigate("/brandviewpage");
+              }}
         >
           View More
         </Button>

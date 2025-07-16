@@ -33,6 +33,8 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 // import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 import { postView } from "../../Utils/function/view";
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import { useDispatch } from "react-redux";
+import { showLoading } from "../../Redux/Slices/loadingSlice";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -377,7 +379,7 @@ const TopFoodFranchises = () => {
   const [showLogin, setShowLogin] = useState(false);
   
   const navigate = useNavigate();
-
+const dispatch = useDispatch();
 const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
   // Filter food franchises
@@ -534,7 +536,7 @@ const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
             },
           }}
           onClick={async () => {
-            
+            dispatch(showLoading())
             navigate("/brandviewpage");
             
           }}

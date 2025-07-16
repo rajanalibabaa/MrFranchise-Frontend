@@ -27,6 +27,7 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 
 import { postView } from "../../Utils/function/view";
+import { showLoading } from "../../Redux/Slices/loadingSlice";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -334,6 +335,7 @@ const TopDesertBakerys = () => {
   const [showLogin, setShowLogin] = useState(false);
   
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
   // Filter brands that belong to Beverage Franchise subcategory
@@ -492,8 +494,10 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
               backgroundColor: "transparent",
             },
           }}
-          onClick={() =>
-               navigate("/brandviewpage")
+          onClick={async () => {
+                dispatch(showLoading());
+                navigate("/brandviewpage");
+              }
           }
         >
           View More

@@ -316,7 +316,7 @@
 
 export const openBrandDialog = (brand) => {
 
-  console.log("============ :",brand)
+  // console.log("============ :",brand)
   const brandSlug = brand.brandDetails?.brandName
     ?.toLowerCase()
     ?.replace(/\s+/g, '-')

@@ -31,6 +31,7 @@ import { useNavigate } from "react-router-dom";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { postView } from "../../Utils/function/view";
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import { useDispatch } from "react-redux";
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
@@ -316,6 +317,7 @@ const TopRestaurantsFranchise = () => {
   const [showLogin, setShowLogin] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
   // Filter brands that belong to Beverage Franchise subcategory
@@ -465,10 +467,10 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
               backgroundColor: "transparent",
             },
           }}
-          onClick={() => {
-             navigate("/brandviewpage");
-           
-          }}
+          onClick={async () => {
+                dispatch(showLoading());
+                navigate("/brandviewpage");
+              }}
         >
           View More
         </Button>

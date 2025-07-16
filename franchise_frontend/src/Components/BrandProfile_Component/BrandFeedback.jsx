@@ -61,7 +61,7 @@ const BrandFeedBack = () => {
                     },
                 }
             );
-            console.log("Feedback submitted:", response.data);
+            // console.log("Feedback submitted:", response.data);
             alert("Feedback submitted successfully!");
             setFeedbackText('');
             setSelectedTopic('');

@@ -170,7 +170,7 @@ const BrandListingController = () => {
         );
         const brand = response.data.brandListing || response.data.data;
         if (response.data.success && brand) {
-          console.log("data id:",response.data.data);
+          // console.log("data id:",response.data.data);
           const flatData = flattenBrandData(brand);
           setFormData(flatData);
           setOriginalData(brand);

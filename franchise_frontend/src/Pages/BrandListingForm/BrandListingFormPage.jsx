@@ -317,7 +317,7 @@ const BrandListingFormPage = () => {
           gallery: formData.gallery,
         };
 
-        console.log("Submission data:", submissionData);
+        // console.log("Submission data:", submissionData);
 
         const response = await axios.post(
           "https://api.yourbackend.com/brand-listings",

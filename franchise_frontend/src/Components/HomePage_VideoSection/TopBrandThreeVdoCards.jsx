@@ -198,18 +198,7 @@ const toggleLike = useToggleLike();
     </Typography>
   );
 
-  const formatInvestment = (range) => {
-  if (!range) return "N/A";
-  return `${range.replace(/-/g, " - ").replace(/(\d+)L/g, "$1 L")}`;
-};
 
-const formatArea = (area) => {
-  if (!area) return "N/A";
-  return area
-    .replace(/-/g, " - ")
-    .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") // comma formatting
-    .replace(/\s*Sq\.?\s*Ft\.?/i, "Sq. Ft.");
-};
 
   return (
     <Box
@@ -498,12 +487,12 @@ const formatArea = (area) => {
                     >
 <Fact
   label="Investment"
-  value={formatInvestment(mainBrand.franchiseDetails?.fico?.[0]?.investmentRange)}
+  value={mainBrand.franchiseDetails?.fico?.[0]?.investmentRange}
 />
 
 <Fact
   label="Area Required"
-  value={formatArea(mainBrand.franchiseDetails?.fico?.[0]?.areaRequired)}
+  value={mainBrand.franchiseDetails?.fico?.[0]?.areaRequired}
 />
                       <Fact
                         label="Franchise Type"

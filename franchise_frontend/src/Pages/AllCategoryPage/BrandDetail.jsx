@@ -44,9 +44,8 @@ import axios from "axios";
 import OverviewTab from "./OverviewTab.jsx";
 import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
-// import { useToggleLike } from '../../Hooks/Fetchbrands';
 import { useToggleLike } from '../../Hooks/Fetchbrands.jsx';
-// import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
+import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx";
 
 
 const BrandDetails = ({ brandData }) => {
@@ -331,7 +330,7 @@ const handleSubmit = useCallback(async (e) => {
       return;
     }
 
-    console.log("payload :", payload)
+    // console.log("payload :", payload)
 
     const response = await axios.post(
       "http://localhost:5000/api/v1/instantapply/postApplication",
@@ -406,6 +405,154 @@ const maskEmail = (email) => {
 const handleOpenShareCLick = (event) => {
   setAnchorEl(event.currentTarget);
 };
+
+  const ExpansionLocationTags = ({ brand }) => {
+    const locations = Array.isArray(
+      brand.expansionLocationData?.expansionLocations?.domestic?.locations
+    )
+      ? brand.expansionLocationData.expansionLocations.domestic.locations.flatMap(
+          (loc) =>
+            Array.isArray(loc.districts)
+              ? loc.districts.flatMap((dist) =>
+                  Array.isArray(dist.cities)
+                    ? dist.cities.map((city) => ({
+                        city,
+                        district: dist.district,
+                        state: loc.state,
+                      }))
+                    : []
+                )
+              : []
+        )
+      : [];
+
+    const category = brand.franchiseDetails?.brandCategories || {};
+    const formattedChipsState = locations.map((loc, index) => ({
+      key: `${loc.state}-${index}`,
+      label: ` ${category.child || ""} franchise in-${loc.state}`,
+    }));
+    const formattedChipsDistrict = locations.map((loc, index) => ({
+      key: `${loc.district}-${index}`,
+      label: ` ${category.child || ""} franchise in-${loc.district}`,
+    }));
+    const formattedChipsCity = locations.map((loc, index) => ({
+      key: `${loc.city}-${index}`,
+      label: ` ${category.child || ""} franchise in-${loc.city}`,
+    }));
+ 
+    return (
+     <Box
+  sx={{
+    border: "1px solid #e0e0e0",
+    borderRadius: "8px",
+    p: 2,
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",  // 👉 Creates 3 equal columns
+    gap: 2,
+    height: "90px",
+    overflowY: "auto",
+  }}
+>
+  {/* State Column */}
+  <Box>
+    {formattedChipsState.length > 0 ? (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        {formattedChipsState.map((chip) => (
+          <Typography
+            key={chip.key}
+            variant="caption"
+            sx={{
+              borderRadius: "4px",
+              color: 'black',
+              whiteSpace: "nowrap",
+            }}
+          >
+            {chip.label}
+          </Typography>
+        ))}
+      </Box>
+    ) : (
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          textAlign: "center",
+          mt: 2,
+        }}
+      >
+        No locations available
+      </Typography>
+    )}
+  </Box>
+
+  {/* District Column */}
+  <Box>
+    {formattedChipsDistrict.length > 0 ? (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        {formattedChipsDistrict.map((chip) => (
+          <Typography
+            key={chip.key}
+            variant="caption"
+            sx={{
+              borderRadius: "4px",
+              color: 'black',
+              whiteSpace: "nowrap",
+            }}
+          >
+            {chip.label}
+          </Typography>
+        ))}
+      </Box>
+    ) : (
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          textAlign: "center",
+          mt: 2,
+        }}
+      >
+        No locations available
+      </Typography>
+    )}
+  </Box>
+
+  {/* City Column */}
+  <Box>
+    {formattedChipsCity.length > 0 ? (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        {formattedChipsCity.map((chip) => (
+          <Typography
+            key={chip.key}
+            variant="caption"
+            sx={{
+              borderRadius: "4px",
+              color: 'black',
+              whiteSpace: "nowrap",
+            }}
+          >
+            {chip.label}
+          </Typography>
+        ))}
+      </Box>
+    ) : (
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          textAlign: "center",
+          mt: 2,
+        }}
+      >
+        No locations available
+      </Typography>
+    )}
+  </Box>
+</Box>
+ 
+
+    );
+  };
   return (
     <>
       <Navbar />
@@ -1534,8 +1681,23 @@ const handleOpenShareCLick = (event) => {
               </Typography>
             </Box>
           </Box>
-        )}              
+        )} 
+
+         
+           
       </Box>
+              <LikedBrands />
+<Box sx={{
+          width: "90%",
+          maxWidth: 1200,
+          mx: "auto",
+          my: 4,
+          px: isMobile ? 2 : 4,
+        }}  color={'#ff9800'} >
+          <Typography variant="h6" sx={{mb:2}}>
+            Tags
+          </Typography>
+          <ExpansionLocationTags brand={selectedBrand} /></Box> 
 {/* <ViewedBrands /> */}
       <Footer />
     </>

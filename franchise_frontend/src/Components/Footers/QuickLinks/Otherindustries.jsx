@@ -66,7 +66,7 @@ const Otherindustries = () => {
 
  const handleSubmit = async (e) => {
   e.preventDefault();
-  console.log("Form submitted:", formData);
+  // console.log("Form submitted:", formData);
   if (validateForm()) {
     try {
       const payload = {
@@ -78,7 +78,7 @@ const Otherindustries = () => {
         message: formData.message,
       };
 
-      console.log("Payload:", payload);
+      // console.log("Payload:", payload);
 
       const response = await axios.post(
         "https://mrfranchisebackend.mrfranchise.in/api/v1/otherindustries/recievingOtherIndustriesData",
@@ -90,7 +90,7 @@ const Otherindustries = () => {
         }
       );
 
-      console.log("Server response:", response.data);
+      // console.log("Server response:", response.data);
       alert("Registration form submitted successfully!");
 
       // Reset form

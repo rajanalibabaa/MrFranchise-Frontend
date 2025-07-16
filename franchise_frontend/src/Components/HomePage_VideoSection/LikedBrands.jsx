@@ -26,10 +26,11 @@ import { useNavigate } from "react-router-dom";
 import { postView } from "../../Utils/function/view";
 import { openBrandDialog } from "../../Hooks/Fetchbrands";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { api } from "../../Api/api";
 import img from "../../assets/images/brandLogo.jpg";
 import { useBrands } from "../../Hooks/Fetchbrands";
+import { showLoading } from "../../Redux/Slices/loadingSlice";
  
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -340,6 +341,7 @@ const LikedBrands = () => {
   const [localLikedBrands, setLocalLikedBrands] = useState([]);
  
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
  
@@ -350,7 +352,7 @@ useEffect(() => {
   if (brands.length > 0) {
     const liked = brands.filter(brand => brand.isLiked === true);
     setLocalLikedBrands(liked);
-    console.log("Local Liked Brands:", liked); // Moved inside
+    // console.log("Local Liked Brands:", liked); // Moved inside
   }
 }, [brands]);
  
@@ -387,7 +389,7 @@ useEffect(() => {
      
       setTimeout(() => setRemoveMsg(""), 3000);
     } catch (error) {
-      console.error("Remove error:", error);
+      // console.error("Remove error:", error);
       setRemoveMsg("Failed to remove brand");
     } finally {
       setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
@@ -523,7 +525,10 @@ useEffect(() => {
               backgroundColor: "transparent",
             },
           }}
-          onClick={() => navigate("/brandviewpage")}
+          onClick={async () => {
+                          dispatch(showLoading());
+                          navigate("/brandviewpage");
+                        }}
         >
           View More
         </Button>
@@ -568,7 +573,7 @@ useEffect(() => {
         }}>
           <Favorite color="disabled" sx={{ fontSize: 60, mb: 2 }} />
           <Typography variant="h6" color="text.secondary">
-            No liked brands yet
+          Please login to view your liked brands
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             Like brands to save them for later

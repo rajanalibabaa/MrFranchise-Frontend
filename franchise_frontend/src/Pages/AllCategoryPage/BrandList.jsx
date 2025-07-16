@@ -67,7 +67,7 @@ const FilterPanelSkeleton = React.memo(() => (
 // Lazy load heavy components
 const BrandComparison = lazy(() => import("./BrandComparison"));
 const FilterPanel = lazy(() => import("./FillterPannel.jsx"));
-const BrandDetail = lazy(() => import("./BrandDetail.jsx"));
+// const BrandDetail = lazy(() => import("./BrandDetail.jsx"));
 const BrandCard = lazy(() => import("./BrandCard.jsx"));
 
 // Memoized BrandCard with proper props comparison
@@ -513,10 +513,10 @@ const handleLikeClick = useCallback(
             </Box>
           ) : (
             <>
-              <Typography variant="h4" gutterBottom color="#ff9800">
+              <Typography sx={{ml: 2}} variant="h4" gutterBottom color="#ff9800">
                 Available Franchise Brands
               </Typography>
-              <Typography variant="body1" gutterBottom>
+              <Typography sx={{ml: 2,mb: 2}} variant="body1" gutterBottom>
                 Showing {filteredBrands.length} of {brands.length} brands
               </Typography>
 
