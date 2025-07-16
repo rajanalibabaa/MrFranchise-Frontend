@@ -211,7 +211,7 @@ const BrandListingController = () => {
 
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${uuid}`
+          `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandListingByUUID/${uuid}`
         );
 
         // console.log("✅ Full API Response:", response.data);
@@ -262,7 +262,7 @@ const BrandListingController = () => {
       // console.log("📤 Saving data to API:", apiData);
 
       const response = await axios.put(
-        `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
         apiData
       );
 

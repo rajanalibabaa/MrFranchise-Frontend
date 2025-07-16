@@ -119,17 +119,17 @@ const BrandDetails = ({ data = {}, onChange, errors = {} }) => {
     if (type === "email") {
       fieldName = "email";
       fieldValue = data.email;
-      endpoint = "http://localhost:5000/api/v1/otpverify/send-otp-email";
+      endpoint = "https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-email";
       payload = { email: data.email, type: "email" };
     } else if (type === "mobile") {
       fieldName = "mobileNumber";
       fieldValue = data.mobileNumber;
-      endpoint = "http://localhost:5000/api/v1/otpverify/send-otp-mobile";
+      endpoint = "https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-mobile";
       payload = { mobile: `${phoneCode}${data.mobileNumber}`, type: "mobile" };
     } else if (type === "whatsapp") {
       fieldName = "whatsappNumber";
       fieldValue = data.whatsappNumber;
-      endpoint = "http://localhost:5000/api/v1/otpverify/send-otp-whatsapp";
+      endpoint = "https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-whatsapp";
       payload = { mobile: `${phoneCode}${data.whatsappNumber}`, type: "whatsapp" };
     }
 
@@ -208,7 +208,7 @@ const BrandDetails = ({ data = {}, onChange, errors = {} }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/otpverify/verify-otp",
+        "https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/verify-otp",
         {
           identifier: type === "email" 
             ? data.email 

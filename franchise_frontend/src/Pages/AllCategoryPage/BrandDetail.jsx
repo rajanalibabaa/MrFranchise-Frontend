@@ -50,7 +50,7 @@ import {
   AccountBalance as AccountBalanceIcon
 } from '@mui/icons-material';
 
-const API_BASE_URL = 'http://localhost:5000/api/v1';
+const API_BASE_URL = 'https://mrfranchisebackend.mrfranchise.in/api/v1';
 
 const BrandDashBoard = ({ selectedSection, sectionContent }) => {
   const theme = useTheme();

@@ -53,7 +53,7 @@ const BrandFeedBack = () => {
 
         try {
             const response = await axios.post(
-                "http://localhost:5000/api/feedback/createFeedback",
+                "https://mrfranchisebackend.mrfranchise.in/api/feedback/createFeedback",
                 formattedData,
                 {
                     headers: {

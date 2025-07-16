@@ -44,7 +44,7 @@ import {
   FilterList as FilterIcon
 } from '@mui/icons-material';
 
-const API_BASE_URL = 'http://localhost:5000/api/v1';
+const API_BASE_URL = 'https://mrfranchisebackend.mrfranchise.in/api/v1';
 
 // Professional color palette
 const professionalColors = {

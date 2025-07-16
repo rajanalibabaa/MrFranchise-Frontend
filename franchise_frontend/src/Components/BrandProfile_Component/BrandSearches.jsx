@@ -55,7 +55,7 @@ const FeedBack = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/feedback/createFeedback",
+        "https://mrfranchisebackend.mrfranchise.in/api/feedback/createFeedback",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -155,7 +155,7 @@ const ComplaintContent = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/complaint/createComplaint",
+        "https://mrfranchisebackend.mrfranchise.in/api/complaint/createComplaint",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
