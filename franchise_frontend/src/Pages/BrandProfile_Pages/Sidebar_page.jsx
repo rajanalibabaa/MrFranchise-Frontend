@@ -8,7 +8,7 @@ import Navbar from "../../Components/Navbar/NavBar";
 const Sidebar = () => {
   return (
     <>
-    <Navbar/>
+    {/* <Navbar/> */}
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
      
       <Box
@@ -65,13 +65,10 @@ const Sidebar = () => {
             Dashboard
           </RouterLink>
           
-          <RouterLink to="/brandDashboard/brandaddvedios" style={navLinkStyle}>
-            Add Videos
-          </RouterLink>
           <RouterLink to="/brandDashboard/brandlistingcontrol" style={navLinkStyle}>
             Brand Listing Controller
           </RouterLink>
-          <RouterLink to="/brandDashboard/branddetailcontrol" style={navLinkStyle}>
+          {/* <RouterLink to="/brandDashboard/branddetailcontrol" style={navLinkStyle}>
           Brand Details
           </RouterLink>
            <RouterLink to="/brandDashboard/franchisedetailcontrol" style={navLinkStyle}>
@@ -82,9 +79,9 @@ const Sidebar = () => {
           </RouterLink>
             <RouterLink to="/brandDashboard/uploadcontrol" style={navLinkStyle}>
           Uploads
-          </RouterLink>
+          </RouterLink> */}
           <RouterLink to="/brandDashboard/brandsearchus" style={navLinkStyle}>
-            SearchUs
+            Reach Us
           </RouterLink>
         </Box>
 

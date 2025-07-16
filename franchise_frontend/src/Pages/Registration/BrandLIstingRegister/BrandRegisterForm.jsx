@@ -36,9 +36,6 @@ import {
 } from "@mui/material";
 import { useTheme, useMediaQuery } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import CloseIcon from "@mui/icons-material/Close";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@mui/icons-material/Delete";
 import BrandDetails from "./BrandDetails";
 import FranchiseDetails from "./FranchiseDetails";
 import Uploads from "../BrandLIstingRegister/BrandRegisterUploads";
@@ -50,10 +47,10 @@ import {
 import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress from "@mui/material/CircularProgress";
-import Footer from "../../../Components/Footers/Footer";
-import categories from "./BrandCategories";
 import BrandExpansionLocationDetails from "./BrandExpansionLocationDetails";
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import { useDispatch } from "react-redux";
+import { showLoading } from "../../../Redux/Slices/loadingSlice";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
 const FORM_STEP_KEY = "brandRegistrationActiveStep";
@@ -216,7 +213,7 @@ const initialFormData = {
 
 const BrandRegisterForm = () => {
   const navigate = useNavigate();
-
+const dispatch = useDispatch();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // <600px
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md")); // 600px - 900px
@@ -322,6 +319,11 @@ const BrandRegisterForm = () => {
 
   const handleBack = () => {
     setActiveStep((prev) => prev - 1);
+  };
+
+  const handleHomeClick = () => {
+    dispatch(showLoading());
+      navigate("/");   
   };
 
   const handleSubmit = async () => {
@@ -464,15 +466,7 @@ const BrandRegisterForm = () => {
       }
     }
   };
-  const handleCountryChange = (event) => {
-    setFormData((prev) => ({
-      ...prev,
-      brandDetails: {
-        ...prev.brandDetails,
-        country: event.target.value,
-      },
-    }));
-  };
+ 
 
   const handleBrandDetailsChange = (update) => {
     setFormData((prev) => ({
@@ -524,15 +518,7 @@ const BrandRegisterForm = () => {
     }));
   };
 
-  const onAwardTextChange = (value) => {
-    setFormData((prev) => ({
-      ...prev,
-      brandDetails: {
-        ...prev.brandDetails,
-        pancardNumber: value,
-      },
-    }));
-  };
+
 
   const handlePreviewOpen = () => {
     setOpenPreview(true);
@@ -542,15 +528,7 @@ const BrandRegisterForm = () => {
     setOpenPreview(false);
   };
 
-  const handleLocationChange = (newData) => {
-    setFormData((prev) => ({
-      ...prev,
-      expansionLocationData: {
-        ...prev.expansionLocationData,
-        ...newData,
-      },
-    }));
-  };
+  
   const handleCancel = () => {
     // Show confirmation dialog
     const confirmCancel = window.confirm(
@@ -644,176 +622,9 @@ const BrandRegisterForm = () => {
     }
   };
 
-  const handleRemoveCategory = (index) => {
-    const updatedCategories = [...formData.brandDetails.brandCategories];
-    updatedCategories.splice(index, 1);
-    setFormData((prev) => ({
-      ...prev,
-      brandDetails: {
-        ...prev.brandDetails,
-        brandCategories: updatedCategories,
-      },
-    }));
-  };
 
-  const handleRemoveExpansionLocation = (index) => {
-    const updatedLocations = [...formData.brandDetails.expansionLocation];
-    updatedLocations.splice(index, 1);
-    setFormData((prev) => ({
-      ...prev,
-      brandDetails: {
-        ...prev.brandDetails,
-        expansionLocation: updatedLocations,
-      },
-    }));
-  };
 
-  const handleRemoveFicoModel = (index) => {
-    const updatedFico = [...formData.franchiseDetails.fico];
-    updatedFico.splice(index, 1);
-    setFormData((prev) => ({
-      ...prev,
-      franchiseDetails: {
-        ...prev.franchiseDetails,
-        fico: updatedFico,
-      },
-    }));
-  };
 
-  const renderSelectedCategories = () => {
-    if (!formData.brandDetails.brandCategories?.length) return null;
-
-    return (
-      <Box sx={{ mt: 1 }}>
-        <Accordion elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-              Selected Categories (
-              {formData.brandDetails.brandCategories.length})
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={1}>
-              {formData.brandDetails.brandCategories.map((category, index) => (
-                <Grid item key={index}>
-                  <Chip
-                    label={`${category.main} > ${category.sub} > ${category.child}`}
-                    variant="outlined"
-                    sx={{ mr: 1, mb: 1 }}
-                    onDelete={() => handleRemoveCategory(index)}
-                    deleteIcon={<CloseIcon />}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
-    );
-  };
-
-  const renderExpansionLocations = () => {
-    if (!formData.brandDetails.expansionLocation?.length) return null;
-
-    return (
-      <Box sx={{ mt: 1 }}>
-        <Accordion elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-              Expansion Locations (
-              {formData.brandDetails.expansionLocation.length})
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={1}>
-              {formData.brandDetails.expansionLocation.map(
-                (location, index) => (
-                  <Grid item key={index}>
-                    <Chip
-                      label={`${location.city}, ${location.state}, ${location.country}`}
-                      variant="outlined"
-                      sx={{ mr: 1, mb: 1 }}
-                      onDelete={() => handleRemoveExpansionLocation(index)}
-                      deleteIcon={<CloseIcon />}
-                    />
-                  </Grid>
-                )
-              )}
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
-    );
-  };
-
-  const renderFicoModels = () => {
-    if (!formData.franchiseDetails.fico?.length) return null;
-
-    // Define the order of fields you want to display
-    const fieldOrder = [
-      "franchiseModel",
-      "franchiseType",
-      "investmentRange",
-      "areaRequired",
-      "franchiseFee",
-      "royaltyFee",
-      "interiorCost",
-      "stockCost",
-      "otherCost",
-      "roi",
-      // "roiPeriod",
-      "payBackPeriod",
-      "breakEven",
-      "requireWorkingCapital",
-      "marginOnSales",
-      // "fixedReturn",
-      "propertyType",
-    ];
-
-    return (
-      <Box sx={{ mt: 1 }}>
-        <Accordion elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-              FICO Models ({formData.franchiseDetails.fico.length})
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={2}>
-              {formData.franchiseDetails.fico.map((model, index) => (
-                <Grid item xs={12} key={index}>
-                  <Paper
-                    sx={{
-                      p: 2,
-                      position: "relative",
-                      border: "1px solid #e0e0e0",
-                    }}
-                  >
-                    <IconButton
-                      sx={{ position: "absolute", top: 8, right: 8 }}
-                      onClick={() => handleRemoveFicoModel(index)}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                    <Grid container spacing={1}>
-                      {fieldOrder.map((field) => (
-                        <Grid item xs={12} sm={6} key={field}>
-                          <Typography variant="body2">
-                            <strong>{formatFieldName(field)}:</strong>{" "}
-                            {model[field] || "Not specified"}
-                          </Typography>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
-    );
-  };
 
   const formatFieldName = (name) => {
     return name
@@ -823,12 +634,6 @@ const BrandRegisterForm = () => {
       .replace(/Pancard/i, "PAN Card");
   };
 
-  const formatFieldValue = (value) => {
-    if (Array.isArray(value)) {
-      return value.length > 0 ? value.join(", ") : "None";
-    }
-    return value || "Not provided";
-  };
 
   const renderPreviewContent = () => {
     const {
@@ -1440,7 +1245,7 @@ const BrandRegisterForm = () => {
             mt={1}
           >
             <Button
-              onClick={() => navigate("/")}
+              onClick={handleHomeClick}
               sx={{
                 backgroundColor: "#7ad03a",
                 color: "white",

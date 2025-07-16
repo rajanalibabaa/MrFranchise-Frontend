@@ -46,7 +46,7 @@ import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 // import { useToggleLike } from '../../Hooks/Fetchbrands';
 import { useToggleLike } from '../../Hooks/Fetchbrands.jsx';
-import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
+// import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
 
 
 const BrandDetails = ({ brandData }) => {
@@ -402,6 +402,10 @@ const maskEmail = (email) => {
   return `${visiblePart}${maskedPart}@${domain}`;
 };
 
+
+const handleOpenShareCLick = (event) => {
+  setAnchorEl(event.currentTarget);
+};
   return (
     <>
       <Navbar />
@@ -418,7 +422,7 @@ const maskEmail = (email) => {
         <Box
           sx={{
             position: "fixed",
-            bottom: isMobile ? 35 : 310,
+            bottom: isMobile ? 35 : 330,
             right: isMobile ? 0 : 20,
             left: isMobile ? 0 : "auto",
             display: "flex",
@@ -1532,7 +1536,7 @@ const maskEmail = (email) => {
           </Box>
         )}              
       </Box>
-<ViewedBrands />
+{/* <ViewedBrands /> */}
       <Footer />
     </>
   );

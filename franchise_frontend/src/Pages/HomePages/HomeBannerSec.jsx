@@ -40,7 +40,7 @@ const dynamicComponents = {
   LikedBrands: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/LikedBrands.jsx")
   )),
-  ViewerBrands: withSuspense(React.lazy(() =>
+  ViewedBrands: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/ViewerBrands.jsx")
 )),
   TopCafeBrandsFranchise: withSuspense(React.lazy(() =>
@@ -104,7 +104,7 @@ const pageConfig = {
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     },
     {
-      component: "ViewerBrands",
+      component: "ViewedBrands",
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     },
@@ -228,7 +228,7 @@ const bannerTexts = [
     subtitle: {
       text: "From Startup Food kiosks To International Food Chains We Have Everything You Need To Start Your Food Franchise Journey",
       highlight: {
-        text: "food franchise journey",
+        // text: "food franchise journey",
         color: "#ff9800",
         lineHeight: "1.5",
         fontWeight: "bold"
@@ -365,14 +365,14 @@ const HomeBannerSec = () => {
         sessionStorage.setItem("popup-shown", "true");
       }
       dispatch(hideLoading());
-    }, 1000);
+    }, 2000);
   }, [controls, dispatch]);
 
   // Rotate text every 2 minutes
   useEffect(() => {
     const interval = setInterval(() => {
       setBannerIndex((prev) => (prev + 1) % bannerTexts.length);
-    }, 1000); // 2 minutes
+    }, 120000); // 2 minutes
     return () => clearInterval(interval);
   }, []);
 
@@ -389,7 +389,7 @@ const HomeBannerSec = () => {
           px: 2,
           position: "relative",
           overflow: "hidden",
-          backgroundColor: sectionConfig.background || '#fffaf7',
+          // backgroundColor: sectionConfig.background || '#fffaf7',
           ...(sectionConfig.backgroundImage && {
             backgroundImage: `linear-gradient(${sectionConfig.background}), url(${sectionConfig.backgroundImage})`,
             backgroundSize: "cover",

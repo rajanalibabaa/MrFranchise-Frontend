@@ -28,29 +28,20 @@ const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
   open={open}
   anchorEl={anchorEl}
   onClose={handleClose}
-  anchorOrigin={{
-    vertical: "top",
-    horizontal: "left",
-  }}
+
   PaperProps={{
     sx: {
         marginLeft:"100px",
       boxShadow: "none",
     //   color :"white",
-      backgroundColor: "white", 
-    },
+      backgroundColor: "transparent", 
+zIndex: 1300,    },
   }}
 >
   <Box
-    display="flex"
-    flexDirection="column"
-    alignItems="center"
     sx={{ backgroundColor: "transparent", p: 1 }} // optional padding
   >
-    {/* Remove this title if you want completely icon-only */}
-    <Typography variant="subtitle1" gutterBottom sx={{ display: "none" }}>
-      Share this via
-    </Typography>
+
 
     <Box display="flex" flexDirection="column" gap={1}>
       <IconButton
