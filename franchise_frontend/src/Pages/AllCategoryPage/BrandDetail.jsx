@@ -1,43 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
   Typography,
-  Avatar,
-  Tabs,
-  Tab,
-  Card,
-  CardContent,
   Grid,
-  Button,
-  CircularProgress,
-  CardMedia,
-  CardActions,
-  Divider,
-  Table,
-  TableContainer,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
   Paper,
+  Button,
   TextField,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
   MenuItem,
-  useMediaQuery,
-  useTheme,
+  CircularProgress,
+  Modal,
   IconButton,
+  Divider,
+  Drawer,
+  Avatar,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  ToggleButton,
-  ToggleButtonGroup
-} from '@mui/material';
-import { useSelector } from 'react-redux';
-import axios from 'axios';
+  useTheme,
+  useMediaQuery,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableCell,
+  TableRow,
+} from "@mui/material";
 import {
   Close,
   Description,
@@ -165,7 +154,7 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
     }
   }, [investorUUID, AccessToken]);
 
-  // Fetch all data
+  // Fetch brand data with error handling
   useEffect(() => {
     if (!uuid) return;
 
@@ -405,28 +394,59 @@ const handleSubmit = useCallback(async (e) => {
     );
   }
 
-    if (error) {
-      return (
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center',
-          height: '200px',
-          flexDirection: 'column',
-          textAlign: 'center'
-        }}>
-          <Typography color="error" variant="h6" gutterBottom>
-            Error Loading Data
-          </Typography>
-          <Typography color="text.secondary">
-            {error}
-          </Typography>
-          <Button 
-            variant="contained" 
-            sx={{ mt: 2 }}
-            onClick={() => window.location.reload()}
+const maskEmail = (email) => {
+  const [name, domain] = email.split("@");
+  if (!name || !domain) return email;
+  const visiblePart = name.slice(0, 2);
+  const maskedPart = "*".repeat(name.length - 2);
+  return `${visiblePart}${maskedPart}@${domain}`;
+};
+
+
+const handleOpenShareCLick = (event) => {
+  setAnchorEl(event.currentTarget);
+};
+  return (
+    <>
+      <Navbar />
+      <Box
+        sx={{
+          width: "90%",
+          maxWidth: 1200,
+          mx: "auto",
+          my: 4,
+          px: isMobile ? 2 : 4,
+        }}
+      >
+        {/* Floating Apply Now Button (Always Visible) */}
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: isMobile ? 35 : 330,
+            right: isMobile ? 0 : 20,
+            left: isMobile ? 0 : "auto",
+            display: "flex",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <Button
+            variant="contained"
+            size="large"
+            onClick={toggleDrawer(true)}
+            sx={{
+              backgroundColor: "#ff9800",
+              color: "white",
+              borderRadius: 50,
+              px: 4,
+              py: 1.5,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+              "&:hover": {
+                backgroundColor: "#e65100",
+              },
+            }}
           >
-            Retry
+            Apply Now
           </Button>
         </Box>
 
@@ -658,80 +678,158 @@ const handleSubmit = useCallback(async (e) => {
                       },
                     }}
                   >
-                    <FilterIcon />
-                  </IconButton>
-                  <Dialog 
-                    open={filterDialogOpen} 
-                    onClose={() => setFilterDialogOpen(false)}
-                    fullWidth
-                    maxWidth="xs"
+                    {isSubmitting ? (
+                      <>
+                        <CircularProgress
+                          size={24}
+                          color="inherit"
+                          sx={{ mr: 2 }}
+                        />
+                        Submitting...
+                      </>
+                    ) : (
+                      "Apply Now"
+                    )}
+                  </Button>
+                </Grid>
+              </Grid>
+            </form>
+          </Box>
+        </Drawer>
+
+        {/* Contact Dialog */}
+        <Dialog
+          open={openContactModal}
+          onClose={handleCloseContact}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle
+            sx={{
+              fontWeight: 600,
+              background: "linear-gradient(45deg, #000 30%, #000 90%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Contact Details
+
+            <IconButton
+              aria-label="close"
+              onClick={handleCloseContact} 
+              sx={{
+                position: "absolute",
+                top: 10,
+                right: 10,
+                color:'error.main'
+              }} 
+            >
+              <Close />
+            </IconButton>
+          </DialogTitle>
+
+          <DialogContent dividers>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Typography>
+  <strong>Manager Name:</strong>{" "}
+  {selectedBrand.brandDetails?.ceoName
+    ? `${selectedBrand.brandDetails.ceoName.slice(0, 2)}***`
+    : "N/A"}
+</Typography>
+
+<Typography>
+  <strong>Mobile Number:</strong>{" "}
+  {selectedBrand.brandDetails?.ceoMobile
+    ? `${selectedBrand.brandDetails.ceoMobile.slice(0, 5)}*****`
+    : "N/A"}
+</Typography>
+
+<Typography>
+  <strong>Email:</strong>{" "}
+  {selectedBrand.brandDetails?.email
+    ? maskEmail(selectedBrand.brandDetails.email)
+    : "N/A"}
+</Typography>
+
+
+              {/* <Typography>
+                <strong>Website:</strong>{" "}
+                {selectedBrand.brandDetails?.website ? (
+                  <a
+                    href={selectedBrand.brandDetails.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    <DialogTitle>Filter Applications</DialogTitle>
-                    <IconButton
-                      aria-label="close"
-                      onClick={() => setFilterDialogOpen(false)}
-                      sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: (theme) => theme.palette.grey[500],
-                      }}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                    <DialogContent>
-                      <FormControl fullWidth sx={{ mt: 1 }}>
-                        <InputLabel>Investment Range</InputLabel>
-                        <Select
-                          label="Investment Range"
-                          value={investmentFilter}
-                          onChange={(e) => setInvestmentFilter(e.target.value)}
-                        >
-                          <MenuItem value="all">All Ranges</MenuItem>
-                          <MenuItem value="1L-5L">1L - 5L</MenuItem>
-                          <MenuItem value="5L-10L">5L - 10L</MenuItem>
-                          <MenuItem value="10L-25L">10L - 25L</MenuItem>
-                          <MenuItem value="25L-50L">25L - 50L</MenuItem>
-                          <MenuItem value="50L+">50L+</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </DialogContent>
-                    <DialogActions>
-                      <Button 
-                        onClick={() => {
-                          setInvestmentFilter('all');
-                          setFilterDialogOpen(false);
-                        }}
-                      >
-                        Reset
-                      </Button>
-                      <Button 
-                        variant="contained" 
-                        onClick={() => setFilterDialogOpen(false)}
-                      >
-                        Apply
-                      </Button>
-                    </DialogActions>
-                  </Dialog>
-                </>
-              ) : (
-                <FormControl sx={{ minWidth: 200 }} size={isMobile ? 'small' : 'medium'}>
-                  <InputLabel>Investment Range</InputLabel>
-                  <Select
-                    label="Investment Range"
-                    value={investmentFilter}
-                    onChange={(e) => setInvestmentFilter(e.target.value)}
+                    {selectedBrand.brandDetails.website}
+                  </a>
+                ) : (
+                  "N/A"
+                )}
+              </Typography>
+
+              <Typography>
+                <strong>Instagram:</strong>{" "}
+                {selectedBrand.brandDetails?.instagram ? (
+                  <a
+                    href={selectedBrand.brandDetails.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    <MenuItem value="all">All Ranges</MenuItem>
-                    <MenuItem value="1L-5L">1L - 5L</MenuItem>
-                    <MenuItem value="5L-10L">5L - 10L</MenuItem>
-                    <MenuItem value="10L-25L">10L - 25L</MenuItem>
-                    <MenuItem value="25L-50L">25L - 50L</MenuItem>
-                    <MenuItem value="50L+">50L+</MenuItem>
-                  </Select>
-                </FormControl>
-              )}
+                    {selectedBrand.brandDetails.instagram}
+                  </a>
+                ) : (
+                  "N/A"
+                )}
+              </Typography> */}
             </Box>
+          </DialogContent>
+
+          <DialogActions>
+            <Button
+              // onClick={handleCloseContact}
+              variant="contained"
+              color="success"
+            >
+              view contact details
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Brand header with animation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Box
+            display="flex"
+            flexDirection={isMobile ? "column" : "row"}
+            alignItems={isMobile ? "flex-start" : "center"}
+            justifyContent="space-between"
+            mb={3}
+            gap={2}
+          >
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={3}
+              flexDirection={isMobile ? "column" : "row"}
+              width="100%"
+            >
+              <Box
+                position="relative"
+                sx={{ border: "3px solid orange", borderRadius: "10px" }}
+              >
+                <Avatar
+                  src={selectedBrand.uploads?.brandLogo}
+                  alt={selectedBrand.brandDetails?.brandName}
+                  sx={{
+                    width: isMobile ? 150 : 200,
+                    height: isMobile ? 150 : 200,
+                    objectFit: "contain",
+                  }}
+                />
+              </Box>
 
               <Box width="100%">
                 <Box>
@@ -826,167 +924,105 @@ const handleSubmit = useCallback(async (e) => {
                       </Button>
                     </Box>
                   </Box>
-                </ToggleButton>
-                <ToggleButton value="investors" aria-label="investor views">
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <AccountBalanceIcon fontSize="small" />
-                    <Typography variant="body1">Investors</Typography>
-                    <Box sx={{ 
-                      backgroundColor: theme.palette.primary.main,
-                      color: 'white',
-                      borderRadius: '50%',
-                      width: 24,
-                      height: 24,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '0.75rem',
-                      ml: 0.5
-                    }}>
-                      {investorViewsCount}
-                    </Box>
-                  </Box>
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
+                </Box>
 
-            {filteredViewsData.length > 0 ? (
-              <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
-                <Table size={isMobile ? 'small' : 'medium'}>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell><strong>Profile</strong></TableCell>
-                      <TableCell><strong>Name</strong></TableCell>
-                      {!isMobile && <TableCell><strong>Type</strong></TableCell>}
-                      {!isTablet && <TableCell><strong>Location</strong></TableCell>}
-                      <TableCell><strong>Viewed On</strong></TableCell>
-                      <TableCell align="right"><strong>Actions</strong></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {filteredViewsData.map((view, index) => {
-                      const viewDate = new Date(view.createdAt).toLocaleDateString();
-                      const name = viewType === 'brands' 
-                        ? view.brandDetails?.fullName || 'Unknown Brand'
-                        : view.fullName || 'Unknown Investor';
-                      const location = viewType === 'brands'
-                        ? view.brandDetails?.state || 'N/A'
-                        : view.state || 'N/A';
-                      const type = viewType === 'brands'
-                        ? view.brandDetails?.businessType || 'N/A'
-                        : view.businessType || 'N/A';
-                      const imageSrc = viewType === 'brands'
-                        ? view.brandDetails?.uploads?.brandLogo?.[0] || '/default-brand.png'
-                        : view.profileImage || '/default-avatar.png';
-
-                      return (
-                        <TableRow key={index} hover>
-                          <TableCell>
-                            <Avatar 
-                              src={imageSrc} 
-                              sx={{ width: 40, height: 40 }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Typography noWrap>
-                              {name}
-                            </Typography>
-                          </TableCell>
-                          {!isMobile && (
-                            <TableCell>
-                              <Typography noWrap>
-                                {type}
-                              </Typography>
-                            </TableCell>
+                <TableContainer component={Paper} sx={{ mt: 2, width: "100%" }}>
+                  <Table>
+                    <TableHead>
+                      <TableRow
+                        sx={{
+                          backgroundColor: "#7ad03a",
+                          "& td, & th": {
+                            padding: isMobile ? "4px 8px" : "8px 12px",
+                          },
+                        }}
+                      >
+                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
+                          <strong>Category</strong>
+                        </TableCell>
+                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
+                          <strong>Area</strong>
+                        </TableCell>
+                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
+                          <strong>Investment</strong>
+                        </TableCell>
+                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
+                          <strong>Total Outlets</strong>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
+                          {selectedBrand.franchiseDetails?.brandCategories
+                            ?.child || "N/A"}
+                        </TableCell>
+                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
+                          {selectedBrand.franchiseDetails?.fico?.[0]
+                            ?.areaRequired || "N/A"}
+                        </TableCell>
+                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
+                          {selectedBrand.franchiseDetails?.fico?.[0]
+                            ?.investmentRange || "N/A"}
+                        </TableCell>
+                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
+                          {getOutletRange(
+                            selectedBrand.franchiseDetails?.totalOutlets
                           )}
-                          {!isTablet && (
-                            <TableCell>
-                              <Typography noWrap>
-                                {location}
-                              </Typography>
-                            </TableCell>
-                          )}
-                          <TableCell>
-                            <Typography noWrap>
-                              {viewDate}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Button 
-                              variant="outlined" 
-                              size="small"
-                              onClick={() => handleViewDetails(view)}
-                              sx={{ minWidth: isMobile ? 80 : 120 }}
-                            >
-                              {isMobile ? 'View' : 'Details'}
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            ) : (
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center',
-                height: '200px',
-                flexDirection: 'column',
-                textAlign: 'center'
-              }}>
-                <Typography variant="h6" color="text.secondary" gutterBottom>
-                  No views found
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {searchTerm 
-                    ? 'Try adjusting your search' 
-                    : `No ${viewType} have viewed your profile yet`}
-                </Typography>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </Box>
-            )}
+            </Box>
           </Box>
-        );
+        </motion.div>
 
-      case 2: // Likes tab
-        return (
-          <Box mt={2}>
-            <Typography variant="h6" gutterBottom>
-              Total Likes: {likedData.length}
-            </Typography>
-            <Grid container spacing={2}>
-              {likedData.length > 0 ? (
-                likedData.map((like) =>
-                  renderUserCard(
-                    like,
-                    like?.brandDetails?.fullName || like?.firstName || 'Unknown',
-                    like?.profileImage || like?.uploads?.brandLogo?.[0],
-                    'Like'
-                  )
-                )
-              ) : (
-                <Grid item xs={12}>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    height: '200px',
-                    flexDirection: 'column',
-                    textAlign: 'center'
-                  }}>
-                    <Typography variant="h6" color="text.secondary" gutterBottom>
-                      No likes yet
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Your brand hasn't received any likes yet
-                    </Typography>
-                  </Box>
-                </Grid>
-              )}
-            </Grid>
-          </Box>
-        );
+        <Divider sx={{ my: 3 }} />
+
+        {/* Media section with animations */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <Box
+            display="flex"
+            flexDirection={isMobile ? "column" : "row"}
+            gap={4}
+          >
+            <Box flex={isMobile ? "none" : 2}>
+              <Box
+                sx={{
+                  width: "100%",
+                  height: isMobile ? 200 : 416,
+                  borderRadius: 2,
+                  overflow: "hidden",
+                }}
+                component={motion.div}
+                whileHover={{ scale: 1.01 }}
+              >
+                {allVideos.length > 0 ? (
+                  <video
+                    controls
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <source src={allVideos[0]} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <Typography variant="body1" color="text.secondary">
+                    No promotional video available
+                  </Typography>
+                )}
+              </Box>
+            </Box>
 
             <Box flex={1}>
               <Box
@@ -1481,7 +1517,7 @@ const handleSubmit = useCallback(async (e) => {
                   )}
                 </Button>
               </Box>
-            </Card>
+            </form>
 
             <Box
               sx={{
@@ -1506,4 +1542,4 @@ const handleSubmit = useCallback(async (e) => {
   );
 };
 
-export default BrandDashBoard;
+export default React.memo(BrandDetails);
