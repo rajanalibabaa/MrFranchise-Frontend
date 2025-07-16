@@ -204,7 +204,7 @@ const BrandCard = memo(
             <Typography variant="h6" component="div" sx={titleStyles}>
               {brandDetails.brandName}
             </Typography>
-            <IconButton sx={{
+            {/* <IconButton sx={{
               color:'rgba(0,0,0,0.23)',
             }}
             onClick={()=>{
@@ -212,7 +212,7 @@ const BrandCard = memo(
             }}
             >
             <PlaylistAddCheckIcon/>
-            </IconButton>
+            </IconButton> */}
             <IconButton
               onClick={() =>
                 handleLikeClick(uuid, isLiked)
@@ -234,25 +234,42 @@ const BrandCard = memo(
             </IconButton>
           </Box>
 
-          <Box sx={{ mb: 1, minHeight: 32 }}>
-            {franchiseDetails.brandCategories?.child ? (
-              <Chip
-                label={franchiseDetails.brandCategories.child}
-                size="small"
-                sx={{
-                  mr: 1,
-                  mb: 1,
-                  bgcolor: "rgba(255, 152, 0, 0.1)",
-                  color: "orange.dark",
-                  fontWeight: 500,
-                }}
-              />
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                N/A
-              </Typography>
-            )}
-          </Box>
+          <Box
+  sx={{
+    mb: 1,
+    minHeight: 32,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  }}
+>
+  {franchiseDetails.brandCategories?.child ? (
+    <Chip
+      label={franchiseDetails.brandCategories.child}
+      size="small"
+      sx={{
+        bgcolor: "rgba(255, 152, 0, 0.1)",
+        color: "orange.dark",
+        fontWeight: 500,
+      }}
+    />
+  ) : (
+    <Typography variant="body2" color="text.secondary">
+      N/A
+    </Typography>
+  )}
+
+  <IconButton
+    size="small"
+    sx={{ color: "rgba(0,0,0,0.23)" }}
+    onClick={() => {
+      console.log("shortlist is clicked");
+    }}
+  >
+    <PlaylistAddCheckIcon />
+  </IconButton>
+</Box>
+
 
           <Box
             sx={{
