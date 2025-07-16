@@ -40,9 +40,9 @@ const dynamicComponents = {
   LikedBrands: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/LikedBrands.jsx")
   )),
-ViewBrands: withSuspense(React.lazy(()=>
-import("../../Components/HomePage_VideoSection/ViewBrands.jsx")
-)),
+  ViewBrands: withSuspense(React.lazy(()=>
+  import("../../Components/HomePage_VideoSection/ViewBrands.jsx")
+  )),
   TopCafeBrandsFranchise: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
   )),
