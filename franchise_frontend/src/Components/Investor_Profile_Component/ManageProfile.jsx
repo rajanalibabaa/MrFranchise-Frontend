@@ -1063,7 +1063,7 @@ const ManageProfile = () => {
       setSnackbarOpen(false);
       
       const response = await axios.patch(
-        `http://localhost:5000/api/v1/investor/deleteInvestorProfileImage/${investorUUID}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/deleteInvestorProfileImage/${investorUUID}`,
         { removeProfileImage: true },
         {
           headers: {
