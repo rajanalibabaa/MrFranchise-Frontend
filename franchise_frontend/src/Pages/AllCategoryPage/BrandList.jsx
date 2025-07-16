@@ -32,7 +32,6 @@ import {
   useToggleLike,
   openBrandDialog,
   filterBrands,
-  useRecordView,
 } from "../../Hooks/Fetchbrands";
 import { useLocation } from "react-router-dom";
 import LoginPage from "../LoginPage/LoginPage.jsx";
@@ -99,9 +98,6 @@ function BrandList() {
   const [comparisonOpen, setComparisonOpen] = useState(false);
   const [selectedForComparison, setSelectedForComparison] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
-
-
-
 
 const handleLikeClick = useCallback(
   async (brandId, isLiked) => {
