@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams,Link, useLocation } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -36,7 +36,9 @@ import {
   Phone,
   Share,
   Favorite,
-  ShareOutlined
+  ShareOutlined,
+  PlaylistAddCheckCircleOutlined,
+  ArrowUpward
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useBrand } from "../../Hooks/Fetchbrands.jsx";
@@ -47,8 +49,11 @@ import Navbar from "../../Components/Navbar/NavBar.jsx";
 import { useToggleLike } from '../../Hooks/Fetchbrands.jsx';
 import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx";
 
+// import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
+import ShareDialogActions from "./ShareDialogActions.jsx";
 
 const BrandDetails = ({ brandData }) => {
+   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -61,7 +66,7 @@ const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openContactModal, setOpenContactModal] = useState(false);
   const [userData, setUserData] = useState(null);
-  const [locationData, setLocationData] = useState({
+const [anchorEl, setAnchorEl] = useState(null);  const [locationData, setLocationData] = useState({
     states: [],
     districts: [],
     cities: [],
@@ -84,7 +89,27 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
     readyToInvest: "",
   });
 
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
+const handleOpenShareClick = (event) => {
+    setAnchorEl(event.currentTarget); 
+  };
+
+  // const handleCloseShareDialog = () => {
+  //   setOpenShareDialog(false);
+  // };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.pageYOffset > 300) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   
   
   const { uuid } = useParams();
@@ -402,9 +427,6 @@ const maskEmail = (email) => {
 };
 
 
-const handleOpenShareCLick = (event) => {
-  setAnchorEl(event.currentTarget);
-};
 
   const ExpansionLocationTags = ({ brand }) => {
     const locations = Array.isArray(
@@ -569,7 +591,7 @@ const handleOpenShareCLick = (event) => {
         <Box
           sx={{
             position: "fixed",
-            bottom: isMobile ? 35 : 330,
+            bottom: isMobile ? 35 : 300,
             right: isMobile ? 0 : 20,
             left: isMobile ? 0 : "auto",
             display: "flex",
@@ -1011,7 +1033,7 @@ const handleOpenShareCLick = (event) => {
                           display: "flex",
                           flexWrap: "wrap",
                           alignItems: "center",
-                          gap: isMobile ? 1 : 6,
+                          gap: isMobile ? 1 : 10,
                           mt: 1,
                         }}
                       >
@@ -1031,28 +1053,7 @@ const handleOpenShareCLick = (event) => {
                         </Typography>
                       </Box>
                     </Box>
-
-                     <IconButton
-                                onClick={handleLikeClick}
-                                disabled={isProcessingLike}
-                                aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
-                              >
-                                {isProcessingLike ? (
-                                  <CircularProgress size={24} />
-                                ) : (
-                                  <Favorite
-                                    sx={{
-                                      color: localIsLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
-                                    }}
-                                  />
-                                )}
-                              </IconButton>
-                       <IconButton
-                                // onClick={handleShareButton}
-                              >
-                                  <ShareOutlined />
-                              </IconButton>
-                    <Box>
+<Box sx={{ml:10}}>
                       <Button
                         variant="contained"
                         size={isMobile ? "small" : "medium"}
@@ -1070,31 +1071,66 @@ const handleOpenShareCLick = (event) => {
                         VIEW CONTACT
                       </Button>
                     </Box>
+                     <IconButton
+                     sx={{marginLeft:"90px"}}
+                                onClick={handleLikeClick}
+                                disabled={isProcessingLike}
+                                aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
+                              >
+                                {isProcessingLike ? (
+                                  <CircularProgress size={24} />
+                                ) : (
+                                  <Favorite
+                                    sx={{
+                                      color: localIsLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
+                                    }}
+                                  />
+                                )}
+                              </IconButton>
+                              <IconButton sx={{
+                                            color:'rgba(0,0,0,0.23)',
+                                          }}
+                                          onClick={()=>{
+                                            console.log("shortlist is clicked")
+                                          }}
+                                          >
+                                          <PlaylistAddCheckCircleOutlined/>
+                                          </IconButton>
+                    <IconButton onClick={handleOpenShareClick}>
+        <ShareOutlined />
+      </IconButton>
+
+      {/* Share Popover */}
+      <ShareDialogActions anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
+                    
                   </Box>
                 </Box>
 
                 <TableContainer component={Paper} sx={{ mt: 2, width: "100%" }}>
-                  <Table>
+                  <Table size="small" sx={{border:"collapse"}}>
                     <TableHead>
                       <TableRow
                         sx={{
                           backgroundColor: "#7ad03a",
                           "& td, & th": {
-                            padding: isMobile ? "4px 8px" : "8px 12px",
+                            padding: isMobile ? "2px 6px" : "8px 12px",
                           },
                         }}
                       >
-                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
+                        <TableCell sx={{ width: "30%", textAlign: "center", p:"3px" }}>
                           <strong>Category</strong>
                         </TableCell>
-                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
+                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
                           <strong>Area</strong>
                         </TableCell>
-                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
+                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
                           <strong>Investment</strong>
                         </TableCell>
-                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
+                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
                           <strong>Total Outlets</strong>
+                        </TableCell>
+<TableCell sx={{ width: "30%", textAlign: "center", whiteSpace: "normal", wordBreak: "break-word" }}>
+                            <strong>Expansion Location</strong>
                         </TableCell>
                       </TableRow>
                     </TableHead>
@@ -1104,19 +1140,60 @@ const handleOpenShareCLick = (event) => {
                           {selectedBrand.franchiseDetails?.brandCategories
                             ?.child || "N/A"}
                         </TableCell>
-                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
+                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
                           {selectedBrand.franchiseDetails?.fico?.[0]
                             ?.areaRequired || "N/A"}
                         </TableCell>
-                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
+                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
                           {selectedBrand.franchiseDetails?.fico?.[0]
                             ?.investmentRange || "N/A"}
                         </TableCell>
-                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
+                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
                           {getOutletRange(
                             selectedBrand.franchiseDetails?.totalOutlets
                           )}
                         </TableCell>
+                    <TableCell sx={{ width: "30%", textAlign: "center" }}>
+  {(() => {
+    const locations =
+      selectedBrand.expansionLocationData?.expansionLocations?.domestic
+        ?.locations || [];
+
+    const states = locations.map((loc) => loc.state).filter(Boolean);
+    const hasMore = states.length > 3;
+
+    if (states.length === 0) {
+      return "Multiple Locations"; 
+    }
+
+    const visibleStates = states.slice(0, 2).join(", ");
+
+    return (
+      <>
+        {visibleStates}
+        {hasMore && (
+          <a 
+            href="#expansion-location"
+            
+            style={{
+              marginLeft: 8,
+              scrollBehavior: "smooth",
+              fontSize: "0.75rem",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              color: "#1976d2",
+              fontWeight: 500,
+              cursor: "pointer"
+            }}
+          >
+            More
+          </a>
+        )}
+      </>
+    );
+  })()}
+</TableCell>
+
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -1699,6 +1776,29 @@ const handleOpenShareCLick = (event) => {
           </Typography>
           <ExpansionLocationTags brand={selectedBrand} /></Box> 
 {/* <ViewedBrands /> */}
+{showBackToTop && (
+  <Box
+    sx={{
+      position: "fixed",
+      bottom: 20,
+      right: 20,
+      zIndex: 1000,
+    }}
+  >
+    <IconButton
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      sx={{
+        backgroundColor: "#ff9800",
+        color: "white",
+        "&:hover": {
+          backgroundColor: "#e65100",
+        },
+      }}
+    >
+      <ArrowUpward />
+    </IconButton>
+  </Box>
+)}
       <Footer />
     </>
   );

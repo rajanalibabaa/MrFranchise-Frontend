@@ -89,17 +89,6 @@ const OverviewTab = ({ brand }) => {
   const [selectedModel, setSelectedModel] = useState(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.pageYOffset > 300) {
-        setShowBackToTop(true);
-      } else {
-        setShowBackToTop(false);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
   const ExpansionLocationGrid = ({ data }) => {
     const [expandedState, setExpandedState] = useState(0);
     const [expandedDistrict, setExpandedDistrict] = useState(
@@ -1300,28 +1289,25 @@ const OverviewTab = ({ brand }) => {
                   "& strong": { color: colors.primary },
                 }}
               />
-              <Typography>
-   {hasData(
-                          brand.franchiseDetails?.uniqueSellingPoints
-                        ) && (
-                          <>
-                            <Typography
-                              variant="body2"
-                              sx={{ color: colors.dark, fontWeight: 600 }}
-                            >
-                              Unique Selling Points:
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{ color: colors.dark }}
-                            >
-                              {brand.franchiseDetails.uniqueSellingPoints.join(
-                                ", "
-                              )}
-                            </Typography>
-                          </>
-                        )}
-              </Typography>
+             <Typography variant="body2" component="div">
+  {hasData(brand.franchiseDetails?.uniqueSellingPoints) && (
+    <>
+      <Typography
+        variant="body1"
+        sx={{ color: colors.dark, fontWeight: 600 }}
+      >
+        Unique Selling Points:
+      </Typography>
+      <Typography
+        variant="body2"
+        sx={{ color: colors.dark }}
+      >
+        {brand.franchiseDetails.uniqueSellingPoints.join(", ")}
+      </Typography>
+    </>
+  )}
+</Typography>
+
             </Box>
           )}
 
@@ -1395,10 +1381,8 @@ const OverviewTab = ({ brand }) => {
                             </Typography>
                           </>
                         )}
-
-                     
-
                         <Typography
+                                      id="expansion-location"
                           variant="body2"
                           sx={{ color: colors.dark, fontWeight: 600 }}
                         >

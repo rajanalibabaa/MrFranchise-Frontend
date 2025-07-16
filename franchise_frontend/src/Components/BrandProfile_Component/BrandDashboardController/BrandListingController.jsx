@@ -286,7 +286,7 @@ const sendOtp = async () => {
 
     try {
       const apiData = unflattenFormData(formData);
-      const response = await axios.put(
+      const response = await axios.patch(
         `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
         apiData
       );

@@ -20,6 +20,7 @@ import {
 import LoginPage from "../LoginPage/LoginPage";
 import { openBrandDialog } from "../../Hooks/Fetchbrands.jsx";
 import { postView } from "../../Utils/function/view.jsx";
+import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 
 const cardStyles = {
   width: 320,
@@ -204,6 +205,15 @@ const BrandCard = memo(
             <Typography variant="h6" component="div" sx={titleStyles}>
               {brandDetails.brandName}
             </Typography>
+            <IconButton sx={{
+              color:'rgba(0,0,0,0.23)',
+            }}
+            onClick={()=>{
+              console.log("shortlist is clicked")
+            }}
+            >
+            <PlaylistAddCheckIcon/>
+            </IconButton>
             <IconButton
               onClick={() =>
                 handleLikeClick(uuid, isLiked)
@@ -301,19 +311,16 @@ const BrandCard = memo(
 );
 
 const LocationDetail = memo(({ locations, onViewMore }) => {
-  const locationText = useMemo(() => {
-    if (!locations) return "Multiple locations";
+  const { displayText, hasMore } = useMemo(() => {
+    const domestic = locations?.domestic?.locations || [];
+    const international = locations?.international?.locations || [];
+    const all = [...domestic, ...international];
 
-    const domestic = locations.domestic?.locations || [];
-    const international = locations.international?.locations || [];
-    const allLocations = [...domestic, ...international];
+    const names = all.map((loc) => loc.state || loc.country).filter(Boolean);
+    const display = names.slice(0, 2).join(", ");
+    const hasMore = names.length > 2;
 
-    return allLocations.length > 0
-      ? allLocations
-          .map((loc) => loc.state || loc.country)
-          .filter(Boolean)
-          .join(", ")
-      : "Multiple locations";
+    return { displayText: display || "Multiple locations", hasMore };
   }, [locations]);
 
   return (
@@ -329,8 +336,8 @@ const LocationDetail = memo(({ locations, onViewMore }) => {
       <Typography variant="body2" noWrap>
         <span style={{ fontWeight: 600 }}>Expansion Location:</span>
         <br />
-        {locationText}
-        {locations && (
+        {displayText}
+        {hasMore && (
           <Button
             size="small"
             sx={{ ml: 0.5, minWidth: 0, padding: 0 }}
@@ -343,6 +350,7 @@ const LocationDetail = memo(({ locations, onViewMore }) => {
     </Box>
   );
 });
+
 
 const DetailItem = memo(({ icon, label, value }) => {
   const clonedIcon = useMemo(
