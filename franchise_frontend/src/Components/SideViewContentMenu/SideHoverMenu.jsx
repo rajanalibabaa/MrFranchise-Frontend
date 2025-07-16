@@ -458,7 +458,7 @@ const brandsData = data || [];
             p: 3,
           }}
         >
-          <img 
+          {/* <img 
             src="/images/no-brands.svg" 
             alt="No brands found" 
             style={{ 
@@ -466,9 +466,9 @@ const brandsData = data || [];
               opacity: 0.7,
               marginBottom: 16
             }}
-          />
+          /> */}
           <Typography variant="h6" gutterBottom>
-            No brands found
+            Find Your Dream Franchise Brands
           </Typography>
           <Typography variant="body2">
             {isMobile ? "Select a category to see brands" : "Select a subcategory to see related brands"}
