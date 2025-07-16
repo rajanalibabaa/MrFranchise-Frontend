@@ -68,7 +68,7 @@ const Sidebar = () => {
           <RouterLink to="/brandDashboard/brandlistingcontrol" style={navLinkStyle}>
             Brand Listing Controller
           </RouterLink>
-          <RouterLink to="/brandDashboard/branddetailcontrol" style={navLinkStyle}>
+          {/* <RouterLink to="/brandDashboard/branddetailcontrol" style={navLinkStyle}>
           Brand Details
           </RouterLink>
            <RouterLink to="/brandDashboard/franchisedetailcontrol" style={navLinkStyle}>
@@ -79,7 +79,7 @@ const Sidebar = () => {
           </RouterLink>
             <RouterLink to="/brandDashboard/uploadcontrol" style={navLinkStyle}>
           Uploads
-          </RouterLink>
+          </RouterLink> */}
           <RouterLink to="/brandDashboard/brandsearchus" style={navLinkStyle}>
             Reach Us
           </RouterLink>
