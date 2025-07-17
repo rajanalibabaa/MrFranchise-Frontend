@@ -93,7 +93,7 @@ function LoginPage({ open, onClose }) {
         { headers: { "Content-Type": "application/json" } }
       );
 
-      console.log(response.data)
+      // console.log(response.data)
 
       if (response.data.success) {
         setSnackbar({

@@ -28,10 +28,11 @@ import { useNavigate } from "react-router-dom";
 import { postView } from "../../Utils/function/view";
 import { openBrandDialog } from "../../Hooks/Fetchbrands";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { api } from "../../Api/api";
 import img from "../../assets/images/brandLogo.jpg";
 import { useBrands } from "../../Hooks/Fetchbrands";
+import { showLoading } from "../../Redux/Slices/loadingSlice";
  
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -355,19 +356,21 @@ const LikedBrands = () => {
   const [showEndShadow, setShowEndShadow] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
 
   const { data: brands = [], isLoading, error, refetch } = useBrands();
 
   // Initialize local liked brands when brands data changes
-  useEffect(() => {
-    if (brands.length > 0) {
-      const liked = brands.filter(brand => brand.isLiked === true);
-      setLocalLikedBrands(liked);
-    }
-  }, [brands]);
-
+useEffect(() => {
+  if (brands.length > 0) {
+    const liked = brands.filter(brand => brand.isLiked === true);
+    setLocalLikedBrands(liked);
+    // console.log("Local Liked Brands:", liked); // Moved inside
+  }
+}, [brands]);
+ 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
@@ -400,7 +403,7 @@ const LikedBrands = () => {
       
       setTimeout(() => setRemoveMsg(""), 3000);
     } catch (error) {
-      console.error("Remove error:", error);
+      // console.error("Remove error:", error);
       setRemoveMsg("Failed to remove brand");
     } finally {
       setLikeProcessing(prev => ({ ...prev, [brandId]: false }));

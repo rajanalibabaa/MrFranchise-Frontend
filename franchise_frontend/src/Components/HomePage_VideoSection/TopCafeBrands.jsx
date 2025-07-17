@@ -337,7 +337,7 @@ const TopCafeFranchises = () => {
   const [showEndShadow, setShowEndShadow] = useState(false);
 
   const navigate = useNavigate();
-
+const dispatch = useDispatch()
   // REACT-QUERY HOOKS
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();

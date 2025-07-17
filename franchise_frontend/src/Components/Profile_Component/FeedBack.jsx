@@ -53,7 +53,7 @@ const FeedBack = () => {
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log("Feedback submitted:", response.data);
+      // console.log("Feedback submitted:", response.data);
       setFeedbackText('');
       setSelectedTopic('');
       setValue(2);

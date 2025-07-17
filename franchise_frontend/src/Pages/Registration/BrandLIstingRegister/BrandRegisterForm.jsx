@@ -10,14 +10,9 @@ import {
   StepConnector,
   stepConnectorClasses,
   styled,
-  Toolbar,
-  FormControl,
-  Select,
-  MenuItem,
   Chip,
   Paper,
   Grid,
-  Divider,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -26,7 +21,6 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TableRow,
   Snackbar,
   Alert,
@@ -224,7 +218,7 @@ const dispatch = useDispatch();
     return savedData ? JSON.parse(savedData) : initialFormData;
   });
 
-  console.log("Form Data:", formData);
+  // console.log("Form Data:", formData);
 
   const [validationErrors, setValidationErrors] = useState({
     brandDetails: {},

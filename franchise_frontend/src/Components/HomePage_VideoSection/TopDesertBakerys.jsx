@@ -29,6 +29,7 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 
 import { postView } from "../../Utils/function/view";
+import { showLoading } from "../../Redux/Slices/loadingSlice";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -347,6 +348,7 @@ const TopDesertBakerys = () => {
   const [showEndShadow, setShowEndShadow] = useState(false);
   
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
 
@@ -614,133 +616,64 @@ const TopDesertBakerys = () => {
               Top Dessert & Bakery Franchises
             </Typography>
 
-            <Button
-              variant="text"
-              size="small"
-              endIcon={<ArrowRight />}
-              sx={{
-                textTransform: "none",
-                fontSize: isMobile ? 14 : 16,
-                color: theme.palette.text.secondary,
-                "&:hover": {
-                  color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                  backgroundColor: "transparent",
-                },
-              }}
-              onClick={() => navigate("/brandviewpage")}
-            >
-              View More
-            </Button>
-          </Box>
-          
-          <Box sx={{ position: 'relative', px: isMobile ? 2 : 0 }}>
-            {/* Previous button */}
-            {showStartShadow && (
-              <Button
-                variant="contained"
-                onClick={handlePrevClick}
-                sx={{
-                  position: 'absolute',
-                  left: isMobile ? 4 : -12,
-                  top: `calc(50% + ${isMobile ? 20 : 40}px)`,
-                  transform: 'translateY(-50%)',
-                  zIndex: 2,
-                  minWidth: '36px',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  padding: 0,
-                  backgroundColor: 'background.paper',
-                  color: 'text.primary',
-                  boxShadow: theme.shadows[4],
-                  '&:hover': {
-                    backgroundColor: 'background.default',
-                  },
-                }}
-              >
-                &lt;
-              </Button>
-            )}
-            
-            {/* Next button */}
-            {showEndShadow && (
-              <Button
-                variant="contained"
-                onClick={handleNextClick}
-                sx={{
-                  position: 'absolute',
-                  right: isMobile ? 4 : -12,
-                  top: `calc(50% + ${isMobile ? 20 : 40}px)`,
-                  transform: 'translateY(-50%)',
-                  zIndex: 2,
-                  minWidth: '36px',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  padding: 0,
-                  backgroundColor: 'background.paper',
-                  color: 'text.primary',
-                  boxShadow: theme.shadows[4],
-                  '&:hover': {
-                    backgroundColor: 'background.default',
-                  },
-                }}
-              >
-                &gt;
-              </Button>
-            )}
-            
-            <Box
-              component={motion.div}
-              initial="initial"
-              animate="animate"
-              ref={scrollContainerRef}
-              sx={{
-                display: "flex",
-                gap: isMobile ? 2 : 3,
-                borderRadius: 3,
-                p: 2,
-                overflowX: "auto",
-                scrollbarWidth: "none",
-                "&::-webkit-scrollbar": { display: "none" },
-                perspective: '1000px',
-              }}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              {dessertBrands.map((brand, index) => (
-                <motion.div
-                  key={`${brand?.uuid}-${index}`} // Add index to key to handle duplicates
-                  whileHover={{ 
-                    scale: 1.03,
-                    zIndex: 10,
-                    boxShadow: theme.shadows[6],
-                    transition: { duration: 0.3 }
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <BrandCard 
-                    brand={brand}
-                    handleApply={handleApply}
-                    handleLikeClick={handleLikeClick}
-                    likeProcessing={likeProcessing}
-                    dimensions={dimensions}
-                    theme={theme}
-                    isMobile={isMobile}
-                    isTablet={isTablet}
-                  />
-                </motion.div>
-              ))}
-            </Box>
-          </Box>
-          
-          {showLogin && (
-            <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
-          )}
-        </Box>
+        <Button
+          variant="text"
+          size="small"
+          endIcon={<ArrowRight />}
+          sx={{
+            textTransform: "none",
+            fontSize: isMobile ? 14 : 16,
+            color: theme.palette.text.secondary,
+            "&:hover": {
+              color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+              backgroundColor: "transparent",
+            },
+          }}
+          onClick={async () => {
+                dispatch(showLoading());
+                navigate("/brandviewpage");
+              }
+          }
+        >
+          View More
+        </Button>
+      </Box>
+
+      <Box
+        component={motion.div}
+        initial="initial"
+        animate="animate"
+        sx={{
+          display: "flex",
+          gap: isMobile ? 2 : 3,
+          borderRadius: 3,
+          p: 1,
+          overflowX: "auto",
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
+        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {beverageBrands.map((brand) => (
+          <BrandCard 
+            key={brand.uuid}
+            brand={brand}
+            handleApply={handleApply}
+            handleLikeClick={handleLikeClick}
+            likeProcessing={likeProcessing}
+            dimensions={dimensions}
+            theme={theme}
+            isMobile={isMobile}
+            isTablet={isTablet}
+          />
+        ))}
+      </Box>
+      {/* <BrandDetailsDialog /> */}
+      {showLogin && (
+        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+      )}
+    </Box>
       )}
     </>
   );

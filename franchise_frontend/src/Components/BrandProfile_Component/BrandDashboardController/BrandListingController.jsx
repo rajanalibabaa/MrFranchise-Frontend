@@ -170,7 +170,7 @@ const BrandListingController = () => {
         );
         const brand = response.data.brandListing || response.data.data;
         if (response.data.success && brand) {
-          console.log("data id:",response.data.data);
+          // console.log("data id:",response.data.data);
           const flatData = flattenBrandData(brand);
           setFormData(flatData);
           setOriginalData(brand);
@@ -286,7 +286,7 @@ const sendOtp = async () => {
 
     try {
       const apiData = unflattenFormData(formData);
-      const response = await axios.put(
+      const response = await axios.patch(
         `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
         apiData
       );

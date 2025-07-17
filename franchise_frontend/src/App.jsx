@@ -70,7 +70,7 @@ function App() {
       const currentTime = Date.now();
 
       if (currentTime >= parsedLogoutTime) {
-        console.log("Session expired. Logging out...");
+        // console.log("Session expired. Logging out...");
         dispatch(logout());
         window.location.href = "/";
       }
@@ -79,13 +79,13 @@ function App() {
     checkAutoLogout();
 
     const timeoutId = setTimeout(() => {
-      console.log("Timeout reached. Calling checkAutoLogout again...");
+      // console.log("Timeout reached. Calling checkAutoLogout again...");
       checkAutoLogout();
     }, exitTime);
 
     return () => {
       clearTimeout(timeoutId);
-      console.log("Cleared logout timeout.");
+      // console.log("Cleared logout timeout.");
     };
   }, [AccessToken, dispatch]);
   return (

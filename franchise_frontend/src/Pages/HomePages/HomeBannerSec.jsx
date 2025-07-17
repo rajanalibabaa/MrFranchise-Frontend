@@ -128,6 +128,11 @@ const pageConfig = {
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     },
+     {
+      component: "ViewedBrands",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    },
     {
       component: "TopLeadingFranchise",
       background: "white",
@@ -372,7 +377,7 @@ const HomeBannerSec = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setBannerIndex((prev) => (prev + 1) % bannerTexts.length);
-    }, 120000); // 2 minutes
+    }, 5000); // 2 minutes
     return () => clearInterval(interval);
   }, []);
 
@@ -501,7 +506,7 @@ const HomeBannerSec = () => {
                   WebkitTextFillColor: "transparent",
                   textShadow: "none",
                   display: "inline",
-                  fontSize: isMobile ? "2rem" : "2.2rem",
+                  fontSize: isMobile ? "1.5rem" : "2.2rem",
                   fontWeight: 900,
                   px: 1,
                 }}
@@ -513,8 +518,8 @@ const HomeBannerSec = () => {
 
           <motion.div variants={pageConfig.animations.item}>
             <Typography
-              variant={isMobile ? "h6" : "subtitle2"}
-              mt={3}
+              variant={isMobile ? "body1" : "subtitle2"}
+              mt={isMobile ? 0 : 3}
               sx={{
                 textAlign: "center",
                 color: "rgba(255,255,255,0.9)",
@@ -523,7 +528,7 @@ const HomeBannerSec = () => {
                 maxWidth: "800px",
                 mx: "auto",
                 lineHeight: 1.5,
-                fontSize: isMobile ? "1.1rem" : "1.1rem",
+                fontSize: isMobile ? "0.85rem" : "1.1rem",
                 textShadow: "0 2px 4px rgba(0,0,0,0.5)",
               }}
               component={motion.div}

@@ -39,11 +39,9 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 // } from "../../Redux/Slices/brandSlice";
 // import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 import { postView } from "../../Utils/function/view";
-import {
-  useBrands,
-  useToggleLike,
-  openBrandDialog,
-} from "../../Hooks/Fetchbrands";
+import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import { useDispatch } from "react-redux";
+import { showLoading } from "../../Redux/Slices/loadingSlice";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },

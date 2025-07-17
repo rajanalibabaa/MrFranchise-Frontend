@@ -29,6 +29,8 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { postView } from "../../Utils/function/view";
 
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import { showLoading } from "../../Redux/Slices/loadingSlice";
+import { useDispatch } from "react-redux";
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },

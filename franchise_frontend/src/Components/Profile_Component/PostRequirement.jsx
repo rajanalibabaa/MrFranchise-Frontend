@@ -51,7 +51,7 @@ const PostRequirement = () => {
         Object.entries(postRequirementData).map(([key, value]) => [key, value.trim()])
       );
 
-      console.log("Sending cleaned data:", cleanData);
+      // console.log("Sending cleaned data:", cleanData);
 
       const response = await axios.post(
         "https://mrfranchisebackend.mrfranchise.in/api/post/createPostRequirement",
@@ -59,7 +59,7 @@ const PostRequirement = () => {
         { headers: { "Content-Type": "application/json" } }
       );
 
-      console.log("Requirement submitted:", response.data);
+      // console.log("Requirement submitted:", response.data);
       alert("Requirement submitted successfully!");
 
       setPostRequirementData({

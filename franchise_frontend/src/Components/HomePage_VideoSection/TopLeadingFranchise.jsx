@@ -326,7 +326,8 @@ const TopLeadingFranchise = () => {
   const [showEndShadow, setShowEndShadow] = useState(false);
   
   const navigate = useNavigate();
-  const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
+  const dispatch = useDispatch();
+const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
 
   // Add the first few brands at the end to create infinite loop effect
@@ -585,26 +586,27 @@ const TopLeadingFranchise = () => {
               Top Leading Franchise
             </Typography>
 
-            <Button
-              variant="text"
-              size="small"
-              endIcon={<ArrowRight />}
-              sx={{
-                textTransform: "none",
-                fontSize: isMobile ? 14 : 16,
-                color: theme.palette.text.secondary,
-                "&:hover": {
-                  color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                  backgroundColor: "transparent",
-                },
-              }}
-              onClick={() => {
+        <Button
+          variant="text"
+          size="small"
+          endIcon={<ArrowRight />}
+          sx={{
+            textTransform: "none",
+            fontSize: isMobile ? 14 : 16,
+            color: theme.palette.text.secondary,
+            "&:hover": {
+              color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+              backgroundColor: "transparent",
+            },
+          }}
+          onClick={async () => {
+                dispatch(showLoading());
                 navigate("/brandviewpage");
               }}
-            >
-              View More
-            </Button>
-          </Box>
+        >
+          View More
+        </Button>
+      </Box>
 
           <Box sx={{ position: 'relative', px: isMobile ? 2 : 0 }}>
             {/* Previous button */}

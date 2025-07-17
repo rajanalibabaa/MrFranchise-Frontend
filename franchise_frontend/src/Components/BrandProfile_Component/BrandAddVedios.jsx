@@ -21,7 +21,7 @@ const BrandAddVedios = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Selected video files:', videoFiles);
+    // console.log('Selected video files:', videoFiles);
     
   };
 

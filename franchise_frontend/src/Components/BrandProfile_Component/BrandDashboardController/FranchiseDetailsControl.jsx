@@ -1376,100 +1376,112 @@ const FranchiseDetailsControl = ({ data = {}, errors = {}, onChange = () => {} }
         </Button>
       </Grid>
 
-      {data.fico?.length > 0 && (
-        <Box sx={{ mt: 4 }}>
-  <Typography variant="h6" sx={{ mb: 2 }}>
-    Saved Franchise Models
-  </Typography>
-
+     {data.fico?.length > 0 && (
   <Box sx={{ mt: 4 }}>
-  <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
-    Saved Franchise Models
-  </Typography>
+    <Box sx={{ mt: 4 }}>
+      <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
+        Saved Franchise Models
+      </Typography>
 
-  <Box sx={{ width: "100%", overflowX: "auto", margin: "0 auto" }}>
-    <TableContainer sx={{ maxHeight: 600 }}>
-      <Table
-        stickyHeader
-        aria-label="saved franchise models"
-        size="medium"
-        sx={{
-          fontSize: "1rem",
-          "& th, & td": {
-            padding: "12px 16px",
-            fontSize: "1rem",
-            whiteSpace: "nowrap"
-          }
-        }}
-      >
-        <TableHead>
-          <TableRow>
-            {[
-              "Model Type", "Franchise Type", "Investment Range", "Area Required",
-              "Agreement Period", "Franchise Fee", "Interior Cost", "Stock Cost",
-              "Additional Cost", "Annual Working Capital", "Royalty Fee", "Break Even",
-              "ROI (%)", "Payback", "Margin On Sales", "Actions"
-            ].map((label, i) => (
-              <TableCell
-                key={i}
-                sx={{
-                  fontWeight: "bold",
-                  backgroundColor: "#f5f5f5"
-                }}
-              >
-                {label}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
+      <Box sx={{ width: "100%", overflowX: "auto", margin: "0 auto" }}>
+        <TableContainer sx={{ maxHeight: 600 }}>
+          <Table
+            stickyHeader
+            aria-label="saved franchise models"
+            size="medium"
+            sx={{
+              fontSize: "1rem",
+              "& th, & td": {
+                padding: "12px 16px",
+                fontSize: "1rem",
+                whiteSpace: "nowrap"
+              }
+            }}
+          >
+            <TableHead>
+              <TableRow>
+                {[
+                  "Industries", "Main Category", "Sub Category", 
+                  "Established Year", "Franchise Since Year",
+                  "Company Owned", "Franchise Outlets", "Total Outlets",
+                  "Model Type", "Franchise Type", "Investment Range", "Area Required",
+                  "Agreement Period", "Franchise Fee", "Interior Cost", "Stock Cost",
+                  "Additional Cost", "Annual Working Capital", "Royalty Fee", "Break Even",
+                  "ROI (%)", "Payback", "Margin On Sales", "Actions"
+                ].map((label, i) => (
+                  <TableCell
+                    key={i}
+                    sx={{
+                      fontWeight: "bold",
+                      backgroundColor: "#f5f5f5"
+                    }}
+                  >
+                    {label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
 
-<TableBody>
-  {data.fico?.map((model, index) => (
-    <TableRow
-      key={index}
-      hover
-      sx={{ "&:last-child td, &:last-child th": { border: 0 }, fontSize: "0.75rem" }}
-    >
-      <TableCell>{model.franchiseModel}</TableCell>
-      <TableCell>{model.franchiseType}</TableCell>
-      <TableCell>{model.investmentRange}</TableCell>
-      <TableCell>{model.areaRequired}</TableCell>
-      <TableCell>{model.agreementPeriod}</TableCell>
-      <TableCell>{formatCurrency(model.franchiseFee)}</TableCell>
-      <TableCell>{formatCurrency(model.interiorCost)}</TableCell>
-      <TableCell>{formatCurrency(model.stockInvestment)}</TableCell>
-      <TableCell>{formatCurrency(model.otherCost)}</TableCell>
-      <TableCell>{formatCurrency(model.requireWorkingCapital)}</TableCell>
-      <TableCell>
-        {model.royaltyFee && model.royaltyFee !== "No Fee" 
-          ? `${model.royaltyFee}${model.royaltyFeeUnit === "%" ? "%" : ""}`
-          : model.royaltyFee}
-      </TableCell>
-      <TableCell>{model.breakEven}</TableCell>
-      <TableCell>{model.roi}%</TableCell>
-      <TableCell>{model.payBackPeriod}</TableCell>
-      <TableCell>{model.marginOnSales}%</TableCell>
-      <TableCell>
-        <IconButton
-          onClick={() => handleDeleteFicoModel(index)}
-          color="error"
-          size="small"
-          aria-label="delete"
-        >
-          <DeleteIcon fontSize="small" />
-        </IconButton>
-      </TableCell>
-    </TableRow>
-  ))}
-</TableBody>
-      </Table>
-    </TableContainer>
+            <TableBody>
+              {data.fico?.map((model, index) => (
+                <TableRow
+                  key={index}
+                  hover
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 }, fontSize: "0.75rem" }}
+                >
+                  {/* Brand Categories */}
+                  <TableCell>{data.brandCategories?.main || ""}</TableCell>
+                  <TableCell>{data.brandCategories?.sub || ""}</TableCell>
+                  <TableCell>{data.brandCategories?.child || ""}</TableCell>
+                  
+                  {/* Establishment & Franchise Year */}
+                  <TableCell>{data.establishedYear || ""}</TableCell>
+                  <TableCell>{data.franchiseSinceYear || ""}</TableCell>
+                  
+                  {/* Franchise Network */}
+                  <TableCell>{data.companyOwnedOutlets || ""}</TableCell>
+                  <TableCell>{data.franchiseOutlets || ""}</TableCell>
+                  <TableCell>{data.totalOutlets || ""}</TableCell>
+                  
+                  {/* Franchise Model Details */}
+                  <TableCell>{model.franchiseModel}</TableCell>
+                  <TableCell>{model.franchiseType}</TableCell>
+                  <TableCell>{model.investmentRange}</TableCell>
+                  <TableCell>{model.areaRequired}</TableCell>
+                  <TableCell>{model.agreementPeriod}</TableCell>
+                  <TableCell>{formatCurrency(model.franchiseFee)}</TableCell>
+                  <TableCell>{formatCurrency(model.interiorCost)}</TableCell>
+                  <TableCell>{formatCurrency(model.stockInvestment)}</TableCell>
+                  <TableCell>{formatCurrency(model.otherCost)}</TableCell>
+                  <TableCell>{formatCurrency(model.requireWorkingCapital)}</TableCell>
+                  <TableCell>
+                    {model.royaltyFee && model.royaltyFee !== "No Fee" 
+                      ? `${model.royaltyFee}${model.royaltyFeeUnit === "%" ? "%" : ""}`
+                      : model.royaltyFee}
+                  </TableCell>
+                  <TableCell>{model.breakEven}</TableCell>
+                  <TableCell>{model.roi}%</TableCell>
+                  <TableCell>{model.payBackPeriod}</TableCell>
+                  <TableCell>{model.marginOnSales}%</TableCell>
+                  <TableCell>
+                    <IconButton
+                      onClick={() => handleDeleteFicoModel(index)}
+                      color="error"
+                      size="small"
+                      aria-label="delete"
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+    </Box>
   </Box>
-</Box>
-
-</Box>
-
-      )}
+)}
 
       <Divider
         sx={{

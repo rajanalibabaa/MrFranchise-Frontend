@@ -350,7 +350,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
   const franchiseTypes = [
     "Single Unit",
-    "Multi unit ",
+    "Multi Unit ",
     "Master Franchise",
     "City Franchise",
     "Area Franchise",
@@ -361,17 +361,17 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
   const franchiseModels = ["FOFO ", "FOCO ", "FICO ", "COCO ", "KIOSK","SHOPPING SHOP","CLOUD KITCHEN"];
 
   const investmentRanges = [
-    { label: "Below ₹50K", value: "Below-50,000" },
-    { label: "₹50K - ₹2 Lakhs", value: "Rs.50,000-2L" },
-    { label: "₹2 - ₹5 Lakhs", value: "Rs.2L-5L" },
-    { label: "₹5 - ₹10 Lakhs", value: "Rs.5L-10L" },
-    { label: "₹10 - ₹20 Lakhs", value: "Rs.10L-20L" },
-    { label: "₹20 - ₹30 Lakhs", value: "Rs.20L-30L" },
-    { label: "₹30 - ₹50 Lakhs", value: "Rs.30L-50L" },
-    { label: "₹50 Lakhs - ₹1 Crore", value: "Rs.50L-1Cr" },
-    { label: "₹1 - ₹2 Crores", value: "Rs.1Cr-2Cr" },
-    { label: "₹2 - ₹5 Crores", value: "Rs.2Cr-5Cr" },
-    { label: "Above ₹5 Crores", value: "Rs.5Cr-above" },
+    { label: "Below ₹50K", value: "Below - 50,000" },
+    { label: "₹50K - ₹2 Lakhs", value: "Rs. 50,000-2 L" },
+    { label: "₹2 - ₹5 Lakhs", value: "Rs. 2 L - 5 L" },
+    { label: "₹5 - ₹10 Lakhs", value: "Rs.5 L - 10 L" },
+    { label: "₹10 - ₹20 Lakhs", value: "Rs. 10 L - 20 L" },
+    { label: "₹20 - ₹30 Lakhs", value: "Rs. 20 L - 30 L" },
+    { label: "₹30 - ₹50 Lakhs", value: "Rs. 30 L- 50 L" },
+    { label: "₹50 Lakhs - ₹1 Crore", value: "Rs. 50 L - 1 Cr" },
+    { label: "₹1 - ₹2 Crores", value: "Rs. 1 Cr - 2 Crs" },
+    { label: "₹2 - ₹5 Crores", value: "Rs. 2 Cr - 5 Crs" },
+    { label: "Above ₹5 Crores", value: "Rs. 5Crs - above" },
   ];
 
   const aidFinancing = ["Yes", "No"];
@@ -864,25 +864,25 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               }
             >
               <MenuItem value="No Space Required">No Space Required</MenuItem>
-              <MenuItem value="100-200 Sq. Ft.">100-200 Sq. Ft.</MenuItem>
-              <MenuItem value="200-500 Sq. Ft.">200-500 Sq. Ft.</MenuItem>
-              <MenuItem value="500-1,000 Sq. Ft.">500-1,000 Sq. Ft.</MenuItem>
-              <MenuItem value="1,000-2,000 Sq. Ft.">
+              <MenuItem value="100 - 200 Sq. Ft.">100-200 Sq. Ft.</MenuItem>
+              <MenuItem value="200 - 500 Sq. Ft.">200-500 Sq. Ft.</MenuItem>
+              <MenuItem value="500 - 1,000 Sq. Ft.">500-1,000 Sq. Ft.</MenuItem>
+              <MenuItem value="1,000 - 2,000 Sq. Ft.">
                 1,000-2,000 Sq. Ft.
               </MenuItem>
-              <MenuItem value="2,000-3,000 Sq. Ft.">
+              <MenuItem value="2,000 - 3,000 Sq. Ft.">
                 2,000-3,000 Sq. Ft.
               </MenuItem>
-              <MenuItem value="3,000-5,000 Sq. Ft.">
+              <MenuItem value="3,000 - 5,000 Sq. Ft.">
                 3,000-5,000 Sq. Ft.
               </MenuItem>
-              <MenuItem value="5,000-7,000 Sq. Ft.">
+              <MenuItem value="5,000 - 7,000 Sq. Ft.">
                 5,000-7,000 Sq. Ft.
               </MenuItem>
-              <MenuItem value="7,000-10,000 Sq. Ft.">
+              <MenuItem value="7,000 - 10,000 Sq. Ft.">
                 7,000-10,000 Sq. Ft.
               </MenuItem>
-              <MenuItem value="10,000-15,000 Sq. Ft.">
+              <MenuItem value="10,000 - 15,000 Sq. Ft.">
                 10,000-15,000 Sq. Ft.
               </MenuItem>
             </Select>

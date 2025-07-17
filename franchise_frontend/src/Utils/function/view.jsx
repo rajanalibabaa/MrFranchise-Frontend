@@ -5,9 +5,9 @@ const token = localStorage.getItem("accessToken");
 const id = localStorage?.getItem("investorUUID") || localStorage?.getItem("brandUUID");
 
 export const postView = async ( viewedID ) => {
-    console.log("id :",id)
-    console.log("viewedId :",viewedID)
-    console.log("token :",token)
+    // console.log("id :",id)
+    // console.log("viewedId :",viewedID)
+    // console.log("token :",token)
     if (id && token && viewedID) {
         try {
         const response = await axios.post(`${api.viewApi.post}/${id}`, 
@@ -20,7 +20,7 @@ export const postView = async ( viewedID ) => {
             }
         );
 
-        console.log(response.data)
+        // console.log(response.data)
 
 
     } catch (error) {
