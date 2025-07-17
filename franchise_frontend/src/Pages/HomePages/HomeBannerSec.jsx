@@ -128,11 +128,6 @@ const pageConfig = {
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     },
-     {
-      component: "ViewedBrands",
-      background: "#fffaf7",
-      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    },
     {
       component: "TopLeadingFranchise",
       background: "white",
