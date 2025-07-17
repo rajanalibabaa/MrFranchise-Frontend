@@ -568,4 +568,4 @@ const HomeBannerSec = () => {
   );
 };
 
-export default HomeBannerSec;
+export default React.memo(HomeBannerSec) // Use React.memo to optimize HomeBannerSec
