@@ -1877,7 +1877,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
             )}
           </Typography>
           <Editor
-            apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
+            apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
             value={data.brandDescription || ""}
             init={{
               height: 400,
