@@ -24,7 +24,7 @@ function Complaint() {
       complaint: complaintText,
     };
 
-    console.log(formattedData)
+    // console.log(formattedData)
 
     try {
       const response = await axios.post(
@@ -36,7 +36,7 @@ function Complaint() {
           }
         }
       );
-      console.log("Complaint submitted:", response.data);
+      // console.log("Complaint submitted:", response.data);
       alert("Complaint submitted successfully!");
       // Clear the form
       setSelectedTopic('');

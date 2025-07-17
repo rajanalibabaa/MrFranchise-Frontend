@@ -11,8 +11,8 @@ const ManageProfile = () => {
     const [investorData, setInvestorData] = useState({});
 const id = useSelector((state) => state.user.investorUUID);
     const AccessToken = useSelector((state) => state.auth.AccessToken);
-    console.log(id);
-    console.log(AccessToken);
+    // console.log(id);
+    // console.log(AccessToken);
     
     useEffect(() => {
         const fetchData = async () => {

@@ -282,7 +282,7 @@ function BrandList() {
 
   const handleOpenBrand = async(brand) => {
 
-    console.log(brand.uuid)
+    // console.log(brand.uuid)
 
     const viewResponse = await axios.post(`https://mrfranchisebackend.mrfranchise.in/api/v1/view/postViewBrands/${Id}`,
       {viewedID:brand.uuid},
@@ -294,7 +294,7 @@ function BrandList() {
         }
     )
 
-    console.log(viewResponse.data)
+    // console.log(viewResponse.data)
     setSelectedBrand(brand);
     setOpenDialog(true);
     setTabValue(0);
@@ -1734,7 +1734,7 @@ const closePopup = () => {
           brandId: selectedBrand?._id,
           brandName: selectedBrand?.personalDetails?.brandName || "",
         };
-        console.log(payload);
+        // console.log(payload);
 
         const response = await axios.post(
           "https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/createInstaApply",

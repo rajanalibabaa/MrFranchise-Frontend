@@ -27,6 +27,8 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 import { postView } from "../../Utils/function/view";
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import { showLoading } from "../../Redux/Slices/loadingSlice";
+import { useDispatch } from "react-redux";
 
 
 const CARD_DIMENSIONS = {
@@ -311,7 +313,7 @@ const TopCafeFranchises = () => {
   const [showLogin, setShowLogin] = useState(false);
   
   const navigate = useNavigate();
-
+const dispatch = useDispatch()
   // REACT-QUERY HOOKS
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
@@ -474,9 +476,8 @@ const TopCafeFranchises = () => {
                 },
               }}
               onClick={async () => {
-                // dispatch(showLoading());
+                dispatch(showLoading());
                 navigate("/brandviewpage");
-               // dispatch(hideLoading());
               }}
             >
               View More

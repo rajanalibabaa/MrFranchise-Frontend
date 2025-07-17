@@ -1,11 +1,21 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import Navbar from "../../Components/Navbar/NavBar";
 import { Box, CircularProgress } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { hideLoading } from "../../Redux/Slices/loadingSlice.jsx";
 
 // Lazy load the BrandList component
 const BrandListNew = lazy(() => import("./BrandList.jsx"));
 
+
 function BrandCategoryViewPage() {
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(hideLoading());
+  }, [dispatch]);
+
   return (
     <>
       {/* Navbar with memoization to prevent unnecessary re-renders */}
@@ -16,6 +26,7 @@ function BrandCategoryViewPage() {
         component="main"
         sx={{
           mt: "12px",
+          ml: "12px",
           minHeight: "calc(100vh - 64px)", // Adjust based on your navbar height
           position: "relative"
         }}

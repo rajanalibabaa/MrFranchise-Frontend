@@ -24,7 +24,7 @@ function BrandComplaint() {
       complaint: complaintText,
     };
 
-    console.log(formattedData);
+    // console.log(formattedData);
 
     try {
       const response = await axios.post(
@@ -36,7 +36,7 @@ function BrandComplaint() {
           }
         }
       );
-      console.log("Complaint submitted:", response.data);
+      // console.log("Complaint submitted:", response.data);
       alert("Complaint submitted successfully!");
       setSelectedTopic('');
       setComplaintText('');

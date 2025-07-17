@@ -54,8 +54,8 @@ const FeedBack = () => {
 
     try {
       
-  console.log(investorUUID)
-  console.log(AccessToken)   
+  // console.log(investorUUID)
+  // console.log(AccessToken)   
       const response = await axios.post(
         // "https://mrfranchisebackend.mrfranchise.in/api/feedback/createFeedback",
         `https://mrfranchisebackend.mrfranchise.in/api/v1/feedback/createFeedback/${investorUUID}`,
@@ -65,7 +65,7 @@ const FeedBack = () => {
           Authorization: `Bearer ${AccessToken}`,
         }
       );
-      console.log("Feedback submitted:", response.data);
+      // console.log("Feedback submitted:", response.data);
       setFeedbackText('');
       setSelectedTopic('');
       setValue(2);

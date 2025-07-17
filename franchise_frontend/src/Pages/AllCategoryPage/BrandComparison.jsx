@@ -90,7 +90,7 @@ const BrandComparison = ({
 
   const franchiseModelFields = [
     { label: "Franchise Model", field: "franchiseModel" },
-    { label: "Franchise Type", field: "franchiseType" },
+    // { label: "Franchise Type", field: "franchiseType" },
     { label: "Area Required (sq.ft)", field: "areaRequired" },
     { label: "Investment Range", field: "investmentRange" },
     { label: "Franchise Fee", field: "franchiseFee" },

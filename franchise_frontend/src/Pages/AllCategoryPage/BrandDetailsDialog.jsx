@@ -96,7 +96,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
           }
         );
 
-        console.log("Investor details response:", response.data.data);
+        // console.log("Investor details response:", response.data.data);
         setUserData(response.data.data);
         const investor = response.data?.data;
         if (investor) {
@@ -175,13 +175,13 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
           : selectedBrand.brandDetails?.brandLogo || "",
       };
 
-      console.log("payload", payload);
+      // console.log("payload", payload);
       const token = localStorage.getItem("accessToken");
       const investorUUID = localStorage.getItem("investorUUID");
       const brandUUID = localStorage.getItem("brandUUID");
       const id = investorUUID || brandUUID;
 
-      console.log(id, token);
+      // console.log(id, token);
 
       // Check for missing id
       if (!id) {
@@ -206,7 +206,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
       }
 
       // Debug logs
-      console.log("Submitting with id:", id, "payload:", payload);
+      // console.log("Submitting with id:", id, "payload:", payload);
 
       const response = await axios.post(
         `https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication/${id}`,
@@ -219,7 +219,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
         }
       );
 
-      console.log("status code", response.data);
+      // console.log("status code", response.data);
 
       if (response.data) {
         setSubmitSuccess(true);
@@ -242,7 +242,7 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
         });
       }
     } catch (error) {
-      console.log("Submission error:", error?.response?.data || error.message);
+      // console.log("Submission error:", error?.response?.data || error.message);
       alert("❌Failed to submit application.");
     } finally {
       setIsSubmitting(false);

@@ -33,7 +33,7 @@ const authSlice = createSlice({
       state.AccessToken = token;
       state.isLogin = true;
       // state.userData = userData;
-      console.log(userData)
+      // console.log(userData)
 
       //  id = investorUUID || brandUUID
 

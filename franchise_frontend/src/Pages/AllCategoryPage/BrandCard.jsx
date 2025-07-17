@@ -20,10 +20,12 @@ import {
 import LoginPage from "../LoginPage/LoginPage";
 import { openBrandDialog } from "../../Hooks/Fetchbrands.jsx";
 import { postView } from "../../Utils/function/view.jsx";
+import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 
 const cardStyles = {
   width: 320,
   height: 520,
+  ml: 1.5,
   display: "flex",
   flexDirection: "column",
   transition: "transform 0.3s, box-shadow 0.3s",
@@ -105,7 +107,7 @@ const BrandCard = memo(
     );
 
     const handleOpenBrand = useCallback(() => {
-      console.log("Open brand dialog ============", brand);
+      // console.log("Open brand dialog ============", brand);
       if ("requestIdleCallback" in window) {
         requestIdleCallback(() => {
           postView(uuid);
@@ -152,7 +154,7 @@ const BrandCard = memo(
               sx={{
                 position: "absolute",
                 top: 8,
-                right: 8,
+                right: 2,
                 zIndex: 2,
                 backgroundColor: isSelectedForComparison
                   ? "rgba(76, 175, 80, 0.9)"
@@ -203,6 +205,15 @@ const BrandCard = memo(
             <Typography variant="h6" component="div" sx={titleStyles}>
               {brandDetails.brandName}
             </Typography>
+            {/* <IconButton sx={{
+              color:'rgba(0,0,0,0.23)',
+            }}
+            onClick={()=>{
+              console.log("shortlist is clicked")
+            }}
+            >
+            <PlaylistAddCheckIcon/>
+            </IconButton> */}
             <IconButton
               onClick={() =>
                 handleLikeClick(uuid, isLiked)
@@ -224,25 +235,42 @@ const BrandCard = memo(
             </IconButton>
           </Box>
 
-          <Box sx={{ mb: 1, minHeight: 32 }}>
-            {franchiseDetails.brandCategories?.child ? (
-              <Chip
-                label={franchiseDetails.brandCategories.child}
-                size="small"
-                sx={{
-                  mr: 1,
-                  mb: 1,
-                  bgcolor: "rgba(255, 152, 0, 0.1)",
-                  color: "orange.dark",
-                  fontWeight: 500,
-                }}
-              />
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                N/A
-              </Typography>
-            )}
-          </Box>
+          <Box
+  sx={{
+    mb: 1,
+    minHeight: 32,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  }}
+>
+  {franchiseDetails.brandCategories?.child ? (
+    <Chip
+      label={franchiseDetails.brandCategories.child}
+      size="small"
+      sx={{
+        bgcolor: "rgba(255, 152, 0, 0.1)",
+        color: "orange.dark",
+        fontWeight: 500,
+      }}
+    />
+  ) : (
+    <Typography variant="body2" color="text.secondary">
+      N/A
+    </Typography>
+  )}
+
+  <IconButton
+    size="small"
+    sx={{ color: "rgba(0,0,0,0.23)" }}
+    onClick={() => {
+      console.log("shortlist is clicked");
+    }}
+  >
+    <PlaylistAddCheckIcon />
+  </IconButton>
+</Box>
+
 
           <Box
             sx={{
@@ -300,19 +328,16 @@ const BrandCard = memo(
 );
 
 const LocationDetail = memo(({ locations, onViewMore }) => {
-  const locationText = useMemo(() => {
-    if (!locations) return "Multiple locations";
+  const { displayText, hasMore } = useMemo(() => {
+    const domestic = locations?.domestic?.locations || [];
+    const international = locations?.international?.locations || [];
+    const all = [...domestic, ...international];
 
-    const domestic = locations.domestic?.locations || [];
-    const international = locations.international?.locations || [];
-    const allLocations = [...domestic, ...international];
+    const names = all.map((loc) => loc.state || loc.country).filter(Boolean);
+    const display = names.slice(0, 2).join(", ");
+    const hasMore = names.length > 2;
 
-    return allLocations.length > 0
-      ? allLocations
-          .map((loc) => loc.state || loc.country)
-          .filter(Boolean)
-          .join(", ")
-      : "Multiple locations";
+    return { displayText: display || "Multiple locations", hasMore };
   }, [locations]);
 
   return (
@@ -328,8 +353,8 @@ const LocationDetail = memo(({ locations, onViewMore }) => {
       <Typography variant="body2" noWrap>
         <span style={{ fontWeight: 600 }}>Expansion Location:</span>
         <br />
-        {locationText}
-        {locations && (
+        {displayText}
+        {hasMore && (
           <Button
             size="small"
             sx={{ ml: 0.5, minWidth: 0, padding: 0 }}
@@ -342,6 +367,7 @@ const LocationDetail = memo(({ locations, onViewMore }) => {
     </Box>
   );
 });
+
 
 const DetailItem = memo(({ icon, label, value }) => {
   const clonedIcon = useMemo(

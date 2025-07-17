@@ -46,7 +46,7 @@ const toggleLike = useToggleLike();
   const CARD_SIZES = {
     main: {
       width: isMobile ? "100%" : isTablet ? "100%" : "68%",
-      height: isMobile ? 420 : isTablet ? 480 : 550,
+      height: isMobile ? 450 : isTablet ? 480 : 550,
       videoHeight: isMobile ? 250 : isTablet ? 300 : 450,
     },
     side: {
@@ -198,18 +198,7 @@ const toggleLike = useToggleLike();
     </Typography>
   );
 
-  const formatInvestment = (range) => {
-  if (!range) return "N/A";
-  return `${range.replace(/-/g, " - ").replace(/(\d+)L/g, "$1 L")}`;
-};
 
-const formatArea = (area) => {
-  if (!area) return "N/A";
-  return area
-    .replace(/-/g, " - ")
-    .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") // comma formatting
-    .replace(/\s*Sq\.?\s*Ft\.?/i, "Sq. Ft.");
-};
 
   return (
     <Box
@@ -481,64 +470,8 @@ const formatArea = (area) => {
 </Typography>
 
                       </Box>
-                    </Stack>
-
-               <Stack
-                    direction={{ xs: "row" }}
-                    alignItems={{ xs: "flex-start", sm: "center" }}
-                    spacing={5}
-                    sx={{ flex: 1, minWidth: 0 }}
-                  >
-
-                    {/* Key facts */}
-                    <Stack
-                      direction="column"
-                      spacing={1}
-                     
-                    >
-<Fact
-  label="Investment"
-  value={formatInvestment(mainBrand.franchiseDetails?.fico?.[0]?.investmentRange)}
-/>
-
-<Fact
-  label="Area Required"
-  value={formatArea(mainBrand.franchiseDetails?.fico?.[0]?.areaRequired)}
-/>
-                      <Fact
-                        label="Franchise Type"
-                         value={mainBrand.franchiseDetails?.fico?.[0]?.franchiseType}
-
-                      />
-                    </Stack>
-
-                    {/* Action buttons */}
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <Button
-                        variant="contained"
-                        onClick={() => handleApply(mainBrand)}
-                        sx={{
-                          px: 3,
-                          fontWeight: 600,
-                          textTransform: "none",
-                          color: "#fff",
-                          background:
-                            theme.palette.mode === "dark"
-                              ? "linear-gradient(45deg, #ffb74d, #ff9800)"
-                              : "linear-gradient(45deg, #f57c00, #ff9800)",
-                          "&:hover": {
-                            background:
-                              theme.palette.mode === "dark"
-                                ? "linear-gradient(45deg, #ff9800, #ffb74d)"
-                                : "linear-gradient(45deg, #ff9800, #f57c00)",
-                            boxShadow: theme.shadows[4],
-                          },
-                        }}
-                      >
-                        View Details
-                      </Button>
-
-                      <Tooltip
+                      {isMobile && (
+   <Tooltip
                         title={
                           mainBrand.isLiked
                             ? "Remove from favorites"
@@ -558,6 +491,115 @@ const formatArea = (area) => {
                           )}
                         </IconButton>
                       </Tooltip>
+)}
+                    </Stack>
+
+               <Stack
+                    direction={{ xs: "row" }}
+                    alignItems={{ xs: "flex-start", sm: "center" }}
+                    spacing={5}
+                    sx={{ flex: 1, minWidth: 0 }}
+                  >
+
+                    {/* Key facts */}
+                    <Stack
+                      direction="column"
+                      spacing={1}
+                     
+                    >
+<Fact
+  label="Investment"
+  value={mainBrand.franchiseDetails?.fico?.[0]?.investmentRange}
+/>
+
+<Fact
+  label="Area Required"
+  value={mainBrand.franchiseDetails?.fico?.[0]?.areaRequired}
+/>
+                      <Fact
+                        label="Franchise Type"
+                         value={mainBrand.franchiseDetails?.fico?.[0]?.franchiseType}
+
+                      />
+                      {isMobile && (
+                         <Button
+                        variant="contained"
+                        onClick={() => handleApply(mainBrand)}
+                        sx={{
+                          
+                          px: 3,
+                          fontWeight: 600,
+                          textTransform: "none",
+                          color: "#fff",
+                          background:
+                            theme.palette.mode === "dark"
+                              ? "linear-gradient(45deg, #ffb74d, #ff9800)"
+                              : "linear-gradient(45deg, #f57c00, #ff9800)",
+                          "&:hover": {
+                            background:
+                              theme.palette.mode === "dark"
+                                ? "linear-gradient(45deg, #ff9800, #ffb74d)"
+                                : "linear-gradient(45deg, #ff9800, #f57c00)",
+                            boxShadow: theme.shadows[4],
+                          },
+                        }}
+                      >
+                        View Details
+                      </Button>
+                      )}
+                    </Stack>
+
+                    {/* Action buttons */}
+                    <Stack direction="row" spacing={1} alignItems="center">
+                    {!isMobile && (
+                        <Button
+                        variant="contained"
+                        onClick={() => handleApply(mainBrand)}
+                        sx={{
+                          
+                          px: 3,
+                          fontWeight: 600,
+                          textTransform: "none",
+                          color: "#fff",
+                          background:
+                            theme.palette.mode === "dark"
+                              ? "linear-gradient(45deg, #ffb74d, #ff9800)"
+                              : "linear-gradient(45deg, #f57c00, #ff9800)",
+                          "&:hover": {
+                            background:
+                              theme.palette.mode === "dark"
+                                ? "linear-gradient(45deg, #ff9800, #ffb74d)"
+                                : "linear-gradient(45deg, #ff9800, #f57c00)",
+                            boxShadow: theme.shadows[4],
+                          },
+                        }}
+                      >
+                        View Details
+                      </Button>
+                    )}
+
+                     {!isMobile && (
+                        <Tooltip
+                        title={
+                          mainBrand.isLiked
+                            ? "Remove from favorites"
+                            : "Add to favorites"
+                        }
+                      >
+                        <IconButton
+                          onClick={() =>
+                            handleLikeClick(mainBrand.uuid, mainBrand.isLiked)
+                          }
+                          disabled={brandsLoading}
+                        >
+                          {mainBrand.isLiked ? (
+                            <Favorite color="error" />
+                          ) : (
+                            <FavoriteBorder />
+                          )}
+                        </IconButton>
+                      </Tooltip>
+                     )}
                     </Stack>
                     </Stack>
                   </Stack>

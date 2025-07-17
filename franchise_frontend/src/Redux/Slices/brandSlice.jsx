@@ -61,7 +61,7 @@ export const Likeshow = async () => {
     );
     return response;
   } catch (error) {
-    console.log(error);
+    // console.log(error);
   }
 };
 
@@ -86,7 +86,7 @@ export const fetchBrands = createAsyncThunk(
         
       }
 
-      console.log("response.data.data :",response.data.data)
+      // console.log("response.data.data :",response.data.data)
       
 
       return response.data.data;
@@ -131,7 +131,7 @@ export const viewApi = createAsyncThunk(
       );
       return res.data.data;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   }
 );
@@ -141,9 +141,9 @@ let viewID = null
 
 if (viewID) {
 
-  console.log("viewID :",viewID)
-  console.log("id :",viewID)
-  console.log("token :",token)
+  // console.log("viewID :",viewID)
+  // console.log("id :",viewID)
+  // console.log("token :",token)
   try {
       const res = await axios.post(
         `https://mrfranchisebackend.mrfranchise.in//api/v1/view/postViewBrands/${id}`,
@@ -155,11 +155,11 @@ if (viewID) {
           },
         }
       );
-      console.log (res.data.data);
+      // console.log (res.data.data);
 
       viewID = null
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
 }
 
