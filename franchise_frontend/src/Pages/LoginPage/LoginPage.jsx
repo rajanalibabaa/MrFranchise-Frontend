@@ -21,10 +21,14 @@ import { useDispatch } from "react-redux";
 import { setUUIDandTOKEN, logout } from "../../Redux/Slices/AuthSlice/authSlice";
 import CloseIcon from "@mui/icons-material/Close";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
+import { useMediaQuery, useTheme } from "@mui/system";
 function LoginPage({ open, onClose }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+    const theme = useTheme();
 
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  
   const [formData, setFormData] = useState({ username: "", otp: "" });
   const [errors, setErrors] = useState({});
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -216,10 +220,12 @@ const handleVerifyOtp = useCallback(async () => {
 
         <DialogContent sx={{ p: 0 }}>
           <Grid display={"flex"} sx={{ minHeight: "65vh" }}>
+              
+           {!isMobile && (
               <Box ml={4} sx={{ display: "flex", alignItems: "center", justifyContent: "center",p:4}}>
                 <img src={illustration} alt="Login" style={{ maxWidth: "100%", height: "65vh" }} />
                 </Box>
-            
+           )}
 
             <Grid ml={2} xs={12} md={6} sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 4 }}>
               <Box sx={{ width: "100%", maxWidth: 400 }}>
