@@ -335,7 +335,7 @@ export const categories = [
         groupId:"A",
         name: "Food Franchises",
         children: [
-          "QSR(Quick Service Restaurants)",
+          "QSR (Quick Service Restaurants)",
           " Casual Dining",
           "Fine Dining",
           "Multi Cuisine Restaurants",
