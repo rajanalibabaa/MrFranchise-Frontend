@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, Avatar, Tabs, Tab, Card, Grid, Button, CircularProgress, Divider, Table, TableContainer, TableHead, TableBody, TableRow, TableCell, Paper, TextField, InputAdornment, FormControl, InputLabel, Select, MenuItem, useMediaQuery, useTheme, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { Person, Visibility, ThumbUp, MailOutline, Search, Close, FilterList, Refresh } from '@mui/icons-material';
+import { Person, Visibility, ThumbUp, MailOutline, Search, Close, FilterList,  } from '@mui/icons-material';
 
 const API_BASE_URL = 'http://localhost:5000/api/v1';
 const colors = {
@@ -146,9 +146,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
       <Typography variant="h6" sx={{ color: colors.textPrimary }}>
         Total Enquiries: {filteredLeadsData.length}
       </Typography>
-      <Button variant="outlined" startIcon={<Refresh />} onClick={fetchData} sx={{ color: colors.accent, borderColor: colors.accent }}>
-        Refresh
-      </Button>
+     
     </Box>
     
     {/* Filter Controls */}
@@ -489,9 +487,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
               Brand View ({brandViewsCount})
             </Button>
           </Box>
-          <Button variant="outlined" startIcon={<Refresh />} onClick={fetchData} sx={{ color: colors.accent, borderColor: colors.accent }}>
-            Refresh
-          </Button>
+          
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
           <FormControl sx={{ minWidth: 200 }} size="small">
@@ -532,9 +528,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                 {dateFilters.map(option => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
               </Select>
             </FormControl>
-            <Button variant="outlined" startIcon={<Refresh />} onClick={fetchData} sx={{ color: colors.accent, borderColor: colors.accent }}>
-              Refresh
-            </Button>
+            
           </Box>
         </Box>
         <TableContainer component={Paper} sx={{ border: `1px solid ${colors.divider}`, boxShadow: 'none' }}>
@@ -576,9 +570,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
             <Typography variant="h6" sx={{ color: colors.textPrimary }}>
               Total Leads: {filteredLeadsData.length}
             </Typography>
-            <Button variant="outlined" startIcon={<Refresh />} onClick={fetchData} sx={{ color: colors.accent, borderColor: colors.accent }}>
-              Refresh
-            </Button>
+           
           </Box>
           
           {/* Filter Controls */}
@@ -997,7 +989,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
           <Card sx={{ mb: 3, backgroundColor: colors.cardBackground, border: `1px solid ${colors.divider}`, boxShadow: 'none' }}>
             <Tabs value={tabValue} onChange={handleTabChange} variant={isMobile ? 'scrollable' : 'fullWidth'} scrollButtons="auto"
               sx={{ '& .MuiTabs-indicator': { backgroundColor: colors.accent, height: 3 } }}>
-              {['Enquiries', 'Views', 'Likes', 'Leads'].map((label, index) => (
+              {['Exclusive Enquiries', 'Views', 'Likes', 'Leads'].map((label, index) => (
                 <Tab key={index} label={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.5 }}>
                     {[<Person />, <Visibility />, <ThumbUp />, <MailOutline />][index]}
