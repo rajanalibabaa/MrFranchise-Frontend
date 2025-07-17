@@ -36,8 +36,6 @@ import {
 import { useLocation } from "react-router-dom";
 import LoginPage from "../LoginPage/LoginPage.jsx";
 
-// Lazy load heavy components
-
 // Memoized components
 const BrandCardSkeleton = React.memo(() => (
   <Box sx={{ height: 350, bgcolor: "rgba(0, 0, 0, 0.04)", borderRadius: 2 }} />

@@ -59,6 +59,7 @@ const toggleLike = useToggleLike();
   const handleLikeClick = useCallback((brandId, isLiked) => {
   // Immediate UI update - no waiting for API response
   const token = localStorage.getItem("accessToken");
+  
   if (!token) {
     setShowLogin(true);
     return;
