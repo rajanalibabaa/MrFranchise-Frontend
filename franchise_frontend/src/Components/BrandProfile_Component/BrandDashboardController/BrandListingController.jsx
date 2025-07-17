@@ -146,7 +146,7 @@ const BrandListingController = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saveStatus, setSaveStatus] = useState({ loading: false, success: false, error: '' });
-  const [isEditing, setIsEditing] = useState(false);
+const [isEditing, setIsEditing] = useState(false);
   const [showOtpDialog, setShowOtpDialog] = useState(false);
   const [expanded, setExpanded] = useState("panel1");
   const [otp, setOtp] = useState('');
@@ -282,7 +282,7 @@ const sendOtp = async () => {
       }
     );
 
-    if (response.data.success?.includes("verified successfully")) {
+    if (response.data.success === true || response.data.message?.includes("verified successfully")) {
       setIsEditing(true);
       setShowOtpDialog(false);
     } else {
@@ -332,6 +332,7 @@ const sendOtp = async () => {
   }
 
   setSaveStatus({ loading: true, success: false, error: '' });
+  console.log("apiData",apiData)
 
   try {
     const apiData = unflattenFormData(formData); 
@@ -494,7 +495,8 @@ if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
               data={formData}
               onChange={handleFormChange}
               errors={{}}
-              isEditing={isEditing}
+             isEditing={isEditing}
+      setIsEditing={setIsEditing}
             />
           </CardContent>
         </AccordionDetails>
@@ -511,7 +513,8 @@ if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
               data={formData}
               onChange={handleFormChange}
               errors={{}}
-              isEditing={isEditing}
+          isEditing={isEditing}
+      setIsEditing={setIsEditing}
             />
           </CardContent>
         </AccordionDetails>
@@ -528,7 +531,8 @@ if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
               data={formData}
               onChange={handleFormChange}
               errors={{}}
-              isEditing={isEditing}
+            isEditing={isEditing}
+      setIsEditing={setIsEditing}
             />
           </CardContent>
         </AccordionDetails>
@@ -545,7 +549,8 @@ if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
               data={formData}
               onChange={handleFormChange}
               errors={{}}
-              isEditing={isEditing}
+         isEditing={isEditing}
+      setIsEditing={setIsEditing}
             />
           </CardContent>
         </AccordionDetails>

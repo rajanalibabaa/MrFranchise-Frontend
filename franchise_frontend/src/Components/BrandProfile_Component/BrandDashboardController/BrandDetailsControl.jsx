@@ -31,7 +31,7 @@ import coutryCode from "../../../Utils/AllCountryCode.jsx";
 // const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 // const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-const BrandDetailsControl = ({ data = {}, errors = {}, onChange }) => {
+const BrandDetailsControl = ({ data = {}, errors = {}, onChange, isEditing= false }) => {
   const [showWhatsappSnackbar, setShowWhatsappSnackbar] = useState(false);
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
 
@@ -873,6 +873,7 @@ useEffect(() => {
             variant="outlined"
             size="medium"
             required
+            disabled={!isEditing}
           />
         </Grid>
         {/* Email with Verification */}
@@ -1109,6 +1110,7 @@ useEffect(() => {
             value={data.brandName || ""}
             onChange={handleChange}
             variant="outlined"
+            disabled={!isEditing}
             size="medium"
             error={!!errors.brandName}
             helperText={errors.brandName}
