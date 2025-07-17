@@ -1,9 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import {visualizer} from 'rollup-plugin-visualizer'
 
 export default defineConfig({
   base: '/', // root path (for AWS this is usually correct)
-  plugins: [react()],
+  plugins: [react(),
+    visualizer()],
   build: {
     target: 'es2015', // ensures broader browser compatibility
     minify: 'terser',

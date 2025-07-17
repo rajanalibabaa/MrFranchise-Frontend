@@ -159,6 +159,7 @@ const id = useSelector((state) => state.user.investorUUID);
                             <Avatar sx={{ width: 200, height: 200, mx: "auto", mb: 2 }}>
                                 <img
                                     src={img}
+                                    loading='lazy'
                                     alt="Profile"
                                     style={{ width: "140%", height: "105%", borderRadius: "50%" }}
                                 />

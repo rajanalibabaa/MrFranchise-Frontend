@@ -58,16 +58,25 @@ function TopBrandVdoCards() {
   };
 
   const handleLikeClick = useCallback((brandId, isLiked) => {
+    console.log("brandId:", brandId, "isLiked:", isLiked);
+    
     const token = localStorage.getItem("accessToken");
     if (!token) {
       setShowLogin(true);
       return;
     }
+// Add validation
+  if (typeof isLiked !== 'boolean') {
+    console.error("Invalid isLiked value:", isLiked);
+    return;
+  }
 
     toggleLike.mutate(
       { brandId, isLiked },
       {
         onMutate: () => {
+               console.log("Optimistic update with:", { brandId, isLiked });
+               
           setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
         },
         onError: (error) => {

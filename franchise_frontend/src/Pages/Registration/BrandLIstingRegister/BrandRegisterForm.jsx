@@ -661,6 +661,7 @@ const dispatch = useDispatch();
                   {isImage ? (
                     <img
                       src={file}
+                      loading="lazy"
                       alt={`Preview ${index}`}
                       style={{ width: "100%", height: "auto", borderRadius: 4 }}
                     />
@@ -697,6 +698,7 @@ const dispatch = useDispatch();
                   {isImage ? (
                     <img
                       src={url}
+                      loading="lazy"
                       alt={`Preview ${index}`}
                       style={{ width: "100%", height: "auto", borderRadius: 4 }}
                     />

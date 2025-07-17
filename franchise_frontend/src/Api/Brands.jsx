@@ -49,34 +49,54 @@ export const fetchBrandById = async (brandId) => {
 };
 
 export const toggleBrandLike = async ({ brandId, isLiked }) => {
-  const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
+  const investorId = localStorage.getItem("investorUUID");
+  const token = localStorage.getItem("accessToken");
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  };
 
   try {
-    if (!id || !brandId) {
-      throw new Error("Missing investorUUID or brandId");
-    }
-
     if (!isLiked) {
-      // Fix field name: use corre  ct case
-      await apiClient.post(api.likeApi.post, {
-        investorUUID: id,
-        brandUUID: brandId,
-      });
+      // For like creation
+      const response = await apiClient.post(
+        '/api/v1/like/post-favbrands',
+        {
+          brandUUID: brandId,
+          investorUUID: investorId
+        },
+        config
+      );
+      return response.data;
     } else {
-      // Fix field name: use correct case
-      await apiClient.delete(`/like/delete-favbrand/${id}`, {
-        data: { brandUUID: brandId },
-      });
+      // For like removal
+      const response = await apiClient.delete(
+        '/api/v1/like/delete-favbrand',
+        {
+          ...config,
+          data: {
+            brandUUID: brandId,
+            investorUUID: investorId
+          }
+        }
+      );
+      return response.data;
     }
-
-    return { brandId, isLiked: !isLiked };
   } catch (error) {
-    console.error("Error toggling brand like:", error?.response?.data || error.message);
+    console.error("API Error Details:", {
+      request: {
+        url: error.config?.url,
+        method: error.config?.method,
+        data: error.config?.data
+      },
+      response: error.response?.data
+    });
     throw error;
   }
 };
-
-
 export const recordBrandView = async (brandID) => {
   const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
   

@@ -1515,6 +1515,7 @@ const OverviewTab = ({ brand }) => {
                           {award.awardImage && (
                             <img
                               src={award.awardImage}
+                              loading="lazy"
                               alt={`Award ${idx + 1}`}
                               style={{
                                 width: "100%",

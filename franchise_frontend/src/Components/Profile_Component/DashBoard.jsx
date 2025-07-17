@@ -74,6 +74,7 @@ const DashBoard = ({ selectedSection, sectionContent }) => {
                                 }}>
                                     <img
                                         src={img}
+                                        loading="lazy"
                                         alt="Profile"
                                         style={{ width: "140%", height: "105%", borderRadius: "50%" }}
                                     />

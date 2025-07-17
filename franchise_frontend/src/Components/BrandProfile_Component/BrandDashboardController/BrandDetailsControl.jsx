@@ -4,50 +4,28 @@ import {
   Grid,
   Typography,
   InputAdornment,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
-  List,
-  ListItem,
-  ListItemText,
   Paper,
   Box,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Button,
   CircularProgress,
   Snackbar,
   Alert,
-  RadioGroup,
-  Radio,
-  Chip,
-  Checkbox,
   Autocomplete,
-  FormControlLabel,
   IconButton,
-  Divider,
   Avatar,
-  Badge,
   Tooltip,
 } from "@mui/material";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import categories from "../../../Pages/Registration/BrandLIstingRegister/BrandCategories";
-import AddIcon from "@mui/icons-material/Add";
 import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
 import CloseIcon from "@mui/icons-material/Close";
-import LanguageIcon from "@mui/icons-material/Language";
 import FlagIcon from "@mui/icons-material/Flag";
-import { Editor } from "@tinymce/tinymce-react";
-import { fontSize, width } from "@mui/system";
 import {
-  fetchGlobalLocationByPostalCode,
-  getSupportedCountries,
-} from "../../../Utils/PincodeFetch.jsx";
+  fetchGlobalLocationByPostalCode} from "../../../Utils/PincodeFetch.jsx";
 import coutryCode from "../../../Utils/AllCountryCode.jsx";
 
 // const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
