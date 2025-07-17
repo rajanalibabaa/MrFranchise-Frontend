@@ -58,16 +58,11 @@ function TopBrandVdoCards() {
   };
 
   const handleLikeClick = useCallback((brandId, isLiked) => {
-    console.log("brandId:", brandId, "isLiked:", isLiked);
-    
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      setShowLogin(true);
-      return;
-    }
-// Add validation
-  if (typeof isLiked !== 'boolean') {
-    console.error("Invalid isLiked value:", isLiked);
+  // Immediate UI update - no waiting for API response
+  const token = localStorage.getItem("accessToken");
+  
+  if (!token) {
+    setShowLogin(true);
     return;
   }
 
