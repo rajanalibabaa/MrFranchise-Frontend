@@ -31,19 +31,20 @@ const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
 
   PaperProps={{
     sx: {
-        marginLeft:"100px",
+        marginLeft:"60px",
+        marginBottom:"30px",
       boxShadow: "none",
-    //   color :"white",
       backgroundColor: "transparent", 
-zIndex: 1300,    },
+zIndex: 1200,
+    },
   }}
 >
   <Box
-    sx={{ backgroundColor: "transparent", p: 1 }} // optional padding
+    sx={{ backgroundColor: "transparent",marginBottom:"50px" ,marginRight:"20px" }} 
   >
 
 
-    <Box display="flex" flexDirection="column" gap={1}>
+    <Box display="flex" flexDirection="column"  >
       <IconButton
         color="primary"
         onClick={() =>

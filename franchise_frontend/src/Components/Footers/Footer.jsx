@@ -42,7 +42,7 @@ function Footer() {
           },
         }
       );
-      console.log("Response from server:", res.data);
+      // console.log("Response from server:", res.data);
       setresponse(res.data.success);
 
       if (res.data.success) {

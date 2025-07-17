@@ -548,7 +548,7 @@ const ViewBrands = () => {
       ) : (
         <Box sx={{ textAlign: "center", p: 4 }}>
           <Typography variant="body1" color="text.secondary">
-            You haven't viewed any brands yet.
+            Please Login To View Brands.
           </Typography>
         </Box>
       )}

@@ -57,6 +57,15 @@ const FilterPanel = React.memo(({
   resultStats = { showing: 0, total: 0 },
   isLoading = false
 }) => {
+  // console.log('modelTypes:', modelTypes);
+  // console.log('locationData:', locationData);
+  // console.log('investmentRanges:', investmentRanges);
+  // console.log('childCategories:', childCategories);
+  // console.log('subCategories:', subCategories);
+  // console.log('categories:', categories);
+  
+  
+  
   const [searchTerms, setSearchTerms] = useState({
     subCategory: '',
     modelType: '',
@@ -95,12 +104,18 @@ const FilterPanel = React.memo(({
       .slice(0, 100);
   }, [subCategories, debouncedSearchTerms.subCategory]);
 
-  const filteredModelTypes = useMemo(() => {
-    const term = debouncedSearchTerms.modelType.toLowerCase();
-    return modelTypes
-      .filter(type => type.toLowerCase().includes(term))
-      .slice(0, 100);
-  }, [modelTypes, debouncedSearchTerms.modelType]);
+  const filteredChildCategories = useMemo(() => {
+    if (!filters.selectedSubCategory) return [];
+    return (childCategories || []).filter(
+      child => child.parentSubCategory === filters.selectedSubCategory
+    ).slice(0, 50);
+  }, [filters.selectedSubCategory, childCategories]);
+
+
+const filteredModelTypes = useMemo(() => {
+  const term = debouncedSearchTerms.modelType.toLowerCase().trim();
+  return modelTypes.filter(type => type.toLowerCase().includes(term));
+}, [modelTypes, debouncedSearchTerms.modelType]);
 
   const filteredInvestmentRanges = useMemo(() => {
     const term = debouncedSearchTerms.investmentRange.toLowerCase();
@@ -133,14 +148,6 @@ const FilterPanel = React.memo(({
       .filter(c => c.city.toLowerCase().includes(term))
       .slice(0, 100);
   }, [filters.selectedDistrict, locationData.cities, debouncedSearchTerms.city]);
-
-  // Memoized child categories for the selected subcategory
-  const filteredChildCategories = useMemo(() => {
-    if (!filters.selectedSubCategory) return [];
-    return (childCategories || []).filter(
-      child => child.parentSubCategory === filters.selectedSubCategory
-    ).slice(0, 50);
-  }, [childCategories, filters.selectedSubCategory]);
 
   // Stable callback handlers
   const handleSearchChange = useCallback((field, value) => {
@@ -220,345 +227,587 @@ const FilterPanel = React.memo(({
         sx={{ mb: 3 }}
       />
 
-      {/* Sub Category Filter */}
-      <Accordion 
-        expanded={expandedSections.subCategory}
-        onChange={() => toggleSection('subCategory')}
-        disableGutters
-        elevation={0}
-        sx={{ mb: 2 }}
+   {/* Sub Category Filter */}
+<Accordion 
+  expanded={expandedSections.subCategory}
+  onChange={() => toggleSection('subCategory')}
+  disableGutters
+  elevation={0}
+  sx={{ 
+    mb: 2,
+    '&:before': {
+      display: 'none'
+    }
+  }}
+>
+  <AccordionSummary 
+    expandIcon={<ExpandMoreIcon sx={{ color: '#4caf50' }} />}
+    sx={{
+      px: 1,
+      '&:hover': {
+        backgroundColor: 'rgba(0, 0, 0, 0.04)'
+      },
+      '&.Mui-expanded': {
+        minHeight: '48px'
+      }
+    }}
+  >
+    <Typography sx={{ 
+      color: '#4caf50', 
+      fontWeight: 'bold',
+      fontSize: '0.875rem'
+    }}>
+      Sub Category
+    </Typography>
+  </AccordionSummary>
+  
+  <AccordionDetails sx={{ p: 0 }}>
+    <Box sx={{ px: 1 }}>
+      <RadioGroup
+        value={filters.selectedSubCategory || ''}
+        onChange={(e) => handleSubCategoryChange(e.target.value)}
       >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography sx={{ color: '#4caf50', fontWeight: 'bold' }}>
-            Sub Category
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <TextField
-            fullWidth
-            size="small"
-            variant="outlined"
-            placeholder="Search sub categories..."
-            value={searchTerms.subCategory}
-            onChange={(e) => handleSearchChange('subCategory', e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ mb: 1 }}
-          />
-          <RadioGroup
-            value={filters.selectedSubCategory || ''}
-            onChange={(e) => handleSubCategoryChange(e.target.value)}
-          >
-            <FormControlLabel
-              value=""
-              control={<Radio color="primary" />}
-              label="All Sub Categories"
+        <FormControlLabel
+          value=""
+          control={
+            <Radio 
+              size="small"
+              sx={{ 
+                color: '#ff9800',
+                '&.Mui-checked': { color: '#4caf50' },
+                padding: '6px'
+              }}
             />
-            {filteredSubCategories.map((subCategory) => (
-              <FormControlLabel
-                key={`subcat-${subCategory}`}
-                value={subCategory}
-                control={<Radio color="primary" />}
-                label={subCategory}
-              />
-            ))}
-          </RadioGroup>
-        </AccordionDetails>
-      </Accordion>
-
-      {/* Child Categories (only shown when a subcategory is selected) */}
-      {filters.selectedSubCategory && filteredChildCategories.length > 0 && (
-        <Accordion 
-          expanded={expandedSections.childCategory}
-          onChange={() => toggleSection('childCategory')}
-          disableGutters
-          elevation={0}
-          sx={{ mb: 2 }}
-        >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography sx={{ color: '#4caf50', fontWeight: 'bold' }}>
-              Child Categories
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
-              {filteredChildCategories.map((childCategory) => (
-                <MemoizedCheckboxLabel
-                  key={`childcat-${childCategory.id}`}
-                  id={childCategory.id}
-                  label={childCategory.name}
-                  checked={(filters.selectedChildCategory || []).includes(childCategory.id)}
-                  onChange={handleChildCategoryToggle(childCategory.id)}
+          }
+          label={
+            <Typography fontSize="0.8125rem">All Sub Categories</Typography>
+          }
+          sx={{ mb: 0, mr: 0 }}
+        />
+        
+        {filteredSubCategories.map((subCategory) => (
+          <Box key={`subcat-container-${subCategory}`} sx={{ mb: 0 }}>
+            <FormControlLabel
+              key={`subcat-${subCategory}`}
+              value={subCategory}
+              control={
+                <Radio 
+                  size="small"
+                  sx={{ 
+                    color: '#ff9800',
+                    '&.Mui-checked': { color: '#4caf50' },
+                    padding: '6px'
+                  }}
                 />
-              ))}
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      )}
+              }
+              label={
+                <Typography fontSize="0.8125rem">{subCategory}</Typography>
+              }
+              sx={{ mb: 0, mr: 0 }}
+            />
+            
+            {/* Child Categories for this specific subcategory */}
+            {filters.selectedSubCategory === subCategory && 
+             filteredChildCategories.length > 0 && (
+              <Collapse in={filters.selectedSubCategory === subCategory}>
+                <Accordion 
+                  expanded={expandedSections.childCategory}
+                  onChange={() => toggleSection('childCategory')}
+                  disableGutters
+                  elevation={0}
+                  sx={{ 
+                    ml: 3,
+                    mt: 0.5,
+                    backgroundColor: 'rgba(0, 0, 0, 0.02)',
+                    '&:before': { display: 'none' }
+                  }}
+                >
+                  <AccordionSummary 
+                    expandIcon={<ExpandMoreIcon sx={{ fontSize: '1rem' }} />}
+                    sx={{
+                      minHeight: '36px',
+                      px: 1,
+                      '& .MuiAccordionSummary-content': {
+                        my: '2px'
+                      }
+                    }}
+                  >
+                    <Typography sx={{ 
+                      color: '#4caf50', 
+                      fontWeight: 'bold',
+                      fontSize: '0.8125rem'
+                    }}>
+                      Child Categories
+                    </Typography>
+                  </AccordionSummary>
+                  
+                  <AccordionDetails sx={{ pt: 0, px: 1 }}>
+                    <Box sx={{ 
+                      maxHeight: 200, 
+                      overflow: 'auto',
+                      '&::-webkit-scrollbar': {
+                        width: '4px'
+                      },
+                      '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: '#e0e0e0',
+                        borderRadius: '2px'
+                      }
+                    }}>
+                      {filteredChildCategories.map((childCategory) => (
+                        <MemoizedCheckboxLabel
+                          key={`childcat-${childCategory.id}`}
+                          id={childCategory.id}
+                          label={
+                            <Typography fontSize="0.8125rem">
+                              {childCategory.name}
+                            </Typography>
+                          }
+                          checked={(filters.selectedChildCategory || []).includes(childCategory.id)}
+                          onChange={handleChildCategoryToggle(childCategory.id)}
+                          sx={{ mb: 0 }}
+                        />
+                      ))}
+                    </Box>
+                  </AccordionDetails>
+                </Accordion>
+              </Collapse>
+            )}
+          </Box>
+        ))}
+      </RadioGroup>
+    </Box>
+  </AccordionDetails>
+</Accordion>
 
       {/* Model Type Filter */}
-      <Accordion 
-        expanded={expandedSections.modelType}
-        onChange={() => toggleSection('modelType')}
-        disableGutters
-        elevation={0}
-        sx={{ mb: 2 }}
+<Accordion 
+  expanded={expandedSections.modelType}
+  onChange={() => toggleSection('modelType')}
+  disableGutters
+  elevation={0}
+  sx={{ 
+    mb: 2,
+    '&:before': {
+      display: 'none'
+    }
+  }}
+>
+  <AccordionSummary 
+    expandIcon={<ExpandMoreIcon sx={{ color: '#4caf50' }} />}
+    sx={{
+      px: 1,
+      '&:hover': {
+        backgroundColor: 'rgba(0, 0, 0, 0.04)'
+      },
+      '&.Mui-expanded': {
+        minHeight: '48px'
+      }
+    }}
+  >
+    <Typography sx={{ 
+      color: '#4caf50', 
+      fontWeight: 'bold',
+      fontSize: '0.875rem'
+    }}>
+      Model Type
+    </Typography>
+  </AccordionSummary>
+  
+  <AccordionDetails sx={{ p: 0 }}>
+    <Box sx={{ px: 1 }}>
+      <RadioGroup
+        value={filters.selectedModelType || ''}
+        onChange={handleSelectChange('selectedModelType')}
       >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography sx={{ color: '#4caf50', fontWeight: 'bold' }}>
-            Model Type
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <FormControl fullWidth>
-            <InputLabel>Model Type</InputLabel>
-            <Select
-              value={filters.selectedModelType || ''}
-              onChange={handleSelectChange('selectedModelType')}
-              label="Model Type"
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 300,
-                  },
-                },
+        <FormControlLabel
+          value=""
+          control={
+            <Radio 
+              size="small"
+              sx={{ 
+                color: '#ff9800',
+                '&.Mui-checked': { color: '#4caf50' },
+                padding: '6px'
               }}
-            >
-              <MenuItem value="">All Model Types</MenuItem>
-              <Box px={2} pb={1}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  placeholder="Search model types..."
-                  value={searchTerms.modelType}
-                  onChange={(e) => handleSearchChange('modelType', e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
-              {filteredModelTypes.map((type) => (
-                <MemoizedMenuItem key={`modeltype-${type}`} value={type}>
-                  {type}
-                </MemoizedMenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </AccordionDetails>
-      </Accordion>
+            />
+          }
+          label={
+            <Typography fontSize="0.8125rem">All Model Types</Typography>
+          }
+          sx={{ mb: 0, mr: 0 }}
+        />
+        {filteredModelTypes.map((type) => (
+          <FormControlLabel
+            key={`modeltype-${type}`}
+            value={type}
+            control={
+              <Radio 
+                size="small"
+                sx={{ 
+                  color: '#ff9800',
+                  '&.Mui-checked': { color: '#4caf50' },
+                  padding: '6px'
+                }}
+              />
+            }
+            label={
+              <Typography fontSize="0.8125rem">{type}</Typography>
+            }
+            sx={{ mb: 0, mr: 0 }}
+          />
+        ))}
+      </RadioGroup>
+    </Box>
+  </AccordionDetails>
+</Accordion>
 
       {/* Location Filters */}
-      <Accordion 
-        expanded={expandedSections.location}
-        onChange={() => toggleSection('location')}
-        disableGutters
-        elevation={0}
-        sx={{ mb: 2 }}
+<Accordion 
+  expanded={expandedSections.location}
+  onChange={() => toggleSection('location')}
+  disableGutters
+  elevation={0}
+  sx={{ 
+    mb: 2,
+    '&:before': {
+      display: 'none'
+    }
+  }}
+>
+  <AccordionSummary 
+    expandIcon={<ExpandMoreIcon sx={{ color: '#4caf50' }} />}
+    sx={{
+      px: 1,
+      '&:hover': {
+        backgroundColor: 'rgba(0, 0, 0, 0.04)'
+      },
+      '&.Mui-expanded': {
+        minHeight: '48px'
+      }
+    }}
+  >
+    <Typography sx={{ 
+      color: '#4caf50', 
+      fontWeight: 'bold',
+      fontSize: '0.875rem'
+    }}>
+      Location Filters
+    </Typography>
+  </AccordionSummary>
+
+  <AccordionDetails sx={{ p: 0 }}>
+    {/* State Radio List with Scroll */}
+    <FormControl 
+      component="fieldset" 
+      sx={{ 
+        mb: 1, 
+        maxHeight: 200, 
+        overflowY: 'auto', 
+        px: 1,
+        '&::-webkit-scrollbar': {
+          width: '4px'
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: '#e0e0e0',
+          borderRadius: '2px'
+        }
+      }}
+    >
+      <RadioGroup
+        value={filters.selectedState || ''}
+        onChange={handleSelectChange('selectedState')}
       >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography sx={{ color: '#4caf50', fontWeight: 'bold' }}>
-            Location
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          {/* State Filter */}
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>State</InputLabel>
-            <Select
-              value={filters.selectedState || ''}
-              onChange={handleSelectChange('selectedState')}
-              label="State"
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 300,
-                  },
-                },
-              }}
-            >
-              <MenuItem value="">All States</MenuItem>
-              <Box px={2} pb={1}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  placeholder="Search states..."
-                  value={searchTerms.state}
-                  onChange={(e) => handleSearchChange('state', e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
-              {filteredStates.map((state) => (
-                <MemoizedMenuItem key={`state-${state}`} value={state}>
-                  {state}
-                </MemoizedMenuItem>
-              ))}
-            </Select>
-          </FormControl>
+        <FormControlLabel 
+          value="" 
+          control={
+            <Radio 
+              size="small" 
+              sx={{ 
+                color: '#ff9800', 
+                '&.Mui-checked': { color: '#4caf50' },
+                padding: '6px'
+              }} 
+            />
+          } 
+          label={
+            <Typography fontSize="0.8125rem">All States</Typography>
+          }
+          sx={{ mb: 0, mr: 0 }}
+        />
+        {filteredStates.map((state) => (
+          <FormControlLabel
+            key={`state-${state}`}
+            value={state}
+            control={
+              <Radio 
+                size="small" 
+                sx={{ 
+                  color: '#ff9800', 
+                  '&.Mui-checked': { color: '#4caf50' },
+                  padding: '6px'
+                }} 
+              />
+            }
+            label={
+              <Typography fontSize="0.8125rem">{state}</Typography>
+            }
+            sx={{ mb: 0, mr: 0 }}
+          />
+        ))}
+      </RadioGroup>
+    </FormControl>
 
-          {/* District Filter */}
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>District</InputLabel>
-            <Select
-              value={filters.selectedDistrict || ''}
-              onChange={handleSelectChange('selectedDistrict')}
-              label="District"
-              disabled={!filters.selectedState}
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 300,
-                  },
-                },
-              }}
-            >
-              <MenuItem value="">All Districts</MenuItem>
-              <Box px={2} pb={1}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  placeholder="Search districts..."
-                  value={searchTerms.district}
-                  onChange={(e) => handleSearchChange('district', e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  }}
+    {/* District Accordion */}
+    <Accordion
+      expanded={!!filters.selectedState}
+      disabled={!filters.selectedState}
+      elevation={0}
+      sx={{ 
+        mb: 1,
+        '&:before': {
+          display: 'none'
+        }
+      }}
+    >
+      <AccordionSummary 
+        expandIcon={<ExpandMoreIcon sx={{ fontSize: '1rem' }} />}
+        sx={{
+          minHeight: '36px',
+          px: 1,
+          '& .MuiAccordionSummary-content': {
+            my: '2px'
+          }
+        }}
+      >
+        <Typography variant="subtitle1" fontWeight="bold" fontSize="0.8125rem">
+          District
+        </Typography>
+      </AccordionSummary>
+      <AccordionDetails sx={{ 
+        maxHeight: 200, 
+        overflowY: 'auto', 
+        px: 1,
+        '&::-webkit-scrollbar': {
+          width: '4px'
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: '#e0e0e0',
+          borderRadius: '2px'
+        }
+      }}>
+        <RadioGroup
+          value={filters.selectedDistrict || ''}
+          onChange={handleSelectChange('selectedDistrict')}
+        >
+          <FormControlLabel 
+            value="" 
+            control={
+              <Radio 
+                size="small" 
+                sx={{ 
+                  color: '#ff9800', 
+                  '&.Mui-checked': { color: '#4caf50' },
+                  padding: '6px'
+                }} 
+              />
+            } 
+            label={
+              <Typography fontSize="0.8125rem">All Districts</Typography>
+            }
+            sx={{ mb: 0, mr: 0 }}
+          />
+          {filteredDistricts.map((district, index) => (
+            <FormControlLabel
+              key={`district-${index}`}
+              value={district.district}
+              control={
+                <Radio 
+                  size="small" 
+                  sx={{ 
+                    color: '#ff9800', 
+                    '&.Mui-checked': { color: '#4caf50' },
+                    padding: '6px'
+                  }} 
                 />
-              </Box>
-              {filteredDistricts.map((district, index) => (
-                <MemoizedMenuItem 
-                  key={`district-${index}`}
-                  value={district.district}
-                >
-                  {district.district}
-                </MemoizedMenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              }
+              label={
+                <Typography fontSize="0.8125rem">{district.district}</Typography>
+              }
+              sx={{ mb: 0, mr: 0 }}
+            />
+          ))}
+        </RadioGroup>
+      </AccordionDetails>
+    </Accordion>
 
-          {/* City Filter */}
-          <FormControl fullWidth>
-            <InputLabel>City</InputLabel>
-            <Select
-              value={filters.selectedCity || ''}
-              onChange={handleSelectChange('selectedCity')}
-              label="City"
-              disabled={!filters.selectedDistrict}
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 300,
-                  },
-                },
-              }}
-            >
-              <MenuItem value="">All Cities</MenuItem>
-              <Box px={2} pb={1}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  placeholder="Search cities..."
-                  value={searchTerms.city}
-                  onChange={(e) => handleSearchChange('city', e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  }}
+    {/* City Accordion */}
+    <Accordion
+      expanded={!!filters.selectedDistrict}
+      disabled={!filters.selectedDistrict}
+      elevation={0}
+      sx={{ 
+        '&:before': {
+          display: 'none'
+        }
+      }}
+    >
+      <AccordionSummary 
+        expandIcon={<ExpandMoreIcon sx={{ fontSize: '1rem' }} />}
+        sx={{
+          minHeight: '36px',
+          px: 1,
+          '& .MuiAccordionSummary-content': {
+            my: '2px'
+          }
+        }}
+      >
+        <Typography variant="subtitle1" fontWeight="bold" fontSize="0.8125rem">
+          City
+        </Typography>
+      </AccordionSummary>
+      <AccordionDetails sx={{ 
+        maxHeight: 200, 
+        overflowY: 'auto', 
+        px: 1,
+        '&::-webkit-scrollbar': {
+          width: '4px'
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: '#e0e0e0',
+          borderRadius: '2px'
+        }
+      }}>
+        <RadioGroup
+          value={filters.selectedCity || ''}
+          onChange={handleSelectChange('selectedCity')}
+        >
+          <FormControlLabel 
+            value="" 
+            control={
+              <Radio 
+                size="small" 
+                sx={{ 
+                  color: '#ff9800', 
+                  '&.Mui-checked': { color: '#4caf50' },
+                  padding: '6px'
+                }} 
+              />
+            } 
+            label={
+              <Typography fontSize="0.8125rem">All Cities</Typography>
+            }
+            sx={{ mb: 0, mr: 0 }}
+          />
+          {filteredCities.map((city, index) => (
+            <FormControlLabel
+              key={`city-${index}`}
+              value={city.city}
+              control={
+                <Radio 
+                  size="small" 
+                  sx={{ 
+                    color: '#ff9800', 
+                    '&.Mui-checked': { color: '#4caf50' },
+                    padding: '6px'
+                  }} 
                 />
-              </Box>
-              {filteredCities.map((city, index) => (
-                <MemoizedMenuItem 
-                  key={`city-${index}`}
-                  value={city.city}
-                >
-                  {city.city}
-                </MemoizedMenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </AccordionDetails>
-      </Accordion>
+              }
+              label={
+                <Typography fontSize="0.8125rem">{city.city}</Typography>
+              }
+              sx={{ mb: 0, mr: 0 }}
+            />
+          ))}
+        </RadioGroup>
+      </AccordionDetails>
+    </Accordion>
+  </AccordionDetails>
+</Accordion>
 
       {/* Investment Range Filter */}
-      <Accordion 
-        expanded={expandedSections.investment}
-        onChange={() => toggleSection('investment')}
-        disableGutters
-        elevation={0}
-        sx={{ mb: 2 }}
+  <Accordion 
+  expanded={expandedSections.investment}
+  onChange={() => toggleSection('investment')}
+  disableGutters
+  elevation={0}
+  sx={{ 
+    mb: 2,
+    '&:before': {
+      display: 'none'
+    }
+  }}
+>
+  <AccordionSummary 
+    expandIcon={<ExpandMoreIcon sx={{ color: '#4caf50' }} />}
+    sx={{
+      px: 1,
+      '&:hover': {
+        backgroundColor: 'rgba(0, 0, 0, 0.04)'
+      },
+      '&.Mui-expanded': {
+        minHeight: '48px'
+      }
+    }}
+  >
+    <Typography sx={{ 
+      color: '#4caf50', 
+      fontWeight: 'bold',
+      fontSize: '0.875rem'
+    }}>
+      Investment Range
+    </Typography>
+  </AccordionSummary>
+  
+  <AccordionDetails sx={{ p: 0 }}>
+    <Box sx={{ px: 3, pt: 1 }}>
+    
+
+      <RadioGroup
+        value={filters.selectedInvestmentRange || ''}
+        onChange={handleSelectChange('selectedInvestmentRange')}
       >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography sx={{ color: '#4caf50', fontWeight: 'bold' }}>
-            Investment Range
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <FormControl fullWidth>
-            <InputLabel>Investment Range</InputLabel>
-            <Select
-              value={filters.selectedInvestmentRange || ''}
-              onChange={handleSelectChange('selectedInvestmentRange')}
-              label="Investment Range"
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    maxHeight: 300,
-                  },
-                },
+        <FormControlLabel
+          value=""
+          control={
+            <Radio 
+              size="small"
+              sx={{ 
+                color: '#ff9800',
+                '&.Mui-checked': { color: '#4caf50' },
+                padding: '6px'
               }}
-            >
-              <MenuItem value="">All Ranges</MenuItem>
-              <Box px={2} pb={1}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  placeholder="Search investment ranges..."
-                  value={searchTerms.investmentRange}
-                  onChange={(e) => handleSearchChange('investmentRange', e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
-              {filteredInvestmentRanges.map((range) => (
-                <MemoizedMenuItem key={`range-${range}`} value={range}>
-                  {range}
-                </MemoizedMenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </AccordionDetails>
-      </Accordion>
+            />
+          }
+          label={
+            <Typography fontSize="0.8125rem">All Ranges</Typography>
+          }
+          sx={{ mb: 0, mr: 0 }}
+        />
+        {filteredInvestmentRanges.map((range) => (
+          <FormControlLabel
+            key={`range-${range}`}
+            value={range}
+            control={
+              <Radio 
+                size="small"
+                sx={{ 
+                  color: '#ff9800',
+                  '&.Mui-checked': { color: '#4caf50' },
+                  padding: '6px'
+                }}
+              />
+            }
+            label={
+              <Typography fontSize="0.8125rem">{range}</Typography>
+            }
+            sx={{ mb: 0, mr: 0 }}
+          />
+        ))}
+      </RadioGroup>
+    </Box>
+  </AccordionDetails>
+</Accordion>
+
 
       {/* Results Count */}
       <Divider sx={{ my: 2 }} />

@@ -96,7 +96,7 @@ function Navbar() {
 
   const handleLoginSuccess = (userData) => {
 
-    console.log("User Data:", userData);
+    // console.log("User Data:", userData);
     dispatch(loginSuccess(userData));
     setLoginModalOpen(false);
   };
@@ -110,8 +110,7 @@ function Navbar() {
     setlogoutLoading(true)
     try {
       const response = await axios.post(
-        // `https://mrfranchisebackend.mrfranchise.in/api/v1/logout/${ID}`,
-        // `https://mrfranchisebackend.mrfranchise.in/api/v1/logout/${ID}`,
+      
         `https://mrfranchisebackend.mrfranchise.in/api/v1/logout/${ID}`,
         {},
         {
@@ -123,7 +122,7 @@ function Navbar() {
         }
       );
 
-      console.log("===logout===")
+      // console.log("===logout===")
 
       if (response.status === 200) {
         setTimeout(() => {
@@ -158,6 +157,10 @@ function Navbar() {
   const handleMenuClose = () => {
     setAnchorEl(null);
     dispatch(toggleMenu(false));
+  };
+  const handleLogoClick = () => {
+    dispatch(showLoading());
+      navigate("/");
   };
 
   // Animation variants
@@ -307,8 +310,7 @@ function Navbar() {
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <Box 
-                component={Link} 
-                to="/" 
+                onClick={handleLogoClick}
                 sx={{ 
                   display: 'flex', 
                   alignItems: 'center', 
@@ -318,6 +320,7 @@ function Navbar() {
                 <img 
                   src={logo} 
                   alt="brand logo" 
+                  loading="lazy"
                   style={{ 
                     width: isMobile ? 120 : 170, 
                     height: isMobile ? 50 : 70,

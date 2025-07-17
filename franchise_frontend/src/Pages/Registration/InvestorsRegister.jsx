@@ -668,8 +668,8 @@ alert('Add Multiple preferences to get more offers from us!','info')
       return;
     }
 
-    console.log("Verifying OTP for type:", type);
-    console.log("OTP entered:", otp);
+    // console.log("Verifying OTP for type:", type);
+    // console.log("OTP entered:", otp);
     setOtpModal((prev) => ({ ...prev, loading: true }));
 
     try {
@@ -692,7 +692,7 @@ alert('Add Multiple preferences to get more offers from us!','info')
           },
         }
       );
-      console.log("OTP verification response:", response.data);
+      // console.log("OTP verification response:", response.data);
 
       if (response.status === 200 || response.data.message) {
         showSnackbar(`${type} verified successfully!`, "success");
@@ -814,21 +814,21 @@ useEffect(() => {
       // preferredCity: data.preferredCity || "",
       // preferredDistrict: data.preferredDistrict || "",
     };
-    console.log("Submitting data:", formattedData);
+    // console.log("Submitting data:", formattedData);
 
     try {
       dispatch(showLoading());
       const response = await axios.post(
        
        // "https://mrfranchisebackend.mrfranchise.in/api/v1/investor/createInvestor",
-         `http://localhost:5000/api/v1/investor/createInvestor`,
+         `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/createInvestor`,
         
         "https://mrfranchisebackend.mrfranchise.in/api/v1/investor/createInvestor",
-        // "http://localhost:5000/api/v1/investor/createInvestor",
+        // "https://mrfranchisebackend.mrfranchise.in/api/v1/investor/createInvestor",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
-console.log("Registration response:", response.data);
+// console.log("Registration response:", response.data);
 
       if (response.status === 201) {
         localStorage.removeItem(FORM_DATA_KEY);
@@ -1774,17 +1774,17 @@ flexDirection: isMobile ? "column" : "row",
                     <MenuItem value="">
                       Select preferred Investment Amount
                     </MenuItem>
-                    <MenuItem value="Below-50,000">Below - Rs.50 K</MenuItem>
-                    <MenuItem value="Rs.50,000-2L">Rs.50 K - 2 L</MenuItem>
-                    <MenuItem value="Rs.2L-5L">Rs.2 L - 5 L</MenuItem>
-                    <MenuItem value="Rs.5L-10L">Rs.5 L - 10 L</MenuItem>
-                    <MenuItem value="Rs.10L-20L">Rs.10 L - 20 L</MenuItem>
-                    <MenuItem value="Rs.20L-30L">Rs.20 L - 30 L</MenuItem>
-                    <MenuItem value="Rs.30L-50L">Rs.30 L - 50 L</MenuItem>
-                    <MenuItem value="Rs.50L-1Cr">Rs.50 L - 1 Cr</MenuItem>
-                    <MenuItem value="Rs.1Cr-2Cr">Rs.1 Cr - 2 Cr</MenuItem>
-                    <MenuItem value="Rs.2Cr-5Cr">Rs.2 Cr - 5 Cr</MenuItem>
-                    <MenuItem value="Rs.5Cr-above">Rs.5 Cr - Above</MenuItem>
+                    <MenuItem value="Below - 50,000">Below - Rs.50 K</MenuItem>
+                    <MenuItem value="Rs. 50,000 - 2 L">Rs.50 K - 2 L</MenuItem>
+                    <MenuItem value="Rs. 2 L - 5 L">Rs.2 L - 5 L</MenuItem>
+                    <MenuItem value="Rs. 5 L - 10 L">Rs.5 L - 10 L</MenuItem>
+                    <MenuItem value="Rs. 10L - 20 L">Rs.10 L - 20 L</MenuItem>
+                    <MenuItem value="Rs. 20 L - 30 L">Rs.20 L - 30 L</MenuItem>
+                    <MenuItem value="Rs. 30 L - 50 L">Rs.30 L - 50 L</MenuItem>
+                    <MenuItem value="Rs. 50 L - 1 Cr">Rs.50 L - 1 Cr</MenuItem>
+                    <MenuItem value="Rs. 1 Cr - 2 Crs">Rs.1 Cr - 2 Cr</MenuItem>
+                    <MenuItem value="Rs. 2 Crs - 5 Crs">Rs.2 Cr - 5 Cr</MenuItem>
+                    <MenuItem value="Rs. 5Crs - above">Rs.5 Cr - Above</MenuItem>
                   </TextField>
                 )}
               />
