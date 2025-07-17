@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { Person, Visibility, ThumbUp, MailOutline, Search, Close, FilterList,  } from '@mui/icons-material';
 
-const API_BASE_URL = 'http://localhost:5000/api/v1';
+const API_BASE_URL = 'https://mrfranchisebackend.mrfranchise.in/api/v1';
 const colors = {
   primary: '#2c3e50', secondary: '#34495e', accent: '#3498db', background: '#f8f9fa',
   cardBackground: '#ffffff', textPrimary: '#2c3e50', textSecondary: '#7f8c8d', divider: '#ecf0f1'
@@ -18,6 +18,7 @@ const dateFilters = [
 const BrandDashBoard = ({ selectedSection, sectionContent }) => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [locationFilter, setLocationFilter] = useState('all');
+  const [matchTypeFilter, setMatchTypeFilter] = useState('all');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
@@ -35,6 +36,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [Leads, setLeads] = useState([])
   const brandUUID = useSelector((state) => state.auth.brandUUID);
   const token = useSelector((state) => state.auth.AccessToken);
   const uniqueInvestmentRanges = [...new Set(applyData.map(item => item.investmentRange))].filter(Boolean);
@@ -46,13 +48,6 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
     return items.filter(item => new Date(item.createdAt || item.apply?.createdAt || item.like?.createdAt) >= daysAgo);
   };
 
-  const filteredApplyData = filterByDate(applyData).filter(apply => {
-    const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = !searchTerm || apply.fullName?.toLowerCase().includes(searchLower) || 
-      apply.mobileNumber?.includes(searchTerm) || apply.district?.toLowerCase().includes(searchLower) || 
-      apply.state?.toLowerCase().includes(searchLower);
-    return matchesSearch && (investmentFilter === 'all' || apply.investmentRange === investmentFilter);
-  });
 
   const fetchData = async () => {
     if (!brandUUID || !token) return;
@@ -63,9 +58,10 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
         axios.get(`${API_BASE_URL}/view/getAllViewBrands/${brandUUID}`, { headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`${API_BASE_URL}/like/getBrandLikedByAll/${brandUUID}`, { headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`${API_BASE_URL}/instantapply/getAllInstaApply/${brandUUID}`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API_BASE_URL}/instantapply/getAllLeads/${brandUUID}`, { headers: { Authorization: `Bearer ${token}` } }),
       ];
       const responses = await Promise.all(endpoints.map(p => p.catch(e => ({ error: e }))));
-      const [brandRes, viewsRes, likedRes, applyRes] = responses;
+      const [brandRes, viewsRes, likedRes, applyRes, leadsRes] = responses;
       if (brandRes.error) throw brandRes.error;
       setBrandData(brandRes.data?.success ? brandRes.data.data : {});
       if (viewsRes.error) throw viewsRes.error;
@@ -74,6 +70,10 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
       setLikedData(likedRes.data?.success ? likedRes.data.data : []);
       if (applyRes.error) throw applyRes.error;
       setApplyData(applyRes.data?.success ? applyRes.data.data : []);
+      if (leadsRes.error) throw leadsRes.error;
+      setLeads(leadsRes.data?.success ? leadsRes.data.data : []);
+
+
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load data.');
     } finally {
@@ -90,6 +90,8 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
   const totalViews = brandViewsCount + investorViewsCount;
   const filteredLikedData = filterByDate(likedData);
   const filteredLeadsData = filterByDate(applyData);
+
+  console.log("leads : ",Leads)
 
   const handleTabChange = (_, newValue) => {
     setTabValue(newValue);
@@ -113,7 +115,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
 
     return (
       <TableRow key={item?.uuid} hover sx={{ '&:hover': { backgroundColor: colors.divider } }}>
-        <TableCell><Avatar src={image || '/default-avatar.png'} sx={{ bgcolor: colors.secondary }} /></TableCell>
+        <TableCell><Avatar src={image || '/default-avatar.png'} sx={{ bgcolor: colors.secondary }}  as="image"/></TableCell>
         <TableCell sx={{ color: colors.textPrimary }}>{name}</TableCell>
         <TableCell sx={{ color: colors.textPrimary }}>{email || 'N/A'}</TableCell>
         <TableCell sx={{ color: colors.textPrimary }}>{phone || 'N/A'}</TableCell>
@@ -544,7 +546,9 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
             <TableBody>
               {filteredLikedData.length > 0 ? filteredLikedData.map(like => (
                 <TableRow key={like?.uuid} hover sx={{ '&:hover': { backgroundColor: colors.divider } }}>
-                  <TableCell><Avatar src={like?.profileImage || like?.uploads?.brandLogo?.[0] || '/default-avatar.png'} sx={{ bgcolor: colors.secondary }} /></TableCell>
+                  <TableCell><Avatar src={like?.profileImage || like?.uploads?.brandLogo?.[0] || '/default-avatar.png'} sx={{ bgcolor: colors.secondary }}
+                  as="image"
+                   /></TableCell>
                   <TableCell sx={{ color: colors.textPrimary }}>{like?.brandDetails?.fullName || like?.firstName || 'Unknown'}</TableCell>
                   <TableCell sx={{ color: colors.textPrimary }}>{like?.brandDetails ? 'Brand' : 'Investor'}</TableCell>
                   <TableCell>
@@ -564,341 +568,387 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
         </TableContainer>
       </Box>;
 
-      case 3: return (
-        <Box mt={4}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" sx={{ color: colors.textPrimary }}>
-              Total Leads: {filteredLeadsData.length}
-            </Typography>
-           
-          </Box>
+case 3: return (
+  <Box mt={4}>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Typography variant="h6" sx={{ color: colors.textPrimary }}>
+        Total Leads: {filterByDate(Leads).length}
+      </Typography>
+    </Box>
+    
+    {/* Filter Controls */}
+    <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2, mb: 3, alignItems: 'center' }}>
+      {isMobile ? (
+        <>
+          <IconButton 
+            onClick={() => setFilterDialogOpen(true)} 
+            sx={{ alignSelf: 'flex-end', color: colors.accent }}
+          >
+            <FilterList />
+          </IconButton>
           
-          {/* Filter Controls */}
-          <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2, mb: 3, alignItems: 'center' }}>
-            {isMobile ? (
-              <>
-                <IconButton 
-                  onClick={() => setFilterDialogOpen(true)} 
-                  sx={{ alignSelf: 'flex-end', color: colors.accent }}
+          <Dialog open={filterDialogOpen} onClose={() => setFilterDialogOpen(false)} fullWidth maxWidth="xs">
+            <DialogTitle sx={{ color: colors.textPrimary, backgroundColor: colors.cardBackground }}>
+              Filter Leads
+            </DialogTitle>
+            <IconButton 
+              onClick={() => setFilterDialogOpen(false)} 
+              sx={{ position: 'absolute', right: 8, top: 8, color: colors.textSecondary }}
+            >
+              <Close />
+            </IconButton>
+            
+            <DialogContent sx={{ backgroundColor: colors.cardBackground }}>
+              {/* Investment Range Filter */}
+              <FormControl fullWidth sx={{ mt: 1 }}>
+                <InputLabel sx={{ color: colors.textSecondary }}>Investment Range</InputLabel>
+                <Select 
+                  label="Investment Range" 
+                  value={investmentFilter} 
+                  onChange={(e) => setInvestmentFilter(e.target.value)}
+                  sx={{ 
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
+                  }}
                 >
-                  <FilterList />
-                </IconButton>
+                  <MenuItem value="all">All Ranges</MenuItem>
+                  {[...new Set(Leads.map(lead => lead.investmentRange))].filter(Boolean).map(range => (
+                    <MenuItem key={range} value={range}>{range}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Child Category Filter */}
+              <FormControl fullWidth sx={{ mt: 2 }}>
+                <InputLabel sx={{ color: colors.textSecondary }}>Category</InputLabel>
+                <Select 
+                  label="Category" 
+                  value={categoryFilter} 
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  sx={{ 
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
+                  }}
+                >
+                  <MenuItem value="all">All Categories</MenuItem>
+                  {[...new Set(
+                    Leads.flatMap(lead => lead.category?.map(c => c.child).filter(Boolean) || [])
+                  )].map(child => (
+                    <MenuItem key={child} value={child}>{child}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Location Filter */}
+              <FormControl fullWidth sx={{ mt: 2 }}>
+                <InputLabel sx={{ color: colors.textSecondary }}>Location</InputLabel>
+                <Select 
+                  label="Location" 
+                  value={locationFilter} 
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                  sx={{ 
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
+                  }}
+                >
+                  <MenuItem value="all">All Locations</MenuItem>
+                  {[...new Set(Leads.map(lead => 
+                    lead.location?.state || ''
+                  ))].filter(Boolean).map(state => (
+                    <MenuItem key={state} value={state}>{state}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Match Type Filter */}
+              <FormControl fullWidth sx={{ mt: 2 }}>
+                <InputLabel sx={{ color: colors.textSecondary }}>Match Type</InputLabel>
+                <Select 
+                  label="Match Type" 
+                  value={matchTypeFilter} 
+                  onChange={(e) => setMatchTypeFilter(e.target.value)}
+                  sx={{ 
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
+                  }}
+                >
+                  <MenuItem value="all">All Match Types</MenuItem>
+                  <MenuItem value="perfect">Perfect Matches</MenuItem>
+                  <MenuItem value="categoryAndInvest">Category & Investment</MenuItem>
+                  <MenuItem value="categoryAndLocation">Category & Location</MenuItem>
+                  <MenuItem value="investmentAndLocation">Investment & Location</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Date Filter */}
+              <FormControl fullWidth sx={{ mt: 2 }}>
+                <InputLabel sx={{ color: colors.textSecondary }}>Time Period</InputLabel>
+                <Select 
+                  label="Time Period" 
+                  value={dateFilter} 
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  sx={{ 
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
+                  }}
+                >
+                  {dateFilters.map(option => (
+                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </DialogContent>
+            
+            <DialogActions sx={{ backgroundColor: colors.cardBackground }}>
+              <Button 
+                onClick={() => { 
+                  setInvestmentFilter('all'); 
+                  setCategoryFilter('all');
+                  setLocationFilter('all');
+                  setMatchTypeFilter('all');
+                  setDateFilter('all'); 
+                  setFilterDialogOpen(false); 
+                }} 
+                sx={{ color: colors.textSecondary }}
+              >
+                Reset
+              </Button>
+              <Button 
+                variant="contained" 
+                onClick={() => setFilterDialogOpen(false)}
+                sx={{ 
+                  backgroundColor: colors.accent, 
+                  '&:hover': { backgroundColor: colors.secondary } 
+                }}
+              >
+                Apply
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+      ) : (
+        <>
+          {/* Desktop Filters */}
+          <FormControl sx={{ minWidth: 200 }} size={isMobile ? 'small' : 'medium'}>
+            <InputLabel sx={{ color: colors.textSecondary }}>Investment Range</InputLabel>
+            <Select 
+              label="Investment Range" 
+              value={investmentFilter} 
+              onChange={(e) => setInvestmentFilter(e.target.value)}
+              sx={{ 
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
+              }}
+            >
+              <MenuItem value="all">All Ranges</MenuItem>
+              {[...new Set(Leads.map(lead => lead.investmentRange))].filter(Boolean).map(range => (
+                <MenuItem key={range} value={range}>{range}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 200 }} size={isMobile ? 'small' : 'medium'}>
+            <InputLabel sx={{ color: colors.textSecondary }}>Category</InputLabel>
+            <Select 
+              label="Category" 
+              value={categoryFilter} 
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              sx={{ 
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
+              }}
+            >
+              <MenuItem value="all">All Categories</MenuItem>
+              {[...new Set(Leads.flatMap(lead => 
+                lead.category?.map(c => c.child).filter(Boolean) || []
+              ))].map(child => (
+                <MenuItem key={child} value={child}>{child}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 200 }} size={isMobile ? 'small' : 'medium'}>
+            <InputLabel sx={{ color: colors.textSecondary }}>Location</InputLabel>
+            <Select 
+              label="Location" 
+              value={locationFilter} 
+              onChange={(e) => setLocationFilter(e.target.value)}
+              sx={{ 
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
+              }}
+            >
+              <MenuItem value="all">All Locations</MenuItem>
+              {[...new Set(Leads.map(lead => 
+                lead.location?.state || ''
+              ))].filter(Boolean).map(state => (
+                <MenuItem key={state} value={state}>{state}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 200 }} size={isMobile ? 'small' : 'medium'}>
+            <InputLabel sx={{ color: colors.textSecondary }}>Match Type</InputLabel>
+            <Select 
+              label="Match Type" 
+              value={matchTypeFilter} 
+              onChange={(e) => setMatchTypeFilter(e.target.value)}
+              sx={{ 
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
+              }}
+            >
+              <MenuItem value="all">All Match Types</MenuItem>
+              <MenuItem value="perfect">Perfect Matches</MenuItem>
+              <MenuItem value="categoryAndInvest">Category & Investment</MenuItem>
+              <MenuItem value="categoryAndLocation">Category & Location</MenuItem>
+              <MenuItem value="investmentAndLocation">Investment & Location</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 200 }} size={isMobile ? 'small' : 'medium'}>
+            <InputLabel sx={{ color: colors.textSecondary }}>Time Period</InputLabel>
+            <Select 
+              label="Time Period" 
+              value={dateFilter} 
+              onChange={(e) => setDateFilter(e.target.value)}
+              sx={{ 
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
+              }}
+            >
+              {dateFilters.map(option => (
+                <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </>
+      )}
+    </Box>
+    
+    {/* Leads Table */}
+    {filterByDate(Leads)
+      .filter(lead => {
+        const searchLower = searchTerm.toLowerCase();
+        const matchesSearch = !searchTerm || 
+          (lead.investorName?.toLowerCase().includes(searchLower) || 
+          lead.investorEmail?.toLowerCase().includes(searchLower) ||
+          lead.investorPhone?.includes(searchTerm) || 
+          lead.location?.district?.toLowerCase().includes(searchLower) || 
+          lead.location?.state?.toLowerCase().includes(searchLower) ||
+          lead.location?.city?.toLowerCase().includes(searchLower));
+        
+        const matchesCategory = categoryFilter === 'all' || 
+          (lead.category && lead.category.some(c => c.child === categoryFilter));
+        
+        const matchesLocation = locationFilter === 'all' || 
+          lead.location?.state === locationFilter;
+        
+        const matchesInvestment = investmentFilter === 'all' || 
+          lead.investmentRange === investmentFilter;
+        
+        const matchesMatchType = matchTypeFilter === 'all' || 
+          (lead.brandMatches && lead.brandMatches.some(match => match.matchType === matchTypeFilter));
+        
+        return matchesSearch && matchesCategory && matchesLocation && matchesInvestment && matchesMatchType;
+      })
+      .length > 0 ? (
+      <TableContainer component={Paper} sx={{ border: `1px solid ${colors.divider}`, boxShadow: 'none' }}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: colors.primary }}>
+              <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Full Name</TableCell>
+              {!isMobile && <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Mobile</TableCell>}
+              <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Location</TableCell>
+              {!isTablet && <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Category</TableCell>}
+              {!isTablet && <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Investment</TableCell>}
+              
+              <TableCell align="right" sx={{ color: '#fff', fontWeight: 600 }}>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filterByDate(Leads)
+              .filter(lead => {
+                const searchLower = searchTerm.toLowerCase();
+                const matchesSearch = !searchTerm || 
+                  (lead.investorName?.toLowerCase().includes(searchLower) || 
+                  lead.investorEmail?.toLowerCase().includes(searchLower) ||
+                  lead.investorPhone?.includes(searchTerm) || 
+                  lead.location?.district?.toLowerCase().includes(searchLower) || 
+                  lead.location?.state?.toLowerCase().includes(searchLower) ||
+                  lead.location?.city?.toLowerCase().includes(searchLower));
                 
-                <Dialog open={filterDialogOpen} onClose={() => setFilterDialogOpen(false)} fullWidth maxWidth="xs">
-                  <DialogTitle sx={{ color: colors.textPrimary, backgroundColor: colors.cardBackground }}>
-                    Filter Leads
-                  </DialogTitle>
-                  <IconButton 
-                    onClick={() => setFilterDialogOpen(false)} 
-                    sx={{ position: 'absolute', right: 8, top: 8, color: colors.textSecondary }}
-                  >
-                    <Close />
-                  </IconButton>
+                const matchesCategory = categoryFilter === 'all' || 
+                  (lead.category && lead.category.some(c => c.child === categoryFilter));
+                
+                const matchesLocation = locationFilter === 'all' || 
+                  lead.location?.state === locationFilter;
+                
+                const matchesInvestment = investmentFilter === 'all' || 
+                  lead.investmentRange === investmentFilter;
+                
+                const matchesMatchType = matchTypeFilter === 'all' || 
+                  (lead.brandMatches && lead.brandMatches.some(match => match.matchType === matchTypeFilter));
+                
+                return matchesSearch && matchesCategory && matchesLocation && matchesInvestment && matchesMatchType;
+              })
+              .map((lead, index) => (
+                <TableRow key={index} hover sx={{ '&:hover': { backgroundColor: colors.divider } }}>
+                  <TableCell sx={{ color: colors.textPrimary }}>{lead?.investorName || 'Unknown'}</TableCell>
+                  {!isMobile && <TableCell sx={{ color: colors.textPrimary }}>{lead.investorPhone || 'N/A'}</TableCell>}
+                  <TableCell sx={{ color: colors.textPrimary }}>
+                    {[lead.location?.state].filter(Boolean).join(', ') || 'N/A'}
+                  </TableCell>
+                  {!isTablet && (
+                    <TableCell sx={{ color: colors.textPrimary }}>
+                      {lead.category?.[0]?.child || 'N/A'}
+                    </TableCell>
+                  )}
+                  {!isTablet && <TableCell sx={{ color: colors.textPrimary }}>{lead.investmentRange || 'N/A'}</TableCell>}
                   
-                  <DialogContent sx={{ backgroundColor: colors.cardBackground }}>
-                    {/* Investment Range Filter */}
-                    <FormControl fullWidth sx={{ mt: 1 }}>
-                      <InputLabel sx={{ color: colors.textSecondary }}>Investment Range</InputLabel>
-                      <Select 
-                        label="Investment Range" 
-                        value={investmentFilter} 
-                        onChange={(e) => setInvestmentFilter(e.target.value)}
-                        sx={{ 
-                          '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
-                        }}
-                      >
-                        <MenuItem value="all">All Ranges</MenuItem>
-                        {uniqueInvestmentRanges.map(range => (
-                          <MenuItem key={range} value={range}>{range}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    {/* Child Category Filter */}
-                    <FormControl fullWidth sx={{ mt: 2 }}>
-                      <InputLabel sx={{ color: colors.textSecondary }}>Category</InputLabel>
-                      <Select 
-                        label="Category" 
-                        value={categoryFilter} 
-                        onChange={(e) => setCategoryFilter(e.target.value)}
-                        sx={{ 
-                          '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
-                        }}
-                      >
-                        <MenuItem value="all">All Categories</MenuItem>
-                        {[...new Set(applyData.flatMap(lead => 
-                          lead.category?.map(c => c.child).filter(Boolean) || []
-                        ))].map(child => (
-                          <MenuItem key={child} value={child}>{child}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    {/* Location Filter */}
-                    <FormControl fullWidth sx={{ mt: 2 }}>
-                      <InputLabel sx={{ color: colors.textSecondary }}>Location</InputLabel>
-                      <Select 
-                        label="Location" 
-                        value={locationFilter} 
-                        onChange={(e) => setLocationFilter(e.target.value)}
-                        sx={{ 
-                          '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
-                        }}
-                      >
-                        <MenuItem value="all">All Locations</MenuItem>
-                        {[...new Set(applyData.map(lead => 
-                          lead.location?.state || ''
-                        ))].filter(Boolean).map(state => (
-                          <MenuItem key={state} value={state}>{state}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    {/* Date Filter */}
-                    <FormControl fullWidth sx={{ mt: 2 }}>
-                      <InputLabel sx={{ color: colors.textSecondary }}>Time Period</InputLabel>
-                      <Select 
-                        label="Time Period" 
-                        value={dateFilter} 
-                        onChange={(e) => setDateFilter(e.target.value)}
-                        sx={{ 
-                          '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
-                        }}
-                      >
-                        {dateFilters.map(option => (
-                          <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </DialogContent>
-                  
-                  <DialogActions sx={{ backgroundColor: colors.cardBackground }}>
+                  <TableCell align="right">
                     <Button 
-                      onClick={() => { 
-                        setInvestmentFilter('all'); 
-                        setCategoryFilter('all');
-                        setLocationFilter('all');
-                        setDateFilter('all'); 
-                        setFilterDialogOpen(false); 
-                      }} 
-                      sx={{ color: colors.textSecondary }}
-                    >
-                      Reset
-                    </Button>
-                    <Button 
-                      variant="contained" 
-                      onClick={() => setFilterDialogOpen(false)}
+                      variant="outlined" 
+                      size="small" 
+                      onClick={() => handleViewDetails(lead)}
                       sx={{ 
-                        backgroundColor: colors.accent, 
-                        '&:hover': { backgroundColor: colors.secondary } 
+                        color: colors.accent, 
+                        borderColor: colors.accent, 
+                        '&:hover': { backgroundColor: `${colors.accent}15` } 
                       }}
                     >
-                      Apply
+                      Details
                     </Button>
-                  </DialogActions>
-                </Dialog>
-              </>
-            ) : (
-              <>
-                {/* Desktop Filters */}
-                <FormControl sx={{ minWidth: 200 }} size={isMobile ? 'small' : 'medium'}>
-                  <InputLabel sx={{ color: colors.textSecondary }}>Investment Range</InputLabel>
-                  <Select 
-                    label="Investment Range" 
-                    value={investmentFilter} 
-                    onChange={(e) => setInvestmentFilter(e.target.value)}
-                    sx={{ 
-                      '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
-                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
-                    }}
-                  >
-                    <MenuItem value="all">All Ranges</MenuItem>
-                    {uniqueInvestmentRanges.map(range => (
-                      <MenuItem key={range} value={range}>{range}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl sx={{ minWidth: 200 }} size={isMobile ? 'small' : 'medium'}>
-                  <InputLabel sx={{ color: colors.textSecondary }}>Category</InputLabel>
-                  <Select 
-                    label="Category" 
-                    value={categoryFilter} 
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                    sx={{ 
-                      '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
-                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
-                    }}
-                  >
-                    <MenuItem value="all">All Categories</MenuItem>
-                    {[...new Set(applyData.flatMap(lead => 
-                      lead.category?.map(c => c.child).filter(Boolean) || []
-                    ))].map(child => (
-                      <MenuItem key={child} value={child}>{child}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl sx={{ minWidth: 200 }} size={isMobile ? 'small' : 'medium'}>
-                  <InputLabel sx={{ color: colors.textSecondary }}>Location</InputLabel>
-                  <Select 
-                    label="Location" 
-                    value={locationFilter} 
-                    onChange={(e) => setLocationFilter(e.target.value)}
-                    sx={{ 
-                      '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
-                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
-                    }}
-                  >
-                    <MenuItem value="all">All Locations</MenuItem>
-                    {[...new Set(applyData.map(lead => 
-                      lead.location?.state || ''
-                    ))].filter(Boolean).map(state => (
-                      <MenuItem key={state} value={state}>{state}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl sx={{ minWidth: 200 }} size={isMobile ? 'small' : 'medium'}>
-                  <InputLabel sx={{ color: colors.textSecondary }}>Time Period</InputLabel>
-                  <Select 
-                    label="Time Period" 
-                    value={dateFilter} 
-                    onChange={(e) => setDateFilter(e.target.value)}
-                    sx={{ 
-                      '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, 
-                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } 
-                    }}
-                  >
-                    {dateFilters.map(option => (
-                      <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </>
-            )}
-          </Box>
-          
-          {/* Leads Table */}
-          {filterByDate(applyData)
-            .filter(lead => {
-              const searchLower = searchTerm.toLowerCase();
-              const matchesSearch = !searchTerm || 
-                (lead.investorName?.toLowerCase().includes(searchLower) || 
-                lead.investorEmail?.toLowerCase().includes(searchLower) ||
-                lead.investorPhone?.includes(searchTerm) || 
-                lead.location?.district?.toLowerCase().includes(searchLower) || 
-                lead.location?.state?.toLowerCase().includes(searchLower) ||
-                lead.location?.city?.toLowerCase().includes(searchLower));
-              
-              const matchesCategory = categoryFilter === 'all' || 
-                (lead.category && lead.category.some(c => c.child === categoryFilter));
-              
-              const matchesLocation = locationFilter === 'all' || 
-                lead.location?.state === locationFilter;
-              
-              const matchesInvestment = investmentFilter === 'all' || 
-                lead.investmentRange === investmentFilter;
-              
-              return matchesSearch && matchesCategory && matchesLocation && matchesInvestment;
-            })
-            .length > 0 ? (
-            <TableContainer component={Paper} sx={{ border: `1px solid ${colors.divider}`, boxShadow: 'none' }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: colors.primary }}>
-                    <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Full Name</TableCell>
-                    {!isMobile && <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Mobile</TableCell>}
-                    <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Location</TableCell>
-                    {!isTablet && <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Category</TableCell>}
-                    {!isTablet && <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Investment</TableCell>}
-                    <TableCell align="right" sx={{ color: '#fff', fontWeight: 600 }}>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filterByDate(applyData)
-                    .filter(lead => {
-                      const searchLower = searchTerm.toLowerCase();
-                      const matchesSearch = !searchTerm || 
-                        (lead.investorName?.toLowerCase().includes(searchLower) || 
-                        lead.investorEmail?.toLowerCase().includes(searchLower) ||
-                        lead.investorPhone?.includes(searchTerm) || 
-                        lead.location?.district?.toLowerCase().includes(searchLower) || 
-                        lead.location?.state?.toLowerCase().includes(searchLower) ||
-                        lead.location?.city?.toLowerCase().includes(searchLower));
-                      
-                      const matchesCategory = categoryFilter === 'all' || 
-                        (lead.category && lead.category.some(c => c.child === categoryFilter));
-                      
-                      const matchesLocation = locationFilter === 'all' || 
-                        lead.location?.state === locationFilter;
-                      
-                      const matchesInvestment = investmentFilter === 'all' || 
-                        lead.investmentRange === investmentFilter;
-                      
-                      return matchesSearch && matchesCategory && matchesLocation && matchesInvestment;
-                    })
-                    .map((lead, index) => (
-                      <TableRow key={index} hover sx={{ '&:hover': { backgroundColor: colors.divider } }}>
-                        <TableCell sx={{ color: colors.textPrimary }}>{lead?.investorName || 'Unknown'}</TableCell>
-                        {!isMobile && <TableCell sx={{ color: colors.textPrimary }}>{lead.investorPhone || 'N/A'}</TableCell>}
-                        <TableCell sx={{ color: colors.textPrimary }}>
-                          {[   lead.location?.state].filter(Boolean).join(', ') || 'N/A'}
-                        </TableCell>
-                        {!isTablet && (
-                          <TableCell sx={{ color: colors.textPrimary }}>
-                            {lead.category?.[0]?.child || 'N/A'}
-                          </TableCell>
-                        )}
-                        {!isTablet && <TableCell sx={{ color: colors.textPrimary }}>{lead.investmentRange || 'N/A'}</TableCell>}
-                        <TableCell align="right">
-                          <Button 
-                            variant="outlined" 
-                            size="small" 
-                            onClick={() => handleViewDetails(lead)}
-                            sx={{ 
-                              color: colors.accent, 
-                              borderColor: colors.accent, 
-                              '&:hover': { backgroundColor: `${colors.accent}15` } 
-                            }}
-                          >
-                            Details
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          ) : (
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              alignItems: 'center', 
-              height: '200px', 
-              flexDirection: 'column',
-              border: `1px dashed ${colors.divider}`, 
-              borderRadius: 2, 
-              backgroundColor: colors.cardBackground 
-            }}>
-              <Typography variant="h6" color={colors.textSecondary} gutterBottom>
-                No leads found
-              </Typography>
-              <Typography variant="body2" color={colors.textSecondary}>
-                {searchTerm || investmentFilter !== 'all' || categoryFilter !== 'all' || locationFilter !== 'all' || dateFilter !== 'all' 
-                  ? 'Try adjusting your search or filters' 
-                  : 'No leads have been recorded yet'}
-              </Typography>
-            </Box>
-          )}
-        </Box>
-      );
-      
-      default: return null;
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    ) : (
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '200px', 
+        flexDirection: 'column',
+        border: `1px dashed ${colors.divider}`, 
+        borderRadius: 2, 
+        backgroundColor: colors.cardBackground 
+      }}>
+        <Typography variant="h6" color={colors.textSecondary} gutterBottom>
+          No leads found
+        </Typography>
+        <Typography variant="body2" color={colors.textSecondary}>
+          {searchTerm || investmentFilter !== 'all' || categoryFilter !== 'all' || locationFilter !== 'all' || matchTypeFilter !== 'all' || dateFilter !== 'all' 
+            ? 'Try adjusting your search or filters' 
+            : 'No leads have been recorded yet'}
+        </Typography>
+      </Box>
+    )}
+  </Box>
+);
+default: return null;
     }
   };
 
@@ -915,9 +965,10 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
         {selectedItem && <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
             <Avatar src={selectedItem?.profileImage || selectedItem?.uploads?.brandLogo?.[0] || '/default-avatar.png'} 
+            as="image"
               sx={{ width: 60, height: 60, bgcolor: colors.secondary }} />
             <Typography variant="h6" sx={{ color: colors.textPrimary }}>
-              {selectedItem.fullName || selectedItem.brandDetails?.brandName || selectedItem.firstName || 'Unknown'}
+              {selectedItem.fullName || selectedItem.brandDetails?.brandName || selectedItem.firstName || selectedItem.investorName||'Unknown'}
             </Typography>
           </Box>
           <Divider sx={{ my: 2, borderColor: colors.divider }} />
@@ -925,16 +976,16 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
             <Grid item xs={12} sm={6}>
               <Typography variant="subtitle2" sx={{ color: colors.textPrimary }}>Contact Information</Typography>
               <Typography sx={{ color: colors.textSecondary }}>
-                Mobile: {selectedItem.mobileNumber || selectedItem?.brandDetails?.mobileNumber || 'N/A'}
+                Mobile: {selectedItem.mobileNumber || selectedItem?.brandDetails?.mobileNumber ||selectedItem.investorPhone ||'N/A'}
               </Typography>
               <Typography sx={{ color: colors.textSecondary }}>
-                Email: {selectedItem.email || selectedItem?.brandDetails?.email || 'N/A'}
+                Email: {selectedItem.email || selectedItem?.brandDetails?.email|| selectedItem.investorEmail || 'N/A'}
               </Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="subtitle2" sx={{ color: colors.textPrimary }}>Location</Typography>
               <Typography sx={{ color: colors.textSecondary }}>
-                {[selectedItem.district, selectedItem.state, selectedItem.country].filter(Boolean).join(', ') || 'N/A'}
+                {[selectedItem.district, selectedItem?.state, selectedItem?.country].filter(Boolean).join(', ') || [selectedItem.location?.city,selectedItem?.location?.district,selectedItem?.location?.state] ||'N/A'}
               </Typography>
             </Grid>
             {selectedItem.investmentRange && <Grid item xs={12} sm={6}>
@@ -945,7 +996,10 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
             <Grid item xs={12} sm={6}>
               <Typography variant="subtitle2" sx={{ color: colors.textPrimary }}>Additional Info</Typography>
               <Typography sx={{ color: colors.textSecondary }}>
-                {tabValue === 0 && `Applied By: ${selectedItem.apply?.applyBy || 'Unknown'}`}
+                {(tabValue === 0 ||tabValue === 3) && `Applied By: ${selectedItem.apply?.applyBy || 'Unknown'}`}
+                <div>
+                  {(tabValue === 0 ||tabValue === 3) && `Applied On: ${new Date(selectedItem.createdAt).toLocaleDateString()}`}
+                </div>
                 {tabValue === 1 && `Viewed On: ${new Date(selectedItem.createdAt).toLocaleDateString()}`}
                 {tabValue === 2 && `Liked On: ${new Date(selectedItem.createdAt).toLocaleDateString()}`}
               </Typography>
@@ -959,11 +1013,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
       </DialogContent>
       <DialogActions sx={{ backgroundColor: colors.cardBackground, borderTop: `1px solid ${colors.divider}` }}>
         <Button onClick={() => setDetailDialogOpen(false)} sx={{ color: colors.textSecondary }}>Close</Button>
-        {selectedItem?.email && <Button variant="contained" startIcon={<MailOutline />} 
-          onClick={() => window.location.href = `mailto:${selectedItem.email}`}
-          sx={{ backgroundColor: colors.accent, '&:hover': { backgroundColor: colors.secondary } }}>
-          Contact
-        </Button>}
+        
       </DialogActions>
     </Dialog>
   );
@@ -975,7 +1025,9 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
           <Card sx={{ mb: 3, p: 3, display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', gap: 3,
             backgroundColor: colors.cardBackground, border: `1px solid ${colors.divider}`, boxShadow: 'none' }}>
             <Avatar src={brandData?.uploads?.brandLogo?.[0] || '/default-brand.png'} 
-              sx={{ width: isMobile ? 80 : 120, height: isMobile ? 80 : 120, border: `3px solid ${colors.accent}`, bgcolor: colors.secondary }} />
+              sx={{ width: isMobile ? 80 : 120, height: isMobile ? 80 : 120, border: `3px solid ${colors.accent}`, bgcolor: colors.secondary }}
+              as="image"
+              />
             <Box>
               <Typography variant="h5" fontWeight={600} gutterBottom sx={{ color: colors.textPrimary }}>
                 {brandData?.brandDetails?.fullName || 'Your Brand'}
@@ -997,7 +1049,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                       color: tabValue === index ? colors.textPrimary : colors.textSecondary }}>{label}</Typography>
                     <Box sx={{ backgroundColor: tabValue === index ? colors.accent : colors.divider, color: tabValue === index ? '#fff' : colors.textSecondary,
                       borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', ml: 0.5 }}>
-                      {[applyData.length, totalViews, likedData.length, applyData.length][index]}
+                      {[applyData.length, totalViews, likedData.length, Leads.length][index]}
                     </Box>
                   </Box>
                 } sx={{ minWidth: 'unset', py: 1.5, '&.Mui-selected': { backgroundColor: `${colors.accent}10` } }} />
