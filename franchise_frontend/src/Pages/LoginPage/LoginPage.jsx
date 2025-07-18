@@ -223,7 +223,7 @@ const handleVerifyOtp = useCallback(async () => {
               
            {!isMobile && (
               <Box ml={4} sx={{ display: "flex", alignItems: "center", justifyContent: "center",p:4}}>
-                <img src={illustration} alt="Login" style={{ maxWidth: "100%", height: "65vh" }} />
+                <img src={illustration} alt="Login" loading="lazy" style={{ maxWidth: "100%", height: "65vh" }} />
                 </Box>
            )}
 

@@ -154,6 +154,7 @@ const BrandCard = React.memo(({
           ) : (
             <CardMedia
               component="img"
+              loading="lazy"
               image={brandLogo}
               alt={brandName}
               sx={{

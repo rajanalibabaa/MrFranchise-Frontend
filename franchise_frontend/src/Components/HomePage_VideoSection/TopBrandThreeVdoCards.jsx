@@ -58,16 +58,20 @@ function TopBrandVdoCards() {
   };
 
   const handleLikeClick = useCallback((brandId, isLiked) => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      setShowLogin(true);
-      return;
-    }
+  // Immediate UI update - no waiting for API response
+  const token = localStorage.getItem("accessToken");
+  
+  if (!token) {
+    setShowLogin(true);
+    return;
+  }
 
     toggleLike.mutate(
       { brandId, isLiked },
       {
         onMutate: () => {
+               console.log("Optimistic update with:", { brandId, isLiked });
+               
           setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
         },
         onError: (error) => {

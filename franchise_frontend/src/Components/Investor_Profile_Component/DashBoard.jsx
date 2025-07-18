@@ -196,6 +196,7 @@ const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, 
         }}>
           <CardMedia
             component="img"
+            loading="lazy"
             height="140"
             image={brandLogo}
             alt={brandName}
@@ -563,6 +564,7 @@ const Dashboard = () => {
         }}>
           <Avatar
             src={userData?.profileImage || img}
+            loading="lazy"
             alt="Profile"
             sx={{
               width: 60,

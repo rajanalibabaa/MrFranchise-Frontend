@@ -190,9 +190,9 @@ const BrandCard = memo(
         >
           <Box
             component="img"
+            loading="lazy"
             src={uploads.brandLogo}
             alt={brandDetails.brandName || "Brand logo"}
-            loading="lazy"
             sx={logoStyles}
           />
 

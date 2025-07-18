@@ -1,6 +1,6 @@
 
-export const API_BASE_URL =  "https://mrfranchisebackend.mrfranchise.in/api/v1";
-
+// export const API_BASE_URL =  "https://mrfranchisebackend.mrfranchise.in/api/v1";
+export const API_BASE_URL =  "http://localhost:5000/api/v1";
 
 
 
@@ -19,7 +19,8 @@ export const api = {
   viewApi: {
     post: `${API_BASE_URL}/view/postViewBrands`,
     get: {
-      getAllViewBrandByID: `${API_BASE_URL}/view/getAllViewBrandByID`
+      getAllViewBrandByID: `${API_BASE_URL}/view/getAllViewBrandByID`,
+      getBrandViews: `${API_BASE_URL}/view/getAllViewBrands`,
     },
     delete: `${API_BASE_URL}/view/deleteViewBrandByID`
   },
@@ -27,17 +28,21 @@ export const api = {
   likeApi: {
     post: `${API_BASE_URL}/like/post-favbrands`,
     get: `${API_BASE_URL}/like/get-favbrands`,
-    delete: `${API_BASE_URL}/like/delete-favbrand`
+    delete: `${API_BASE_URL}/like/delete-favbrand`,
+    getBrandLikedByAll: `${API_BASE_URL}/like/getBrandLikedByAll`,
   },
   instantApplyApi: {
     post: `${API_BASE_URL}/instantapply/postInstaApply`,
     get: {
-      getInstaApplyById: `${API_BASE_URL}/instantapply/getInstaApplyById`
+      getInstaApplyById: `${API_BASE_URL}/instantapply/getInstaApplyById`,
+      getAllInstaApply: `${API_BASE_URL}/instantapply/getAllInstaApply`,
+      getAllLeads: `${API_BASE_URL}/instantapply/getAllLeads`,
     }
   },
   user: {
     get: {
-      investor: `${API_BASE_URL}/investor/getInvestorByUUID`
+      investor: `${API_BASE_URL}/investor/getInvestorByUUID`,
+      brand : `${API_BASE_URL}/brandlisting/getBrandListingByUUID`,
     }
   }
 };

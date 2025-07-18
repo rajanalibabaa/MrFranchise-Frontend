@@ -644,6 +644,7 @@ const handleClose = () => {
             >
               <img
                 src={selectedBrand.uploads?.brandLogo}
+                loading="lazy"
                 alt={selectedBrand.brandDetails?.brandName}
                 style={{
                   width: 100,
@@ -800,6 +801,7 @@ const handleClose = () => {
           >
             <img
               src={imageUrl}
+              loading="lazy"
               alt={`Gallery ${index}`}
               style={{
                 width: '100%',
@@ -874,6 +876,7 @@ const handleClose = () => {
       
       <img
         src={allImages[currentImageIndex]}
+        loading="lazy"
         alt={`Gallery ${currentImageIndex}`}
         style={{
           maxWidth: '100%',
@@ -933,6 +936,7 @@ const handleClose = () => {
         >
           <img
             src={img}
+            loading=" lazy"
             alt={`Thumbnail ${index}`}
             style={{
               width: '100%',
@@ -1109,6 +1113,7 @@ const handleClose = () => {
                 <img
                   src={selectedMedia}
                   alt="Full view"
+                  loading="lazy"
                   style={{
                     width: "100%",
                     maxHeight: "80vh",
