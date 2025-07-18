@@ -13,21 +13,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import { useBrands } from "../../Hooks/Fetchbrands";
 
-// Constants moved outside component to prevent recreation
-const INVESTMENT_RANGE_OPTIONS = [
-  { label: "All Ranges", value: "" },
-  { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
-  { label: "Rs.2L-5L", value: "Rs.2L-5L" },
-  { label: "Rs.5L-10L", value: "Rs.5L-10L" },
-  { label: "Rs.10L-20L", value: "Rs.10L-20L" },
-  { label: "Rs.20L-30L", value: "Rs.20L-30L" },
-  { label: "Rs.30L-50L", value: "Rs.30L-50L" },
-  { label: "Rs.50L-1Cr", value: "Rs.50L-1Cr" },
-  { label: "Rs.1Cr-2Cr", value: "Rs.1Cr-2Cr" },
-  { label: "Rs.2Cr-5Cr", value: "Rs.2Cr-5Cr" },
-  { label: "Rs.5Cr-above", value: "Rs.5Cr-above" },
-];
-
 const FilterDropdowns = () => {
   const navigate = useNavigate();
   const [filters, setFilters] = useState({
@@ -42,14 +27,14 @@ const FilterDropdowns = () => {
     error 
   } = useBrands();
 
-  // Memoize the extraction of unique subcategories and states
-  const { subCategories, states } = useMemo(() => {
-    if (!brands || brands.length === 0) return { subCategories: [], states: [] };
+  // Memoize the extraction of unique subcategories, states, and investment ranges
+  const { subCategories, states, investmentRanges } = useMemo(() => {
+    if (!brands || brands.length === 0) return { subCategories: [], states: [], investmentRanges: [] };
 
     const subCategoriesMap = new Map();
     const statesSet = new Set();
+    const investmentRangesSet = new Set();
 
-    // Using for loop instead of forEach for better performance with large datasets
     for (let i = 0; i < brands.length; i++) {
       const brand = brands[i];
       
@@ -65,26 +50,43 @@ const FilterDropdowns = () => {
         const loc = locations[j];
         if (loc.state) statesSet.add(loc.state);
       }
+
+      // Process investment ranges
+      const investmentRange = brand.franchiseDetails?.fico?.[0]?.investmentRange;
+      if (investmentRange) investmentRangesSet.add(investmentRange);
     }
 
     return {
       subCategories: Array.from(subCategoriesMap.values()),
-      states: Array.from(statesSet).sort() // Sort states alphabetically
+      states: Array.from(statesSet).sort(),
+      investmentRanges: Array.from(investmentRangesSet).sort()
     };
   }, [brands]);
+
+  // Format investment ranges for dropdown with "All Ranges" option
+  const formattedInvestmentRanges = useMemo(() => {
+    const ranges = [{ label: "All Ranges", value: "" }];
+    
+    investmentRanges.forEach(range => {
+      ranges.push({
+        label: range,
+        value: range
+      });
+    });
+
+    return ranges;
+  }, [investmentRanges]);
 
   const handleFilterChange = useCallback((name, value) => {
     setFilters(prev => ({ ...prev, [name]: value }));
   }, []);
 
   const handleFindBrands = useCallback(() => {
-    // Only pass filter criteria to the next page, not the entire brands data
     navigate("/brandviewpage", {
       state: { filters }
     });
   }, [navigate, filters]);
 
-  // Show loading or error states
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" p={4}>
@@ -125,7 +127,7 @@ const FilterDropdowns = () => {
             MenuProps={{
               PaperProps: {
                 style: {
-                  maxHeight: 300 // Limit dropdown height for performance
+                  maxHeight: 300
                 }
               }
             }}
@@ -149,7 +151,7 @@ const FilterDropdowns = () => {
             MenuProps={{
               PaperProps: {
                 style: {
-                  maxHeight: 300 // Limit dropdown height for performance
+                  maxHeight: 300
                 }
               }
             }}
@@ -170,8 +172,15 @@ const FilterDropdowns = () => {
             value={filters.selectedInvestmentRange}
             onChange={(e) => handleFilterChange("selectedInvestmentRange", e.target.value)}
             label="Investment Range"
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 300
+                }
+              }
+            }}
           >
-            {INVESTMENT_RANGE_OPTIONS.map((option) => (
+            {formattedInvestmentRanges.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
               </MenuItem>
@@ -192,7 +201,7 @@ const FilterDropdowns = () => {
               backgroundColor: "#558b2f",
             },
           }}
-          disabled={isLoading} // Disable button while loading
+          disabled={isLoading}
         >
           {isLoading ? <CircularProgress size={24} /> : "Find Brands"}
         </Button>

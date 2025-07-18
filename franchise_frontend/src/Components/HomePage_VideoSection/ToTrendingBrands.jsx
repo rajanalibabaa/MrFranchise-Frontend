@@ -89,8 +89,12 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
   gap: { xs: 4, sm: 3, md: 4, lg: 5 }, // Responsive gap
   mb: 6,
   width: '100%',
-  overflowX: 'hidden', // Prevent horizontal scrolling
-  px: { xs: 1, sm: 2 } // Add horizontal padding
+  px: { xs: 1, sm: 2 }, // Add horizontal padding
+   scrollbarWidth: 'none',         // Firefox
+  msOverflowStyle: 'none',        // Internet Explorer
+  '&::-webkit-scrollbar': {
+    display: 'none'               // Chrome, Safari
+  }
 }}>
   {brands.map((brand) => (
     <motion.div

@@ -363,14 +363,13 @@ const LikedBrands = () => {
   const { data: brands = [], isLoading, error, refetch } = useBrands();
 
   // Initialize local liked brands when brands data changes
-useEffect(() => {
-  if (brands.length > 0) {
-    const liked = brands.filter(brand => brand.isLiked === true);
-    setLocalLikedBrands(liked);
-    // console.log("Local Liked Brands:", liked); // Moved inside
-  }
-}, [brands]);
- 
+  useEffect(() => {
+    if (brands.length > 0) {
+      const liked = brands.filter(brand => brand.isLiked === true);
+      setLocalLikedBrands(liked);
+    }
+  }, [brands]);
+
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;

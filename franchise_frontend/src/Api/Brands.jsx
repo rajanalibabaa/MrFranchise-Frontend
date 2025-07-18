@@ -28,7 +28,7 @@ export const fetchBrands = async () => {
   
   try {
     const response = await apiClient.get(url);
-    // console.log("Fetched Brands:", response.data.data);
+    console.log("Fetched Brands:", response.data.data);
     return response.data.data;
   } catch (error) {
     console.error("Error fetching brands:", error);
@@ -50,7 +50,7 @@ export const fetchBrandById = async (brandId) => {
 
 export const toggleBrandLike = async ({ brandId, isLiked }) => {
   const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
-
+console.log("brandId :",brandId)
   try {
     if (!id || !brandId) {
       throw new Error("Missing investorUUID or brandId");
@@ -59,7 +59,7 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
     if (!isLiked) {
       // Fix field name: use corre  ct case
       await apiClient.post(api.likeApi.post, {
-        investorUUID: id,
+        // investorUUID: id,
         brandUUID: brandId,
       });
     } else {

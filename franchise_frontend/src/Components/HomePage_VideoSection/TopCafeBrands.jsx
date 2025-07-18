@@ -34,11 +34,10 @@ import { useNavigate } from "react-router-dom";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 import { postView } from "../../Utils/function/view";
-import {
-  useBrands,
-  useToggleLike,
-  openBrandDialog,
-} from "../../Hooks/Fetchbrands";
+import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import { showLoading } from "../../Redux/Slices/loadingSlice";
+import { useDispatch } from "react-redux";
+
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -430,7 +429,7 @@ const dispatch = useDispatch()
     const start = container.scrollLeft;
     const change = target - start;
     const startTime = performance.now();
-    const duration = 500; // 0.5 second scroll duration
+    const duration = 5000; // 0.5 second scroll duration
 
     const animateScroll = (currentTime) => {
       const elapsed = currentTime - startTime;
@@ -643,7 +642,10 @@ const dispatch = useDispatch()
                   backgroundColor: "transparent",
                 },
               }}
-              onClick={() => navigate("/brandviewpage")}
+              onClick={async () => {
+                dispatch(showLoading());
+                navigate("/brandviewpage");
+              }}
             >
               View More
             </Button>

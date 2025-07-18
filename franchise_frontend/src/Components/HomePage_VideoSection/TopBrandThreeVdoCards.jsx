@@ -57,6 +57,7 @@ const toggleLike = useToggleLike();
   };
 
   const handleLikeClick = useCallback((brandId, isLiked) => {
+    console.log(" handleLikeClick :",isLiked)
   // Immediate UI update - no waiting for API response
   const token = localStorage.getItem("accessToken");
   if (!token) {
@@ -84,6 +85,9 @@ const toggleLike = useToggleLike();
     }
   );
 }, [toggleLike]);
+
+
+
 
   const handleNext = useCallback(() => {
     if (brands.length > 0) {
@@ -151,6 +155,7 @@ const toggleLike = useToggleLike();
   };
 
   const handleApply = (brand) => {
+    console.log("uuid brand :",brand)
     postView(brand.uuid)
     openBrandDialog(brand)
     // navigate(`/brands/${brand.uuid}`)

@@ -373,8 +373,8 @@ const TopBeverageFranchises = () => {
   const [showEndShadow, setShowEndShadow] = useState(false);
   
   const navigate = useNavigate();
-  
-  // REACT-QUERY HOOKS
+  const dispatch = useDispatch();
+ // REACT-QUERY HOOKS
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
 
@@ -647,25 +647,28 @@ const TopBeverageFranchises = () => {
               Top Beverage Franchises
             </Typography>
 
-            <Button
-              variant="text"
-              size="small"
-              endIcon={<ArrowRight />}
-              sx={{
-                textTransform: "none",
-                fontSize: isMobile ? 14 : 16,
-                color: theme.palette.text.secondary,
-                "&:hover": {
-                  color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                  backgroundColor: "transparent",
-                },
-              }}
-              onClick={() => navigate("/brandviewpage")}
-            >
-              View More
-            </Button>
-          </Box>
+        <Button
+          variant="text"
+          size="small"
+          endIcon={<ArrowRight />}
+          sx={{
+            textTransform: "none",
+            fontSize: isMobile ? 14 : 16,
+            color: theme.palette.text.secondary,
+            "&:hover": {
+              color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+              backgroundColor: "transparent",
+            },
+          }}
+          onClick={async () => {
+            dispatch(showLoading());
+            navigate("/brandviewpage");
           
+          }}
+        >
+          View More
+        </Button>
+          </Box>
           <Box sx={{ position: 'relative', px: isMobile ? 2 : 0 }}>
             {/* Previous button */}
             {showStartShadow && (
@@ -777,6 +780,7 @@ const TopBeverageFranchises = () => {
       )}
     </>
   );
+  // <
 };
 
 export default React.memo(TopBeverageFranchises);

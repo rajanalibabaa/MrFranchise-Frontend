@@ -80,6 +80,8 @@
   return useMutation({
     mutationFn: toggleBrandLike,
     onMutate: async ({ brandId, isLiked }) => {
+
+      console.log("======== :",isLiked)
       // Cancel any outgoing refetches to avoid overwriting our optimistic update
       await queryClient.cancelQueries(["brands"]);
       

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useNavigate, useParams,Link, useLocation } from "react-router-dom";
+import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -38,7 +38,7 @@ import {
   Favorite,
   ShareOutlined,
   PlaylistAddCheckCircleOutlined,
-  ArrowUpward
+  ArrowUpward,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useBrand } from "../../Hooks/Fetchbrands.jsx";
@@ -46,18 +46,18 @@ import axios from "axios";
 import OverviewTab from "./OverviewTab.jsx";
 import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
-import { useToggleLike } from '../../Hooks/Fetchbrands.jsx';
+import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx";
 
 // import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
 import ShareDialogActions from "./ShareDialogActions.jsx";
 
 const BrandDetails = ({ brandData }) => {
-   const location = useLocation();
+  const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-const navigate = useNavigate();
+  const navigate = useNavigate();
   // State management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,15 +66,16 @@ const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openContactModal, setOpenContactModal] = useState(false);
   const [userData, setUserData] = useState(null);
-const [anchorEl, setAnchorEl] = useState(null);  const [locationData, setLocationData] = useState({
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [locationData, setLocationData] = useState({
     states: [],
     districts: [],
     cities: [],
   });
 
-const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
+  const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
   const [isProcessingLike, setIsProcessingLike] = useState(false);
-  
+
   const { mutate: toggleLike } = useToggleLike();
 
   const [formData, setFormData] = useState({
@@ -91,8 +92,8 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
 
   const [showBackToTop, setShowBackToTop] = useState(false);
 
-const handleOpenShareClick = (event) => {
-    setAnchorEl(event.currentTarget); 
+  const handleOpenShareClick = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
   // const handleCloseShareDialog = () => {
@@ -110,46 +111,42 @@ const handleOpenShareClick = (event) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  
-  
+
   const { uuid } = useParams();
   // const { selectedBrand } = useSelector((state) => state.brands);
   const selectedBrand = brandData || {};
- 
 
   // Get investor data from localStorage with caching
   const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
   const AccessToken = useMemo(() => localStorage.getItem("accessToken"), []);
 
+  const handleLikeClick = useCallback(() => {
+    if (isProcessingLike) return;
 
-    const handleLikeClick = useCallback(() => {
-      if (isProcessingLike) return;
-      
-      setIsProcessingLike(true);
-      const newLikeStatus = !localIsLiked;
-      
-      // Optimistic update
-      setLocalIsLiked(newLikeStatus);
-      
-      toggleLike(
-        { brandId: uuid, isLiked: !newLikeStatus },
-        {
-          onError: () => {
-            // Revert on error
-            setLocalIsLiked(!newLikeStatus);
-          },
-          onSettled: () => {
-            setIsProcessingLike(false);
-          }
-        }
-      );
-    }, [uuid, localIsLiked, isProcessingLike, toggleLike]);
+    setIsProcessingLike(true);
+    const newLikeStatus = !localIsLiked;
 
+    // Optimistic update
+    setLocalIsLiked(newLikeStatus);
+
+    toggleLike(
+      { brandId: uuid, isLiked: !newLikeStatus },
+      {
+        onError: () => {
+          // Revert on error
+          setLocalIsLiked(!newLikeStatus);
+        },
+        onSettled: () => {
+          setIsProcessingLike(false);
+        },
+      }
+    );
+  }, [uuid, localIsLiked, isProcessingLike, toggleLike]);
 
   // Memoized API calls
   const fetchInvestorDetails = useCallback(async () => {
     if (!investorUUID || !AccessToken) return;
-    
+
     try {
       const response = await axios.get(
         `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
@@ -158,13 +155,13 @@ const handleOpenShareClick = (event) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${AccessToken}`,
           },
-          signal: AbortSignal.timeout(5000) // Add timeout
+          signal: AbortSignal.timeout(5000), // Add timeout
         }
       );
-      
+
       if (response.data?.data) {
         setUserData(response.data.data);
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           fullName: response.data.data.firstName || "",
           investorEmail: response.data.data.email || "",
@@ -183,21 +180,20 @@ const handleOpenShareClick = (event) => {
     if (!uuid) return;
 
     const controller = new AbortController();
-    
+
     const fetchBrand = async () => {
       try {
         await useBrand(uuid).unwrap();
         // If brand is not found, redirect to brands page
-
       } catch (error) {
         console.error("Failed to fetch brand details:", error);
       }
     };
 
     fetchBrand();
-    
+
     return () => controller.abort();
-  }, [uuid,]);
+  }, [uuid]);
 
   // Fetch investor data on mount if logged in (with caching)
   useEffect(() => {
@@ -210,10 +206,17 @@ const handleOpenShareClick = (event) => {
 
   // Extract location data from brand
   useEffect(() => {
-    if (selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
-      const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
-      const states = [...new Set(locations.map((loc) => loc.state).filter(Boolean))];
-      setLocationData(prev => ({
+    if (
+      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
+        ?.locations
+    ) {
+      const locations =
+        selectedBrand.expansionLocationData.expansionLocations.domestic
+          .locations;
+      const states = [
+        ...new Set(locations.map((loc) => loc.state).filter(Boolean)),
+      ];
+      setLocationData((prev) => ({
         ...prev,
         states,
         districts: [],
@@ -224,16 +227,24 @@ const handleOpenShareClick = (event) => {
 
   // Update districts when state changes
   useEffect(() => {
-    if (formData.state && selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
-      const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
+    if (
+      formData.state &&
+      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
+        ?.locations
+    ) {
+      const locations =
+        selectedBrand.expansionLocationData.expansionLocations.domestic
+          .locations;
       const stateObj = locations.find((loc) => loc.state === formData.state);
-      const districts = [...new Set(stateObj?.districts?.map((d) => d.district) || [])];
-      setLocationData(prev => ({
+      const districts = [
+        ...new Set(stateObj?.districts?.map((d) => d.district) || []),
+      ];
+      setLocationData((prev) => ({
         ...prev,
         districts,
         cities: [],
       }));
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         district: "",
         city: "",
@@ -243,16 +254,25 @@ const handleOpenShareClick = (event) => {
 
   // Update cities when district changes
   useEffect(() => {
-    if (formData.state && formData.district && selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
-      const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
+    if (
+      formData.state &&
+      formData.district &&
+      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
+        ?.locations
+    ) {
+      const locations =
+        selectedBrand.expansionLocationData.expansionLocations.domestic
+          .locations;
       const stateObj = locations.find((loc) => loc.state === formData.state);
-      const districtObj = stateObj?.districts?.find((d) => d.district === formData.district);
+      const districtObj = stateObj?.districts?.find(
+        (d) => d.district === formData.district
+      );
       const cities = [...new Set(districtObj?.cities || [])];
-      setLocationData(prev => ({
+      setLocationData((prev) => ({
         ...prev,
         cities,
       }));
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         city: "",
       }));
@@ -260,17 +280,23 @@ const handleOpenShareClick = (event) => {
   }, [formData.district, formData.state, selectedBrand]);
 
   // Memoized derived data for better performance
-  const investmentRanges = useMemo(() => [
-    ...new Set(selectedBrand?.franchiseDetails?.fico?.map((m) => m.investmentRange) || [])
-  ], [selectedBrand]);
+  const investmentRanges = useMemo(
+    () => [
+      ...new Set(
+        selectedBrand?.franchiseDetails?.fico?.map((m) => m.investmentRange) ||
+          []
+      ),
+    ],
+    [selectedBrand]
+  );
 
-  const investmentTimings = useMemo(() => 
-    ["Immediately", "1 - 3 Months", "3 - 6 Months", "6 + Months"],
+  const investmentTimings = useMemo(
+    () => ["Immediately", "1 - 3 Months", "3 - 6 Months", "6 + Months"],
     []
   );
 
-  const readyToInvestOptions = useMemo(() => 
-    ["Own Investment", "Going To Loan", "Need Loan Assistance"],
+  const readyToInvestOptions = useMemo(
+    () => ["Own Investment", "Going To Loan", "Need Loan Assistance"],
     []
   );
 
@@ -281,7 +307,9 @@ const handleOpenShareClick = (event) => {
 
   const allImages = useMemo(
     () => [
-      ...(selectedBrand?.uploads?.brandLogo ? [selectedBrand.uploads.brandLogo] : []),
+      ...(selectedBrand?.uploads?.brandLogo
+        ? [selectedBrand.uploads.brandLogo]
+        : []),
       ...(selectedBrand?.uploads?.exteriorOutlet || []),
       ...(selectedBrand?.uploads?.interiorOutlet || []),
     ],
@@ -307,90 +335,109 @@ const handleOpenShareClick = (event) => {
   const handleOpenContact = useCallback(() => setOpenContactModal(true), []);
   const handleCloseContact = useCallback(() => setOpenContactModal(false), []);
 
-  const toggleDrawer = useCallback((open) => (event) => {
-    if (event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) {
-      return;
-    }
-    setDrawerOpen(open);
-  }, []);
+  const toggleDrawer = useCallback(
+    (open) => (event) => {
+      if (
+        event.type === "keydown" &&
+        (event.key === "Tab" || event.key === "Shift")
+      ) {
+        return;
+      }
+      setDrawerOpen(open);
+    },
+    []
+  );
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   }, []);
 
-const handleSubmit = useCallback(async (e) => {
-  e.preventDefault();
-  setIsSubmitting(true);
-  
-  const id = investorUUID || localStorage.getItem("brandUUID");  // Single declaration
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setIsSubmitting(true);
 
-  if (!id) {
-    alert("User not logged in or missing ID. Please login again.");
-    navigate("/registerhandleuser");
-    return;
-  }
+      const id = investorUUID || localStorage.getItem("brandUUID"); // Single declaration
 
-  try {
-    const payload = {
-      ...formData,
-      state: formData.state || "",
-      district: formData.district || "",
-      city: formData.city || "",
-      brandId: selectedBrand?.uuid,
-      brandName: selectedBrand?.brandDetails?.brandName || "",
-      applyId: id  // Use the already declared id
-    };
-
-    // Validate required fields
-    const requiredFields = [
-      'fullName', 'investorEmail', 'mobileNumber', 'state', 
-      'district', 'city', 'investmentRange', 'planToInvest', 'readyToInvest'
-    ];
-    
-    const missingFields = requiredFields.filter(field => !payload[field]);
-    
-    if (missingFields.length > 0) {
-      alert(`Please fill all required fields: ${missingFields.join(', ')}`);
-      return;
-    }
-
-    // console.log("payload :", payload)
-
-    const response = await axios.post(
-      "http://localhost:5000/api/v1/instantapply/postApplication",
-      payload,
-      { 
-        headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(10000) // Add timeout
+      if (!id) {
+        alert("User not logged in or missing ID. Please login again.");
+        navigate("/registerhandleuser");
+        return;
       }
-    );
 
-    if (response.data) {
-      setSubmitSuccess(true);
-      alert("✅Success! Your application has been submitted.");
-      setDrawerOpen(false);
-       // ✅ Reset the form after successful submission
-  setFormData({
-   fullName: "",
-    investorEmail: "",
-    mobileNumber: "",
-    investmentRange: "",
-    state: "",
-    district: "",
-    city: "",
-    planToInvest: "",
-    readyToInvest: "",
-    // Add other fields if present in formData
-  });
-    }
-  } catch (error) {
-    console.error("Submission error:", error?.response?.data || error.message);
-    alert("❌Failed to submit application. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-  }
-}, [formData, selectedBrand, investorUUID, navigate]);
+      try {
+        const payload = {
+          ...formData,
+          state: formData.state || "",
+          district: formData.district || "",
+          city: formData.city || "",
+          brandId: selectedBrand?.uuid,
+          brandName: selectedBrand?.brandDetails?.brandName || "",
+          applyId: id, // Use the already declared id
+        };
+
+        // Validate required fields
+        const requiredFields = [
+          "fullName",
+          "investorEmail",
+          "mobileNumber",
+          "state",
+          "district",
+          "city",
+          "investmentRange",
+          "planToInvest",
+          "readyToInvest",
+        ];
+
+        const missingFields = requiredFields.filter((field) => !payload[field]);
+
+        if (missingFields.length > 0) {
+          alert(`Please fill all required fields: ${missingFields.join(", ")}`);
+          return;
+        }
+
+        // console.log("payload :", payload)
+
+        const response = await axios.post(
+          "http://localhost:5000/api/v1/instantapply/postApplication",
+          payload,
+          {
+            headers: { "Content-Type": "application/json" },
+            signal: AbortSignal.timeout(10000), // Add timeout
+          }
+        );
+
+        if (response.data) {
+          setSubmitSuccess(true);
+          alert("✅Success! Your application has been submitted.");
+          setDrawerOpen(false);
+          // ✅ Reset the form after successful submission
+          setFormData({
+            fullName: "",
+            investorEmail: "",
+            mobileNumber: "",
+            investmentRange: "",
+            state: "",
+            district: "",
+            city: "",
+            planToInvest: "",
+            readyToInvest: "",
+            // Add other fields if present in formData
+          });
+        }
+      } catch (error) {
+        console.error(
+          "Submission error:",
+          error?.response?.data || error.message
+        );
+        alert("❌Failed to submit application. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [formData, selectedBrand, investorUUID, navigate]
+  );
 
   const handleImageOpen = useCallback((index) => {
     setCurrentImageIndex(index);
@@ -398,11 +445,15 @@ const handleSubmit = useCallback(async (e) => {
   }, []);
 
   const handlePrevImage = useCallback(() => {
-    setCurrentImageIndex(prev => (prev === 0 ? allImages.length - 1 : prev - 1));
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? allImages.length - 1 : prev - 1
+    );
   }, [allImages.length]);
 
   const handleNextImage = useCallback(() => {
-    setCurrentImageIndex(prev => (prev === allImages.length - 1 ? 0 : prev + 1));
+    setCurrentImageIndex((prev) =>
+      prev === allImages.length - 1 ? 0 : prev + 1
+    );
   }, [allImages.length]);
 
   // Scroll to top on component mount
@@ -412,21 +463,24 @@ const handleSubmit = useCallback(async (e) => {
 
   if (!selectedBrand) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="80vh"
+      >
         <CircularProgress />
       </Box>
     );
   }
 
-const maskEmail = (email) => {
-  const [name, domain] = email.split("@");
-  if (!name || !domain) return email;
-  const visiblePart = name.slice(0, 2);
-  const maskedPart = "*".repeat(name.length - 2);
-  return `${visiblePart}${maskedPart}@${domain}`;
-};
-
-
+  const maskEmail = (email) => {
+    const [name, domain] = email.split("@");
+    if (!name || !domain) return email;
+    const visiblePart = name.slice(0, 2);
+    const maskedPart = "*".repeat(name.length - 2);
+    return `${visiblePart}${maskedPart}@${domain}`;
+  };
 
   const ExpansionLocationTags = ({ brand }) => {
     const locations = Array.isArray(
@@ -461,118 +515,116 @@ const maskEmail = (email) => {
       key: `${loc.city}-${index}`,
       label: ` ${category.child || ""} franchise in-${loc.city}`,
     }));
- 
+
     return (
-     <Box
-  sx={{
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
-    p: 2,
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",  // 👉 Creates 3 equal columns
-    gap: 2,
-    height: "90px",
-    overflowY: "auto",
-  }}
->
-  {/* State Column */}
-  <Box>
-    {formattedChipsState.length > 0 ? (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        {formattedChipsState.map((chip) => (
-          <Typography
-            key={chip.key}
-            variant="caption"
-            sx={{
-              borderRadius: "4px",
-              color: 'black',
-              whiteSpace: "nowrap",
-            }}
-          >
-            {chip.label}
-          </Typography>
-        ))}
-      </Box>
-    ) : (
-      <Typography
-        variant="body2"
+      <Box
         sx={{
-          color: "text.secondary",
-          textAlign: "center",
-          mt: 2,
+          border: "1px solid #e0e0e0",
+          borderRadius: "8px",
+          p: 2,
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)", // 👉 Creates 3 equal columns
+          gap: 2,
+          height: "90px",
+          overflowY: "auto",
         }}
       >
-        No locations available
-      </Typography>
-    )}
-  </Box>
+        {/* State Column */}
+        <Box>
+          {formattedChipsState.length > 0 ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {formattedChipsState.map((chip) => (
+                <Typography
+                  key={chip.key}
+                  variant="caption"
+                  sx={{
+                    borderRadius: "4px",
+                    color: "black",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {chip.label}
+                </Typography>
+              ))}
+            </Box>
+          ) : (
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                textAlign: "center",
+                mt: 2,
+              }}
+            >
+              No locations available
+            </Typography>
+          )}
+        </Box>
 
-  {/* District Column */}
-  <Box>
-    {formattedChipsDistrict.length > 0 ? (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        {formattedChipsDistrict.map((chip) => (
-          <Typography
-            key={chip.key}
-            variant="caption"
-            sx={{
-              borderRadius: "4px",
-              color: 'black',
-              whiteSpace: "nowrap",
-            }}
-          >
-            {chip.label}
-          </Typography>
-        ))}
+        {/* District Column */}
+        <Box>
+          {formattedChipsDistrict.length > 0 ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {formattedChipsDistrict.map((chip) => (
+                <Typography
+                  key={chip.key}
+                  variant="caption"
+                  sx={{
+                    borderRadius: "4px",
+                    color: "black",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {chip.label}
+                </Typography>
+              ))}
+            </Box>
+          ) : (
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                textAlign: "center",
+                mt: 2,
+              }}
+            >
+              No locations available
+            </Typography>
+          )}
+        </Box>
+
+        {/* City Column */}
+        <Box>
+          {formattedChipsCity.length > 0 ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {formattedChipsCity.map((chip) => (
+                <Typography
+                  key={chip.key}
+                  variant="caption"
+                  sx={{
+                    borderRadius: "4px",
+                    color: "black",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {chip.label}
+                </Typography>
+              ))}
+            </Box>
+          ) : (
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                textAlign: "center",
+                mt: 2,
+              }}
+            >
+              No locations available
+            </Typography>
+          )}
+        </Box>
       </Box>
-    ) : (
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          textAlign: "center",
-          mt: 2,
-        }}
-      >
-        No locations available
-      </Typography>
-    )}
-  </Box>
-
-  {/* City Column */}
-  <Box>
-    {formattedChipsCity.length > 0 ? (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        {formattedChipsCity.map((chip) => (
-          <Typography
-            key={chip.key}
-            variant="caption"
-            sx={{
-              borderRadius: "4px",
-              color: 'black',
-              whiteSpace: "nowrap",
-            }}
-          >
-            {chip.label}
-          </Typography>
-        ))}
-      </Box>
-    ) : (
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          textAlign: "center",
-          mt: 2,
-        }}
-      >
-        No locations available
-      </Typography>
-    )}
-  </Box>
-</Box>
- 
-
     );
   };
   return (
@@ -648,7 +700,7 @@ const maskEmail = (email) => {
               }}
             >
               <Typography variant="h6" fontWeight={700} color="#ff9800">
-                Apply for  Franchise
+                Apply for Franchise
               </Typography>
               <IconButton onClick={toggleDrawer(false)}>
                 <Close />
@@ -656,14 +708,14 @@ const maskEmail = (email) => {
             </Box>
 
             <form onSubmit={handleSubmit}>
-            <Grid
+              <Grid
                 spacing={2}
                 sx={{
                   display: "grid",
                   gridTemplateColumns: "repeat(1, 1fr)",
                   gap: 2,
                 }}
-              >           
+              >
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -882,16 +934,15 @@ const maskEmail = (email) => {
             }}
           >
             Contact Details
-
             <IconButton
               aria-label="close"
-              onClick={handleCloseContact} 
+              onClick={handleCloseContact}
               sx={{
                 position: "absolute",
                 top: 10,
                 right: 10,
-                color:'error.main'
-              }} 
+                color: "error.main",
+              }}
             >
               <Close />
             </IconButton>
@@ -899,27 +950,26 @@ const maskEmail = (email) => {
 
           <DialogContent dividers>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Typography>
-  <strong>Manager Name:</strong>{" "}
-  {selectedBrand.brandDetails?.ceoName
-    ? `${selectedBrand.brandDetails.ceoName.slice(0, 2)}***`
-    : "N/A"}
-</Typography>
+              <Typography>
+                <strong>Manager Name:</strong>{" "}
+                {selectedBrand.brandDetails?.ceoName
+                  ? `${selectedBrand.brandDetails.ceoName.slice(0, 2)}***`
+                  : "N/A"}
+              </Typography>
 
-<Typography>
-  <strong>Mobile Number:</strong>{" "}
-  {selectedBrand.brandDetails?.ceoMobile
-    ? `${selectedBrand.brandDetails.ceoMobile.slice(0, 5)}*****`
-    : "N/A"}
-</Typography>
+              <Typography>
+                <strong>Mobile Number:</strong>{" "}
+                {selectedBrand.brandDetails?.ceoMobile
+                  ? `${selectedBrand.brandDetails.ceoMobile.slice(0, 5)}*****`
+                  : "N/A"}
+              </Typography>
 
-<Typography>
-  <strong>Email:</strong>{" "}
-  {selectedBrand.brandDetails?.email
-    ? maskEmail(selectedBrand.brandDetails.email)
-    : "N/A"}
-</Typography>
-
+              <Typography>
+                <strong>Email:</strong>{" "}
+                {selectedBrand.brandDetails?.email
+                  ? maskEmail(selectedBrand.brandDetails.email)
+                  : "N/A"}
+              </Typography>
 
               {/* <Typography>
                 <strong>Website:</strong>{" "}
@@ -1053,7 +1103,7 @@ const maskEmail = (email) => {
                         </Typography>
                       </Box>
                     </Box>
-<Box sx={{ml:10}}>
+                    <Box sx={{ ml: 10 }}>
                       <Button
                         variant="contained"
                         size={isMobile ? "small" : "medium"}
@@ -1071,43 +1121,48 @@ const maskEmail = (email) => {
                         VIEW CONTACT
                       </Button>
                     </Box>
-                     <IconButton
-                     sx={{marginLeft:"90px"}}
-                                onClick={handleLikeClick}
-                                disabled={isProcessingLike}
-                                aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
-                              >
-                                {isProcessingLike ? (
-                                  <CircularProgress size={24} />
-                                ) : (
-                                  <Favorite
-                                    sx={{
-                                      color: localIsLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
-                                    }}
-                                  />
-                                )}
-                              </IconButton>
-                              <IconButton sx={{
-                                            color:'rgba(0,0,0,0.23)',
-                                          }}
-                                          onClick={()=>{
-                                            console.log("shortlist is clicked")
-                                          }}
-                                          >
-                                          <PlaylistAddCheckCircleOutlined/>
-                                          </IconButton>
+                    <IconButton
+                      sx={{ marginLeft: "90px" }}
+                      onClick={handleLikeClick}
+                      disabled={isProcessingLike}
+                      aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
+                    >
+                      {isProcessingLike ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        <Favorite
+                          sx={{
+                            color: localIsLiked
+                              ? "#f44336"
+                              : "rgba(0, 0, 0, 0.23)",
+                          }}
+                        />
+                      )}
+                    </IconButton>
+                    <IconButton
+                      sx={{
+                        color: "rgba(0,0,0,0.23)",
+                      }}
+                      onClick={() => {
+                        console.log("shortlist is clicked");
+                      }}
+                    >
+                      <PlaylistAddCheckCircleOutlined />
+                    </IconButton>
                     <IconButton onClick={handleOpenShareClick}>
-        <ShareOutlined />
-      </IconButton>
+                      <ShareOutlined />
+                    </IconButton>
 
-      {/* Share Popover */}
-      <ShareDialogActions anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
-                    
+                    {/* Share Popover */}
+                    <ShareDialogActions
+                      anchorEl={anchorEl}
+                      setAnchorEl={setAnchorEl}
+                    />
                   </Box>
                 </Box>
 
                 <TableContainer component={Paper} sx={{ mt: 2, width: "100%" }}>
-                  <Table size="small" sx={{border:"collapse"}}>
+                  <Table size="small" sx={{ border: "collapse" }}>
                     <TableHead>
                       <TableRow
                         sx={{
@@ -1117,7 +1172,9 @@ const maskEmail = (email) => {
                           },
                         }}
                       >
-                        <TableCell sx={{ width: "30%", textAlign: "center", p:"3px" }}>
+                        <TableCell
+                          sx={{ width: "30%", textAlign: "center", p: "3px" }}
+                        >
                           <strong>Category</strong>
                         </TableCell>
                         <TableCell sx={{ width: "15%", textAlign: "center" }}>
@@ -1129,8 +1186,15 @@ const maskEmail = (email) => {
                         <TableCell sx={{ width: "15%", textAlign: "center" }}>
                           <strong>Total Outlets</strong>
                         </TableCell>
-<TableCell sx={{ width: "30%", textAlign: "center", whiteSpace: "normal", wordBreak: "break-word" }}>
-                            <strong>Expansion Location</strong>
+                        <TableCell
+                          sx={{
+                            width: "30%",
+                            textAlign: "center",
+                            whiteSpace: "normal",
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          <strong>Expansion Location</strong>
                         </TableCell>
                       </TableRow>
                     </TableHead>
@@ -1153,47 +1217,47 @@ const maskEmail = (email) => {
                             selectedBrand.franchiseDetails?.totalOutlets
                           )}
                         </TableCell>
-                    <TableCell sx={{ width: "30%", textAlign: "center" }}>
-  {(() => {
-    const locations =
-      selectedBrand.expansionLocationData?.expansionLocations?.domestic
-        ?.locations || [];
+                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
+                          {(() => {
+                            const locations =
+                              selectedBrand.expansionLocationData
+                                ?.expansionLocations?.domestic?.locations || [];
 
-    const states = locations.map((loc) => loc.state).filter(Boolean);
-    const hasMore = states.length > 3;
+                            const states = locations
+                              .map((loc) => loc.state)
+                              .filter(Boolean);
+                            const hasMore = states.length > 3;
 
-    if (states.length === 0) {
-      return "Multiple Locations"; 
-    }
+                            if (states.length === 0) {
+                              return "Multiple Locations";
+                            }
 
-    const visibleStates = states.slice(0, 2).join(", ");
+                            const visibleStates = states.slice(0, 2).join(", ");
 
-    return (
-      <>
-        {visibleStates}
-        {hasMore && (
-          <a 
-            href="#expansion-location"
-            
-            style={{
-              marginLeft: 8,
-              scrollBehavior: "smooth",
-              fontSize: "0.75rem",
-              textTransform: "uppercase",
-              textDecoration: "none",
-              color: "#1976d2",
-              fontWeight: 500,
-              cursor: "pointer"
-            }}
-          >
-            More
-          </a>
-        )}
-      </>
-    );
-  })()}
-</TableCell>
-
+                            return (
+                              <>
+                                {visibleStates}
+                                {hasMore && (
+                                  <a
+                                    href="#expansion-location"
+                                    style={{
+                                      marginLeft: 8,
+                                      scrollBehavior: "smooth",
+                                      fontSize: "0.75rem",
+                                      textTransform: "uppercase",
+                                      textDecoration: "none",
+                                      color: "#1976d2",
+                                      fontWeight: 500,
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    More
+                                  </a>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -1514,7 +1578,7 @@ const maskEmail = (email) => {
           </DialogActions>
         </Dialog>
 
-         {/* Desktop Application Form */}
+        {/* Desktop Application Form */}
         {!isMobile && !isTablet && (
           <Box
             sx={{
@@ -1540,7 +1604,7 @@ const maskEmail = (email) => {
               Instant Franchise Application
             </Typography>
             <form onSubmit={handleSubmit}>
-               <Grid
+              <Grid
                 spacing={2}
                 sx={{
                   display: "grid",
@@ -1758,47 +1822,48 @@ const maskEmail = (email) => {
               </Typography>
             </Box>
           </Box>
-        )} 
-
-         
-           
+        )}
       </Box>
-              <LikedBrands />
-<Box sx={{
+      <LikedBrands />
+      <Box
+        sx={{
           width: "90%",
           maxWidth: 1200,
           mx: "auto",
           my: 4,
           px: isMobile ? 2 : 4,
-        }}  color={'#ff9800'} >
-          <Typography variant="h6" sx={{mb:2}}>
-            Tags
-          </Typography>
-          <ExpansionLocationTags brand={selectedBrand} /></Box> 
-{/* <ViewedBrands /> */}
-{showBackToTop && (
-  <Box
-    sx={{
-      position: "fixed",
-      bottom: 20,
-      right: 20,
-      zIndex: 1000,
-    }}
-  >
-    <IconButton
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      sx={{
-        backgroundColor: "#ff9800",
-        color: "white",
-        "&:hover": {
-          backgroundColor: "#e65100",
-        },
-      }}
-    >
-      <ArrowUpward />
-    </IconButton>
-  </Box>
-)}
+        }}
+        color={"#ff9800"}
+      >
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Tags
+        </Typography>
+        <ExpansionLocationTags brand={selectedBrand} />
+      </Box>
+      {/* <ViewedBrands /> */}
+      {showBackToTop && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: 20,
+            right: 20,
+            zIndex: 1000,
+          }}
+        >
+          <IconButton
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            sx={{
+              backgroundColor: "#ff9800",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#e65100",
+              },
+            }}
+          >
+            <ArrowUpward />
+          </IconButton>
+        </Box>
+      )}
       <Footer />
     </>
   );

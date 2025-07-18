@@ -96,6 +96,7 @@ const BrandCard = memo(
       isLiked,
     } = brand;
 
+    console.log(brand);
     const investmentRange = useMemo(
       () => franchiseDetails.fico?.[0]?.investmentRange || "Not specified",
       [franchiseDetails.fico]
@@ -137,7 +138,12 @@ const BrandCard = memo(
       requestAnimationFrame(() => {
         onToggleBrandComparison(brand);
       });
-    }, [brand, onToggleBrandComparison, isSelectedForComparison, maxComparisonReached]);
+    }, [
+      brand,
+      onToggleBrandComparison,
+      isSelectedForComparison,
+      maxComparisonReached,
+    ]);
 
     return (
       <Card sx={cardStyles}>
@@ -215,18 +221,16 @@ const BrandCard = memo(
             <PlaylistAddCheckIcon/>
             </IconButton> */}
             <IconButton
-              onClick={() =>
-                handleLikeClick(uuid, isLiked)
-              }
-              disabled={likeProcessing[brandDetails.uuid]}
+              onClick={() => handleLikeClick(localIsLiked.uuid, localIsLiked.isLiked)}
+              disabled={likeProcessing[localIsLiked.uuid]}
               sx={{ ml: 1 }}
             >
-              {likeProcessing[brandDetails.uuid] ? (
+              {likeProcessing[localIsLiked.uuid] ? (
                 <CircularProgress size={24} />
               ) : (
                 <Favorite
                   sx={{
-                    color: brandDetails.isLiked
+                    color: localIsLiked.isLiked
                       ? "#f44336"
                       : "rgba(0, 0, 0, 0.23)",
                   }}
@@ -236,41 +240,40 @@ const BrandCard = memo(
           </Box>
 
           <Box
-  sx={{
-    mb: 1,
-    minHeight: 32,
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  }}
->
-  {franchiseDetails.brandCategories?.child ? (
-    <Chip
-      label={franchiseDetails.brandCategories.child}
-      size="small"
-      sx={{
-        bgcolor: "rgba(255, 152, 0, 0.1)",
-        color: "orange.dark",
-        fontWeight: 500,
-      }}
-    />
-  ) : (
-    <Typography variant="body2" color="text.secondary">
-      N/A
-    </Typography>
-  )}
+            sx={{
+              mb: 1,
+              minHeight: 32,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            {franchiseDetails.brandCategories?.child ? (
+              <Chip
+                label={franchiseDetails.brandCategories.child}
+                size="small"
+                sx={{
+                  bgcolor: "rgba(255, 152, 0, 0.1)",
+                  color: "orange.dark",
+                  fontWeight: 500,
+                }}
+              />
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                N/A
+              </Typography>
+            )}
 
-  <IconButton
-    size="small"
-    sx={{ color: "rgba(0,0,0,0.23)" }}
-    onClick={() => {
-      console.log("shortlist is clicked");
-    }}
-  >
-    <PlaylistAddCheckIcon />
-  </IconButton>
-</Box>
-
+            <IconButton
+              size="small"
+              sx={{ color: "rgba(0,0,0,0.23)" }}
+              onClick={() => {
+                console.log("shortlist is clicked");
+              }}
+            >
+              <PlaylistAddCheckIcon />
+            </IconButton>
+          </Box>
 
           <Box
             sx={{
@@ -367,7 +370,6 @@ const LocationDetail = memo(({ locations, onViewMore }) => {
     </Box>
   );
 });
-
 
 const DetailItem = memo(({ icon, label, value }) => {
   const clonedIcon = useMemo(
