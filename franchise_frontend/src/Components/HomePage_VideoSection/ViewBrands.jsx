@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -23,16 +23,11 @@ import ArrowRight from "@mui/icons-material/ArrowRight";
 import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import Business from "@mui/icons-material/Business";
 import AreaChart from "@mui/icons-material/AreaChart";
-import Close from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
-import { postView } from "../../Utils/function/view";
-import { openBrandDialog } from "../../Hooks/Fetchbrands";
+import { useSelector } from "react-redux";
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
 import { api } from "../../Api/api";
-import img from "../../assets/images/brandLogo.jpg";
-import { useBrands } from "../../Hooks/Fetchbrands";
-import { showLoading } from "../../Redux/Slices/loadingSlice";
+import { openBrandDialog } from "../../Hooks/Fetchbrands";
  
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -47,31 +42,27 @@ const cardVariants = {
  
 const BrandCard = React.memo(({
   brand,
-  handleApply,
-  handleLikeClick,
-  likeProcessing,
+  handleViewDetails,
+  // handleToggleLike,
+  // likeProcessing,
   dimensions,
   theme,
   isMobile,
-  isTablet
+  isTablet,
+  // likedStates
 }) => {
   const videoRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
   const observerRef = useRef();
  
-  const brandId = brand.uuid;
-  const franchiseModel = brand.franchiseDetails?.fico?.[0] || {};
-  const category = brand.franchiseDetails?.brandCategories || {};
+  const brandId = brand?.uuid || '';
+  const franchiseModel = brand?.franchiseDetails?.fico?.[0] || {};
+  const category = brand?.franchiseDetails?.brandCategories || {};
   const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
-  const brandLogo = brand?.uploads?.brandLogo?.[0] || img;
-  const brandName = brand.brandDetails?.brandName || "Unnamed Brand";
+  const brandLogo = brand?.uploads?.brandLogo?.[0] || '';
+  const brandName = brand?.brandDetails?.brandName || 'Brand';
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
- 
-  const {
-    investmentRange = "Not specified",
-    areaRequired = "Not specified",
-    franchiseType = "N/A",
-  } = franchiseModel;
+  // const isLiked = likedStates[brandId] || false;
  
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -120,7 +111,6 @@ const BrandCard = React.memo(({
           },
         }}
       >
-        {/* Video/Image Section */}
         <Box
           ref={videoRef}
           sx={{
@@ -152,60 +142,27 @@ const BrandCard = React.memo(({
               preload="none"
             />
           ) : (
-            <CardMedia
-              component="img"
-              loading="lazy"
-              image={brandLogo}
-              alt={brandName}
+            <Box
               sx={{
                 position: "absolute",
                 top: 0,
                 left: 0,
                 width: "100%",
                 height: "100%",
-                objectFit: "cover",
-              }}
-            />
-          )}
-         
-          {/* Like button */}
-          <Box sx={{
-            position: 'absolute',
-            top: 12,
-            right: 12,
-            zIndex: 2
-          }}>
-            <IconButton
-              onClick={() => handleLikeClick(brandId)}
-              disabled={likeProcessing[brandId]}
-              sx={{
-                backgroundColor: 'rgba(255,255,255,0.9)',
-                p: 0.5,
-                '&:hover': {
-                  backgroundColor: '#fff',
-                  transform: 'scale(1.1)'
-                },
-                transition: 'all 0.2s ease'
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              {likeProcessing[brandId] ? (
-                <CircularProgress size={24} />
-              ) : (
-                <Favorite
-                  sx={{
-                    color: brand.isLiked ? '#f44336' : 'rgba(0, 0, 0, 0.54)',
-                    transition: 'all 0.3s ease'
-                  }}
-                />
-              )}
-            </IconButton>
-          </Box>
+              <Typography variant="body2" color="text.secondary">
+                No video available
+              </Typography>
+            </Box>
+          )}
         </Box>
  
-        {/* Content Section */}
-        <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
           <CardContent sx={{ pb: 1 }}>
-            {/* Brand Header */}
             <Box
               sx={{
                 display: "flex",
@@ -224,40 +181,51 @@ const BrandCard = React.memo(({
                   flexShrink: 0,
                 }}
               />
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography
-                  variant="h6"
-                  fontWeight={600}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {brandName}
-                </Typography>
-              </Box>
+              <Typography
+                variant="h6"
+                fontWeight={600}
+                sx={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  flex: 1,
+                }}
+              >
+                {brandName}
+              </Typography>
+              {/* <IconButton
+                onClick={() => handleToggleLike(brandId)}
+                disabled={likeProcessing[brandId]}
+              >
+                {likeProcessing[brandId] ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  <Favorite
+                    sx={{
+                      color: isLiked
+                        ? "#f44336"
+                        : "rgba(0, 0, 0, 0.23)",
+                    }}
+                  />
+                )}
+              </IconButton> */}
             </Box>
  
-            {/* Categories */}
-            {(category.main || category.child) && (
+            {category?.child && (
               <Box sx={{ mb: 2 }}>
-                <Stack direction="row" spacing={1} 
+                <Stack direction="row" spacing={1}
                 justifyContent="space-between" 
-                    alignItems="center" 
-                sx={{ flexWrap: 'wrap' }}>
-                  {category.child && (
-                    <Chip
-                      label={category.child}
-                      size="small"
-                      sx={{
-                        bgcolor: "rgba(255, 152, 0, 0.1)",
-                        color: "orange.dark",
-                        fontWeight: 500,
-                        mb: 1,
-                      }}
-                    />
-                  )}
+                    alignItems="center" >
+                  <Chip
+                    label={category.child}
+                    size="small"
+                    sx={{
+                      bgcolor: "rgba(255, 152, 0, 0.1)",
+                      color: "orange.dark",
+                      fontWeight: 500,
+                      mb: 1,
+                    }}
+                  />
                     <IconButton>
                       <Tooltip title={'ShortList'}><PlaylistAddCheckCircleOutlined /></Tooltip>
                     </IconButton>
@@ -265,7 +233,6 @@ const BrandCard = React.memo(({
               </Box>
             )}
  
-            {/* Franchise Details */}
             <Stack spacing={1} sx={{ mb: 2 }}>
               <Box display="flex" alignItems="center">
                 <Business
@@ -277,7 +244,7 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  <strong>Franchise Type:</strong> {franchiseType}
+                  Franchise Type : {franchiseModel?.franchiseType || "N/A"}
                 </Typography>
               </Box>
  
@@ -291,10 +258,9 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  <strong>Investment:</strong> {investmentRange}
+                  Investment : {franchiseModel?.investmentRange || "Not specified"}
                 </Typography>
               </Box>
- 
               <Box display="flex" alignItems="center">
                 <AreaChart
                   sx={{
@@ -305,7 +271,7 @@ const BrandCard = React.memo(({
                   }}
                 />
                 <Typography variant="body2">
-                  <strong>Area:</strong> {areaRequired}
+                  Area : {franchiseModel?.areaRequired || "Not specified"}
                 </Typography>
               </Box>
             </Stack>
@@ -313,12 +279,11 @@ const BrandCard = React.memo(({
             <Divider sx={{ my: 1 }} />
           </CardContent>
  
-          {/* Action Button */}
-          <Box sx={{ px: 2, pb: 2, mt: 'auto' }}>
+          <Box sx={{ px: 2, pb: 2 }}>
             <Button
               variant="contained"
               fullWidth
-              onClick={() => handleApply(brand)}
+              onClick={() => handleViewDetails(brand)}
               sx={{
                 backgroundColor: "#f29724",
                 "&:hover": {
@@ -331,7 +296,7 @@ const BrandCard = React.memo(({
                 fontWeight: 500,
               }}
             >
-              View Full Details
+              View Details
             </Button>
           </Box>
         </Box>
@@ -340,7 +305,7 @@ const BrandCard = React.memo(({
   );
 });
  
-const LikedBrands = () => {
+ const ViewBrands = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
@@ -350,26 +315,15 @@ const LikedBrands = () => {
   const scrollIntervalRef = useRef(null);
   const scrollRequestRef = useRef(null);
 
-  const [likeProcessing, setLikeProcessing] = useState({});
-  const [removeMsg, setRemoveMsg] = useState("");
-  const [localLikedBrands, setLocalLikedBrands] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
 
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
-
-  const { data: brands = [], isLoading, error, refetch } = useBrands();
-
-  // Initialize local liked brands when brands data changes
-  useEffect(() => {
-    if (brands.length > 0) {
-      const liked = brands.filter(brand => brand.isLiked === true);
-      setLocalLikedBrands(liked);
-    }
-  }, [brands]);
+  const navigate = useNavigate();
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -377,40 +331,44 @@ const LikedBrands = () => {
     return CARD_DIMENSIONS.desktop;
   }, [isMobile, isTablet]);
 
-  const handleLikeClick = useCallback(async (brandId) => {
-    if (likeProcessing[brandId] || !investorUUID || !AccessToken) return;
-    
-    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+  const fetchData = useCallback(async () => {
+    if (!investorUUID || !AccessToken) {
+      setLoading(false);
+      return;
+    }
 
     try {
-      await axios.delete(
-        `${api.likeApi.delete}/${investorUUID}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${AccessToken}`,
-          },
-          data: { brandID: brandId },
-        }
-      );
-      
-      // Update local state immediately for better UX
-      setLocalLikedBrands(prev => prev.filter(brand => brand.uuid !== brandId));
-      setRemoveMsg("Brand removed successfully");
-      
-      // Refetch data to ensure consistency with server
-      await refetch();
-      
-      setTimeout(() => setRemoveMsg(""), 3000);
-    } catch (error) {
-      // console.error("Remove error:", error);
-      setRemoveMsg("Failed to remove brand");
-    } finally {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-    }
-  }, [likeProcessing, investorUUID, AccessToken, refetch]);
+      setLoading(true);
+      setError(null);
+     
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AccessToken}`,
+        },
+        timeout: 10000
+      };
 
-  const handleApply = useCallback((brand) => {
+      const viewedRes = await axios.get(
+        `${api.viewApi.get.getAllViewBrandByID}/${investorUUID}`,
+        config
+      ).then(res => res.data?.data || [])
+       .catch(() => []);
+
+      setBrands(viewedRes);
+    } catch (error) {
+      console.error("Error in fetchData:", error);
+      setError("Failed to load brands data");
+    } finally {
+      setLoading(false);
+    }
+  }, [investorUUID, AccessToken]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleViewDetails = useCallback((brand) => {
     postView(brand.uuid);
     openBrandDialog(brand);
   }, []);
@@ -425,10 +383,10 @@ const LikedBrands = () => {
 
   const handleMouseLeave = useCallback(() => {
     isPaused.current = false;
-    if (!scrollIntervalRef.current) {
+    if (!scrollIntervalRef.current && brands.length > 0) {
       startAutoScroll();
     }
-  }, []);
+  }, [brands.length]);
 
   // Calculate the scroll distance for 4 cards (including gap)
   const getScrollDistance = useCallback(() => {
@@ -526,7 +484,7 @@ const LikedBrands = () => {
       container.addEventListener('scroll', handleScroll);
       handleScroll();
       
-      if (localLikedBrands.length > 0) {
+      if (brands.length > 0) {
         startAutoScroll();
       }
     }
@@ -542,11 +500,16 @@ const LikedBrands = () => {
         cancelAnimationFrame(scrollRequestRef.current);
       }
     };
-  }, [localLikedBrands.length, handleScroll, startAutoScroll]);
+  }, [brands.length, handleScroll, startAutoScroll]);
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: 200 
+      }}>
         <CircularProgress />
       </Box>
     );
@@ -554,19 +517,8 @@ const LikedBrands = () => {
 
   if (error) {
     return (
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        py: 10,
-        textAlign: 'center'
-      }}>
-        <Typography variant="h6" color="error" sx={{ mb: 2 }}>
-          Error loading brands
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {error.message}
-        </Typography>
+      <Box sx={{ textAlign: "center", p: 4 }}>
+        <Typography color="error">{error}</Typography>
       </Box>
     );
   }
@@ -576,34 +528,17 @@ const LikedBrands = () => {
   return (
     <>
       {id && (
-        <Box sx={{
-          py: isMobile ? 1 : 2,
-          px: isMobile ? 0 : 2,
-          maxWidth: isMobile ? "100%" : 1400,
-          mx: "auto",
-          mb: isMobile ? 0 : 2,
-          position: 'relative',
-        }}
+        <Box
+          sx={{
+            py: isMobile ? 1 : 2,
+            px: isMobile ? 0 : 2,
+            maxWidth: isMobile ? "100%" : 1400,
+            mx: "auto",
+            mb: isMobile ? 0 : 2,
+            position: 'relative',
+          }}
           ref={containerRef}
         >
-          {removeMsg && (
-            <Box sx={{
-              mb: 3,
-              p: 2,
-              borderRadius: 2,
-              backgroundColor: '#4caf50',
-              color: 'white',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <Typography>{removeMsg}</Typography>
-              <IconButton size="small" onClick={() => setRemoveMsg("")}>
-                <Close sx={{ color: 'white' }} />
-              </IconButton>
-            </Box>
-          )}
-          
           <Box
             sx={{
               display: "flex",
@@ -632,9 +567,8 @@ const LikedBrands = () => {
                 },
               }}
             >
-              Liked Brands
+              Viewed Brands
             </Typography>
-
             <Button
               variant="text"
               size="small"
@@ -654,7 +588,7 @@ const LikedBrands = () => {
             </Button>
           </Box>
 
-          {localLikedBrands.length > 0 ? (
+          {brands.length > 0 ? (
             <Box sx={{ position: 'relative', px: isMobile ? 2 : 0 }}>
               {/* Previous button */}
               {showStartShadow && (
@@ -730,7 +664,7 @@ const LikedBrands = () => {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
-                {localLikedBrands.map((brand) => (
+                {brands.map((brand) => (
                   <motion.div
                     key={brand?.uuid}
                     whileHover={{ 
@@ -744,11 +678,9 @@ const LikedBrands = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <BrandCard
+                    <BrandCard 
                       brand={brand}
-                      handleApply={handleApply}
-                      handleLikeClick={handleLikeClick}
-                      likeProcessing={likeProcessing}
+                      handleViewDetails={handleViewDetails}
                       dimensions={dimensions}
                       theme={theme}
                       isMobile={isMobile}
@@ -759,19 +691,19 @@ const LikedBrands = () => {
               </Box>
             </Box>
           ) : (
-            <Box sx={{
+            <Box sx={{ 
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               py: 10,
               textAlign: 'center'
             }}>
-              <Favorite color="disabled" sx={{ fontSize: 60, mb: 2 }} />
+              <Visibility color="disabled" sx={{ fontSize: 60, mb: 2 }} />
               <Typography variant="h6" color="text.secondary">
-                No liked brands yet
+                No viewed brands yet
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Like brands to save them for later
+                View brands to see them appear here
               </Typography>
             </Box>
           )}
@@ -781,4 +713,5 @@ const LikedBrands = () => {
   );
 };
 
-export default LikedBrands;
+export default React.memo(ViewBrands);
+ 

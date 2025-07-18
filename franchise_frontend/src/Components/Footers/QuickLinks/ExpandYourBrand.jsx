@@ -107,6 +107,7 @@ const Section = ({ title, icon, items, image, description }) => (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
           <img
             src={image}
+            loading="lazy"
             alt={title}
             style={{
               maxWidth: "100%",

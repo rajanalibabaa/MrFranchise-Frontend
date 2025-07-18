@@ -1282,6 +1282,7 @@ const maskEmail = (email) => {
                     >
                       <img
                         src={imageUrl}
+                        loading="lazy"
                         alt={`Gallery ${index}`}
                         style={{
                           width: "100%",
@@ -1329,6 +1330,7 @@ const maskEmail = (email) => {
                     {allImages[3] && (
                       <img
                         src={allImages[3]}
+                        loading="lazy"
                         alt="Preview"
                         style={{
                           position: "absolute",
@@ -1437,6 +1439,7 @@ const maskEmail = (email) => {
 
               <img
                 src={allImages[currentImageIndex]}
+                loading="lazy"
                 alt={`Gallery ${currentImageIndex}`}
                 style={{
                   maxWidth: "100%",
@@ -1501,6 +1504,7 @@ const maskEmail = (email) => {
                 >
                   <img
                     src={img}
+                    loading="lazy"
                     alt={`Thumbnail ${index}`}
                     style={{
                       width: "100%",

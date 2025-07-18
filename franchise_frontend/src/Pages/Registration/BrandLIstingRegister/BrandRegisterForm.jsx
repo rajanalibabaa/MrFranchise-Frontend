@@ -420,7 +420,7 @@ const dispatch = useDispatch();
         });
 
         const response = await axios.post(
-          "https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/createBrandListing",
+          "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {
@@ -661,6 +661,7 @@ const dispatch = useDispatch();
                   {isImage ? (
                     <img
                       src={file}
+                      loading="lazy"
                       alt={`Preview ${index}`}
                       style={{ width: "100%", height: "auto", borderRadius: 4 }}
                     />
@@ -697,6 +698,7 @@ const dispatch = useDispatch();
                   {isImage ? (
                     <img
                       src={url}
+                      loading="lazy"
                       alt={`Preview ${index}`}
                       style={{ width: "100%", height: "auto", borderRadius: 4 }}
                     />
