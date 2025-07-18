@@ -14,7 +14,8 @@ import {
   Divider,
   Avatar,
   Stack,
-  Tooltip
+  Tooltip,
+  
 } from "@mui/material";
 import { motion } from "framer-motion";
 import Favorite from "@mui/icons-material/Favorite";
@@ -28,6 +29,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { api } from "../../Api/api";
 import { openBrandDialog } from "../../Hooks/Fetchbrands";
+import { Visibility } from "@mui/icons-material";
  
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
