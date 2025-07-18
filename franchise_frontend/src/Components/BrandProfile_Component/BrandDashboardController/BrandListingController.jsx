@@ -256,43 +256,6 @@ const sendOtp = async () => {
 
 
  const verifyOtp = async () => {
-
-  if (!otp || otp.length !== 6) {
-    setOtpError('Please enter a valid 6-digit OTP');
-    return;
-  }
-
-  setOtpVerifying(true);
-  setOtpError('');
-
-  try {
-
-    const response = await axios.post(
-      'http://localhost:5000/api/v1/otpverify/verify-otp',
-      {
-        identifier: formData.email,
-        otp: otp,
-        type: "email"
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${otpToken}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    if (response.data.success === true || response.data.message?.includes("verified successfully")) {
-      setIsEditing(true);
-      setShowOtpDialog(false);
-    } else {
-      setOtpError(response.data.error || 'Invalid OTP');
-    }
-  } catch (err) {
-    setOtpError(err.response?.data?.error || 'Verification failed');
-  } finally {
-    setOtpVerifying(false);
-  }
 };
 
 
