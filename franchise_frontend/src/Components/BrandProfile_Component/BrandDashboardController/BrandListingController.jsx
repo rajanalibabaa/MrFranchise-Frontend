@@ -230,7 +230,7 @@ const [otpToken, setOtpToken] = useState(null); // store token
 const sendOtp = async () => {
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/v1/otpverify/send-otp-email', 
+        'https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-email', 
         {
           email: formData.email,
         
@@ -300,7 +300,7 @@ const sendOtp = async () => {
   try {
     const apiData = unflattenFormData(formData); 
     const response = await axios.put(
-      `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
+      `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
       apiData
     );
 

@@ -1,61 +1,32 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import BrandDetails from "./BrandDetail.jsx";
-import { useBrand } from "../../Hooks/Fetchbrands.jsx";
-import { CircularProgress } from "@mui/material";
+import {  useBrands } from "../../Hooks/Fetchbrands.jsx";
 
 function BrandDetailsPage() {
   const { brandId } = useParams();
-  const navigate = useNavigate();
   const [fromSession, setFromSession] = useState(false);
-  const [checkedStorage, setCheckedStorage] = useState(false);
 
-  // ✅ Check if brandId is stored (just to track if it's opened from dialog)
+  // ✅ Check session storage (optional tracking)
   useEffect(() => {
     const brandKey = `viewing-brand-id-${brandId}`;
     const storedId = sessionStorage.getItem(brandKey);
-
     if (storedId === brandId) {
-      setFromSession(true); // optional use
+      setFromSession(true);
     }
-
-    setCheckedStorage(true);
   }, [brandId]);
 
-  // ✅ Fetch brand data only after session check
-  const {
-    data: brandData,
-    isLoading,
-    isError,
-    error
-  } = useBrand(brandId, {
-    enabled: checkedStorage,
-  });
+ 
+  const { data: brands = [] } = useBrands();
+  const fallbackBrandData = useMemo(() => {
+    return brands.find((brand) => brand.uuid === brandId || brand.id?.toString() === brandId);
+  }, [brands, brandId]);
 
-  // ✅ Redirect if nothing is found
-  useEffect(() => {
-    if (checkedStorage && !isLoading && !brandData && isError) {
-      console.error("Brand not found. Redirecting...", error);
-      navigate("/brandviewpage", { replace: true });
-    }
-  }, [checkedStorage, isLoading, brandData, isError, navigate, error]);
+  const finalBrandData = fallbackBrandData;
 
-  if (!checkedStorage || isLoading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh'
-      }}>
-        <CircularProgress color="secondary" />
-      </div>
-    );
-  }
+  if (!finalBrandData) return null;
 
-  if (!brandData) return null;
-
-  return <BrandDetails brandData={brandData} />;
+  return <BrandDetails brandData={finalBrandData} fromSession={fromSession} />;
 }
 
 export default BrandDetailsPage;
