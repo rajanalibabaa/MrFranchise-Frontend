@@ -749,8 +749,7 @@ const TopInvestVdo2 = React.memo(() => {
               },
             }}
             onClick={() => {
-              navigate("/brandviewpage");
-            }}
+window.open            }}
           >
             View More
           </Button>

@@ -403,126 +403,122 @@ useEffect(() => {
     setOtpInput("");
   };
 
-  // Send OTP for verification
-  const handleSendOtp = async (field) => {
-    setVerificationState((prev) => ({
-      ...prev,
-      [field]: {
-        ...prev[field],
-        loading: true,
-        error: null,
-      },
-    }));
+const [otpToken, setOtpToken] = useState(null);
 
-    try {
-      // Call your OTP API endpoint
-      const response = await axios.post("/api/send-otp", {
+console.log("OTP Token:", otpToken);
+// Send OTP
+const handleSendOtp = async (field) => {
+  setVerificationState((prev) => ({
+    ...prev,
+    [field]: { ...prev[field], loading: true, error: null },
+  }));
+
+  try {
+    const response = await axios.post(
+      "http://localhost:5000/api/v1/otpverify/send-otp-email",
+      {
         [field === "email" ? "email" : "phone"]: data[field],
         type: field,
-      });
-
-      if (response.data.success) {
-        setVerificationState((prev) => ({
-          ...prev,
-          [field]: {
-            ...prev[field],
-            otpSent: true,
-            loading: false,
-          },
-        }));
-        setSnackbar({
-          open: true,
-          message: `OTP sent successfully to your ${field}`,
-          severity: "success",
-        });
-      } else {
-        throw new Error(response.data.message || "Failed to send OTP");
+      },
+      {
+        headers: { "Content-Type": "application/json" },
       }
-    } catch (error) {
-      console.error(`Error sending OTP for ${field}:`, error);
+    );
+
+    if (response.data.success) {
+      setOtpToken(response.data.token || null); // Only store if your backend sends a token
       setVerificationState((prev) => ({
         ...prev,
-        [field]: {
-          ...prev[field],
-          loading: false,
-          error: error.response?.data?.message || error.message,
-        },
+        [field]: { ...prev[field], otpSent: true, loading: false },
       }));
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || "Failed to send OTP",
-        severity: "error",
+        message: `OTP sent successfully to your ${field}`,
+        severity: "success",
       });
+    } else {
+      throw new Error(response.data.message || "Failed to send OTP");
     }
-  };
-
-  // Verify the entered OTP
-  const handleVerifyOtp = async (field) => {
-    if (!otpInput || otpInput.length !== 6) {
-      setVerificationState((prev) => ({
-        ...prev,
-        [field]: {
-          ...prev[field],
-          error: "Please enter a valid 6-digit OTP",
-        },
-      }));
-      return;
-    }
-
+  } catch (error) {
+    console.error(`Error sending OTP for ${field}:`, error);
     setVerificationState((prev) => ({
       ...prev,
       [field]: {
         ...prev[field],
-        loading: true,
-        error: null,
+        loading: false,
+        error: error.response?.data?.message || error.message,
       },
     }));
+    setSnackbar({
+      open: true,
+      message: error.response?.data?.message || "Failed to send OTP",
+      severity: "error",
+    });
+  }
+};
 
-    try {
-      // Call your OTP verification API endpoint
-      const response = await axios.post("/api/verify-otp", {
+// Verify OTP
+const handleVerifyOtp = async (field) => {
+  if (!otpInput || otpInput.length !== 6) {
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: { ...prev[field], error: "Please enter a valid 6-digit OTP" },
+    }));
+    return;
+  }
+
+  setVerificationState((prev) => ({
+    ...prev,
+    [field]: { ...prev[field], loading: true, error: null },
+  }));
+
+  try {
+    const response = await axios.post(
+      "http://localhost:5000/api/v1/otpverify/verify-otp",
+      {
         [field === "email" ? "email" : "phone"]: data[field],
+        identifier: data[field],
         otp: otpInput,
         type: field,
-      });
-
-      if (response.data.success) {
-        setVerificationState((prev) => ({
-          ...prev,
-          [field]: {
-            ...prev[field],
-            verified: true,
-            showDialog: false,
-            loading: false,
-          },
-        }));
-        setSnackbar({
-          open: true,
-          message: `${
-            field === "email" ? "Email" : "Mobile number"
-          } verified successfully!`,
-          severity: "success",
-        });
-      } else {
-        throw new Error(response.data.message || "OTP verification failed");
+      },
+      {
+        headers: {
+          ...(otpToken ? { Authorization: `Bearer ${otpToken}` } : {}), // Only send if needed
+          "Content-Type": "application/json",
+        },
       }
-    } catch (error) {
-      console.error(`Error verifying OTP for ${field}:`, error);
+    );
+
+    if (response.data.message === "OTP verified successfully") {
       setVerificationState((prev) => ({
         ...prev,
-        [field]: {
-          ...prev[field],
-          loading: false,
-          error: error.response?.data?.message || error.message,
-        },
+        [field]: { ...prev[field], verified: true, showDialog: false, loading: false },
       }));
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || "OTP verification failed",
-        severity: "error",
+        message: `${field === "email" ? "Email" : "Mobile number"} verified successfully!`,
+        severity: "success",
       });
+    } else {
+      throw new Error(response.data.message || "OTP verification failed");
     }
-  };
+  } catch (error) {
+    console.error(`Error verifying OTP for ${field}:`, error);
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        loading: false,
+        error: error.response?.data?.message || error.message,
+      },
+    }));
+    setSnackbar({
+      open: true,
+      message: error.response?.data?.message || "OTP verification failed",
+      severity: "error",
+    });
+  }
+};
 
   // Resend OTP
   const handleResendOtp = (field) => {

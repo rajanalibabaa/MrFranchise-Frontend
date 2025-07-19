@@ -584,7 +584,8 @@ const BrandCard = React.memo(({
                   backgroundColor: "transparent",
                 },
               }}
-              onClick={() => navigate("/brandviewpage")}
+              onClick={() => 
+window.open('/brandviewpage', '_blank')              }
             >
               View More
             </Button>

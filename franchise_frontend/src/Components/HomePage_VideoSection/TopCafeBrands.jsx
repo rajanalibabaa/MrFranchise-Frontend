@@ -114,10 +114,10 @@ const BrandCard = React.memo(
             width: "100%",
             border: "1px solid #eee",
             boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
-            },
+            // transition: "all 0.3s ease",
+            // "&:hover": {
+            //   boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
+            // },
           }}
         >
           <Box
@@ -257,7 +257,7 @@ const BrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    Franchise Type : {franchiseModel?.franchiseType || "N/A"}
+                    Franchise Type : {franchiseModel?.franchiseModel || "N/A"}
                   </Typography>
                 </Box>
 
@@ -335,8 +335,7 @@ const TopCafeFranchises = () => {
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
 
-  const navigate = useNavigate();
-const dispatch = useDispatch()
+  
   // REACT-QUERY HOOKS
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
@@ -643,9 +642,8 @@ const dispatch = useDispatch()
                 },
               }}
               onClick={async () => {
-                dispatch(showLoading());
-                navigate("/brandviewpage");
-              }}
+                // dispatch(showLoading());
+window.open('/brandviewpage', '_blank')              }}
             >
               View More
             </Button>

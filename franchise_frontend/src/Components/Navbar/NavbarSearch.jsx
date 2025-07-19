@@ -397,11 +397,13 @@ const NavbarSearch = ({ open, handleClose }) => {
     setSearchTerm(suggestion.value);
     setOpenSuggestions(false);
     
-    // Navigate directly to the brand
-    if (suggestion.brandId) {
-      navigate(`/brands/${suggestion.brandId}`);
-      handleClose();
-    }
+    // Navigate directly to the brand in a new tab
+if (suggestion.brandId) {
+  const url = `/brands/${suggestion.brandId}`;
+  window.open(url, "_blank"); // Opens in a new tab
+  handleClose();
+}
+
     
     // Parse the category or location from the match text to set filters
     if (suggestion.matchText) {

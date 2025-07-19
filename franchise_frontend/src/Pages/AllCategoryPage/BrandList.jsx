@@ -20,6 +20,7 @@ import {
   IconButton,
   useMediaQuery,
   useTheme,
+  Tooltip
 } from "@mui/material";
 import {
   Close,
@@ -342,36 +343,49 @@ const handleLikeClick = useCallback(
   return (
     <Container maxWidth="xl" sx={{ mt: 0, mb: 6 }}>
       {/* Comparison Button */}
-      <Box
-        sx={{
-          position: "fixed",
-          top: 200,
-          right: 25,
-          // bottom: 80,
-          zIndex: 1000,
-        }}
-      >
-        <Badge badgeContent={selectedForComparison.length} color="primary">
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Compare />}
-            onClick={() => setComparisonOpen(true)}
-            disabled={selectedForComparison.length === 0}
-            sx={{
-              borderRadius: 4,
-              boxShadow: 3,
-              bgcolor: "#ff9800",
-              "&:hover": {
-                bgcolor: "#fb8c00",
-                boxShadow: 6,
-              },
-            }}
-          >
-            Compare
-          </Button>
-        </Badge>
-      </Box>
+
+
+<Box
+  sx={{
+    position: "fixed",
+    top: 290,
+    right: 25,
+    zIndex: 1000,
+  }}
+>
+  <Badge badgeContent={selectedForComparison.length} color="primary">
+    <Tooltip
+      title={
+        selectedForComparison.length === 0
+          ? "Select brands to enable comparison"
+          : "Click to compare selected brands"
+      }
+      placement="left"
+      arrow
+    >
+      <span>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Compare />}
+          onClick={() => setComparisonOpen(true)}
+          disabled={selectedForComparison.length === 0}
+          sx={{
+            borderRadius: 4,
+            boxShadow: 3,
+            bgcolor: "#ff9800",
+            "&:hover": {
+              bgcolor: "#fb8c00",
+              boxShadow: 6,
+            },
+          }}
+        >
+          Compare
+        </Button>
+      </span>
+    </Tooltip>
+  </Badge>
+</Box>
 
       {/* Scroll to Top Button */}
       {scrollPosition > 300 && (
@@ -450,7 +464,7 @@ const handleLikeClick = useCallback(
 
         {/* Mobile Filters Button */}
         {isMobile && (
-          <Box sx={{ mb: 2 }}>
+          <Box sx={{ mb: 2 ,mt:8,}}>
             <Button
               variant="outlined"
               startIcon={<FilterAlt sx={{ color: "#ff9800" }} />}
@@ -507,10 +521,17 @@ const handleLikeClick = useCallback(
             </Box>
           ) : (
             <>
-              <Typography sx={{ml: 2}} variant="h4" gutterBottom color="#ff9800">
-                Available Franchise Brands
+             {!isMobile && (
+                <Typography sx={{ml: 2,}} variant="h4"  gutterBottom color="#ff9800">
+                Food & Beverage Brands
               </Typography>
-              <Typography sx={{ml: 2,mb: 2}} variant="body1" gutterBottom>
+             )}
+             {isMobile && (
+                <Typography sx={{ml: 2,}} variant="h5"  gutterBottom color="#ff9800">
+                Food & Beverage Brands
+              </Typography>
+             )}
+              <Typography sx={{ml: 2,mb: 2}} variant="body2" gutterBottom>
                 Showing {filteredBrands.length} of {brands.length} brands
               </Typography>
 
@@ -563,6 +584,7 @@ const handleLikeClick = useCallback(
             display="flex"
             justifyContent="space-between"
             alignItems="center"
+
             mb={2}
           >
             <Typography variant="h6">Filters</Typography>
@@ -600,7 +622,7 @@ const handleLikeClick = useCallback(
             variant="contained"
             fullWidth
             onClick={() => setMobileFiltersOpen(false)}
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, backgroundColor: "#ff9800" }}
           >
             Apply Filters
           </Button>

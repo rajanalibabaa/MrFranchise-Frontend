@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo, useMemo } from "react";
+import React, { useState, useCallback, memo, useMemo, useRef } from "react";
 import {
   Box,
   Button,
@@ -8,6 +8,9 @@ import {
   IconButton,
   Typography,
   Tooltip,
+  useTheme,
+  CardMedia,
+  Divider,
 } from "@mui/material";
 import {
   Compare,
@@ -16,6 +19,7 @@ import {
   AttachMoney,
   AreaChart,
   Description,
+  Business,
 } from "@mui/icons-material";
 import LoginPage from "../LoginPage/LoginPage";
 import { openBrandDialog } from "../../Hooks/Fetchbrands.jsx";
@@ -23,9 +27,11 @@ import { postView } from "../../Utils/function/view.jsx";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 
 const cardStyles = {
-  width: 320,
-  height: 520,
+
+  width:  { xs: "40vh", sm: "calc(50% - 10px)", md: 320 },
+  height: { xs: "50vh", sm: "calc(50% - 10px)", md: 430 },
   ml: 1.5,
+  mt: 4,
   display: "flex",
   flexDirection: "column",
   transition: "transform 0.3s, box-shadow 0.3s",
@@ -42,7 +48,7 @@ const logoStyles = {
   objectFit: "contain",
   backgroundColor: "#f9f9f9",
   py: 2,
-  height: "200px",
+  height: "80px",
   width: "100%",
   borderBottom: "1px solid #eee",
 };
@@ -62,7 +68,7 @@ const titleStyles = {
 };
 
 const viewButtonStyles = {
-  py: 1.25,
+  // py: 1.25,
   bgcolor: "#4caf50",
   borderRadius: 1,
   fontWeight: 500,
@@ -84,15 +90,12 @@ const BrandCard = memo(
     onToggleBrandComparison,
     maxComparisonReached,
   }) => {
-    const [localIsLiked, setLocalIsLiked] = useState(brand.isLiked);
-    const [isProcessingLike, setIsProcessingLike] = useState(false);
 
     const {
       uuid,
       uploads = {},
       brandDetails = {},
       franchiseDetails = {},
-      expansionLocationData = {},
       isLiked,
     } = brand;
 
@@ -100,7 +103,10 @@ const BrandCard = memo(
       () => franchiseDetails.fico?.[0]?.investmentRange || "Not specified",
       [franchiseDetails.fico]
     );
-
+const franchiseType = useMemo(
+  () => franchiseDetails.fico?.[0]?.franchiseModel || "N/A",
+  [franchiseDetails.fico]
+)
     const areaRequired = useMemo(
       () => franchiseDetails.fico?.[0]?.areaRequired || "Not specified",
       [franchiseDetails.fico]
@@ -139,8 +145,19 @@ const BrandCard = memo(
       });
     }, [brand, onToggleBrandComparison, isSelectedForComparison, maxComparisonReached]);
 
+
+const videoRef = useRef(null);
+ const handlePlay = () => {
+    const allVideos = document.querySelectorAll("video");
+    allVideos.forEach((vid) => {
+      if (vid !== videoRef.current) {
+        vid.pause();
+      }
+    });
+  };
+
     return (
-      <Card sx={cardStyles}>
+      <Card sx={cardStyles} >
         <Tooltip
           title={
             maxComparisonReached && !isSelectedForComparison
@@ -148,6 +165,7 @@ const BrandCard = memo(
               : ""
           }
           placement="top"
+          arrow
         >
           <span>
             <IconButton
@@ -188,14 +206,47 @@ const BrandCard = memo(
             flexDirection: "column",
           }}
         >
-          <Box
-            component="img"
-            loading="lazy"
-            src={uploads.brandLogo}
-            alt={brandDetails.brandName || "Brand logo"}
-            sx={logoStyles}
-          />
+        <Box
+  sx={{
+    position: "relative",
+    width: "100%",          // Take full width
+    maxWidth: "640px",      // Optional max size
+    margin: "0 auto",       // Center horizontally
+    aspectRatio: "16/9",    // Keeps 16:9 ratio
+  }}
+>
+<Box
+  sx={{
+    position: "relative",
+    width: "100%",
+    maxWidth: "50vh",    // Controls overall size
+    aspectRatio: "16/9", // Keeps the video ratio locked
+    margin: "0 auto",    // Center horizontally
+  }}
+>
+  <CardMedia
+    component="video"
+    ref={videoRef}
+    loading="lazy"
+    poster={uploads.brandLogo} // Poster will also match same box size
+    src={uploads.franchisePromotionVideo}
+    alt={brandDetails.brandName}
+    sx={{
+      width: "100%",
+      height: "100%",
+      objectFit: "contain", // Keeps video/poster proportional
+      backgroundColor: "#000", // Optional: black background for empty space
+    }}
+    onPlay={handlePlay}
+    controls
+    
+    preload="none"
+  />
+</Box>
 
+</Box>
+
+<Divider sx={{ my: 1 }} />
           <Box
             display="flex"
             justifyContent="space-between"
@@ -252,6 +303,7 @@ const BrandCard = memo(
         bgcolor: "rgba(255, 152, 0, 0.1)",
         color: "orange.dark",
         fontWeight: 500,
+        mb: 1,
       }}
     />
   ) : (
@@ -281,10 +333,7 @@ const BrandCard = memo(
               },
             }}
           >
-            <LocationDetail
-              locations={expansionLocationData.expansionLocations}
-              onViewMore={handleOpenBrand}
-            />
+            
 
             <DetailItem
               icon={<AttachMoney />}
@@ -297,6 +346,10 @@ const BrandCard = memo(
               label="Area Required"
               value={areaRequired}
             />
+            <DetailItem
+              icon={<Business />}
+              label='Franchise Model'  
+              value={franchiseType} />
           </Box>
 
           <Button
@@ -327,46 +380,7 @@ const BrandCard = memo(
   }
 );
 
-const LocationDetail = memo(({ locations, onViewMore }) => {
-  const { displayText, hasMore } = useMemo(() => {
-    const domestic = locations?.domestic?.locations || [];
-    const international = locations?.international?.locations || [];
-    const all = [...domestic, ...international];
 
-    const names = all.map((loc) => loc.state || loc.country).filter(Boolean);
-    const display = names.slice(0, 2).join(", ");
-    const hasMore = names.length > 2;
-
-    return { displayText: display || "Multiple locations", hasMore };
-  }, [locations]);
-
-  return (
-    <Box display="flex" alignItems="center">
-      <LocationOn
-        sx={{
-          mr: 1.5,
-          fontSize: "1rem",
-          color: "text.secondary",
-          flexShrink: 0,
-        }}
-      />
-      <Typography variant="body2" noWrap>
-        <span style={{ fontWeight: 600 }}>Expansion Location:</span>
-        <br />
-        {displayText}
-        {hasMore && (
-          <Button
-            size="small"
-            sx={{ ml: 0.5, minWidth: 0, padding: 0 }}
-            onClick={onViewMore}
-          >
-            ...more
-          </Button>
-        )}
-      </Typography>
-    </Box>
-  );
-});
 
 
 const DetailItem = memo(({ icon, label, value }) => {
@@ -386,8 +400,8 @@ const DetailItem = memo(({ icon, label, value }) => {
   return (
     <Box display="flex" alignItems="center">
       {clonedIcon}
-      <Typography variant="body2" noWrap>
-        <span style={{ fontWeight: 600 }}>{label}:</span> {value}
+      <Typography variant="caption" noWrap>
+        <span style={{ fontWeight: 600 }}>{label}:</span>  {value}
       </Typography>
     </Box>
   );
