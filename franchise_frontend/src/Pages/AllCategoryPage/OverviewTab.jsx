@@ -132,7 +132,7 @@ const OverviewTab = ({ brand }) => {
 
   const handleUserScrollEnd = () => {
     // restart auto-scroll after short delay
-    setTimeout(() => setIsUserScrolling(false), 1000);
+    setTimeout(() => setIsUserScrolling(false), 100);
   };
 
   const tableRows = brand.franchiseDetails?.fico?.map((model, index) => (
