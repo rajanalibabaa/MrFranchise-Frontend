@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState, useCallback, useMemo, } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   Box,
@@ -39,7 +38,7 @@ import {
   Favorite,
   ShareOutlined,
   PlaylistAddCheckCircleOutlined,
-  ArrowUpward
+  ArrowUpward,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useBrand } from "../../Hooks/Fetchbrands.jsx";
@@ -47,7 +46,7 @@ import axios from "axios";
 import OverviewTab from "./OverviewTab.jsx";
 import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
-import { useToggleLike } from '../../Hooks/Fetchbrands.jsx';
+import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx";
 import ShareDialogActions from "./ShareDialogActions.jsx";
 
@@ -59,9 +58,9 @@ const BrandDetails = ({ brandData }) => {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md")); // 600px - 900px
   const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg")); // 900px - 1200px
   const isLargeDesktop = useMediaQuery(theme.breakpoints.up("lg")); // > 1200px
-  
+
   const navigate = useNavigate();
-  
+
   // State management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,7 +78,7 @@ const BrandDetails = ({ brandData }) => {
 
   const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
   const [isProcessingLike, setIsProcessingLike] = useState(false);
-  
+
   const { mutate: toggleLike } = useToggleLike();
 
   const [formData, setFormData] = useState({
@@ -97,7 +96,7 @@ const BrandDetails = ({ brandData }) => {
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   const handleOpenShareClick = (event) => {
-    setAnchorEl(event.currentTarget); 
+    setAnchorEl(event.currentTarget);
   };
 
   useEffect(() => {
@@ -111,23 +110,23 @@ const BrandDetails = ({ brandData }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  
+
   const { uuid } = useParams();
   const selectedBrand = brandData || {};
- 
+
   // Get investor data from localStorage with caching
   const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
   const AccessToken = useMemo(() => localStorage.getItem("accessToken"), []);
 
   const handleLikeClick = useCallback(() => {
     if (isProcessingLike) return;
-    
+
     setIsProcessingLike(true);
     const newLikeStatus = !localIsLiked;
-    
+
     // Optimistic update
     setLocalIsLiked(newLikeStatus);
-    
+
     toggleLike(
       { brandId: uuid, isLiked: !newLikeStatus },
       {
@@ -137,7 +136,7 @@ const BrandDetails = ({ brandData }) => {
         },
         onSettled: () => {
           setIsProcessingLike(false);
-        }
+        },
       }
     );
   }, [uuid, localIsLiked, isProcessingLike, toggleLike]);
@@ -145,7 +144,7 @@ const BrandDetails = ({ brandData }) => {
   // Memoized API calls
   const fetchInvestorDetails = useCallback(async () => {
     if (!investorUUID || !AccessToken) return;
-    
+
     try {
       const response = await axios.get(
         `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
@@ -154,13 +153,13 @@ const BrandDetails = ({ brandData }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${AccessToken}`,
           },
-          signal: AbortSignal.timeout(5000)
+          signal: AbortSignal.timeout(5000),
         }
       );
-      
+
       if (response.data?.data) {
         setUserData(response.data.data);
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           fullName: response.data.data.firstName || "",
           investorEmail: response.data.data.email || "",
@@ -179,7 +178,7 @@ const BrandDetails = ({ brandData }) => {
     if (!uuid) return;
 
     const controller = new AbortController();
-    
+
     const fetchBrand = async () => {
       try {
         await useBrand(uuid).unwrap();
@@ -189,7 +188,7 @@ const BrandDetails = ({ brandData }) => {
     };
 
     fetchBrand();
-    
+
     return () => controller.abort();
   }, [uuid]);
 
@@ -204,10 +203,17 @@ const BrandDetails = ({ brandData }) => {
 
   // Extract location data from brand
   useEffect(() => {
-    if (selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
-      const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
-      const states = [...new Set(locations.map((loc) => loc.state).filter(Boolean))];
-      setLocationData(prev => ({
+    if (
+      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
+        ?.locations
+    ) {
+      const locations =
+        selectedBrand.expansionLocationData.expansionLocations.domestic
+          .locations;
+      const states = [
+        ...new Set(locations.map((loc) => loc.state).filter(Boolean)),
+      ];
+      setLocationData((prev) => ({
         ...prev,
         states,
         districts: [],
@@ -218,16 +224,24 @@ const BrandDetails = ({ brandData }) => {
 
   // Update districts when state changes
   useEffect(() => {
-    if (formData.state && selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
-      const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
+    if (
+      formData.state &&
+      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
+        ?.locations
+    ) {
+      const locations =
+        selectedBrand.expansionLocationData.expansionLocations.domestic
+          .locations;
       const stateObj = locations.find((loc) => loc.state === formData.state);
-      const districts = [...new Set(stateObj?.districts?.map((d) => d.district) || [])];
-      setLocationData(prev => ({
+      const districts = [
+        ...new Set(stateObj?.districts?.map((d) => d.district) || []),
+      ];
+      setLocationData((prev) => ({
         ...prev,
         districts,
         cities: [],
       }));
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         district: "",
         city: "",
@@ -237,16 +251,25 @@ const BrandDetails = ({ brandData }) => {
 
   // Update cities when district changes
   useEffect(() => {
-    if (formData.state && formData.district && selectedBrand?.expansionLocationData?.expansionLocations?.domestic?.locations) {
-      const locations = selectedBrand.expansionLocationData.expansionLocations.domestic.locations;
+    if (
+      formData.state &&
+      formData.district &&
+      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
+        ?.locations
+    ) {
+      const locations =
+        selectedBrand.expansionLocationData.expansionLocations.domestic
+          .locations;
       const stateObj = locations.find((loc) => loc.state === formData.state);
-      const districtObj = stateObj?.districts?.find((d) => d.district === formData.district);
+      const districtObj = stateObj?.districts?.find(
+        (d) => d.district === formData.district
+      );
       const cities = [...new Set(districtObj?.cities || [])];
-      setLocationData(prev => ({
+      setLocationData((prev) => ({
         ...prev,
         cities,
       }));
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         city: "",
       }));
@@ -254,17 +277,23 @@ const BrandDetails = ({ brandData }) => {
   }, [formData.district, formData.state, selectedBrand]);
 
   // Memoized derived data for better performance
-  const investmentRanges = useMemo(() => [
-    ...new Set(selectedBrand?.franchiseDetails?.fico?.map((m) => m.investmentRange) || [])
-  ], [selectedBrand]);
+  const investmentRanges = useMemo(
+    () => [
+      ...new Set(
+        selectedBrand?.franchiseDetails?.fico?.map((m) => m.investmentRange) ||
+          []
+      ),
+    ],
+    [selectedBrand]
+  );
 
-  const investmentTimings = useMemo(() => 
-    ["Immediately", "1 - 3 Months", "3 - 6 Months", "6 + Months"],
+  const investmentTimings = useMemo(
+    () => ["Immediately", "1 - 3 Months", "3 - 6 Months", "6 + Months"],
     []
   );
 
-  const readyToInvestOptions = useMemo(() => 
-    ["Own Investment", "Going To Loan", "Need Loan Assistance"],
+  const readyToInvestOptions = useMemo(
+    () => ["Own Investment", "Going To Loan", "Need Loan Assistance"],
     []
   );
 
@@ -275,7 +304,9 @@ const BrandDetails = ({ brandData }) => {
 
   const allImages = useMemo(
     () => [
-      ...(selectedBrand?.uploads?.brandLogo ? [selectedBrand.uploads.brandLogo] : []),
+      ...(selectedBrand?.uploads?.brandLogo
+        ? [selectedBrand.uploads.brandLogo]
+        : []),
       ...(selectedBrand?.uploads?.exteriorOutlet || []),
       ...(selectedBrand?.uploads?.interiorOutlet || []),
     ],
@@ -303,85 +334,104 @@ const BrandDetails = ({ brandData }) => {
   const handleOpenContact = useCallback(() => setOpenContactModal(true), []);
   const handleCloseContact = useCallback(() => setOpenContactModal(false), []);
 
-  const toggleDrawer = useCallback((open) => (event) => {
-    if (event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) {
-      return;
-    }
-    setDrawerOpen(open);
-  }, []);
+  const toggleDrawer = useCallback(
+    (open) => (event) => {
+      if (
+        event.type === "keydown" &&
+        (event.key === "Tab" || event.key === "Shift")
+      ) {
+        return;
+      }
+      setDrawerOpen(open);
+    },
+    []
+  );
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   }, []);
 
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    const id = investorUUID || localStorage.getItem("brandUUID");
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setIsSubmitting(true);
 
-    if (!id) {
-      alert("User not logged in or missing ID. Please login again.");
-      navigate("/registerhandleuser");
-      return;
-    }
+      const id = investorUUID || localStorage.getItem("brandUUID");
 
-    try {
-      const payload = {
-        ...formData,
-        state: formData.state || "",
-        district: formData.district || "",
-        city: formData.city || "",
-        brandId: selectedBrand?.uuid,
-        brandName: selectedBrand?.brandDetails?.brandName || "",
-        applyId: id
-      };
-
-      const requiredFields = [
-        'fullName', 'investorEmail', 'mobileNumber', 'state', 
-        'district', 'city', 'investmentRange', 'planToInvest', 'readyToInvest'
-      ];
-      
-      const missingFields = requiredFields.filter(field => !payload[field]);
-      
-      if (missingFields.length > 0) {
-        alert(`Please fill all required fields: ${missingFields.join(', ')}`);
+      if (!id) {
+        alert("User not logged in or missing ID. Please login again.");
+        navigate("/registerhandleuser");
         return;
       }
 
-      const response = await axios.post(
-        "https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication",
-        payload,
-        { 
-          headers: { "Content-Type": "application/json" },
-          signal: AbortSignal.timeout(10000)
-        }
-      );
+      try {
+        const payload = {
+          ...formData,
+          state: formData.state || "",
+          district: formData.district || "",
+          city: formData.city || "",
+          brandId: selectedBrand?.uuid,
+          brandName: selectedBrand?.brandDetails?.brandName || "",
+          applyId: id,
+        };
 
-      if (response.data) {
-        setSubmitSuccess(true);
-        alert("✅Success! Your application has been submitted.");
-        setDrawerOpen(false);
-        setFormData({
-          fullName: "",
-          investorEmail: "",
-          mobileNumber: "",
-          investmentRange: "",
-          state: "",
-          district: "",
-          city: "",
-          planToInvest: "",
-          readyToInvest: "",
-        });
+        const requiredFields = [
+          "fullName",
+          "investorEmail",
+          "mobileNumber",
+          "state",
+          "district",
+          "city",
+          "investmentRange",
+          "planToInvest",
+          "readyToInvest",
+        ];
+
+        const missingFields = requiredFields.filter((field) => !payload[field]);
+
+        if (missingFields.length > 0) {
+          alert(`Please fill all required fields: ${missingFields.join(", ")}`);
+          return;
+        }
+
+        const response = await axios.post(
+          "https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication",
+          payload,
+          {
+            headers: { "Content-Type": "application/json" },
+            signal: AbortSignal.timeout(10000),
+          }
+        );
+
+        if (response.data) {
+          setSubmitSuccess(true);
+          alert("✅Success! Your application has been submitted.");
+          setDrawerOpen(false);
+          setFormData({
+            fullName: "",
+            investorEmail: "",
+            mobileNumber: "",
+            investmentRange: "",
+            state: "",
+            district: "",
+            city: "",
+            planToInvest: "",
+            readyToInvest: "",
+          });
+        }
+      } catch (error) {
+        console.error(
+          "Submission error:",
+          error?.response?.data || error.message
+        );
+        alert("❌Failed to submit application. Please try again.");
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error("Submission error:", error?.response?.data || error.message);
-      alert("❌Failed to submit application. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [formData, selectedBrand, investorUUID, navigate]);
+    },
+    [formData, selectedBrand, investorUUID, navigate]
+  );
 
   const handleImageOpen = useCallback((index) => {
     setCurrentImageIndex(index);
@@ -389,11 +439,15 @@ const BrandDetails = ({ brandData }) => {
   }, []);
 
   const handlePrevImage = useCallback(() => {
-    setCurrentImageIndex(prev => (prev === 0 ? allImages.length - 1 : prev - 1));
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? allImages.length - 1 : prev - 1
+    );
   }, [allImages.length]);
 
   const handleNextImage = useCallback(() => {
-    setCurrentImageIndex(prev => (prev === allImages.length - 1 ? 0 : prev + 1));
+    setCurrentImageIndex((prev) =>
+      prev === allImages.length - 1 ? 0 : prev + 1
+    );
   }, [allImages.length]);
 
   // Scroll to top on component mount
@@ -412,7 +466,12 @@ const BrandDetails = ({ brandData }) => {
 
   if (!selectedBrand) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="80vh"
+      >
         <CircularProgress />
       </Box>
     );
@@ -452,7 +511,7 @@ const BrandDetails = ({ brandData }) => {
       key: `${loc.city}-${index}`,
       label: ` ${category.child || ""} franchise in-${loc.city}`,
     }));
- 
+
     return (
       <Box
         sx={{
@@ -461,7 +520,11 @@ const BrandDetails = ({ brandData }) => {
           p: 2,
           display: "grid",
           // Responsive grid columns
-          gridTemplateColumns: isMobile ? "1fr" : isTablet ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : isTablet
+            ? "repeat(2, 1fr)"
+            : "repeat(3, 1fr)",
           gap: 2,
           height: isMobile ? "auto" : "90px",
           overflowY: "auto",
@@ -471,20 +534,22 @@ const BrandDetails = ({ brandData }) => {
         <Box>
           {formattedChipsState.length > 0 ? (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              {formattedChipsState.slice(0, isMobile ? 3 : formattedChipsState.length).map((chip) => (
-                <Typography
-                  key={chip.key}
-                  variant="caption"
-                  sx={{
-                    borderRadius: "4px",
-                    color: 'black',
-                    whiteSpace: "nowrap",
-                    fontSize: isMobile ? "0.7rem" : "0.8rem",
-                  }}
-                >
-                  {chip.label}
-                </Typography>
-              ))}
+              {formattedChipsState
+                .slice(0, isMobile ? 3 : formattedChipsState.length)
+                .map((chip) => (
+                  <Typography
+                    key={chip.key}
+                    variant="caption"
+                    sx={{
+                      borderRadius: "4px",
+                      color: "black",
+                      whiteSpace: "nowrap",
+                      fontSize: isMobile ? "0.7rem" : "0.8rem",
+                    }}
+                  >
+                    {chip.label}
+                  </Typography>
+                ))}
             </Box>
           ) : (
             <Typography
@@ -505,20 +570,22 @@ const BrandDetails = ({ brandData }) => {
           <Box>
             {formattedChipsDistrict.length > 0 ? (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {formattedChipsDistrict.slice(0, isMobile ? 3 : formattedChipsDistrict.length).map((chip) => (
-                  <Typography
-                    key={chip.key}
-                    variant="caption"
-                    sx={{
-                      borderRadius: "4px",
-                      color: 'black',
-                      whiteSpace: "nowrap",
-                      fontSize: isMobile ? "0.7rem" : "0.8rem",
-                    }}
-                  >
-                    {chip.label}
-                  </Typography>
-                ))}
+                {formattedChipsDistrict
+                  .slice(0, isMobile ? 3 : formattedChipsDistrict.length)
+                  .map((chip) => (
+                    <Typography
+                      key={chip.key}
+                      variant="caption"
+                      sx={{
+                        borderRadius: "4px",
+                        color: "black",
+                        whiteSpace: "nowrap",
+                        fontSize: isMobile ? "0.7rem" : "0.8rem",
+                      }}
+                    >
+                      {chip.label}
+                    </Typography>
+                  ))}
               </Box>
             ) : (
               <Typography
@@ -546,7 +613,7 @@ const BrandDetails = ({ brandData }) => {
                     variant="caption"
                     sx={{
                       borderRadius: "4px",
-                      color: 'black',
+                      color: "black",
                       whiteSpace: "nowrap",
                       fontSize: isMobile ? "0.7rem" : "0.8rem",
                     }}
@@ -590,12 +657,12 @@ const BrandDetails = ({ brandData }) => {
         <Box
           sx={{
             position: "fixed",
-             bottom: isMobile ? 35 : 300,
-             right: isMobile ? 0 : 20,
-             left: isMobile ? 0 : "auto",
-             display: "flex",
-             justifyContent: "center",
-             zIndex: 1000,
+            bottom: isMobile ? 35 : 300,
+            right: isMobile ? 0 : 20,
+            left: isMobile ? 0 : "auto",
+            display: "flex",
+            justifyContent: "center",
+            zIndex: 1000,
           }}
         >
           <Button
@@ -661,7 +728,7 @@ const BrandDetails = ({ brandData }) => {
                   gridTemplateColumns: "repeat(1, 1fr)",
                   gap: 2,
                 }}
-              >           
+              >
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -691,7 +758,9 @@ const BrandDetails = ({ brandData }) => {
                     fullWidth
                     label="Mobile Number"
                     name="mobileNumber"
-                    value={formData.mobileNumber || userData?.mobileNumber || ""}
+                    value={
+                      formData.mobileNumber || userData?.mobileNumber || ""
+                    }
                     onChange={handleChange}
                     required
                     variant="outlined"
@@ -882,13 +951,13 @@ const BrandDetails = ({ brandData }) => {
             Contact Details
             <IconButton
               aria-label="close"
-              onClick={handleCloseContact} 
+              onClick={handleCloseContact}
               sx={{
                 position: "absolute",
                 top: 8,
                 right: 8,
-                color:'error.main'
-              }} 
+                color: "error.main",
+              }}
             >
               <Close />
             </IconButton>
@@ -953,8 +1022,8 @@ const BrandDetails = ({ brandData }) => {
             >
               <Box
                 position="relative"
-                sx={{ 
-                  border: "3px solid orange", 
+                sx={{
+                  border: "3px solid orange",
                   borderRadius: "10px",
                   // width: isMobile ? 120 : isTablet ? 150 : 200,
                   // height: isMobile ? 120 : isTablet ? 150 : 200,
@@ -965,8 +1034,8 @@ const BrandDetails = ({ brandData }) => {
                   alt={selectedBrand.brandDetails?.brandName}
                   sx={{
                     width: isMobile ? 150 : 200,
-                     height: isMobile ? 150 : 200,
-                     objectFit: "contain",
+                    height: isMobile ? 150 : 200,
+                    objectFit: "contain",
                   }}
                 />
               </Box>
@@ -978,7 +1047,7 @@ const BrandDetails = ({ brandData }) => {
                     alignItems="center"
                     justifyContent="space-between"
                     flexDirection={isMobile ? "column" : "row"}
-                    gap={ 2}
+                    gap={2}
                   >
                     <Box>
                       <Typography
@@ -986,7 +1055,8 @@ const BrandDetails = ({ brandData }) => {
                         sx={{
                           fontWeight: 600,
                           mb: 1,
-                          background: "linear-gradient(45deg, #000 30%, #000 90%)",
+                          background:
+                            "linear-gradient(45deg, #000 30%, #000 90%)",
                           WebkitBackgroundClip: "text",
                           WebkitTextFillColor: "transparent",
                           textAlign: isMobile ? "center" : "left",
@@ -995,8 +1065,8 @@ const BrandDetails = ({ brandData }) => {
                       >
                         {selectedBrand.brandDetails?.brandName}
                       </Typography>
-                      <Typography 
-                        variant="body1" 
+                      <Typography
+                        variant="body1"
                         color="text.secondary"
                         textAlign={isMobile ? "center" : "left"}
                         fontSize={isMobile ? "0.875rem" : "1rem"}
@@ -1007,11 +1077,11 @@ const BrandDetails = ({ brandData }) => {
                       <Box
                         sx={{
                           display: "flex",
-                           flexWrap: "wrap",
-                           alignItems: "center",
-                           gap: isMobile ? 1 : 10,
-                           mt: 1,
-                           justifyContent: isMobile ? "center" : "flex-start",
+                          flexWrap: "wrap",
+                          alignItems: "center",
+                          gap: isMobile ? 1 : 10,
+                          mt: 1,
+                          justifyContent: isMobile ? "center" : "flex-start",
                         }}
                       >
                         <Typography fontSize={isMobile ? "0.8rem" : "0.9rem"}>
@@ -1030,11 +1100,11 @@ const BrandDetails = ({ brandData }) => {
                         </Typography>
                       </Box>
                     </Box>
-                    <Box 
+                    <Box
                       sx={{
                         mt: isMobile ? 1 : 0,
-                         // alignSelf: isMobile ? "center" : "flex-end",
-                         ml: isMobile ? 0 : 2,
+                        // alignSelf: isMobile ? "center" : "flex-end",
+                        ml: isMobile ? 0 : 2,
                       }}
                     >
                       <Button
@@ -1043,8 +1113,8 @@ const BrandDetails = ({ brandData }) => {
                         startIcon={<Phone />}
                         onClick={handleOpenContact}
                         sx={{
-                           px: isMobile ? 1 : 1.5,
-                           py: isMobile ? 1 : 2,
+                          px: isMobile ? 1 : 1.5,
+                          py: isMobile ? 1 : 2,
                           bgcolor: "#ff9800",
                           "&:hover": {
                             bgcolor: "#e65100",
@@ -1055,10 +1125,12 @@ const BrandDetails = ({ brandData }) => {
                         VIEW CONTACT
                       </Button>
                       <IconButton
-                      sx={{ marginLeft: "90px" }}
+                        sx={{ marginLeft: "90px" }}
                         onClick={handleLikeClick}
                         disabled={isProcessingLike}
-                        aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
+                        aria-label={
+                          localIsLiked ? "Unlike brand" : "Like brand"
+                        }
                         // size={isMobile ? "small" : "medium"}
                       >
                         {isProcessingLike ? (
@@ -1066,47 +1138,56 @@ const BrandDetails = ({ brandData }) => {
                         ) : (
                           <Favorite
                             sx={{
-                              color: localIsLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
+                              color: localIsLiked
+                                ? "#f44336"
+                                : "rgba(0, 0, 0, 0.23)",
                               // fontSize: isMobile ? "1.2rem" : "1.5rem",
                             }}
                           />
                         )}
                       </IconButton>
-                      <IconButton 
+                      <IconButton
                         sx={{
-                          color: 'rgba(0,0,0,0.23)',
+                          color: "rgba(0,0,0,0.23)",
                         }}
                         size={isMobile ? "small" : "medium"}
                         onClick={() => {
                           console.log("shortlist is clicked");
-                          }}
+                        }}
                       >
-                        <PlaylistAddCheckCircleOutlined sx={{ fontSize: isMobile ? "1.2rem" : "1.5rem" }} />
+                        <PlaylistAddCheckCircleOutlined
+                          sx={{ fontSize: isMobile ? "1.2rem" : "1.5rem" }}
+                        />
                       </IconButton>
-                      <IconButton 
+                      <IconButton
                         onClick={handleOpenShareClick}
                         size={isMobile ? "small" : "medium"}
                       >
-                        <ShareOutlined sx={{ fontSize: isMobile ? "1.2rem" : "1.5rem" }} />
+                        <ShareOutlined
+                          sx={{ fontSize: isMobile ? "1.2rem" : "1.5rem" }}
+                        />
                       </IconButton>
                       <ShareDialogActions
-                       anchorEl={anchorEl}
-                       setAnchorEl={setAnchorEl}
-                     />
+                        anchorEl={anchorEl}
+                        setAnchorEl={setAnchorEl}
+                      />
                     </Box>
                   </Box>
                 </Box>
 
                 {/* Responsive table */}
-                <TableContainer 
-                  component={Paper} 
-                  sx={{ 
-                    mt: 2, 
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    mt: 2,
                     width: "100%",
                     overflowX: "auto",
                   }}
                 >
-                  <Table size={isMobile ? "small" : "medium"} sx={{ minWidth: isMobile ? 600 : "100%" }}>
+                  <Table
+                    size={isMobile ? "small" : "medium"}
+                    sx={{ minWidth: isMobile ? 600 : "100%" }}
+                  >
                     <TableHead>
                       <TableRow
                         sx={{
@@ -1136,26 +1217,65 @@ const BrandDetails = ({ brandData }) => {
                     </TableHead>
                     <TableBody>
                       <TableRow>
-                        <TableCell sx={{ width: "30%", textAlign: "center", fontSize: isMobile ? "0.7rem" : "0.8rem" }}>
-                          {selectedBrand.franchiseDetails?.brandCategories?.child || "N/A"}
+                        <TableCell
+                          sx={{
+                            width: "30%",
+                            textAlign: "center",
+                            fontSize: isMobile ? "0.7rem" : "0.8rem",
+                          }}
+                        >
+                          {selectedBrand.franchiseDetails?.brandCategories
+                            ?.child || "N/A"}
                         </TableCell>
-                        <TableCell sx={{ width: "15%", textAlign: "center", fontSize: isMobile ? "0.7rem" : "0.8rem" }}>
-                          {selectedBrand.franchiseDetails?.fico?.[0]?.areaRequired || "N/A"}
+                        <TableCell
+                          sx={{
+                            width: "15%",
+                            textAlign: "center",
+                            fontSize: isMobile ? "0.7rem" : "0.8rem",
+                          }}
+                        >
+                          {selectedBrand.franchiseDetails?.fico?.[0]
+                            ?.areaRequired || "N/A"}
                         </TableCell>
-                        <TableCell sx={{ width: "15%", textAlign: "center", fontSize: isMobile ? "0.7rem" : "0.8rem" }}>
-                          {selectedBrand.franchiseDetails?.fico?.[0]?.investmentRange || "N/A"}
+                        <TableCell
+                          sx={{
+                            width: "15%",
+                            textAlign: "center",
+                            fontSize: isMobile ? "0.7rem" : "0.8rem",
+                          }}
+                        >
+                          {selectedBrand.franchiseDetails?.fico?.[0]
+                            ?.investmentRange || "N/A"}
                         </TableCell>
-                        <TableCell sx={{ width: "15%", textAlign: "center", fontSize: isMobile ? "0.7rem" : "0.8rem" }}>
-                          {getOutletRange(selectedBrand.franchiseDetails?.totalOutlets)}
+                        <TableCell
+                          sx={{
+                            width: "15%",
+                            textAlign: "center",
+                            fontSize: isMobile ? "0.7rem" : "0.8rem",
+                          }}
+                        >
+                          {getOutletRange(
+                            selectedBrand.franchiseDetails?.totalOutlets
+                          )}
                         </TableCell>
-                        <TableCell sx={{ width: "30%", textAlign: "center", fontSize: isMobile ? "0.7rem" : "0.8rem" }}>
+                        <TableCell
+                          sx={{
+                            width: "30%",
+                            textAlign: "center",
+                            fontSize: isMobile ? "0.7rem" : "0.8rem",
+                          }}
+                        >
                           {(() => {
-                            const locations = selectedBrand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
-                            const states = locations.map((loc) => loc.state).filter(Boolean);
+                            const locations =
+                              selectedBrand.expansionLocationData
+                                ?.expansionLocations?.domestic?.locations || [];
+                            const states = locations
+                              .map((loc) => loc.state)
+                              .filter(Boolean);
                             const hasMore = states.length > 2;
 
                             if (states.length === 0) {
-                              return "Multiple Locations"; 
+                              return "Multiple Locations";
                             }
 
                             const visibleStates = states.slice(0, 2).join(", ");
@@ -1164,7 +1284,7 @@ const BrandDetails = ({ brandData }) => {
                               <>
                                 {visibleStates}
                                 {hasMore && (
-                                  <a 
+                                  <a
                                     href="#expansion-location"
                                     style={{
                                       marginLeft: 8,
@@ -1172,7 +1292,7 @@ const BrandDetails = ({ brandData }) => {
                                       textDecoration: "none",
                                       color: "#1976d2",
                                       fontWeight: 500,
-                                      cursor: "pointer"
+                                      cursor: "pointer",
                                     }}
                                   >
                                     More
@@ -1253,7 +1373,9 @@ const BrandDetails = ({ brandData }) => {
               <Box
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(2, 1fr)",
+                  gridTemplateColumns: isMobile
+                    ? "repeat(2, 1fr)"
+                    : "repeat(2, 1fr)",
                   gap: 1,
                 }}
               >
@@ -1322,9 +1444,9 @@ const BrandDetails = ({ brandData }) => {
                   >
                     <Typography
                       variant={isMobile ? "body2" : "h6"}
-                      sx={{ 
-                        fontWeight: 600, 
-                        textAlign: "center", 
+                      sx={{
+                        fontWeight: 600,
+                        textAlign: "center",
                         zIndex: 1,
                         fontSize: isMobile ? "0.875rem" : "1rem",
                       }}
@@ -1373,6 +1495,149 @@ const BrandDetails = ({ brandData }) => {
             </motion.div>
           </Box>
         </Box>
+        <Dialog
+          open={imageModalOpen}
+          onClose={() => setImageModalOpen(false)}
+          maxWidth="lg"
+          fullWidth
+          sx={{
+            "& .MuiDialog-paper": {
+              backgroundColor: "rgba(0,0,0,0.9)",
+              overflow: "hidden",
+            },
+          }}
+        >
+          <DialogTitle
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              color: "white",
+            }}
+          >
+            <Typography>
+              Image {currentImageIndex + 1} of {allImages.length}
+            </Typography>
+            <IconButton
+              onClick={() => setImageModalOpen(false)}
+              color="inherit"
+            >
+              <Close />
+            </IconButton>
+          </DialogTitle>
+
+          <DialogContent
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: isMobile ? "50vh" : "70vh",
+            }}
+          >
+            <Box
+              sx={{
+                position: "relative",
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <IconButton
+                sx={{
+                  position: "absolute",
+                  left: 16,
+                  color: "white",
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  "&:hover": {
+                    backgroundColor: "rgba(0,0,0,0.7)",
+                  },
+                }}
+                onClick={handlePrevImage}
+              >
+                <ArrowBack fontSize="large" />
+              </IconButton>
+
+              <img
+                src={allImages[currentImageIndex]}
+                loading="lazy"
+                alt={`Gallery ${currentImageIndex}`}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  objectFit: "contain",
+                  margin: "0 auto",
+                }}
+              />
+
+              <IconButton
+                sx={{
+                  position: "absolute",
+                  right: 16,
+                  color: "white",
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  "&:hover": {
+                    backgroundColor: "rgba(0,0,0,0.7)",
+                  },
+                }}
+                onClick={handleNextImage}
+              >
+                <ArrowForward fontSize="large" />
+              </IconButton>
+            </Box>
+          </DialogContent>
+
+          <DialogActions
+            sx={{
+              justifyContent: "center",
+              pb: 3,
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                gap: 1,
+                flexWrap: "wrap",
+                justifyContent: "center",
+                maxWidth: "100%",
+                overflowX: "auto",
+                px: 2,
+                py: 1,
+              }}
+            >
+              {allImages.map((img, index) => (
+                <Box
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  sx={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: 1,
+                    overflow: "hidden",
+                    cursor: "pointer",
+                    border:
+                      currentImageIndex === index
+                        ? "2px solid #1976d2"
+                        : "1px solid #555",
+                    opacity: currentImageIndex === index ? 1 : 0.7,
+                    flexShrink: 0,
+                  }}
+                >
+                  <img
+                    src={img}
+                    loading="lazy"
+                    alt={`Thumbnail ${index}`}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
+              ))}
+            </Box>
+          </DialogActions>
+        </Dialog>
 
         {/* Desktop Application Form - responsive layout */}
         {!isMobile && (
@@ -1395,7 +1660,11 @@ const BrandDetails = ({ brandData }) => {
                 alignItems: "center",
                 gap: 2,
                 color: "#ff9800",
-                fontSize: isMobile ? "1.25rem" : isTablet ? "1.5rem" : "1.75rem",
+                fontSize: isMobile
+                  ? "1.25rem"
+                  : isTablet
+                  ? "1.5rem"
+                  : "1.75rem",
               }}
             >
               Instant Franchise Application
@@ -1406,7 +1675,9 @@ const BrandDetails = ({ brandData }) => {
                 sx={{
                   display: "grid",
                   // Responsive grid columns
-                  gridTemplateColumns: isTablet ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
+                  gridTemplateColumns: isTablet
+                    ? "repeat(2, 1fr)"
+                    : "repeat(3, 1fr)",
                   gap: 2,
                 }}
               >
@@ -1439,7 +1710,9 @@ const BrandDetails = ({ brandData }) => {
                     fullWidth
                     label="Mobile Number"
                     name="mobileNumber"
-                    value={formData.mobileNumber || userData?.mobileNumber || ""}
+                    value={
+                      formData.mobileNumber || userData?.mobileNumber || ""
+                    }
                     onChange={handleChange}
                     required
                     variant="outlined"
@@ -1612,32 +1885,38 @@ const BrandDetails = ({ brandData }) => {
                 borderLeft: `4px solid rgb(84, 241, 12)`,
               }}
             >
-              <Typography variant="body2" fontSize={isMobile ? "0.8rem" : "0.9rem"}>
+              <Typography
+                variant="body2"
+                fontSize={isMobile ? "0.8rem" : "0.9rem"}
+              >
                 <strong>Note:</strong> Our team will contact you within 24 hours
                 to discuss the franchise opportunity in detail.
               </Typography>
             </Box>
           </Box>
-        )} 
+        )}
       </Box>
-      
+
       {/* Liked brands and tags section */}
       <LikedBrands />
-      <Box 
+      <Box
         sx={{
           width: "90%",
           maxWidth: 1200,
           mx: "auto",
           my: 4,
           px: isMobile ? 1 : isTablet ? 3 : 4,
-        }}  
-        color={'#ff9800'} 
+        }}
+        color={"#ff9800"}
       >
-        <Typography variant="h6" sx={{ mb: 2, fontSize: isMobile ? "1.25rem" : "1.5rem" }}>
+        <Typography
+          variant="h6"
+          sx={{ mb: 2, fontSize: isMobile ? "1.25rem" : "1.5rem" }}
+        >
           Tags
         </Typography>
         <ExpansionLocationTags brand={selectedBrand} />
-      </Box> 
+      </Box>
 
       {/* Back to top button - responsive positioning */}
       {showBackToTop && (
@@ -1663,25 +1942,10 @@ const BrandDetails = ({ brandData }) => {
           </IconButton>
         </Box>
       )}
-      
+
       <Footer />
     </>
   );
 };
 
 export default React.memo(BrandDetails);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

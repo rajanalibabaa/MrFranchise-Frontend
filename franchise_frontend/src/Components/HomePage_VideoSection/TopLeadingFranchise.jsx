@@ -583,7 +583,7 @@ const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
                 },
               }}
             >
-              Top Leading Franchise
+              Leading Brands
             </Typography>
 
         <Button

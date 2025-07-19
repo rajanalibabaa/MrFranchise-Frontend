@@ -191,15 +191,15 @@ const BrandCard = React.memo(
                   }}
                 />
                 <Typography
-                  variant="h6"
-                  fontWeight={600}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    flex: 1,
-                  }}
-                >
+                                variant="body2"
+                                fontWeight={600}
+                                sx={{
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  flex: 1,
+                                }}
+                              >
                   {brandName}
                 </Typography>
                 <IconButton
@@ -626,7 +626,7 @@ const dispatch = useDispatch()
                 },
               }}
             >
-              Top Coffee & Tea Cafes
+              Top Coffee & Tea Cafes Brands
             </Typography>
 
             <Button
