@@ -9,7 +9,7 @@ import {
   Typography,
   Tooltip,
   CardMedia,
-  Divider
+  Divider,
 } from "@mui/material";
 import {
   Compare,
@@ -19,6 +19,8 @@ import {
   AreaChart,
   Description,
   Business,
+  CheckBox,
+  CheckBoxOutlineBlank,
 } from "@mui/icons-material";
 import LoginPage from "../LoginPage/LoginPage";
 import { openBrandDialog, useToggleLike } from "../../Hooks/Fetchbrands";
@@ -147,40 +149,50 @@ const BrandCard = memo(({
   };
   return (
     <Card sx={cardStyles}>
-      <Tooltip
-        title={maxComparisonReached && !isSelectedForComparison ? "Maximum 3 brands can be compared" : ""}
-        placement="top"
-      >
-        <span>
-          <IconButton
-            sx={{
-              position: "absolute",
-              top: 8,
-              right: 2,
-              zIndex: 2,
-              backgroundColor: isSelectedForComparison
-                ? "rgba(76, 175, 80, 0.9)"
-                : maxComparisonReached
-                ? "rgba(244, 67, 54, 0.7)"
-                : "rgba(0,0,0,0.5)",
-              color: "white",
-              "&:hover": {
-                backgroundColor: isSelectedForComparison
-                  ? "rgba(56, 142, 60, 0.9)"
-                  : maxComparisonReached
-                  ? "rgba(244, 67, 54, 0.9)"
-                  : "rgba(0,0,0,0.7)",
-              },
-              width: 32,
-              height: 32,
-            }}
-            onClick={handleComparisonToggle}
-            disabled={maxComparisonReached && !isSelectedForComparison}
-          >
-            <Compare fontSize="large" />
-          </IconButton>
-        </span>
-      </Tooltip>
+
+<Tooltip
+  title={
+    maxComparisonReached && !isSelectedForComparison
+      ? "Maximum 3 brands can be compared"
+      : ""
+  }
+  placement="top"
+>
+  <span>
+    <IconButton
+      sx={{
+        position: "absolute",
+        top: 8,
+        right: 2,
+        zIndex: 2,
+        backgroundColor: isSelectedForComparison
+          ? "rgba(76, 175, 80, 0.9)" // Green when selected
+          : maxComparisonReached
+          ? "rgba(244, 67, 54, 0.7)" // Red when disabled
+          : "rgba(0,0,0,0.5)", // Default
+        color: "white",
+        "&:hover": {
+          backgroundColor: isSelectedForComparison
+            ? "rgba(56, 142, 60, 0.9)"
+            : maxComparisonReached
+            ? "rgba(244, 67, 54, 0.9)"
+            : "rgba(0,0,0,0.7)",
+        },
+        width: 32,
+        height: 32,
+      }}
+      onClick={handleComparisonToggle}
+      disabled={maxComparisonReached && !isSelectedForComparison}
+    >
+      {isSelectedForComparison ? (
+        <CheckBox fontSize="small" /> // Checked state
+      ) : (
+        <CheckBoxOutlineBlank fontSize="small" /> // Unchecked state
+      )}
+    </IconButton>
+  </span>
+</Tooltip>
+
 
       <Box sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
 

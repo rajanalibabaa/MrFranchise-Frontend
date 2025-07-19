@@ -247,19 +247,7 @@ const BrandCard = React.memo(
               )}
 
               <Stack spacing={1} sx={{ mb: 2 }}>
-                <Box display="flex" alignItems="center">
-                  <Business
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    Franchise Type : {franchiseModel?.franchiseModel || "N/A"}
-                  </Typography>
-                </Box>
+                
 
                 <Box display="flex" alignItems="center">
                   <MonetizationOn
@@ -286,6 +274,19 @@ const BrandCard = React.memo(
                   />
                   <Typography variant="body2">
                     Area : {franchiseModel?.areaRequired || "Not specified"}
+                  </Typography>
+                </Box>
+                <Box display="flex" alignItems="center">
+                  <Business
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    Franchise Model : {franchiseModel?.franchiseModel || "N/A"}
                   </Typography>
                 </Box>
               </Stack>

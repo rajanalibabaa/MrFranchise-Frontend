@@ -471,8 +471,8 @@ function TopBrandVdoCards() {
                           value={mainBrand.franchiseDetails?.fico?.[0]?.areaRequired}
                         />
                         <Fact
-                          label="Franchise Type"
-                          value={mainBrand.franchiseDetails?.fico?.[0]?.franchiseType}
+                          label="Franchise Model"
+                          value={mainBrand.franchiseDetails?.fico?.[0]?.franchiseModel}
                         />
                         {isMobile && (
                           <Button
@@ -812,7 +812,7 @@ function TopBrandVdoCards() {
                         lineHeight: 1.5,
                       }}
                     >
-                     Franchising Type: {brand.franchiseDetails?.fico?.[0]?.franchiseModel}
+                     Franchising Model: {brand.franchiseDetails?.fico?.[0]?.franchiseModel}
                     </Typography>
                   </Box>
 
