@@ -148,7 +148,7 @@ const BrandDetails = ({ brandData }) => {
 
     try {
       const response = await axios.get(
-        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",

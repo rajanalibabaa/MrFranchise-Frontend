@@ -167,7 +167,7 @@ const [isEditing, setIsEditing] = useState(false);
       }
       try {
         const response = await axios.get(
-          `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandListingByUUID/${uuid}`
+          `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${uuid}`
         );
         const brand = response.data.brandListing || response.data.data;
         if (response.data.success && brand) {
@@ -231,7 +231,7 @@ const [otpToken, setOtpToken] = useState(null); // store token
 const sendOtp = async () => {
     try {
       const response = await axios.post(
-        'https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-email', 
+        'http://localhost:5000/api/v1/otpverify/send-otp-email', 
         {
           email: formData.email,
         
@@ -306,7 +306,7 @@ const sendOtp = async () => {
     try {
       const apiData = unflattenFormData(formData);
       const response = await axios.patch(
-        `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
+        `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
         apiData
       );
       if (response.data.success) {
@@ -338,7 +338,7 @@ const sendOtp = async () => {
   try {
     const apiData = unflattenFormData(formData); 
     const response = await axios.put(
-      `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
+      `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
       apiData
     );
 
