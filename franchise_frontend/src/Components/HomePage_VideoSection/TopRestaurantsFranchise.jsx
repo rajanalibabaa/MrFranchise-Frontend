@@ -631,8 +631,8 @@ const TopRestaurantsFranchise = () => {
             },
           }}
           onClick={async () => {
-                dispatch(showLoading());
-                navigate("/brandviewpage");
+                // dispatch(showLoading());
+window.open('/brandviewpage', '_blank');
               }}
         >
           View More

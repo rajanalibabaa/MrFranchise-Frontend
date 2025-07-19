@@ -49,13 +49,14 @@ import Navbar from "../../Components/Navbar/NavBar.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx";
 import SimilarBrands from "../../Components/HomePage_VideoSection/SimilarBrands.jsx"
-// import {MostLikedBrands} from "../../Components/HomePage_VideoSection/MostLikedBrands.jsx"
+// import MostLikedBrands from "../../Components/HomePage_VideoSection/MostLikedBrands.jsx"
 
 // import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
 import ShareDialogActions from "./ShareDialogActions.jsx";
 
 const BrandDetails = ({ brandData }) => {
-  const location = useLocation();
+
+   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -125,8 +126,28 @@ const BrandDetails = ({ brandData }) => {
   const handleLikeClick = useCallback(() => {
     if (isProcessingLike) return;
 
-    setIsProcessingLike(true);
-    const newLikeStatus = !localIsLiked;
+    const handleLikeClick = useCallback(() => {
+      if (isProcessingLike) return;
+      
+      setIsProcessingLike(true);
+      const newLikeStatus = brandData.isLiked;
+      
+      // Optimistic update
+      setLocalIsLiked(newLikeStatus);
+      
+      toggleLike(
+        { brandId: brandData.uuid, isLiked: newLikeStatus },
+        {
+          onError: () => {
+            // Revert on error
+            setLocalIsLiked(!newLikeStatus);
+          },
+          onSettled: () => {
+            setIsProcessingLike(false);
+          }
+        }
+      );
+    }, [ brandData, isProcessingLike, toggleLike]);
 
     // Optimistic update
     setLocalIsLiked(newLikeStatus);
@@ -1123,34 +1144,31 @@ const BrandDetails = ({ brandData }) => {
                         VIEW CONTACT
                       </Button>
                     </Box>
-                    <IconButton
-                      sx={{ marginLeft: "90px" }}
-                      onClick={handleLikeClick}
-                      disabled={isProcessingLike}
-                      aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
-                    >
-                      {isProcessingLike ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Favorite
-                          sx={{
-                            color: localIsLiked
-                              ? "#f44336"
-                              : "rgba(0, 0, 0, 0.23)",
-                          }}
-                        />
-                      )}
-                    </IconButton>
-                    <IconButton
-                      sx={{
-                        color: "rgba(0,0,0,0.23)",
-                      }}
-                      onClick={() => {
-                        console.log("shortlist is clicked");
-                      }}
-                    >
-                      <PlaylistAddCheckCircleOutlined />
-                    </IconButton>
+                     <IconButton
+                     sx={{marginLeft:"90px"}}
+                                onClick={handleLikeClick}
+                                disabled={isProcessingLike}
+                                aria-label={brandData.isLiked ? "Unlike brand" : "Like brand"}
+                              >
+                                {isProcessingLike ? (
+                                  <CircularProgress size={24} />
+                                ) : (
+                                  <Favorite
+                                    sx={{
+                                      color: brandData.isLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
+                                    }}
+                                  />
+                                )}
+                              </IconButton>
+                              <IconButton sx={{
+                                            color:'rgba(0,0,0,0.23)',
+                                          }}
+                                          onClick={()=>{
+                                            console.log("shortlist is clicked")
+                                          }}
+                                          >
+                                          <PlaylistAddCheckCircleOutlined/>
+                                          </IconButton>
                     <IconButton onClick={handleOpenShareClick}>
                       <ShareOutlined />
                     </IconButton>

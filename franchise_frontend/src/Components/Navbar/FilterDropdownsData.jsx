@@ -81,11 +81,13 @@ const FilterDropdowns = () => {
     setFilters(prev => ({ ...prev, [name]: value }));
   }, []);
 
-  const handleFindBrands = useCallback(() => {
-    navigate("/brandviewpage", {
-      state: { filters }
-    });
-  }, [navigate, filters]);
+ const handleFindBrands = useCallback(() => {
+  const url = `/brandviewpage?filters=${encodeURIComponent(
+    JSON.stringify(filters)
+  )}`;
+  window.open(url, "_blank"); // Opens in a new tab
+}, [filters]);
+
 
   if (isLoading) {
     return (
