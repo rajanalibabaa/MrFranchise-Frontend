@@ -114,10 +114,10 @@ const BrandCard = React.memo(
             width: "100%",
             border: "1px solid #eee",
             boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
-            },
+            // transition: "all 0.3s ease",
+            // "&:hover": {
+            //   boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
+            // },
           }}
         >
           <Box
@@ -247,19 +247,7 @@ const BrandCard = React.memo(
               )}
 
               <Stack spacing={1} sx={{ mb: 2 }}>
-                <Box display="flex" alignItems="center">
-                  <Business
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    Franchise Type : {franchiseModel?.franchiseType || "N/A"}
-                  </Typography>
-                </Box>
+                
 
                 <Box display="flex" alignItems="center">
                   <MonetizationOn
@@ -286,6 +274,19 @@ const BrandCard = React.memo(
                   />
                   <Typography variant="body2">
                     Area : {franchiseModel?.areaRequired || "Not specified"}
+                  </Typography>
+                </Box>
+                <Box display="flex" alignItems="center">
+                  <Business
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    Franchise Model : {franchiseModel?.franchiseModel || "N/A"}
                   </Typography>
                 </Box>
               </Stack>
@@ -335,8 +336,7 @@ const TopCafeFranchises = () => {
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
 
-  const navigate = useNavigate();
-const dispatch = useDispatch()
+  
   // REACT-QUERY HOOKS
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
@@ -643,9 +643,8 @@ const dispatch = useDispatch()
                 },
               }}
               onClick={async () => {
-                dispatch(showLoading());
-                navigate("/brandviewpage");
-              }}
+                // dispatch(showLoading());
+window.open('/brandviewpage', '_blank')              }}
             >
               View More
             </Button>

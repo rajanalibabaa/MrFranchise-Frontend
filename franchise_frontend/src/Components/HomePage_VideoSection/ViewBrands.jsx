@@ -14,7 +14,8 @@ import {
   Divider,
   Avatar,
   Stack,
-  Tooltip
+  Tooltip,
+  
 } from "@mui/material";
 import { motion } from "framer-motion";
 import Favorite from "@mui/icons-material/Favorite";
@@ -586,7 +587,8 @@ const BrandCard = React.memo(({
                   backgroundColor: "transparent",
                 },
               }}
-              onClick={() => navigate("/brandviewpage")}
+              onClick={() => 
+window.open('/brandviewpage', '_blank')              }
             >
               View More
             </Button>

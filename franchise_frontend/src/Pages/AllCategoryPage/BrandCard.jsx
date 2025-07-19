@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo, useMemo } from "react";
+import React, { useState, useCallback, memo, useMemo, useRef } from "react";
 import {
   Box,
   Button,
@@ -8,6 +8,8 @@ import {
   IconButton,
   Typography,
   Tooltip,
+  CardMedia,
+  Divider,
 } from "@mui/material";
 import {
   Compare,
@@ -16,6 +18,9 @@ import {
   AttachMoney,
   AreaChart,
   Description,
+  Business,
+  CheckBox,
+  CheckBoxOutlineBlank,
 } from "@mui/icons-material";
 import LoginPage from "../LoginPage/LoginPage";
 import { openBrandDialog, useToggleLike } from "../../Hooks/Fetchbrands";
@@ -23,9 +28,11 @@ import { postView } from "../../Utils/function/view";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 
 const cardStyles = {
-  width: 320,
-  height: 520,
+
+  width:  { xs: "40vh", sm: "calc(50% - 10px)", md: 260 },
+  height: { xs: "55vh", sm: "calc(50% - 10px)", md: 380 },
   ml: 1.5,
+  mt: 4,
   display: "flex",
   flexDirection: "column",
   transition: "transform 0.3s, box-shadow 0.3s",
@@ -37,6 +44,7 @@ const cardStyles = {
     boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
   },
 };
+
 
 const logoStyles = {
   objectFit: "contain",
@@ -62,7 +70,7 @@ const titleStyles = {
 };
 
 const viewButtonStyles = {
-  py: 1.25,
+  py: .5,
   bgcolor: "#4caf50",
   borderRadius: 1,
   fontWeight: 500,
@@ -89,7 +97,6 @@ const BrandCard = memo(({
     uploads = {},
     brandDetails = {},
     franchiseDetails = {},
-    expansionLocationData = {},
     isLiked,
   } = brand;
 
@@ -100,6 +107,10 @@ const BrandCard = memo(({
 
   const areaRequired = useMemo(
     () => franchiseDetails.fico?.[0]?.areaRequired || "Not specified",
+    [franchiseDetails.fico]
+  );
+  const franchiseModel = useMemo(
+    () => franchiseDetails.fico?.[0]?.franchiseModel || "Not specified",
     [franchiseDetails.fico]
   );
 
@@ -126,66 +137,124 @@ const BrandCard = memo(({
     onToggleBrandComparison(brand);
   }, [brand, onToggleBrandComparison, isSelectedForComparison, maxComparisonReached]);
 
+
+  const videoRef = useRef(null);
+ const handlePlay = () => {
+    const allVideos = document.querySelectorAll("video");
+    allVideos.forEach((vid) => {
+      if (vid !== videoRef.current) {
+        vid.pause();
+      }
+    });
+  };
   return (
     <Card sx={cardStyles}>
-      <Tooltip
-        title={maxComparisonReached && !isSelectedForComparison ? "Maximum 3 brands can be compared" : ""}
-        placement="top"
-      >
-        <span>
-          <IconButton
-            sx={{
-              position: "absolute",
-              top: 8,
-              right: 2,
-              zIndex: 2,
-              backgroundColor: isSelectedForComparison
-                ? "rgba(76, 175, 80, 0.9)"
-                : maxComparisonReached
-                ? "rgba(244, 67, 54, 0.7)"
-                : "rgba(0,0,0,0.5)",
-              color: "white",
-              "&:hover": {
-                backgroundColor: isSelectedForComparison
-                  ? "rgba(56, 142, 60, 0.9)"
-                  : maxComparisonReached
-                  ? "rgba(244, 67, 54, 0.9)"
-                  : "rgba(0,0,0,0.7)",
-              },
-              width: 32,
-              height: 32,
-            }}
-            onClick={handleComparisonToggle}
-            disabled={maxComparisonReached && !isSelectedForComparison}
-          >
-            <Compare fontSize="small" />
-          </IconButton>
-        </span>
-      </Tooltip>
+
+<Tooltip
+  title={
+    maxComparisonReached && !isSelectedForComparison
+      ? "Maximum 3 brands can be compared"
+      : ""
+  }
+  placement="top"
+>
+  <span>
+    <IconButton
+      sx={{
+        position: "absolute",
+        top: 8,
+        right: 2,
+        zIndex: 2,
+        backgroundColor: isSelectedForComparison
+          ? "rgba(76, 175, 80, 0.9)" // Green when selected
+          : maxComparisonReached
+          ? "rgba(244, 67, 54, 0.7)" // Red when disabled
+          : "rgba(0,0,0,0.5)", // Default
+        color: "white",
+        "&:hover": {
+          backgroundColor: isSelectedForComparison
+            ? "rgba(56, 142, 60, 0.9)"
+            : maxComparisonReached
+            ? "rgba(244, 67, 54, 0.9)"
+            : "rgba(0,0,0,0.7)",
+        },
+        width: 32,
+        height: 32,
+      }}
+      onClick={handleComparisonToggle}
+      disabled={maxComparisonReached && !isSelectedForComparison}
+    >
+      {isSelectedForComparison ? (
+        <CheckBox fontSize="small" /> // Checked state
+      ) : (
+        <CheckBoxOutlineBlank fontSize="small" /> // Unchecked state
+      )}
+    </IconButton>
+  </span>
+</Tooltip>
+
 
       <Box sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
-        <Box
-          component="img"
-          loading="lazy"
-          src={uploads.brandLogo}
-          alt={brandDetails.brandName || "Brand logo"}
-          sx={logoStyles}
-        />
 
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mt={1}>
-          <Typography variant="h6" component="div" sx={titleStyles}>
+        <Box
+  sx={{
+    position: "relative",
+    width: "100%",          // Take full width
+    maxWidth: "640px",      // Optional max size
+    margin: "0 auto",       // Center horizontally
+    aspectRatio: "16/9",    // Keeps 16:9 ratio
+  }}
+>
+<Box
+  sx={{
+    position: "relative",
+    width: "100%",
+    maxWidth: "50vh",    // Controls overall size
+    aspectRatio: "16/9", // Keeps the video ratio locked
+    margin: "0 auto",    // Center horizontally
+  }}
+>
+  <CardMedia
+    component="video"
+    ref={videoRef}
+    loading="lazy"
+    poster={uploads.brandLogo} // Poster will also match same box size
+    src={uploads.franchisePromotionVideo}
+    alt={brandDetails.brandName}
+    sx={{
+      width: "100%",
+      height: "100%",
+      objectFit: "contain", // Keeps video/poster proportional
+      backgroundColor: "#000", // Optional: black background for empty space
+    }}
+    onPlay={handlePlay}
+    controls
+    
+    preload="none"
+  />
+</Box>
+
+</Box>
+
+<Divider sx={{ my: 1 }} />
+
+        <Box display="flex" justifyContent="space-evenly" alignItems="flex-start" >
+          <Typography variant="body1" component="div" sx={titleStyles}>
             {brandDetails.brandName}
           </Typography>
           <IconButton
             onClick={handleLikeClick}
             disabled={isProcessingLike}
-            sx={{ ml: 1 }}
+            // sx={{ ml: 1 }}
           >
             {isProcessingLike ? (
               <CircularProgress size={24} />
             ) : (
               <Favorite sx={{ color: isLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)" }} />
             )}
+          </IconButton>
+           <IconButton size="small" sx={{ color: "rgba(0,0,0,0.23)",mt:0.4 }}>
+            <PlaylistAddCheckIcon />
           </IconButton>
         </Box>
 
@@ -194,21 +263,19 @@ const BrandCard = memo(({
             <Chip
               label={franchiseDetails.brandCategories.child}
               size="small"
-              sx={{ bgcolor: "rgba(255, 152, 0, 0.1)", color: "orange.dark", fontWeight: 500 }}
+              sx={{ bgcolor: "rgba(255, 152, 0, 0.1)", color: "orange.dark", fontWeight: 200 }}
             />
           ) : (
             <Typography variant="body2" color="text.secondary">N/A</Typography>
           )}
 
-          <IconButton size="small" sx={{ color: "rgba(0,0,0,0.23)" }}>
-            <PlaylistAddCheckIcon />
-          </IconButton>
+         
         </Box>
 
         <Box sx={{ mb: 2, flexGrow: 1, "& > *:not(:last-child)": { mb: 1 } }}>
-          <LocationDetail locations={expansionLocationData.expansionLocations} onViewMore={handleOpenBrand} />
           <DetailItem icon={<AttachMoney />} label="Investment Range" value={investmentRange} />
           <DetailItem icon={<AreaChart />} label="Area Required" value={areaRequired} />
+          <DetailItem icon={<Business />} label="Franchise Model" value={franchiseModel} />
         </Box>
 
         <Button
@@ -233,32 +300,6 @@ const BrandCard = memo(({
   prevProps.maxComparisonReached === nextProps.maxComparisonReached
 ));
 
-const LocationDetail = memo(({ locations, onViewMore }) => {
-  const { displayText, hasMore } = useMemo(() => {
-    const domestic = locations?.domestic?.locations || [];
-    const international = locations?.international?.locations || [];
-    const all = [...domestic, ...international];
-    const names = all.map((loc) => loc.state || loc.country).filter(Boolean);
-    const display = names.slice(0, 2).join(", ");
-    return { displayText: display || "Multiple locations", hasMore: names.length > 2 };
-  }, [locations]);
-
-  return (
-    <Box display="flex" alignItems="center">
-      <LocationOn sx={{ mr: 1.5, fontSize: "1rem", color: "text.secondary", flexShrink: 0 }} />
-      <Typography variant="body2" noWrap>
-        <span style={{ fontWeight: 600 }}>Expansion Location:</span>
-        <br />
-        {displayText}
-        {hasMore && (
-          <Button size="small" sx={{ ml: 0.5, minWidth: 0, padding: 0 }} onClick={onViewMore}>
-            ...more
-          </Button>
-        )}
-      </Typography>
-    </Box>
-  );
-});
 
 const DetailItem = memo(({ icon, label, value }) => {
   const clonedIcon = useMemo(
@@ -269,7 +310,7 @@ const DetailItem = memo(({ icon, label, value }) => {
   return (
     <Box display="flex" alignItems="center">
       {clonedIcon}
-      <Typography variant="body2" noWrap>
+      <Typography variant="caption" noWrap>
         <span style={{ fontWeight: 600 }}>{label}:</span> {value}
       </Typography>
     </Box>

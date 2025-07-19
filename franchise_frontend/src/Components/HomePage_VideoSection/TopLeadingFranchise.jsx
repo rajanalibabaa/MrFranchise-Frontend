@@ -600,9 +600,8 @@ const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
             },
           }}
           onClick={async () => {
-                dispatch(showLoading());
-                navigate("/brandviewpage");
-              }}
+                // dispatch(showLoading());
+window.open('/brandviewpage', '_blank')              }}
         >
           View More
         </Button>

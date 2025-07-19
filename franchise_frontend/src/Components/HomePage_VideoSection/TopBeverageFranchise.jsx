@@ -431,7 +431,7 @@ const TopBeverageFranchises = () => {
   const handleMouseLeave = useCallback(() => {
     isPaused.current = false;
     if (!scrollIntervalRef.current) {
-      startAutoScroll();
+      // startAutoScroll();
     }
   }, []);
 
@@ -661,9 +661,8 @@ const TopBeverageFranchises = () => {
             },
           }}
           onClick={async () => {
-            dispatch(showLoading());
-            navigate("/brandviewpage");
-          
+            // dispatch(showLoading());
+window.open('/brandviewpage', '_blank');          
           }}
         >
           View More
