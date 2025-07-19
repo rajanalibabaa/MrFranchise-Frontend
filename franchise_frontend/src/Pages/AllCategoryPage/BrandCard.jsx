@@ -30,7 +30,7 @@ import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 const cardStyles = {
 
   width:  { xs: "40vh", sm: "calc(50% - 10px)", md: 260 },
-  height: { xs: "50vh", sm: "calc(50% - 10px)", md: 380 },
+  height: { xs: "55vh", sm: "calc(50% - 10px)", md: 380 },
   ml: 1.5,
   mt: 4,
   display: "flex",

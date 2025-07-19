@@ -403,14 +403,18 @@ useEffect(() => {
     setOtpInput("");
   };
 
-const [otpToken, setOtpToken] = useState(null);
+const [otpToken, setOtpToken] = useState(null); // Add this state for token storage
+          console.log("Token:", otpToken);
 
-console.log("OTP Token:", otpToken);
-// Send OTP
+// OTP Verification Functions - Fixed Version
 const handleSendOtp = async (field) => {
   setVerificationState((prev) => ({
     ...prev,
-    [field]: { ...prev[field], loading: true, error: null },
+    [field]: {
+      ...prev[field],
+      loading: true,
+      error: null,
+    },
   }));
 
   try {
@@ -421,16 +425,27 @@ const handleSendOtp = async (field) => {
         type: field,
       },
       {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          'Content-Type': 'application/json'
+        }
       }
     );
 
-    if (response.data.success) {
-      setOtpToken(response.data.token || null); // Only store if your backend sends a token
+    // Modified success check to match backend response
+    if (response.data.token) {
+      setOtpToken(response.data.token);
+      console.log("OTP Token stored:", response.data.token);
+      
       setVerificationState((prev) => ({
         ...prev,
-        [field]: { ...prev[field], otpSent: true, loading: false },
+        [field]: {
+          ...prev[field],
+          otpSent: true,
+          loading: false,
+          verified: false,
+        },
       }));
+      
       setSnackbar({
         open: true,
         message: `OTP sent successfully to your ${field}`,
@@ -441,85 +456,113 @@ const handleSendOtp = async (field) => {
     }
   } catch (error) {
     console.error(`Error sending OTP for ${field}:`, error);
+    const errorMessage = error.response?.data?.message || 
+                       error.response?.data?.error || 
+                       error.message || 
+                       "Failed to send OTP";
+    
     setVerificationState((prev) => ({
       ...prev,
       [field]: {
         ...prev[field],
         loading: false,
-        error: error.response?.data?.message || error.message,
+        error: errorMessage,
       },
     }));
+    
     setSnackbar({
       open: true,
-      message: error.response?.data?.message || "Failed to send OTP",
+      message: errorMessage,
       severity: "error",
     });
   }
 };
 
-// Verify OTP
 const handleVerifyOtp = async (field) => {
   if (!otpInput || otpInput.length !== 6) {
     setVerificationState((prev) => ({
       ...prev,
-      [field]: { ...prev[field], error: "Please enter a valid 6-digit OTP" },
+      [field]: {
+        ...prev[field],
+        error: "Please enter a valid 6-digit OTP",
+      },
     }));
     return;
   }
 
   setVerificationState((prev) => ({
     ...prev,
-    [field]: { ...prev[field], loading: true, error: null },
+    [field]: {
+      ...prev[field],
+      loading: true,
+      error: null,
+    },
   }));
 
   try {
+    console.log("Verifying with token:", otpToken); // Debug log
+    
     const response = await axios.post(
       "http://localhost:5000/api/v1/otpverify/verify-otp",
       {
-        [field === "email" ? "email" : "phone"]: data[field],
         identifier: data[field],
         otp: otpInput,
         type: field,
       },
       {
         headers: {
-          ...(otpToken ? { Authorization: `Bearer ${otpToken}` } : {}), // Only send if needed
-          "Content-Type": "application/json",
-        },
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${otpToken}`
+        }
       }
     );
 
-    if (response.data.message === "OTP verified successfully") {
+    // Modified success check to match backend response
+    if (response.data.message && response.data.message.includes("verified successfully")) {
       setVerificationState((prev) => ({
         ...prev,
-        [field]: { ...prev[field], verified: true, showDialog: false, loading: false },
+        [field]: {
+          ...prev[field],
+          verified: true,
+          showDialog: false,
+          loading: false,
+        },
       }));
+      
       setSnackbar({
         open: true,
-        message: `${field === "email" ? "Email" : "Mobile number"} verified successfully!`,
+        message: response.data.message || `${field === "email" ? "Email" : "Mobile number"} verified successfully!`,
         severity: "success",
       });
+      
+      setOtpInput('');
     } else {
-      throw new Error(response.data.message || "OTP verification failed");
+      throw new Error(response.data.error || "OTP verification failed");
     }
   } catch (error) {
-    console.error(`Error verifying OTP for ${field}:`, error);
+    console.error(`Error verifying OTP for ${field}:`, error.response?.data || error);
+    
+    const errorMessage = error.response?.data?.message || 
+                       error.response?.data?.error || 
+                       error.message || 
+                       "OTP verification failed";
+    
     setVerificationState((prev) => ({
       ...prev,
       [field]: {
         ...prev[field],
         loading: false,
-        error: error.response?.data?.message || error.message,
+        error: errorMessage,
       },
     }));
+    
     setSnackbar({
       open: true,
-      message: error.response?.data?.message || "OTP verification failed",
+      message: errorMessage,
       severity: "error",
     });
   }
 };
-
   // Resend OTP
   const handleResendOtp = (field) => {
     handleSendOtp(field);
@@ -578,36 +621,36 @@ const handleVerifyOtp = async (field) => {
               />
             </InputAdornment>
           ),
-          endAdornment: (
-            <InputAdornment position="end">
-              {verificationState.mobileNumber.verified ? (
-                <Box display="flex" alignItems="center" color="success.main">
-                  <CheckCircleIcon fontSize="medium" />
-                  <Typography variant="caption" sx={{ ml: 0.5 }}>
-                    Verified
-                  </Typography>
-                </Box>
-              ) : (
-                <Button
-                  variant="outlined"
-                  size="medium"
-                  onClick={() => handleVerificationDialog("mobileNumber", true)}
-                  disabled={
-                    !data.mobileNumber || verificationState.mobileNumber.loading
-                  }
-                  startIcon={
-                    verificationState.mobileNumber.loading ? (
-                      <CircularProgress size={14} />
-                    ) : (
-                      <SendIcon fontSize="medium" />
-                    )
-                  }
-                >
-                  Verify
-                </Button>
-              )}
-            </InputAdornment>
-          ),
+          // endAdornment: (
+          //   <InputAdornment position="end">
+          //     {verificationState.mobileNumber.verified ? (
+          //       <Box display="flex" alignItems="center" color="success.main">
+          //         <CheckCircleIcon fontSize="medium" />
+          //         <Typography variant="caption" sx={{ ml: 0.5 }}>
+          //           Verified
+          //         </Typography>
+          //       </Box>
+          //     ) : (
+          //       <Button
+          //         variant="outlined"
+          //         size="medium"
+          //         onClick={() => handleVerificationDialog("mobileNumber", true)}
+          //         disabled={
+          //           !data.mobileNumber || verificationState.mobileNumber.loading
+          //         }
+          //         startIcon={
+          //           verificationState.mobileNumber.loading ? (
+          //             <CircularProgress size={14} />
+          //           ) : (
+          //             <SendIcon fontSize="medium" />
+          //           )
+          //         }
+          //       >
+          //         Verify
+          //       </Button>
+          //     )}
+          //   </InputAdornment>
+          // ),
         }}
         required
       />
@@ -876,54 +919,55 @@ const handleVerifyOtp = async (field) => {
         </Grid>
         {/* Email with Verification */}
         <Grid item xs={12} sm={6} md={2.4}>
-          <TextField
-            fullWidth
-            label="Email"
-            name="email"
-            type="email"
-            value={data.email || ""}
-            onChange={handleChange}
-            error={!!errors.email}
-            helperText={errors.email}
-            variant="outlined"
-            size="medium"
-            required
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  {verificationState.email.verified ? (
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      color="success.main"
-                    >
-                      <CheckCircleIcon fontSize="medium" />
-                      <Typography variant="caption" sx={{ ml: 0.5 }}>
-                        Verified
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <Button
-                      variant="outlined"
-                      size="medium"
-                      onClick={() => handleVerificationDialog("email", true)}
-                      disabled={!data.email || verificationState.email.loading}
-                      startIcon={
-                        verificationState.email.loading ? (
-                          <CircularProgress size={14} />
-                        ) : (
-                          <SendIcon fontSize="medium" />
-                        )
-                      }
-                    >
-                      Verify
-                    </Button>
-                  )}
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
+  <TextField
+    fullWidth
+    label="Email"
+    name="email"
+    type="email"
+    value={data.email || ""}
+    onChange={handleChange}
+    error={!!errors.email}
+    helperText={errors.email}
+    variant="outlined"
+    size="medium"
+    required
+    InputProps={{
+      endAdornment: (
+        <InputAdornment position="end">
+          {verificationState.email.verified ? (
+            <Box display="flex" alignItems="center" color="success.main">
+              <CheckCircleIcon fontSize="medium" />
+              <Typography variant="caption" sx={{ ml: 0.5 }}>
+                Verified
+              </Typography>
+            </Box>
+          ) : (
+            <Button
+              variant="outlined"
+              size="medium"
+              onClick={async () => {
+                // First open the dialog
+                handleVerificationDialog("email", true);
+                // Then immediately send OTP
+                await handleSendOtp("email");
+              }}
+              disabled={!data.email || verificationState.email.loading}
+              startIcon={
+                verificationState.email.loading ? (
+                  <CircularProgress size={14} />
+                ) : (
+                  <SendIcon fontSize="medium" />
+                )
+              }
+            >
+              Verify
+            </Button>
+          )}
+        </InputAdornment>
+      ),
+    }}
+  />
+</Grid>
 
         {/* Mobile Number with Verification */}
         <Grid item xs={12} sm={6} md={2.4}>
