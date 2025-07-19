@@ -206,14 +206,15 @@ const BrandCard = React.memo(({
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Tooltip title={brandName} placement="top">
                   <Typography
-                    variant="h6"
-                    fontWeight={600}
-                    sx={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
+                                  variant="body2"
+                                  fontWeight={600}
+                                  sx={{
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    flex: 1,
+                                  }}
+                                >
                     {brandName}
                   </Typography>
                 </Tooltip>
@@ -644,7 +645,7 @@ const TopBeverageFranchises = () => {
                 },
               }}
             >
-              Top Beverage Franchises
+              Top Beverage Brands
             </Typography>
 
         <Button

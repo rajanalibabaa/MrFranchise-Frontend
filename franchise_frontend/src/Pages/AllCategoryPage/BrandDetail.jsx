@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
@@ -1950,4 +1949,3 @@ const BrandDetails = ({ brandData }) => {
 };
 
 export default React.memo(BrandDetails);
-

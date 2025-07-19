@@ -189,15 +189,15 @@ const BrandCard = React.memo(({
                 }}
               />
               <Typography
-                variant="h6"
-                fontWeight={600}
-                sx={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  flex: 1,
-                }}
-              >
+                              variant="body2"
+                              fontWeight={600}
+                              sx={{
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                flex: 1,
+                              }}
+                            >
                 {brand.brandDetails.brandName}
               </Typography>
               <IconButton
@@ -613,7 +613,7 @@ const TopDesertBakerys = () => {
                 },
               }}
             >
-              Top Dessert & Bakery Franchises
+              Top Dessert & Bakery Brands
             </Typography>
 
             <Button
