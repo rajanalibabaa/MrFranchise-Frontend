@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -48,18 +49,19 @@ import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx";
-import SimilarBrands from "../../Components/HomePage_VideoSection/SimilarBrands.jsx"
-// import {MostLikedBrands} from "../../Components/HomePage_VideoSection/MostLikedBrands.jsx"
-
-// import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
 import ShareDialogActions from "./ShareDialogActions.jsx";
 
 const BrandDetails = ({ brandData }) => {
   const location = useLocation();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  // Enhanced media queries for better responsiveness
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // < 600px
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md")); // 600px - 900px
+  const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg")); // 900px - 1200px
+  const isLargeDesktop = useMediaQuery(theme.breakpoints.up("lg")); // > 1200px
+
   const navigate = useNavigate();
+
   // State management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -98,10 +100,6 @@ const BrandDetails = ({ brandData }) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // const handleCloseShareDialog = () => {
-  //   setOpenShareDialog(false);
-  // };
-
   useEffect(() => {
     const handleScroll = () => {
       if (window.pageYOffset > 300) {
@@ -115,7 +113,6 @@ const BrandDetails = ({ brandData }) => {
   }, []);
 
   const { uuid } = useParams();
-  // const { selectedBrand } = useSelector((state) => state.brands);
   const selectedBrand = brandData || {};
 
   // Get investor data from localStorage with caching
@@ -157,7 +154,7 @@ const BrandDetails = ({ brandData }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${AccessToken}`,
           },
-          signal: AbortSignal.timeout(5000), // Add timeout
+          signal: AbortSignal.timeout(5000),
         }
       );
 
@@ -186,7 +183,6 @@ const BrandDetails = ({ brandData }) => {
     const fetchBrand = async () => {
       try {
         await useBrand(uuid).unwrap();
-        // If brand is not found, redirect to brands page
       } catch (error) {
         console.error("Failed to fetch brand details:", error);
       }
@@ -318,11 +314,13 @@ const BrandDetails = ({ brandData }) => {
     [selectedBrand]
   );
 
+  // Responsive image box sizing
   const getImageBoxSize = useCallback(() => {
-    if (isMobile) return 100;
-    if (isTablet) return 150;
-    return 204;
-  }, [isMobile, isTablet]);
+    if (isMobile) return 120; // Slightly larger for better mobile touch targets
+    if (isTablet) return 160;
+    if (isSmallDesktop) return 180;
+    return 204; // Large desktop
+  }, [isMobile, isTablet, isSmallDesktop]);
 
   const getOutletRange = useCallback((value) => {
     const numericValue = Number(value);
@@ -333,7 +331,7 @@ const BrandDetails = ({ brandData }) => {
     return `${lower} - ${upper}`;
   }, []);
 
-  // Optimized event handlers
+  // Event handlers
   const handleOpenContact = useCallback(() => setOpenContactModal(true), []);
   const handleCloseContact = useCallback(() => setOpenContactModal(false), []);
 
@@ -360,7 +358,7 @@ const BrandDetails = ({ brandData }) => {
       e.preventDefault();
       setIsSubmitting(true);
 
-      const id = investorUUID || localStorage.getItem("brandUUID"); // Single declaration
+      const id = investorUUID || localStorage.getItem("brandUUID");
 
       if (!id) {
         alert("User not logged in or missing ID. Please login again.");
@@ -376,10 +374,9 @@ const BrandDetails = ({ brandData }) => {
           city: formData.city || "",
           brandId: selectedBrand?.uuid,
           brandName: selectedBrand?.brandDetails?.brandName || "",
-          applyId: id, // Use the already declared id
+          applyId: id,
         };
 
-        // Validate required fields
         const requiredFields = [
           "fullName",
           "investorEmail",
@@ -399,14 +396,12 @@ const BrandDetails = ({ brandData }) => {
           return;
         }
 
-        // console.log("payload :", payload)
-
         const response = await axios.post(
-          "http://localhost:5000/api/v1/instantapply/postApplication",
+          "https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication",
           payload,
           {
             headers: { "Content-Type": "application/json" },
-            signal: AbortSignal.timeout(10000), // Add timeout
+            signal: AbortSignal.timeout(10000),
           }
         );
 
@@ -414,7 +409,6 @@ const BrandDetails = ({ brandData }) => {
           setSubmitSuccess(true);
           alert("✅Success! Your application has been submitted.");
           setDrawerOpen(false);
-          // ✅ Reset the form after successful submission
           setFormData({
             fullName: "",
             investorEmail: "",
@@ -425,7 +419,6 @@ const BrandDetails = ({ brandData }) => {
             city: "",
             planToInvest: "",
             readyToInvest: "",
-            // Add other fields if present in formData
           });
         }
       } catch (error) {
@@ -463,6 +456,15 @@ const BrandDetails = ({ brandData }) => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Mask email for privacy
+  const maskEmail = (email) => {
+    const [name, domain] = email.split("@");
+    if (!name || !domain) return email;
+    const visiblePart = name.slice(0, 2);
+    const maskedPart = "*".repeat(name.length - 2);
+    return `${visiblePart}${maskedPart}@${domain}`;
+  };
+
   if (!selectedBrand) {
     return (
       <Box
@@ -476,14 +478,7 @@ const BrandDetails = ({ brandData }) => {
     );
   }
 
-  const maskEmail = (email) => {
-    const [name, domain] = email.split("@");
-    if (!name || !domain) return email;
-    const visiblePart = name.slice(0, 2);
-    const maskedPart = "*".repeat(name.length - 2);
-    return `${visiblePart}${maskedPart}@${domain}`;
-  };
-
+  // ExpansionLocationTags component for responsive location display
   const ExpansionLocationTags = ({ brand }) => {
     const locations = Array.isArray(
       brand.expansionLocationData?.expansionLocations?.domestic?.locations
@@ -525,9 +520,14 @@ const BrandDetails = ({ brandData }) => {
           borderRadius: "8px",
           p: 2,
           display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)", // 👉 Creates 3 equal columns
+          // Responsive grid columns
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : isTablet
+            ? "repeat(2, 1fr)"
+            : "repeat(3, 1fr)",
           gap: 2,
-          height: "90px",
+          height: isMobile ? "auto" : "90px",
           overflowY: "auto",
         }}
       >
@@ -535,19 +535,22 @@ const BrandDetails = ({ brandData }) => {
         <Box>
           {formattedChipsState.length > 0 ? (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              {formattedChipsState.map((chip) => (
-                <Typography
-                  key={chip.key}
-                  variant="caption"
-                  sx={{
-                    borderRadius: "4px",
-                    color: "black",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {chip.label}
-                </Typography>
-              ))}
+              {formattedChipsState
+                .slice(0, isMobile ? 3 : formattedChipsState.length)
+                .map((chip) => (
+                  <Typography
+                    key={chip.key}
+                    variant="caption"
+                    sx={{
+                      borderRadius: "4px",
+                      color: "black",
+                      whiteSpace: "nowrap",
+                      fontSize: isMobile ? "0.7rem" : "0.8rem",
+                    }}
+                  >
+                    {chip.label}
+                  </Typography>
+                ))}
             </Box>
           ) : (
             <Typography
@@ -563,85 +566,95 @@ const BrandDetails = ({ brandData }) => {
           )}
         </Box>
 
-        {/* District Column */}
-        <Box>
-          {formattedChipsDistrict.length > 0 ? (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              {formattedChipsDistrict.map((chip) => (
-                <Typography
-                  key={chip.key}
-                  variant="caption"
-                  sx={{
-                    borderRadius: "4px",
-                    color: "black",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {chip.label}
-                </Typography>
-              ))}
-            </Box>
-          ) : (
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-                textAlign: "center",
-                mt: 2,
-              }}
-            >
-              No locations available
-            </Typography>
-          )}
-        </Box>
+        {/* District Column - hidden on mobile if no space */}
+        {!isMobile && (
+          <Box>
+            {formattedChipsDistrict.length > 0 ? (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {formattedChipsDistrict
+                  .slice(0, isMobile ? 3 : formattedChipsDistrict.length)
+                  .map((chip) => (
+                    <Typography
+                      key={chip.key}
+                      variant="caption"
+                      sx={{
+                        borderRadius: "4px",
+                        color: "black",
+                        whiteSpace: "nowrap",
+                        fontSize: isMobile ? "0.7rem" : "0.8rem",
+                      }}
+                    >
+                      {chip.label}
+                    </Typography>
+                  ))}
+              </Box>
+            ) : (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  textAlign: "center",
+                  mt: 2,
+                }}
+              >
+                No locations available
+              </Typography>
+            )}
+          </Box>
+        )}
 
-        {/* City Column */}
-        <Box>
-          {formattedChipsCity.length > 0 ? (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              {formattedChipsCity.map((chip) => (
-                <Typography
-                  key={chip.key}
-                  variant="caption"
-                  sx={{
-                    borderRadius: "4px",
-                    color: "black",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {chip.label}
-                </Typography>
-              ))}
-            </Box>
-          ) : (
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-                textAlign: "center",
-                mt: 2,
-              }}
-            >
-              No locations available
-            </Typography>
-          )}
-        </Box>
+        {/* City Column - hidden on mobile and tablet if no space */}
+        {(isLargeDesktop || isSmallDesktop) && (
+          <Box>
+            {formattedChipsCity.length > 0 ? (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {formattedChipsCity.map((chip) => (
+                  <Typography
+                    key={chip.key}
+                    variant="caption"
+                    sx={{
+                      borderRadius: "4px",
+                      color: "black",
+                      whiteSpace: "nowrap",
+                      fontSize: isMobile ? "0.7rem" : "0.8rem",
+                    }}
+                  >
+                    {chip.label}
+                  </Typography>
+                ))}
+              </Box>
+            ) : (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  textAlign: "center",
+                  mt: 2,
+                }}
+              >
+                No locations available
+              </Typography>
+            )}
+          </Box>
+        )}
       </Box>
     );
   };
+
   return (
     <>
       <Navbar />
+      {/* Main container with responsive width and padding */}
       <Box
         sx={{
           width: "90%",
-          maxWidth: 1200,
+          maxWidth: 1200, // Increased max width for larger screens
           mx: "auto",
-          my: 4,
-          px: isMobile ? 2 : 4,
+          my: isMobile ? 2 : 4,
+          px: isMobile ? 1 : isTablet ? 3 : 4,
         }}
       >
-        {/* Floating Apply Now Button (Always Visible) */}
+        {/* Floating Apply Now Button - responsive positioning */}
         <Box
           sx={{
             position: "fixed",
@@ -655,7 +668,7 @@ const BrandDetails = ({ brandData }) => {
         >
           <Button
             variant="contained"
-            size="large"
+            size={isMobile ? "medium" : "large"}
             onClick={toggleDrawer(true)}
             sx={{
               backgroundColor: "#ff9800",
@@ -667,6 +680,8 @@ const BrandDetails = ({ brandData }) => {
               "&:hover": {
                 backgroundColor: "#e65100",
               },
+              fontSize: isMobile ? "0.875rem" : "1rem",
+              // width: isMobile ? "100%" : "auto",
             }}
           >
             Apply Now
@@ -680,19 +695,16 @@ const BrandDetails = ({ brandData }) => {
           onClose={toggleDrawer(false)}
           PaperProps={{
             sx: {
-              borderTopLeftRadius: isMobile || isTablet ? 16 : 16,
-              borderTopRightRadius: isMobile || isTablet ? 16 : 16,
-              borderTopBottomRadius: isMobile || isTablet ? 16 : 16,
-              borderBottomLeftRadius: isMobile || isTablet ? 16 : 16,
-              borderBottomRightRadius: isMobile || isTablet ? 16 : 16,
-              maxHeight: isMobile || isTablet ? "80vh" : "93vh",
-              width: isMobile || isTablet ? "100%" : 430,
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+              maxHeight: isMobile ? "80vh" : isTablet ? "70vh" : "93vh",
+              width: isMobile ? "100%" : isTablet ? "80%" : 430,
               overflow: "auto",
-              mt: isMobile || isTablet ? 0 : 3,
+              mx: "auto",
             },
           }}
         >
-          <Box sx={{ p: 3 }}>
+          <Box sx={{ p: isMobile ? 2 : 3 }}>
             <Box
               sx={{
                 display: "flex",
@@ -925,7 +937,8 @@ const BrandDetails = ({ brandData }) => {
           open={openContactModal}
           onClose={handleCloseContact}
           fullWidth
-          maxWidth="sm"
+          maxWidth={isMobile ? "xs" : "sm"} // Responsive dialog size
+          fullScreen={isMobile} // Full screen on mobile
         >
           <DialogTitle
             sx={{
@@ -933,6 +946,7 @@ const BrandDetails = ({ brandData }) => {
               background: "linear-gradient(45deg, #000 30%, #000 90%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
+              fontSize: isMobile ? "1.25rem" : "1.5rem",
             }}
           >
             Contact Details
@@ -941,8 +955,8 @@ const BrandDetails = ({ brandData }) => {
               onClick={handleCloseContact}
               sx={{
                 position: "absolute",
-                top: 10,
-                right: 10,
+                top: 8,
+                right: 8,
                 color: "error.main",
               }}
             >
@@ -952,66 +966,36 @@ const BrandDetails = ({ brandData }) => {
 
           <DialogContent dividers>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Typography>
+              <Typography fontSize={isMobile ? "0.9rem" : "1rem"}>
                 <strong>Manager Name:</strong>{" "}
                 {selectedBrand.brandDetails?.ceoName
                   ? `${selectedBrand.brandDetails.ceoName.slice(0, 2)}***`
                   : "N/A"}
               </Typography>
 
-              <Typography>
+              <Typography fontSize={isMobile ? "0.9rem" : "1rem"}>
                 <strong>Mobile Number:</strong>{" "}
                 {selectedBrand.brandDetails?.ceoMobile
                   ? `${selectedBrand.brandDetails.ceoMobile.slice(0, 5)}*****`
                   : "N/A"}
               </Typography>
 
-              <Typography>
+              <Typography fontSize={isMobile ? "0.9rem" : "1rem"}>
                 <strong>Email:</strong>{" "}
                 {selectedBrand.brandDetails?.email
                   ? maskEmail(selectedBrand.brandDetails.email)
                   : "N/A"}
               </Typography>
-
-              {/* <Typography>
-                <strong>Website:</strong>{" "}
-                {selectedBrand.brandDetails?.website ? (
-                  <a
-                    href={selectedBrand.brandDetails.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedBrand.brandDetails.website}
-                  </a>
-                ) : (
-                  "N/A"
-                )}
-              </Typography>
-
-              <Typography>
-                <strong>Instagram:</strong>{" "}
-                {selectedBrand.brandDetails?.instagram ? (
-                  <a
-                    href={selectedBrand.brandDetails.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedBrand.brandDetails.instagram}
-                  </a>
-                ) : (
-                  "N/A"
-                )}
-              </Typography> */}
             </Box>
           </DialogContent>
 
           <DialogActions>
             <Button
-              // onClick={handleCloseContact}
               variant="contained"
               color="success"
+              size={isMobile ? "small" : "medium"}
             >
-              view contact details
+              View contact details
             </Button>
           </DialogActions>
         </Dialog>
@@ -1033,13 +1017,18 @@ const BrandDetails = ({ brandData }) => {
             <Box
               display="flex"
               alignItems="center"
-              gap={3}
+              gap={isMobile ? 1 : 3}
               flexDirection={isMobile ? "column" : "row"}
               width="100%"
             >
               <Box
                 position="relative"
-                sx={{ border: "3px solid orange", borderRadius: "10px" }}
+                sx={{
+                  border: "3px solid orange",
+                  borderRadius: "10px",
+                  // width: isMobile ? 120 : isTablet ? 150 : 200,
+                  // height: isMobile ? 120 : isTablet ? 150 : 200,
+                }}
               >
                 <Avatar
                   src={selectedBrand.uploads?.brandLogo}
@@ -1072,11 +1061,17 @@ const BrandDetails = ({ brandData }) => {
                           WebkitBackgroundClip: "text",
                           WebkitTextFillColor: "transparent",
                           textAlign: isMobile ? "center" : "left",
+                          fontSize: isMobile ? "center" : "left",
                         }}
                       >
                         {selectedBrand.brandDetails?.brandName}
                       </Typography>
-                      <Typography variant="body1" color="text.secondary">
+                      <Typography
+                        variant="body1"
+                        color="text.secondary"
+                        textAlign={isMobile ? "center" : "left"}
+                        fontSize={isMobile ? "0.875rem" : "1rem"}
+                      >
                         {selectedBrand.brandDetails?.tagLine}
                       </Typography>
 
@@ -1087,16 +1082,17 @@ const BrandDetails = ({ brandData }) => {
                           alignItems: "center",
                           gap: isMobile ? 1 : 10,
                           mt: 1,
+                          justifyContent: isMobile ? "center" : "flex-start",
                         }}
                       >
-                        <Typography>
+                        <Typography fontSize={isMobile ? "0.8rem" : "0.9rem"}>
                           Established Year:{" "}
                           <label variant="body1" color="text.secondary">
                             {selectedBrand.franchiseDetails?.establishedYear ||
                               "N/A"}
                           </label>
                         </Typography>
-                        <Typography>
+                        <Typography fontSize={isMobile ? "0.8rem" : "0.9rem"}>
                           Franchise Since:{" "}
                           <label variant="body1" color="text.secondary">
                             {selectedBrand.franchiseDetails
@@ -1105,7 +1101,13 @@ const BrandDetails = ({ brandData }) => {
                         </Typography>
                       </Box>
                     </Box>
-                    <Box sx={{ ml: 10 }}>
+                    <Box
+                      sx={{
+                        mt: isMobile ? 1 : 0,
+                        // alignSelf: isMobile ? "center" : "flex-end",
+                        ml: isMobile ? 0 : 2,
+                      }}
+                    >
                       <Button
                         variant="contained"
                         size={isMobile ? "small" : "medium"}
@@ -1118,65 +1120,86 @@ const BrandDetails = ({ brandData }) => {
                           "&:hover": {
                             bgcolor: "#e65100",
                           },
+                          fontSize: isMobile ? "0.75rem" : "0.875rem",
                         }}
                       >
                         VIEW CONTACT
                       </Button>
-                    </Box>
-                    <IconButton
-                      sx={{ marginLeft: "90px" }}
-                      onClick={handleLikeClick}
-                      disabled={isProcessingLike}
-                      aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
-                    >
-                      {isProcessingLike ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        <Favorite
-                          sx={{
-                            color: localIsLiked
-                              ? "#f44336"
-                              : "rgba(0, 0, 0, 0.23)",
-                          }}
+                      <IconButton
+                        sx={{ marginLeft: "90px" }}
+                        onClick={handleLikeClick}
+                        disabled={isProcessingLike}
+                        aria-label={
+                          localIsLiked ? "Unlike brand" : "Like brand"
+                        }
+                        // size={isMobile ? "small" : "medium"}
+                      >
+                        {isProcessingLike ? (
+                          <CircularProgress size={isMobile ? 20 : 24} />
+                        ) : (
+                          <Favorite
+                            sx={{
+                              color: localIsLiked
+                                ? "#f44336"
+                                : "rgba(0, 0, 0, 0.23)",
+                              // fontSize: isMobile ? "1.2rem" : "1.5rem",
+                            }}
+                          />
+                        )}
+                      </IconButton>
+                      <IconButton
+                        sx={{
+                          color: "rgba(0,0,0,0.23)",
+                        }}
+                        size={isMobile ? "small" : "medium"}
+                        onClick={() => {
+                          console.log("shortlist is clicked");
+                        }}
+                      >
+                        <PlaylistAddCheckCircleOutlined
+                          sx={{ fontSize: isMobile ? "1.2rem" : "1.5rem" }}
                         />
-                      )}
-                    </IconButton>
-                    <IconButton
-                      sx={{
-                        color: "rgba(0,0,0,0.23)",
-                      }}
-                      onClick={() => {
-                        console.log("shortlist is clicked");
-                      }}
-                    >
-                      <PlaylistAddCheckCircleOutlined />
-                    </IconButton>
-                    <IconButton onClick={handleOpenShareClick}>
-                      <ShareOutlined />
-                    </IconButton>
-
-                    {/* Share Popover */}
-                    <ShareDialogActions
-                      anchorEl={anchorEl}
-                      setAnchorEl={setAnchorEl}
-                    />
+                      </IconButton>
+                      <IconButton
+                        onClick={handleOpenShareClick}
+                        size={isMobile ? "small" : "medium"}
+                      >
+                        <ShareOutlined
+                          sx={{ fontSize: isMobile ? "1.2rem" : "1.5rem" }}
+                        />
+                      </IconButton>
+                      <ShareDialogActions
+                        anchorEl={anchorEl}
+                        setAnchorEl={setAnchorEl}
+                      />
+                    </Box>
                   </Box>
                 </Box>
 
-                <TableContainer component={Paper} sx={{ mt: 2, width: "100%" }}>
-                  <Table size="small" sx={{ border: "collapse" }}>
+                {/* Responsive table */}
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    mt: 2,
+                    width: "100%",
+                    overflowX: "auto",
+                  }}
+                >
+                  <Table
+                    size={isMobile ? "small" : "medium"}
+                    sx={{ minWidth: isMobile ? 600 : "100%" }}
+                  >
                     <TableHead>
                       <TableRow
                         sx={{
                           backgroundColor: "#7ad03a",
                           "& td, & th": {
-                            padding: isMobile ? "2px 6px" : "8px 12px",
+                            padding: isMobile ? "4px 8px" : "8px 12px",
+                            fontSize: isMobile ? "0.7rem" : "0.8rem",
                           },
                         }}
                       >
-                        <TableCell
-                          sx={{ width: "30%", textAlign: "center", p: "3px" }}
-                        >
+                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
                           <strong>Category</strong>
                         </TableCell>
                         <TableCell sx={{ width: "15%", textAlign: "center" }}>
@@ -1188,47 +1211,69 @@ const BrandDetails = ({ brandData }) => {
                         <TableCell sx={{ width: "15%", textAlign: "center" }}>
                           <strong>Total Outlets</strong>
                         </TableCell>
-                        <TableCell
-                          sx={{
-                            width: "30%",
-                            textAlign: "center",
-                            whiteSpace: "normal",
-                            wordBreak: "break-word",
-                          }}
-                        >
+                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
                           <strong>Expansion Location</strong>
                         </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       <TableRow>
-                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
+                        <TableCell
+                          sx={{
+                            width: "30%",
+                            textAlign: "center",
+                            fontSize: isMobile ? "0.7rem" : "0.8rem",
+                          }}
+                        >
                           {selectedBrand.franchiseDetails?.brandCategories
                             ?.child || "N/A"}
                         </TableCell>
-                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
+                        <TableCell
+                          sx={{
+                            width: "15%",
+                            textAlign: "center",
+                            fontSize: isMobile ? "0.7rem" : "0.8rem",
+                          }}
+                        >
                           {selectedBrand.franchiseDetails?.fico?.[0]
                             ?.areaRequired || "N/A"}
                         </TableCell>
-                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
+                        <TableCell
+                          sx={{
+                            width: "15%",
+                            textAlign: "center",
+                            fontSize: isMobile ? "0.7rem" : "0.8rem",
+                          }}
+                        >
                           {selectedBrand.franchiseDetails?.fico?.[0]
                             ?.investmentRange || "N/A"}
                         </TableCell>
-                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
+                        <TableCell
+                          sx={{
+                            width: "15%",
+                            textAlign: "center",
+                            fontSize: isMobile ? "0.7rem" : "0.8rem",
+                          }}
+                        >
                           {getOutletRange(
                             selectedBrand.franchiseDetails?.totalOutlets
                           )}
                         </TableCell>
-                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
+                        <TableCell
+                          sx={{
+                            width: "30%",
+                            textAlign: "center",
+                            fontSize: isMobile ? "0.7rem" : "0.8rem",
+                          }}
+                        >
                           {(() => {
                             const locations =
                               selectedBrand.expansionLocationData
                                 ?.expansionLocations?.domestic?.locations || [];
-
                             const states = locations
                               .map((loc) => loc.state)
                               .filter(Boolean);
-                            const hasMore = states.length > 3;
+                            const hasMore = states.length > 2;
 
                             if (states.length === 0) {
                               return "Multiple Locations";
@@ -1244,9 +1289,7 @@ const BrandDetails = ({ brandData }) => {
                                     href="#expansion-location"
                                     style={{
                                       marginLeft: 8,
-                                      scrollBehavior: "smooth",
-                                      fontSize: "0.75rem",
-                                      textTransform: "uppercase",
+                                      fontSize: "0.7rem",
                                       textDecoration: "none",
                                       color: "#1976d2",
                                       fontWeight: 500,
@@ -1271,7 +1314,7 @@ const BrandDetails = ({ brandData }) => {
 
         <Divider sx={{ my: 3 }} />
 
-        {/* Media section with animations */}
+        {/* Media section with responsive layout */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -1282,11 +1325,12 @@ const BrandDetails = ({ brandData }) => {
             flexDirection={isMobile ? "column" : "row"}
             gap={4}
           >
+            {/* Main video - responsive sizing */}
             <Box flex={isMobile ? "none" : 2}>
               <Box
                 sx={{
                   width: "100%",
-                  height: isMobile ? 200 : 416,
+                  height: isMobile ? 200 : isTablet ? 300 : 416,
                   borderRadius: 2,
                   overflow: "hidden",
                 }}
@@ -1307,13 +1351,25 @@ const BrandDetails = ({ brandData }) => {
                     Your browser does not support the video tag.
                   </video>
                 ) : (
-                  <Typography variant="body1" color="text.secondary">
-                    No promotional video available
-                  </Typography>
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    <Typography variant="body1" color="text.secondary">
+                      No promotional video available
+                    </Typography>
+                  </Box>
                 )}
               </Box>
             </Box>
 
+            {/* Gallery images - responsive grid */}
             <Box flex={1}>
               <Box
                 sx={{
@@ -1389,7 +1445,12 @@ const BrandDetails = ({ brandData }) => {
                   >
                     <Typography
                       variant={isMobile ? "body2" : "h6"}
-                      sx={{ fontWeight: 600, textAlign: "center", zIndex: 1 }}
+                      sx={{
+                        fontWeight: 600,
+                        textAlign: "center",
+                        zIndex: 1,
+                        fontSize: isMobile ? "0.875rem" : "1rem",
+                      }}
                     >
                       View More ({Math.max(allImages.length - 3, 0)}+)
                     </Typography>
@@ -1417,6 +1478,7 @@ const BrandDetails = ({ brandData }) => {
 
         <Divider sx={{ my: 5 }} />
 
+        {/* Overview tab section */}
         <Box
           sx={{
             display: "flex",
@@ -1424,22 +1486,16 @@ const BrandDetails = ({ brandData }) => {
             gap: 4,
           }}
         >
-          {/* Overview tab */}
           <Box sx={{ width: "100%" }}>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
             >
-              <OverviewTab
-                brand={selectedBrand}
-                // setIsModalOpen={setIsModalOpen}
-              />
+              <OverviewTab brand={selectedBrand} />
             </motion.div>
           </Box>
         </Box>
-
-        {/* Image Modal */}
         <Dialog
           open={imageModalOpen}
           onClose={() => setImageModalOpen(false)}
@@ -1584,12 +1640,12 @@ const BrandDetails = ({ brandData }) => {
           </DialogActions>
         </Dialog>
 
-        {/* Desktop Application Form */}
-        {!isMobile && !isTablet && (
+        {/* Desktop Application Form - responsive layout */}
+        {!isMobile && (
           <Box
             sx={{
               mt: 4,
-              p: 4,
+              p: isMobile ? 2 : isTablet ? 3 : 4,
               borderRadius: "16px",
               background: "white",
               boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
@@ -1605,6 +1661,11 @@ const BrandDetails = ({ brandData }) => {
                 alignItems: "center",
                 gap: 2,
                 color: "#ff9800",
+                fontSize: isMobile
+                  ? "1.25rem"
+                  : isTablet
+                  ? "1.5rem"
+                  : "1.75rem",
               }}
             >
               Instant Franchise Application
@@ -1614,7 +1675,10 @@ const BrandDetails = ({ brandData }) => {
                 spacing={2}
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
+                  // Responsive grid columns
+                  gridTemplateColumns: isTablet
+                    ? "repeat(2, 1fr)"
+                    : "repeat(3, 1fr)",
                   gap: 2,
                 }}
               >
@@ -1627,7 +1691,7 @@ const BrandDetails = ({ brandData }) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
@@ -1639,7 +1703,7 @@ const BrandDetails = ({ brandData }) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
@@ -1653,7 +1717,7 @@ const BrandDetails = ({ brandData }) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   />
                 </Grid>
 
@@ -1668,7 +1732,7 @@ const BrandDetails = ({ brandData }) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   >
                     {locationData.states.map((state, i) => (
                       <MenuItem key={i} value={state}>
@@ -1689,7 +1753,7 @@ const BrandDetails = ({ brandData }) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                     disabled={!formData.state}
                   >
                     {locationData.districts.map((district, i) => (
@@ -1711,7 +1775,7 @@ const BrandDetails = ({ brandData }) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                     disabled={!formData.district}
                   >
                     {locationData.cities.map((city, i) => (
@@ -1732,7 +1796,7 @@ const BrandDetails = ({ brandData }) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   >
                     {investmentRanges.map((range, i) => (
                       <MenuItem key={i} value={range}>
@@ -1751,7 +1815,7 @@ const BrandDetails = ({ brandData }) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   >
                     {investmentTimings.map((option, i) => (
                       <MenuItem key={i} value={option}>
@@ -1770,7 +1834,7 @@ const BrandDetails = ({ brandData }) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   >
                     {readyToInvestOptions.map((option, i) => (
                       <MenuItem key={i} value={option}>
@@ -1783,14 +1847,14 @@ const BrandDetails = ({ brandData }) => {
               <Box display="flex" justifyContent="center" mt={2}>
                 <Button
                   type="submit"
-                  size="large"
+                  size={isMobile ? "medium" : "large"}
                   variant="contained"
                   disabled={isSubmitting}
                   sx={{
                     backgroundColor: "#ff9800",
-                    py: 1.5,
-                    fontSize: "1rem",
-                    px: 4,
+                    py: isMobile ? 1 : 1.5,
+                    fontSize: isMobile ? "0.875rem" : "1rem",
+                    px: isMobile ? 3 : 4,
                     "&:disabled": {
                       background: "#e0e0e0",
                       color: "#9e9e9e",
@@ -1822,7 +1886,10 @@ const BrandDetails = ({ brandData }) => {
                 borderLeft: `4px solid rgb(84, 241, 12)`,
               }}
             >
-              <Typography variant="body2">
+              <Typography
+                variant="body2"
+                fontSize={isMobile ? "0.8rem" : "0.9rem"}
+              >
                 <strong>Note:</strong> Our team will contact you within 24 hours
                 to discuss the franchise opportunity in detail.
               </Typography>
@@ -1830,33 +1897,35 @@ const BrandDetails = ({ brandData }) => {
           </Box>
         )}
       </Box>
-      {/* <LikedBrands /> */}
-      <Box>
-      <SimilarBrands brandData={brandData} />
-      {/* <MostLikedBrands/> */}
-      </Box>
+
+      {/* Liked brands and tags section */}
+      <LikedBrands />
       <Box
         sx={{
           width: "90%",
           maxWidth: 1200,
           mx: "auto",
           my: 4,
-          px: isMobile ? 2 : 4,
+          px: isMobile ? 1 : isTablet ? 3 : 4,
         }}
         color={"#ff9800"}
       >
-        <Typography variant="h6" sx={{ mb: 2 }}>
+        <Typography
+          variant="h6"
+          sx={{ mb: 2, fontSize: isMobile ? "1.25rem" : "1.5rem" }}
+        >
           Tags
         </Typography>
         <ExpansionLocationTags brand={selectedBrand} />
       </Box>
-      {/* <ViewedBrands /> */}
+
+      {/* Back to top button - responsive positioning */}
       {showBackToTop && (
         <Box
           sx={{
             position: "fixed",
-            bottom: 20,
-            right: 20,
+            bottom: isMobile ? 16 : 24,
+            right: isMobile ? 16 : 24,
             zIndex: 1000,
           }}
         >
@@ -1874,9 +1943,11 @@ const BrandDetails = ({ brandData }) => {
           </IconButton>
         </Box>
       )}
+
       <Footer />
     </>
   );
 };
 
 export default React.memo(BrandDetails);
+
