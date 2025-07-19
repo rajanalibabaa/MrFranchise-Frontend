@@ -85,6 +85,9 @@ export const useToggleLike = () => {
     onMutate: async ({ brandId, isLiked }) => {
       console.log("Toggling like for brandId:", brandId, "isLiked:", isLiked);
       // Cancel any outgoing refetches
+
+      console.log("======== :",isLiked)
+      // Cancel any outgoing refetches to avoid overwriting our optimistic update
       await queryClient.cancelQueries(["brands"]);
       
       // Get current data snapshot
@@ -113,9 +116,14 @@ export const useToggleLike = () => {
       // toast.error(error.response?.data?.message || "Failed to update like status");
     },
     onSuccess: (data, variables, context) => {
+
+      console.log("data :",data)
+      console.log("variables :",variables)
+      console.log("context :",context)
+      // console.log("old :",old)
       // Confirm the update and remove optimistic flag
-      queryClient.setQueryData(["brands"], (old) => 
-        old?.map(brand => 
+      queryClient.setQueryData(["brands"], (context) => 
+        context.previousBrands?.map(brand => 
           brand.uuid === context?.brandId 
             ? { ...brand, isLiked: !context.isLiked, _optimistic: undefined } 
             : brand

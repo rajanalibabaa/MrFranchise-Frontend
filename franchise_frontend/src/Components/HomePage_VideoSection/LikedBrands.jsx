@@ -355,7 +355,7 @@ useEffect(() => {
   if (brands.length > 0) {
     const liked = brands.filter(brand => brand.isLiked === true);
     setLocalLikedBrands(liked);
-    console.log("Local Liked Brands:", liked); // Moved inside
+    // console.log("Local Liked Brands:", liked); // Moved inside
   }
 }, [brands]);
  

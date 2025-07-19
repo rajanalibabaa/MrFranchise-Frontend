@@ -569,6 +569,7 @@ if (suggestion.brandId) {
         },
         replace: true
       });
+      window.location.reload();
     } else {
       // Otherwise navigate normally
       navigate('/brandViewPage', {

@@ -421,7 +421,7 @@ const SimilarBrands = ({ brandData }) => {
   const handleMouseLeave = useCallback(() => {
     isPaused.current = false;
     if (!scrollIntervalRef.current) {
-      startAutoScroll();
+      // startAutoScroll();
     }
   }, []);
 
