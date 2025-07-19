@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useRef, useMemo, lazy, Suspense } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  lazy,
+  Suspense,
+} from "react";
 import {
   Box,
   Typography,
@@ -21,15 +28,17 @@ import {
   Chip,
 } from "@mui/material";
 
-const DescriptionIcon = lazy(() => import('@mui/icons-material/Description'));
-const Business = lazy(() => import('@mui/icons-material/Business'));
-const ArrowBack = lazy(() => import('@mui/icons-material/ArrowBack'));
-const Place = lazy(() => import('@mui/icons-material/Place'));
-const LocationCity = lazy(() => import('@mui/icons-material/LocationCity'));
-const LocationOff = lazy(() => import('@mui/icons-material/LocationOff'));
-const Map = lazy(() => import('@mui/icons-material/Map'));
-const FiberManualRecord = lazy(() => import('@mui/icons-material/FiberManualRecord'));
-const Public = lazy(() => import('@mui/icons-material/Public'));
+const DescriptionIcon = lazy(() => import("@mui/icons-material/Description"));
+const Business = lazy(() => import("@mui/icons-material/Business"));
+const ArrowBack = lazy(() => import("@mui/icons-material/ArrowBack"));
+const Place = lazy(() => import("@mui/icons-material/Place"));
+const LocationCity = lazy(() => import("@mui/icons-material/LocationCity"));
+const LocationOff = lazy(() => import("@mui/icons-material/LocationOff"));
+const Map = lazy(() => import("@mui/icons-material/Map"));
+const FiberManualRecord = lazy(() =>
+  import("@mui/icons-material/FiberManualRecord")
+);
+const Public = lazy(() => import("@mui/icons-material/Public"));
 
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -47,8 +56,6 @@ const colors = {
   light: "#f5f5f5",
 };
 
-
-
 const float = keyframes`
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
@@ -63,8 +70,6 @@ const AnimatedCard = styled(Card)(({ theme }) => ({
     boxShadow: theme.shadows[10],
   },
 }));
-
-
 
 const SectionHeader = styled(Typography)({
   position: "relative",
@@ -86,8 +91,111 @@ const OverviewTab = ({ brand }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const overviewRef = useRef(null);
+  const containerRef = useRef(null);
   const [selectedModel, setSelectedModel] = useState(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
+
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
+
+  useEffect(() => {
+    if (!isMobile || !containerRef.current) return;
+
+    let scrollInterval;
+    const container = containerRef.current;
+
+    const startAutoScroll = () => {
+      if (scrollInterval) clearInterval(scrollInterval);
+      scrollInterval = setInterval(() => {
+        if (!container) return;
+        // scroll by 1px every 10ms
+        container.scrollLeft += 1;
+        // if reached end, go back to start
+
+         if (container.scrollLeft >= container.scrollWidth / 2) {
+          container.scrollLeft = 0;
+        }
+      }, 10); // adjust speed
+    };
+
+    if (!isUserScrolling) startAutoScroll();
+
+    return () => {
+      if (scrollInterval) {
+        clearInterval(scrollInterval);
+      }
+    };
+  }, [isMobile, isUserScrolling]);
+
+  const handleUserScrollStart = () => {
+    setIsUserScrolling(true);
+  };
+
+  const handleUserScrollEnd = () => {
+    // restart auto-scroll after short delay
+    setTimeout(() => setIsUserScrolling(false), 1000);
+  };
+
+  const tableRows = brand.franchiseDetails?.fico?.map((model, index) => (
+    <Fade in={true} key={index} timeout={index * 100}>
+      <TableRow
+        hover
+        selected={selectedModel?._id === model._id}
+        sx={{ "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.04)" } }}
+      >
+        {[
+          model.franchiseModel,
+          model.franchiseType,
+          model.investmentRange,
+          model.areaRequired,
+          model.agreementPeriod ? `${model.agreementPeriod} yrs` : "N/A",
+          model.franchiseFee
+            ? `₹${Number(model.franchiseFee).toLocaleString("en-IN")}`
+            : "N/A",
+          model.interiorCost
+            ? `₹${Number(model.interiorCost).toLocaleString("en-IN")}`
+            : "N/A",
+          model.stockInvestment
+            ? `₹${Number(model.stockInvestment).toLocaleString("en-IN")}`
+            : "N/A",
+          model.otherCost
+            ? `₹${Number(model.otherCost).toLocaleString("en-IN")}`
+            : "N/A",
+          model.requireWorkingCapital
+            ? `₹${Number(model.requireWorkingCapital).toLocaleString("en-IN")}`
+            : "N/A",
+          model.royaltyFee,
+          model.breakEven,
+          model.roi ? `${model.roi}%` : "N/A",
+          model.payBackPeriod,
+          model.marginOnSales ? `${model.marginOnSales}%` : "N/A",
+        ].map((value, j) => (
+          <TableCell
+            key={j}
+            align="center"
+            sx={{
+              borderBottom: "1px solid rgba(0,0,0,0.05)",
+              padding: "25px 16px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              fontWeight:
+                (j === 12 && model.roi) || (j === 14 && model.marginOnSales)
+                  ? 700
+                  : "inherit",
+              color:
+                j === 12 && parseFloat(model.roi) > 20
+                  ? "success.main"
+                  : j === 14 && parseFloat(model.marginOnSales) > 30
+                  ? "success.main"
+                  : "inherit",
+            }}
+          >
+            {value || "N/A"}
+          </TableCell>
+        ))}
+      </TableRow>
+    </Fade>
+  ));
 
   const ExpansionLocationGrid = ({ data }) => {
     const [expandedState, setExpandedState] = useState(0);
@@ -949,152 +1057,152 @@ const OverviewTab = ({ brand }) => {
     );
   };
 
-//   const ExpansionLocationTags = ({ brand }) => {
-//     const locations = Array.isArray(
-//       brand.expansionLocationData?.expansionLocations?.domestic?.locations
-//     )
-//       ? brand.expansionLocationData.expansionLocations.domestic.locations.flatMap(
-//           (loc) =>
-//             Array.isArray(loc.districts)
-//               ? loc.districts.flatMap((dist) =>
-//                   Array.isArray(dist.cities)
-//                     ? dist.cities.map((city) => ({
-//                         city,
-//                         district: dist.district,
-//                         state: loc.state,
-//                       }))
-//                     : []
-//                 )
-//               : []
-//         )
-//       : [];
+  //   const ExpansionLocationTags = ({ brand }) => {
+  //     const locations = Array.isArray(
+  //       brand.expansionLocationData?.expansionLocations?.domestic?.locations
+  //     )
+  //       ? brand.expansionLocationData.expansionLocations.domestic.locations.flatMap(
+  //           (loc) =>
+  //             Array.isArray(loc.districts)
+  //               ? loc.districts.flatMap((dist) =>
+  //                   Array.isArray(dist.cities)
+  //                     ? dist.cities.map((city) => ({
+  //                         city,
+  //                         district: dist.district,
+  //                         state: loc.state,
+  //                       }))
+  //                     : []
+  //                 )
+  //               : []
+  //         )
+  //       : [];
 
-//     const category = brand.franchiseDetails?.brandCategories || {};
-//     const formattedChipsState = locations.map((loc, index) => ({
-//       key: `${loc.state}-${index}`,
-//       label: ` ${category.child || ""} franchise in-${loc.state}`,
-//     }));
-//     const formattedChipsDistrict = locations.map((loc, index) => ({
-//       key: `${loc.district}-${index}`,
-//       label: ` ${category.child || ""} franchise in-${loc.district}`,
-//     }));
-//     const formattedChipsCity = locations.map((loc, index) => ({
-//       key: `${loc.city}-${index}`,
-//       label: ` ${category.child || ""} franchise in-${loc.city}`,
-//     }));
- 
-//     return (
-//       <Box
-//   sx={{
-//     border: "1px solid #e0e0e0",
-//     borderRadius: "8px",
-//     p: 2,
-//     display: "grid",
-//     gridTemplateColumns: "repeat(3, 1fr)",  // 👉 Creates 3 equal columns
-//     gap: 2,
-//     height: "90px",
-//     overflowY: "auto",
-//   }}
-// >
-//   {/* State Column */}
-//   <Box>
-//     {formattedChipsState.length > 0 ? (
-//       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-//         {formattedChipsState.map((chip) => (
-//           <Typography
-//             key={chip.key}
-//             variant="caption"
-//             sx={{
-//               borderRadius: "4px",
-//               color: colors.dark,
-//               whiteSpace: "nowrap",
-//             }}
-//           >
-//             {chip.label}
-//           </Typography>
-//         ))}
-//       </Box>
-//     ) : (
-//       <Typography
-//         variant="body2"
-//         sx={{
-//           color: "text.secondary",
-//           textAlign: "center",
-//           mt: 2,
-//         }}
-//       >
-//         No locations available
-//       </Typography>
-//     )}
-//   </Box>
+  //     const category = brand.franchiseDetails?.brandCategories || {};
+  //     const formattedChipsState = locations.map((loc, index) => ({
+  //       key: `${loc.state}-${index}`,
+  //       label: ` ${category.child || ""} franchise in-${loc.state}`,
+  //     }));
+  //     const formattedChipsDistrict = locations.map((loc, index) => ({
+  //       key: `${loc.district}-${index}`,
+  //       label: ` ${category.child || ""} franchise in-${loc.district}`,
+  //     }));
+  //     const formattedChipsCity = locations.map((loc, index) => ({
+  //       key: `${loc.city}-${index}`,
+  //       label: ` ${category.child || ""} franchise in-${loc.city}`,
+  //     }));
 
-//   {/* District Column */}
-//   <Box>
-//     {formattedChipsDistrict.length > 0 ? (
-//       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-//         {formattedChipsDistrict.map((chip) => (
-//           <Typography
-//             key={chip.key}
-//             variant="caption"
-//             sx={{
-//               borderRadius: "4px",
-//               color: colors.dark,
-//               whiteSpace: "nowrap",
-//             }}
-//           >
-//             {chip.label}
-//           </Typography>
-//         ))}
-//       </Box>
-//     ) : (
-//       <Typography
-//         variant="body2"
-//         sx={{
-//           color: "text.secondary",
-//           textAlign: "center",
-//           mt: 2,
-//         }}
-//       >
-//         No locations available
-//       </Typography>
-//     )}
-//   </Box>
+  //     return (
+  //       <Box
+  //   sx={{
+  //     border: "1px solid #e0e0e0",
+  //     borderRadius: "8px",
+  //     p: 2,
+  //     display: "grid",
+  //     gridTemplateColumns: "repeat(3, 1fr)",  // 👉 Creates 3 equal columns
+  //     gap: 2,
+  //     height: "90px",
+  //     overflowY: "auto",
+  //   }}
+  // >
+  //   {/* State Column */}
+  //   <Box>
+  //     {formattedChipsState.length > 0 ? (
+  //       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+  //         {formattedChipsState.map((chip) => (
+  //           <Typography
+  //             key={chip.key}
+  //             variant="caption"
+  //             sx={{
+  //               borderRadius: "4px",
+  //               color: colors.dark,
+  //               whiteSpace: "nowrap",
+  //             }}
+  //           >
+  //             {chip.label}
+  //           </Typography>
+  //         ))}
+  //       </Box>
+  //     ) : (
+  //       <Typography
+  //         variant="body2"
+  //         sx={{
+  //           color: "text.secondary",
+  //           textAlign: "center",
+  //           mt: 2,
+  //         }}
+  //       >
+  //         No locations available
+  //       </Typography>
+  //     )}
+  //   </Box>
 
-//   {/* City Column */}
-//   <Box>
-//     {formattedChipsCity.length > 0 ? (
-//       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-//         {formattedChipsCity.map((chip) => (
-//           <Typography
-//             key={chip.key}
-//             variant="caption"
-//             sx={{
-//               borderRadius: "4px",
-//               color: colors.dark,
-//               whiteSpace: "nowrap",
-//             }}
-//           >
-//             {chip.label}
-//           </Typography>
-//         ))}
-//       </Box>
-//     ) : (
-//       <Typography
-//         variant="body2"
-//         sx={{
-//           color: "text.secondary",
-//           textAlign: "center",
-//           mt: 2,
-//         }}
-//       >
-//         No locations available
-//       </Typography>
-//     )}
-//   </Box>
-// </Box>
+  //   {/* District Column */}
+  //   <Box>
+  //     {formattedChipsDistrict.length > 0 ? (
+  //       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+  //         {formattedChipsDistrict.map((chip) => (
+  //           <Typography
+  //             key={chip.key}
+  //             variant="caption"
+  //             sx={{
+  //               borderRadius: "4px",
+  //               color: colors.dark,
+  //               whiteSpace: "nowrap",
+  //             }}
+  //           >
+  //             {chip.label}
+  //           </Typography>
+  //         ))}
+  //       </Box>
+  //     ) : (
+  //       <Typography
+  //         variant="body2"
+  //         sx={{
+  //           color: "text.secondary",
+  //           textAlign: "center",
+  //           mt: 2,
+  //         }}
+  //       >
+  //         No locations available
+  //       </Typography>
+  //     )}
+  //   </Box>
 
-//     );
-//   };
+  //   {/* City Column */}
+  //   <Box>
+  //     {formattedChipsCity.length > 0 ? (
+  //       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+  //         {formattedChipsCity.map((chip) => (
+  //           <Typography
+  //             key={chip.key}
+  //             variant="caption"
+  //             sx={{
+  //               borderRadius: "4px",
+  //               color: colors.dark,
+  //               whiteSpace: "nowrap",
+  //             }}
+  //           >
+  //             {chip.label}
+  //           </Typography>
+  //         ))}
+  //       </Box>
+  //     ) : (
+  //       <Typography
+  //         variant="body2"
+  //         sx={{
+  //           color: "text.secondary",
+  //           textAlign: "center",
+  //           mt: 2,
+  //         }}
+  //       >
+  //         No locations available
+  //       </Typography>
+  //     )}
+  //   </Box>
+  // </Box>
+
+  //     );
+  //   };
 
   const hasData = (sectionData) => {
     if (Array.isArray(sectionData)) {
@@ -1118,145 +1226,97 @@ const OverviewTab = ({ brand }) => {
               >
                 Franchise Details
               </Typography>
-              <Box sx={{ mb: 4 }}>
-                <TableContainer
-                  sx={{
-                    borderRadius: "16px",
-                    overflowX: "auto",
-                    maxHeight: "calc(100vh - 300px)",
-                  }}
-                >
-                  <Table
-                    stickyHeader
+               <Box sx={{ mb: 4 }}>
+      <TableContainer
+        ref={containerRef}
+        sx={{
+          borderRadius: "16px",
+          overflowX: "auto",
+          maxHeight: "calc(100vh - 300px)",
+          display: "flex",  // make sure content flows horizontally
+        }}
+        onTouchStart={handleUserScrollStart}
+        onTouchEnd={handleUserScrollEnd}
+        onMouseEnter={handleUserScrollStart}
+        onMouseLeave={handleUserScrollEnd}
+      >
+        <Box sx={{ display: "flex" }}>
+          {/* render original table */}
+          <Table
+            stickyHeader
+            sx={{
+              width: 2000,
+              tableLayout: "fixed",
+              flexShrink: 0,
+            }}
+          >
+            <TableHead>
+              <TableRow>
+                {[
+                  "Model", "Type", "Investment", "Area", "Agreement",
+                  "Franchise Fee", "Interior Cost", "Stock", "Other Costs",
+                  "Working Capital", "Royalty Fee", "Break Even", "ROI",
+                  "Payback", "Margin"
+                ].map((header, i) => (
+                  <TableCell
+                    key={i}
+                    align="center"
                     sx={{
-                      width: 2000,
-                      tableLayout: "fixed", // this makes columns distribute evenly
+                      backgroundColor: "#7ad03a",
+                      color: "black",
+                      fontWeight: 700,
+                      padding: "12px 16px",
+                      borderBottom: "none",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    <TableHead>
-                      <TableRow>
-                        {[
-                          "Model",
-                          "Type",
-                          "Investment",
-                          "Area",
-                          "Agreement",
-                          "Franchise Fee",
-                          "Interior Cost",
-                          "Stock",
-                          "Other Costs",
-                          "Working Capital",
-                          "Royalty Fee",
-                          "Break Even",
-                          "ROI",
-                          "Payback",
-                          "Margin",
-                        ].map((header, i) => (
-                          <TableCell
-                            key={i}
-                            align="center"
-                            sx={{
-                              backgroundColor: "#7ad03a",
-                              color: "black",
-                              fontWeight: 700,
-                              padding: "12px 16px",
-                              borderBottom: "none",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {header}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableHead>
+                    {header}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>{tableRows}</TableBody>
+          </Table>
 
-                    <TableBody>
-                      {brand.franchiseDetails?.fico?.map((model, index) => (
-                        <Fade in={true} key={index} timeout={index * 100}>
-                          <TableRow
-                            hover
-                            selected={selectedModel?._id === model._id}
-                            // onClick={() => handleModelSelect(model)}
-                            sx={{
-                              "&:hover": {
-                                backgroundColor: "rgba(0, 0, 0, 0.04)",
-                              },
-                            }}
-                          >
-                            {[
-                              model.franchiseModel,
-                              model.franchiseType,
-                              model.investmentRange,
-                              model.areaRequired,
-                              model.agreementPeriod
-                                ? `${model.agreementPeriod} yrs`
-                                : "N/A",
-                              model.franchiseFee
-                                ? `₹${Number(model.franchiseFee).toLocaleString(
-                                    "en-IN"
-                                  )}`
-                                : "N/A",
-                              model.interiorCost
-                                ? `₹${Number(model.interiorCost).toLocaleString(
-                                    "en-IN"
-                                  )}`
-                                : "N/A",
-                              model.stockInvestment
-                                ? `₹${Number(
-                                    model.stockInvestment
-                                  ).toLocaleString("en-IN")}`
-                                : "N/A",
-                              model.otherCost
-                                ? `₹${Number(model.otherCost).toLocaleString(
-                                    "en-IN"
-                                  )}`
-                                : "N/A",
-                              model.requireWorkingCapital
-                                ? `₹${Number(
-                                    model.requireWorkingCapital
-                                  ).toLocaleString("en-IN")}`
-                                : "N/A",
-                              model.royaltyFee,
-                              model.breakEven,
-                              model.roi ? `${model.roi}%` : "N/A",
-                              model.payBackPeriod,
-                              model.marginOnSales
-                                ? `${model.marginOnSales}%`
-                                : "N/A",
-                            ].map((value, j) => (
-                              <TableCell
-                                key={j}
-                                align="center"
-                                sx={{
-                                  borderBottom: "1px solid rgba(0,0,0,0.05)",
-                                  padding: "25px 16px",
-                                  whiteSpace: "nowrap",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  fontWeight:
-                                    (j === 12 && model.roi) ||
-                                    (j === 14 && model.marginOnSales)
-                                      ? 700
-                                      : "inherit",
-                                  color:
-                                    j === 12 && parseFloat(model.roi) > 20
-                                      ? "success.main"
-                                      : j === 14 &&
-                                        parseFloat(model.marginOnSales) > 30
-                                      ? "success.main"
-                                      : "inherit",
-                                }}
-                              >
-                                {value || "N/A"}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        </Fade>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
+          {/* duplicate table for seamless scroll */}
+          <Table
+            stickyHeader
+            sx={{
+              width: 2000,
+              tableLayout: "fixed",
+              flexShrink: 0,
+            }}
+          >
+            <TableHead>
+              <TableRow>
+                {[
+                  "Model", "Type", "Investment", "Area", "Agreement",
+                  "Franchise Fee", "Interior Cost", "Stock", "Other Costs",
+                  "Working Capital", "Royalty Fee", "Break Even", "ROI",
+                  "Payback", "Margin"
+                ].map((header, i) => (
+                  <TableCell
+                    key={i}
+                    align="center"
+                    sx={{
+                      backgroundColor: "#7ad03a",
+                      color: "black",
+                      fontWeight: 700,
+                      padding: "12px 16px",
+                      borderBottom: "none",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {header}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>{tableRows}</TableBody>
+          </Table>
+        </Box>
+      </TableContainer>
+    </Box>
             </>
           )}
 
@@ -1289,25 +1349,21 @@ const OverviewTab = ({ brand }) => {
                   "& strong": { color: colors.primary },
                 }}
               />
-             <Typography variant="body2" component="div">
-  {hasData(brand.franchiseDetails?.uniqueSellingPoints) && (
-    <>
-      <Typography
-        variant="body1"
-        sx={{ color: colors.dark, fontWeight: 600 }}
-      >
-        Unique Selling Points:
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{ color: colors.dark }}
-      >
-        {brand.franchiseDetails.uniqueSellingPoints.join(", ")}
-      </Typography>
-    </>
-  )}
-</Typography>
-
+              <Typography variant="body2" component="div">
+                {hasData(brand.franchiseDetails?.uniqueSellingPoints) && (
+                  <>
+                    <Typography
+                      variant="body1"
+                      sx={{ color: colors.dark, fontWeight: 600 }}
+                    >
+                      Unique Selling Points:
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: colors.dark }}>
+                      {brand.franchiseDetails.uniqueSellingPoints.join(", ")}
+                    </Typography>
+                  </>
+                )}
+              </Typography>
             </Box>
           )}
 
@@ -1316,7 +1372,7 @@ const OverviewTab = ({ brand }) => {
             brand.franchiseDetails?.aidFinancing ||
             hasData(brand.franchiseDetails?.uniqueSellingPoints)) && (
             <Grid container spacing={3} sx={{ mt: 2, mb: 3 }}>
-              <Grid  xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <Zoom in={true} timeout={700}>
                   <AnimatedCard
                     sx={{
@@ -1382,7 +1438,7 @@ const OverviewTab = ({ brand }) => {
                           </>
                         )}
                         <Typography
-                                      id="expansion-location"
+                          id="expansion-location"
                           variant="body2"
                           sx={{ color: colors.dark, fontWeight: 600 }}
                         >
@@ -1493,7 +1549,7 @@ const OverviewTab = ({ brand }) => {
               brand.uploads.awards.length > 0 ? (
                 <Grid container spacing={2}>
                   {brand.uploads.awards.map((award, idx) => (
-                    <Grid  xs={12} sm={6} md={4} key={idx}>
+                    <Grid xs={12} sm={6} md={4} key={idx}>
                       <Slide direction="up" in={true} timeout={idx * 200}>
                         <Box
                           sx={{
@@ -1587,7 +1643,7 @@ const OverviewTab = ({ brand }) => {
               </Typography>
               <Grid container spacing={2}>
                 {brand.uploads.businessPlan.map((doc, idx) => (
-                  <Grid  xs={12} sm={6} md={4} key={idx}>
+                  <Grid xs={12} sm={6} md={4} key={idx}>
                     <Slide direction="up" in={true} timeout={idx * 200}>
                       <Box
                         sx={{
@@ -1668,7 +1724,6 @@ const OverviewTab = ({ brand }) => {
               supplied. Please read the terms & conditions on MrFranchise.in
             </Typography>
           </Box>
-        
         </Box>
       ),
     },
@@ -1679,7 +1734,7 @@ const OverviewTab = ({ brand }) => {
       {sections.map((section, index) => (
         <Box key={index} sx={{ mb: 6 }}>
           <SectionHeader
-component="div"
+            component="div"
             variant="h5"
             sx={{
               display: "flex",
@@ -1708,8 +1763,6 @@ component="div"
           {section.content}
         </Box>
       ))}
-
-     
     </Box>
   );
 };

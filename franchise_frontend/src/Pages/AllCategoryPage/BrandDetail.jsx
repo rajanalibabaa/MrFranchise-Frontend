@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useNavigate, useParams,Link, useLocation } from "react-router-dom";
+
+import React, { useEffect, useState, useCallback, useMemo, } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -48,16 +49,19 @@ import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 import { useToggleLike } from '../../Hooks/Fetchbrands.jsx';
 import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx";
-
-// import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
 import ShareDialogActions from "./ShareDialogActions.jsx";
 
 const BrandDetails = ({ brandData }) => {
-   const location = useLocation();
+  const location = useLocation();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-const navigate = useNavigate();
+  // Enhanced media queries for better responsiveness
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // < 600px
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md")); // 600px - 900px
+  const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg")); // 900px - 1200px
+  const isLargeDesktop = useMediaQuery(theme.breakpoints.up("lg")); // > 1200px
+  
+  const navigate = useNavigate();
+  
   // State management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,13 +70,14 @@ const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openContactModal, setOpenContactModal] = useState(false);
   const [userData, setUserData] = useState(null);
-const [anchorEl, setAnchorEl] = useState(null);  const [locationData, setLocationData] = useState({
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [locationData, setLocationData] = useState({
     states: [],
     districts: [],
     cities: [],
   });
 
-const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
+  const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
   const [isProcessingLike, setIsProcessingLike] = useState(false);
   
   const { mutate: toggleLike } = useToggleLike();
@@ -91,13 +96,9 @@ const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
 
   const [showBackToTop, setShowBackToTop] = useState(false);
 
-const handleOpenShareClick = (event) => {
+  const handleOpenShareClick = (event) => {
     setAnchorEl(event.currentTarget); 
   };
-
-  // const handleCloseShareDialog = () => {
-  //   setOpenShareDialog(false);
-  // };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -111,40 +112,35 @@ const handleOpenShareClick = (event) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
   
-  
   const { uuid } = useParams();
-  // const { selectedBrand } = useSelector((state) => state.brands);
   const selectedBrand = brandData || {};
  
-
   // Get investor data from localStorage with caching
   const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
   const AccessToken = useMemo(() => localStorage.getItem("accessToken"), []);
 
-
-    const handleLikeClick = useCallback(() => {
-      if (isProcessingLike) return;
-      
-      setIsProcessingLike(true);
-      const newLikeStatus = !localIsLiked;
-      
-      // Optimistic update
-      setLocalIsLiked(newLikeStatus);
-      
-      toggleLike(
-        { brandId: uuid, isLiked: !newLikeStatus },
-        {
-          onError: () => {
-            // Revert on error
-            setLocalIsLiked(!newLikeStatus);
-          },
-          onSettled: () => {
-            setIsProcessingLike(false);
-          }
+  const handleLikeClick = useCallback(() => {
+    if (isProcessingLike) return;
+    
+    setIsProcessingLike(true);
+    const newLikeStatus = !localIsLiked;
+    
+    // Optimistic update
+    setLocalIsLiked(newLikeStatus);
+    
+    toggleLike(
+      { brandId: uuid, isLiked: !newLikeStatus },
+      {
+        onError: () => {
+          // Revert on error
+          setLocalIsLiked(!newLikeStatus);
+        },
+        onSettled: () => {
+          setIsProcessingLike(false);
         }
-      );
-    }, [uuid, localIsLiked, isProcessingLike, toggleLike]);
-
+      }
+    );
+  }, [uuid, localIsLiked, isProcessingLike, toggleLike]);
 
   // Memoized API calls
   const fetchInvestorDetails = useCallback(async () => {
@@ -158,7 +154,7 @@ const handleOpenShareClick = (event) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${AccessToken}`,
           },
-          signal: AbortSignal.timeout(5000) // Add timeout
+          signal: AbortSignal.timeout(5000)
         }
       );
       
@@ -187,8 +183,6 @@ const handleOpenShareClick = (event) => {
     const fetchBrand = async () => {
       try {
         await useBrand(uuid).unwrap();
-        // If brand is not found, redirect to brands page
-
       } catch (error) {
         console.error("Failed to fetch brand details:", error);
       }
@@ -197,7 +191,7 @@ const handleOpenShareClick = (event) => {
     fetchBrand();
     
     return () => controller.abort();
-  }, [uuid,]);
+  }, [uuid]);
 
   // Fetch investor data on mount if logged in (with caching)
   useEffect(() => {
@@ -288,11 +282,13 @@ const handleOpenShareClick = (event) => {
     [selectedBrand]
   );
 
+  // Responsive image box sizing
   const getImageBoxSize = useCallback(() => {
-    if (isMobile) return 100;
-    if (isTablet) return 150;
-    return 204;
-  }, [isMobile, isTablet]);
+    if (isMobile) return 120; // Slightly larger for better mobile touch targets
+    if (isTablet) return 160;
+    if (isSmallDesktop) return 180;
+    return 204; // Large desktop
+  }, [isMobile, isTablet, isSmallDesktop]);
 
   const getOutletRange = useCallback((value) => {
     const numericValue = Number(value);
@@ -303,7 +299,7 @@ const handleOpenShareClick = (event) => {
     return `${lower} - ${upper}`;
   }, []);
 
-  // Optimized event handlers
+  // Event handlers
   const handleOpenContact = useCallback(() => setOpenContactModal(true), []);
   const handleCloseContact = useCallback(() => setOpenContactModal(false), []);
 
@@ -319,78 +315,73 @@ const handleOpenShareClick = (event) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   }, []);
 
-const handleSubmit = useCallback(async (e) => {
-  e.preventDefault();
-  setIsSubmitting(true);
-  
-  const id = investorUUID || localStorage.getItem("brandUUID");  // Single declaration
-
-  if (!id) {
-    alert("User not logged in or missing ID. Please login again.");
-    navigate("/registerhandleuser");
-    return;
-  }
-
-  try {
-    const payload = {
-      ...formData,
-      state: formData.state || "",
-      district: formData.district || "",
-      city: formData.city || "",
-      brandId: selectedBrand?.uuid,
-      brandName: selectedBrand?.brandDetails?.brandName || "",
-      applyId: id  // Use the already declared id
-    };
-
-    // Validate required fields
-    const requiredFields = [
-      'fullName', 'investorEmail', 'mobileNumber', 'state', 
-      'district', 'city', 'investmentRange', 'planToInvest', 'readyToInvest'
-    ];
+  const handleSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
     
-    const missingFields = requiredFields.filter(field => !payload[field]);
-    
-    if (missingFields.length > 0) {
-      alert(`Please fill all required fields: ${missingFields.join(', ')}`);
+    const id = investorUUID || localStorage.getItem("brandUUID");
+
+    if (!id) {
+      alert("User not logged in or missing ID. Please login again.");
+      navigate("/registerhandleuser");
       return;
     }
 
-    // console.log("payload :", payload)
+    try {
+      const payload = {
+        ...formData,
+        state: formData.state || "",
+        district: formData.district || "",
+        city: formData.city || "",
+        brandId: selectedBrand?.uuid,
+        brandName: selectedBrand?.brandDetails?.brandName || "",
+        applyId: id
+      };
 
-    const response = await axios.post(
-      "https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication",
-      payload,
-      { 
-        headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(10000) // Add timeout
+      const requiredFields = [
+        'fullName', 'investorEmail', 'mobileNumber', 'state', 
+        'district', 'city', 'investmentRange', 'planToInvest', 'readyToInvest'
+      ];
+      
+      const missingFields = requiredFields.filter(field => !payload[field]);
+      
+      if (missingFields.length > 0) {
+        alert(`Please fill all required fields: ${missingFields.join(', ')}`);
+        return;
       }
-    );
 
-    if (response.data) {
-      setSubmitSuccess(true);
-      alert("✅Success! Your application has been submitted.");
-      setDrawerOpen(false);
-       // ✅ Reset the form after successful submission
-  setFormData({
-   fullName: "",
-    investorEmail: "",
-    mobileNumber: "",
-    investmentRange: "",
-    state: "",
-    district: "",
-    city: "",
-    planToInvest: "",
-    readyToInvest: "",
-    // Add other fields if present in formData
-  });
+      const response = await axios.post(
+        "https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication",
+        payload,
+        { 
+          headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(10000)
+        }
+      );
+
+      if (response.data) {
+        setSubmitSuccess(true);
+        alert("✅Success! Your application has been submitted.");
+        setDrawerOpen(false);
+        setFormData({
+          fullName: "",
+          investorEmail: "",
+          mobileNumber: "",
+          investmentRange: "",
+          state: "",
+          district: "",
+          city: "",
+          planToInvest: "",
+          readyToInvest: "",
+        });
+      }
+    } catch (error) {
+      console.error("Submission error:", error?.response?.data || error.message);
+      alert("❌Failed to submit application. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (error) {
-    console.error("Submission error:", error?.response?.data || error.message);
-    alert("❌Failed to submit application. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-  }
-}, [formData, selectedBrand, investorUUID, navigate]);
+  }, [formData, selectedBrand, investorUUID, navigate]);
 
   const handleImageOpen = useCallback((index) => {
     setCurrentImageIndex(index);
@@ -410,6 +401,15 @@ const handleSubmit = useCallback(async (e) => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Mask email for privacy
+  const maskEmail = (email) => {
+    const [name, domain] = email.split("@");
+    if (!name || !domain) return email;
+    const visiblePart = name.slice(0, 2);
+    const maskedPart = "*".repeat(name.length - 2);
+    return `${visiblePart}${maskedPart}@${domain}`;
+  };
+
   if (!selectedBrand) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -418,16 +418,7 @@ const handleSubmit = useCallback(async (e) => {
     );
   }
 
-const maskEmail = (email) => {
-  const [name, domain] = email.split("@");
-  if (!name || !domain) return email;
-  const visiblePart = name.slice(0, 2);
-  const maskedPart = "*".repeat(name.length - 2);
-  return `${visiblePart}${maskedPart}@${domain}`;
-};
-
-
-
+  // ExpansionLocationTags component for responsive location display
   const ExpansionLocationTags = ({ brand }) => {
     const locations = Array.isArray(
       brand.expansionLocationData?.expansionLocations?.domestic?.locations
@@ -463,145 +454,153 @@ const maskEmail = (email) => {
     }));
  
     return (
-     <Box
-  sx={{
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
-    p: 2,
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",  // 👉 Creates 3 equal columns
-    gap: 2,
-    height: "90px",
-    overflowY: "auto",
-  }}
->
-  {/* State Column */}
-  <Box>
-    {formattedChipsState.length > 0 ? (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        {formattedChipsState.map((chip) => (
-          <Typography
-            key={chip.key}
-            variant="caption"
-            sx={{
-              borderRadius: "4px",
-              color: 'black',
-              whiteSpace: "nowrap",
-            }}
-          >
-            {chip.label}
-          </Typography>
-        ))}
-      </Box>
-    ) : (
-      <Typography
-        variant="body2"
+      <Box
         sx={{
-          color: "text.secondary",
-          textAlign: "center",
-          mt: 2,
+          border: "1px solid #e0e0e0",
+          borderRadius: "8px",
+          p: 2,
+          display: "grid",
+          // Responsive grid columns
+          gridTemplateColumns: isMobile ? "1fr" : isTablet ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
+          gap: 2,
+          height: isMobile ? "auto" : "90px",
+          overflowY: "auto",
         }}
       >
-        No locations available
-      </Typography>
-    )}
-  </Box>
+        {/* State Column */}
+        <Box>
+          {formattedChipsState.length > 0 ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {formattedChipsState.slice(0, isMobile ? 3 : formattedChipsState.length).map((chip) => (
+                <Typography
+                  key={chip.key}
+                  variant="caption"
+                  sx={{
+                    borderRadius: "4px",
+                    color: 'black',
+                    whiteSpace: "nowrap",
+                    fontSize: isMobile ? "0.7rem" : "0.8rem",
+                  }}
+                >
+                  {chip.label}
+                </Typography>
+              ))}
+            </Box>
+          ) : (
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                textAlign: "center",
+                mt: 2,
+              }}
+            >
+              No locations available
+            </Typography>
+          )}
+        </Box>
 
-  {/* District Column */}
-  <Box>
-    {formattedChipsDistrict.length > 0 ? (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        {formattedChipsDistrict.map((chip) => (
-          <Typography
-            key={chip.key}
-            variant="caption"
-            sx={{
-              borderRadius: "4px",
-              color: 'black',
-              whiteSpace: "nowrap",
-            }}
-          >
-            {chip.label}
-          </Typography>
-        ))}
+        {/* District Column - hidden on mobile if no space */}
+        {!isMobile && (
+          <Box>
+            {formattedChipsDistrict.length > 0 ? (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {formattedChipsDistrict.slice(0, isMobile ? 3 : formattedChipsDistrict.length).map((chip) => (
+                  <Typography
+                    key={chip.key}
+                    variant="caption"
+                    sx={{
+                      borderRadius: "4px",
+                      color: 'black',
+                      whiteSpace: "nowrap",
+                      fontSize: isMobile ? "0.7rem" : "0.8rem",
+                    }}
+                  >
+                    {chip.label}
+                  </Typography>
+                ))}
+              </Box>
+            ) : (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  textAlign: "center",
+                  mt: 2,
+                }}
+              >
+                No locations available
+              </Typography>
+            )}
+          </Box>
+        )}
+
+        {/* City Column - hidden on mobile and tablet if no space */}
+        {(isLargeDesktop || isSmallDesktop) && (
+          <Box>
+            {formattedChipsCity.length > 0 ? (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {formattedChipsCity.map((chip) => (
+                  <Typography
+                    key={chip.key}
+                    variant="caption"
+                    sx={{
+                      borderRadius: "4px",
+                      color: 'black',
+                      whiteSpace: "nowrap",
+                      fontSize: isMobile ? "0.7rem" : "0.8rem",
+                    }}
+                  >
+                    {chip.label}
+                  </Typography>
+                ))}
+              </Box>
+            ) : (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  textAlign: "center",
+                  mt: 2,
+                }}
+              >
+                No locations available
+              </Typography>
+            )}
+          </Box>
+        )}
       </Box>
-    ) : (
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          textAlign: "center",
-          mt: 2,
-        }}
-      >
-        No locations available
-      </Typography>
-    )}
-  </Box>
-
-  {/* City Column */}
-  <Box>
-    {formattedChipsCity.length > 0 ? (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        {formattedChipsCity.map((chip) => (
-          <Typography
-            key={chip.key}
-            variant="caption"
-            sx={{
-              borderRadius: "4px",
-              color: 'black',
-              whiteSpace: "nowrap",
-            }}
-          >
-            {chip.label}
-          </Typography>
-        ))}
-      </Box>
-    ) : (
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          textAlign: "center",
-          mt: 2,
-        }}
-      >
-        No locations available
-      </Typography>
-    )}
-  </Box>
-</Box>
- 
-
     );
   };
+
   return (
     <>
       <Navbar />
+      {/* Main container with responsive width and padding */}
       <Box
         sx={{
           width: "90%",
-          maxWidth: 1200,
+          maxWidth: 1200, // Increased max width for larger screens
           mx: "auto",
-          my: 4,
-          px: isMobile ? 2 : 4,
+          my: isMobile ? 2 : 4,
+          px: isMobile ? 1 : isTablet ? 3 : 4,
         }}
       >
-        {/* Floating Apply Now Button (Always Visible) */}
+        {/* Floating Apply Now Button - responsive positioning */}
         <Box
           sx={{
             position: "fixed",
-            bottom: isMobile ? 35 : 300,
-            right: isMobile ? 0 : 20,
-            left: isMobile ? 0 : "auto",
-            display: "flex",
-            justifyContent: "center",
-            zIndex: 1000,
+             bottom: isMobile ? 35 : 300,
+             right: isMobile ? 0 : 20,
+             left: isMobile ? 0 : "auto",
+             display: "flex",
+             justifyContent: "center",
+             zIndex: 1000,
           }}
         >
           <Button
             variant="contained"
-            size="large"
+            size={isMobile ? "medium" : "large"}
             onClick={toggleDrawer(true)}
             sx={{
               backgroundColor: "#ff9800",
@@ -613,6 +612,8 @@ const maskEmail = (email) => {
               "&:hover": {
                 backgroundColor: "#e65100",
               },
+              fontSize: isMobile ? "0.875rem" : "1rem",
+              // width: isMobile ? "100%" : "auto",
             }}
           >
             Apply Now
@@ -626,19 +627,16 @@ const maskEmail = (email) => {
           onClose={toggleDrawer(false)}
           PaperProps={{
             sx: {
-              borderTopLeftRadius: isMobile || isTablet ? 16 : 16,
-              borderTopRightRadius: isMobile || isTablet ? 16 : 16,
-              borderTopBottomRadius: isMobile || isTablet ? 16 : 16,
-              borderBottomLeftRadius: isMobile || isTablet ? 16 : 16,
-              borderBottomRightRadius: isMobile || isTablet ? 16 : 16,
-              maxHeight: isMobile || isTablet ? "80vh" : "93vh",
-              width: isMobile || isTablet ? "100%" : 430,
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+              maxHeight: isMobile ? "80vh" : isTablet ? "70vh" : "93vh",
+              width: isMobile ? "100%" : isTablet ? "80%" : 430,
               overflow: "auto",
-              mt: isMobile || isTablet ? 0 : 3,
+              mx: "auto",
             },
           }}
         >
-          <Box sx={{ p: 3 }}>
+          <Box sx={{ p: isMobile ? 2 : 3 }}>
             <Box
               sx={{
                 display: "flex",
@@ -648,7 +646,7 @@ const maskEmail = (email) => {
               }}
             >
               <Typography variant="h6" fontWeight={700} color="#ff9800">
-                Apply for  Franchise
+                Apply for Franchise
               </Typography>
               <IconButton onClick={toggleDrawer(false)}>
                 <Close />
@@ -656,7 +654,7 @@ const maskEmail = (email) => {
             </Box>
 
             <form onSubmit={handleSubmit}>
-            <Grid
+              <Grid
                 spacing={2}
                 sx={{
                   display: "grid",
@@ -693,9 +691,7 @@ const maskEmail = (email) => {
                     fullWidth
                     label="Mobile Number"
                     name="mobileNumber"
-                    value={
-                      formData.mobileNumber || userData?.mobileNumber || ""
-                    }
+                    value={formData.mobileNumber || userData?.mobileNumber || ""}
                     onChange={handleChange}
                     required
                     variant="outlined"
@@ -871,7 +867,8 @@ const maskEmail = (email) => {
           open={openContactModal}
           onClose={handleCloseContact}
           fullWidth
-          maxWidth="sm"
+          maxWidth={isMobile ? "xs" : "sm"} // Responsive dialog size
+          fullScreen={isMobile} // Full screen on mobile
         >
           <DialogTitle
             sx={{
@@ -879,17 +876,17 @@ const maskEmail = (email) => {
               background: "linear-gradient(45deg, #000 30%, #000 90%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
+              fontSize: isMobile ? "1.25rem" : "1.5rem",
             }}
           >
             Contact Details
-
             <IconButton
               aria-label="close"
               onClick={handleCloseContact} 
               sx={{
                 position: "absolute",
-                top: 10,
-                right: 10,
+                top: 8,
+                right: 8,
                 color:'error.main'
               }} 
             >
@@ -899,67 +896,36 @@ const maskEmail = (email) => {
 
           <DialogContent dividers>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Typography>
-  <strong>Manager Name:</strong>{" "}
-  {selectedBrand.brandDetails?.ceoName
-    ? `${selectedBrand.brandDetails.ceoName.slice(0, 2)}***`
-    : "N/A"}
-</Typography>
-
-<Typography>
-  <strong>Mobile Number:</strong>{" "}
-  {selectedBrand.brandDetails?.ceoMobile
-    ? `${selectedBrand.brandDetails.ceoMobile.slice(0, 5)}*****`
-    : "N/A"}
-</Typography>
-
-<Typography>
-  <strong>Email:</strong>{" "}
-  {selectedBrand.brandDetails?.email
-    ? maskEmail(selectedBrand.brandDetails.email)
-    : "N/A"}
-</Typography>
-
-
-              {/* <Typography>
-                <strong>Website:</strong>{" "}
-                {selectedBrand.brandDetails?.website ? (
-                  <a
-                    href={selectedBrand.brandDetails.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedBrand.brandDetails.website}
-                  </a>
-                ) : (
-                  "N/A"
-                )}
+              <Typography fontSize={isMobile ? "0.9rem" : "1rem"}>
+                <strong>Manager Name:</strong>{" "}
+                {selectedBrand.brandDetails?.ceoName
+                  ? `${selectedBrand.brandDetails.ceoName.slice(0, 2)}***`
+                  : "N/A"}
               </Typography>
 
-              <Typography>
-                <strong>Instagram:</strong>{" "}
-                {selectedBrand.brandDetails?.instagram ? (
-                  <a
-                    href={selectedBrand.brandDetails.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedBrand.brandDetails.instagram}
-                  </a>
-                ) : (
-                  "N/A"
-                )}
-              </Typography> */}
+              <Typography fontSize={isMobile ? "0.9rem" : "1rem"}>
+                <strong>Mobile Number:</strong>{" "}
+                {selectedBrand.brandDetails?.ceoMobile
+                  ? `${selectedBrand.brandDetails.ceoMobile.slice(0, 5)}*****`
+                  : "N/A"}
+              </Typography>
+
+              <Typography fontSize={isMobile ? "0.9rem" : "1rem"}>
+                <strong>Email:</strong>{" "}
+                {selectedBrand.brandDetails?.email
+                  ? maskEmail(selectedBrand.brandDetails.email)
+                  : "N/A"}
+              </Typography>
             </Box>
           </DialogContent>
 
           <DialogActions>
             <Button
-              // onClick={handleCloseContact}
               variant="contained"
               color="success"
+              size={isMobile ? "small" : "medium"}
             >
-              view contact details
+              View contact details
             </Button>
           </DialogActions>
         </Dialog>
@@ -981,21 +947,26 @@ const maskEmail = (email) => {
             <Box
               display="flex"
               alignItems="center"
-              gap={3}
+              gap={isMobile ? 1 : 3}
               flexDirection={isMobile ? "column" : "row"}
               width="100%"
             >
               <Box
                 position="relative"
-                sx={{ border: "3px solid orange", borderRadius: "10px" }}
+                sx={{ 
+                  border: "3px solid orange", 
+                  borderRadius: "10px",
+                  // width: isMobile ? 120 : isTablet ? 150 : 200,
+                  // height: isMobile ? 120 : isTablet ? 150 : 200,
+                }}
               >
                 <Avatar
                   src={selectedBrand.uploads?.brandLogo}
                   alt={selectedBrand.brandDetails?.brandName}
                   sx={{
                     width: isMobile ? 150 : 200,
-                    height: isMobile ? 150 : 200,
-                    objectFit: "contain",
+                     height: isMobile ? 150 : 200,
+                     objectFit: "contain",
                   }}
                 />
               </Box>
@@ -1007,7 +978,7 @@ const maskEmail = (email) => {
                     alignItems="center"
                     justifyContent="space-between"
                     flexDirection={isMobile ? "column" : "row"}
-                    gap={2}
+                    gap={ 2}
                   >
                     <Box>
                       <Typography
@@ -1015,36 +986,42 @@ const maskEmail = (email) => {
                         sx={{
                           fontWeight: 600,
                           mb: 1,
-                          background:
-                            "linear-gradient(45deg, #000 30%, #000 90%)",
+                          background: "linear-gradient(45deg, #000 30%, #000 90%)",
                           WebkitBackgroundClip: "text",
                           WebkitTextFillColor: "transparent",
                           textAlign: isMobile ? "center" : "left",
+                          fontSize: isMobile ? "center" : "left",
                         }}
                       >
                         {selectedBrand.brandDetails?.brandName}
                       </Typography>
-                      <Typography variant="body1" color="text.secondary">
+                      <Typography 
+                        variant="body1" 
+                        color="text.secondary"
+                        textAlign={isMobile ? "center" : "left"}
+                        fontSize={isMobile ? "0.875rem" : "1rem"}
+                      >
                         {selectedBrand.brandDetails?.tagLine}
                       </Typography>
 
                       <Box
                         sx={{
                           display: "flex",
-                          flexWrap: "wrap",
-                          alignItems: "center",
-                          gap: isMobile ? 1 : 10,
-                          mt: 1,
+                           flexWrap: "wrap",
+                           alignItems: "center",
+                           gap: isMobile ? 1 : 10,
+                           mt: 1,
+                           justifyContent: isMobile ? "center" : "flex-start",
                         }}
                       >
-                        <Typography>
+                        <Typography fontSize={isMobile ? "0.8rem" : "0.9rem"}>
                           Established Year:{" "}
                           <label variant="body1" color="text.secondary">
                             {selectedBrand.franchiseDetails?.establishedYear ||
                               "N/A"}
                           </label>
                         </Typography>
-                        <Typography>
+                        <Typography fontSize={isMobile ? "0.8rem" : "0.9rem"}>
                           Franchise Since:{" "}
                           <label variant="body1" color="text.secondary">
                             {selectedBrand.franchiseDetails
@@ -1053,71 +1030,94 @@ const maskEmail = (email) => {
                         </Typography>
                       </Box>
                     </Box>
-<Box sx={{ml:10}}>
+                    <Box 
+                      sx={{
+                        mt: isMobile ? 1 : 0,
+                         // alignSelf: isMobile ? "center" : "flex-end",
+                         ml: isMobile ? 0 : 2,
+                      }}
+                    >
                       <Button
                         variant="contained"
                         size={isMobile ? "small" : "medium"}
                         startIcon={<Phone />}
                         onClick={handleOpenContact}
                         sx={{
-                          px: isMobile ? 1 : 1.5,
-                          py: isMobile ? 1 : 2,
+                           px: isMobile ? 1 : 1.5,
+                           py: isMobile ? 1 : 2,
                           bgcolor: "#ff9800",
                           "&:hover": {
                             bgcolor: "#e65100",
                           },
+                          fontSize: isMobile ? "0.75rem" : "0.875rem",
                         }}
                       >
                         VIEW CONTACT
                       </Button>
+                      <IconButton
+                      sx={{ marginLeft: "90px" }}
+                        onClick={handleLikeClick}
+                        disabled={isProcessingLike}
+                        aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
+                        // size={isMobile ? "small" : "medium"}
+                      >
+                        {isProcessingLike ? (
+                          <CircularProgress size={isMobile ? 20 : 24} />
+                        ) : (
+                          <Favorite
+                            sx={{
+                              color: localIsLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
+                              // fontSize: isMobile ? "1.2rem" : "1.5rem",
+                            }}
+                          />
+                        )}
+                      </IconButton>
+                      <IconButton 
+                        sx={{
+                          color: 'rgba(0,0,0,0.23)',
+                        }}
+                        size={isMobile ? "small" : "medium"}
+                        onClick={() => {
+                          console.log("shortlist is clicked");
+                          }}
+                      >
+                        <PlaylistAddCheckCircleOutlined sx={{ fontSize: isMobile ? "1.2rem" : "1.5rem" }} />
+                      </IconButton>
+                      <IconButton 
+                        onClick={handleOpenShareClick}
+                        size={isMobile ? "small" : "medium"}
+                      >
+                        <ShareOutlined sx={{ fontSize: isMobile ? "1.2rem" : "1.5rem" }} />
+                      </IconButton>
+                      <ShareDialogActions
+                       anchorEl={anchorEl}
+                       setAnchorEl={setAnchorEl}
+                     />
                     </Box>
-                     <IconButton
-                     sx={{marginLeft:"90px"}}
-                                onClick={handleLikeClick}
-                                disabled={isProcessingLike}
-                                aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
-                              >
-                                {isProcessingLike ? (
-                                  <CircularProgress size={24} />
-                                ) : (
-                                  <Favorite
-                                    sx={{
-                                      color: localIsLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
-                                    }}
-                                  />
-                                )}
-                              </IconButton>
-                              <IconButton sx={{
-                                            color:'rgba(0,0,0,0.23)',
-                                          }}
-                                          onClick={()=>{
-                                            console.log("shortlist is clicked")
-                                          }}
-                                          >
-                                          <PlaylistAddCheckCircleOutlined/>
-                                          </IconButton>
-                    <IconButton onClick={handleOpenShareClick}>
-        <ShareOutlined />
-      </IconButton>
-
-      {/* Share Popover */}
-      <ShareDialogActions anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
-                    
                   </Box>
                 </Box>
 
-                <TableContainer component={Paper} sx={{ mt: 2, width: "100%" }}>
-                  <Table size="small" sx={{border:"collapse"}}>
+                {/* Responsive table */}
+                <TableContainer 
+                  component={Paper} 
+                  sx={{ 
+                    mt: 2, 
+                    width: "100%",
+                    overflowX: "auto",
+                  }}
+                >
+                  <Table size={isMobile ? "small" : "medium"} sx={{ minWidth: isMobile ? 600 : "100%" }}>
                     <TableHead>
                       <TableRow
                         sx={{
                           backgroundColor: "#7ad03a",
                           "& td, & th": {
-                            padding: isMobile ? "2px 6px" : "8px 12px",
+                            padding: isMobile ? "4px 8px" : "8px 12px",
+                            fontSize: isMobile ? "0.7rem" : "0.8rem",
                           },
                         }}
                       >
-                        <TableCell sx={{ width: "30%", textAlign: "center", p:"3px" }}>
+                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
                           <strong>Category</strong>
                         </TableCell>
                         <TableCell sx={{ width: "15%", textAlign: "center" }}>
@@ -1129,71 +1129,59 @@ const maskEmail = (email) => {
                         <TableCell sx={{ width: "15%", textAlign: "center" }}>
                           <strong>Total Outlets</strong>
                         </TableCell>
-<TableCell sx={{ width: "30%", textAlign: "center", whiteSpace: "normal", wordBreak: "break-word" }}>
-                            <strong>Expansion Location</strong>
+                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
+                          <strong>Expansion Location</strong>
                         </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       <TableRow>
-                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
-                          {selectedBrand.franchiseDetails?.brandCategories
-                            ?.child || "N/A"}
+                        <TableCell sx={{ width: "30%", textAlign: "center", fontSize: isMobile ? "0.7rem" : "0.8rem" }}>
+                          {selectedBrand.franchiseDetails?.brandCategories?.child || "N/A"}
                         </TableCell>
-                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
-                          {selectedBrand.franchiseDetails?.fico?.[0]
-                            ?.areaRequired || "N/A"}
+                        <TableCell sx={{ width: "15%", textAlign: "center", fontSize: isMobile ? "0.7rem" : "0.8rem" }}>
+                          {selectedBrand.franchiseDetails?.fico?.[0]?.areaRequired || "N/A"}
                         </TableCell>
-                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
-                          {selectedBrand.franchiseDetails?.fico?.[0]
-                            ?.investmentRange || "N/A"}
+                        <TableCell sx={{ width: "15%", textAlign: "center", fontSize: isMobile ? "0.7rem" : "0.8rem" }}>
+                          {selectedBrand.franchiseDetails?.fico?.[0]?.investmentRange || "N/A"}
                         </TableCell>
-                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
-                          {getOutletRange(
-                            selectedBrand.franchiseDetails?.totalOutlets
-                          )}
+                        <TableCell sx={{ width: "15%", textAlign: "center", fontSize: isMobile ? "0.7rem" : "0.8rem" }}>
+                          {getOutletRange(selectedBrand.franchiseDetails?.totalOutlets)}
                         </TableCell>
-                    <TableCell sx={{ width: "30%", textAlign: "center" }}>
-  {(() => {
-    const locations =
-      selectedBrand.expansionLocationData?.expansionLocations?.domestic
-        ?.locations || [];
+                        <TableCell sx={{ width: "30%", textAlign: "center", fontSize: isMobile ? "0.7rem" : "0.8rem" }}>
+                          {(() => {
+                            const locations = selectedBrand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
+                            const states = locations.map((loc) => loc.state).filter(Boolean);
+                            const hasMore = states.length > 2;
 
-    const states = locations.map((loc) => loc.state).filter(Boolean);
-    const hasMore = states.length > 3;
+                            if (states.length === 0) {
+                              return "Multiple Locations"; 
+                            }
 
-    if (states.length === 0) {
-      return "Multiple Locations"; 
-    }
+                            const visibleStates = states.slice(0, 2).join(", ");
 
-    const visibleStates = states.slice(0, 2).join(", ");
-
-    return (
-      <>
-        {visibleStates}
-        {hasMore && (
-          <a 
-            href="#expansion-location"
-            
-            style={{
-              marginLeft: 8,
-              scrollBehavior: "smooth",
-              fontSize: "0.75rem",
-              textTransform: "uppercase",
-              textDecoration: "none",
-              color: "#1976d2",
-              fontWeight: 500,
-              cursor: "pointer"
-            }}
-          >
-            More
-          </a>
-        )}
-      </>
-    );
-  })()}
-</TableCell>
-
+                            return (
+                              <>
+                                {visibleStates}
+                                {hasMore && (
+                                  <a 
+                                    href="#expansion-location"
+                                    style={{
+                                      marginLeft: 8,
+                                      fontSize: "0.7rem",
+                                      textDecoration: "none",
+                                      color: "#1976d2",
+                                      fontWeight: 500,
+                                      cursor: "pointer"
+                                    }}
+                                  >
+                                    More
+                                  </a>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -1205,7 +1193,7 @@ const maskEmail = (email) => {
 
         <Divider sx={{ my: 3 }} />
 
-        {/* Media section with animations */}
+        {/* Media section with responsive layout */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -1216,11 +1204,12 @@ const maskEmail = (email) => {
             flexDirection={isMobile ? "column" : "row"}
             gap={4}
           >
+            {/* Main video - responsive sizing */}
             <Box flex={isMobile ? "none" : 2}>
               <Box
                 sx={{
                   width: "100%",
-                  height: isMobile ? 200 : 416,
+                  height: isMobile ? 200 : isTablet ? 300 : 416,
                   borderRadius: 2,
                   overflow: "hidden",
                 }}
@@ -1241,20 +1230,30 @@ const maskEmail = (email) => {
                     Your browser does not support the video tag.
                   </video>
                 ) : (
-                  <Typography variant="body1" color="text.secondary">
-                    No promotional video available
-                  </Typography>
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    <Typography variant="body1" color="text.secondary">
+                      No promotional video available
+                    </Typography>
+                  </Box>
                 )}
               </Box>
             </Box>
 
+            {/* Gallery images - responsive grid */}
             <Box flex={1}>
               <Box
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: isMobile
-                    ? "repeat(2, 1fr)"
-                    : "repeat(2, 1fr)",
+                  gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(2, 1fr)",
                   gap: 1,
                 }}
               >
@@ -1323,7 +1322,12 @@ const maskEmail = (email) => {
                   >
                     <Typography
                       variant={isMobile ? "body2" : "h6"}
-                      sx={{ fontWeight: 600, textAlign: "center", zIndex: 1 }}
+                      sx={{ 
+                        fontWeight: 600, 
+                        textAlign: "center", 
+                        zIndex: 1,
+                        fontSize: isMobile ? "0.875rem" : "1rem",
+                      }}
                     >
                       View More ({Math.max(allImages.length - 3, 0)}+)
                     </Typography>
@@ -1351,6 +1355,7 @@ const maskEmail = (email) => {
 
         <Divider sx={{ my: 5 }} />
 
+        {/* Overview tab section */}
         <Box
           sx={{
             display: "flex",
@@ -1358,172 +1363,23 @@ const maskEmail = (email) => {
             gap: 4,
           }}
         >
-          {/* Overview tab */}
           <Box sx={{ width: "100%" }}>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
             >
-              <OverviewTab
-                brand={selectedBrand}
-                // setIsModalOpen={setIsModalOpen}
-              />
+              <OverviewTab brand={selectedBrand} />
             </motion.div>
           </Box>
         </Box>
 
-        {/* Image Modal */}
-        <Dialog
-          open={imageModalOpen}
-          onClose={() => setImageModalOpen(false)}
-          maxWidth="lg"
-          fullWidth
-          sx={{
-            "& .MuiDialog-paper": {
-              backgroundColor: "rgba(0,0,0,0.9)",
-              overflow: "hidden",
-            },
-          }}
-        >
-          <DialogTitle
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              color: "white",
-            }}
-          >
-            <Typography>
-              Image {currentImageIndex + 1} of {allImages.length}
-            </Typography>
-            <IconButton
-              onClick={() => setImageModalOpen(false)}
-              color="inherit"
-            >
-              <Close />
-            </IconButton>
-          </DialogTitle>
-
-          <DialogContent
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: isMobile ? "50vh" : "70vh",
-            }}
-          >
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <IconButton
-                sx={{
-                  position: "absolute",
-                  left: 16,
-                  color: "white",
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  "&:hover": {
-                    backgroundColor: "rgba(0,0,0,0.7)",
-                  },
-                }}
-                onClick={handlePrevImage}
-              >
-                <ArrowBack fontSize="large" />
-              </IconButton>
-
-              <img
-                src={allImages[currentImageIndex]}
-                loading="lazy"
-                alt={`Gallery ${currentImageIndex}`}
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  objectFit: "contain",
-                  margin: "0 auto",
-                }}
-              />
-
-              <IconButton
-                sx={{
-                  position: "absolute",
-                  right: 16,
-                  color: "white",
-                  backgroundColor: "rgba(0,0,0,0.5)",
-                  "&:hover": {
-                    backgroundColor: "rgba(0,0,0,0.7)",
-                  },
-                }}
-                onClick={handleNextImage}
-              >
-                <ArrowForward fontSize="large" />
-              </IconButton>
-            </Box>
-          </DialogContent>
-
-          <DialogActions
-            sx={{
-              justifyContent: "center",
-              pb: 3,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                flexWrap: "wrap",
-                justifyContent: "center",
-                maxWidth: "100%",
-                overflowX: "auto",
-                px: 2,
-                py: 1,
-              }}
-            >
-              {allImages.map((img, index) => (
-                <Box
-                  key={index}
-                  onClick={() => setCurrentImageIndex(index)}
-                  sx={{
-                    width: 60,
-                    height: 60,
-                    borderRadius: 1,
-                    overflow: "hidden",
-                    cursor: "pointer",
-                    border:
-                      currentImageIndex === index
-                        ? "2px solid #1976d2"
-                        : "1px solid #555",
-                    opacity: currentImageIndex === index ? 1 : 0.7,
-                    flexShrink: 0,
-                  }}
-                >
-                  <img
-                    src={img}
-                    loading="lazy"
-                    alt={`Thumbnail ${index}`}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </Box>
-              ))}
-            </Box>
-          </DialogActions>
-        </Dialog>
-
-         {/* Desktop Application Form */}
-        {!isMobile && !isTablet && (
+        {/* Desktop Application Form - responsive layout */}
+        {!isMobile && (
           <Box
             sx={{
               mt: 4,
-              p: 4,
+              p: isMobile ? 2 : isTablet ? 3 : 4,
               borderRadius: "16px",
               background: "white",
               boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
@@ -1539,16 +1395,18 @@ const maskEmail = (email) => {
                 alignItems: "center",
                 gap: 2,
                 color: "#ff9800",
+                fontSize: isMobile ? "1.25rem" : isTablet ? "1.5rem" : "1.75rem",
               }}
             >
               Instant Franchise Application
             </Typography>
             <form onSubmit={handleSubmit}>
-               <Grid
+              <Grid
                 spacing={2}
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
+                  // Responsive grid columns
+                  gridTemplateColumns: isTablet ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
                   gap: 2,
                 }}
               >
@@ -1561,7 +1419,7 @@ const maskEmail = (email) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
@@ -1573,7 +1431,7 @@ const maskEmail = (email) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
@@ -1581,13 +1439,11 @@ const maskEmail = (email) => {
                     fullWidth
                     label="Mobile Number"
                     name="mobileNumber"
-                    value={
-                      formData.mobileNumber || userData?.mobileNumber || ""
-                    }
+                    value={formData.mobileNumber || userData?.mobileNumber || ""}
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   />
                 </Grid>
 
@@ -1602,7 +1458,7 @@ const maskEmail = (email) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   >
                     {locationData.states.map((state, i) => (
                       <MenuItem key={i} value={state}>
@@ -1623,7 +1479,7 @@ const maskEmail = (email) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                     disabled={!formData.state}
                   >
                     {locationData.districts.map((district, i) => (
@@ -1645,7 +1501,7 @@ const maskEmail = (email) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                     disabled={!formData.district}
                   >
                     {locationData.cities.map((city, i) => (
@@ -1666,7 +1522,7 @@ const maskEmail = (email) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   >
                     {investmentRanges.map((range, i) => (
                       <MenuItem key={i} value={range}>
@@ -1685,7 +1541,7 @@ const maskEmail = (email) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   >
                     {investmentTimings.map((option, i) => (
                       <MenuItem key={i} value={option}>
@@ -1704,7 +1560,7 @@ const maskEmail = (email) => {
                     onChange={handleChange}
                     required
                     variant="outlined"
-                    size="medium"
+                    size={isMobile ? "small" : "medium"}
                   >
                     {readyToInvestOptions.map((option, i) => (
                       <MenuItem key={i} value={option}>
@@ -1717,14 +1573,14 @@ const maskEmail = (email) => {
               <Box display="flex" justifyContent="center" mt={2}>
                 <Button
                   type="submit"
-                  size="large"
+                  size={isMobile ? "medium" : "large"}
                   variant="contained"
                   disabled={isSubmitting}
                   sx={{
                     backgroundColor: "#ff9800",
-                    py: 1.5,
-                    fontSize: "1rem",
-                    px: 4,
+                    py: isMobile ? 1 : 1.5,
+                    fontSize: isMobile ? "0.875rem" : "1rem",
+                    px: isMobile ? 3 : 4,
                     "&:disabled": {
                       background: "#e0e0e0",
                       color: "#9e9e9e",
@@ -1756,56 +1612,76 @@ const maskEmail = (email) => {
                 borderLeft: `4px solid rgb(84, 241, 12)`,
               }}
             >
-              <Typography variant="body2">
+              <Typography variant="body2" fontSize={isMobile ? "0.8rem" : "0.9rem"}>
                 <strong>Note:</strong> Our team will contact you within 24 hours
                 to discuss the franchise opportunity in detail.
               </Typography>
             </Box>
           </Box>
         )} 
-
-         
-           
       </Box>
-              <LikedBrands />
-<Box sx={{
+      
+      {/* Liked brands and tags section */}
+      <LikedBrands />
+      <Box 
+        sx={{
           width: "90%",
           maxWidth: 1200,
           mx: "auto",
           my: 4,
-          px: isMobile ? 2 : 4,
-        }}  color={'#ff9800'} >
-          <Typography variant="h6" sx={{mb:2}}>
-            Tags
-          </Typography>
-          <ExpansionLocationTags brand={selectedBrand} /></Box> 
-{/* <ViewedBrands /> */}
-{showBackToTop && (
-  <Box
-    sx={{
-      position: "fixed",
-      bottom: 20,
-      right: 20,
-      zIndex: 1000,
-    }}
-  >
-    <IconButton
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      sx={{
-        backgroundColor: "#ff9800",
-        color: "white",
-        "&:hover": {
-          backgroundColor: "#e65100",
-        },
-      }}
-    >
-      <ArrowUpward />
-    </IconButton>
-  </Box>
-)}
+          px: isMobile ? 1 : isTablet ? 3 : 4,
+        }}  
+        color={'#ff9800'} 
+      >
+        <Typography variant="h6" sx={{ mb: 2, fontSize: isMobile ? "1.25rem" : "1.5rem" }}>
+          Tags
+        </Typography>
+        <ExpansionLocationTags brand={selectedBrand} />
+      </Box> 
+
+      {/* Back to top button - responsive positioning */}
+      {showBackToTop && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: isMobile ? 16 : 24,
+            right: isMobile ? 16 : 24,
+            zIndex: 1000,
+          }}
+        >
+          <IconButton
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            sx={{
+              backgroundColor: "#ff9800",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#e65100",
+              },
+            }}
+          >
+            <ArrowUpward />
+          </IconButton>
+        </Box>
+      )}
+      
       <Footer />
     </>
   );
 };
 
 export default React.memo(BrandDetails);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
