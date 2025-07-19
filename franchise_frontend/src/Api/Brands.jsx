@@ -52,18 +52,17 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
   // const investorId = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
   const token = localStorage.getItem("accessToken");
 
-  console.log("brandId :",brandId)
-  console.log("brandId isLiked  :",isLiked)
-  const brands = await fetchBrands();
-  brands.filter(brand =>{
-    if ( brand.uuid === brandId) {
-      console.log("Brand found:", brand);
-      console.log("Brand found:", brand.isLiked);
+  
+  // const brands = await fetchBrands();
+  // brands.filter(brand =>{
+  //   if ( brand.uuid === brandId) {
+  //     console.log("Brand found:", brand);
+  //     console.log("Brand found:", brand.isLiked);
      
       
-    }
+  //   }
      
-  });
+  // });
   
 
 
@@ -74,9 +73,12 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
     }
   };
 
+  const AccessToken = localStorage.getItem("accessToken");
+
   try {
     if (!isLiked) {
-       console.log("if  :",isLiked)
+       console.log("api brandId false:",brandId)
+  console.log("api brandId isLiked  false:",isLiked)
       // For like creation
       // const response = await apiClient.post(
       //   '/api/v1/like/post-favbrands',
@@ -98,7 +100,8 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
 
       return response.data;
     } else {
-      console.log("else  :",isLiked)
+           console.log("api brandId true:",brandId)
+  console.log("api brandId isLiked  true:",isLiked)
       // For like removal
       // const response = await apiClient.delete(
       //   '/api/v1/like/delete-favbrand',
@@ -111,13 +114,19 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
       //   }
       // );
 
-      const response = await axios.delete(`${api.likeApi.delete}/${id}`,
+      const response = await axios.delete(
+        `${api.likeApi.delete}/${id}`,
         {
-          branduuid: brandId,
-          // investorUUID: investorId
-        },
-        config
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+          data: { brandID: brandId },
+        }
+        
       );
+
+      console.log("res delete:",response.data)
       return response.data;
     }
   } catch (error) {

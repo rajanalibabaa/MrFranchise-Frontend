@@ -57,8 +57,7 @@ function TopBrandVdoCards() {
     },
   };
 
-  const handleLikeClick = useCallback((brandId, isLiked) => {
-  // Immediate UI update - no waiting for API response
+ const handleLikeClick = useCallback((brandId, isLiked) => {
   const token = localStorage.getItem("accessToken");
   
   if (!token) {
@@ -66,23 +65,28 @@ function TopBrandVdoCards() {
     return;
   }
 
-    toggleLike.mutate(
-      { brandId, isLiked },
-      {
-        onMutate: () => {
-               console.log("Optimistic update with:", { brandId, isLiked });
-               
-          setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
-        },
-        onError: (error) => {
-          console.error("Like operation failed:", error);
-        },
-        onSettled: () => {
-          setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-        }
+  // Optimistic UI update with loading state
+  setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+
+  toggleLike.mutate(
+    { brandId, isLiked },
+    {
+      onError: (error) => {
+        console.error("Like operation failed:", error);
+        // Show error feedback to user
+        // toast.error("Failed to update like status. Please try again.");
+      },
+      onSettled: () => {
+        // Clean up loading state
+        setLikeProcessing(prev => {
+          const newState = { ...prev };
+          delete newState[brandId];
+          return newState;
+        });
       }
-    );
-  }, [toggleLike]);
+    }
+  );
+}, [toggleLike]);
 
   const handleNext = useCallback(() => {
     if (brands.length > 0) {

@@ -28,7 +28,7 @@ function Complaint() {
 
     try {
       const response = await axios.post(
-        "https://mrfranchisebackend.mrfranchise.in/api/complaint/createComplaint",
+        "http://localhost:5000/api/complaint/createComplaint",
         formattedData,
         {
           headers: {
