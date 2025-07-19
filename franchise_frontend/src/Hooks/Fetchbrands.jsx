@@ -22,7 +22,9 @@
     }),
     forListing: (brand) => ({
       ...brandSelectors.basicInfo(brand),
-      description: brand.brandDetails?.description,
+      description: brand.franchiseDetails?.brandDescription,
+      categories: brand.franchiseDetails?.brandCategories,
+      locations: brand.expansionLocationData?.expansionLocations?.domestic?.locations ,
       companyName: brand.brandDetails?.companyName,
       investmentRange: brand.franchiseDetails?.fico?.[0]?.investmentRange
     })

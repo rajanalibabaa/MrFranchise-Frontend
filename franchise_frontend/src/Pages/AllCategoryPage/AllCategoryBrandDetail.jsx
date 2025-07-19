@@ -1812,6 +1812,7 @@ const closePopup = () => {
                 <img
                   src={selectedBrand?.brandDetails?.brandLogo}
                   alt={selectedBrand?.personalDetails?.brandName}
+                  loading="lazy"
                   style={{
                     width: 100,
                     height: 100,
@@ -2048,6 +2049,7 @@ const closePopup = () => {
                               >
                                 <img
                                   src={imageUrl}
+                                  loading="lazy"
                                   alt={`Gallery ${index}`}
                                   style={{
                                     width: "100%",
@@ -2325,6 +2327,7 @@ const closePopup = () => {
               ) : (
                 <img
                   src={selectedMedia}
+                  loading="lazy"
                   alt="Full view"
                   style={{
                     width: "100%",

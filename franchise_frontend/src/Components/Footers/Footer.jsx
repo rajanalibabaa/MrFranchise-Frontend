@@ -91,6 +91,7 @@ function Footer() {
               <Box
                 component="img"
                 src={brandlogo}
+                loading="lazy"
                 alt="MR FRANCHISE Logo"
                 sx={{
                   width: "auto",

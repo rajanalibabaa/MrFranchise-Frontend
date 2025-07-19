@@ -162,6 +162,8 @@ const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, 
   const brandName = item.brandDetails?.brandName || "Unnamed Brand";
   const brandLogo = item.uploads?.brandLogo?.[0] || img;
 
+  console.log('===',isLiked);
+  
   return (
     <Box sx={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
       <Card sx={{
@@ -196,6 +198,7 @@ const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, 
         }}>
           <CardMedia
             component="img"
+            loading="lazy"
             height="140"
             image={brandLogo}
             alt={brandName}
@@ -334,7 +337,9 @@ const Dashboard = () => {
   
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
-
+  console.log('likedBrands',likedBrands);
+  console.log('likedStates',likedStates);
+  
   // Memoized stats calculation
   const stats = useMemo(() => ({
     totalViews: viewedBrands.length,
@@ -563,6 +568,7 @@ const Dashboard = () => {
         }}>
           <Avatar
             src={userData?.profileImage || img}
+            loading="lazy"
             alt="Profile"
             sx={{
               width: 60,

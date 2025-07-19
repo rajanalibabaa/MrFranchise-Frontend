@@ -564,7 +564,7 @@ const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
       const newScrollLeft = container.scrollLeft + scrollDistance;
 
       smoothScrollTo(newScrollLeft);
-    }, 5000); // Scroll every 5 seconds
+    }, 2000); // Scroll every 5 seconds
   }, [getScrollDistance, smoothScrollTo]);
 
   // Easing function for smooth scrolling

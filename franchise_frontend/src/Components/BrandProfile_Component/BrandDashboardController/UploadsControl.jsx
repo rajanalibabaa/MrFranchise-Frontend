@@ -285,6 +285,7 @@ const UploadsControl = ({
         <img
           src={safeData.brandLogo[0]}
           alt="Brand Logo"
+          loading="lazy"
           style={{
             height: 60,
             borderRadius: 4,
@@ -510,6 +511,7 @@ onChange("pancardNumber", e.target.value.toUpperCase())              }
             component="img"
             src={safeData.pancard[0]}
             alt="PAN Preview"
+            loading="lazy"
             sx={{ width: 100, borderRadius: 1, border: "1px solid #ccc" }}
           />
         )}
@@ -608,6 +610,7 @@ onChange("pancardNumber", e.target.value.toUpperCase())              }
             component="img"
             src={safeData.gstCertificate[0]}
             alt="GST Certificate"
+            loading="lazy"
             sx={{ width: 100, borderRadius: 1, border: "1px solid #ccc" }}
           />
         )}

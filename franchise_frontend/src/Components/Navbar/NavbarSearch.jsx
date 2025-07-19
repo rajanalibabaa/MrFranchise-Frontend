@@ -1,5 +1,4 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
@@ -15,20 +14,272 @@ import {
   MenuItem,
   Button,
   Typography,
-  FormControl
+  FormControl,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Chip
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import { useBrandsForFiltering } from '../..//Hooks/Fetchbrands';
+import { useBrandsForFiltering, useBrandsForListing } from '../..//Hooks/Fetchbrands';
+
+const highlightMatch = (text, searchTerm) => {
+  if (!searchTerm || !text) return text;
+  
+  const regex = new RegExp(`(${searchTerm})`, 'gi');
+  const parts = text.split(regex);
+  
+  return parts.map((part, index) => 
+    part.toLowerCase() === searchTerm.toLowerCase() ? 
+    <span key={index} style={{ fontWeight: 'bold', backgroundColor: 'yellow' }}>{part}</span> : 
+    part
+  );
+};
 
 const NavbarSearch = ({ open, handleClose }) => {
   const navigate = useNavigate();
 
   const [tab, setTab] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [openSuggestions, setOpenSuggestions] = useState(false);
+  const [activeSuggestion, setActiveSuggestion] = useState(0);
 
   // Get all filter options using React Query
   const { data: brands = [] } = useBrandsForFiltering();
+  const { data: listingBrands = [] } = useBrandsForListing();
+
+  // Generate search suggestions including categories and locations
+  const searchSuggestions = useMemo(() => {
+    if (!searchTerm || searchTerm.length < 2) return [];
+
+    const term = searchTerm.toLowerCase();
+    const suggestions = [];
+
+    // Add brand suggestions that match the search term
+    listingBrands.forEach(brand => {
+      // Check brand name
+      if (brand.brandName?.toLowerCase().includes(term)) {
+        suggestions.push({
+          type: 'Brand',
+          value: brand.brandName,
+          brandId: brand.uuid,
+          icon: '🏢',
+          searchTerm: term
+        });
+      }
+
+      // Check categories (main, sub, child)
+      if (brand.categories) {
+        if (brand.categories.main?.toLowerCase().includes(term)) {
+          suggestions.push({
+            type: 'Brand',
+            value: brand.brandName,
+            brandId: brand.uuid,
+            icon: '🏢',
+            matchText: `Category: ${brand.categories.main}`,
+            searchTerm: term
+          });
+        }
+        if (brand.categories.sub?.toLowerCase().includes(term)) {
+          suggestions.push({
+            type: 'Brand',
+            value: brand.brandName,
+            brandId: brand.uuid,
+            icon: '🏢',
+            matchText: `Category: ${brand.categories.main} > ${brand.categories.sub}`,
+            searchTerm: term
+          });
+        }
+        if (brand.categories.child?.toLowerCase().includes(term)) {
+          suggestions.push({
+            type: 'Brand',
+            value: brand.brandName,
+            brandId: brand.uuid,
+            icon: '🏢',
+            matchText: `Category: ${brand.categories.main} > ${brand.categories.sub} > ${brand.categories.child}`,
+            searchTerm: term
+          });
+        }
+      }
+
+      // Check locations
+      brand.locations?.forEach(location => {
+        if (location.state?.toLowerCase().includes(term)) {
+          suggestions.push({
+            type: 'Brand',
+            value: brand.brandName,
+            brandId: brand.uuid,
+            icon: '🏢',
+            matchText: `Location: ${location.state}`,
+            searchTerm: term
+          });
+        }
+
+        location.districts?.forEach(district => {
+          if (district.district?.toLowerCase().includes(term)) {
+            suggestions.push({
+              type: 'Brand',
+              value: brand.brandName,
+              brandId: brand.uuid,
+              icon: '🏢',
+              matchText: `Location: ${location.state} > ${district.district}`,
+              searchTerm: term
+            });
+          }
+
+          district.cities?.forEach(city => {
+            if (city.toLowerCase().includes(term)) {
+              suggestions.push({
+                type: 'Brand',
+                value: brand.brandName,
+                brandId: brand.uuid,
+                icon: '🏢',
+                matchText: `Location: ${location.state} > ${district.district} > ${city}`,
+                searchTerm: term
+              });
+            }
+          });
+        });
+      });
+    });
+
+    // Add standalone category suggestions (not tied to specific brands)
+    const allCategories = new Set();
+    const allLocations = new Set();
+
+    brands.forEach(brand => {
+      if (brand.categories) {
+        if (brand.categories.main) {
+          allCategories.add(`${brand.categories.main}`);
+        }
+        if (brand.categories.main && brand.categories.sub) {
+          allCategories.add(`${brand.categories.main} > ${brand.categories.sub}`);
+        }
+        if (brand.categories.main && brand.categories.sub && brand.categories.child) {
+          allCategories.add(`${brand.categories.main} > ${brand.categories.sub} > ${brand.categories.child}`);
+        }
+      }
+
+      brand.locations?.forEach(location => {
+        if (location.state) {
+          allLocations.add(`${location.state}`);
+          location.districts?.forEach(district => {
+            if (district.district) {
+              allLocations.add(`${location.state} > ${district.district}`);
+              district.cities?.forEach(city => {
+                allLocations.add(`${location.state} > ${district.district} > ${city}`);
+              });
+            }
+          });
+        }
+      });
+    });
+
+    // Add standalone category matches
+    Array.from(allCategories).forEach(category => {
+      if (category.toLowerCase().includes(term)) {
+        const parts = category.split(' > ');
+        // Find brands that have this category
+        const matchingBrands = listingBrands.filter(brand => {
+          if (parts.length === 1) return brand.categories?.main === parts[0];
+          if (parts.length === 2) return brand.categories?.main === parts[0] && brand.categories?.sub === parts[1];
+          if (parts.length === 3) return brand.categories?.main === parts[0] && brand.categories?.sub === parts[1] && brand.categories?.child === parts[2];
+          return false;
+        });
+
+        matchingBrands.forEach(brand => {
+          suggestions.push({
+            type: 'Brand',
+            value: brand.brandName,
+            brandId: brand.uuid,
+            icon: '🏢',
+            matchText: `Category: ${category}`,
+            searchTerm: term
+          });
+        });
+      }
+    });
+
+    // Add standalone location matches
+    Array.from(allLocations).forEach(location => {
+      if (location.toLowerCase().includes(term)) {
+        const parts = location.split(' > ');
+        // Find brands that have this location
+        const matchingBrands = listingBrands.filter(brand => {
+          return brand.locations?.some(loc => {
+            if (parts.length === 1) return loc.state === parts[0];
+            if (parts.length === 2) {
+              return loc.state === parts[0] && 
+                loc.districts?.some(dist => dist.district === parts[1]);
+            }
+            if (parts.length === 3) {
+              return loc.state === parts[0] && 
+                loc.districts?.some(dist => 
+                  dist.district === parts[1] && 
+                  dist.cities?.includes(parts[2])
+                )
+            }
+            return false;
+          });
+        });
+
+        matchingBrands.forEach(brand => {
+          suggestions.push({
+            type: 'Brand',
+            value: brand.brandName,
+            brandId: brand.uuid,
+            icon: '🏢',
+            matchText: `Location: ${location}`,
+            searchTerm: term
+          });
+        });
+      }
+    });
+
+    // Remove duplicates (same brand with same match text)
+    const uniqueSuggestions = suggestions.filter(
+      (suggestion, index, self) =>
+        index === self.findIndex(s => 
+          s.brandId === suggestion.brandId && 
+          s.matchText === suggestion.matchText
+        )
+    );
+
+    return uniqueSuggestions.slice(0, 10); // Limit to 10 suggestions
+  }, [searchTerm, listingBrands, brands]);
+
+  // Handle keyboard navigation for suggestions
+  useEffect(() => {
+    if (!openSuggestions || searchSuggestions.length === 0) return;
+
+    const handleKeyDown = (e) => {
+      // Arrow down
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveSuggestion(prev => 
+          prev < searchSuggestions.length - 1 ? prev + 1 : prev
+        );
+      }
+      // Arrow up
+      else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveSuggestion(prev => (prev > 0 ? prev - 1 : 0));
+      }
+      // Enter
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (searchSuggestions[activeSuggestion]) {
+          handleSuggestionSelect(searchSuggestions[activeSuggestion]);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [openSuggestions, searchSuggestions, activeSuggestion]);
 
   // Extract filter options from brands data
   const filterOptions = useMemo(() => {
@@ -49,24 +300,24 @@ const NavbarSearch = ({ open, handleClose }) => {
       if (mainCat){
          mainCategories.add(mainCat);
 
-      // Initialize subcategories map for this main category if it doesn't exist
-      if (!subCategories.has(mainCat)){
-        subCategories.set(mainCat, new Set());
+        // Initialize subcategories map for this main category if it doesn't exist
+        if (!subCategories.has(mainCat)){
+          subCategories.set(mainCat, new Set());
+        }
+
+        if (subCat){
+          subCategories.get(mainCat).add(subCat);
+
+          // Initialize child categories map for this subcategory if it doesn't exist
+          if (!childCategories.has(subCat)) {
+              childCategories.set(subCat, new Set());
+            }
+
+          if (childCat) {
+              childCategories.get(subCat).add(childCat);
+            }
+        }
       }
-
-      if (subCat){
-        subCategories.get(mainCat).add(subCat);
-
-        // Initialize child categories map for this subcategory if it doesn't exist
-        if (!childCategories.has(subCat)) {
-            childCategories.set(subCat, new Set());
-          }
-
-        if (childCat) {
-            childCategories.get(subCat).add(childCat);
-          }
-      }
-    }
 
       // Locations
       brand.locations?.forEach(location => {
@@ -141,6 +392,61 @@ const NavbarSearch = ({ open, handleClose }) => {
     setSearchTerms(prev => ({ ...prev, [key]: value }));
   };
 
+  const handleSuggestionSelect = (suggestion) => {
+    // Set the brand name in the search bar
+    setSearchTerm(suggestion.value);
+    setOpenSuggestions(false);
+    
+    // Navigate directly to the brand
+    if (suggestion.brandId) {
+      navigate(`/brands/${suggestion.brandId}`);
+      handleClose();
+    }
+    
+    // Parse the category or location from the match text to set filters
+    if (suggestion.matchText) {
+      if (suggestion.matchText.startsWith('Category:')) {
+        const categoryPath = suggestion.matchText.replace('Category: ', '');
+        const parts = categoryPath.split(' > ');
+        if (parts.length === 1) {
+          setSelectedMainCategory(parts[0]);
+          setSelectedSubCategory('');
+          setSelectedChildCategory('');
+          setTab(0);
+        } else if (parts.length === 2) {
+          setSelectedMainCategory(parts[0]);
+          setSelectedSubCategory(parts[1]);
+          setSelectedChildCategory('');
+          setTab(0);
+        } else if (parts.length === 3) {
+          setSelectedMainCategory(parts[0]);
+          setSelectedSubCategory(parts[1]);
+          setSelectedChildCategory(parts[2]);
+          setTab(0);
+        }
+      } else if (suggestion.matchText.startsWith('Location:')) {
+        const locationPath = suggestion.matchText.replace('Location: ', '');
+        const parts = locationPath.split(' > ');
+        if (parts.length === 1) {
+          setSelectedState(parts[0]);
+          setSelectedDistrict('');
+          setSelectedCity('');
+          setTab(1);
+        } else if (parts.length === 2) {
+          setSelectedState(parts[0]);
+          setSelectedDistrict(parts[1]);
+          setSelectedCity('');
+          setTab(1);
+        } else if (parts.length === 3) {
+          setSelectedState(parts[0]);
+          setSelectedDistrict(parts[1]);
+          setSelectedCity(parts[2]);
+          setTab(1);
+        }
+      }
+    }
+  };
+
   const handleExplore = () => {
     const filters = {
       searchTerm,
@@ -161,8 +467,22 @@ const NavbarSearch = ({ open, handleClose }) => {
 
     // Filter brands based on selected filters
     const filteredBrands = brands.filter(brand => {
-      // Filter by search term if it exists
-      if (searchTerm && !brand.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+      // Filter by search term if it exists (only brand name)
+      if (searchTerm && 
+          !brand.brandName?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+          !(brand.categories?.main?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+          !(brand.categories?.sub?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+          !(brand.categories?.child?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+          !brand.locations?.some(location => 
+            location.state?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            location.districts?.some(district => 
+              district.district?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              district.cities?.some(city => 
+                city.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+            )
+          )
+      ) {
         return false;
       }
 
@@ -187,8 +507,7 @@ const NavbarSearch = ({ open, handleClose }) => {
             (!selectedDistrict || location.districts?.some(district => 
               district.district === selectedDistrict && 
               (!selectedCity || district.cities?.includes(selectedCity))
-            )
-          )
+            ))
           );
           if (!hasState) return false;
         }
@@ -284,6 +603,29 @@ const NavbarSearch = ({ open, handleClose }) => {
     return filterOptions.childCategories[selectedSubCategory] || [];
   }, [selectedSubCategory, filterOptions.childCategories]);
 
+  // Get active filters count for display
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (searchTerm) count++;
+    if (selectedMainCategory) count++;
+    if (selectedSubCategory) count++;
+    if (selectedChildCategory) count++;
+    if (selectedState) count++;
+    if (selectedDistrict) count++;
+    if (selectedCity) count++;
+    if (selectedInvestmentRange) count++;
+    return count;
+  }, [
+    searchTerm,
+    selectedMainCategory,
+    selectedSubCategory,
+    selectedChildCategory,
+    selectedState,
+    selectedDistrict,
+    selectedCity,
+    selectedInvestmentRange
+  ]);
+
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md" sx={{ top: { xs: "-20%", sm: "-50%", lg: "-300px" } }}>
       <DialogContent sx={{ position: 'relative', p: 3 }}>
@@ -295,18 +637,35 @@ const NavbarSearch = ({ open, handleClose }) => {
           <CloseIcon />
         </IconButton>
 
-        {/* Search Input */}
-        <Box display="flex" justifyContent="center" mb={2}>
+        {/* Search Input with Suggestions */}
+        <Box display="flex" justifyContent="center" mb={2} position="relative">
           <TextField
-            placeholder="Search for business opportunities"
+            placeholder="Search for brands by name, category, or location"
             fullWidth
             variant="outlined"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setOpenSuggestions(e.target.value.length > 1);
+            }}
+            onFocus={() => searchTerm.length > 1 && setOpenSuggestions(true)}
+            onBlur={() => setTimeout(() => setOpenSuggestions(false), 200)}
             sx={{ maxWidth: 500 }}
             InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
               endAdornment: (
                 <InputAdornment position="end">
+                  {activeFiltersCount > 0 && (
+                    <Chip 
+                      label={`${activeFiltersCount} filters`} 
+                      size="small" 
+                      sx={{ mr: 1 }}
+                    />
+                  )}
                   <IconButton 
                     sx={{ bgcolor: 'rgb(104, 159, 56)', color: 'white', "&:hover": { backgroundColor: "#7ad03a" } }}
                     onClick={handleExplore}
@@ -317,6 +676,116 @@ const NavbarSearch = ({ open, handleClose }) => {
               )
             }}
           />
+          
+          {/* Search Suggestions Dropdown */}
+          {openSuggestions && searchSuggestions.length > 0 && (
+            <Paper 
+              elevation={3} 
+              sx={{
+                position: 'absolute',
+                top: '100%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 'calc(100% - 32px)',
+                maxWidth: 500,
+                maxHeight: 300,
+                overflow: 'auto',
+                zIndex: 1300,
+                mt: 1
+              }}
+            >
+              <List>
+                {searchSuggestions.map((suggestion, index) => (
+                  <React.Fragment key={`${suggestion.type}-${suggestion.value}-${index}`}>
+                    <ListItem 
+                      button
+                      selected={index === activeSuggestion}
+                      onMouseEnter={() => setActiveSuggestion(index)}
+                      onClick={() => handleSuggestionSelect(suggestion)}
+                      sx={{
+                        '&:hover': { backgroundColor: 'action.hover' },
+                        '&.Mui-selected': { backgroundColor: 'action.selected' }
+                      }}
+                    >
+                      <Box sx={{ mr: 1, fontSize: '1.2rem' }}>{suggestion.icon}</Box>
+                      <ListItemText
+                        primary={highlightMatch(suggestion.value, suggestion.searchTerm)}
+                        secondary={
+                          suggestion.matchText ? (
+                            <span>{highlightMatch(suggestion.matchText, suggestion.searchTerm)}</span>
+                          ) : (
+                            <span>Brand</span>
+                          )
+                        }
+                        secondaryTypographyProps={{ color: 'text.secondary' }}
+                      />
+                    </ListItem>
+                    {index < searchSuggestions.length - 1 && <Divider />}
+                  </React.Fragment>
+                ))}
+              </List>
+            </Paper>
+          )}
+        </Box>
+
+        {/* Active Filters */}
+        <Box display="flex" justifyContent="center" flexWrap="wrap" gap={1} mb={2}>
+          {selectedMainCategory && (
+            <Chip 
+              label={`Industry: ${selectedMainCategory}`} 
+              onDelete={() => {
+                setSelectedMainCategory('');
+                setSelectedSubCategory('');
+                setSelectedChildCategory('');
+              }}
+            />
+          )}
+          {selectedSubCategory && (
+            <Chip 
+              label={`Category: ${selectedSubCategory}`} 
+              onDelete={() => {
+                setSelectedSubCategory('');
+                setSelectedChildCategory('');
+              }}
+            />
+          )}
+          {selectedChildCategory && (
+            <Chip 
+              label={`Sub-Category: ${selectedChildCategory}`} 
+              onDelete={() => setSelectedChildCategory('')}
+            />
+          )}
+          {selectedState && (
+            <Chip 
+              label={`State: ${selectedState}`} 
+              onDelete={() => {
+                setSelectedState('');
+                setSelectedDistrict('');
+                setSelectedCity('');
+              }}
+            />
+          )}
+          {selectedDistrict && (
+            <Chip 
+              label={`District: ${selectedDistrict}`} 
+              onDelete={() => {
+                setSelectedDistrict('');
+                setSelectedCity('');
+              }}
+            />
+          )}
+          {selectedCity && (
+            <Chip 
+              label={`City: ${selectedCity}`} 
+              onDelete={() => setSelectedCity('')}
+            />
+          )}
+          {selectedInvestmentRange && (
+            <Chip 
+              label={`Investment: ${selectedInvestmentRange}`} 
+              onDelete={() => setSelectedInvestmentRange('')}
+            />
+          )}
         </Box>
 
         {/* Explore Text */}
@@ -608,5 +1077,3 @@ const NavbarSearch = ({ open, handleClose }) => {
 };
 
 export default NavbarSearch;
-
-

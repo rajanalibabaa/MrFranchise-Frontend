@@ -48,6 +48,8 @@ import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx";
+import SimilarBrands from "../../Components/HomePage_VideoSection/SimilarBrands.jsx"
+// import {MostLikedBrands} from "../../Components/HomePage_VideoSection/MostLikedBrands.jsx"
 
 // import { ViewedBrands } from "../../Components/HomePage_VideoSection/ViewerBrands.jsx";
 import ShareDialogActions from "./ShareDialogActions.jsx";
@@ -1346,6 +1348,7 @@ const BrandDetails = ({ brandData }) => {
                     >
                       <img
                         src={imageUrl}
+                        loading="lazy"
                         alt={`Gallery ${index}`}
                         style={{
                           width: "100%",
@@ -1393,6 +1396,7 @@ const BrandDetails = ({ brandData }) => {
                     {allImages[3] && (
                       <img
                         src={allImages[3]}
+                        loading="lazy"
                         alt="Preview"
                         style={{
                           position: "absolute",
@@ -1501,6 +1505,7 @@ const BrandDetails = ({ brandData }) => {
 
               <img
                 src={allImages[currentImageIndex]}
+                loading="lazy"
                 alt={`Gallery ${currentImageIndex}`}
                 style={{
                   maxWidth: "100%",
@@ -1565,6 +1570,7 @@ const BrandDetails = ({ brandData }) => {
                 >
                   <img
                     src={img}
+                    loading="lazy"
                     alt={`Thumbnail ${index}`}
                     style={{
                       width: "100%",
@@ -1824,7 +1830,11 @@ const BrandDetails = ({ brandData }) => {
           </Box>
         )}
       </Box>
-      <LikedBrands />
+      {/* <LikedBrands /> */}
+      <Box>
+      <SimilarBrands brandData={brandData} />
+      {/* <MostLikedBrands/> */}
+      </Box>
       <Box
         sx={{
           width: "90%",

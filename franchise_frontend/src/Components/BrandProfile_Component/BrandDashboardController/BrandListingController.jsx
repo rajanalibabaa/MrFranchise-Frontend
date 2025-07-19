@@ -146,7 +146,7 @@ const BrandListingController = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saveStatus, setSaveStatus] = useState({ loading: false, success: false, error: '' });
-  const [isEditing, setIsEditing] = useState(false);
+const [isEditing, setIsEditing] = useState(false);
   const [showOtpDialog, setShowOtpDialog] = useState(false);
   const [expanded, setExpanded] = useState("panel1");
   const [otp, setOtp] = useState('');
@@ -225,58 +225,39 @@ const handleFormChange = (field, value) => {
     }
   };
 
+const [otpToken, setOtpToken] = useState(null); // store token
 
 const sendOtp = async () => {
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/v1/otpverify/send-otp-email', // Use same origin
+        'http://localhost:5000/api/v1/otpverify/send-otp-email', 
         {
           email: formData.email,
-          name: formData.fullName || 'User',
-          uuid: uuid // Add UUID to request
+        
+        },{
+          headers:{
+            'Content-Type':'application/json'
+          }
         }
       );
 
-      if (!response.data.success) {
+      if(response.data.token){
+        setOtpToken(response.data.token); // ✅ Store token
+      // Show OTP dialog/modal here
+      }
+
+      if (response.data.success) {
         throw new Error(response.data.message || 'Failed to send OTP');
       }
-    } catch (err) {
+    } catch (err) { 
       throw new Error(err.response?.data?.message || 'Error sending OTP');
     }
   };
 
 
-  const verifyOtp = async () => {
-    if (!otp || otp.length !== 6) {
-      setOtpError('Please enter a valid 6-digit OTP');
-      return;
-    }
-    
-    setOtpVerifying(true);
-    setOtpError('');
-    
-    try {
-      const response = await axios.post(
-        'http://localhost:5000/api/v1/otpverify/verify-otp-email', // Use same origin
-        {
-          email: formData.email,
-          otp: otp,
-          uuid: uuid // Add UUID to request
-        }
-      );
-      
-      if (response.data.success) {
-        setIsEditing(true);
-        setShowOtpDialog(false);
-      } else {
-        setOtpError(response.data.message || 'Invalid OTP');
-      }
-    } catch (err) {
-      setOtpError(err.response?.data?.message || 'Verification failed');
-    } finally {
-      setOtpVerifying(false);
-    }
-  };
+ const verifyOtp = async () => {
+};
+
 
   const handleSave = async () => {
     const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
@@ -314,6 +295,7 @@ const sendOtp = async () => {
   }
 
   setSaveStatus({ loading: true, success: false, error: '' });
+  console.log("apiData",apiData)
 
   try {
     const apiData = unflattenFormData(formData); 
@@ -476,7 +458,8 @@ if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
               data={formData}
               onChange={handleFormChange}
               errors={{}}
-              isEditing={isEditing}
+             isEditing={isEditing}
+      setIsEditing={setIsEditing}
             />
           </CardContent>
         </AccordionDetails>
@@ -493,7 +476,8 @@ if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
               data={formData}
               onChange={handleFormChange}
               errors={{}}
-              isEditing={isEditing}
+          isEditing={isEditing}
+      setIsEditing={setIsEditing}
             />
           </CardContent>
         </AccordionDetails>
@@ -510,7 +494,8 @@ if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
               data={formData}
               onChange={handleFormChange}
               errors={{}}
-              isEditing={isEditing}
+            isEditing={isEditing}
+      setIsEditing={setIsEditing}
             />
           </CardContent>
         </AccordionDetails>
@@ -527,7 +512,8 @@ if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
               data={formData}
               onChange={handleFormChange}
               errors={{}}
-              isEditing={isEditing}
+         isEditing={isEditing}
+      setIsEditing={setIsEditing}
             />
           </CardContent>
         </AccordionDetails>
