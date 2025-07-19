@@ -67,6 +67,17 @@ const BrandCard = React.memo(
     const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
     const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
     const brandName = brand.brandDetails.brandName || "Brand";
+    
+     const {
+      investmentRange = "Not specified",
+      areaRequired = "Not specified",
+      franchiseType = "N/A",
+      franchiseModel: modelType = "N/A",
+      franchiseFee = "N/A",
+      royaltyFee = "N/A",
+      roi = "N/A",
+      payBackPeriod = "N/A",
+    } = firstModel;
 
     useEffect(() => {
       observerRef.current = new IntersectionObserver(
@@ -244,7 +255,7 @@ const BrandCard = React.memo(
                 </Box>
               )}
 
-              <Stack spacing={1} sx={{ mb: 2 }}>
+                <Stack spacing={1} sx={{ mb: 2 }}>
                 <Box display="flex" alignItems="center">
                   <Business
                     sx={{
@@ -255,7 +266,7 @@ const BrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    Franchise Type : {firstModel.franchiseType || "N/A"}
+                    <strong>Investment:</strong> {investmentRange}
                   </Typography>
                 </Box>
 
@@ -269,9 +280,10 @@ const BrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    Investment : {firstModel.investmentRange || "Not specified"}
+                    <strong>Area:</strong> {areaRequired}
                   </Typography>
                 </Box>
+
                 <Box display="flex" alignItems="center">
                   <AreaChart
                     sx={{
@@ -282,7 +294,7 @@ const BrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    Area : {firstModel.investmentRange || "Not specified"}
+                    <strong>Type:</strong> {modelType}
                   </Typography>
                 </Box>
               </Stack>
@@ -656,11 +668,11 @@ window.open('/brandviewpage', '_blank');
                   height: "36px",
                   borderRadius: "50%",
                   padding: 0,
-                  backgroundColor: "background.paper",
-                  color: "text.primary",
+                  backgroundColor: "#98dd2e",
+                  color: "white",
                   boxShadow: theme.shadows[4],
                   "&:hover": {
-                    backgroundColor: "background.default",
+                    backgroundColor: "#b7f92b",
                   },
                 }}
               >
@@ -684,11 +696,11 @@ window.open('/brandviewpage', '_blank');
                   height: "36px",
                   borderRadius: "50%",
                   padding: 0,
-                  backgroundColor: "background.paper",
-                  color: "text.primary",
+                  backgroundColor: "#98dd2e",
+                  color: "white",
                   boxShadow: theme.shadows[4],
                   "&:hover": {
-                    backgroundColor: "background.default",
+                    backgroundColor: "#b7f92b",
                   },
                 }}
               >
