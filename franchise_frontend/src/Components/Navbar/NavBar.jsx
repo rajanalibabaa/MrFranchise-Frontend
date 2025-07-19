@@ -354,7 +354,11 @@ function Navbar() {
   </motion.div>
               <motion.div whileHover={{ y: -2 }}>
                 <Button 
-                onClick={() => navigate('/brandlistingform')}
+                onClick={() => {
+  const url = `/brandlistingform?source=${encodeURIComponent("mr franchise")}&ref=${encodeURIComponent("homepage")}`;
+  window.open(url, "_blank");
+}}
+
                   startIcon={<Plus size={20} />}
                   
                   sx={{

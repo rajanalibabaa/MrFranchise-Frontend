@@ -340,7 +340,7 @@ const BrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    <strong>Type:</strong> {franchiseType}
+                    <strong>Investment:</strong> {investmentRange}
                   </Typography>
                 </Box>
 
@@ -354,7 +354,7 @@ const BrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    <strong>Investment:</strong> {investmentRange}
+                    <strong>Area:</strong> {areaRequired}
                   </Typography>
                 </Box>
 
@@ -368,7 +368,7 @@ const BrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    <strong>Area:</strong> {areaRequired}
+                    <strong>Type:</strong> {modelType}
                   </Typography>
                 </Box>
               </Stack>
@@ -773,11 +773,11 @@ window.open            }}
               height: '36px',
               borderRadius: '50%',
               padding: 0,
-              backgroundColor: 'background.paper',
-              color: 'text.primary',
+              backgroundColor: '#98dd2e',
+              color: 'white',
               boxShadow: theme.shadows[4],
               '&:hover': {
-                backgroundColor: 'background.default',
+                backgroundColor: '#b7f92b',
               },
             }}
           >
@@ -801,11 +801,11 @@ window.open            }}
               height: '36px',
               borderRadius: '50%',
               padding: 0,
-              backgroundColor: 'background.paper',
-              color: 'text.primary',
+              backgroundColor: '#98dd2e',
+              color: 'white',
               boxShadow: theme.shadows[4],
               '&:hover': {
-                backgroundColor: 'background.default',
+                backgroundColor: '#b7f92b',
               },
             }}
           >

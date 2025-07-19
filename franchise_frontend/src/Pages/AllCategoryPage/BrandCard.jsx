@@ -30,7 +30,7 @@ import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 const cardStyles = {
 
   width:  { xs: "40vh", sm: "calc(50% - 10px)", md: 260 },
-  height: { xs: "50vh", sm: "calc(50% - 10px)", md: 380 },
+  height: { xs: "55vh", sm: "calc(50% - 10px)", md: 380 },
   ml: 1.5,
   mt: 4,
   display: "flex",
@@ -100,12 +100,6 @@ const BrandCard = memo(({
     isLiked,
   } = brand;
 
-<<<<<<< HEAD
-    console.log(brand);
-    const investmentRange = useMemo(
-      () => franchiseDetails.fico?.[0]?.investmentRange || "Not specified",
-      [franchiseDetails.fico]
-=======
   const investmentRange = useMemo(
     () => franchiseDetails.fico?.[0]?.investmentRange || "Not specified",
     [franchiseDetails.fico]
@@ -135,7 +129,6 @@ const BrandCard = memo(({
     toggleLike(
       { brandId: uuid, isLiked },
       { onSettled: () => setIsProcessingLike(false) }
->>>>>>> 3296e11064a2076244cd97668193a5808eef7764
     );
   }, [uuid, isLiked, toggleLike, isProcessingLike]);
 
@@ -201,151 +194,6 @@ const BrandCard = memo(({
 </Tooltip>
 
 
-<<<<<<< HEAD
-    const handleComparisonToggle = useCallback(() => {
-      if (maxComparisonReached && !isSelectedForComparison) {
-        return;
-      }
-      requestAnimationFrame(() => {
-        onToggleBrandComparison(brand);
-      });
-    }, [
-      brand,
-      onToggleBrandComparison,
-      isSelectedForComparison,
-      maxComparisonReached,
-    ]);
-
-    return (
-      <Card sx={cardStyles}>
-        <Tooltip
-          title={
-            maxComparisonReached && !isSelectedForComparison
-              ? "Maximum 3 brands can be compared"
-              : ""
-          }
-          placement="top"
-        >
-          <span>
-            <IconButton
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 2,
-                zIndex: 2,
-                backgroundColor: isSelectedForComparison
-                  ? "rgba(76, 175, 80, 0.9)"
-                  : maxComparisonReached
-                  ? "rgba(244, 67, 54, 0.7)"
-                  : "rgba(0,0,0,0.5)",
-                color: "white",
-                "&:hover": {
-                  backgroundColor: isSelectedForComparison
-                    ? "rgba(56, 142, 60, 0.9)"
-                    : maxComparisonReached
-                    ? "rgba(244, 67, 54, 0.9)"
-                    : "rgba(0,0,0,0.7)",
-                },
-                width: 32,
-                height: 32,
-              }}
-              onClick={handleComparisonToggle}
-              disabled={maxComparisonReached && !isSelectedForComparison}
-            >
-              <Compare fontSize="small" />
-            </IconButton>
-          </span>
-        </Tooltip>
-
-        <Box
-          sx={{
-            p: 2,
-            flexGrow: 1,
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Box
-            component="img"
-            loading="lazy"
-            src={uploads.brandLogo}
-            alt={brandDetails.brandName || "Brand logo"}
-            sx={logoStyles}
-          />
-
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="flex-start"
-            mt={1}
-          >
-            <Typography variant="h6" component="div" sx={titleStyles}>
-              {brandDetails.brandName}
-            </Typography>
-            {/* <IconButton sx={{
-              color:'rgba(0,0,0,0.23)',
-            }}
-            onClick={()=>{
-              console.log("shortlist is clicked")
-            }}
-            >
-            <PlaylistAddCheckIcon/>
-            </IconButton> */}
-            <IconButton
-              onClick={() => handleLikeClick(localIsLiked.uuid, localIsLiked.isLiked)}
-              disabled={likeProcessing[localIsLiked.uuid]}
-              sx={{ ml: 1 }}
-            >
-              {likeProcessing[localIsLiked.uuid] ? (
-                <CircularProgress size={24} />
-              ) : (
-                <Favorite
-                  sx={{
-                    color: localIsLiked.isLiked
-                      ? "#f44336"
-                      : "rgba(0, 0, 0, 0.23)",
-                  }}
-                />
-              )}
-            </IconButton>
-          </Box>
-
-          <Box
-            sx={{
-              mb: 1,
-              minHeight: 32,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            {franchiseDetails.brandCategories?.child ? (
-              <Chip
-                label={franchiseDetails.brandCategories.child}
-                size="small"
-                sx={{
-                  bgcolor: "rgba(255, 152, 0, 0.1)",
-                  color: "orange.dark",
-                  fontWeight: 500,
-                }}
-              />
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                N/A
-              </Typography>
-            )}
-
-            <IconButton
-              size="small"
-              sx={{ color: "rgba(0,0,0,0.23)" }}
-              onClick={() => {
-                console.log("shortlist is clicked");
-              }}
-            >
-              <PlaylistAddCheckIcon />
-            </IconButton>
-          </Box>
-=======
       <Box sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
 
         <Box
@@ -387,7 +235,6 @@ const BrandCard = memo(({
 </Box>
 
 </Box>
->>>>>>> 3296e11064a2076244cd97668193a5808eef7764
 
 <Divider sx={{ my: 1 }} />
 

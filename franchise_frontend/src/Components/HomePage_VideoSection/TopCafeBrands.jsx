@@ -30,14 +30,12 @@ import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import Business from "@mui/icons-material/Business";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
-// import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 import { postView } from "../../Utils/function/view";
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 import { showLoading } from "../../Redux/Slices/loadingSlice";
 import { useDispatch } from "react-redux";
-
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -72,6 +70,17 @@ const BrandCard = React.memo(
     const brandLogo = brand?.uploads?.brandLogo?.[0] || "";
     const brandName = brand?.brandDetails?.brandName || "Brand";
     const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
+
+    const {
+      investmentRange = "Not specified",
+      areaRequired = "Not specified",
+      franchiseType = "N/A",
+      franchiseModel: modelType = "N/A",
+      franchiseFee = "N/A",
+      royaltyFee = "N/A",
+      roi = "N/A",
+      payBackPeriod = "N/A",
+    } = franchiseModel;
 
     useEffect(() => {
       observerRef.current = new IntersectionObserver(
@@ -114,10 +123,6 @@ const BrandCard = React.memo(
             width: "100%",
             border: "1px solid #eee",
             boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-            // transition: "all 0.3s ease",
-            // "&:hover": {
-            //   boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
-            // },
           }}
         >
           <Box
@@ -247,7 +252,19 @@ const BrandCard = React.memo(
               )}
 
               <Stack spacing={1} sx={{ mb: 2 }}>
-                
+                <Box display="flex" alignItems="center">
+                  <Business
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    <strong>Investment:</strong> {investmentRange}
+                  </Typography>
+                </Box>
 
                 <Box display="flex" alignItems="center">
                   <MonetizationOn
@@ -259,10 +276,10 @@ const BrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    Investment :{" "}
-                    {franchiseModel?.investmentRange || "Not specified"}
+                    <strong>Area:</strong> {areaRequired}
                   </Typography>
                 </Box>
+
                 <Box display="flex" alignItems="center">
                   <AreaChart
                     sx={{
@@ -273,20 +290,7 @@ const BrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    Area : {franchiseModel?.areaRequired || "Not specified"}
-                  </Typography>
-                </Box>
-                <Box display="flex" alignItems="center">
-                  <Business
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    Franchise Model : {franchiseModel?.franchiseModel || "N/A"}
+                    <strong>Type:</strong> {modelType}
                   </Typography>
                 </Box>
               </Stack>
@@ -327,8 +331,6 @@ const TopCafeFranchises = () => {
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
-  const isPaused = useRef(false);
-  const scrollIntervalRef = useRef(null);
   const scrollRequestRef = useRef(null);
 
   const [likeProcessing, setLikeProcessing] = useState({});
@@ -336,7 +338,6 @@ const TopCafeFranchises = () => {
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
 
-  
   // REACT-QUERY HOOKS
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
@@ -357,8 +358,7 @@ const TopCafeFranchises = () => {
       );
     });
 
-    // Add the first few brands at the end to create infinite loop effect
-    return [...filtered, ...filtered.slice(0, 4)];
+    return filtered;
   }, [brands]);
 
   const dimensions = useMemo(() => {
@@ -396,29 +396,13 @@ const TopCafeFranchises = () => {
     [openBrandDialog]
   );
 
-  const handleMouseEnter = useCallback(() => {
-    isPaused.current = true;
-    if (scrollIntervalRef.current) {
-      clearInterval(scrollIntervalRef.current);
-      scrollIntervalRef.current = null;
-    }
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    isPaused.current = false;
-    if (!scrollIntervalRef.current) {
-      startAutoScroll();
-    }
-  }, []);
-
-  // Calculate the scroll distance for 4 cards (including gap)
+  // Calculate the scroll distance for 1 card (including gap)
   const getScrollDistance = useCallback(() => {
-    const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
-    return cardWidthWithGap * 4;
+    return dimensions.width + (isMobile ? 16 : 24);
   }, [dimensions.width, isMobile]);
 
   // Smooth scroll function
-  const smoothScrollTo = useCallback((target) => {
+  const smoothScrollTo = useCallback((target, immediate = false) => {
     if (!scrollContainerRef.current) return;
 
     const container = scrollContainerRef.current;
@@ -427,9 +411,9 @@ const TopCafeFranchises = () => {
     }
 
     const start = container.scrollLeft;
-    const change = target - start;
+    let change = target - start;
     const startTime = performance.now();
-    const duration = 5000; // 0.5 second scroll duration
+    const duration = immediate ? 0 : 1000; // 1 second scroll duration
 
     const animateScroll = (currentTime) => {
       const elapsed = currentTime - startTime;
@@ -441,87 +425,11 @@ const TopCafeFranchises = () => {
         scrollRequestRef.current = requestAnimationFrame(animateScroll);
       } else {
         handleScroll(); // Update shadow states after scroll completes
-        checkForLoop(); // Check if we need to loop back to start
       }
     };
 
     scrollRequestRef.current = requestAnimationFrame(animateScroll);
   }, []);
-
-  // Check if we've scrolled to the duplicated items and need to loop back
-  const checkForLoop = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-
-    const container = scrollContainerRef.current;
-    const scrollWidth = container.scrollWidth;
-    const clientWidth = container.clientWidth;
-    const maxScrollLeft = scrollWidth - clientWidth;
-
-    // If we're within 100px of the end, jump back to the equivalent position at the start
-    if (container.scrollLeft >= maxScrollLeft - 100) {
-      const originalBrandsCount = coffeeTeaBrands.length - 4; // Subtract the duplicated items
-      const originalScrollWidth =
-        originalBrandsCount * (dimensions.width + (isMobile ? 16 : 24));
-
-      // Calculate equivalent position at the start
-      const newScrollLeft = container.scrollLeft - originalScrollWidth;
-      container.scrollLeft = newScrollLeft;
-    }
-  }, [coffeeTeaBrands.length, dimensions.width, isMobile]);
-
-  // Handle next button click - scroll forward 4 cards
-  const handleNextClick = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-
-    const container = scrollContainerRef.current;
-    const scrollDistance = getScrollDistance();
-    const newScrollLeft = container.scrollLeft + scrollDistance;
-
-    smoothScrollTo(newScrollLeft);
-  }, [getScrollDistance, smoothScrollTo]);
-
-  // Handle previous button click - scroll backward 4 cards
-  const handlePrevClick = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-
-    const container = scrollContainerRef.current;
-    const scrollDistance = getScrollDistance();
-    const newScrollLeft = container.scrollLeft - scrollDistance;
-
-    // If we're at the start, jump to near the end (before the duplicated items)
-    if (newScrollLeft <= 0) {
-      const originalBrandsCount = coffeeTeaBrands.length - 4; // Subtract the duplicated items
-      const originalScrollWidth =
-        originalBrandsCount * (dimensions.width + (isMobile ? 16 : 24));
-      const clientWidth = container.clientWidth;
-      smoothScrollTo(originalScrollWidth - clientWidth);
-    } else {
-      smoothScrollTo(newScrollLeft);
-    }
-  }, [
-    coffeeTeaBrands.length,
-    dimensions.width,
-    getScrollDistance,
-    isMobile,
-    smoothScrollTo,
-  ]);
-
-  // Enhanced auto-scroll with 2-card movement
-  const startAutoScroll = useCallback(() => {
-    if (scrollIntervalRef.current) {
-      clearInterval(scrollIntervalRef.current);
-    }
-
-    scrollIntervalRef.current = setInterval(() => {
-      if (isPaused.current || !scrollContainerRef.current) return;
-
-      const container = scrollContainerRef.current;
-      const scrollDistance = getScrollDistance() / 2; // Scroll 2 cards at a time (half of 4)
-      const newScrollLeft = container.scrollLeft + scrollDistance;
-
-      smoothScrollTo(newScrollLeft);
-    }, 5000); // Scroll every 5 seconds
-  }, [getScrollDistance, smoothScrollTo]);
 
   // Easing function for smooth scrolling
   const easeInOutQuad = (t) => {
@@ -530,12 +438,34 @@ const TopCafeFranchises = () => {
 
   // Track scroll position for shadow effects
   const handleScroll = useCallback(() => {
-    if (!scrollContainerRef.current) return;
+    if (!scrollContainerRef.current || coffeeTeaBrands.length === 0) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
     setShowStartShadow(scrollLeft > 10);
     setShowEndShadow(scrollLeft < scrollWidth - clientWidth - 10);
-  }, []);
+  }, [coffeeTeaBrands.length]);
+
+  // Handle next button click - scroll forward 1 card
+  const handleNextClick = useCallback(() => {
+    if (!scrollContainerRef.current || coffeeTeaBrands.length === 0) return;
+
+    const container = scrollContainerRef.current;
+    const scrollDistance = getScrollDistance();
+    const newScrollLeft = container.scrollLeft + scrollDistance;
+
+    smoothScrollTo(newScrollLeft);
+  }, [coffeeTeaBrands.length, getScrollDistance, smoothScrollTo]);
+
+  // Handle previous button click - scroll backward 1 card
+  const handlePrevClick = useCallback(() => {
+    if (!scrollContainerRef.current || coffeeTeaBrands.length === 0) return;
+
+    const container = scrollContainerRef.current;
+    const scrollDistance = getScrollDistance();
+    const newScrollLeft = container.scrollLeft - scrollDistance;
+
+    smoothScrollTo(newScrollLeft);
+  }, [coffeeTeaBrands.length, getScrollDistance, smoothScrollTo]);
 
   // Initialize and clean up
   useEffect(() => {
@@ -543,24 +473,17 @@ const TopCafeFranchises = () => {
     if (container) {
       container.addEventListener("scroll", handleScroll);
       handleScroll();
-
-      if (coffeeTeaBrands.length > 0) {
-        startAutoScroll();
-      }
     }
 
     return () => {
       if (container) {
         container.removeEventListener("scroll", handleScroll);
       }
-      if (scrollIntervalRef.current) {
-        clearInterval(scrollIntervalRef.current);
-      }
       if (scrollRequestRef.current) {
         cancelAnimationFrame(scrollRequestRef.current);
       }
     };
-  }, [coffeeTeaBrands.length, handleScroll, startAutoScroll]);
+  }, [handleScroll]);
 
   if (brandsLoading) {
     return (
@@ -580,8 +503,8 @@ const TopCafeFranchises = () => {
     );
   }
 
-  // Only show if we have at least one brand (excluding duplicates)
-  const shouldShow = coffeeTeaBrands.length > 4;
+  // Only show if we have brands
+  const shouldShow = coffeeTeaBrands.length > 0;
 
   return (
     <>
@@ -643,8 +566,8 @@ const TopCafeFranchises = () => {
                 },
               }}
               onClick={async () => {
-                // dispatch(showLoading());
-window.open('/brandviewpage', '_blank')              }}
+                window.open('/brandviewpage', '_blank')
+              }}
             >
               View More
             </Button>
@@ -667,11 +590,11 @@ window.open('/brandviewpage', '_blank')              }}
                   height: "36px",
                   borderRadius: "50%",
                   padding: 0,
-                  backgroundColor: "background.paper",
-                  color: "text.primary",
+                  backgroundColor: "#98dd2e",
+                  color: "white",
                   boxShadow: theme.shadows[4],
                   "&:hover": {
-                    backgroundColor: "background.default",
+                    backgroundColor: "#b7f92b",
                   },
                 }}
               >
@@ -695,11 +618,11 @@ window.open('/brandviewpage', '_blank')              }}
                   height: "36px",
                   borderRadius: "50%",
                   padding: 0,
-                  backgroundColor: "background.paper",
-                  color: "text.primary",
+                  backgroundColor: "#98dd2e",
+                  color: "white",
                   boxShadow: theme.shadows[4],
                   "&:hover": {
-                    backgroundColor: "background.default",
+                    backgroundColor: "#b7f92b",
                   },
                 }}
               >
@@ -722,12 +645,10 @@ window.open('/brandviewpage', '_blank')              }}
                 "&::-webkit-scrollbar": { display: "none" },
                 perspective: "1000px",
               }}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
             >
-              {coffeeTeaBrands.map((brand, index) => (
+              {coffeeTeaBrands.map((brand) => (
                 <motion.div
-                  key={`${brand?.uuid}-${index}`} // Add index to key to handle duplicates
+                  key={brand?.uuid}
                   whileHover={{
                     scale: 1.03,
                     zIndex: 10,

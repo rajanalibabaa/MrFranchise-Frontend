@@ -75,7 +75,7 @@ const BrandCard = React.memo(({
     investmentRange = "Not specified",
     areaRequired = "Not specified",
     franchiseType = "N/A",
-    // franchiseModel: modelType = "N/A",
+    franchiseModel: modelType = "N/A",
     // franchiseFee = "N/A",
     // royaltyFee = "N/A",
     // roi = "N/A",
@@ -280,52 +280,49 @@ const BrandCard = React.memo(({
             )}
 
             {/* Franchise Details */}
-            <Stack spacing={1} sx={{ mb: 2 }}>
-              <Box display="flex" alignItems="center">
-                <Business
-                  sx={{
-                    mr: 1.5,
-                    fontSize: "1rem",
-                    color: "text.secondary",
-                    flexShrink: 0,
-                  }}
-                />
-                <Typography variant="body2">
-                   <strong>Franchise Type :</strong> {franchiseType}
-                   {/* <strong>Model:</strong> {modelType} | */}
-                </Typography>
-              </Box>
+              <Stack spacing={1} sx={{ mb: 2 }}>
+                <Box display="flex" alignItems="center">
+                  <Business
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    <strong>Investment:</strong> {investmentRange}
+                  </Typography>
+                </Box>
 
-              <Box display="flex" alignItems="center">
-                <MonetizationOn
-                  sx={{
-                    mr: 1.5,
-                    fontSize: "1rem",
-                    color: "text.secondary",
-                    flexShrink: 0,
-                  }}
-                />
-                <Typography variant="body2">
-                  <strong>Investment:</strong> {investmentRange} 
-                  {/* | <strong>Fee:</strong> {franchiseFee} */}
-                </Typography>
-              </Box>
+                <Box display="flex" alignItems="center">
+                  <MonetizationOn
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    <strong>Area:</strong> {areaRequired}
+                  </Typography>
+                </Box>
 
-              <Box display="flex" alignItems="center">
-                <AreaChart
-                  sx={{
-                    mr: 1.5,
-                    fontSize: "1rem",
-                    color: "text.secondary",
-                    flexShrink: 0,
-                  }}
-                />
-                <Typography variant="body2">
-                  <strong>Area:</strong> {areaRequired} 
-                  {/* | <strong>ROI:</strong> {roi}% in {payBackPeriod} */}
-                </Typography>
-              </Box>
-            </Stack>
+                <Box display="flex" alignItems="center">
+                  <AreaChart
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    <strong>Type:</strong> {modelType}
+                  </Typography>
+                </Box>
+              </Stack>
 
             <Divider sx={{ my: 1 }} />
           </CardContent>
@@ -685,11 +682,11 @@ window.open('/brandviewpage', '_blank');
                   height: '36px',
                   borderRadius: '50%',
                   padding: 0,
-                  backgroundColor: 'background.paper',
-                  color: 'text.primary',
+                  backgroundColor: '#98dd2e',
+                  color: 'white',
                   boxShadow: theme.shadows[4],
                   '&:hover': {
-                    backgroundColor: 'background.default',
+                    backgroundColor: '#b7f92b',
                   },
                 }}
               >
@@ -713,11 +710,11 @@ window.open('/brandviewpage', '_blank');
                   height: '36px',
                   borderRadius: '50%',
                   padding: 0,
-                  backgroundColor: 'background.paper',
-                  color: 'text.primary',
+                  backgroundColor: '#98dd2e',
+                  color: 'white',
                   boxShadow: theme.shadows[4],
                   '&:hover': {
-                    backgroundColor: 'background.default',
+                    backgroundColor: '#b7f92b',
                   },
                 }}
               >

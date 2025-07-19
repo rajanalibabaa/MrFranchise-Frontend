@@ -64,11 +64,16 @@ const BrandCard = React.memo(({
   const brandName = brand.brandDetails?.brandName || "Unnamed Brand";
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
  
-  const {
-    investmentRange = "Not specified",
-    areaRequired = "Not specified",
-    franchiseType = "N/A",
-  } = franchiseModel;
+     const {
+      investmentRange = "Not specified",
+      areaRequired = "Not specified",
+      franchiseType = "N/A",
+      franchiseModel: modelType = "N/A",
+      franchiseFee = "N/A",
+      royaltyFee = "N/A",
+      roi = "N/A",
+      payBackPeriod = "N/A",
+    } = franchiseModel;
  
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -256,49 +261,49 @@ const BrandCard = React.memo(({
             )}
  
             {/* Franchise Details */}
-            <Stack spacing={1} sx={{ mb: 2 }}>
-              <Box display="flex" alignItems="center">
-                <Business
-                  sx={{
-                    mr: 1.5,
-                    fontSize: "1rem",
-                    color: "text.secondary",
-                    flexShrink: 0,
-                  }}
-                />
-                <Typography variant="body2">
-                  <strong>Franchise Type:</strong> {franchiseType}
-                </Typography>
-              </Box>
- 
-              <Box display="flex" alignItems="center">
-                <MonetizationOn
-                  sx={{
-                    mr: 1.5,
-                    fontSize: "1rem",
-                    color: "text.secondary",
-                    flexShrink: 0,
-                  }}
-                />
-                <Typography variant="body2">
-                  <strong>Investment:</strong> {investmentRange}
-                </Typography>
-              </Box>
- 
-              <Box display="flex" alignItems="center">
-                <AreaChart
-                  sx={{
-                    mr: 1.5,
-                    fontSize: "1rem",
-                    color: "text.secondary",
-                    flexShrink: 0,
-                  }}
-                />
-                <Typography variant="body2">
-                  <strong>Area:</strong> {areaRequired}
-                </Typography>
-              </Box>
-            </Stack>
+              <Stack spacing={1} sx={{ mb: 2 }}>
+                <Box display="flex" alignItems="center">
+                  <Business
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    <strong>Investment:</strong> {investmentRange}
+                  </Typography>
+                </Box>
+
+                <Box display="flex" alignItems="center">
+                  <MonetizationOn
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    <strong>Area:</strong> {areaRequired}
+                  </Typography>
+                </Box>
+
+                <Box display="flex" alignItems="center">
+                  <AreaChart
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    <strong>Type:</strong> {modelType}
+                  </Typography>
+                </Box>
+              </Stack>
  
             <Divider sx={{ my: 1 }} />
           </CardContent>
