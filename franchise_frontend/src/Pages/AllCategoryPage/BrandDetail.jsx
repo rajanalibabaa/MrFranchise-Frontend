@@ -53,6 +53,7 @@ import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx"
 import ShareDialogActions from "./ShareDialogActions.jsx";
 
 const BrandDetails = ({ brandData }) => {
+
    const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -126,13 +127,13 @@ const handleOpenShareClick = (event) => {
       if (isProcessingLike) return;
       
       setIsProcessingLike(true);
-      const newLikeStatus = !localIsLiked;
+      const newLikeStatus = brandData.isLiked;
       
       // Optimistic update
       setLocalIsLiked(newLikeStatus);
       
       toggleLike(
-        { brandId: uuid, isLiked: !newLikeStatus },
+        { brandId: brandData.uuid, isLiked: newLikeStatus },
         {
           onError: () => {
             // Revert on error
@@ -143,7 +144,7 @@ const handleOpenShareClick = (event) => {
           }
         }
       );
-    }, [uuid, localIsLiked, isProcessingLike, toggleLike]);
+    }, [ brandData, isProcessingLike, toggleLike]);
 
 
   // Memoized API calls
@@ -1075,14 +1076,14 @@ const maskEmail = (email) => {
                      sx={{marginLeft:"90px"}}
                                 onClick={handleLikeClick}
                                 disabled={isProcessingLike}
-                                aria-label={localIsLiked ? "Unlike brand" : "Like brand"}
+                                aria-label={brandData.isLiked ? "Unlike brand" : "Like brand"}
                               >
                                 {isProcessingLike ? (
                                   <CircularProgress size={24} />
                                 ) : (
                                   <Favorite
                                     sx={{
-                                      color: localIsLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
+                                      color: brandData.isLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
                                     }}
                                   />
                                 )}
