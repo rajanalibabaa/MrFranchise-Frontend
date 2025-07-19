@@ -358,7 +358,7 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
     "State Franchise",
   ];
 
-  const franchiseModels = ["FOFO ", "FOCO ", "FICO ", "COCO ", "KIOSK","SHOPPING SHOP","CLOUD KITCHEN"];
+  const franchiseModels = ["FOFO ", "FOCO ", "FICO ", "COCO ", "KIOSK","SHOP IN SHOP","CLOUD KITCHEN"];
 
   const investmentRanges = [
     { label: "Below ₹50K", value: "Below - 50,000" },

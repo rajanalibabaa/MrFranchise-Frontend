@@ -58,6 +58,7 @@ function TopBrandVdoCards() {
   };
 
   const handleLikeClick = useCallback((brandId, isLiked) => {
+    console.log(" handleLikeClick :",isLiked)
   // Immediate UI update - no waiting for API response
   const token = localStorage.getItem("accessToken");
   
@@ -83,6 +84,9 @@ function TopBrandVdoCards() {
       }
     );
   }, [toggleLike]);
+
+
+
 
   const handleNext = useCallback(() => {
     if (brands.length > 0) {

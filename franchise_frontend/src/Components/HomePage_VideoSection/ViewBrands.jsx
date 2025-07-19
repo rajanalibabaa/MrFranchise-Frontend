@@ -66,6 +66,7 @@ const BrandCard = React.memo(({
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
   // const isLiked = likedStates[brandId] || false;
  
+  
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
