@@ -61,7 +61,7 @@ const BrandDetailsControl = ({
             data.data.map(c => ({
               name: c.country,
               code: c.iso2,
-              dial_code: c.phone_code ? +`${c.phone_code}` : "",
+              dial_code: c.phone_code ? `+${c.phone_code}` : "",
             }))
           );
         }
@@ -265,7 +265,7 @@ const BrandDetailsControl = ({
                 <InputAdornment position="start">
                   <Autocomplete
                     options={uniqueCountryCodes}
-                    getOptionLabel={(option) =>` ${option.dial_code}`}
+                    getOptionLabel={(option) => `${option.dial_code}`}
                     value={mobileCountryCode}
                     onChange={(event, newValue) =>
                       handleCountryCodeChange("mobile", newValue)
@@ -316,7 +316,7 @@ const BrandDetailsControl = ({
                 <InputAdornment position="start">
                   <Autocomplete
                     options={uniqueCountryCodes}
-                    getOptionLabel={(option) =>` ${option.dial_code}`}
+                    getOptionLabel={(option) => `${option.dial_code}`}
                     value={whatsappCountryCode}
                     onChange={(event, newValue) =>
                       handleCountryCodeChange("whatsapp", newValue)
@@ -464,7 +464,7 @@ const BrandDetailsControl = ({
                 <InputAdornment position="start">
                   <Autocomplete
                     options={uniqueCountryCodes}
-                    getOptionLabel={(option) =>` ${option.dial_code}`}
+                    getOptionLabel={(option) => `${option.dial_code}`}
                     value={ceoCountryCode}
                     onChange={(event, newValue) =>
                       handleCountryCodeChange("ceo", newValue)

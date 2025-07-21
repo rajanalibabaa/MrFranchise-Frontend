@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import BrandDetailsControl from './BrandDetailsControl';
@@ -257,7 +256,7 @@ const BrandListingController = () => {
   const sendOtp = async () => {
     try {
       const response = await axios.post(
-      "http://localhost:5000/api/v1/otpverify/send-otp-email",
+        'http://localhost:5000/api/v1/otpverify/send-otp-email',
         {
           email: formData.email,
         },
@@ -561,4 +560,3 @@ const BrandListingController = () => {
 };
 
 export default BrandListingController;
-
