@@ -114,6 +114,8 @@ const BrandCard = memo(({
     [franchiseDetails.fico]
   );
 
+  const [brandLlke, setBrandLike] = useState(brand.isLiked)
+
   const handleOpenBrand = useCallback(() => {
     if ("requestIdleCallback" in window) {
       requestIdleCallback(() => postView(uuid));
@@ -127,9 +129,11 @@ const BrandCard = memo(({
     if (isProcessingLike) return;
     setIsProcessingLike(true);
     toggleLike(
-      { brandId: uuid, isLiked },
+      { brandId: uuid, isLiked:brandLlke },
       { onSettled: () => setIsProcessingLike(false) }
     );
+
+  setBrandLike(!brandLlke)
   }, [uuid, isLiked, toggleLike, isProcessingLike]);
 
   const handleComparisonToggle = useCallback(() => {
@@ -250,7 +254,7 @@ const BrandCard = memo(({
             {isProcessingLike ? (
               <CircularProgress size={24} />
             ) : (
-              <Favorite sx={{ color: isLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)" }} />
+              <Favorite sx={{ color: brandLlke ? "#f44336" : "rgba(0, 0, 0, 0.23)" }} />
             )}
           </IconButton>
            <IconButton size="small" sx={{ color: "rgba(0,0,0,0.23)",mt:0.4 }}>

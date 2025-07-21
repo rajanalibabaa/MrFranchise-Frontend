@@ -121,14 +121,16 @@ const BrandDetails = ({ brandData }) => {
   const handleLikeClick = useCallback(() => {
     if (isProcessingLike) return;
 
+    console.log("brandData handleLikeClick :",brandData)
+
     setIsProcessingLike(true);
     const newLikeStatus = !localIsLiked;
 
     // Optimistic update
-    setLocalIsLiked(newLikeStatus);
+    setLocalIsLiked(!localIsLiked);
 
     toggleLike(
-      { brandId: uuid, isLiked: !newLikeStatus },
+      { brandId: brandData.uuid, isLiked: brandData.isLiked },
       {
         onError: () => {
           // Revert on error
@@ -1138,7 +1140,7 @@ const BrandDetails = ({ brandData }) => {
                         ) : (
                           <Favorite
                             sx={{
-                              color: localIsLiked
+                              color: brandData?.isLiked
                                 ? "#f44336"
                                 : "rgba(0, 0, 0, 0.23)",
                               // fontSize: isMobile ? "1.2rem" : "1.5rem",
