@@ -66,6 +66,7 @@ const BrandCard = React.memo(({
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
   // const isLiked = likedStates[brandId] || false;
  
+  
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
@@ -612,11 +613,11 @@ window.open('/brandviewpage', '_blank')              }
                     height: '36px',
                     borderRadius: '50%',
                     padding: 0,
-                    backgroundColor: 'background.paper',
-                    color: 'text.primary',
+                    backgroundColor: '#98dd2e',
+                    color: 'white',
                     boxShadow: theme.shadows[4],
                     '&:hover': {
-                      backgroundColor: 'background.default',
+                      backgroundColor: '#b7f92b',
                     },
                   }}
                 >
@@ -640,11 +641,11 @@ window.open('/brandviewpage', '_blank')              }
                     height: '36px',
                     borderRadius: '50%',
                     padding: 0,
-                    backgroundColor: 'background.paper',
-                    color: 'text.primary',
+                    backgroundColor: '#98dd2e',
+                    color: 'white',
                     boxShadow: theme.shadows[4],
                     '&:hover': {
-                      backgroundColor: 'background.default',
+                      backgroundColor: '#b7f92b',
                     },
                   }}
                 >

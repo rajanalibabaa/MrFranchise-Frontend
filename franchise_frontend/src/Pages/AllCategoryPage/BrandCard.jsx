@@ -273,8 +273,8 @@ const BrandCard = memo(({
         </Box>
 
         <Box sx={{ mb: 2, flexGrow: 1, "& > *:not(:last-child)": { mb: 1 } }}>
-          <DetailItem icon={<AttachMoney />} label="Investment Range" value={investmentRange} />
-          <DetailItem icon={<AreaChart />} label="Area Required" value={areaRequired} />
+          <DetailItem icon={<AttachMoney />} label="Investment" value={investmentRange} />
+          <DetailItem icon={<AreaChart />} label="Area" value={areaRequired} />
           <DetailItem icon={<Business />} label="Franchise Model" value={franchiseModel} />
         </Box>
 
@@ -300,7 +300,6 @@ const BrandCard = memo(({
   prevProps.maxComparisonReached === nextProps.maxComparisonReached
 ));
 
-
 const DetailItem = memo(({ icon, label, value }) => {
   const clonedIcon = useMemo(
     () => React.cloneElement(icon, { sx: { mr: 1.5, fontSize: "1rem", color: "text.secondary", flexShrink: 0 } }),
@@ -311,7 +310,7 @@ const DetailItem = memo(({ icon, label, value }) => {
     <Box display="flex" alignItems="center">
       {clonedIcon}
       <Typography variant="caption" noWrap>
-        <span style={{ fontWeight: 600 }}>{label}:</span> {value}
+        <span style={{ fontWeight: 400 }}>{label}:</span> {value}
       </Typography>
     </Box>
   );

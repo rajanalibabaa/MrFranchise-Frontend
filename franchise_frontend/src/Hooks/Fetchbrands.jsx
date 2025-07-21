@@ -85,6 +85,9 @@ export const useToggleLike = () => {
     onMutate: async ({ brandId, isLiked }) => {
       console.log("Toggling like for brandId:", brandId, "isLiked:", isLiked);
       // Cancel any outgoing refetches
+
+      console.log("======== :",isLiked)
+      // Cancel any outgoing refetches to avoid overwriting our optimistic update
       await queryClient.cancelQueries(["brands"]);
       
       // Get current data snapshot

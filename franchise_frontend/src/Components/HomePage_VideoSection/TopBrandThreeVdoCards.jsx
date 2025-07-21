@@ -88,6 +88,9 @@ function TopBrandVdoCards() {
   );
 }, [toggleLike]);
 
+
+
+
   const handleNext = useCallback(() => {
     if (brands.length > 0) {
       setCurrentIndex((prev) => (prev + 1) % brands.length);

@@ -560,7 +560,7 @@ if (suggestion.brandId) {
 
     // Check if we're already on the brand view page
     if (location.pathname === '/brandViewPage') {
-      // If already on brand view page, update the state directly
+      // If already on brand view page, update the state directl
       navigate('/brandViewPage', {
         state: {
           filteredBrands,
@@ -569,8 +569,10 @@ if (suggestion.brandId) {
         },
         replace: true
       });
+      window.location.reload();
     } else {
       // Otherwise navigate normally
+
       navigate('/brandViewPage', {
         state: {
           filteredBrands,
