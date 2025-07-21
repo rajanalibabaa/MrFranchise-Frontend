@@ -81,11 +81,13 @@ const FilterDropdowns = () => {
     setFilters(prev => ({ ...prev, [name]: value }));
   }, []);
 
-  const handleFindBrands = useCallback(() => {
-    navigate("/brandviewpage", {
-      state: { filters }
-    });
-  }, [navigate, filters]);
+ const handleFindBrands = useCallback(() => {
+  const url = `/brandviewpage?filters=${encodeURIComponent(
+    JSON.stringify(filters)
+  )}`;
+  window.open(url, "_blank"); // Opens in a new tab
+}, [filters]);
+
 
   if (isLoading) {
     return (
@@ -141,29 +143,7 @@ const FilterDropdowns = () => {
           </Select>
         </FormControl>
 
-        {/* State Filter */}
-        <FormControl fullWidth sx={{ minWidth: 180 }}>
-          <InputLabel>Location</InputLabel>
-          <Select
-            value={filters.selectedState}
-            onChange={(e) => handleFilterChange("selectedState", e.target.value)}
-            label="Location"
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  maxHeight: 300
-                }
-              }
-            }}
-          >
-            <MenuItem value="">All Locations</MenuItem>
-            {states.map((state) => (
-              <MenuItem key={state} value={state}>
-                {state}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+       
 
         {/* Investment Range Filter */}
         <FormControl fullWidth sx={{ minWidth: 180 }}>
@@ -183,6 +163,29 @@ const FilterDropdowns = () => {
             {formattedInvestmentRanges.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+         {/* State Filter */}
+        <FormControl fullWidth sx={{ minWidth: 180 }}>
+          <InputLabel>Location</InputLabel>
+          <Select
+            value={filters.selectedState}
+            onChange={(e) => handleFilterChange("selectedState", e.target.value)}
+            label="Location"
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 300
+                }
+              }
+            }}
+          >
+            <MenuItem value="">All Locations</MenuItem>
+            {states.map((state) => (
+              <MenuItem key={state} value={state}>
+                {state}
               </MenuItem>
             ))}
           </Select>

@@ -27,10 +27,10 @@ import { useNavigate } from "react-router-dom";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 import { postView } from "../../Utils/function/view";
-
-import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import { useBrands, useToggleLike, openBrandDialog } from "../../Hooks/Fetchbrands";
 import { showLoading } from "../../Redux/Slices/loadingSlice";
 import { useDispatch } from "react-redux";
+
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
@@ -206,34 +206,17 @@ const BrandCard = React.memo(({
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Tooltip title={brandName} placement="top">
                   <Typography
-                                  variant="body2"
-                                  fontWeight={600}
-                                  sx={{
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    flex: 1,
-                                  }}
-                                >
+                    variant="h6"
+                    fontWeight={600}
+                    sx={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {brandName}
                   </Typography>
                 </Tooltip>
-                {/* {tagLine && (
-                  <Tooltip title={tagLine} placement="top">
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {tagLine}
-                    </Typography>
-                  </Tooltip>
-                )} */}
               </Box>
               <IconButton
                 onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
@@ -355,7 +338,7 @@ const BrandCard = React.memo(({
   );
 });
 
-const TopBeverageFranchises = () => {
+const SimilarBrands = ({ brandData }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
@@ -372,22 +355,31 @@ const TopBeverageFranchises = () => {
   
   const navigate = useNavigate();
   const dispatch = useDispatch();
- // REACT-QUERY HOOKS
+  
+  // REACT-QUERY HOOKS
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
 
-  // Filter beverage franchises
-  const beverageBrands = useMemo(() => {
+
+
+  // Filter similar brands by child category, excluding the current brand
+  const similarBrands = useMemo(() => {
+    if (!brandData || !brands.length) return [];
+    
+    const currentChildCategory = brandData.franchiseDetails?.brandCategories?.child;
+    if (!currentChildCategory) return [];
+    
     const filtered = brands.filter(brand => {
-      const category = brand.franchiseDetails?.brandCategories || {};
-      return (
-        category.main === "Food & Beverages"
-      );
+      // Exclude the current brand
+      if (brand.uuid === brandData.uuid) return false;
+      
+      // Include brands with the same child category
+      return brand.franchiseDetails?.brandCategories?.child === currentChildCategory;
     });
     
     // Add the first few brands at the end to create infinite loop effect
     return [...filtered, ...filtered.slice(0, 4)];
-  }, [brands]);
+  }, [brandData, brands]);
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -416,7 +408,7 @@ const TopBeverageFranchises = () => {
   const handleApply = useCallback((brand) => {
     postView(brand.uuid);
     openBrandDialog(brand);
-  }, [openBrandDialog]);
+  }, []);
 
   const handleMouseEnter = useCallback(() => {
     isPaused.current = true;
@@ -481,14 +473,14 @@ const TopBeverageFranchises = () => {
     
     // If we're within 100px of the end, jump back to the equivalent position at the start
     if (container.scrollLeft >= maxScrollLeft - 100) {
-      const originalBrandsCount = beverageBrands.length - 4; // Subtract the duplicated items
+      const originalBrandsCount = similarBrands.length - 4; // Subtract the duplicated items
       const originalScrollWidth = originalBrandsCount * (dimensions.width + (isMobile ? 16 : 24));
       
       // Calculate equivalent position at the start
       const newScrollLeft = container.scrollLeft - originalScrollWidth;
       container.scrollLeft = newScrollLeft;
     }
-  }, [beverageBrands.length, dimensions.width, isMobile]);
+  }, [similarBrands.length, dimensions.width, isMobile]);
 
   // Handle next button click - scroll forward 4 cards
   const handleNextClick = useCallback(() => {
@@ -511,33 +503,14 @@ const TopBeverageFranchises = () => {
     
     // If we're at the start, jump to near the end (before the duplicated items)
     if (newScrollLeft <= 0) {
-      const originalBrandsCount = beverageBrands.length - 4; // Subtract the duplicated items
+      const originalBrandsCount = similarBrands.length - 4; // Subtract the duplicated items
       const originalScrollWidth = originalBrandsCount * (dimensions.width + (isMobile ? 16 : 24));
       const clientWidth = container.clientWidth;
       smoothScrollTo(originalScrollWidth - clientWidth);
     } else {
       smoothScrollTo(newScrollLeft);
     }
-  }, [beverageBrands.length, dimensions.width, getScrollDistance, isMobile, smoothScrollTo]);
-
-  /*
-  // Commented out auto-scroll functionality
-  const startAutoScroll = useCallback(() => {
-    if (scrollIntervalRef.current) {
-      clearInterval(scrollIntervalRef.current);
-    }
-
-    scrollIntervalRef.current = setInterval(() => {
-      if (isPaused.current || !scrollContainerRef.current) return;
-
-      const container = scrollContainerRef.current;
-      const scrollDistance = getScrollDistance() / 2; // Scroll 2 cards at a time (half of 4)
-      const newScrollLeft = container.scrollLeft + scrollDistance;
-      
-      smoothScrollTo(newScrollLeft);
-    }, 5000); // Scroll every 5 seconds
-  }, [getScrollDistance, smoothScrollTo]);
-  */
+  }, [similarBrands.length, dimensions.width, getScrollDistance, isMobile, smoothScrollTo]);
 
   // Easing function for smooth scrolling
   const easeInOutQuad = (t) => {
@@ -559,13 +532,6 @@ const TopBeverageFranchises = () => {
     if (container) {
       container.addEventListener('scroll', handleScroll);
       handleScroll();
-      
-      /*
-      // Commented out auto-scroll initialization
-      if (beverageBrands.length > 0) {
-        startAutoScroll();
-      }
-      */
     }
     
     return () => {
@@ -579,7 +545,7 @@ const TopBeverageFranchises = () => {
         cancelAnimationFrame(scrollRequestRef.current);
       }
     };
-  }, [beverageBrands.length, handleScroll/*, startAutoScroll*/]);
+  }, [similarBrands.length, handleScroll]);
 
   if (brandsLoading) {
     return (
@@ -598,186 +564,156 @@ const TopBeverageFranchises = () => {
   }
 
   // Only show if we have at least one brand (excluding duplicates)
-  const shouldShow = beverageBrands.length > 4;
+  const shouldShow = similarBrands.length > 4;
+
+  if (!shouldShow) return null;
 
   return (
     <>
-      {shouldShow && (
-        <Box
+      <Box
+        sx={{
+          py: isMobile ? 1 : 3,
+          px: isMobile ? 2 : 4,
+          maxWidth: 1400,
+          mx: "auto",
+          mt: 4,
+          borderTop: `1px solid ${theme.palette.divider}`,
+          position: 'relative',
+        }}
+        ref={containerRef}
+      >
+        <Typography
+          variant={isMobile ? "h6" : "h5"}
+          fontWeight="bold"
           sx={{
-            py: isMobile ? 1 : 2,
-            px: isMobile ? 0 : 2,
-            maxWidth: isMobile ? "100%" : 1400,
-            mx: "auto",
-            mb: isMobile ? 0 : 2,
-            position: 'relative',
+            color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+            mb: 3,
+            textAlign: "left",
+            position: "relative",
+            "&:after": {
+              content: '""',
+              display: "block",
+              width: "80px",
+              height: "4px",
+              background: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+              mt: 1,
+              borderRadius: 2,
+            },
           }}
-          ref={containerRef}
         >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-              px: isMobile ? 2 : 0,
-            }}
-          >
-            <Typography
-              variant={isMobile ? "body1" : "h5"}
-              fontWeight="bold"
+          Similar Category Brands
+        </Typography>
+
+        <Box sx={{ position: 'relative', px: isMobile ? 0 : 0 }}>
+          {/* Previous button */}
+          {showStartShadow && (
+            <Button
+              variant="contained"
+              onClick={handlePrevClick}
               sx={{
-                color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                mb: 1,
-                textAlign: "left",
-                position: "relative",
-                "&:after": {
-                  content: '""',
-                  display: "block",
-                  width: "80px",
-                  height: "4px",
-                  background: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                  mt: 1,
-                  borderRadius: 2,
+                position: 'absolute',
+                left: isMobile ? 4 : -12,
+                top: `calc(50% + ${isMobile ? 20 : 40}px)`,
+                transform: 'translateY(-50%)',
+                zIndex: 2,
+                minWidth: '36px',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                padding: 0,
+                backgroundColor: '#98dd2e',
+                color: 'white',
+                boxShadow: theme.shadows[4],
+                '&:hover': {
+                  backgroundColor: '#b7f92b',
                 },
               }}
             >
-              Top Beverage Brands
-            </Typography>
-
-        <Button
-          variant="text"
-          size="small"
-          endIcon={<ArrowRight />}
-          sx={{
-            textTransform: "none",
-            fontSize: isMobile ? 14 : 16,
-            color: theme.palette.text.secondary,
-            "&:hover": {
-              color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-              backgroundColor: "transparent",
-            },
-          }}
-          onClick={async () => {
-            // dispatch(showLoading());
-window.open('/brandviewpage', '_blank');          
-          }}
-        >
-          View More
-        </Button>
-          </Box>
-          <Box sx={{ position: 'relative', px: isMobile ? 2 : 0 }}>
-            {/* Previous button */}
-            {showStartShadow && (
-              <Button
-                variant="contained"
-                onClick={handlePrevClick}
-                sx={{
-                  position: 'absolute',
-                  left: isMobile ? 4 : -12,
-                  top: `calc(50% + ${isMobile ? 20 : 40}px)`,
-                  transform: 'translateY(-50%)',
-                  zIndex: 2,
-                  minWidth: '36px',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  padding: 0,
-                  backgroundColor: '#98dd2e',
-                  color: 'white',
-                  boxShadow: theme.shadows[4],
-                  '&:hover': {
-                    backgroundColor: '#b7f92b',
-                  },
-                }}
-              >
-                &lt;
-              </Button>
-            )}
-            
-            {/* Next button */}
-            {showEndShadow && (
-              <Button
-                variant="contained"
-                onClick={handleNextClick}
-                sx={{
-                  position: 'absolute',
-                  right: isMobile ? 4 : -12,
-                  top: `calc(50% + ${isMobile ? 20 : 40}px)`,
-                  transform: 'translateY(-50%)',
-                  zIndex: 2,
-                  minWidth: '36px',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  padding: 0,
-                  backgroundColor: '#98dd2e',
-                  color: 'white',
-                  boxShadow: theme.shadows[4],
-                  '&:hover': {
-                    backgroundColor: '#b7f92b',
-                  },
-                }}
-              >
-                &gt;
-              </Button>
-            )}
-            
-            <Box
-              component={motion.div}
-              initial="initial"
-              animate="animate"
-              ref={scrollContainerRef}
-              sx={{
-                display: "flex",
-                gap: isMobile ? 2 : 3,
-                borderRadius: 3,
-                p: 2,
-                overflowX: "auto",
-                scrollbarWidth: "none",
-                "&::-webkit-scrollbar": { display: "none" },
-                perspective: '1000px',
-              }}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              {beverageBrands.map((brand, index) => (
-                <motion.div
-                  key={`${brand?.uuid}-${index}`} // Add index to key to handle duplicates
-                  whileHover={{ 
-                    scale: 1.03,
-                    zIndex: 10,
-                    boxShadow: theme.shadows[6],
-                    transition: { duration: 0.3 }
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <BrandCard 
-                    brand={brand}
-                    handleApply={handleApply}
-                    handleLikeClick={handleLikeClick}
-                    likeProcessing={likeProcessing}
-                    dimensions={dimensions}
-                    theme={theme}
-                    isMobile={isMobile}
-                    isTablet={isTablet}
-                  />
-                </motion.div>
-              ))}
-            </Box>
-          </Box>
-          
-          {showLogin && (
-            <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+              &lt;
+            </Button>
           )}
+          
+          {/* Next button */}
+          {showEndShadow && (
+            <Button
+              variant="contained"
+              onClick={handleNextClick}
+              sx={{
+                position: 'absolute',
+                right: isMobile ? 4 : -12,
+                top: `calc(50% + ${isMobile ? 20 : 40}px)`,
+                transform: 'translateY(-50%)',
+                zIndex: 2,
+                minWidth: '36px',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                padding: 0,
+                backgroundColor: '#98dd2e',
+                color: 'white',
+                boxShadow: theme.shadows[4],
+                '&:hover': {
+                  backgroundColor: '#b7f92b',
+                },
+              }}
+            >
+              &gt;
+            </Button>
+          )}
+          
+          <Box
+            component={motion.div}
+            initial="initial"
+            animate="animate"
+            ref={scrollContainerRef}
+            sx={{
+              display: "flex",
+              gap: isMobile ? 2 : 3,
+              borderRadius: 3,
+              p: 2,
+              overflowX: "auto",
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+              perspective: '1000px',
+            }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            {similarBrands.map((brand, index) => (
+              <motion.div
+                key={`${brand?.uuid}-${index}`} // Add index to key to handle duplicates
+                whileHover={{ 
+                  scale: 1.03,
+                  zIndex: 10,
+                  boxShadow: theme.shadows[6],
+                  transition: { duration: 0.3 }
+                }}
+                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <BrandCard 
+                  brand={brand}
+                  handleApply={handleApply}
+                  handleLikeClick={handleLikeClick}
+                  likeProcessing={likeProcessing}
+                  dimensions={dimensions}
+                  theme={theme}
+                  isMobile={isMobile}
+                  isTablet={isTablet}
+                />
+              </motion.div>
+            ))}
+          </Box>
         </Box>
-      )}
+        
+        {showLogin && (
+          <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+        )}
+      </Box>
     </>
   );
-  // <
 };
 
-export default React.memo(TopBeverageFranchises);
+export default React.memo(SimilarBrands);

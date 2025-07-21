@@ -66,6 +66,7 @@ const BrandCard = React.memo(({
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
   // const isLiked = likedStates[brandId] || false;
  
+  
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
@@ -322,8 +323,12 @@ const BrandCard = React.memo(({
   const [error, setError] = useState(null);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
+  
+  const investorId = useSelector((state) => state.auth?.investorUUID)
+  const brandId = useSelector((state) => state.auth?.brandUUID)
+  const id =  localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID")
+|| investorId || brandId
 
-  const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
   const navigate = useNavigate();
 
@@ -334,7 +339,7 @@ const BrandCard = React.memo(({
   }, [isMobile, isTablet]);
 
   const fetchData = useCallback(async () => {
-    if (!investorUUID || !AccessToken) {
+    if (!id || !AccessToken) {
       setLoading(false);
       return;
     }
@@ -352,7 +357,7 @@ const BrandCard = React.memo(({
       };
 
       const viewedRes = await axios.get(
-        `${api.viewApi.get.getAllViewBrandByID}/${investorUUID}`,
+        `${api.viewApi.get.getAllViewBrandByID}/${id}`,
         config
       ).then(res => res.data?.data || [])
        .catch(() => []);
@@ -364,7 +369,7 @@ const BrandCard = React.memo(({
     } finally {
       setLoading(false);
     }
-  }, [investorUUID, AccessToken]);
+  }, [id, AccessToken]);
 
   useEffect(() => {
     fetchData();
@@ -525,11 +530,10 @@ const BrandCard = React.memo(({
     );
   }
 
-  const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
-
+  
   return (
     <>
-      {id && (
+      {id && brands.length > 0 &&(
         <Box
           sx={{
             py: isMobile ? 1 : 2,
@@ -584,7 +588,8 @@ const BrandCard = React.memo(({
                   backgroundColor: "transparent",
                 },
               }}
-              onClick={() => navigate("/brandviewpage")}
+              onClick={() => 
+window.open('/brandviewpage', '_blank')              }
             >
               View More
             </Button>
@@ -608,11 +613,11 @@ const BrandCard = React.memo(({
                     height: '36px',
                     borderRadius: '50%',
                     padding: 0,
-                    backgroundColor: 'background.paper',
-                    color: 'text.primary',
+                    backgroundColor: '#98dd2e',
+                    color: 'white',
                     boxShadow: theme.shadows[4],
                     '&:hover': {
-                      backgroundColor: 'background.default',
+                      backgroundColor: '#b7f92b',
                     },
                   }}
                 >
@@ -636,11 +641,11 @@ const BrandCard = React.memo(({
                     height: '36px',
                     borderRadius: '50%',
                     padding: 0,
-                    backgroundColor: 'background.paper',
-                    color: 'text.primary',
+                    backgroundColor: '#98dd2e',
+                    color: 'white',
                     boxShadow: theme.shadows[4],
                     '&:hover': {
-                      backgroundColor: 'background.default',
+                      backgroundColor: '#b7f92b',
                     },
                   }}
                 >

@@ -166,7 +166,7 @@ const BrandListingController = () => {
       }
       try {
         const response = await axios.get(
-          `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandListingByUUID/${uuid}`
+          `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${uuid}`
         );
         const brand = response.data.brandListing || response.data.data;
         if (response.data.success && brand) {

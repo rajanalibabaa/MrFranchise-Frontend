@@ -1,6 +1,7 @@
   import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
   import { fetchBrands, fetchBrandById, recordBrandView, toggleBrandLike } from "../Api/Brands";
 
+
   // Cache configuration
   const CACHE_TIME = 10 * 60 * 1000; // 10 minutes
   const STALE_TIME = 5 * 60 * 1000; // 5 minutes
@@ -76,57 +77,66 @@
     });
   };
 
- export const useToggleLike = () => {
+export const useToggleLike = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
     mutationFn: toggleBrandLike,
     onMutate: async ({ brandId, isLiked }) => {
+      console.log("Toggling like for brandId:", brandId, "isLiked:", isLiked);
+      // Cancel any outgoing refetches
+
+      console.log("======== :",isLiked)
       // Cancel any outgoing refetches to avoid overwriting our optimistic update
       await queryClient.cancelQueries(["brands"]);
       
-      // Snapshot the previous value
+      // Get current data snapshot
       const previousBrands = queryClient.getQueryData(["brands"]);
       
-      // Optimistically update to the new value
+      // Optimistically update the UI
       queryClient.setQueryData(["brands"], (old) => 
         old?.map(brand => 
-          brand.uuid === brandId ? { 
-            ...brand, 
-            isLiked: !isLiked,
-            // Add optimistic flag to track this update
-            _optimistic: true 
-          } : brand
+          brand.uuid === brandId 
+            ? { ...brand, isLiked: !isLiked, _optimistic: true } 
+            : brand
         )
       );
       
       return { previousBrands, brandId, isLiked };
     },
-    onError: (err, variables, context) => {
-      // Roll back to previous value on error
+    onError: (error, variables, context) => {
+      console.error("Like toggle failed:", error);
+      
+      // Rollback optimistic update
       if (context?.previousBrands) {
         queryClient.setQueryData(["brands"], context.previousBrands);
       }
       
-      // Optionally show error feedback to user
-      toast.error("Failed to update like status");
+      // Show user feedback
+      // toast.error(error.response?.data?.message || "Failed to update like status");
     },
     onSuccess: (data, variables, context) => {
-      // Update with server data on success
-      queryClient.setQueryData(["brands"], (old) => 
-        old?.map(brand => 
-          brand.uuid === context?.brandId ? { 
-            ...brand, 
-            isLiked: !context.isLiked,
-            _optimistic: undefined // Remove optimistic flag
-          } : brand
+
+      console.log("data :",data)
+      console.log("variables :",variables)
+      console.log("context :",context)
+      // console.log("old :",old)
+      // Confirm the update and remove optimistic flag
+      queryClient.setQueryData(["brands"], (context) => 
+        context.previousBrands?.map(brand => 
+          brand.uuid === context?.brandId 
+            ? { ...brand, isLiked: !context.isLiked, _optimistic: undefined } 
+            : brand
         )
       );
+      
+      // Show success feedback
+      // toast.success(`Brand ${!context.isLiked ? "liked" : "unliked"} successfully`);
     },
-    // Use onSettled carefully - it might cause unnecessary refetches
-    // onSettled: () => {
-    //   queryClient.invalidateQueries(["brands"]);
-    // }
+    onSettled: () => {
+      // Optional: Refetch brands to ensure sync with server
+      // queryClient.invalidateQueries(["brands"]);
+    }
   });
 };
 
