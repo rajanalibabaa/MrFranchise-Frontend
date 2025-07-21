@@ -20,7 +20,7 @@ import BrandComplaint from "./Components/BrandProfile_Component/BrandComplaint";
 
 import BrandListingController from './Components/BrandProfile_Component/BrandDashboardController/BrandListingController.jsx';
 import Upgradeaccount from './Components/Investor_Profile_Component/Upgradeaccount.jsx';
-import { Provider, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage.jsx';
 import BrandSearchus from './Components/BrandProfile_Component/BrandSearches.jsx';
 import BrandRegisterForm from './Pages/Registration/BrandLIstingRegister/BrandRegisterForm.jsx';
