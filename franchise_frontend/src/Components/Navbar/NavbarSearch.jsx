@@ -679,679 +679,452 @@ if (suggestion.brandId) {
   ]);
 
   return (
-    <Dialog 
-  open={open} 
-  onClose={handleClose} 
-  fullWidth 
-  maxWidth="md" 
-  sx={{ 
-    '& .MuiDialog-paper': {
-      borderRadius: 3,
-      background: 'linear-gradient(to bottom, #f9f9f9, #ed2222ff)',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-      overflow: 'visible'
-    },
-    top: { xs: "5%", sm: "10%", md: "15%" }
-  }}
->
-  <DialogContent sx={{ 
-    position: 'relative', 
-    p: { xs: 2, sm: 3 },
-    '&:first-of-type': {
-      pt: { xs: 3, sm: 4 }
-    }
-  }}>
-    {/* Close Button - Improved positioning and styling */}
-    <IconButton
-      onClick={handleClose}
-      sx={{
-        position: 'absolute',
-        top: { xs: 8, sm: 12 },
-        right: { xs: 8, sm: 12 },
-        bgcolor: 'rgba(0,0,0,0.05)',
-        '&:hover': {
-          bgcolor: 'rgba(0,0,0,0.1)'
-        },
-        transition: 'all 0.2s ease'
-      }}
-    >
-      <CloseIcon fontSize="small" sx={{ color: 'rgba(251, 4, 4, 0.97)' }} />
-    </IconButton>
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md" sx={{ top: { xs: "-20%", sm: "-50%", lg: "-300px" } }}>
+      <DialogContent sx={{ position: 'relative', p: 3 }}>
+        {/* Close Button */}
+        <IconButton
+          onClick={handleClose}
+          sx={{ position: 'absolute', top: { xs: -5, sm: 2 }, right: { xs: -7, sm: 4 } }}
+        >
+          <CloseIcon />
+        </IconButton>
 
-    {/* Main Search Container */}
-    <Box display="flex" justifyContent="center" mb={2} position="relative">
-      <Box sx={{ width: '100%', maxWidth: 600 }}>
         {/* Search Input with Suggestions */}
-        <TextField
-          placeholder="Search for brands by name, category, or location"
-          fullWidth
-          variant="outlined"
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setOpenSuggestions(e.target.value.length > 1);
-          }}
-          onFocus={() => searchTerm.length > 1 && setOpenSuggestions(true)}
-          onBlur={() => setTimeout(() => setOpenSuggestions(false), 200)}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-              boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
-              '& fieldset': {
-                borderColor: 'rgba(0,0,0,0.1)'
-              },
-              '&:hover fieldset': {
-                borderColor: 'rgba(0,0,0,0.2)'
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: 'rgb(104, 159, 56)',
-                boxShadow: '0 0 0 2px rgba(104, 159, 56, 0.2)'
-              }
-            }
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" sx={{ color: 'rgba(0,0,0,0.5)' }} />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                {activeFiltersCount > 0 && (
-                  <Chip 
-                    label={`${activeFiltersCount} filters`} 
-                    size="small" 
-                    sx={{ 
-                      mr: 1,
-                      bgcolor: 'rgba(104, 159, 56, 0.1)',
-                      color: 'rgb(104, 159, 56)'
+        <Box display="flex" justifyContent="center" mb={2} position="relative">
+          <TextField
+            placeholder="Search for brands by name, category, or location"
+            fullWidth
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setOpenSuggestions(e.target.value.length > 1);
+            }}
+            onFocus={() => searchTerm.length > 1 && setOpenSuggestions(true)}
+            onBlur={() => setTimeout(() => setOpenSuggestions(false), 200)}
+            sx={{ maxWidth: 500 }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  {activeFiltersCount > 0 && (
+                    <Chip 
+                      label={`${activeFiltersCount} filters`} 
+                      size="small" 
+                      sx={{ mr: 1 }}
+                    />
+                  )}
+                  <IconButton 
+                    sx={{ bgcolor: 'rgb(104, 159, 56)', color: 'white', "&:hover": { backgroundColor: "#7ad03a" } }}
+                    onClick={handleExplore}
+                  >
+                    <SearchIcon />
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
+          />
+          
+          {/* Search Suggestions Dropdown */}
+          {openSuggestions && searchSuggestions.length > 0 && (
+            <Paper 
+              elevation={3} 
+              sx={{
+                position: 'absolute',
+                top: '100%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 'calc(100% - 32px)',
+                maxWidth: 500,
+                maxHeight: 300,
+                overflow: 'auto',
+                zIndex: 1300,
+                mt: 1
+              }}
+            >
+              <List>
+                {searchSuggestions.map((suggestion, index) => (
+                  <React.Fragment key={`${suggestion.type}-${suggestion.value}-${index}`}>
+                    <ListItem 
+                      button
+                      selected={index === activeSuggestion}
+                      onMouseEnter={() => setActiveSuggestion(index)}
+                      onClick={() => handleSuggestionSelect(suggestion)}
+                      sx={{
+                        '&:hover': { backgroundColor: 'action.hover' },
+                        '&.Mui-selected': { backgroundColor: 'action.selected' }
+                      }}
+                    >
+                      <Box sx={{ mr: 1, fontSize: '1.2rem' }}>{suggestion.icon}</Box>
+                      <ListItemText
+                        primary={highlightMatch(suggestion.value, suggestion.searchTerm)}
+                        secondary={
+                          suggestion.matchText ? (
+                            <span>{highlightMatch(suggestion.matchText, suggestion.searchTerm)}</span>
+                          ) : (
+                            <span>Brand</span>
+                          )
+                        }
+                        secondaryTypographyProps={{ color: 'text.secondary' }}
+                      />
+                    </ListItem>
+                    {index < searchSuggestions.length - 1 && <Divider />}
+                  </React.Fragment>
+                ))}
+              </List>
+            </Paper>
+          )}
+        </Box>
+
+        {/* Active Filters */}
+        <Box display="flex" justifyContent="center" flexWrap="wrap" gap={1} mb={2}>
+          {selectedMainCategory && (
+            <Chip 
+              label={`Industry: ${selectedMainCategory}`} 
+              onDelete={() => {
+                setSelectedMainCategory('');
+                setSelectedSubCategory('');
+                setSelectedChildCategory('');
+              }}
+            />
+          )}
+          {selectedSubCategory && (
+            <Chip 
+              label={`Category: ${selectedSubCategory}`} 
+              onDelete={() => {
+                setSelectedSubCategory('');
+                setSelectedChildCategory('');
+              }}
+            />
+          )}
+          {selectedChildCategory && (
+            <Chip 
+              label={`Sub-Category: ${selectedChildCategory}`} 
+              onDelete={() => setSelectedChildCategory('')}
+            />
+          )}
+          {selectedState && (
+            <Chip 
+              label={`State: ${selectedState}`} 
+              onDelete={() => {
+                setSelectedState('');
+                setSelectedDistrict('');
+                setSelectedCity('');
+              }}
+            />
+          )}
+          {selectedDistrict && (
+            <Chip 
+              label={`District: ${selectedDistrict}`} 
+              onDelete={() => {
+                setSelectedDistrict('');
+                setSelectedCity('');
+              }}
+            />
+          )}
+          {selectedCity && (
+            <Chip 
+              label={`City: ${selectedCity}`} 
+              onDelete={() => setSelectedCity('')}
+            />
+          )}
+          {selectedInvestmentRange && (
+            <Chip 
+              label={`Investment: ${selectedInvestmentRange}`} 
+              onDelete={() => setSelectedInvestmentRange('')}
+            />
+          )}
+        </Box>
+
+        {/* Explore Text */}
+        <Typography
+          variant="body1"
+          align="center"
+          color="text.secondary"
+          sx={{ mb: 2 }}
+        >
+          Or Explore By
+        </Typography>
+
+        {/* Tabs */}
+        <Tabs
+          value={tab}
+          onChange={handleTabChange}
+          centered
+          textColor="error"
+          indicatorColor="error"
+          sx={{ mb: { xs: 0.5, sm: 2 }, p: { xs: "12px 0px" } }}
+        >
+          <Tab label="Categories" />
+          <Tab label="Location" />
+          <Tab label="Investment" />
+        </Tabs>
+
+        {/* Tab Content */}
+        {tab === 0 && (
+          <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center" mb={3}>
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel>Industry</InputLabel>
+              <Select
+                value={selectedMainCategory}
+                onChange={(e) => {
+                  setSelectedMainCategory(e.target.value);
+                  setSelectedSubCategory('');
+                  setSelectedChildCategory('');
+                }}
+                label="Industry"
+              >
+                <MenuItem value="">Select Industry</MenuItem>
+                {mainCategories.map((category, index) => (
+                  <MenuItem key={`cat-${index}`} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl sx={{ minWidth: 200 }} disabled={!selectedMainCategory}>
+              <InputLabel>Main Category</InputLabel>
+              <Select
+                value={selectedSubCategory}
+                onChange={(e) => {
+                  setSelectedSubCategory(e.target.value);
+                  setSelectedChildCategory('');
+                }}
+                label="Main Category"
+              >
+                <MenuItem value="">Select Main Category</MenuItem>
+                {subCategories.map((sub, index) => (
+                  <MenuItem key={`sub-cat-${index}`} value={sub}>
+                    {sub}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl sx={{ minWidth: 200 }} disabled={!selectedSubCategory}>
+              <InputLabel>Sub Category</InputLabel>
+              <Select
+                value={selectedChildCategory}
+                onChange={(e) => setSelectedChildCategory(e.target.value)}
+                label="Sub Category"
+              >
+                <MenuItem value="">Select Sub Category</MenuItem>
+                {childCategories.map((child, index) => (
+                  <MenuItem key={`child-cat-${index}`} value={child}>
+                    {child}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        )}
+
+        {tab === 1 && (
+          <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center" mb={3}>
+            {/* State Filter */}
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel>State</InputLabel>
+              <Select
+                value={selectedState}
+                onChange={(e) => {
+                  setSelectedState(e.target.value);
+                  setSelectedDistrict('');
+                  setSelectedCity('');
+                }}
+                label="State"
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 300,
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="">All States</MenuItem>
+                <Box px={2} pb={1}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    placeholder="Search states..."
+                    value={searchTerms.state}
+                    onChange={(e) => handleSearchChange('state', e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
                     }}
                   />
-                )}
-                <IconButton 
-                  sx={{ 
-                    bgcolor: 'rgb(104, 159, 56)', 
-                    color: 'white', 
-                    "&:hover": { 
-                      backgroundColor: "#7ad03a",
-                      transform: 'scale(1.05)'
+                </Box>
+                {filteredStates.map((state, index) => (
+                  <MenuItem key={`state-${index}`} value={state}>
+                    {state}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* District Filter */}
+            <FormControl sx={{ minWidth: 200 }} disabled={!selectedState}>
+              <InputLabel>District</InputLabel>
+              <Select
+                value={selectedDistrict}
+                onChange={(e) => {
+                  setSelectedDistrict(e.target.value);
+                  setSelectedCity('');
+                }}
+                label="District"
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 300,
                     },
-                    transition: 'all 0.2s ease',
-                    ml: 1
-                  }}
-                  onClick={handleExplore}
-                >
-                  <SearchIcon fontSize="small" />
-                </IconButton>
-              </InputAdornment>
-            )
-          }}
-        />
-        
-        {/* Search Suggestions Dropdown - Improved styling */}
-        {openSuggestions && searchSuggestions.length > 0 && (
-          <Paper 
-            elevation={4} 
-            sx={{
-              position: 'absolute',
-              top: 'calc(100% + 8px)',
-              left: 0,
-              right: 0,
-              width: '100%',
-              maxWidth: 600,
-              maxHeight: { xs: 250, sm: 300 },
-              overflow: 'auto',
-              zIndex: 1300,
-              mt: 0.5,
-              borderRadius: 2,
-              border: '1px solid rgba(0,0,0,0.1)',
-              mx: 'auto'
-            }}
-          >
-            <List dense sx={{ py: 0 }}>
-              {searchSuggestions.map((suggestion, index) => (
-                <React.Fragment key={`${suggestion.type}-${suggestion.value}-${index}`}>
-                  <ListItem 
-                    button
-                    selected={index === activeSuggestion}
-                    onMouseEnter={() => setActiveSuggestion(index)}
-                    onClick={() => handleSuggestionSelect(suggestion)}
-                    sx={{
-                      '&:hover': { 
-                        backgroundColor: 'rgba(104, 159, 56, 0.05)' 
-                      },
-                      '&.Mui-selected': { 
-                        backgroundColor: 'rgba(104, 159, 56, 0.08)',
-                        '&:hover': {
-                          backgroundColor: 'rgba(104, 159, 56, 0.1)'
-                        }
-                      },
-                      py: 1.5,
-                      px: 2
+                  },
+                }}
+              >
+                <MenuItem value="">All Districts</MenuItem>
+                <Box px={2} pb={1}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    placeholder="Search districts..."
+                    value={searchTerms.district}
+                    onChange={(e) => handleSearchChange('district', e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
                     }}
-                  >
-                    <Box sx={{ 
-                      mr: 1.5, 
-                      color: 'rgb(104, 159, 56)',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}>
-                      {suggestion.icon}
-                    </Box>
-                    <ListItemText
-                      primary={highlightMatch(suggestion.value, suggestion.searchTerm)}
-                      secondary={
-                        suggestion.matchText ? (
-                          <span>{highlightMatch(suggestion.matchText, suggestion.searchTerm)}</span>
-                        ) : (
-                          <span>Brand</span>
-                        )
-                      }
-                      primaryTypographyProps={{ 
-                        fontWeight: 500,
-                        color: 'text.primary'
-                      }}
-                      secondaryTypographyProps={{ 
-                        color: 'text.secondary',
-                        fontSize: '0.8rem'
-                      }}
-                    />
-                  </ListItem>
-                  {index < searchSuggestions.length - 1 && (
-                    <Divider sx={{ my: 0, mx: 2 }} />
-                  )}
-                </React.Fragment>
-              ))}
-            </List>
-          </Paper>
-        )}
-      </Box>
-    </Box>
+                  />
+                </Box>
+                {filteredDistricts.map((district, index) => (
+                  <MenuItem key={`district-${index}`} value={district}>
+                    {district}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-    {/* Active Filters - Improved styling */}
-    {activeFiltersCount > 0 && (
-      <Box 
-        display="flex" 
-        justifyContent="center" 
-        flexWrap="wrap" 
-        gap={1} 
-        mb={3}
-        sx={{
-          px: { xs: 1, sm: 0 },
-          py: 1,
-          bgcolor: 'rgba(104, 159, 56, 0.03)',
-          borderRadius: 2,
-          border: '1px dashed rgba(104, 159, 56, 0.2)',
-          mx: { xs: -2, sm: 0 }
-        }}
-      >
-        {selectedMainCategory && (
-          <Chip 
-            label={`Industry: ${selectedMainCategory}`} 
-            onDelete={() => {
-              setSelectedMainCategory('');
-              setSelectedSubCategory('');
-              setSelectedChildCategory('');
-            }}
-            size="small"
-            sx={{
-              bgcolor: 'rgba(104, 159, 56, 0.1)',
-              color: 'rgb(104, 159, 56)'
-            }}
-          />
+            {/* City Filter */}
+            <FormControl sx={{ minWidth: 200 }} disabled={!selectedDistrict}>
+              <InputLabel>City</InputLabel>
+              <Select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                label="City"
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 300,
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="">All Cities</MenuItem>
+                <Box px={2} pb={1}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    placeholder="Search cities..."
+                    value={searchTerms.city}
+                    onChange={(e) => handleSearchChange('city', e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+                {filteredCities.map((city, index) => (
+                  <MenuItem key={`city-${index}`} value={city}>
+                    {city}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
         )}
-        {selectedSubCategory && (
-          <Chip 
-            label={`Category: ${selectedSubCategory}`} 
-            onDelete={() => {
-              setSelectedSubCategory('');
-              setSelectedChildCategory('');
-            }}
-            size="small"
-            sx={{
-              bgcolor: 'rgba(104, 159, 56, 0.1)',
-              color: 'rgb(104, 159, 56)'
-            }}
-          />
-        )}
-        {selectedChildCategory && (
-          <Chip 
-            label={`Sub-Category: ${selectedChildCategory}`} 
-            onDelete={() => setSelectedChildCategory('')}
-            size="small"
-            sx={{
-              bgcolor: 'rgba(104, 159, 56, 0.1)',
-              color: 'rgb(104, 159, 56)'
-            }}
-          />
-        )}
-        {selectedState && (
-          <Chip 
-            label={`State: ${selectedState}`} 
-            onDelete={() => {
-              setSelectedState('');
-              setSelectedDistrict('');
-              setSelectedCity('');
-            }}
-            size="small"
-            sx={{
-              bgcolor: 'rgba(104, 159, 56, 0.1)',
-              color: 'rgb(104, 159, 56)'
-            }}
-          />
-        )}
-        {selectedDistrict && (
-          <Chip 
-            label={`District: ${selectedDistrict}`} 
-            onDelete={() => {
-              setSelectedDistrict('');
-              setSelectedCity('');
-            }}
-            size="small"
-            sx={{
-              bgcolor: 'rgba(104, 159, 56, 0.1)',
-              color: 'rgb(104, 159, 56)'
-            }}
-          />
-        )}
-        {selectedCity && (
-          <Chip 
-            label={`City: ${selectedCity}`} 
-            onDelete={() => setSelectedCity('')}
-            size="small"
-            sx={{
-              bgcolor: 'rgba(104, 159, 56, 0.1)',
-              color: 'rgb(104, 159, 56)'
-            }}
-          />
-        )}
-        {selectedInvestmentRange && (
-          <Chip 
-            label={`Investment: ${selectedInvestmentRange}`} 
-            onDelete={() => setSelectedInvestmentRange('')}
-            size="small"
-            sx={{
-              bgcolor: 'rgba(104, 159, 56, 0.1)',
-              color: 'rgb(104, 159, 56)'
-            }}
-          />
-        )}
-      </Box>
-    )}
 
-    {/* Explore Text - Improved styling */}
-    <Typography
-      variant="body1"
-      align="center"
-      color="text.secondary"
-      sx={{ 
-        mb: 2,
-        position: 'relative',
-        '&::before, &::after': {
-          content: '""',
-          position: 'absolute',
-          top: '50%',
-          width: '30%',
-          height: '1px',
-          bgcolor: 'divider'
-        },
-        '&::before': {
-          left: 0
-        },
-        '&::after': {
-          right: 0
-        }
-      }}
-    >
-      Or Explore By
-    </Typography>
+        {tab === 2 && (
+          <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center" mb={3}>
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel>Investment Range</InputLabel>
+              <Select
+                value={selectedInvestmentRange}
+                onChange={(e) => setSelectedInvestmentRange(e.target.value)}
+                label="Investment Range"
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 300,
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="">Select Investment Range</MenuItem>
+                <Box px={2} pb={1}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    placeholder="Search investment ranges..."
+                    value={searchTerms.investment}
+                    onChange={(e) => handleSearchChange('investment', e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+                {filteredInvestmentRanges.map((range, index) => (
+                  <MenuItem key={`range-${index}`} value={range}>
+                    {range}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        )}
 
-    {/* Tabs - Improved styling */}
-    <Tabs
-      value={tab}
-      onChange={handleTabChange}
-      centered
-      textColor="primary"
-      indicatorColor="primary"
-      sx={{ 
-        mb: { xs: 1, sm: 3 },
-        '& .MuiTabs-flexContainer': {
-          gap: { xs: 1, sm: 2 }
-        },
-        '& .MuiTab-root': {
-          minWidth: 'auto',
-          px: { xs: 1, sm: 2 },
-          fontSize: { xs: '0.8rem', sm: '0.9rem' },
-          textTransform: 'none',
-          fontWeight: 500,
-          color: 'text.secondary',
-          '&.Mui-selected': {
-            color: 'rgb(104, 159, 56)'
-          }
-        },
-        '& .MuiTabs-indicator': {
-          bgcolor: 'rgb(104, 159, 56)',
-          height: 3,
-          borderRadius: '3px 3px 0 0'
-        }
-      }}
-    >
-      <Tab label="Categories" />
-      <Tab label="Location" />
-      <Tab label="Investment" />
-    </Tabs>
-
-    {/* Tab Content - Improved responsive layout */}
-    {tab === 0 && (
-      <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} justifyContent="center" mb={3}>
-        <FormControl sx={{ minWidth: { xs: '100%', sm: 200 }, flex: 1 }}>
-          <InputLabel>Industry</InputLabel>
-          <Select
-            value={selectedMainCategory}
-            onChange={(e) => {
-              setSelectedMainCategory(e.target.value);
-              setSelectedSubCategory('');
-              setSelectedChildCategory('');
-            }}
-            label="Industry"
+        {/* Action Buttons */}
+        <Box display="flex" justifyContent="center" gap={2}>
+          <Button
+            variant="contained"
+            onClick={handleExplore}
             sx={{
-              '& .MuiSelect-select': {
-                display: 'flex',
-                alignItems: 'center'
-              }
+              backgroundColor: 'rgb(104, 159, 56)',
+              '&:hover': { backgroundColor: "#7ad03a" },
+              textTransform: 'none'
             }}
           >
-            <MenuItem value="">Select Industry</MenuItem>
-            {mainCategories.map((category, index) => (
-              <MenuItem key={`cat-${index}`} value={category}>
-                {category}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl sx={{ minWidth: { xs: '100%', sm: 200 }, flex: 1 }} disabled={!selectedMainCategory}>
-          <InputLabel>Main Category</InputLabel>
-          <Select
-            value={selectedSubCategory}
-            onChange={(e) => {
-              setSelectedSubCategory(e.target.value);
-              setSelectedChildCategory('');
-            }}
-            label="Main Category"
+            Explore
+          </Button>
+          <Button
+            variant="text"
+            onClick={handleClearAll}
+            sx={{ textTransform: 'none', color: "black" }}
           >
-            <MenuItem value="">Select Main Category</MenuItem>
-            {subCategories.map((sub, index) => (
-              <MenuItem key={`sub-cat-${index}`} value={sub}>
-                {sub}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl sx={{ minWidth: { xs: '100%', sm: 200 }, flex: 1 }} disabled={!selectedSubCategory}>
-          <InputLabel>Sub Category</InputLabel>
-          <Select
-            value={selectedChildCategory}
-            onChange={(e) => setSelectedChildCategory(e.target.value)}
-            label="Sub Category"
-          >
-            <MenuItem value="">Select Sub Category</MenuItem>
-            {childCategories.map((child, index) => (
-              <MenuItem key={`child-cat-${index}`} value={child}>
-                {child}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-    )}
-
-    {tab === 1 && (
-      <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} justifyContent="center" mb={3}>
-        {/* State Filter */}
-        <FormControl sx={{ minWidth: { xs: '100%', sm: 200 }, flex: 1 }}>
-          <InputLabel>State</InputLabel>
-          <Select
-            value={selectedState}
-            onChange={(e) => {
-              setSelectedState(e.target.value);
-              setSelectedDistrict('');
-              setSelectedCity('');
-            }}
-            label="State"
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  maxHeight: 300,
-                },
-              },
-            }}
-          >
-            <MenuItem value="">All States</MenuItem>
-            <Box px={2} pb={1}>
-              <TextField
-                fullWidth
-                size="small"
-                variant="outlined"
-                placeholder="Search states..."
-                value={searchTerms.state}
-                onChange={(e) => handleSearchChange('state', e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 1
-                  }
-                }}
-              />
-            </Box>
-            {filteredStates.map((state, index) => (
-              <MenuItem key={`state-${index}`} value={state}>
-                {state}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* District Filter */}
-        <FormControl sx={{ minWidth: { xs: '100%', sm: 200 }, flex: 1 }} disabled={!selectedState}>
-          <InputLabel>District</InputLabel>
-          <Select
-            value={selectedDistrict}
-            onChange={(e) => {
-              setSelectedDistrict(e.target.value);
-              setSelectedCity('');
-            }}
-            label="District"
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  maxHeight: 300,
-                },
-              },
-            }}
-          >
-            <MenuItem value="">All Districts</MenuItem>
-            <Box px={2} pb={1}>
-              <TextField
-                fullWidth
-                size="small"
-                variant="outlined"
-                placeholder="Search districts..."
-                value={searchTerms.district}
-                onChange={(e) => handleSearchChange('district', e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 1
-                  }
-                }}
-              />
-            </Box>
-            {filteredDistricts.map((district, index) => (
-              <MenuItem key={`district-${index}`} value={district}>
-                {district}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* City Filter */}
-        <FormControl sx={{ minWidth: { xs: '100%', sm: 200 }, flex: 1 }} disabled={!selectedDistrict}>
-          <InputLabel>City</InputLabel>
-          <Select
-            value={selectedCity}
-            onChange={(e) => setSelectedCity(e.target.value)}
-            label="City"
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  maxHeight: 300,
-                },
-              },
-            }}
-          >
-            <MenuItem value="">All Cities</MenuItem>
-            <Box px={2} pb={1}>
-              <TextField
-                fullWidth
-                size="small"
-                variant="outlined"
-                placeholder="Search cities..."
-                value={searchTerms.city}
-                onChange={(e) => handleSearchChange('city', e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 1
-                  }
-                }}
-              />
-            </Box>
-            {filteredCities.map((city, index) => (
-              <MenuItem key={`city-${index}`} value={city}>
-                {city}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-    )}
-
-    {tab === 2 && (
-      <Box display="flex" justifyContent="center" mb={3}>
-        <FormControl sx={{ minWidth: { xs: '100%', sm: 300 } }}>
-          <InputLabel>Investment Range</InputLabel>
-          <Select
-            value={selectedInvestmentRange}
-            onChange={(e) => setSelectedInvestmentRange(e.target.value)}
-            label="Investment Range"
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  maxHeight: 300,
-                },
-              },
-            }}
-          >
-            <MenuItem value="">Select Investment Range</MenuItem>
-            <Box px={2} pb={1}>
-              <TextField
-                fullWidth
-                size="small"
-                variant="outlined"
-                placeholder="Search investment ranges..."
-                value={searchTerms.investment}
-                onChange={(e) => handleSearchChange('investment', e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 1
-                  }
-                }}
-              />
-            </Box>
-            {filteredInvestmentRanges.map((range, index) => (
-              <MenuItem key={`range-${index}`} value={range}>
-                {range}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-    )}
-
-    {/* Action Buttons - Improved styling */}
-    <Box display="flex" justifyContent="center" gap={2} mt={2}>
-      <Button
-        variant="contained"
-        onClick={handleExplore}
-        sx={{
-          backgroundColor: 'rgb(104, 159, 56)',
-          '&:hover': { 
-            backgroundColor: "#7ad03a",
-            transform: 'translateY(-1px)',
-            boxShadow: '0 4px 12px rgba(104, 159, 56, 0.3)'
-          },
-          textTransform: 'none',
-          px: 4,
-          py: 1,
-          borderRadius: 2,
-          fontSize: '1rem',
-          fontWeight: 500,
-          transition: 'all 0.2s ease',
-          boxShadow: '0 2px 8px rgba(104, 159, 56, 0.2)'
-        }}
-      >
-        Explore Brands
-      </Button>
-      <Button
-        variant="outlined"
-        onClick={handleClearAll}
-        sx={{ 
-          textTransform: 'none', 
-          color: "text.secondary",
-          borderColor: 'rgba(0,0,0,0.1)',
-          '&:hover': {
-            borderColor: 'rgba(0,0,0,0.2)',
-            bgcolor: 'rgba(0,0,0,0.02)'
-          },
-          px: 4,
-          py: 1,
-          borderRadius: 2,
-          fontSize: '1rem',
-          fontWeight: 500
-        }}
-      >
-        Clear All
-      </Button>
-    </Box>
-  </DialogContent>
-</Dialog>
+            Clear All
+          </Button>
+        </Box>
+      </DialogContent>
+    </Dialog>
   );
 };
 
