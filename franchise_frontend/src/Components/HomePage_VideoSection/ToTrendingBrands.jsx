@@ -1,14 +1,12 @@
 import { Typography, Box, Button, Card, Avatar, IconButton, Stack, CircularProgress } from '@mui/material';
 import { motion } from 'framer-motion';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import { useNavigate } from "react-router-dom";
 import { postView } from '../../Utils/function/view';
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 const TopInvestVdocardround = () => {
-  const navigate = useNavigate();
   
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
@@ -145,18 +143,21 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
         </IconButton>
 
         {/* Brand Logo */}
-        <Avatar
-          src={brand.uploads?.brandLogo}
-          alt={brand.uploads?.brandName}
-          variant="square"
-          loading="lazy"
-          sx={{
-            width: 70,
-            height: 70,
-            border: '1px solid #f29724',
-            mb: 1
-          }}
-        />
+
+<Box
+  component="img"
+  src={brand.uploads?.brandLogo}
+  alt={brand.uploads?.brandName}
+  loading="lazy"
+  sx={{
+    width: 100,
+    height: 80,
+    border: '1px solid #f29724',
+    mb: 1,
+    objectFit: 'contain',  // or 'cover'
+  }}
+/>
+
 
         {/* Brand Name - Improved text truncation */}
         <Typography 

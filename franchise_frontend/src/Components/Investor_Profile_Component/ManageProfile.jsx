@@ -26,7 +26,6 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
 import { TbPhotoEdit } from "react-icons/tb";
-import { api } from "../../Api/api";
 
 const ManageProfile = () => {
   // State management

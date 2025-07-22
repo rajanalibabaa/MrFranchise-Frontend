@@ -19,7 +19,6 @@ import {
 import { motion } from "framer-motion";
 import Favorite from "@mui/icons-material/Favorite";
 import PlaylistAddCheckCircleOutlined from "@mui/icons-material/PlaylistAddCheckCircleOutlined";
-import ArrowRight from "@mui/icons-material/ArrowRight";
 import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import Business from "@mui/icons-material/Business";
 import AreaChart from "@mui/icons-material/AreaChart";
@@ -28,7 +27,6 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 import { postView } from "../../Utils/function/view";
 import { useBrands, useToggleLike, openBrandDialog } from "../../Hooks/Fetchbrands";
-import { showLoading } from "../../Redux/Slices/loadingSlice";
 import { useDispatch } from "react-redux";
 
 const CARD_DIMENSIONS = {

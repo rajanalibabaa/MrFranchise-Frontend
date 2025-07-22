@@ -1026,15 +1026,15 @@ default: return null;
           <Card sx={{ mb: 3, p: 3, display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', gap: 3,
             backgroundColor: colors.cardBackground, border: `1px solid ${colors.divider}`, boxShadow: 'none' }}>
             <Avatar src={brandData?.uploads?.brandLogo?.[0] || '/default-brand.png'} 
-              sx={{ width: isMobile ? 80 : 120, height: isMobile ? 80 : 120, border: `3px solid ${colors.accent}`, bgcolor: colors.secondary }}
+              sx={{ width: isMobile ? 80 : 80, height: isMobile ? 80 : 80, border: `3px solid ${colors.accent}`, bgcolor: colors.secondary }}
               as="image"
               />
             <Box>
               <Typography variant="h5" fontWeight={600} gutterBottom sx={{ color: colors.textPrimary }}>
                 {brandData?.brandDetails?.fullName || 'Your Brand'}
               </Typography>
-              <Typography variant="body1" sx={{ color: colors.textSecondary }} gutterBottom>
-                {brandData?.brandID || 'Business type not specified'}
+              <Typography variant="caption" sx={{ color: colors.textSecondary }} gutterBottom>
+               Member Id : {brandData?.brandID || 'Business type not specified'}
               </Typography>
             </Box>
           </Card>

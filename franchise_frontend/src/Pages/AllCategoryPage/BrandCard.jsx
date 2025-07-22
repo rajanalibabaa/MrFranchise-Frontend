@@ -12,9 +12,7 @@ import {
   Divider,
 } from "@mui/material";
 import {
-  Compare,
   Favorite,
-  LocationOn,
   AttachMoney,
   AreaChart,
   Description,

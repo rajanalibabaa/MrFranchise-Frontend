@@ -33,7 +33,7 @@ import AdvertiseWithUs from './Components/Footers/QuickLinks/AdvertiseWithUs.jsx
 
 import ExpandYourBrand from './Components/Footers/QuickLinks/ExpandYourBrand.jsx';
 import InvestFranchise from './Components/Footers/QuickLinks/InvestFranchise.jsx';
-import FranchisePromotion from './Components/Footers/QuickLinks/FranchisePromotion.jsx';
+// import FranchisePromotion from './Components/Footers/QuickLinks/FranchisePromotion.jsx';
 import { logout } from './Redux/Slices/AuthSlice/authSlice.jsx';
 
 import { Box } from "@mui/material";
@@ -145,7 +145,7 @@ function App() {
           <Route path="/advertisewithus" element={<AdvertiseWithUs />} />
           <Route path="/expandyourbrand" element={<ExpandYourBrand />} />
           <Route path="/investfranchise" element={<InvestFranchise />} />
-          <Route path="/franchisepromotion" element={<FranchisePromotion />} />
+          {/* <Route path="/franchisepromotion" element={<FranchisePromotion />} /> */}
           <Route path="/otherindustries" element={<Otherindustries/>}/>
           <Route path="/blogs" element={<Blogs />} />
           

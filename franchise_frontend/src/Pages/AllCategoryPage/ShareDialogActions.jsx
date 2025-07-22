@@ -5,14 +5,11 @@ import {
   Typography,
   Box,
 } from "@mui/material";
-import {
-  Facebook,
-  Twitter,
-  LinkedIn,
-  WhatsApp,
-  Email,
-  Instagram
-} from "@mui/icons-material";
+import Facebook from '@mui/icons-material/Facebook';
+import Twitter from '@mui/icons-material/Twitter';
+import LinkedIn from '@mui/icons-material/LinkedIn';
+import WhatsApp from '@mui/icons-material/WhatsApp';
+import Email from '@mui/icons-material/Email';
 
 const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
   const open = Boolean(anchorEl);

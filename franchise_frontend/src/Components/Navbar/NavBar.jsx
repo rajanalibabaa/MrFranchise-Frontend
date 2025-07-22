@@ -10,17 +10,15 @@ import {
   Typography,
   Button,
   MenuItem,
-  Select,
-  FormControl,
+ 
   useMediaQuery,
   useTheme,
   Menu,
-  Badge,
-  Container,
+  
   Divider
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { User, MessageSquare, Globe, LogOut, LogIn, UserPlus, Home, Plus, Search } from "lucide-react";
+import { User, LogOut, LogIn, UserPlus, Home, Plus, Search } from "lucide-react";
 import SideViewContent from "../SideViewContentMenu/SideHoverMenu";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { useSelector, useDispatch } from "react-redux";
@@ -138,16 +136,24 @@ function Navbar() {
   };
 
   const handleMyProfileNavigate = () => {
+  const investorUUID = localStorage.getItem("investorUUID");
+  const brandUUID = localStorage.getItem("brandUUID");
+  const userName = localStorage.getItem("userName") || "Guest";
 
-    if(localStorage.getItem("investorUUID")){
-      navigate("/investordashboard")
-    }else if(localStorage.getItem("brandUUID")){
-      navigate("/brandDashboard")
-    }else{
-      navigate("/")
-    }
-    dispatch(toggleMenu(false));
+  let url = "/";
+
+  if (investorUUID) {
+    url = `/investordashboard?id=${encodeURIComponent(investorUUID)}&name=${encodeURIComponent(userName)}`;
+  } else if (brandUUID) {
+    url = `/brandDashboard?id=${encodeURIComponent(brandUUID)}&name=${encodeURIComponent(userName)}`;
   }
+
+  // Opens in a new tab/window
+  window.open(url, "_blank", "noopener,noreferrer");
+
+  dispatch(toggleMenu(false));
+};
+
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -252,7 +258,7 @@ function Navbar() {
           position: 'relative',
           zIndex: 1
         }}>
-          {['Expand Your Franchise', 'Investor', 'Advertise','Lead Distribution Packages','Other Industries',"Blogs"].map((text, index) => (
+          {['Expand Your Franchise', 'Investor', 'Advertise','Other Industries',"Blogs"].map((text, index) => (
             <motion.div
               key={text}
               whileHover={{ scale: 1.05 }}
@@ -264,7 +270,7 @@ function Navbar() {
                   text === 'Expand Your Franchise' ? '/expandyourbrand' :
                   text === 'Investor' ? '/investfranchise' :
                   text === 'Advertise' ? '/advertisewithus' :
-                  text === 'Lead Distribution Packages' ? '/franchisepromotion' : 
+                  // text === 'Lead Distribution Packages' ? '/franchisepromotion' : 
                   text === 'Other Industries' ? '/otherindustries' : 
                   text === 'Blogs' ? '/blogs' : '/'
                 }

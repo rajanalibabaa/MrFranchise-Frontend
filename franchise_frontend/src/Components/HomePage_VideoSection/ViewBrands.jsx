@@ -18,7 +18,6 @@ import {
   
 } from "@mui/material";
 import { motion } from "framer-motion";
-import Favorite from "@mui/icons-material/Favorite";
 import PlaylistAddCheckCircleOutlined from "@mui/icons-material/PlaylistAddCheckCircleOutlined";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import MonetizationOn from "@mui/icons-material/MonetizationOn";

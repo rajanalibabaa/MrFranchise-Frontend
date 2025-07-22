@@ -2,9 +2,7 @@ import React, {
   useState,
   useEffect,
   useRef,
-  useMemo,
   lazy,
-  Suspense,
 } from "react";
 import {
   Box,
