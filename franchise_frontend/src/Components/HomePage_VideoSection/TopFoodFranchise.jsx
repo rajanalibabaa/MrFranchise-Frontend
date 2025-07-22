@@ -225,15 +225,14 @@ const BrandCard = React.memo(
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Tooltip title={brandName} placement="top">
                     <Typography
-                                    variant="body2"
-                                    fontWeight={600}
-                                    sx={{
-                                      whiteSpace: "nowrap",
-                                      overflow: "hidden",
-                                      textOverflow: "ellipsis",
-                                      flex: 1,
-                                    }}
-                                  >
+                      variant="h6"
+                      fontWeight={600}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
                       {brandName}
                     </Typography>
                   </Tooltip>
@@ -435,14 +434,13 @@ const TopFoodFranchises = () => {
     [openBrandDialog]
   );
 
-  // Calculate the scroll distance for 4 cards (including gap)
+  // Calculate the scroll distance for 1 card (including gap)
   const getScrollDistance = useCallback(() => {
-    const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
-    return cardWidthWithGap * 4;
+    return dimensions.width + (isMobile ? 16 : 24);
   }, [dimensions.width, isMobile]);
 
   // Smooth scroll function
-  const smoothScrollTo = useCallback((target) => {
+  const smoothScrollTo = useCallback((target, immediate = false) => {
     if (!scrollContainerRef.current) return;
 
     const container = scrollContainerRef.current;
@@ -451,9 +449,9 @@ const TopFoodFranchises = () => {
     }
 
     const start = container.scrollLeft;
-    const change = target - start;
+    let change = target - start;
     const startTime = performance.now();
-    const duration = 500; // 0.5 second scroll duration
+    const duration = immediate ? 0 : 1000; // 1 second scroll duration
 
     const animateScroll = (currentTime) => {
       const elapsed = currentTime - startTime;
@@ -471,28 +469,6 @@ const TopFoodFranchises = () => {
     scrollRequestRef.current = requestAnimationFrame(animateScroll);
   }, []);
 
-  // Handle next button click - scroll forward 4 cards
-  const handleNextClick = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-
-    const container = scrollContainerRef.current;
-    const scrollDistance = getScrollDistance();
-    const newScrollLeft = container.scrollLeft + scrollDistance;
-
-    smoothScrollTo(newScrollLeft);
-  }, [getScrollDistance, smoothScrollTo]);
-
-  // Handle previous button click - scroll backward 4 cards
-  const handlePrevClick = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-
-    const container = scrollContainerRef.current;
-    const scrollDistance = getScrollDistance();
-    const newScrollLeft = container.scrollLeft - scrollDistance;
-
-    smoothScrollTo(newScrollLeft);
-  }, [getScrollDistance, smoothScrollTo]);
-
   // Easing function for smooth scrolling
   const easeInOutQuad = (t) => {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
@@ -500,12 +476,34 @@ const TopFoodFranchises = () => {
 
   // Track scroll position for shadow effects
   const handleScroll = useCallback(() => {
-    if (!scrollContainerRef.current) return;
+    if (!scrollContainerRef.current || foodBrands.length === 0) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
     setShowStartShadow(scrollLeft > 10);
     setShowEndShadow(scrollLeft < scrollWidth - clientWidth - 10);
-  }, []);
+  }, [foodBrands.length]);
+
+  // Handle next button click - scroll forward 1 card
+  const handleNextClick = useCallback(() => {
+    if (!scrollContainerRef.current || foodBrands.length === 0) return;
+
+    const container = scrollContainerRef.current;
+    const scrollDistance = getScrollDistance();
+    const newScrollLeft = container.scrollLeft + scrollDistance;
+
+    smoothScrollTo(newScrollLeft);
+  }, [foodBrands.length, getScrollDistance, smoothScrollTo]);
+
+  // Handle previous button click - scroll backward 1 card
+  const handlePrevClick = useCallback(() => {
+    if (!scrollContainerRef.current || foodBrands.length === 0) return;
+
+    const container = scrollContainerRef.current;
+    const scrollDistance = getScrollDistance();
+    const newScrollLeft = container.scrollLeft - scrollDistance;
+
+    smoothScrollTo(newScrollLeft);
+  }, [foodBrands.length, getScrollDistance, smoothScrollTo]);
 
   // Initialize and clean up
   useEffect(() => {
@@ -589,7 +587,7 @@ const TopFoodFranchises = () => {
                 },
               }}
             >
-              Top Food Brands
+              Top Food Franchises
             </Typography>
 
             <Button

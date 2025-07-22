@@ -256,7 +256,7 @@ const BrandListingController = () => {
   const sendOtp = async () => {
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/v1/otpverify/send-otp-email',
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-email`,
         {
           email: formData.email,
         },
@@ -290,7 +290,7 @@ const BrandListingController = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/v1/otpverify/verify-otp',
+       `https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/verify-otp`,
         {
           identifier: formData.email,
           otp: otp,
@@ -327,6 +327,7 @@ const BrandListingController = () => {
       const apiData = unflattenFormData(formData);
       const response = await axios.patch(
        ` http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
+      // `https://mrfranchisebackend.mrfranchise.in/v1/api/brandlisting/updateBrandListingByUUID/${uuid}`,
         apiData
       );
 
