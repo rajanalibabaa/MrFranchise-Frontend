@@ -37,7 +37,6 @@ import {
   useToggleLike,
   openBrandDialog,
 } from "../../Hooks/Fetchbrands";
-
 import { handleShortList } from "../../Api/shortListApi";
 import { shuffleArray } from "./ShuffleData";
 
@@ -132,6 +131,7 @@ const mediaHeight = dimensions.height * 0.4; // 40% of card height
             borderRadius: 3,
             overflow: "hidden",
             width: "100%",
+            height: dimensions.height,
             border: "1px solid #eee",
             // boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
           }}
@@ -371,6 +371,8 @@ const TopCafeFranchises = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
+    const [shuffledBrands, setShuffledBrands] = useState([]);
+  const [visibleCardCount, setVisibleCardCount] = useState(4);
 
   // REACT-QUERY HOOKS
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
@@ -378,11 +380,10 @@ const TopCafeFranchises = () => {
 
   // Filter brands that belong to Coffee & Tea Cafes category
   const coffeeTeaBrands = useMemo(() => {
-    const filtered = brands.filter((brand) => {
+   return brands.filter((brand) => {
       const category = brand?.franchiseDetails?.brandCategories || {};
       const categoryName = category?.child?.toLowerCase() || "";
       const subCategory = category?.sub?.toLowerCase() || "";
-
       return (
         categoryName.includes("coffee") ||
         categoryName.includes("tea") ||
@@ -391,8 +392,6 @@ const TopCafeFranchises = () => {
         subCategory === "beverage franchises"
       );
     });
-
-    return filtered;
   }, [brands]);
 
  const dimensions = useMemo(() => {
@@ -550,7 +549,7 @@ const TopCafeFranchises = () => {
   }
 
   // Only show if we have brands
-  const shouldShow = coffeeTeaBrands.length > 0;
+  const shouldShow = shuffledBrands.length > 0;
 
   return (
     <>
@@ -717,7 +716,7 @@ const TopCafeFranchises = () => {
                 paddingBottom: isMobile ? "24px" : "16px",
               }}
             >
-              {coffeeTeaBrands.map((brand) => (
+              {shuffledBrands.slice(0, visibleCardCount).map((brand) => (
                 <motion.div
                   key={brand?.uuid}
                   whileHover={{

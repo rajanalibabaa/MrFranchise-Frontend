@@ -39,7 +39,7 @@ import { handleShortList } from "../../Api/shortListApi";
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
-  smallDesktop: { width: 280, height: 500 },
+   smallDesktop: { width: 280, height: 500 },
   desktop: { width: 267, height: 480 },
   largeDesktop: { width: 327, height: 500 },
 };
@@ -69,7 +69,7 @@ const BrandCard = React.memo(
     const firstModel = franchiseModels || {};
     const categories = brand.franchiseDetails?.brandCategories || {};
     const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
-    const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
+    const mediaHeight = dimensions.height * 0.4; // 40% of card height
     const brandName = brand.brandDetails.brandName || "Brand";
     
      const {
@@ -132,6 +132,7 @@ const BrandCard = React.memo(
             borderRadius: 3,
             overflow: "hidden",
             width: "100%",
+            height: dimensions.height,
             // border: "1px solid #eee",
             // boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
             transition: "all 0.3s ease",
@@ -359,10 +360,11 @@ const BrandCard = React.memo(
 const TopRestaurantsFranchise = () => {
    const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-  const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+   const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
   const isDesktop = useMediaQuery(theme.breakpoints.between("lg", "xl"));
   const isLargeDesktop = useMediaQuery(theme.breakpoints.up("xl"));
+
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const scrollRequestRef = useRef(null);
@@ -371,6 +373,7 @@ const TopRestaurantsFranchise = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
+  const [visibleCardCount, setVisibleCardCount] = useState(4);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -404,7 +407,7 @@ const TopRestaurantsFranchise = () => {
     return () => window.removeEventListener("resize", updateVisibleCards);
   }, [dimensions.width, isMobile]);
 
-  
+
   const handleLikeClick = useCallback(
     (brandId, isLiked) => {
       const token = localStorage.getItem("accessToken");
