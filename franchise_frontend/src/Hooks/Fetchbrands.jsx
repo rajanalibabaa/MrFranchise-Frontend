@@ -12,7 +12,8 @@
       uuid: brand.uuid,
       brandName: brand.brandDetails?.brandName,
       logo: brand.brandDetails?.logo,
-      isLiked: brand.isLiked
+      isLiked: brand.isLiked,
+      isShortListed: brand.isShortListed
     }),
     forFiltering: (brand) => ({
       uuid: brand.uuid,

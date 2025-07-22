@@ -34,6 +34,8 @@ import { useDispatch } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { postView } from "../../Utils/function/view";
 import { useBrands, useToggleLike, openBrandDialog } from "../../Hooks/Fetchbrands";
+import { showLoading } from "../../Redux/Slices/loadingSlice";
+import { handleShortList } from "../../Api/shortListApi";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -108,6 +110,18 @@ const BrandCard = React.memo(
         }
       };
     }, []);
+
+    const [shortListed, setShortListed] = useState(brand.isShortListed)
+   const handleToggleShortList = async (brand) => {
+      try {
+        const response = await handleShortList(brand);
+        if (response.success) {
+          setShortListed(!shortListed);
+        }
+      } catch (error) {
+        console.error("Error toggling shortlist:", error);
+      }
+    };
 
     return (
       <motion.div
@@ -265,8 +279,19 @@ const BrandCard = React.memo(
                         }}
                       />
                     )}
-                    <IconButton>
-                      <Tooltip title={'ShortList'}><PlaylistAddCheckCircleOutlined /></Tooltip>
+                    <IconButton
+                      onClick={() => handleToggleShortList(brand)}
+                       sx={{
+                        color: shortListed
+                          ? "#7ef400ff"
+                          : "rgba(0, 0, 0, 0.23)",
+                      }}
+                    >
+                      <Tooltip title={'ShortList'}
+                        
+                      ><PlaylistAddCheckCircleOutlined
+                     
+                      /></Tooltip>
                     </IconButton>
                   </Stack>
                 </Box>
@@ -400,6 +425,7 @@ const TopFoodFranchises = () => {
     },
     [toggleLike]
   );
+
 
   const handleApply = useCallback(
     (brand) => {

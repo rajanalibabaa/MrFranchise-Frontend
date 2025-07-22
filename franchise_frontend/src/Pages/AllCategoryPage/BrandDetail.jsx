@@ -45,6 +45,7 @@ import Navbar from "../../Components/Navbar/NavBar.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx";
 import ShareDialogActions from "./ShareDialogActions.jsx";
+import { handleShortList } from "../../Api/shortListApi.jsx";
 
 const BrandDetails = ({ brandData }) => {
   const location = useLocation();
@@ -394,7 +395,7 @@ const BrandDetails = ({ brandData }) => {
         }
 
         const response = await axios.post(
-          "https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication",
+          "http://localhost:5000/api/v1/instantapply/postApplication",
           payload,
           {
             headers: { "Content-Type": "application/json" },
@@ -637,6 +638,22 @@ const BrandDetails = ({ brandData }) => {
       </Box>
     );
   };
+
+ const [shortListed, setShortListed] = useState(brandData)
+          const handleToggleShortList = async (brandData) => {
+
+            console.log("===brandData=== :",brandData)
+                 try {
+                   const response = await handleShortList(brandData);
+                   if (response.success) {
+                     setShortListed(!shortListed);
+                   }
+                 } catch (error) {
+                   console.error("Error toggling shortlist:", error);
+                 }
+               };
+
+  
 
   return (
     <>
@@ -1145,18 +1162,21 @@ const BrandDetails = ({ brandData }) => {
                         )}
                       </IconButton>
                       <IconButton
-                        sx={{
-                          color: "rgba(0,0,0,0.23)",
-                        }}
-                        size={isMobile ? "small" : "medium"}
-                        onClick={() => {
-                          console.log("shortlist is clicked");
-                        }}
-                      >
+                      onClick={() => handleToggleShortList(shortListed)}
+                       sx={{
+                        color: shortListed
+                          ? "#7ef400ff"
+                          : "rgba(0, 0, 0, 0.23)",
+                      }}
+                    >
+                      {/* <Tooltip title={'ShortList'}
+                        
+                      > */}
                         <PlaylistAddCheckCircleOutlined
-                          sx={{ fontSize: isMobile ? "1.2rem" : "1.5rem" }}
-                        />
-                      </IconButton>
+                     
+                      />
+                      {/* </Tooltip> */}
+                    </IconButton>
                       <IconButton
                         onClick={handleOpenShareClick}
                         size={isMobile ? "small" : "medium"}

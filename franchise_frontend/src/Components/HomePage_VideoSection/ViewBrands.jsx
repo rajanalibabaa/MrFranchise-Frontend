@@ -29,6 +29,7 @@ import axios from "axios";
 import { api } from "../../Api/api";
 import { openBrandDialog } from "../../Hooks/Fetchbrands";
 import { Visibility } from "@mui/icons-material";
+import { handleShortList } from "../../Api/shortListApi";
  
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -87,6 +88,21 @@ const BrandCard = React.memo(({
       }
     };
   }, []);
+
+
+
+    const [shortListed, setShortListed] = useState(brand.isShortListed)
+    const handleToggleShortList = async (brand) => {
+       try {
+         const response = await handleShortList(brand);
+         if (response.success) {
+           setShortListed(!shortListed);
+         }
+       } catch (error) {
+         console.error("Error toggling shortlist:", error);
+       }
+     };
+
  
   return (
     <motion.div
@@ -228,9 +244,21 @@ const BrandCard = React.memo(({
                       mb: 1,
                     }}
                   />
-                    <IconButton>
-                      <Tooltip title={'ShortList'}><PlaylistAddCheckCircleOutlined /></Tooltip>
+                    <IconButton
+                      onClick={() => handleToggleShortList(brand)}
+                       sx={{
+                        color: shortListed
+                          ? "#7ef400ff"
+                          : "rgba(0, 0, 0, 0.23)",
+                      }}
+                    >
+                      <Tooltip title={'ShortList'}
+                        
+                      ><PlaylistAddCheckCircleOutlined
+                     
+                      /></Tooltip>
                     </IconButton>
+
                 </Stack>
               </Box>
             )}

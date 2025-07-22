@@ -3,6 +3,8 @@
 export const API_BASE_URL =  "http://localhost:5000/api/v1";
 // export const API_BASE_URL =  "http://localhost:5000/api/v1";
 // export const API_BASE_URL =  "http://localhost:5000/api/v1";
+// export const API_BASE_URL =  "http://localhost:5000/api/v1";
+// export const API_BASE_URL =  "http://localhost:5000/api/v1";
 
 
 
@@ -46,5 +48,12 @@ export const api = {
       investor: `${API_BASE_URL}/investor/getInvestorByUUID`,
       brand : `${API_BASE_URL}/brandlisting/getBrandListingByUUID`,
     }
+  },
+
+  shortListApi : {
+      post : `${API_BASE_URL}/shortList/post`,
+      get : `${API_BASE_URL}/shortList/getShortListedById`,
+      getDataForBrandOwner : `${API_BASE_URL}/shortList/getShortListedDataForOwner`,
+   
   }
 };
