@@ -28,6 +28,7 @@ import {
   Clear as ClearIcon,
   Compare,
 } from "@mui/icons-material";
+
 import {
   useBrands,
   useToggleLike,

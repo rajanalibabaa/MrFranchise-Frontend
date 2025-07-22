@@ -29,7 +29,6 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { postView } from "../../Utils/function/view";
 
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
-import { showLoading } from "../../Redux/Slices/loadingSlice";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 const CARD_DIMENSIONS = {

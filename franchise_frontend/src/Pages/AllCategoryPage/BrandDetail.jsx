@@ -9,7 +9,6 @@ import {
   TextField,
   MenuItem,
   CircularProgress,
-  Modal,
   IconButton,
   Divider,
   Drawer,
@@ -29,12 +28,9 @@ import {
 } from "@mui/material";
 import {
   Close,
-  Description,
-  Business,
   ArrowBack,
   ArrowForward,
   Phone,
-  Share,
   Favorite,
   ShareOutlined,
   PlaylistAddCheckCircleOutlined,
