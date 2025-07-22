@@ -40,7 +40,9 @@ import { handleShortList } from "../../Api/shortListApi";
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
-  desktop: { width: 327, height: 500 },
+   smallDesktop: { width: 280, height: 500 },
+  desktop: { width: 267, height: 480 },
+  largeDesktop: { width: 327, height: 500 },
 };
 
 const cardVariants = {
@@ -67,7 +69,7 @@ const BrandCard = React.memo(
     const franchiseModel = brand.franchiseDetails?.fico?.[0] || {};
     const category = brand.franchiseDetails?.brandCategories || {};
     const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
-    const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
+    const mediaHeight = dimensions.height * 0.4; // 40% of card height
 
     // Extract brand details with fallbacks
     const brandDetails = brand.brandDetails || {};
@@ -143,6 +145,7 @@ const BrandCard = React.memo(
             // border: "1px solid #eee",
             // boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
             transition: "all 0.3s ease",
+            height: dimensions.height,
             // "&:hover": {
             //   boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
             // },
@@ -381,6 +384,9 @@ const TopFoodFranchises = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+   const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
+  const isDesktop = useMediaQuery(theme.breakpoints.between("lg", "xl"));
+  const isLargeDesktop = useMediaQuery(theme.breakpoints.up("xl"));
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const scrollRequestRef = useRef(null);
@@ -389,6 +395,7 @@ const TopFoodFranchises = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
+  const [visibleCardCount, setVisibleCardCount] = useState(4);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -406,8 +413,26 @@ const TopFoodFranchises = () => {
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
-    return CARD_DIMENSIONS.desktop;
-  }, [isMobile, isTablet]);
+    if (isSmallDesktop) return CARD_DIMENSIONS.smallDesktop;
+    if (isDesktop) return CARD_DIMENSIONS.desktop;
+    return CARD_DIMENSIONS.largeDesktop;
+  }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
+
+  // Calculate visible cards based on container width
+  useEffect(() => {
+    const updateVisibleCards = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
+        const count = Math.floor(containerWidth / cardWidthWithGap);
+        setVisibleCardCount(Math.max(1, Math.min(count, 6)));
+      }
+    };
+
+    updateVisibleCards();
+    window.addEventListener("resize", updateVisibleCards);
+    return () => window.removeEventListener("resize", updateVisibleCards);
+  }, [dimensions.width, isMobile]);
 
   const handleLikeClick = useCallback(
     (brandId, isLiked) => {
