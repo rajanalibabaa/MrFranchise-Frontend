@@ -17,7 +17,6 @@ import {
   Select,
   InputLabel,
   FormControl,
-  Slider,
   Chip,
   Drawer,
   IconButton,
@@ -30,7 +29,6 @@ import {
   Tab,
   Tabs,
   Rating,
-  Fade,
   TableContainer,
   Table,
   TableBody,
@@ -54,9 +52,7 @@ import {
   Share,
   Business as BusinessIcon,
   Description as DescriptionIcon,
-  Facebook,
-  Instagram,
-  LinkedIn,
+  
   AccountTree,
   Support,
   Favorite,
@@ -67,7 +63,6 @@ import { CheckCircleOutline } from "@mui/icons-material";
 import {motion} from "framer-motion"
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { set } from "react-hook-form";
 import LoginPage from "../LoginPage/LoginPage.jsx";
 
 function BrandList() {

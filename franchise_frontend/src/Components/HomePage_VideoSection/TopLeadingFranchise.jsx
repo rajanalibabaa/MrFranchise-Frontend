@@ -30,6 +30,7 @@ import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 import { postView } from "../../Utils/function/view";
+import { handleShortList } from "../../Api/shortListApi";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -65,12 +66,7 @@ const BrandCard = React.memo(({
     const {
       investmentRange = "Not specified",
       areaRequired = "Not specified",
-      franchiseType = "N/A",
       franchiseModel: modelType = "N/A",
-      franchiseFee = "N/A",
-      royaltyFee = "N/A",
-      roi = "N/A",
-      payBackPeriod = "N/A",
     } = firstModel;
 
   const videoUrl =  
@@ -99,6 +95,18 @@ const BrandCard = React.memo(({
       }
     };
   }, []);
+
+  const [shortListed, setShortListed] = useState(brand.isShortListed)
+          const handleToggleShortList = async (brand) => {
+             try {
+               const response = await handleShortList(brand);
+               if (response.success) {
+                 setShortListed(!shortListed);
+               }
+             } catch (error) {
+               console.error("Error toggling shortlist:", error);
+             }
+           };
 
   return (
     <motion.div
@@ -242,10 +250,22 @@ const BrandCard = React.memo(({
                         mb: 1,
                       }}
                     />
-                    <IconButton>
-                      <Tooltip title={'ShortList'}><PlaylistAddCheckCircleOutlined /></Tooltip>
+                    <IconButton
+                      onClick={() => handleToggleShortList(brand)}
+                       sx={{
+                        color: shortListed
+                          ? "#7ef400ff"
+                          : "rgba(0, 0, 0, 0.23)",
+                      }}
+                    >
+                      <Tooltip title={'ShortList'}
+                        
+                      ><PlaylistAddCheckCircleOutlined
+                     
+                      /></Tooltip>
                     </IconButton>
                 </Stack>
+                
               </Box>
             )}
                

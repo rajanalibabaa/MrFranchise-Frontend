@@ -29,9 +29,9 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { postView } from "../../Utils/function/view";
 
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
-import { showLoading } from "../../Redux/Slices/loadingSlice";
 import { useDispatch } from "react-redux";
 import axios from "axios";
+import { handleShortList } from "../../Api/shortListApi";
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
@@ -106,30 +106,17 @@ const BrandCard = React.memo(({
   }, []);
 
 
-  const handleShortList = async(shortListedId) => {
-
-    console.log("shortListedId :",shortListedId)
-
-    const id = localStorage.getItem("investorUUID") || localStorage.getItem("branUUID")
-    const token = localStorage.getItem("accessToken")
-
-    const response = await axios.post(`http://localhost:5000/api/v1/shortList/post/${id}`,
-      {
-        shortListedId
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization':` Bearer ${token}`
-
-        }
-      }
-
-      
-    )
-
-    console.log("res shortlist",response.data)
-  }
+    const [shortListed, setShortListed] = useState(brand.isShortListed)
+    const handleToggleShortList = async (brand) => {
+       try {
+         const response = await handleShortList(brand);
+         if (response.success) {
+           setShortListed(!shortListed);
+         }
+       } catch (error) {
+         console.error("Error toggling shortlist:", error);
+       }
+     };
 
   return (
     <motion.div
@@ -301,9 +288,18 @@ const BrandCard = React.memo(({
                     />
                   )}
                     <IconButton
-                     onClick={() => handleShortList(brand.uuid)}
+                      onClick={() => handleToggleShortList(brand)}
+                       sx={{
+                        color: shortListed
+                          ? "#7ef400ff"
+                          : "rgba(0, 0, 0, 0.23)",
+                      }}
                     >
-                      <Tooltip title={'ShortList'}><PlaylistAddCheckCircleOutlined /></Tooltip>
+                      <Tooltip title={'ShortList'}
+                        
+                      ><PlaylistAddCheckCircleOutlined
+                     
+                      /></Tooltip>
                     </IconButton>
                 </Stack>
               </Box>

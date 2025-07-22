@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   Button,
-  Slide,
   Avatar,
   IconButton,
   useMediaQuery,

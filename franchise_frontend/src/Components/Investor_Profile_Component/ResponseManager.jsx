@@ -4,10 +4,12 @@ import {
   Select, MenuItem, TextField, Rating, Avatar,
   IconButton, Chip, useMediaQuery, useTheme, Snackbar, Alert
 } from "@mui/material";
-import {
-  Star, StarBorder, Email, Feedback, 
-  Report, CheckCircle
-} from '@mui/icons-material';
+import Star from '@mui/icons-material/Star';
+import StarBorder from '@mui/icons-material/StarBorder';
+import Email from '@mui/icons-material/Email';
+import Feedback from '@mui/icons-material/Feedback';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import   Report from '@mui/icons-material/Report';
 import { alpha } from '@mui/material/styles';
 import axios from 'axios';
 import { useSelector } from 'react-redux';

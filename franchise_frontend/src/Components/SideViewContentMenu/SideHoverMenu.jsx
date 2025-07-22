@@ -4,15 +4,12 @@ import {
   Box,
   Typography,
   Avatar,
-  Dialog,
-  DialogTitle,
-  DialogContent,
+ 
   IconButton,
   useMediaQuery,
   useTheme,
   Grid,
   Divider,
-  Skeleton,
   Chip,
   Tabs,
   Tab,
@@ -27,7 +24,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useBrands,openBrandDialog,useBrand } from "../../Hooks/Fetchbrands";
+import { useBrands,openBrandDialog } from "../../Hooks/Fetchbrands";
 
 
 
