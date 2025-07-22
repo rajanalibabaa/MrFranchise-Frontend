@@ -30,7 +30,7 @@ import PlaylistAddCheckCircleOutlined from "@mui/icons-material/PlaylistAddCheck
 import Business from "@mui/icons-material/Business";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { postView } from "../../Utils/function/view";
 import { useBrands, useToggleLike, openBrandDialog } from "../../Hooks/Fetchbrands";
@@ -110,6 +110,8 @@ const BrandCard = React.memo(
         }
       };
     }, []);
+
+   
 
     const [shortListed, setShortListed] = useState(brand.isShortListed)
    const handleToggleShortList = async (brand) => {

@@ -22,13 +22,13 @@ export const toggleLikeBrand = createAsyncThunk(
       const brandID = brandId;
       if (!isLiked) {
         await axios.post(
-          "http://localhost:5000//api/v1/like/post-favbrands",
+          "http://localhost:5000/api/v1/like/post-favbrands",
           { branduuid: brandId },
           config
         );
       } else if (isLiked) {
-        const res = await axios.delete(
-          `http://localhost:5000//api/v1/like/delete-favbrand/${id}`,
+        await axios.delete(
+          `http://localhost:5000/api/v1/like/delete-favbrand/${id}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export const toggleLikeBrand = createAsyncThunk(
 export const Likeshow = async () => {
   try {
     const response = await axios.get(
-      `http://localhost:5000//api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
+      `http://localhost:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -61,7 +61,8 @@ export const Likeshow = async () => {
     );
     return response;
   } catch (error) {
-    // console.log(error);
+    console.error("Error fetching liked brands:", error);
+    throw error;
   }
 };
 
@@ -73,21 +74,16 @@ export const fetchBrands = createAsyncThunk(
 
       if (!token) {
         response = await axios.get(
-          "http://localhost:5000//api/v1/brandlisting/getAllBrandListing",
+          "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
           {
             headers: {
               "Content-Type": "application/json",
             },
           }
         );
-      }
-      if (token) {
+      } else {
         response = await Likeshow();
-        
       }
-
-      // console.log("response.data.data :",response.data.data)
-      
 
       return response.data.data;
     } catch (err) {
@@ -101,7 +97,7 @@ export const fetchBrandById = createAsyncThunk(
   async (brandId, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000//api/v1/brandlisting/getBrandListingById/${brandId}`,
+        `http://localhost:5000/api/v1/brandlisting/getBrandListingById/${brandId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -120,49 +116,21 @@ export const viewApi = createAsyncThunk(
   async (brandID, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        `http://localhost:5000//api/v1/view/postViewBrands/${id}`,
+        `http://localhost:5000/api/v1/view/postViewBrands/${id}`,
+        { brandID },
         {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
-            data: { brandID },
           },
         }
       );
       return res.data.data;
     } catch (error) {
-      // console.log(error);
+      return rejectWithValue(error.message || "Failed to track view");
     }
   }
 );
-
-
-let viewID = null
-
-if (viewID) {
-
-  // console.log("viewID :",viewID)
-  // console.log("id :",viewID)
-  // console.log("token :",token)
-  try {
-      const res = await axios.post(
-        `http://localhost:5000//api/v1/view/postViewBrands/${id}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-            data: { viewID },
-          },
-        }
-      );
-      // console.log (res.data.data);
-
-      viewID = null
-    } catch (error) {
-      // console.log(error);
-    }
-}
-
 
 const brandSlice = createSlice({
   name: "brands",
@@ -171,6 +139,7 @@ const brandSlice = createSlice({
     filteredData: [],
     loading: false,
     error: null,
+    likeLoading: {},
     categories: [],
     subCategories: [],
     childCategories: [],
@@ -213,25 +182,148 @@ const brandSlice = createSlice({
       };
       state.filteredData = state.data;
     },
-    // openBrandDialog: (state, action) => {
-    //   state.openDialog = true;
-    //   state.selectedBrand = action.payload;
-    //   const newWindow = window.open(`/brands/${action.payload.uuid}?`, '_blank');
-    //   localStorage.setItem(`brand-${action.payload.uuid}`, JSON.stringify(action.payload));
-    //  viewID = action.payload.uuid
-    //   if (newWindow) {
-    //     newWindow.onbeforeunload = () => {
-    //       localStorage.removeItem(`brand-${action.payload.uuid}`);
-    //     };
-    //   }
-    // },
+    openBrandDialog: (state, action) => {
+      state.openDialog = true;
+      state.selectedBrand = action.payload;
+    },
     closeBrandDialog: (state) => {
       state.openDialog = false;
       state.selectedBrand = null;
     },
+    setLikeLoading: (state, action) => {
+      const { brandId, isLoading } = action.payload;
+      state.likeLoading = {
+        ...state.likeLoading,
+        [brandId]: isLoading,
+      };
+    },
   },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchBrands.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBrands.fulfilled, (state, action) => {
+        state.loading = false;
+        state.data = action.payload || [];
+        state.filteredData = applyFiltersToBrands(action.payload, state.filters);
+
+        // Extract filter options
+        const categoryMap = {};
+        const subCategoryMap = {};
+        const childCategoryMap = {};
+        const stateSet = new Set();
+        const districtSet = new Set();
+        const citySet = new Set();
+        const modelTypeSet = new Set();
+        const investmentRangeSet = new Set();
+
+        const districtsWithState = [];
+        const citiesWithDistrict = [];
+
+        action.payload.forEach((brand) => {
+          // Categories
+          const brandCategories = brand.franchiseDetails?.brandCategories;
+          if (brandCategories) {
+            if (brandCategories.main && !categoryMap[brandCategories.main]) {
+              categoryMap[brandCategories.main] = {
+                id: brandCategories.main,
+                name: brandCategories.main,
+              };
+            }
+            if (brandCategories.sub && !subCategoryMap[brandCategories.sub]) {
+              subCategoryMap[brandCategories.sub] = {
+                id: brandCategories.sub,
+                name: brandCategories.sub,
+                parentCategory: brandCategories.main,
+              };
+            }
+            if (brandCategories.child && !childCategoryMap[brandCategories.child]) {
+              childCategoryMap[brandCategories.child] = {
+                id: brandCategories.child,
+                name: brandCategories.child,
+                parentSubCategory: brandCategories.sub,
+              };
+            }
+          }
+
+          // Locations
+          const domesticLocations = brand.expansionLocationData?.expansionLocations.domestic?.locations || [];
+          domesticLocations.forEach(location => {
+            if (location.state) {
+              stateSet.add(location.state);
+              
+              if (location.districts) {
+                location.districts.forEach(districtObj => {
+                  if (districtObj.district) {
+                    districtSet.add(districtObj.district);
+                    districtsWithState.push({
+                      district: districtObj.district,
+                      state: location.state
+                    });
+                    
+                    if (districtObj.cities) {
+                      districtObj.cities.forEach(city => {
+                        if (city) {
+                          citySet.add(city);
+                          citiesWithDistrict.push({
+                            city: city,
+                            district: districtObj.district
+                          });
+                        }
+                      });
+                    }
+                  }
+                });
+              }
+            }
+          });
+
+          // Model types and investment ranges
+          const fico = brand.franchiseDetails?.fico || [];
+          fico.forEach(item => {
+            if (item.franchiseType) modelTypeSet.add(item.franchiseType);
+            if (item.investmentRange) investmentRangeSet.add(item.investmentRange);
+          });
+        });
+
+        state.categories = Object.values(categoryMap);
+        state.subCategories = Object.values(subCategoryMap);
+        state.childCategories = Object.values(childCategoryMap);
+        
+        state.states = Array.from(stateSet).sort();
+        state.districts = districtsWithState;
+        state.cities = citiesWithDistrict;
+        
+        state.modelTypes = Array.from(modelTypeSet).sort();
+        state.investmentRanges = Array.from(investmentRangeSet).sort((a, b) => {
+          const order = [
+            "Below - Rs.50 ",
+            "Rs.2L-5L",
+            "Rs.5L-10L",
+            "Rs.10L-20L",
+            "Rs.20L-30L",
+            "Rs.30L-50L",
+            "Rs.50L-1Cr",
+            "Rs.1Cr-2Cr",
+            "Rs.2Cr-5Cr",
+            "Rs.5Cr-above"
+          ];
+          return order.indexOf(a) - order.indexOf(b);
+        });
+      })
+      .addCase(fetchBrands.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(toggleLikeBrand.pending, (state, action) => {
+        const { brandId } = action.meta.arg;
+        state.likeLoading = {
+          ...state.likeLoading,
+          [brandId]: true,
+        };
+      })
       .addCase(toggleLikeBrand.fulfilled, (state, action) => {
         const { brandId, isLiked } = action.payload;
         state.data = state.data.map((brand) =>
@@ -240,136 +332,27 @@ const brandSlice = createSlice({
         state.filteredData = state.filteredData.map((brand) =>
           brand.uuid === brandId ? { ...brand, isLiked } : brand
         );
+        state.likeLoading = {
+          ...state.likeLoading,
+          [brandId]: false,
+        };
+      })
+      .addCase(toggleLikeBrand.rejected, (state, action) => {
+        const { brandId } = action.meta.arg;
+        state.likeLoading = {
+          ...state.likeLoading,
+          [brandId]: false,
+        };
+        state.error = action.payload;
       })
       .addCase(viewApi.fulfilled, (state, action) => {
         const { brandID } = action.payload || {};
         state.brandID = brandID;
-      })
-      // .addCase(fetchBrands.pending, (state) => {
-      //   state.loading = true;
-      //   state.error = null;
-      // })
-      // .addCase(fetchBrands.fulfilled, (state, action) => {
-      //   state.loading = false;
-      //   state.data = action.payload || [];
-      //   state.filteredData = applyFiltersToBrands(action.payload, state.filters);
-
-      //   // Extract unique values for filters
-      //   const categoryMap = {};
-      //   const subCategoryMap = {};
-      //   const childCategoryMap = {};
-      //   const stateSet = new Set();
-      //   const districtSet = new Set();
-      //   const citySet = new Set();
-      //   const modelTypeSet = new Set();
-      //   const investmentRangeSet = new Set();
-
-      //   // Temporary arrays to hold location data with relationships
-      //   const districtsWithState = [];
-      //   const citiesWithDistrict = [];
-
-      //   action.payload.forEach((brand) => {
-      //     // Categories
-      //     const brandCategories = brand.franchiseDetails?.brandCategories;
-      //     if (brandCategories) {
-      //       if (brandCategories.main && !categoryMap[brandCategories.main]) {
-      //         categoryMap[brandCategories.main] = {
-      //           id: brandCategories.main,
-      //           name: brandCategories.main,
-      //         };
-      //       }
-      //       if (brandCategories.sub && !subCategoryMap[brandCategories.sub]) {
-      //         subCategoryMap[brandCategories.sub] = {
-      //           id: brandCategories.sub,
-      //           name: brandCategories.sub,
-      //           parentCategory: brandCategories.main,
-      //         };
-      //       }
-      //       if (brandCategories.child && !childCategoryMap[brandCategories.child]) {
-      //         childCategoryMap[brandCategories.child] = {
-      //           id: brandCategories.child,
-      //           name: brandCategories.child,
-      //           parentSubCategory: brandCategories.sub,
-      //         };
-      //       }
-      //     }
-
-      //     // Process expansion locations
-      //     const domesticLocations = brand.expansionLocationData?.expansionLocations.domestic?.locations || [];
-      //     domesticLocations.forEach(location => {
-      //       if (location.state) {
-      //         stateSet.add(location.state);
-              
-      //         // Process districts for this state
-      //         if (location.districts) {
-      //           location.districts.forEach(districtObj => {
-      //             if (districtObj.district) {
-      //               districtSet.add(districtObj.district);
-      //               districtsWithState.push({
-      //                 district: districtObj.district,
-      //                 state: location.state
-      //               });
-                    
-      //               // Process cities for this district
-      //               if (districtObj.cities) {
-      //                 districtObj.cities.forEach(city => {
-      //                   if (city) {
-      //                     citySet.add(city);
-      //                     citiesWithDistrict.push({
-      //                       city: city,
-      //                       district: districtObj.district
-      //                     });
-      //                   }
-      //                 });
-      //               }
-      //             }
-      //           });
-      //         }
-      //       }
-      //     });
-
-      //     // Extract model types and investment ranges
-      //     const fico = brand.franchiseDetails?.fico || [];
-      //     fico.forEach(item => {
-      //       if (item.franchiseType) modelTypeSet.add(item.franchiseType);
-      //       if (item.investmentRange) investmentRangeSet.add(item.investmentRange);
-      //     });
-      //   });
-
-      //   state.categories = Object.values(categoryMap);
-      //   state.subCategories = Object.values(subCategoryMap);
-      //   state.childCategories = Object.values(childCategoryMap);
-        
-      //   // Location data with relationships
-      //   state.states = Array.from(stateSet).sort();
-      //   state.districts = districtsWithState;
-      //   state.cities = citiesWithDistrict;
-        
-      //   state.modelTypes = Array.from(modelTypeSet).sort();
-      //   state.investmentRanges = Array.from(investmentRangeSet).sort((a, b) => {
-      //     const order = [
-      //       "Below - Rs.50 ",
-      //       "Rs.2L-5L",
-      //       "Rs.5L-10L",
-      //       "Rs.10L-20L",
-      //       "Rs.20L-30L",
-      //       "Rs.30L-50L",
-      //       "Rs.50L-1Cr",
-      //       "Rs.1Cr-2Cr",
-      //       "Rs.2Cr-5Cr",
-      //       "Rs.5Cr-above"
-      //     ];
-      //     return order.indexOf(a) - order.indexOf(b);
-      //   });
-      // })
-      // .addCase(fetchBrands.rejected, (state, action) => {
-      //   state.loading = false;
-      //   state.error = action.payload;
-      // });
+      });
   },
 });
 
-// Enhanced filter function with proper location filtering
+// Filter function remains the same as in your original code
 const applyFiltersToBrands = (brands, filters) => {
   if (!brands) return [];
   
@@ -418,32 +401,26 @@ const applyFiltersToBrands = (brands, filters) => {
       let hasMatchingLocation = false;
       
       for (const location of domesticLocations) {
-        // Check state match
         if (filters.selectedState && location.state !== filters.selectedState) {
           continue;
         }
         
-        // If no district or city filter, any location in the state matches
         if (!filters.selectedDistrict && !filters.selectedCity) {
           hasMatchingLocation = true;
           break;
         }
         
-        // Check districts in this location
         const districts = location.districts || [];
         for (const districtObj of districts) {
-          // Check district match
           if (filters.selectedDistrict && districtObj.district !== filters.selectedDistrict) {
             continue;
           }
           
-          // If no city filter, any district in the state matches
           if (!filters.selectedCity) {
             hasMatchingLocation = true;
             break;
           }
           
-          // Check cities in this district
           const cities = districtObj.cities || [];
           if (cities.includes(filters.selectedCity)) {
             hasMatchingLocation = true;
@@ -469,11 +446,12 @@ const applyFiltersToBrands = (brands, filters) => {
   });
 };
 
-export const {fetchAllFilterData,
-  
+export const {
   setFilters,
   clearFilters,
   openBrandDialog,
-  closeBrandDialog } =
-  brandSlice.actions;
+  closeBrandDialog,
+  setLikeLoading,
+} = brandSlice.actions;
+
 export default brandSlice.reducer;

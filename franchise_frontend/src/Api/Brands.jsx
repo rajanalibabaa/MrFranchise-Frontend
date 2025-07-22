@@ -1,6 +1,8 @@
 // api/brands.js
 import axios from "axios"
 import { api, API_BASE_URL } from "./api";
+import { useDispatch } from "react-redux";
+import { initializeShortlist } from "../Redux/Slices/shortlistslice";
 
 // Create a single axios instance with default headers
 const apiClient = axios.create({
@@ -22,13 +24,17 @@ apiClient.interceptors.request.use(config => {
 const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
 
 export const fetchBrands = async () => {
+
+  // const dispatch = useDispatch()
   const url = id 
     ? `${api.allBrandsApi.get.likeAndUnlikeBrands}/${id}`
     : api.allBrandsApi.get.defaultBrands;
   
   try {
     const response = await apiClient.get(url);
-    console.log("Fetched Brands:", response.data.data);
+
+    // dispatch(initializeShortlist(response.data.data))
+    // console.log("Fetched Brands:", response.data.data);
     return response.data.data;
   } catch (error) {
     console.error("Error fetching brands:", error);
@@ -157,3 +163,7 @@ export const recordBrandView = async (brandID) => {
     throw error;
   }
 };
+
+export const redux = () => {
+  
+}

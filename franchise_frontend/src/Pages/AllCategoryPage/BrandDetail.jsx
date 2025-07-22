@@ -72,7 +72,7 @@ const BrandDetails = ({ brandData }) => {
     districts: [],
     cities: [],
   });
-
+ const [shortListed, setShortListed] = useState(brandData.isShortListed)
   const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
   const [isProcessingLike, setIsProcessingLike] = useState(false);
 
@@ -476,8 +476,13 @@ const BrandDetails = ({ brandData }) => {
     );
   }
 
+ 
   // ExpansionLocationTags component for responsive location display
   const ExpansionLocationTags = ({ brand }) => {
+
+
+  
+
     const locations = Array.isArray(
       brand.expansionLocationData?.expansionLocations?.domestic?.locations
     )
@@ -639,21 +644,18 @@ const BrandDetails = ({ brandData }) => {
     );
   };
 
- const [shortListed, setShortListed] = useState(brandData)
-          const handleToggleShortList = async (brandData) => {
-
-            console.log("===brandData=== :",brandData)
-                 try {
-                   const response = await handleShortList(brandData);
-                   if (response.success) {
-                     setShortListed(!shortListed);
-                   }
-                 } catch (error) {
-                   console.error("Error toggling shortlist:", error);
-                 }
-               };
-
-  
+   
+const handleToggleShortList = async () => {
+  try {
+    const response = await handleShortList(selectedBrand); // Use selectedBrand instead of shortListed
+    if (response.success) {
+      setShortListed(prev => !prev);
+    
+    }
+  } catch (error) {
+    console.error("Error toggling shortlist:", error);
+  }
+};
 
   return (
     <>
