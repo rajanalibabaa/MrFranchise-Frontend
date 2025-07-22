@@ -29,7 +29,7 @@ import { handleShortList } from "../../Api/shortListApi";
 
 const cardStyles = {
   width: { xs: "40vh", sm: "calc(50% - 10px)", md: 260 },
-  height: { xs: "55vh", sm: "calc(50% - 10px)", md: 380 },
+  height: { xs: "55vh", sm: "calc(50% - 10px)", md: 400 },
   ml: 1.5,
   mt: 4,
   display: "flex",
@@ -44,14 +44,7 @@ const cardStyles = {
   },
 };
 
-const logoStyles = {
-  objectFit: "contain",
-  backgroundColor: "#f9f9f9",
-  py: 2,
-  height: "200px",
-  width: "100%",
-  borderBottom: "1px solid #eee",
-};
+
 
 const titleStyles = {
   fontWeight: 600,
@@ -166,82 +159,89 @@ const BrandCard = memo(
 
     return (
       <Card sx={cardStyles}>
-        <Tooltip
-          title={
-            maxComparisonReached && !isSelectedForComparison
-              ? "Maximum 3 brands can be compared"
-              : ""
-          }
-          placement="top"
-        >
-          <span>
-            <IconButton
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 2,
-                zIndex: 2,
-                backgroundColor: isSelectedForComparison
-                  ? "rgba(76, 175, 80, 0.9)"
-                  : maxComparisonReached
-                  ? "rgba(244, 67, 54, 0.7)"
-                  : "rgba(0,0,0,0.5)",
-                color: "white",
-                "&:hover": {
-                  backgroundColor: isSelectedForComparison
-                    ? "rgba(56, 142, 60, 0.9)"
-                    : maxComparisonReached
-                    ? "rgba(244, 67, 54, 0.9)"
-                    : "rgba(0,0,0,0.7)",
-                },
-                width: 32,
-                height: 32,
-              }}
-              onClick={handleComparisonToggle}
-              disabled={maxComparisonReached && !isSelectedForComparison}
-            >
-              {isSelectedForComparison ? (
-                <CheckBox fontSize="small" />
-              ) : (
-                <CheckBoxOutlineBlank fontSize="small" />
-              )}
-            </IconButton>
-          </span>
-        </Tooltip>
+ <Tooltip
+  title={
+    maxComparisonReached && !isSelectedForComparison
+      ? "Maximum 3 brands can be compared"
+      : "Click to add from comparison"
+  }
+  placement="right"
+  arrow
+>
+  <span> {/* Tooltip needs a wrapper for disabled buttons */}
+    <IconButton
+      sx={{
+        position: "absolute",
+        top: 8,
+        right: 2,
+        zIndex: 2,
+        backgroundColor: isSelectedForComparison
+          ? "rgba(76, 175, 80, 0.9)"
+          : maxComparisonReached
+          ? "rgba(244, 67, 54, 0.7)"
+          : "rgba(0,0,0,0.5)",
+        color: "white",
+        "&:hover": {
+          backgroundColor: isSelectedForComparison
+            ? "rgba(56, 142, 60, 0.9)"
+            : maxComparisonReached
+            ? "rgba(244, 67, 54, 0.9)"
+            : "rgba(0,0,0,0.7)",
+        },
+        width: 32,
+        height: 32,
+      }}
+      onClick={handleComparisonToggle}
+      disabled={maxComparisonReached && !isSelectedForComparison}
+    >
+      {isSelectedForComparison ? (
+        <CheckBox fontSize="small" />
+      ) : (
+        <CheckBoxOutlineBlank fontSize="small" />
+      )}
+    </IconButton>
+  </span>
+</Tooltip>
+
+
 
         <Box sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Box
-            sx={{
-              position: "relative",
-              width: "100%",
-              maxWidth: "50vh",
-              aspectRatio: "16/9",
-              margin: "0 auto",
-            }}
-          >
-            <CardMedia
-              component="video"
-              ref={videoRef}
-              loading="lazy"
-              poster={uploads.brandLogo}
-              src={uploads.franchisePromotionVideo}
-              alt={brandDetails.brandName}
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-                backgroundColor: "#000",
-              }}
-              onPlay={handlePlay}
-              controls
-              preload="none"
-            />
-          </Box>
+  sx={{
+    position: "relative",
+    width: "100%",
+    maxWidth: "600px",       // Set a fixed max width (you can adjust)
+    height: "auto",
+    aspectRatio: "16 / 9",   // Always keep 16:9 ratio
+    margin: "0 auto",
+    backgroundColor: "#000",
+    overflow: "hidden",      // Prevent unwanted stretching
+    flexShrink: 0,           // Prevent shrinking when parent resizes
+  }}
+>
+  <CardMedia
+    component="video"
+    ref={videoRef}
+    poster={uploads.brandLogo}
+    src={uploads.franchisePromotionVideo}
+    alt={brandDetails.brandName}
+    controls
+    preload="none"
+    sx={{
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",   // Keeps aspect ratio without black bars
+      display: "block",
+    }}
+    onPlay={handlePlay}
+  />
+</Box>
+
 
           <Divider sx={{ my: 1 }} />
 
           <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography variant="body1" component="div" sx={titleStyles}>
+            <Typography variant="body2" component="div" sx={titleStyles}>
               {brandDetails.brandName}
             </Typography>
             <Box>

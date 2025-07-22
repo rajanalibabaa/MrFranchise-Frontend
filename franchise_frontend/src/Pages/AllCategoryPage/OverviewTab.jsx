@@ -41,6 +41,7 @@ const Public = lazy(() => import("@mui/icons-material/Public"));
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { keyframes } from "@emotion/react";
+import LeaderboardAd from "../../services/AdvertiseAds/LeaderBoardsAds";
 
 // Color palette
 const colors = {
@@ -91,7 +92,6 @@ const OverviewTab = ({ brand }) => {
   const overviewRef = useRef(null);
   const containerRef = useRef(null);
   const [selectedModel, setSelectedModel] = useState(null);
-  const [showBackToTop, setShowBackToTop] = useState(false);
 
   const [isUserScrolling, setIsUserScrolling] = useState(false);
 
@@ -1738,7 +1738,9 @@ const OverviewTab = ({ brand }) => {
     <Box ref={overviewRef}>
       {sections.map((section, index) => (
         <Box key={index} sx={{ mb: 6 }}>
-          <SectionHeader
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent:'space-evenly' }}>
+             <SectionHeader>
+            <Box
             component="div"
             variant="h5"
             sx={{
@@ -1761,10 +1763,17 @@ const OverviewTab = ({ brand }) => {
             >
               {section.icon}
             </Box>
-            <Typography variant="h4" fontWeight={700} color="#ff9800">
+            <Typography variant="h4" fontWeight={700} color="#ff9800" >
               {section.title}
             </Typography>
+            
+          </Box>
+          
           </SectionHeader>
+          {/* <LeaderboardAd /> */}
+              
+               </Box>
+         
           {section.content}
         </Box>
       ))}
