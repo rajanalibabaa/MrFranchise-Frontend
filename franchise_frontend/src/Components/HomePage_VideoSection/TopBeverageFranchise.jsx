@@ -25,13 +25,11 @@ import Business from "@mui/icons-material/Business";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-
 import { postView } from "../../Utils/function/view";
-
-import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import { useBrands, useToggleLike, openBrandDialog } from "../../Hooks/Fetchbrands";
 import { useDispatch } from "react-redux";
-import axios from "axios";
 import { handleShortList } from "../../Api/shortListApi";
+
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
@@ -67,8 +65,8 @@ const BrandCard = React.memo(({
   const brandDetails = brand.brandDetails || {};
   const {
     brandName = "N/A",
-    // tagLine = "",
-    // companyName = "N/A",
+    tagLine = "",
+    companyName = "N/A",
   } = brandDetails;
 
   // Extract franchise details with fallbacks
@@ -77,10 +75,10 @@ const BrandCard = React.memo(({
     areaRequired = "Not specified",
     franchiseType = "N/A",
     franchiseModel: modelType = "N/A",
-    // franchiseFee = "N/A",
-    // royaltyFee = "N/A",
-    // roi = "N/A",
-    // payBackPeriod = "N/A"
+    franchiseFee = "N/A",
+    royaltyFee = "N/A",
+    roi = "N/A",
+    payBackPeriod = "N/A"
   } = franchiseModel;
 
   useEffect(() => {
@@ -105,18 +103,17 @@ const BrandCard = React.memo(({
     };
   }, []);
 
-
-    const [shortListed, setShortListed] = useState(brand.isShortListed)
-    const handleToggleShortList = async (brand) => {
-       try {
-         const response = await handleShortList(brand);
-         if (response.success) {
-           setShortListed(!shortListed);
-         }
-       } catch (error) {
-         console.error("Error toggling shortlist:", error);
-       }
-     };
+  const [shortListed, setShortListed] = useState(brand.isShortListed)
+  const handleToggleShortList = async (brand) => {
+    try {
+      const response = await handleShortList(brand);
+      if (response.success) {
+        setShortListed(!shortListed);
+      }
+    } catch (error) {
+      console.error("Error toggling shortlist:", error);
+    }
+  };
 
   return (
     <motion.div
@@ -167,7 +164,7 @@ const BrandCard = React.memo(({
                 left: 0,
                 width: "100%",
                 height: "100%",
-                objectFit: "cover",
+                objectFit: "contain",
               }}
               controls
               muted
@@ -220,34 +217,17 @@ const BrandCard = React.memo(({
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Tooltip title={brandName} placement="top">
                   <Typography
-                                  variant="body2"
-                                  fontWeight={600}
-                                  sx={{
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    flex: 1,
-                                  }}
-                                >
+                    variant="h6"
+                    fontWeight={600}
+                    sx={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {brandName}
                   </Typography>
                 </Tooltip>
-                {/* {tagLine && (
-                  <Tooltip title={tagLine} placement="top">
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {tagLine}
-                    </Typography>
-                  </Tooltip>
-                )} */}
               </Box>
               <IconButton
                 onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
@@ -287,68 +267,66 @@ const BrandCard = React.memo(({
                       }}
                     />
                   )}
-                    <IconButton
-                      onClick={() => handleToggleShortList(brand)}
-                       sx={{
-                        color: shortListed
-                          ? "#7ef400ff"
-                          : "rgba(0, 0, 0, 0.23)",
-                      }}
-                    >
-                      <Tooltip title={'ShortList'}
-                        
-                      ><PlaylistAddCheckCircleOutlined
-                     
-                      /></Tooltip>
-                    </IconButton>
+                  <IconButton
+                    onClick={() => handleToggleShortList(brand)}
+                    sx={{
+                      color: shortListed
+                        ? "#7ef400ff"
+                        : "rgba(0, 0, 0, 0.23)",
+                    }}
+                  >
+                    <Tooltip title={'ShortList'}>
+                      <PlaylistAddCheckCircleOutlined />
+                    </Tooltip>
+                  </IconButton>
                 </Stack>
               </Box>
             )}
 
             {/* Franchise Details */}
-              <Stack spacing={1} sx={{ mb: 2 }}>
-                <Box display="flex" alignItems="center">
-                  <Business
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    <strong>Investment:</strong> {investmentRange}
-                  </Typography>
-                </Box>
+            <Stack spacing={1} sx={{ mb: 2 }}>
+              <Box display="flex" alignItems="center">
+                <Business
+                  sx={{
+                    mr: 1.5,
+                    fontSize: "1rem",
+                    color: "text.secondary",
+                    flexShrink: 0,
+                  }}
+                />
+                <Typography variant="body2">
+                  <strong>Investment:</strong> {investmentRange}
+                </Typography>
+              </Box>
 
-                <Box display="flex" alignItems="center">
-                  <MonetizationOn
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    <strong>Area:</strong> {areaRequired}
-                  </Typography>
-                </Box>
+              <Box display="flex" alignItems="center">
+                <MonetizationOn
+                  sx={{
+                    mr: 1.5,
+                    fontSize: "1rem",
+                    color: "text.secondary",
+                    flexShrink: 0,
+                  }}
+                />
+                <Typography variant="body2">
+                  <strong>Area:</strong> {areaRequired}
+                </Typography>
+              </Box>
 
-                <Box display="flex" alignItems="center">
-                  <AreaChart
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    <strong>Type:</strong> {modelType}
-                  </Typography>
-                </Box>
-              </Stack>
+              <Box display="flex" alignItems="center">
+                <AreaChart
+                  sx={{
+                    mr: 1.5,
+                    fontSize: "1rem",
+                    color: "text.secondary",
+                    flexShrink: 0,
+                  }}
+                />
+                <Typography variant="body2">
+                  <strong>Type:</strong> {modelType}
+                </Typography>
+              </Box>
+            </Stack>
 
             <Divider sx={{ my: 1 }} />
           </CardContent>
@@ -386,8 +364,6 @@ const TopBeverageFranchises = () => {
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
-  const isPaused = useRef(false);
-  const scrollIntervalRef = useRef(null);
   const scrollRequestRef = useRef(null);
 
   const [likeProcessing, setLikeProcessing] = useState({});
@@ -397,21 +373,17 @@ const TopBeverageFranchises = () => {
   
   const navigate = useNavigate();
   const dispatch = useDispatch();
- // REACT-QUERY HOOKS
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
 
   // Filter beverage franchises
   const beverageBrands = useMemo(() => {
-    const filtered = brands.filter(brand => {
+    return brands.filter(brand => {
       const category = brand.franchiseDetails?.brandCategories || {};
       return (
         category.main === "Food & Beverages"
       );
     });
-    
-    // Add the first few brands at the end to create infinite loop effect
-    return [...filtered, ...filtered.slice(0, 4)];
   }, [brands]);
 
   const dimensions = useMemo(() => {
@@ -443,29 +415,13 @@ const TopBeverageFranchises = () => {
     openBrandDialog(brand);
   }, [openBrandDialog]);
 
-  const handleMouseEnter = useCallback(() => {
-    isPaused.current = true;
-    if (scrollIntervalRef.current) {
-      clearInterval(scrollIntervalRef.current);
-      scrollIntervalRef.current = null;
-    }
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    isPaused.current = false;
-    if (!scrollIntervalRef.current) {
-      // startAutoScroll();
-    }
-  }, []);
-
-  // Calculate the scroll distance for 4 cards (including gap)
+  // Calculate the scroll distance for 1 card (including gap)
   const getScrollDistance = useCallback(() => {
-    const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
-    return cardWidthWithGap * 4;
+    return dimensions.width + (isMobile ? 16 : 24);
   }, [dimensions.width, isMobile]);
 
   // Smooth scroll function
-  const smoothScrollTo = useCallback((target) => {
+  const smoothScrollTo = useCallback((target, immediate = false) => {
     if (!scrollContainerRef.current) return;
     
     const container = scrollContainerRef.current;
@@ -474,9 +430,9 @@ const TopBeverageFranchises = () => {
     }
     
     const start = container.scrollLeft;
-    const change = target - start;
+    let change = target - start;
     const startTime = performance.now();
-    const duration = 500; // 0.5 second scroll duration
+    const duration = immediate ? 0 : 1000; // 1 second scroll duration
     
     const animateScroll = (currentTime) => {
       const elapsed = currentTime - startTime;
@@ -488,81 +444,11 @@ const TopBeverageFranchises = () => {
         scrollRequestRef.current = requestAnimationFrame(animateScroll);
       } else {
         handleScroll(); // Update shadow states after scroll completes
-        checkForLoop(); // Check if we need to loop back to start
       }
     };
     
     scrollRequestRef.current = requestAnimationFrame(animateScroll);
   }, []);
-
-  // Check if we've scrolled to the duplicated items and need to loop back
-  const checkForLoop = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-    
-    const container = scrollContainerRef.current;
-    const scrollWidth = container.scrollWidth;
-    const clientWidth = container.clientWidth;
-    const maxScrollLeft = scrollWidth - clientWidth;
-    
-    // If we're within 100px of the end, jump back to the equivalent position at the start
-    if (container.scrollLeft >= maxScrollLeft - 100) {
-      const originalBrandsCount = beverageBrands.length - 4; // Subtract the duplicated items
-      const originalScrollWidth = originalBrandsCount * (dimensions.width + (isMobile ? 16 : 24));
-      
-      // Calculate equivalent position at the start
-      const newScrollLeft = container.scrollLeft - originalScrollWidth;
-      container.scrollLeft = newScrollLeft;
-    }
-  }, [beverageBrands.length, dimensions.width, isMobile]);
-
-  // Handle next button click - scroll forward 4 cards
-  const handleNextClick = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-    
-    const container = scrollContainerRef.current;
-    const scrollDistance = getScrollDistance();
-    const newScrollLeft = container.scrollLeft + scrollDistance;
-    
-    smoothScrollTo(newScrollLeft);
-  }, [getScrollDistance, smoothScrollTo]);
-
-  // Handle previous button click - scroll backward 4 cards
-  const handlePrevClick = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-    
-    const container = scrollContainerRef.current;
-    const scrollDistance = getScrollDistance();
-    const newScrollLeft = container.scrollLeft - scrollDistance;
-    
-    // If we're at the start, jump to near the end (before the duplicated items)
-    if (newScrollLeft <= 0) {
-      const originalBrandsCount = beverageBrands.length - 4; // Subtract the duplicated items
-      const originalScrollWidth = originalBrandsCount * (dimensions.width + (isMobile ? 16 : 24));
-      const clientWidth = container.clientWidth;
-      smoothScrollTo(originalScrollWidth - clientWidth);
-    } else {
-      smoothScrollTo(newScrollLeft);
-    }
-  }, [beverageBrands.length, dimensions.width, getScrollDistance, isMobile, smoothScrollTo]);
-
-  /*
-  // Commented out auto-scroll functionality
-  const startAutoScroll = useCallback(() => {
-    if (scrollIntervalRef.current) {
-      clearInterval(scrollIntervalRef.current);
-    }
-
-    scrollIntervalRef.current = setInterval(() => {
-      if (isPaused.current || !scrollContainerRef.current) return;
-
-      const container = scrollContainerRef.current;
-      const scrollDistance = getScrollDistance() / 2; // Scroll 2 cards at a time (half of 4)
-      const newScrollLeft = container.scrollLeft + scrollDistance;
-      
-      smoothScrollTo(newScrollLeft);
-    }, 5000); // Scroll every 5 seconds
-  }, [getScrollDistance, smoothScrollTo]);
-  */
 
   // Easing function for smooth scrolling
   const easeInOutQuad = (t) => {
@@ -571,12 +457,34 @@ const TopBeverageFranchises = () => {
 
   // Track scroll position for shadow effects
   const handleScroll = useCallback(() => {
-    if (!scrollContainerRef.current) return;
+    if (!scrollContainerRef.current || beverageBrands.length === 0) return;
     
     const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
     setShowStartShadow(scrollLeft > 10);
     setShowEndShadow(scrollLeft < scrollWidth - clientWidth - 10);
-  }, []);
+  }, [beverageBrands.length]);
+
+  // Handle next button click - scroll forward 1 card
+  const handleNextClick = useCallback(() => {
+    if (!scrollContainerRef.current || beverageBrands.length === 0) return;
+    
+    const container = scrollContainerRef.current;
+    const scrollDistance = getScrollDistance();
+    const newScrollLeft = container.scrollLeft + scrollDistance;
+    
+    smoothScrollTo(newScrollLeft);
+  }, [beverageBrands.length, getScrollDistance, smoothScrollTo]);
+
+  // Handle previous button click - scroll backward 1 card
+  const handlePrevClick = useCallback(() => {
+    if (!scrollContainerRef.current || beverageBrands.length === 0) return;
+    
+    const container = scrollContainerRef.current;
+    const scrollDistance = getScrollDistance();
+    const newScrollLeft = container.scrollLeft - scrollDistance;
+    
+    smoothScrollTo(newScrollLeft);
+  }, [beverageBrands.length, getScrollDistance, smoothScrollTo]);
 
   // Initialize and clean up
   useEffect(() => {
@@ -584,27 +492,17 @@ const TopBeverageFranchises = () => {
     if (container) {
       container.addEventListener('scroll', handleScroll);
       handleScroll();
-      
-      /*
-      // Commented out auto-scroll initialization
-      if (beverageBrands.length > 0) {
-        startAutoScroll();
-      }
-      */
     }
     
     return () => {
       if (container) {
         container.removeEventListener('scroll', handleScroll);
       }
-      if (scrollIntervalRef.current) {
-        clearInterval(scrollIntervalRef.current);
-      }
       if (scrollRequestRef.current) {
         cancelAnimationFrame(scrollRequestRef.current);
       }
     };
-  }, [beverageBrands.length, handleScroll/*, startAutoScroll*/]);
+  }, [handleScroll]);
 
   if (brandsLoading) {
     return (
@@ -622,8 +520,8 @@ const TopBeverageFranchises = () => {
     );
   }
 
-  // Only show if we have at least one brand (excluding duplicates)
-  const shouldShow = beverageBrands.length > 4;
+  // Only show if we have brands
+  const shouldShow = beverageBrands.length > 0;
 
   return (
     <>
@@ -670,27 +568,27 @@ const TopBeverageFranchises = () => {
               Top Beverage Brands
             </Typography>
 
-        <Button
-          variant="text"
-          size="small"
-          endIcon={<ArrowRight />}
-          sx={{
-            textTransform: "none",
-            fontSize: isMobile ? 14 : 16,
-            color: theme.palette.text.secondary,
-            "&:hover": {
-              color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-              backgroundColor: "transparent",
-            },
-          }}
-          onClick={async () => {
-            // dispatch(showLoading());
-window.open('/brandviewpage', '_blank');          
-          }}
-        >
-          View More
-        </Button>
+            <Button
+              variant="text"
+              size="small"
+              endIcon={<ArrowRight />}
+              sx={{
+                textTransform: "none",
+                fontSize: isMobile ? 14 : 16,
+                color: theme.palette.text.secondary,
+                "&:hover": {
+                  color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                  backgroundColor: "transparent",
+                },
+              }}
+              onClick={() => {
+                window.open('/brandviewpage', '_blank');            
+              }}
+            >
+              View More
+            </Button>
           </Box>
+
           <Box sx={{ position: 'relative', px: isMobile ? 2 : 0 }}>
             {/* Previous button */}
             {showStartShadow && (
@@ -763,13 +661,11 @@ window.open('/brandviewpage', '_blank');
                 "&::-webkit-scrollbar": { display: "none" },
                 perspective: '1000px',
               }}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
             >
-              {beverageBrands.map((brand, index) => (
+              {beverageBrands.map((brand) => (
                 <motion.div
-                  key={`${brand?.uuid}-${index}`} // Add index to key to handle duplicates
-                  whileHover={{ 
+                  key={brand.uuid}
+                  whileHover={{
                     scale: 1.03,
                     zIndex: 10,
                     boxShadow: theme.shadows[6],
@@ -802,7 +698,6 @@ window.open('/brandviewpage', '_blank');
       )}
     </>
   );
-  // <
 };
 
 export default React.memo(TopBeverageFranchises);

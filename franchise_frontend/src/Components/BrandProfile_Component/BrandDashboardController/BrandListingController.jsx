@@ -290,7 +290,8 @@ const BrandListingController = () => {
 
     try {
       const response = await axios.post(
-       `https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/verify-otp`,
+      //  `https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/verify-otp`,
+       `http://localhost:5000/api/v1/otpverify/verify-otp`,
         {
           identifier: formData.email,
           otp: otp,

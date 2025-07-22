@@ -40,6 +40,7 @@ import { handleShortList } from "../../Api/shortListApi";
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
+  laptop: { width: 360, height: 580 },
   desktop: { width: 327, height: 500 },
 };
 
