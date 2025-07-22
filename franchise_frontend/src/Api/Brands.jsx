@@ -28,7 +28,7 @@ export const fetchBrands = async () => {
   
   try {
     const response = await apiClient.get(url);
-    // console.log("Fetched Brands:", response.data.data);
+    console.log("Fetched Brands:", response.data.data);
     return response.data.data;
   } catch (error) {
     console.error("Error fetching brands:", error);
@@ -49,8 +49,22 @@ export const fetchBrandById = async (brandId) => {
 };
 
 export const toggleBrandLike = async ({ brandId, isLiked }) => {
-  const investorId = localStorage.getItem("investorUUID");
+  // const investorId = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
   const token = localStorage.getItem("accessToken");
+
+  
+  // const brands = await fetchBrands();
+  // brands.filter(brand =>{
+  //   if ( brand.uuid === brandId) {
+  //     console.log("Brand found:", brand);
+  //     console.log("Brand found:", brand.isLiked);
+     
+      
+  //   }
+     
+  // });
+  
+
 
   const config = {
     headers: {
@@ -59,30 +73,60 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
     }
   };
 
+  const AccessToken = localStorage.getItem("accessToken");
+
   try {
     if (!isLiked) {
+       console.log("api brandId false:",brandId)
+  console.log("api brandId isLiked  false:",isLiked)
       // For like creation
-      const response = await apiClient.post(
-        '/api/v1/like/post-favbrands',
-        {
-          brandUUID: brandId,
-          investorUUID: investorId
+      // const response = await apiClient.post(
+      //   '/api/v1/like/post-favbrands',
+      //   {
+      //     branduuid: brandId,
+      //     // investorUUID: investorId
+      //   },
+      //   config
+      // );
+      
+
+      const response = await axios.post(`${api.likeApi.post}`,
+          {
+          branduuid: brandId,
+          // investorUUID: investorId
         },
         config
-      );
+      )
+
       return response.data;
     } else {
+           console.log("api brandId true:",brandId)
+  console.log("api brandId isLiked  true:",isLiked)
       // For like removal
-      const response = await apiClient.delete(
-        '/api/v1/like/delete-favbrand',
+      // const response = await apiClient.delete(
+      //   '/api/v1/like/delete-favbrand',
+      //   {
+      //     ...config,
+      //     data: {
+      //       brandID: brandId,
+      //       // investorUUID: investorId
+      //     }
+      //   }
+      // );
+
+      const response = await axios.delete(
+        `${api.likeApi.delete}/${id}`,
         {
-          ...config,
-          data: {
-            brandUUID: brandId,
-            investorUUID: investorId
-          }
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+          data: { brandID: brandId },
         }
+        
       );
+
+      console.log("res delete:",response.data)
       return response.data;
     }
   } catch (error) {
@@ -92,11 +136,13 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
         method: error.config?.method,
         data: error.config?.data
       },
-      response: error.response?.data
+      // response: error?.response?.data
     });
     throw error;
   }
 };
+
+
 export const recordBrandView = async (brandID) => {
   const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
   

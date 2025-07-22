@@ -69,6 +69,16 @@ const BrandCard = React.memo(({
   const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
   const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
 
+          const {
+      investmentRange = "Not specified",
+      areaRequired = "Not specified",
+      franchiseType = "N/A",
+      franchiseModel: modelType = "N/A",
+      franchiseFee = "N/A",
+      royaltyFee = "N/A",
+      roi = "N/A",
+      payBackPeriod = "N/A",
+    } = firstModel;
   
 
   useEffect(() => {
@@ -189,15 +199,15 @@ const BrandCard = React.memo(({
                 }}
               />
               <Typography
-                variant="h6"
-                fontWeight={600}
-                sx={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  flex: 1,
-                }}
-              >
+                              variant="body2"
+                              fontWeight={600}
+                              sx={{
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                flex: 1,
+                              }}
+                            >
                 {brand.brandDetails.brandName}
               </Typography>
               <IconButton
@@ -260,48 +270,49 @@ const BrandCard = React.memo(({
                   ))} */}
             
 
-            <Stack spacing={1} sx={{ mb: 2 }}>
-              <Box display="flex" alignItems="center">
-                <Business
-                  sx={{
-                    mr: 1.5,
-                    fontSize: "1rem",
-                    color: "text.secondary",
-                    flexShrink: 0,
-                  }}
-                />
-                <Typography variant="body2">
-                  Franchise Type : {firstModel.franchiseType || "N/A"}
-                </Typography>
-              </Box>
+              <Stack spacing={1} sx={{ mb: 2 }}>
+                <Box display="flex" alignItems="center">
+                  <Business
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    <strong>Investment:</strong> {investmentRange}
+                  </Typography>
+                </Box>
 
-              <Box display="flex" alignItems="center">
-                <MonetizationOn
-                  sx={{
-                    mr: 1.5,
-                    fontSize: "1rem",
-                    color: "text.secondary",
-                    flexShrink: 0,
-                  }}
-                />
-                <Typography variant="body2">
-                  Investment : {firstModel.investmentRange || "Not specified"}
-                </Typography>
-              </Box>
-              <Box display="flex" alignItems="center">
-                <AreaChart
-                  sx={{
-                    mr: 1.5,
-                    fontSize: "1rem",
-                    color: "text.secondary",
-                    flexShrink: 0,
-                  }}
-                />
-                <Typography variant="body2">
-                  Area : {firstModel.investmentRange || "Not specified"}
-                </Typography>
-              </Box>
-            </Stack>
+                <Box display="flex" alignItems="center">
+                  <MonetizationOn
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    <strong>Area:</strong> {areaRequired}
+                  </Typography>
+                </Box>
+
+                <Box display="flex" alignItems="center">
+                  <AreaChart
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    <strong>Type:</strong> {modelType}
+                  </Typography>
+                </Box>
+              </Stack>
 
             <Divider sx={{ my: 1 }} />
           </CardContent>
@@ -613,7 +624,7 @@ const TopDesertBakerys = () => {
                 },
               }}
             >
-              Top Dessert & Bakery Franchises
+              Top Dessert & Bakery Brands
             </Typography>
 
             <Button
@@ -630,9 +641,8 @@ const TopDesertBakerys = () => {
                 },
               }}
               onClick={async () => {
-                dispatch(showLoading());
-                navigate("/brandviewpage");
-              }}
+                // dispatch(showLoading());
+                window.open('/brandviewpage', '_blank')              }}
             >
               View More
             </Button>
@@ -655,11 +665,11 @@ const TopDesertBakerys = () => {
                   height: '36px',
                   borderRadius: '50%',
                   padding: 0,
-                  backgroundColor: 'background.paper',
-                  color: 'text.primary',
+                  backgroundColor: '#98dd2e',
+                  color: 'white',
                   boxShadow: theme.shadows[4],
                   '&:hover': {
-                    backgroundColor: 'background.default',
+                    backgroundColor: '#b7f92b',
                   },
                 }}
               >
@@ -683,11 +693,11 @@ const TopDesertBakerys = () => {
                   height: '36px',
                   borderRadius: '50%',
                   padding: 0,
-                  backgroundColor: 'background.paper',
-                  color: 'text.primary',
+                  backgroundColor: '#98dd2e',
+                  color: 'white',
                   boxShadow: theme.shadows[4],
                   '&:hover': {
-                    backgroundColor: 'background.default',
+                    backgroundColor: '#b7f92b',
                   },
                 }}
               >

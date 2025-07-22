@@ -257,14 +257,15 @@ const BrandCard = React.memo(
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Tooltip title={brandName} placement="top">
                     <Typography
-                      variant="h6"
-                      fontWeight={600}
-                      sx={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
+                                    variant="body2"
+                                    fontWeight={600}
+                                    sx={{
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                      flex: 1,
+                                    }}
+                                  >
                       {brandName}
                     </Typography>
                   </Tooltip>
@@ -340,7 +341,7 @@ const BrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    <strong>Type:</strong> {franchiseType}
+                    <strong>Investment:</strong> {investmentRange}
                   </Typography>
                 </Box>
 
@@ -354,7 +355,7 @@ const BrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    <strong>Investment:</strong> {investmentRange}
+                    <strong>Area:</strong> {areaRequired}
                   </Typography>
                 </Box>
 
@@ -368,7 +369,7 @@ const BrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    <strong>Area:</strong> {areaRequired}
+                    <strong>Type:</strong> {modelType}
                   </Typography>
                 </Box>
               </Stack>
@@ -749,8 +750,7 @@ const TopInvestVdo2 = React.memo(() => {
               },
             }}
             onClick={() => {
-              navigate("/brandviewpage");
-            }}
+window.open            }}
           >
             View More
           </Button>
@@ -774,11 +774,11 @@ const TopInvestVdo2 = React.memo(() => {
               height: '36px',
               borderRadius: '50%',
               padding: 0,
-              backgroundColor: 'background.paper',
-              color: 'text.primary',
+              backgroundColor: '#98dd2e',
+              color: 'white',
               boxShadow: theme.shadows[4],
               '&:hover': {
-                backgroundColor: 'background.default',
+                backgroundColor: '#b7f92b',
               },
             }}
           >
@@ -802,11 +802,11 @@ const TopInvestVdo2 = React.memo(() => {
               height: '36px',
               borderRadius: '50%',
               padding: 0,
-              backgroundColor: 'background.paper',
-              color: 'text.primary',
+              backgroundColor: '#98dd2e',
+              color: 'white',
               boxShadow: theme.shadows[4],
               '&:hover': {
-                backgroundColor: 'background.default',
+                backgroundColor: '#b7f92b',
               },
             }}
           >

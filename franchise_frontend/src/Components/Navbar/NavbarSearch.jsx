@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -41,6 +41,7 @@ const highlightMatch = (text, searchTerm) => {
 
 const NavbarSearch = ({ open, handleClose }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [tab, setTab] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,6 +51,21 @@ const NavbarSearch = ({ open, handleClose }) => {
   // Get all filter options using React Query
   const { data: brands = [] } = useBrandsForFiltering();
   const { data: listingBrands = [] } = useBrandsForListing();
+
+  // Initialize state from location state if available (when coming from brand view page)
+  useEffect(() => {
+    if (location.state?.filters) {
+      const { filters } = location.state;
+      setSearchTerm(filters.searchTerm || '');
+      setSelectedMainCategory(filters.selectedMainCategory || '');
+      setSelectedSubCategory(filters.selectedSubCategory || '');
+      setSelectedChildCategory(filters.selectedChildCategory || '');
+      setSelectedState(filters.selectedState || '');
+      setSelectedDistrict(filters.selectedDistrict || '');
+      setSelectedCity(filters.selectedCity || '');
+      setSelectedInvestmentRange(filters.selectedInvestmentRange || '');
+    }
+  }, [location.state]);
 
   // Generate search suggestions including categories and locations
   const searchSuggestions = useMemo(() => {
@@ -397,11 +413,13 @@ const NavbarSearch = ({ open, handleClose }) => {
     setSearchTerm(suggestion.value);
     setOpenSuggestions(false);
     
-    // Navigate directly to the brand
-    if (suggestion.brandId) {
-      navigate(`/brands/${suggestion.brandId}`);
-      handleClose();
-    }
+    // Navigate directly to the brand in a new tab
+if (suggestion.brandId) {
+  const url = `/brands/${suggestion.brandId}`;
+  window.open(url, "_blank"); // Opens in a new tab
+  handleClose();
+}
+
     
     // Parse the category or location from the match text to set filters
     if (suggestion.matchText) {
@@ -447,26 +465,9 @@ const NavbarSearch = ({ open, handleClose }) => {
     }
   };
 
-  const handleExplore = () => {
-    const filters = {
-      searchTerm,
-      ...(tab === 0 && {
-        selectedMainCategory,
-        selectedSubCategory,
-        selectedChildCategory
-      }),
-      ...(tab === 1 && {
-        selectedState,
-        selectedDistrict,
-        selectedCity
-      }),
-      ...(tab === 2 && {
-        selectedInvestmentRange
-      })
-    };
-
-    // Filter brands based on selected filters
-    const filteredBrands = brands.filter(brand => {
+  // Filter brands based on selected filters
+  const filteredBrands = useMemo(() => {
+    return brands.filter(brand => {
       // Filter by search term if it exists (only brand name)
       if (searchTerm && 
           !brand.brandName?.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -522,14 +523,65 @@ const NavbarSearch = ({ open, handleClose }) => {
 
       return true;
     });
+  }, [
+    brands,
+    searchTerm,
+    tab,
+    selectedMainCategory,
+    selectedSubCategory,
+    selectedChildCategory,
+    selectedState,
+    selectedDistrict,
+    selectedCity,
+    selectedInvestmentRange
+  ]);
 
-    // Pass filtered brands to the brand view page
-    navigate('/brandViewPage', {
-      state: {
-        filteredBrands,
-        filters
-      }
-    });
+  const handleExplore = () => {
+    const filters = {
+      searchTerm,
+      ...(tab === 0 && {
+        selectedMainCategory,
+        selectedSubCategory,
+        selectedChildCategory
+      }),
+      ...(tab === 1 && {
+        selectedState,
+        selectedDistrict,
+        selectedCity
+      }),
+      ...(tab === 2 && {
+        selectedInvestmentRange
+      })
+    };
+
+    // Store filters in localStorage to persist them across page refreshes
+    localStorage.setItem('brandFilters', JSON.stringify(filters));
+    localStorage.setItem('filteredBrands', JSON.stringify(filteredBrands));
+
+    // Check if we're already on the brand view page
+    if (location.pathname === '/brandViewPage') {
+      // If already on brand view page, update the state directl
+      navigate('/brandViewPage', {
+        state: {
+          filteredBrands,
+          filters,
+          fromSearch: true
+        },
+        replace: true
+      });
+      window.location.reload();
+    } else {
+      // Otherwise navigate normally
+
+      navigate('/brandViewPage', {
+        state: {
+          filteredBrands,
+          filters,
+          fromSearch: true
+        }
+      });
+    }
+    
     handleClose();
   };
 

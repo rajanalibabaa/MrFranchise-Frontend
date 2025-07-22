@@ -47,8 +47,8 @@ function TopBrandVdoCards() {
   const CARD_SIZES = {
     main: {
       width: isMobile ? "100%" : isTablet ? "100%" : "68%",
-      height: isMobile ? 450 : isTablet ? 480 : 550,
-      videoHeight: isMobile ? 250 : isTablet ? 300 : 450,
+      height: isMobile ? 470 : isTablet ? 480 : 550,
+      videoHeight: isMobile ? 240 : isTablet ? 300 : 450,
     },
     side: {
       width: isMobile ? "100%" : isTablet ? "100%" : "30%",
@@ -57,8 +57,7 @@ function TopBrandVdoCards() {
     },
   };
 
-  const handleLikeClick = useCallback((brandId, isLiked) => {
-  // Immediate UI update - no waiting for API response
+ const handleLikeClick = useCallback((brandId, isLiked) => {
   const token = localStorage.getItem("accessToken");
   
   if (!token) {
@@ -66,23 +65,31 @@ function TopBrandVdoCards() {
     return;
   }
 
-    toggleLike.mutate(
-      { brandId, isLiked },
-      {
-        onMutate: () => {
-               console.log("Optimistic update with:", { brandId, isLiked });
-               
-          setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
-        },
-        onError: (error) => {
-          console.error("Like operation failed:", error);
-        },
-        onSettled: () => {
-          setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-        }
+  // Optimistic UI update with loading state
+  setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+
+  toggleLike.mutate(
+    { brandId, isLiked },
+    {
+      onError: (error) => {
+        console.error("Like operation failed:", error);
+        // Show error feedback to user
+        // toast.error("Failed to update like status. Please try again.");
+      },
+      onSettled: () => {
+        // Clean up loading state
+        setLikeProcessing(prev => {
+          const newState = { ...prev };
+          delete newState[brandId];
+          return newState;
+        });
       }
-    );
-  }, [toggleLike]);
+    }
+  );
+}, [toggleLike]);
+
+
+
 
   const handleNext = useCallback(() => {
     if (brands.length > 0) {
@@ -370,7 +377,7 @@ function TopBrandVdoCards() {
                 <CardContent
                   sx={{
                     bgcolor: "background.paper",
-                    px: { xs: 0, sm: 3 },
+                    px: { xs: 0, sm: 2 },
                     py: 0,
                     height: `calc(${CARD_SIZES.main.height}px - ${CARD_SIZES.main.videoHeight}px)`,
                     display: "flex",
@@ -381,7 +388,7 @@ function TopBrandVdoCards() {
                   <Stack
                     direction={{ xs: "column", sm: "row" }}
                     alignItems={{ xs: "flex-start", sm: "center" }}
-                    ml={{ xs: 3 }}
+                    ml={{ xs: 2 }}
                     spacing={1}
                     sx={{ flex: 1, minWidth: 0 }}
                   >
@@ -402,8 +409,9 @@ function TopBrandVdoCards() {
                         }}
                       />
 
-                      <Box>
-                       <Box display="flex" alignItems="center"> <Typography
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
+                       <Box display="flex" alignItems="center"> 
+                        <Typography
                           variant="body2"
                           fontWeight={700}
                           noWrap
@@ -435,7 +443,8 @@ function TopBrandVdoCards() {
                           </IconButton>
                         </Tooltip>
                       )}
-                        </Box></Box>
+                        </Box>
+                        </Box>
                         
 
                         <Typography
@@ -469,8 +478,8 @@ function TopBrandVdoCards() {
                           value={mainBrand.franchiseDetails?.fico?.[0]?.areaRequired}
                         />
                         <Fact
-                          label="Franchise Type"
-                          value={mainBrand.franchiseDetails?.fico?.[0]?.franchiseType}
+                          label="Franchise Model"
+                          value={mainBrand.franchiseDetails?.fico?.[0]?.franchiseModel}
                         />
                         {isMobile && (
                           <Button
@@ -810,7 +819,7 @@ function TopBrandVdoCards() {
                         lineHeight: 1.5,
                       }}
                     >
-                     Franchising Type: {brand.franchiseDetails?.fico?.[0]?.franchiseModel}
+                     Franchising Model: {brand.franchiseDetails?.fico?.[0]?.franchiseModel}
                     </Typography>
                   </Box>
 

@@ -1,61 +1,45 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import BrandDetails from "./BrandDetail.jsx";
-import { useBrand } from "../../Hooks/Fetchbrands.jsx";
-import { CircularProgress } from "@mui/material";
+import { useBrands } from "../../Hooks/Fetchbrands.jsx";
 
 function BrandDetailsPage() {
   const { brandId } = useParams();
-  const navigate = useNavigate();
   const [fromSession, setFromSession] = useState(false);
-  const [checkedStorage, setCheckedStorage] = useState(false);
 
-  // ✅ Check if brandId is stored (just to track if it's opened from dialog)
+  // Memoize the brand key to avoid recomputation
+  const brandKey = useMemo(() => `viewing-brand-id-${brandId}`, [brandId]);
+
+  // ✅ Check session storage (optimized)
   useEffect(() => {
-    const brandKey = `viewing-brand-id-${brandId}`;
     const storedId = sessionStorage.getItem(brandKey);
-
     if (storedId === brandId) {
-      setFromSession(true); // optional use
+      setFromSession(true);
     }
+    // No need to clean up as we're just reading
+  }, [brandId, brandKey]); // Added brandKey to dependencies
 
-    setCheckedStorage(true);
-  }, [brandId]);
-
-  // ✅ Fetch brand data only after session check
-  const {
-    data: brandData,
-    isLoading,
-    isError,
-    error
-  } = useBrand(brandId, {
-    enabled: checkedStorage,
-  });
-
-  // ✅ Redirect if nothing is found
-  useEffect(() => {
-    if (checkedStorage && !isLoading && !brandData && isError) {
-      console.error("Brand not found. Redirecting...", error);
-      navigate("/brandviewpage", { replace: true });
-    }
-  }, [checkedStorage, isLoading, brandData, isError, navigate, error]);
-
-  if (!checkedStorage || isLoading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh'
-      }}>
-        <CircularProgress color="secondary" />
-      </div>
+  // Consider adding error handling if useBrands supports it
+  const { data: brands = [] } = useBrands();
+  
+  // Optimized memo with early return
+  const fallbackBrandData = useMemo(() => {
+    if (!brands.length) return null;
+    return brands.find((brand) => 
+      brand.uuid === brandId || brand.id?.toString() === brandId
     );
-  }
+  }, [brands, brandId]);
 
-  if (!brandData) return null;
+  // Early return if no data yet
+  if (!fallbackBrandData) return null;
 
-  return <BrandDetails brandData={brandData} />;
+  return (
+    <BrandDetails 
+      brandData={fallbackBrandData} 
+      fromSession={fromSession} 
+      key={brandId} // Add key to force re-render when brand changes
+    />
+  );
 }
 
 export default BrandDetailsPage;
