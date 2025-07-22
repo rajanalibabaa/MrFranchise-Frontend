@@ -415,7 +415,7 @@ function TopBrandVdoCards() {
                           fontWeight={700}
                           noWrap
                           sx={{
-                            backgroundColor: "#7ad03a",
+                            backgroundColor: "black",
                             WebkitBackgroundClip: "text",
                             WebkitTextFillColor: "transparent",
                              whiteSpace: "normal",
@@ -718,8 +718,7 @@ function TopBrandVdoCards() {
                       <Tooltip title={brand.brandDetails?.brandName || brand.title}>
                         <Typography
                           variant={isMobile ? "caption" : "body1"}
-                          color="#7ad03a"
-                          // fontWeight="bold"
+                          color="black"
                           noWrap={false}
                           sx={{
                             flex: 1,

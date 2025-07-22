@@ -127,7 +127,7 @@ const BrandCard = React.memo(
       <motion.div
         key={brandId}
         variants={cardVariants}
-        whileHover={{ scale: 1.03 }}
+        // whileHover={{ scale: 1.03 }}
         style={{
           width: dimensions.width,
           flexShrink: 0,
@@ -140,12 +140,12 @@ const BrandCard = React.memo(
             borderRadius: 3,
             overflow: "hidden",
             width: "100%",
-            border: "1px solid #eee",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+            // border: "1px solid #eee",
+            // boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
             transition: "all 0.3s ease",
-            "&:hover": {
-              boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
-            },
+            // "&:hover": {
+            //   boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
+            // },
           }}
         >
           {/* Video/Image Section */}
@@ -213,30 +213,33 @@ const BrandCard = React.memo(
                   justifyContent: "space-between",
                 }}
               >
-                <Avatar
-                  src={brand?.uploads?.brandLogo?.[0]}
-                  sx={{
-                    width: 50,
-                    height: 50,
-                    border: "1px solid #eee",
-                    flexShrink: 0,
-                  }}
-                />
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Tooltip title={brandName} placement="top">
-                    <Typography
-                      variant="h6"
-                      fontWeight={600}
-                      sx={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
+                <Box
+                                                            component="img"
+                                                            src={brand?.uploads?.brandLogo?.[0]}
+                                                            alt={brand.uploads?.brandName}
+                                                            loading="lazy"
+                                                            sx={{
+                                                              width: 100,
+                                                              height: 50,
+                                                              border: '1px solid #f29724',
+                                                        
+                                                              objectFit: 'contain',  
+                                                            }}
+                                                          />
+              <IconButton
+                      onClick={() => handleToggleShortList(brand)}
+                       sx={{
+                        color: shortListed
+                          ? "#7ef400ff"
+                          : "rgba(0, 0, 0, 0.23)",
                       }}
                     >
-                      {brandName}
-                    </Typography>
-                  </Tooltip>
-                </Box>
+                      <Tooltip title={'ShortList'}
+                        
+                      ><PlaylistAddCheckCircleOutlined
+                     
+                      /></Tooltip>
+                    </IconButton>
                 <IconButton
                   onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
                   disabled={likeProcessing[brand.uuid]}
@@ -255,7 +258,22 @@ const BrandCard = React.memo(
                   )}
                 </IconButton>
               </Box>
-
+   <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Tooltip title={brandName} placement="top">
+                    <Typography
+                      variant="body1"
+                      fontWeight={800}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        mb:1
+                      }}
+                    >
+                      {brandName}
+                    </Typography>
+                  </Tooltip>
+                </Box>
               {/* Categories */}
               {(category.main || category.child) && (
                 <Box sx={{ mb: 2 }}>
@@ -278,20 +296,7 @@ const BrandCard = React.memo(
                         }}
                       />
                     )}
-                    <IconButton
-                      onClick={() => handleToggleShortList(brand)}
-                       sx={{
-                        color: shortListed
-                          ? "#7ef400ff"
-                          : "rgba(0, 0, 0, 0.23)",
-                      }}
-                    >
-                      <Tooltip title={'ShortList'}
-                        
-                      ><PlaylistAddCheckCircleOutlined
-                     
-                      /></Tooltip>
-                    </IconButton>
+                   
                   </Stack>
                 </Box>
               )}
@@ -571,7 +576,7 @@ const TopFoodFranchises = () => {
               variant={isMobile ? "body1" : "h5"}
               fontWeight="bold"
               sx={{
-                color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                color: "black",
                 mb: 1,
                 textAlign: "left",
                 position: "relative",
@@ -628,11 +633,11 @@ const TopFoodFranchises = () => {
                   height: "36px",
                   borderRadius: "50%",
                   padding: 0,
-                  backgroundColor: "#98dd2e",
+                  backgroundColor: "rgba(111, 255, 0, 0.98)",
                   color: "white",
                   boxShadow: theme.shadows[4],
                   "&:hover": {
-                    backgroundColor: "#b7f92b",
+                    backgroundColor: "#7ad03a",
                   },
                 }}
               >
@@ -656,11 +661,11 @@ const TopFoodFranchises = () => {
                   height: "36px",
                   borderRadius: "50%",
                   padding: 0,
-                  backgroundColor: "#98dd2e",
+                  backgroundColor: "rgba(111, 255, 0, 0.98)",
                   color: "white",
                   boxShadow: theme.shadows[4],
                   "&:hover": {
-                    backgroundColor: "#b7f92b",
+                    backgroundColor: "#7ad03a",
                   },
                 }}
               >
@@ -673,15 +678,39 @@ const TopFoodFranchises = () => {
               initial="initial"
               animate="animate"
               ref={scrollContainerRef}
-              sx={{
+             sx={{
                 display: "flex",
                 gap: isMobile ? 2 : 3,
                 borderRadius: 3,
                 p: 2,
                 overflowX: "auto",
-                scrollbarWidth: "none",
-                "&::-webkit-scrollbar": { display: "none" },
                 perspective: "1000px",
+                // Custom attractive scrollbar design
+                '&::-webkit-scrollbar': {
+                  height: isMobile ? '10px' : '8px',
+                  backgroundColor: 'transparent',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: 'linear-gradient(90deg, transparent, rgba(242, 151, 36, 0.1), transparent)',
+                  borderRadius: '10px',
+                  marginX: isMobile ? 0 : '10%',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: 'linear-gradient(90deg, #f29724, #98dd2e)',
+                  borderRadius: '10px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  border: '2px solid white',
+                  backgroundSize: '200%',
+                  transition: 'background-position 0.3s ease',
+                  '&:hover': {
+                    backgroundPosition: 'right center',
+                  },
+                },
+                // Firefox scrollbar
+                scrollbarColor: `transparent`,
+                scrollbarWidth: 'thin',
+                // Extra bottom padding for mobile
+                paddingBottom: isMobile ? '24px' : '16px',
               }}
             >
               {foodBrands.map((brand) => (
@@ -690,7 +719,7 @@ const TopFoodFranchises = () => {
                   whileHover={{
                     scale: 1.03,
                     zIndex: 10,
-                    boxShadow: theme.shadows[6],
+                    // boxShadow: theme.shadows[6],
                     transition: { duration: 0.3 },
                   }}
                   whileTap={{ scale: 0.98 }}

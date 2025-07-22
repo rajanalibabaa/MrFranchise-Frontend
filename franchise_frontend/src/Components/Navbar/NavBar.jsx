@@ -369,7 +369,7 @@ function Navbar() {
                   
                   sx={{
                     color: 'black',  
-                    backgroundColor: '#7ad03a',
+                    backgroundColor: ' #6fff00fa',
                     borderRadius: '8px',
                     px: {4: 3, xs: 2},
                     py:isMobile?0: 1,
@@ -378,7 +378,7 @@ function Navbar() {
                     fontSize: isMobile ? '0.5': '1rem',
                     fontWeight: 500,
                     '&:hover': {
-                      backgroundColor: 'rgba(111, 255, 0, 0.98)'
+                      backgroundColor: '#7ad03a'
                     }
                   }}
                 >

@@ -38,7 +38,7 @@ import { useDispatch } from "react-redux";
 import { handleShortList } from "../../Api/shortListApi";
 
 const CARD_DIMENSIONS = {
-  mobile: { width: 280, height: 520 },
+  mobile: { width: 280, height: 500 },
   tablet: { width: 320, height: 560 },
   desktop: { width: 327, height: 500 },
 };
@@ -119,7 +119,7 @@ const BrandCard = React.memo(
       <motion.div
         key={brandId}
         variants={cardVariants}
-        whileHover={{ scale: 1.03 }}
+        // whileHover={{ scale: 1.03 }}
         style={{
           width: dimensions.width,
           flexShrink: 0,
@@ -133,7 +133,7 @@ const BrandCard = React.memo(
             overflow: "hidden",
             width: "100%",
             border: "1px solid #eee",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+            // boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
           }}
         >
           <Box
@@ -193,11 +193,38 @@ const BrandCard = React.memo(
                   display: "flex",
                   alignItems: "center",
                   gap: 2,
-                  mb: 1.5,
+                  // mb: 0.5,
                   justifyContent: "space-between",
                 }}
               >
-                <Avatar
+                <Box
+                                            component="img"
+                                            src={brand?.uploads?.brandLogo?.[0]}
+                                            alt={brand.uploads?.brandName}
+                                            loading="lazy"
+                                            sx={{
+                                              width: 100,
+                                              height: 50,
+                                              border: '1px solid #f29724',
+                                              mb: 1,
+                                              objectFit: 'contain',  
+                                            }}
+                                          />
+                                           <IconButton
+                      onClick={() => handleToggleShortList(brand)}
+                       sx={{
+                        color: shortListed
+                          ? "#7ef400ff"
+                          : "rgba(0, 0, 0, 0.23)",
+                      }}
+                    >
+                      <Tooltip title={'ShortList'}
+                        
+                      ><PlaylistAddCheckCircleOutlined
+                     
+                      /></Tooltip>
+                    </IconButton>
+                {/* <Avatar
                   src={brandLogo}
                   sx={{
                     width: 50,
@@ -205,19 +232,8 @@ const BrandCard = React.memo(
                     border: "1px solid #eee",
                     flexShrink: 0,
                   }}
-                />
-                <Typography
-                                variant="body2"
-                                fontWeight={600}
-                                sx={{
-                                  whiteSpace: "nowrap",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  flex: 1,
-                                }}
-                              >
-                  {brandName}
-                </Typography>
+                /> */}
+               
                 <IconButton
                   onClick={() => handleLikeClick(brandId, brand?.isLiked)}
                   disabled={likeProcessing[brandId]}
@@ -235,7 +251,19 @@ const BrandCard = React.memo(
                   )}
                 </IconButton>
               </Box>
-
+ <Typography
+                                variant="body1"
+                                fontWeight={800}
+                                sx={{
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  flex: 1,
+                                  mb:1
+                                }}
+                              >
+                  {brandName}
+                </Typography>
               {category?.child && (
                 <Box sx={{ mb: 2 }}>
                   <Stack
@@ -255,20 +283,7 @@ const BrandCard = React.memo(
                       }}
                     />
 
-                    <IconButton
-                      onClick={() => handleToggleShortList(brand)}
-                       sx={{
-                        color: shortListed
-                          ? "#7ef400ff"
-                          : "rgba(0, 0, 0, 0.23)",
-                      }}
-                    >
-                      <Tooltip title={'ShortList'}
-                        
-                      ><PlaylistAddCheckCircleOutlined
-                     
-                      /></Tooltip>
-                    </IconButton>
+                   
                   </Stack>
                 </Box>
               )}
@@ -555,7 +570,7 @@ const TopCafeFranchises = () => {
               variant={isMobile ? "body1" : "h5"}
               fontWeight="bold"
               sx={{
-                color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                color:"black",
                 mb: 1,
                 textAlign: "left",
                 position: "relative",
@@ -612,11 +627,11 @@ const TopCafeFranchises = () => {
                   height: "36px",
                   borderRadius: "50%",
                   padding: 0,
-                  backgroundColor: "#98dd2e",
+                  backgroundColor: "rgba(111, 255, 0, 0.98)",
                   color: "white",
-                  boxShadow: theme.shadows[4],
+                  // boxShadow: theme.shadows[4],
                   "&:hover": {
-                    backgroundColor: "#b7f92b",
+                    backgroundColor: "#7ad03a",
                   },
                 }}
               >
@@ -640,11 +655,11 @@ const TopCafeFranchises = () => {
                   height: "36px",
                   borderRadius: "50%",
                   padding: 0,
-                  backgroundColor: "#98dd2e",
+                  backgroundColor: "rgba(111, 255, 0, 0.98)",
                   color: "white",
                   boxShadow: theme.shadows[4],
                   "&:hover": {
-                    backgroundColor: "#b7f92b",
+                    backgroundColor: "#7ad03a",
                   },
                 }}
               >
@@ -657,15 +672,39 @@ const TopCafeFranchises = () => {
               initial="initial"
               animate="animate"
               ref={scrollContainerRef}
-              sx={{
+             sx={{
                 display: "flex",
                 gap: isMobile ? 2 : 3,
                 borderRadius: 3,
                 p: 2,
                 overflowX: "auto",
-                scrollbarWidth: "none",
-                "&::-webkit-scrollbar": { display: "none" },
                 perspective: "1000px",
+                // Custom attractive scrollbar design
+                '&::-webkit-scrollbar': {
+                  height: isMobile ? '10px' : '8px',
+                  backgroundColor: 'transparent',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: 'linear-gradient(90deg, transparent, rgba(242, 151, 36, 0.1), transparent)',
+                  borderRadius: '10px',
+                  marginX: isMobile ? 0 : '10%',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: 'linear-gradient(90deg, #f29724, #98dd2e)',
+                  borderRadius: '10px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  border: '2px solid white',
+                  backgroundSize: '200%',
+                  transition: 'background-position 0.3s ease',
+                  '&:hover': {
+                    backgroundPosition: 'right center',
+                  },
+                },
+                // Firefox scrollbar
+                scrollbarColor: `transparent`,
+                scrollbarWidth: 'thin',
+                // Extra bottom padding for mobile
+                paddingBottom: isMobile ? '24px' : '16px',
               }}
             >
               {coffeeTeaBrands.map((brand) => (
@@ -674,7 +713,7 @@ const TopCafeFranchises = () => {
                   whileHover={{
                     scale: 1.03,
                     zIndex: 10,
-                    boxShadow: theme.shadows[6],
+                    // boxShadow: theme.shadows[6],
                     transition: { duration: 0.3 },
                   }}
                   whileTap={{ scale: 0.98 }}
