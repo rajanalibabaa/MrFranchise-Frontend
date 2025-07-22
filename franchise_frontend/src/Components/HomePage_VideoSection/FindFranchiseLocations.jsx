@@ -748,7 +748,6 @@ const TopInvestVdo2 = React.memo(() => {
           animate="animate"
           ref={scrollContainerRef}
           sx={{
-<<<<<<< HEAD
                 display: "flex",
                 gap: isMobile ? 2 : 3,
                 borderRadius: 3,
@@ -782,19 +781,7 @@ const TopInvestVdo2 = React.memo(() => {
                 // Extra bottom padding for mobile
                 paddingBottom: isMobile ? '24px' : '16px',
               }}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-=======
-            display: "flex",
-            gap: isMobile ? 2 : 3,
-            borderRadius: 3,
-            p: 2,
-            overflowX: "auto",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-            perspective: '1000px',
-          }}
->>>>>>> 898ea049d6b863bf98ebaa02da7cbf2231419e40
+         
         >
           {filteredBrands.map((brand) => (
             <motion.div

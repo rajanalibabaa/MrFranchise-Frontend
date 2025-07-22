@@ -73,12 +73,12 @@ const BrandCard = React.memo(
      const {
       investmentRange = "Not specified",
       areaRequired = "Not specified",
-      franchiseType = "N/A",
+      // franchiseType = "N/A",
       franchiseModel: modelType = "N/A",
-      franchiseFee = "N/A",
-      royaltyFee = "N/A",
-      roi = "N/A",
-      payBackPeriod = "N/A",
+      // franchiseFee = "N/A",
+      // royaltyFee = "N/A",
+      // roi = "N/A",
+      // payBackPeriod = "N/A",
     } = firstModel;
 
     useEffect(() => {

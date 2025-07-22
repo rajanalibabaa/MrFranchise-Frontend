@@ -31,6 +31,7 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 import { postView } from "../../Utils/function/view";
 import { handleShortList } from "../../Api/shortListApi";
+import { shuffleArray } from "./ShuffleData";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -373,6 +374,13 @@ const TopLeadingFranchise = () => {
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
 
+  // Add the first few brands at the end to create infinite loop effect
+  const loopingBrands = useMemo(() => {
+
+    const shuffledBrands = shuffleArray([...brands]);
+    return [...shuffledBrands, ...shuffledBrands.slice(0, 4)];
+  }, [brands]);
+
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
@@ -602,19 +610,11 @@ const TopLeadingFranchise = () => {
                   height: "36px",
                   borderRadius: "50%",
                   padding: 0,
-<<<<<<< HEAD
                   backgroundColor: 'rgba(111, 255, 0, 0.98)',
                   color: 'white',
                   boxShadow: theme.shadows[4],
                   '&:hover': {
                     backgroundColor: '#7ad03a',
-=======
-                  backgroundColor: "#98dd2e",
-                  color: "white",
-                  boxShadow: theme.shadows[4],
-                  "&:hover": {
-                    backgroundColor: "#b7f92b",
->>>>>>> 898ea049d6b863bf98ebaa02da7cbf2231419e40
                   },
                 }}
               >
@@ -638,19 +638,11 @@ const TopLeadingFranchise = () => {
                   height: "36px",
                   borderRadius: "50%",
                   padding: 0,
-<<<<<<< HEAD
                   backgroundColor: 'rgba(111, 255, 0, 0.98)',
                   color: 'white',
                   boxShadow: theme.shadows[4],
                   '&:hover': {
                     backgroundColor: '#7ad03a',
-=======
-                  backgroundColor: "#98dd2e",
-                  color: "white",
-                  boxShadow: theme.shadows[4],
-                  "&:hover": {
-                    backgroundColor: "#b7f92b",
->>>>>>> 898ea049d6b863bf98ebaa02da7cbf2231419e40
                   },
                 }}
               >
@@ -669,7 +661,6 @@ const TopLeadingFranchise = () => {
                 borderRadius: 3,
                 p: 2,
                 overflowX: "auto",
-<<<<<<< HEAD
                 perspective: "1000px",
                 // Custom attractive scrollbar design
                 '&::-webkit-scrollbar': {
@@ -699,14 +690,7 @@ const TopLeadingFranchise = () => {
                 paddingBottom: isMobile ? '24px' : '16px',
               }}
               
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-=======
-                scrollbarWidth: "none",
-                "&::-webkit-scrollbar": { display: "none" },
-                perspective: "1000px",
-              }}
->>>>>>> 898ea049d6b863bf98ebaa02da7cbf2231419e40
+              
             >
               {brands.map((brand) => (
                 <motion.div
@@ -714,13 +698,8 @@ const TopLeadingFranchise = () => {
                   whileHover={{
                     scale: 1.03,
                     zIndex: 10,
-<<<<<<< HEAD
                     // boxShadow: theme.shadows[6],
                     transition: { duration: 0.3 }
-=======
-                    boxShadow: theme.shadows[6],
-                    transition: { duration: 0.3 },
->>>>>>> 898ea049d6b863bf98ebaa02da7cbf2231419e40
                   }}
                   whileTap={{ scale: 0.98 }}
                   initial={{ opacity: 0, y: 20 }}
@@ -752,4 +731,3 @@ const TopLeadingFranchise = () => {
 };
 
 export default React.memo(TopLeadingFranchise);
-

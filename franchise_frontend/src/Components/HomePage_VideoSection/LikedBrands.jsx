@@ -30,6 +30,7 @@ import { useSelector } from "react-redux";
 import { api } from "../../Api/api";
 import img from "../../assets/images/brandLogo.jpg";
 import { useBrands } from "../../Hooks/Fetchbrands";
+import { shuffleArray } from "./ShuffleData";
  
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -67,12 +68,12 @@ const BrandCard = React.memo(({
      const {
       investmentRange = "Not specified",
       areaRequired = "Not specified",
-      franchiseType = "N/A",
+      // franchiseType = "N/A",
       franchiseModel: modelType = "N/A",
-      franchiseFee = "N/A",
-      royaltyFee = "N/A",
-      roi = "N/A",
-      payBackPeriod = "N/A",
+      // franchiseFee = "N/A",
+      // royaltyFee = "N/A",
+      // roi = "N/A",
+      // payBackPeriod = "N/A",
     } = franchiseModel;
  
   useEffect(() => {
@@ -343,6 +344,7 @@ const LikedBrands = () => {
   const [likeProcessing, setLikeProcessing] = useState({});
   const [removeMsg, setRemoveMsg] = useState("");
   const [localLikedBrands, setLocalLikedBrands] = useState([]);
+  const [shuffledBrands, setShuffledBrands] = useState([]);
  
   const navigate = useNavigate();
   const id = localStorage.getItem ("id") || localStorage.getItem ("brandUUID") || useSelector((state) => state.auth?.investorUUID) || useSelector((state) => state.auth?.brandUUID);
@@ -355,6 +357,7 @@ useEffect(() => {
   if (brands.length > 0) {
     const liked = brands.filter(brand => brand.isLiked === true);
     setLocalLikedBrands(liked);
+    setShuffledBrands(shuffleArray(liked));
     // console.log("Local Liked Brands:", liked); // Moved inside
   }
 }, [brands]);
@@ -385,6 +388,7 @@ useEffect(() => {
      
       // Update local state immediately for better UX
       setLocalLikedBrands(prev => prev.filter(brand => brand.uuid !== brandId));
+      setShuffledBrands(prev => prev.filter(brand => brand.uuid !== brandId));
       // setRemoveMsg("Brand removed successfully");
      
       // Refetch data to ensure consistency with server
@@ -436,7 +440,7 @@ useEffect(() => {
  
   return (
     <>
-    {id && localLikedBrands.length > 0 && (
+    {id && localLikedBrands.length > 4 && (
       <Box sx={{
       py: isMobile ? 1 : 2,
       px: isMobile ? 0 : 2,
@@ -527,7 +531,7 @@ useEffect(() => {
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          {localLikedBrands.map((brand) => (
+          {shuffledBrands.map((brand) => (
             <BrandCard
               key={brand.uuid}
               brand={brand}

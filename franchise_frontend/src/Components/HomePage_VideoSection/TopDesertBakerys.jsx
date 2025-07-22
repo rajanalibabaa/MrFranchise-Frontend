@@ -33,6 +33,7 @@ import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 import { postView } from "../../Utils/function/view";
 import { showLoading } from "../../Redux/Slices/loadingSlice";
 import { handleShortList } from "../../Api/shortListApi";
+import { shuffleArray } from "./ShuffleData";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -58,13 +59,6 @@ const BrandCard = React.memo(({
   const videoRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
   const observerRef = useRef();
-
-  // const brandId = brand.uuid;
-  // const franchiseModels = brand.franchiseDetails?.fico?.[0] || [];
-  // const firstModel = franchiseModels[0] || {};
-  // const categories = brand.personalDetails?.brandCategories || [];
-  // const videoUrl = brand?.brandDetails?.brandPromotionVideo?.[0]
-  // const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
    const brandId = brand.uuid;
   const franchiseModels = brand.franchiseDetails?.fico?.[0] || {};
   const firstModel = franchiseModels || {};
@@ -75,12 +69,12 @@ const BrandCard = React.memo(({
           const {
       investmentRange = "Not specified",
       areaRequired = "Not specified",
-      franchiseType = "N/A",
+      // franchiseType = "N/A",
       franchiseModel: modelType = "N/A",
-      franchiseFee = "N/A",
-      royaltyFee = "N/A",
-      roi = "N/A",
-      payBackPeriod = "N/A",
+      // franchiseFee = "N/A",
+      // royaltyFee = "N/A",
+      // roi = "N/A",
+      // payBackPeriod = "N/A",
     } = firstModel;
   
 
@@ -288,22 +282,6 @@ const BrandCard = React.memo(({
                 </Stack>
               </Box>
             )}
-
-            {/* {categories.map((category, index) => (
-                    <Chip
-                      key={index}
-                      label={category.child}
-                      size="small"
-                      sx={{
-                        bgcolor: "rgba(255, 152, 0, 0.1)",
-                        color: "orange.dark",
-                        fontWeight: 500,
-                        mb: 1,
-                      }}
-                    />
-                  ))} */}
-            
-
               <Stack spacing={1} sx={{ mb: 2 }}>
                 <Box display="flex" alignItems="center">
                   <Business
@@ -751,5 +729,4 @@ const TopDesertBakerys = () => {
 };
 
 export default React.memo(TopDesertBakerys);
-
 

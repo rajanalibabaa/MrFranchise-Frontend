@@ -29,6 +29,8 @@ import { postView } from "../../Utils/function/view";
 import { useBrands, useToggleLike, openBrandDialog } from "../../Hooks/Fetchbrands";
 import { useDispatch } from "react-redux";
 import { handleShortList } from "../../Api/shortListApi";
+import { shuffleArray } from "./ShuffleData";
+
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -73,7 +75,7 @@ const BrandCard = React.memo(({
   const {
     investmentRange = "Not specified",
     areaRequired = "Not specified",
-    franchiseType = "N/A",
+    // franchiseType = "N/A",
     franchiseModel: modelType = "N/A",
     franchiseFee = "N/A",
     royaltyFee = "N/A",
@@ -254,7 +256,6 @@ const BrandCard = React.memo(({
              <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Tooltip title={brandName} placement="top">
                   <Typography
-<<<<<<< HEAD
                                   variant="body1"
                                   fontWeight={800}
                                   sx={{
@@ -265,16 +266,6 @@ const BrandCard = React.memo(({
                                     mb:1
                                   }}
                                 >
-=======
-                    variant="h6"
-                    fontWeight={600}
-                    sx={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
->>>>>>> 898ea049d6b863bf98ebaa02da7cbf2231419e40
                     {brandName}
                   </Typography>
                 </Tooltip>
@@ -299,22 +290,7 @@ const BrandCard = React.memo(({
                       }}
                     />
                   )}
-<<<<<<< HEAD
                    
-=======
-                  <IconButton
-                    onClick={() => handleToggleShortList(brand)}
-                    sx={{
-                      color: shortListed
-                        ? "#7ef400ff"
-                        : "rgba(0, 0, 0, 0.23)",
-                    }}
-                  >
-                    <Tooltip title={'ShortList'}>
-                      <PlaylistAddCheckCircleOutlined />
-                    </Tooltip>
-                  </IconButton>
->>>>>>> 898ea049d6b863bf98ebaa02da7cbf2231419e40
                 </Stack>
               </Box>
             )}
@@ -406,6 +382,7 @@ const TopBeverageFranchises = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
+  const [shuffledBrands, setShuffledBrands] = useState([]);
   
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -420,7 +397,17 @@ const TopBeverageFranchises = () => {
         category.main === "Food & Beverages"
       );
     });
-  }, [brands]);
+
+    // Only shuffle if we haven't already shuffled (to maintain shuffle on re-renders)
+    if (shuffledBrands.length === 0 && filtered.length > 0) {
+      const shuffled = shuffleArray(filtered);
+      setShuffledBrands(shuffled);
+      return [...shuffled, ...shuffled.slice(0, 4)]; // Add duplicates for infinite loop
+    }
+    
+    // Add the first few brands at the end to create infinite loop effect
+    return [...filtered, ...filtered.slice(0, 4)];
+  }, [brands, shuffledBrands]);
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -486,6 +473,57 @@ const TopBeverageFranchises = () => {
     scrollRequestRef.current = requestAnimationFrame(animateScroll);
   }, []);
 
+  // // Check if we've scrolled to the duplicated items and need to loop back
+  // const checkForLoop = useCallback(() => {
+  //   if (!scrollContainerRef.current) return;
+    
+  //   const container = scrollContainerRef.current;
+  //   const scrollWidth = container.scrollWidth;
+  //   const clientWidth = container.clientWidth;
+  //   const maxScrollLeft = scrollWidth - clientWidth;
+    
+  //   // If we're within 100px of the end, jump back to the equivalent position at the start
+  //   if (container.scrollLeft >= maxScrollLeft - 100) {
+  //     const originalBrandsCount = beverageBrands.length - 4; // Subtract the duplicated items
+  //     const originalScrollWidth = originalBrandsCount * (dimensions.width + (isMobile ? 16 : 24));
+      
+  //     // Calculate equivalent position at the start
+  //     const newScrollLeft = container.scrollLeft - originalScrollWidth;
+  //     container.scrollLeft = newScrollLeft;
+  //   }
+  // }, [beverageBrands.length, dimensions.width, isMobile]);
+
+  // // Handle next button click - scroll forward 4 cards
+  // const handleNextClick = useCallback(() => {
+  //   if (!scrollContainerRef.current) return;
+    
+  //   const container = scrollContainerRef.current;
+  //   const scrollDistance = getScrollDistance();
+  //   const newScrollLeft = container.scrollLeft + scrollDistance;
+    
+  //   smoothScrollTo(newScrollLeft);
+  // }, [getScrollDistance, smoothScrollTo]);
+
+  // // Handle previous button click - scroll backward 4 cards
+  // const handlePrevClick = useCallback(() => {
+  //   if (!scrollContainerRef.current) return;
+    
+  //   const container = scrollContainerRef.current;
+  //   const scrollDistance = getScrollDistance();
+  //   const newScrollLeft = container.scrollLeft - scrollDistance;
+    
+  //   // If we're at the start, jump to near the end (before the duplicated items)
+  //   if (newScrollLeft <= 0) {
+  //     const originalBrandsCount = beverageBrands.length - 4; // Subtract the duplicated items
+  //     const originalScrollWidth = originalBrandsCount * (dimensions.width + (isMobile ? 16 : 24));
+  //     const clientWidth = container.clientWidth;
+  //     smoothScrollTo(originalScrollWidth - clientWidth);
+  //   } else {
+  //     smoothScrollTo(newScrollLeft);
+  //   }
+  // }, [beverageBrands.length, dimensions.width, getScrollDistance, isMobile, smoothScrollTo]);
+
+ 
   // Easing function for smooth scrolling
   const easeInOutQuad = (t) => {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
@@ -528,6 +566,8 @@ const TopBeverageFranchises = () => {
     if (container) {
       container.addEventListener('scroll', handleScroll);
       handleScroll();
+      
+      
     }
     
     return () => {
@@ -721,12 +761,8 @@ const TopBeverageFranchises = () => {
                 // Extra bottom padding for mobile
                 paddingBottom: isMobile ? '24px' : '16px',
               }}
-<<<<<<< HEAD
              
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-=======
->>>>>>> 898ea049d6b863bf98ebaa02da7cbf2231419e40
+        
             >
               {beverageBrands.map((brand) => (
                 <motion.div
