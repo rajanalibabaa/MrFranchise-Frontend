@@ -204,7 +204,7 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
               textOverflow: 'ellipsis'
             }}
           >
-            Investment: {brand.franchiseDetails?.fico?.[0]?.investmentRange || 'N/A'}
+            Investment : {brand.franchiseDetails?.fico?.[0]?.investmentRange || 'N/A'}
           </Typography>
           <Typography 
             variant="caption" 
@@ -215,7 +215,18 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
               textOverflow: 'ellipsis'
             }}
           >
-            Area: {brand.franchiseDetails?.fico?.[0]?.areaRequired || 'N/A'} sq.ft
+            Area : {brand.franchiseDetails?.fico?.[0]?.areaRequired || 'N/A'}
+          </Typography>
+          <Typography 
+            variant="caption" 
+            fontWeight={500}
+            sx={{
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+          >
+            Type : {brand.franchiseDetails?.fico?.[0]?.franchiseModel || 'N/A'}
           </Typography>
         </Stack>
 
