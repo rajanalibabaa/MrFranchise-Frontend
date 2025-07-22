@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import BrandDetailsControl from './BrandDetailsControl';
@@ -593,5 +592,5 @@ if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
     
   );
 };
-export default BrandListingController;
 
+export default BrandListingController;
