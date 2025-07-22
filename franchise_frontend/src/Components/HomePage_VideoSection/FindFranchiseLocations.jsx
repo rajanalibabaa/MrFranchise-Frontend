@@ -48,7 +48,9 @@ import { handleShortList } from "../../Api/shortListApi";
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
-  desktop: { width: 327, height: 500 },
+ smallDesktop: { width: 280, height: 500 },
+  desktop: { width: 267, height: 480 },
+  largeDesktop: { width: 327, height: 500 },
 };
 
 const cardVariants = {
@@ -121,17 +123,17 @@ const BrandCard = React.memo(
       };
     }, []);
 
-     const [shortListed, setShortListed] = useState(brand.isShortListed)
-              const handleToggleShortList = async (brand) => {
-                 try {
-                   const response = await handleShortList(brand);
-                   if (response.success) {
-                     setShortListed(!shortListed);
-                   }
-                 } catch (error) {
-                   console.error("Error toggling shortlist:", error);
-                 }
-               };
+    const [shortListed, setShortListed] = useState(brand.isShortListed);
+    const handleToggleShortList = async (brand) => {
+      try {
+        const response = await handleShortList(brand);
+        if (response.success) {
+          setShortListed(!shortListed);
+        }
+      } catch (error) {
+        console.error("Error toggling shortlist:", error);
+      }
+    };
 
     return (
       <motion.div
@@ -208,41 +210,6 @@ const BrandCard = React.memo(
                 </Typography>
               </Box>
             )}
-            {/* <Chip 
-            label={displayState} 
-            size="small"
-            sx={{ 
-              position: "absolute", 
-              top: 12, 
-              left: 12, 
-              backgroundColor: "rgba(0,0,0,0.7)", 
-              color: "white", 
-              fontWeight: 600 
-            }} 
-          /> */}
-            {/* <IconButton
-              onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
-              disabled={likeProcessing[brand.uuid]}
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                backgroundColor: "rgba(255,255,255,0.8)",
-                "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.9)",
-                },
-              }}
-            >
-              {likeProcessing[brand.uuid] ? (
-                <CircularProgress size={24} />
-              ) : (
-                <Favorite
-                  sx={{
-                    color: brand.isLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
-                  }}
-                />
-              )}
-            </IconButton> */}
           </Box>
 
           {/* Content Section */}
@@ -258,33 +225,29 @@ const BrandCard = React.memo(
                   justifyContent: "space-between",
                 }}
               >
-                  <Box
-                                                                                          component="img"
-                                                                                          src={brand?.uploads?.brandLogo?.[0]}
-                                                                                          alt={brand.uploads?.brandName}
-                                                                                          loading="lazy"
-                                                                                          sx={{
-                                                                                            width: 100,
-                                                                                            height: 50,
-                                                                                            border: '1px solid #f29724',
-                                                                                      
-                                                                                            objectFit: 'contain',  
-                                                                                          }}
-                                                                                        />
-                                 <IconButton
-                                     onClick={() => handleToggleShortList(brand)}
-                                      sx={{
-                                       color: shortListed
-                                         ? "#7ef400ff"
-                                         : "rgba(0, 0, 0, 0.23)",
-                                     }}
-                                   >
-                                     <Tooltip title={'ShortList'}
-                                       
-                                     ><PlaylistAddCheckCircleOutlined
-                                    
-                                     /></Tooltip>
-                                   </IconButton>
+                <Box
+                  component="img"
+                  src={brand?.uploads?.brandLogo?.[0]}
+                  alt={brand.uploads?.brandName}
+                  loading="lazy"
+                  sx={{
+                    width: 100,
+                    height: 50,
+                    border: "1px solid #f29724",
+
+                    objectFit: "contain",
+                  }}
+                />
+                <IconButton
+                  onClick={() => handleToggleShortList(brand)}
+                  sx={{
+                    color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                  }}
+                >
+                  <Tooltip title={"ShortList"}>
+                    <PlaylistAddCheckCircleOutlined />
+                  </Tooltip>
+                </IconButton>
                 <IconButton
                   onClick={() => handleLikeClick(brandId, brand?.isLiked)}
                   disabled={likeProcessing[brandId]}
@@ -302,32 +265,33 @@ const BrandCard = React.memo(
                   )}
                 </IconButton>
               </Box>
- <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Tooltip title={brandName} placement="top">
-                    <Typography
-                                    variant="body1"
-                                    fontWeight={800}
-                                    sx={{
-                                      whiteSpace: "nowrap",
-                                      overflow: "hidden",
-                                      textOverflow: "ellipsis",
-                                      flex: 1,
-                                      mb:1
-                                    }}
-                                  >
-                      {brandName}
-                    </Typography>
-                  </Tooltip>
-
-                  
-                </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Tooltip title={brandName} placement="top">
+                  <Typography
+                    variant="body1"
+                    fontWeight={800}
+                    sx={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      flex: 1,
+                      mb: 1,
+                    }}
+                  >
+                    {brandName}
+                  </Typography>
+                </Tooltip>
+              </Box>
               {/* Categories */}
               {category.child && (
                 <Box sx={{ mb: 2 }}>
-                  <Stack direction="row" spacing={1} 
-                   justifyContent="space-between" 
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    justifyContent="space-between"
                     alignItems="center"
-                  sx={{ flexWrap: "wrap" }}>
+                    sx={{ flexWrap: "wrap" }}
+                  >
                     <Chip
                       label={category.child}
                       size="small"
@@ -338,7 +302,6 @@ const BrandCard = React.memo(
                         mb: 1,
                       }}
                     />
-                     
                   </Stack>
                 </Box>
               )}
@@ -422,7 +385,10 @@ const BrandCard = React.memo(
 const TopInvestVdo2 = React.memo(() => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("sm","md"));
+  const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
+  const isDesktop = useMediaQuery(theme.breakpoints.between("lg", "xl"));
+  const isLargeDesktop = useMediaQuery(theme.breakpoints.up("xl"));
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const scrollRequestRef = useRef(null);
@@ -465,11 +431,22 @@ const TopInvestVdo2 = React.memo(() => {
     });
   }, [brands, selectedState]);
 
-  const dimensions = useMemo(() => {
-    if (isMobile) return CARD_DIMENSIONS.mobile;
+ const dimensions = useMemo(() => {
+     if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
-    return CARD_DIMENSIONS.desktop;
-  }, [isMobile, isTablet]);
+    if (isSmallDesktop) return CARD_DIMENSIONS.smallDesktop;
+    if (isDesktop) return CARD_DIMENSIONS.desktop;
+    return CARD_DIMENSIONS.largeDesktop;
+  }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
+
+  useEffect(() => {
+    const updateVisibleCards = () => {
+    };
+
+    updateVisibleCards();
+    window.addEventListener("resize", updateVisibleCards);
+    return () => window.removeEventListener("resize", updateVisibleCards);
+  }, [dimensions.width, isMobile]);
 
   const handleLikeClick = useCallback(
     (brandId, isLiked) => {
@@ -629,7 +606,7 @@ const TopInvestVdo2 = React.memo(() => {
         <Typography
           variant={isMobile ? "h6" : "h5"}
           fontWeight="bold"
-          sx={{ 
+          sx={{
             color: "black",
             position: "relative",
             "&:after": {
@@ -645,8 +622,8 @@ const TopInvestVdo2 = React.memo(() => {
         >
           Franchise Opportunities in {selectedState}
         </Typography>
-        
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <FormControl sx={{ minWidth: isMobile ? "100%" : 200 }} size="small">
             <InputLabel id="state-filter-label">Filter by State</InputLabel>
             <Select
@@ -662,7 +639,7 @@ const TopInvestVdo2 = React.memo(() => {
               ))}
             </Select>
           </FormControl>
-          
+
           <Button
             variant="text"
             size="small"
@@ -677,7 +654,7 @@ const TopInvestVdo2 = React.memo(() => {
               },
             }}
             onClick={() => {
-              window.open('/brandviewpage', '_blank');            
+              window.open("/brandviewpage", "_blank");
             }}
           >
             View More
@@ -685,56 +662,56 @@ const TopInvestVdo2 = React.memo(() => {
         </Box>
       </Box>
 
-      <Box sx={{ position: 'relative', px: isMobile ? 2 : 0 }}>
+      <Box sx={{ position: "relative", px: isMobile ? 2 : 0 }}>
         {/* Previous button */}
         {showStartShadow && (
           <Button
             variant="contained"
             onClick={handlePrevClick}
             sx={{
-              position: 'absolute',
+              position: "absolute",
               left: isMobile ? 4 : -12,
               top: `calc(50% + ${isMobile ? 20 : 40}px)`,
-              transform: 'translateY(-50%)',
+              transform: "translateY(-50%)",
               zIndex: 2,
-              minWidth: '36px',
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
+              minWidth: "36px",
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
               padding: 0,
-              backgroundColor: 'rgba(111, 255, 0, 0.98)',
-              color: 'white',
+              backgroundColor: "rgba(111, 255, 0, 0.98)",
+              color: "white",
               boxShadow: theme.shadows[4],
-              '&:hover': {
-                backgroundColor: '#7ad03a',
+              "&:hover": {
+                backgroundColor: "#7ad03a",
               },
             }}
           >
             &lt;
           </Button>
         )}
-        
+
         {/* Next button */}
         {showEndShadow && (
           <Button
             variant="contained"
             onClick={handleNextClick}
             sx={{
-              position: 'absolute',
+              position: "absolute",
               right: isMobile ? 4 : -12,
               top: `calc(50% + ${isMobile ? 20 : 40}px)`,
-              transform: 'translateY(-50%)',
+              transform: "translateY(-50%)",
               zIndex: 2,
-              minWidth: '36px',
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
+              minWidth: "36px",
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
               padding: 0,
-              backgroundColor: 'rgba(111, 255, 0, 0.98)',
-              color: 'white',
+              backgroundColor: "rgba(111, 255, 0, 0.98)",
+              color: "white",
               boxShadow: theme.shadows[4],
-              '&:hover': {
-                backgroundColor: '#7ad03a',
+              "&:hover": {
+                backgroundColor: "#7ad03a",
               },
             }}
           >
@@ -748,49 +725,49 @@ const TopInvestVdo2 = React.memo(() => {
           animate="animate"
           ref={scrollContainerRef}
           sx={{
-                display: "flex",
-                gap: isMobile ? 2 : 3,
-                borderRadius: 3,
-                p: 2,
-                overflowX: "auto",
-                perspective: "1000px",
-                // Custom attractive scrollbar design
-                '&::-webkit-scrollbar': {
-                  height: isMobile ? '10px' : '8px',
-                  backgroundColor: 'transparent',
-                },
-                '&::-webkit-scrollbar-track': {
-                  background: 'linear-gradient(90deg, transparent, rgba(242, 151, 36, 0.1), transparent)',
-                  borderRadius: '10px',
-                  marginX: isMobile ? 0 : '10%',
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  background: 'linear-gradient(90deg, #f29724, #98dd2e)',
-                  borderRadius: '10px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                  border: '2px solid white',
-                  backgroundSize: '200%',
-                  transition: 'background-position 0.3s ease',
-                  '&:hover': {
-                    backgroundPosition: 'right center',
-                  },
-                },
-                // Firefox scrollbar
-                scrollbarColor: `transparent`,
-                scrollbarWidth: 'thin',
-                // Extra bottom padding for mobile
-                paddingBottom: isMobile ? '24px' : '16px',
-              }}
-         
+            display: "flex",
+            gap: isMobile ? 2 : 3,
+            borderRadius: 3,
+            p: 2,
+            overflowX: "auto",
+            perspective: "1000px",
+            // Custom attractive scrollbar design
+            "&::-webkit-scrollbar": {
+              height: isMobile ? "10px" : "8px",
+              backgroundColor: "transparent",
+            },
+            "&::-webkit-scrollbar-track": {
+              background:
+                "linear-gradient(90deg, transparent, rgba(242, 151, 36, 0.1), transparent)",
+              borderRadius: "10px",
+              marginX: isMobile ? 0 : "10%",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: "linear-gradient(90deg, #f29724, #98dd2e)",
+              borderRadius: "10px",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+              border: "2px solid white",
+              backgroundSize: "200%",
+              transition: "background-position 0.3s ease",
+              "&:hover": {
+                backgroundPosition: "right center",
+              },
+            },
+            // Firefox scrollbar
+            scrollbarColor: `transparent`,
+            scrollbarWidth: "thin",
+            // Extra bottom padding for mobile
+            paddingBottom: isMobile ? "24px" : "16px",
+          }}
         >
           {filteredBrands.map((brand) => (
             <motion.div
               key={brand.uuid}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.03,
                 zIndex: 10,
                 // boxShadow: theme.shadows[6],
-                transition: { duration: 0.3 }
+                transition: { duration: 0.3 },
               }}
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, y: 20 }}
@@ -826,4 +803,3 @@ const TopInvestVdo2 = React.memo(() => {
 });
 
 export default React.memo(TopInvestVdo2);
-

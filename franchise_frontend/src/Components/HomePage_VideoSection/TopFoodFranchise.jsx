@@ -37,9 +37,10 @@ import { useBrands, useToggleLike, openBrandDialog } from "../../Hooks/Fetchbran
 import { showLoading } from "../../Redux/Slices/loadingSlice";
 import { handleShortList } from "../../Api/shortListApi";
 
+
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
-  tablet: { width: 320, height: 560 },
+  tablet: { width: 320, height: 560 }, 
   desktop: { width: 327, height: 500 },
 };
 

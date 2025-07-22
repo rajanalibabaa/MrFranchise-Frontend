@@ -465,7 +465,7 @@ function TopBrandVdoCards() {
                       direction={{ xs: "row" }}
                       alignItems={{ xs: "flex-start", sm: "center" }}
                       spacing={5}
-                      sx={{ flex: 1, minWidth: 0 }}
+                      sx={{ flex: 1, minWidth: 0,mt:0 }}
                     >
                       <Stack direction="column" spacing={1}>
                         <Fact
