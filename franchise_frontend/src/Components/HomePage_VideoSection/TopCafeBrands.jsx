@@ -20,7 +20,7 @@ import {
   Divider,
   Avatar,
   Stack,
-  Tooltip
+  Tooltip,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import Favorite from "@mui/icons-material/Favorite";
@@ -32,15 +32,22 @@ import AreaChart from "@mui/icons-material/AreaChart";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 import { postView } from "../../Utils/function/view";
-import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import {
+  useBrands,
+  useToggleLike,
+  openBrandDialog,
+} from "../../Hooks/Fetchbrands";
 import { showLoading } from "../../Redux/Slices/loadingSlice";
 import { useDispatch } from "react-redux";
 import { handleShortList } from "../../Api/shortListApi";
+import { shuffleArray } from "./ShuffleData";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
-  desktop: { width: 327, height: 500 },
+  smallDesktop: { width: 280, height: 500 },
+  desktop: { width: 267, height: 480 },
+  largeDesktop: { width: 327, height: 500 },
 };
 
 const cardVariants = {
@@ -69,17 +76,17 @@ const BrandCard = React.memo(
     const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
     const brandLogo = brand?.uploads?.brandLogo?.[0] || "";
     const brandName = brand?.brandDetails?.brandName || "Brand";
-    const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
+    const mediaHeight = dimensions.height * 0.4; // 40% of card height
 
     const {
       investmentRange = "Not specified",
       areaRequired = "Not specified",
-      franchiseType = "N/A",
+      // franchiseType = "N/A",
       franchiseModel: modelType = "N/A",
-      franchiseFee = "N/A",
-      royaltyFee = "N/A",
-      roi = "N/A",
-      payBackPeriod = "N/A",
+      // franchiseFee = "N/A",
+      // royaltyFee = "N/A",
+      // roi = "N/A",
+      // payBackPeriod = "N/A",
     } = franchiseModel;
 
     useEffect(() => {
@@ -104,17 +111,17 @@ const BrandCard = React.memo(
       };
     }, []);
 
-       const [shortListed, setShortListed] = useState(brand.isShortListed)
-        const handleToggleShortList = async (brand) => {
-           try {
-             const response = await handleShortList(brand);
-             if (response.success) {
-               setShortListed(!shortListed);
-             }
-           } catch (error) {
-             console.error("Error toggling shortlist:", error);
-           }
-         };
+    const [shortListed, setShortListed] = useState(brand.isShortListed);
+    const handleToggleShortList = async (brand) => {
+      try {
+        const response = await handleShortList(brand);
+        if (response.success) {
+          setShortListed(!shortListed);
+        }
+      } catch (error) {
+        console.error("Error toggling shortlist:", error);
+      }
+    };
     return (
       <motion.div
         key={brandId}
@@ -207,15 +214,15 @@ const BrandCard = React.memo(
                   }}
                 />
                 <Typography
-                                variant="body2"
-                                fontWeight={600}
-                                sx={{
-                                  whiteSpace: "nowrap",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  flex: 1,
-                                }}
-                              >
+                  variant="body2"
+                  fontWeight={600}
+                  sx={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    flex: 1,
+                  }}
+                >
                   {brandName}
                 </Typography>
                 <IconButton
@@ -241,8 +248,8 @@ const BrandCard = React.memo(
                   <Stack
                     direction="row"
                     spacing={3}
-                    justifyContent="space-between" 
-                    alignItems="center" 
+                    justifyContent="space-between"
+                    alignItems="center"
                   >
                     <Chip
                       label={category.child}
@@ -257,17 +264,15 @@ const BrandCard = React.memo(
 
                     <IconButton
                       onClick={() => handleToggleShortList(brand)}
-                       sx={{
+                      sx={{
                         color: shortListed
                           ? "#7ef400ff"
                           : "rgba(0, 0, 0, 0.23)",
                       }}
                     >
-                      <Tooltip title={'ShortList'}
-                        
-                      ><PlaylistAddCheckCircleOutlined
-                     
-                      /></Tooltip>
+                      <Tooltip title={"ShortList"}>
+                        <PlaylistAddCheckCircleOutlined />
+                      </Tooltip>
                     </IconButton>
                   </Stack>
                 </Box>
@@ -350,7 +355,11 @@ const BrandCard = React.memo(
 const TopCafeFranchises = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
+  const isDesktop = useMediaQuery(theme.breakpoints.between("lg", "xl"));
+  const isLargeDesktop = useMediaQuery(theme.breakpoints.up("xl"));
+
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const scrollRequestRef = useRef(null);
@@ -359,6 +368,7 @@ const TopCafeFranchises = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
+  const [shuffledBrands, setShuffledBrands] = useState([]);
 
   // REACT-QUERY HOOKS
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
@@ -383,11 +393,36 @@ const TopCafeFranchises = () => {
     return filtered;
   }, [brands]);
 
+  // NEW: Initialize and shuffle brands only on component mount (page load)
+  useEffect(() => {
+    if (coffeeTeaBrands.length > 0) {
+      setShuffledBrands(shuffleArray(coffeeTeaBrands));
+    }
+  }, [coffeeTeaBrands]); // only runs when cofeeteabrands changes
+
   const dimensions = useMemo(() => {
-    if (isMobile) return CARD_DIMENSIONS.mobile;
+     if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
-    return CARD_DIMENSIONS.desktop;
-  }, [isMobile, isTablet]);
+    if (isSmallDesktop) return CARD_DIMENSIONS.smallDesktop;
+    if (isDesktop) return CARD_DIMENSIONS.desktop;
+    return CARD_DIMENSIONS.largeDesktop;
+  }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
+
+  // Calculate visible cards based on container width
+  useEffect(() => {
+    const updateVisibleCards = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
+        const count = Math.floor(containerWidth / cardWidthWithGap);
+        setVisibleCardCount(Math.max(1, Math.min(count, 6)));
+      }
+    };
+
+    updateVisibleCards();
+    window.addEventListener("resize", updateVisibleCards);
+    return () => window.removeEventListener("resize", updateVisibleCards);
+  }, [dimensions.width, isMobile]);
 
   const handleLikeClick = useCallback(
     (brandId, isLiked) => {
@@ -526,21 +561,21 @@ const TopCafeFranchises = () => {
   }
 
   // Only show if we have brands
-  const shouldShow = coffeeTeaBrands.length > 0;
+  const shouldShow = shuffledBrands.length > 0;
 
   return (
     <>
       {shouldShow && (
         <Box
+        ref ={containerRef}
           sx={{
             py: isMobile ? 1 : 2,
             px: isMobile ? 0 : 2,
-            maxWidth: isMobile ? "100%" : 1400,
+            maxWidth: "100%",
             mx: "auto",
             mb: isMobile ? 0 : 2,
             position: "relative",
           }}
-          ref={containerRef}
         >
           <Box
             sx={{
@@ -588,7 +623,7 @@ const TopCafeFranchises = () => {
                 },
               }}
               onClick={async () => {
-                window.open('/brandviewpage', '_blank')
+                window.open("/brandviewpage", "_blank");
               }}
             >
               View More
@@ -604,7 +639,7 @@ const TopCafeFranchises = () => {
                 sx={{
                   position: "absolute",
                   left: isMobile ? 4 : -12,
-                  top: `calc(50% + ${isMobile ? 20 : 40}px)`,
+                  top: `calc(50% + ${dimensions.height / 4}px)`,
                   transform: "translateY(-50%)",
                   zIndex: 2,
                   minWidth: "36px",
@@ -632,7 +667,7 @@ const TopCafeFranchises = () => {
                 sx={{
                   position: "absolute",
                   right: isMobile ? 4 : -12,
-                  top: `calc(50% + ${isMobile ? 20 : 40}px)`,
+                  top: `calc(50% + ${dimensions.height / 4}px)`,
                   transform: "translateY(-50%)",
                   zIndex: 2,
                   minWidth: "36px",
@@ -668,7 +703,7 @@ const TopCafeFranchises = () => {
                 perspective: "1000px",
               }}
             >
-              {coffeeTeaBrands.map((brand) => (
+              {shuffledBrands.map((brand) => (
                 <motion.div
                   key={brand?.uuid}
                   whileHover={{

@@ -560,7 +560,7 @@ const BrandCard = React.memo(({
   
   return (
     <>
-      {id && brands.length > 0 &&(
+      {id && brands.length > 4 &&(
         <Box
           sx={{
             py: isMobile ? 1 : 2,

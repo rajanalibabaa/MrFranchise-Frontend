@@ -36,6 +36,7 @@ import { postView } from "../../Utils/function/view";
 import { useBrands, useToggleLike, openBrandDialog } from "../../Hooks/Fetchbrands";
 import { showLoading } from "../../Redux/Slices/loadingSlice";
 import { handleShortList } from "../../Api/shortListApi";
+import { shuffleArray } from "./ShuffleData";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -81,12 +82,12 @@ const BrandCard = React.memo(
     const {
       investmentRange = "Not specified",
       areaRequired = "Not specified",
-      franchiseType = "N/A",
+      // franchiseType = "N/A",
       franchiseModel: modelType = "N/A",
-      franchiseFee = "N/A",
-      royaltyFee = "N/A",
-      roi = "N/A",
-      payBackPeriod = "N/A",
+      // franchiseFee = "N/A",
+      // royaltyFee = "N/A",
+      // roi = "N/A",
+      // payBackPeriod = "N/A",
     } = franchiseModel;
 
     useEffect(() => {
@@ -390,13 +391,20 @@ const TopFoodFranchises = () => {
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
   const toggleLike = useToggleLike();
 
-  // Filter food franchises
+  // Filter and shuffle food franchises
   const foodBrands = useMemo(() => {
-    return brands.filter((brand) => {
+    const filtered = brands.filter((brand) => {
       const category = brand.franchiseDetails?.brandCategories || {};
       return category.sub === "Food Franchises";
     });
+    
+    // Shuffle the filtered brands only on initial load (page refresh)
+    const shuffledBrands = shuffleArray(filtered);
+    
+    // Add the first few brands at the end to create infinite loop effect
+    return [...shuffledBrands, ...shuffledBrands.slice(0, 4)];
   }, [brands]);
+
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -542,7 +550,7 @@ const TopFoodFranchises = () => {
   }
 
   // Only show if we have brands
-  const shouldShow = foodBrands.length > 0;
+  const shouldShow = foodBrands.length > 4;
 
   return (
     <>

@@ -32,6 +32,9 @@ import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { handleShortList } from "../../Api/shortListApi";
+import { shuffleArray } from "./ShuffleData";
+
+
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
@@ -75,7 +78,7 @@ const BrandCard = React.memo(({
   const {
     investmentRange = "Not specified",
     areaRequired = "Not specified",
-    franchiseType = "N/A",
+    // franchiseType = "N/A",
     franchiseModel: modelType = "N/A",
     // franchiseFee = "N/A",
     // royaltyFee = "N/A",
@@ -394,6 +397,7 @@ const TopBeverageFranchises = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
+  const [shuffledBrands, setShuffledBrands] = useState([]);
   
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -409,10 +413,17 @@ const TopBeverageFranchises = () => {
         category.main === "Food & Beverages"
       );
     });
+
+    // Only shuffle if we haven't already shuffled (to maintain shuffle on re-renders)
+    if (shuffledBrands.length === 0 && filtered.length > 0) {
+      const shuffled = shuffleArray(filtered);
+      setShuffledBrands(shuffled);
+      return [...shuffled, ...shuffled.slice(0, 4)]; // Add duplicates for infinite loop
+    }
     
     // Add the first few brands at the end to create infinite loop effect
     return [...filtered, ...filtered.slice(0, 4)];
-  }, [brands]);
+  }, [brands, shuffledBrands]);
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -545,25 +556,7 @@ const TopBeverageFranchises = () => {
     }
   }, [beverageBrands.length, dimensions.width, getScrollDistance, isMobile, smoothScrollTo]);
 
-  /*
-  // Commented out auto-scroll functionality
-  const startAutoScroll = useCallback(() => {
-    if (scrollIntervalRef.current) {
-      clearInterval(scrollIntervalRef.current);
-    }
-
-    scrollIntervalRef.current = setInterval(() => {
-      if (isPaused.current || !scrollContainerRef.current) return;
-
-      const container = scrollContainerRef.current;
-      const scrollDistance = getScrollDistance() / 2; // Scroll 2 cards at a time (half of 4)
-      const newScrollLeft = container.scrollLeft + scrollDistance;
-      
-      smoothScrollTo(newScrollLeft);
-    }, 5000); // Scroll every 5 seconds
-  }, [getScrollDistance, smoothScrollTo]);
-  */
-
+ 
   // Easing function for smooth scrolling
   const easeInOutQuad = (t) => {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
@@ -585,12 +578,7 @@ const TopBeverageFranchises = () => {
       container.addEventListener('scroll', handleScroll);
       handleScroll();
       
-      /*
-      // Commented out auto-scroll initialization
-      if (beverageBrands.length > 0) {
-        startAutoScroll();
-      }
-      */
+      
     }
     
     return () => {
