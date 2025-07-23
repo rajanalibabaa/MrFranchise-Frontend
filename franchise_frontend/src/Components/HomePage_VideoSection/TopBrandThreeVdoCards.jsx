@@ -398,6 +398,7 @@ function TopBrandVdoCards() {
                       sx={{ minWidth: 0, flex: 1 }}
                     >
                       <Avatar
+                                                  onClick={() => handleApply(mainBrand)}
                         src={mainBrand.uploads?.brandLogo?.[0]}
                         alt={mainBrand.brandDetails?.brandName}
                         sx={{
@@ -405,9 +406,9 @@ function TopBrandVdoCards() {
                           height: 50,
                           border: `2px solid ${theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00"}`,
                           boxShadow: theme.shadows[2],
+                          cursor: "pointer",
                         }}
                       />
-
                       <Box sx={{ minWidth: 0, flex: 1 }}>
                        <Box display="flex" alignItems="center"> 
                         <Typography
@@ -452,6 +453,7 @@ function TopBrandVdoCards() {
                           overflow="hidden"
                           textOverflow="ellipsis"
                           color="text.secondary"
+
                         >
                           {mainBrand.franchiseDetails?.brandCategories
                             ? `${mainBrand.franchiseDetails.brandCategories.child}`
@@ -485,7 +487,7 @@ function TopBrandVdoCards() {
                             variant="contained"
                             onClick={() => handleApply(mainBrand)}
                             sx={{
-                              // px: 3,
+                              mx:"auto",
                               fontWeight: 600,
                               textTransform: "none",
                               color: "#fff",

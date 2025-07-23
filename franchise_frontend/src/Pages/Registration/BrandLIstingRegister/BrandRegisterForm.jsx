@@ -437,13 +437,12 @@ const dispatch = useDispatch();
             severity: "success",
           });
 
-          // Reset form after successful submission
           localStorage.removeItem(FORM_DATA_KEY);
           localStorage.removeItem(FORM_STEP_KEY);
           setFormData(initialFormData);
           setActiveStep(0);
           setTimeout(() => {
-            navigate("/");
+            navigate("/advertisewithus");
           }, 1500);
         }
       } catch (error) {

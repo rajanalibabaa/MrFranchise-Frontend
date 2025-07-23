@@ -194,15 +194,20 @@ const BrandCard = React.memo(({
                 justifyContent: "space-between",
               }}
             >
-              <Avatar
-                src={brand?.uploads?.brandLogo?.[0]}
-                sx={{
-                  width: 50,
-                  height: 50,
-                  border: "1px solid #eee",
-                  flexShrink: 0,
-                }}
-              />
+              <Box
+                              onClick={()=>handleApply(brand)}
+                                component="img"
+                                src={brand?.uploads?.brandLogo?.[0]}
+                                alt={brand.uploads?.brandName}
+                                loading="lazy"
+                                sx={{
+                                  width: 100,
+                                  height: 50,
+                                  border: "1px solid #f29724",
+              cursor:'pointer',
+                                  objectFit: "contain",
+                                }}
+                              />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Tooltip title={brandName} placement="top">
                   <Typography

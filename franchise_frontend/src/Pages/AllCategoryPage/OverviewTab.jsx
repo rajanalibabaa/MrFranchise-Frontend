@@ -105,18 +105,14 @@ const [hasHoveredOnce, setHasHoveredOnce] = useState(false);
       if (scrollInterval) clearInterval(scrollInterval);
       scrollInterval = setInterval(() => {
         if (!container) return;
-        // scroll by 1px every 10ms
         container.scrollLeft += 1;
-        // if reached end, go back to start
-
          if (container.scrollLeft >= container.scrollWidth / 2) {
           container.scrollLeft = 0;
         }
-      }, 10); // adjust speed
+      }, 10);
     };
 
     if (!isUserScrolling) startAutoScroll();
-
     return () => {
       if (scrollInterval) {
         clearInterval(scrollInterval);
@@ -1210,6 +1206,8 @@ stopScroll();
 
   //     );
   //   };
+
+
 
   const hasData = (sectionData) => {
     if (Array.isArray(sectionData)) {

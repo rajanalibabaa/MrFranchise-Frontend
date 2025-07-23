@@ -225,29 +225,34 @@ const BrandCard = React.memo(
                   justifyContent: "space-between",
                 }}
               >
-                <Box
-                  component="img"
-                  src={brand?.uploads?.brandLogo?.[0]}
-                  alt={brand.uploads?.brandName}
-                  loading="lazy"
-                  sx={{
-                    width: 100,
-                    height: 50,
-                    border: "1px solid #f29724",
-
-                    objectFit: "contain",
-                  }}
-                />
-                <IconButton
-                  onClick={() => handleToggleShortList(brand)}
-                  sx={{
-                    color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
-                  }}
-                >
-                  <Tooltip title={"ShortList"}>
-                    <PlaylistAddCheckCircleOutlined />
-                  </Tooltip>
-                </IconButton>
+                  <Box
+                                  onClick={() => handleApply(brand)}
+                                                                                          component="img"
+                                                                                          src={brand?.uploads?.brandLogo?.[0]}
+                                                                                          alt={brand.uploads?.brandName}
+                                                                                          loading="lazy"
+                                                                                          sx={{
+                                                                                            width: 100,
+                                                                                            height: 50,
+                                                                                            border: '1px solid #f29724',
+                                                                                      cursor: 'pointer',
+                                                                                            objectFit: 'contain',  
+                                                                                          }}
+                                                                                        />
+                                 <IconButton
+                                     onClick={() => handleToggleShortList(brand)}
+                                      sx={{
+                                       color: shortListed
+                                         ? "#7ef400ff"
+                                         : "rgba(0, 0, 0, 0.23)",
+                                     }}
+                                   >
+                                     <Tooltip title={'ShortList'}
+                                       
+                                     ><PlaylistAddCheckCircleOutlined
+                                    
+                                     /></Tooltip>
+                                   </IconButton>
                 <IconButton
                   onClick={() => handleLikeClick(brandId, brand?.isLiked)}
                   disabled={likeProcessing[brandId]}
