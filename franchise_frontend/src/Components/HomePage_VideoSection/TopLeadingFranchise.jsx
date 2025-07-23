@@ -195,6 +195,7 @@ const BrandCard = React.memo(({
                 justifyContent: "space-between",
               }}
             > <Box
+                            onClick={() => handleApply(brand)}
                             component="img"
                             src={brand?.uploads?.brandLogo?.[0]}
                             alt={brand.uploads?.brandName}
@@ -204,7 +205,8 @@ const BrandCard = React.memo(({
                               height: 50,
                               border: '1px solid #f29724',
                               // mb: 0.5,
-                              objectFit: 'contain',  
+                              objectFit: 'contain', 
+                              cursor: 'pointer' 
                             }}
                           />
               {/* <Avatar

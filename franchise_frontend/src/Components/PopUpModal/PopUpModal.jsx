@@ -183,13 +183,19 @@ const PopupModal = ({ open, onClose }) => {
           </IconButton>
 
           {/* Image with lazy loading and placeholder */}
-          <Box sx={{ position: 'relative' }}>
+          <Box sx={{ position: 'relative',overflow: 'hidden',width: '100%',height:'auto' }}>
             <img 
               src={pop1} 
               alt="Franchise opportunities" 
-              style={styles.image}
+              style={{
+                width: '100%',
+      height: 'auto',
+      display: 'block',
+                objectFit: 'cover',
+               }}
               loading="lazy"
               decoding="async"
+
             />
             {!imageLoaded && (
               <Box 

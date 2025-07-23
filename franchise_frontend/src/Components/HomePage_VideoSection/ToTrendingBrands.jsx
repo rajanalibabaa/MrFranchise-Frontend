@@ -145,6 +145,7 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
         {/* Brand Logo */}
 
 <Box
+                onClick={() => handleApply(brand)}
   component="img"
   src={brand.uploads?.brandLogo}
   alt={brand.uploads?.brandName}
@@ -154,6 +155,7 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
     height: 80,
     border: '1px solid #f29724',
     mb: 1,
+    cursor: 'pointer',
     objectFit: 'contain',  // or 'cover'
   }}
 />
