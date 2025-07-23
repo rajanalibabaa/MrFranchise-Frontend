@@ -169,8 +169,8 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            width: '100%', // Take full width of card
-            px: 0.5 // Add small padding
+            width: '100%',
+            px: 0.5,
           }}
         >
           {brand.brandDetails?.brandName}

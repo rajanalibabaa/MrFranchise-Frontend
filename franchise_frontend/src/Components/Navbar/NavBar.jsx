@@ -165,8 +165,11 @@ function Navbar() {
     dispatch(toggleMenu(false));
   };
   const handleLogoClick = () => {
+    if (location.pathname === '/') {
+    window.location.reload();
+  } else {
     dispatch(showLoading());
-      navigate("/");
+      navigate("/");}
   };
 
   // Animation variants

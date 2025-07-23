@@ -105,32 +105,34 @@ const OverviewTab = ({ brand }) => {
       if (scrollInterval) clearInterval(scrollInterval);
       scrollInterval = setInterval(() => {
         if (!container) return;
-        // scroll by 1px every 10ms
         container.scrollLeft += 1;
-        // if reached end, go back to start
-
          if (container.scrollLeft >= container.scrollWidth / 2) {
           container.scrollLeft = 0;
         }
-      }, 10); // adjust speed
+      }, 10);
     };
 
     if (!isUserScrolling) startAutoScroll();
-
     return () => {
       if (scrollInterval) {
         clearInterval(scrollInterval);
       }
     };
   }, [isMobile, isUserScrolling]);
-
+const [hasHoveredOnce, setHasHoveredOnce] = useState(false);
+const handleMouseEnter = () => {
+  if (!hasHoveredOnce) {
+    setHasHoveredOnce(true);
+    startScroll(); 
+  }
+};
   const handleUserScrollStart = () => {
     setIsUserScrolling(true);
   };
 
   const handleUserScrollEnd = () => {
-    // restart auto-scroll after short delay
-    setTimeout(() => setIsUserScrolling(false), 100);
+   
+   stopScroll();
   };
 
   const tableRows = brand.franchiseDetails?.fico?.map((model, index) => (
@@ -1202,6 +1204,8 @@ const OverviewTab = ({ brand }) => {
   //     );
   //   };
 
+
+
   const hasData = (sectionData) => {
     if (Array.isArray(sectionData)) {
       return sectionData.length > 0;
@@ -1238,7 +1242,7 @@ const OverviewTab = ({ brand }) => {
         onMouseEnter={handleUserScrollStart}
         onMouseLeave={handleUserScrollEnd}
       >
-        <Box sx={{ display: "flex" }}>
+        <Box sx={{ display: "flex" }}  onMouseEnter={handleMouseEnter}>
           {/* render original table */}
           <Table
             stickyHeader

@@ -407,7 +407,6 @@ function TopBrandVdoCards() {
                           boxShadow: theme.shadows[2],
                         }}
                       />
-
                       <Box sx={{ minWidth: 0, flex: 1 }}>
                        <Box display="flex" alignItems="center"> 
                         <Typography
@@ -452,6 +451,7 @@ function TopBrandVdoCards() {
                           overflow="hidden"
                           textOverflow="ellipsis"
                           color="text.secondary"
+
                         >
                           {mainBrand.franchiseDetails?.brandCategories
                             ? `${mainBrand.franchiseDetails.brandCategories.child}`
@@ -465,7 +465,7 @@ function TopBrandVdoCards() {
                       direction={{ xs: "row" }}
                       alignItems={{ xs: "flex-start", sm: "center" }}
                       spacing={5}
-                      sx={{ flex: 1, minWidth: 0 }}
+                      sx={{ flex: 1, minWidth: 0}}
                     >
                       <Stack direction="column" spacing={1}>
                         <Fact
@@ -485,7 +485,8 @@ function TopBrandVdoCards() {
                             variant="contained"
                             onClick={() => handleApply(mainBrand)}
                             sx={{
-                              // px: 3,
+                              // mt:2,
+                              mx:"auto",
                               fontWeight: 600,
                               textTransform: "none",
                               color: "#fff",
