@@ -7,9 +7,11 @@ import {
   Button,
   useTheme,
   useMediaQuery,
-  Dialog
+  Dialog,
+  Container,
+  CircularProgress
 } from "@mui/material";
-
+import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice.jsx";
 import businessLogo from "../../assets/images/Business_logo.png";
 import FacebookIcon from "../../Assets/Images/FacebookIcon.png";
 // import LinkedInIcon from "../../Assets/Images/LinkedinIcon.png";
@@ -18,16 +20,24 @@ import FacebookIcon from "../../Assets/Images/FacebookIcon.png";
 import GoogleIcon from "../../Assets/Images/GoogleIcon.png";
 import LoginPage from "../../Pages/LoginPage/LoginPage"
 import Footer from "../../Components/Footers/Footer";
-import Navbar from "../../Components/Navbar/NavBar";
+import { useDispatch } from "react-redux";
+import Navbar from "../../Components/Navbar/NavBar.jsx";
+// import { showLoading , hideLoading} from "../../Redux/Slices/loadingSlice";
 
-function RegisterHandleUser() {
+function RegisterHandleUser({boolean = true}) {
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [loginOpen, setLoginOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
 
   const openLoginPopup = () => {
+    setIsSubmitting(true);
     setLoginOpen(true);
   };
 
@@ -36,16 +46,20 @@ function RegisterHandleUser() {
   };
 
   const handleNavigation = (path) => {
+    setIsSubmitting(true);
     navigate(path);
   };
   const handleSocialLogin = (provider) => {
-    window.location.href = `https://franchise-backend-wgp6.onrender.com/api/v1/auth/${provider}`;
+    setIsSubmitting(true);
+    window.location.href = `https://mrfranchisebackend.mrfranchise.in/auth/${provider}`;
   };
 
   return (
     <>
     <Navbar/>
+    {/* {boolean && <Navbar/>} */}
     <Box
+    mt={isMobile ? 0 : 0}
       sx={{
         height: "100vh",
         overflow: "hidden",
@@ -112,7 +126,13 @@ function RegisterHandleUser() {
 
         <Button
           variant="contained"
-          onClick={() => handleNavigation("/investor-register")}
+          onClick={() => 
+          {   dispatch(showLoading())
+            handleNavigation("/investor-register")
+            setTimeout(() => {
+              dispatch(hideLoading());
+            },  2000);
+          }}
           sx={{
             mb: 2,
             bgcolor: "#7ad03a",
@@ -123,12 +143,22 @@ function RegisterHandleUser() {
             maxWidth: 250,
           }}
         >
-          Investor Register
+          {isLoading && activeButton === "investor" ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Investor Registration"
+                )}
         </Button>
 
         <Button
           variant="contained"
-          onClick={() => handleNavigation("/brandlistingform")}
+          onClick={() =>
+           { dispatch(showLoading());
+            handleNavigation("/brandlistingform");
+            setTimeout(() => {
+              dispatch(hideLoading());
+            }, 2000);
+          }}
           sx={{
             mb: 2,
             bgcolor: "#e99830",
@@ -139,7 +169,11 @@ function RegisterHandleUser() {
             maxWidth: 250,
           }}
         >
-          Brand Register
+          {isLoading && activeButton === "brand" ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Brand Registration"
+                )}
         </Button>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
@@ -173,7 +207,13 @@ function RegisterHandleUser() {
         loading="lazy"
         src={GoogleIcon}
         alt="Google"
-        onClick={() => handleSocialLogin("google")}
+        onClick={() => 
+        { dispatch(showLoading())
+          handleSocialLogin("google")
+          setTimeout(() => {
+            dispatch(hideLoading());
+          }, 2000);
+        }}
         sx={{
           width: 32,
           height: 32,
@@ -187,13 +227,19 @@ function RegisterHandleUser() {
     </Grid>
 
     {/* Facebook Icon */}
-    <Grid item>
+    {/* <Grid item>
       <Box
         component="img"
         loading="lazy"
         src={FacebookIcon}
         alt="Facebook"
-        onClick={() => handleSocialLogin("facebook")}
+        onClick={() => 
+        { dispatch(showLoading())
+          handleSocialLogin("facebook")
+          setTimeout(() => {
+            dispatch(hideLoading());
+          }, 2000);
+        } }
         sx={{
           width: 32,
           height: 32,
@@ -204,7 +250,7 @@ function RegisterHandleUser() {
           },
         }}
       />
-    </Grid>
+    </Grid> */}
   </Grid>
   {/* Login Popup Dialog */}
       <Dialog open={loginOpen} onClose={closeLoginPopup} maxWidth="sm" fullWidth>
@@ -213,7 +259,8 @@ function RegisterHandleUser() {
 </Box>
       </Grid>
     </Box>
-    <Footer/>
+    {/* <Footer/> */}
+    {boolean && <Footer/>}
     </>
     
   );

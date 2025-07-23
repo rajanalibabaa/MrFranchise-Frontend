@@ -1,332 +1,522 @@
 import React, { useState } from 'react';
 import {
-  Box,
-  Typography,
-  List,
-  ListItemButton,
-  ListItemText,
-  Collapse,
-  Divider,
-  Paper,
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-  Rating,
+  Box, Typography, Paper, Button, FormControl, InputLabel,
+  Select, MenuItem, TextField, Rating, Avatar,
+  IconButton, Chip, useMediaQuery, useTheme, Snackbar, Alert
 } from "@mui/material";
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import StarIcon from '@mui/icons-material/Star';
+import Star from '@mui/icons-material/Star';
+import StarBorder from '@mui/icons-material/StarBorder';
+import Email from '@mui/icons-material/Email';
+import Feedback from '@mui/icons-material/Feedback';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import   Report from '@mui/icons-material/Report';
+import { alpha } from '@mui/material/styles';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { styled } from '@mui/material/styles';
 
-const labels = {
-  0.5: 'Useless',
-  1: 'Useless+',
-  1.5: 'Poor',
-  2: 'Poor+',
-  2.5: 'Ok',
-  3: 'Ok+',
-  3.5: 'Good',
-  4: 'Good+',
-  4.5: 'Excellent',
-  5: 'Excellent+',
+// Color Palette
+const colors = {
+  pistachio: '#93C572',
+  lightOrange: '#FFB347',
+  white: '#FFFFFF',
+  black: '#2C2C2C',
+  lightGray: '#F5F5F5',
+  darkGray: '#555555'
 };
 
-function getLabelText(value) {
-  return `${value} Star${value !== 1 ? 's' : ''}, ${labels[value]}`;
-}
+// Styled Components
+const DashboardContainer = styled(Box)(({ theme }) => ({
+  minHeight: '100vh',
+  backgroundColor: colors.lightGray,
+  [theme.breakpoints.up('md')]: {
+    padding: theme.spacing(2)
+  }
+}));
 
-const FeedBack = () => {
-  const [value, setValue] = useState(2);
-  const [hover, setHover] = useState(-1);
-  const [selectedTopic, setSelectedTopic] = useState('');
-  const [feedbackText, setFeedbackText] = useState('');
+const DashboardCard = styled(Paper)(({ theme }) => ({
+  borderRadius: '12px',
+  overflow: 'hidden',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+  backgroundColor: colors.white,
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 6px 16px rgba(0,0,0,0.12)'
+  }
+}));
+
+const PrimaryButton = styled(Button)(({ theme }) => ({
+  backgroundColor: colors.pistachio,
+  color: colors.white,
+  fontWeight: 600,
+  padding: '8px 16px',
+  borderRadius: '8px',
+  fontSize: '0.875rem',
+  '&:hover': {
+    backgroundColor: '#7DA95D',
+    boxShadow: '0 2px 8px rgba(147, 197, 114, 0.3)'
+  }
+}));
+
+const SecondaryButton = styled(Button)(({ theme }) => ({
+  backgroundColor: colors.lightOrange,
+  color: colors.white,
+  fontWeight: 600,
+  borderRadius: '8px',
+  fontSize: '0.875rem',
+  '&:hover': {
+    backgroundColor: '#E69F42',
+    boxShadow: '0 2px 8px rgba(255, 179, 71, 0.3)'
+  }
+}));
+
+const SectionHeader = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(2),
+  backgroundColor: colors.pistachio,
+  color: colors.white
+}));
+
+// Rating Component
+const CustomRating = ({ value, onChange }) => (
+  <Rating
+    value={value}
+    precision={0.5}
+    onChange={onChange}
+    icon={<Star fontSize="inherit" style={{ color: colors.lightOrange }} />}
+    emptyIcon={<StarBorder fontSize="inherit" style={{ color: colors.darkGray }} />}
+  />
+);
+
+// Feedback Form Component
+const FeedbackForm = ({ showSnackbar, isMobile }) => {
+  const [rating, setRating] = useState(3);
+  const [category, setCategory] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { investorUUID, AccessToken } = useSelector((state) => state.auth || {});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const formattedData = {
-      topic: selectedTopic,
-      rating: value,
-      feedback: feedbackText,
-    };
+    setIsSubmitting(true);
+    
+    if (!investorUUID || !AccessToken) {
+      showSnackbar("Please login to submit feedback", "error");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/feedback/createFeedback",
-        formattedData,
-        { headers: { "Content-Type": "application/json" } }
+        `https://mrfranchisebackend.mrfranchise.in/feedback/createFeedback/${investorUUID}`,
+        { topic: category, rating, feedback },
+        { headers: { "Content-Type": "application/json", Authorization: `Bearer ${AccessToken}` } }
       );
-      console.log("Feedback submitted:", response.data);
-      setFeedbackText('');
-      setSelectedTopic('');
-      setValue(2);
-      alert('Feedback submitted successfully!');
+      showSnackbar(response.data.message || "Feedback submitted!", "success");
+      setCategory('');
+      setFeedback('');
+      setRating(3);
     } catch (error) {
-      console.error("Submission error:", error);
-      alert('Failed to submit feedback.');
+      showSnackbar(error.response?.data?.message || "Submission failed", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Paper elevation={4} sx={{ p: 4, maxWidth: 700, mx: "auto", borderRadius: 3, backgroundColor: "#ffffff" }}>
-        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center", color: "#ffa000" }}>
-          Submit Your Feedback
-        </Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 4 }}>
-          <Rating
-            name="hover-feedback"
-            value={value}
-            precision={0.5}
-            getLabelText={getLabelText}
-            onChange={(event, newValue) => setValue(newValue)}
-            onChangeActive={(event, newHover) => setHover(newHover)}
-            size="large"
-            emptyIcon={<StarIcon style={{ opacity: 0.4 }} fontSize="inherit" />}
-          />
-          <Box sx={{ ml: 2, minWidth: 80, textAlign: "center" }}>
-            <Typography variant="body2" color="text.secondary">
-              {labels[hover !== -1 ? hover : value]}
-            </Typography>
-          </Box>
+    <DashboardCard>
+      <SectionHeader>
+        <Avatar sx={{ bgcolor: colors.white, color: colors.pistachio, mr: 1, width: 32, height: 32 }}>
+          <Feedback fontSize="small" />
+        </Avatar>
+        <Typography variant={isMobile ? "body2" : "subtitle1"} fontWeight="600">Share Your Feedback</Typography>
+      </SectionHeader>
+      
+      <Box p={2}>
+        <Box textAlign="center" mb={2}>
+          <Typography variant={isMobile ? "caption" : "body2"} color={colors.darkGray} mb={1}>
+            How would you rate your experience?
+          </Typography>
+          <CustomRating value={rating} onChange={(e, newValue) => setRating(newValue)} />
         </Box>
 
-        <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 3 }} onSubmit={handleSubmit}>
-          <FormControl required fullWidth size="medium">
-            <InputLabel id="topic-label">Topic</InputLabel>
+        <form onSubmit={handleSubmit}>
+          <FormControl fullWidth sx={{ mb: 2 }} size="small">
+            <InputLabel sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>Category</InputLabel>
             <Select
-              labelId="topic-label"
-              id="topic-select"
-              value={selectedTopic}
-              label="Topic"
-              onChange={(e) => setSelectedTopic(e.target.value)}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              label="Category"
+              required
+              sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}
             >
-              <MenuItem value="Service Quality">Service Quality</MenuItem>
-              <MenuItem value="Support Team">Support Team</MenuItem>
-              <MenuItem value="Platform UI">Platform UI</MenuItem>
-              <MenuItem value="Response Time">Response Time</MenuItem>
-              <MenuItem value="Pricing">Pricing</MenuItem>
-              <MenuItem value="Other">Other</MenuItem>
+              {["Service", "Platform", "Support", "Other"].map(item => (
+                <MenuItem key={item} value={item} sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>{item}</MenuItem>
+              ))}
             </Select>
           </FormControl>
 
           <TextField
-            required
-            label="Feedback"
-            placeholder="Share your thoughts..."
-            variant="outlined"
+            label="Your Feedback"
             multiline
-            rows={5}
-            fullWidth
-            size="medium"
-            value={feedbackText}
-            onChange={(e) => setFeedbackText(e.target.value)}
-          />
-
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{ alignSelf: "flex-end", borderRadius: 2, px: 4, backgroundColor: "#558b2f" }}
-          >
-            Submit Your Feedback
-          </Button>
-        </Box>
-      </Paper>
-    </Box>
-  );
-};
-
-const ComplaintContent = () => {
-  const [selectedTopic, setSelectedTopic] = useState('');
-  const [complaintText, setComplaintText] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const formattedData = {
-      topic: selectedTopic,
-      complaint: complaintText,
-    };
-
-    try {
-      const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/complaint/createComplaint",
-        formattedData,
-        { headers: { "Content-Type": "application/json" } }
-      );
-      console.log("Complaint submitted:", response.data);
-      alert("Complaint submitted successfully!");
-      setSelectedTopic('');
-      setComplaintText('');
-    } catch (error) {
-      console.error("Submission error:", error);
-      alert("Failed to submit complaint.");
-    }
-  };
-
-  return (
-    <Box sx={{ mt: 4, px: 2 }}>
-      <Paper elevation={4} sx={{ p: 4, maxWidth: 700, mx: "auto", borderRadius: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3, textAlign: "center", color: "#ffa000" }}>
-          Submit a Complaint
-        </Typography>
-
-        <Box
-          component="form"
-          sx={{ display: "flex", flexDirection: "column", gap: 3 }}
-          onSubmit={handleSubmit}
-        >
-          <FormControl required fullWidth size="small">
-            <InputLabel id="complaint-topic-label">Topic</InputLabel>
-            <Select
-              labelId="complaint-topic-label"
-              id="complaint-topic"
-              value={selectedTopic}
-              label="Topic"
-              onChange={(e) => setSelectedTopic(e.target.value)}
-            >
-              <MenuItem value="Service Issue">Service Issue</MenuItem>
-              <MenuItem value="Technical Bug">Technical Bug</MenuItem>
-              <MenuItem value="Payment Problem">Payment Problem</MenuItem>
-              <MenuItem value="Slow Response">Slow Response</MenuItem>
-              <MenuItem value="Other">Other</MenuItem>
-            </Select>
-          </FormControl>
-
-          <TextField
-            required
-            label="Complaint"
-            placeholder="Describe your issue"
-            variant="outlined"
-            multiline
-            rows={5}
+            rows={4}
             fullWidth
             size="small"
-            value={complaintText}
-            onChange={(e) => setComplaintText(e.target.value)}
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            sx={{ mb: 2, '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.875rem' } }}
+            InputLabelProps={{ style: { fontSize: isMobile ? '0.75rem' : '0.875rem' } }}
+            required
           />
 
-          <Box sx={{ textAlign: "right" }}>
-            <Button type="submit" variant="contained" color="primary" sx={{ backgroundColor: "#558b2f" }}>
-              Submit Your Complaint
-            </Button>
+          <Box display="flex" justifyContent="flex-end">
+            <PrimaryButton 
+              type="submit" 
+              disabled={isSubmitting}
+              startIcon={<CheckCircle fontSize="small" />}
+              sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+            </PrimaryButton>
           </Box>
-        </Box>
-      </Paper>
-    </Box>
-  );
-};
-
-const ContactUs = () => {
-  return (
-    <Box sx={{ mt: 4, px: 2 }}>
-      <Paper elevation={4} sx={{ p: 4, maxWidth: 700, mx: "auto", borderRadius: 3 }}>
-        <Typography variant="body1" sx={{ textAlign: "center" }}>
-  You can reach us by email at{' '}
- 
-  <a
-    href="https://mail.google.com/mail/?view=cm&fs=1&to=mrfranchisc22@gmail.com"
-    target="_blank"
-    rel="noopener noreferrer"
-    style={{ color: "#1976d2", textDecoration: "underline" }}
-  >
-    mrfranchisc22@gmail.com
-  </a>
-</Typography>
-
-      </Paper>
-    </Box>
-  );
-};
-
-const data = {
-  Category: ["Contact Us", "Feedback", "Complaint"],
-};
-
-const ResponseManager = () => {
-  const [openCategory, setOpenCategory] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null);
-
-  const handleToggle = (category) => {
-    setOpenCategory(prev => (prev === category ? null : category));
-    setSelectedItem(null);
-  };
-
-  const renderContent = (item) => {
-    if (item === "Feedback") return <FeedBack />;
-    if (item === "Complaint") return <ComplaintContent />;
-    if (item === "Contact Us") return <ContactUs />;
-    return null;
-  };
-
-  return (
-    <Box>
-      <Typography
-        variant="h6"
-        fontWeight={600}
-        mb={2}
-        sx={{
-          textAlign: "center",
-          color: "#fafafa",
-          backgroundColor: "#689f38",
-          padding: "10px",
-          borderRadius: "5px",
-        }}
-      >
-        Response Manager
-      </Typography>
-
-      <Box
-        sx={{
-          display: 'flex',
-          border: '1px solid #ddd',
-          borderRadius: 2,
-          maxHeight: 600,
-          overflow: 'hidden',
-        }}
-      >
-        {/* Sidebar */}
-        <Box sx={{ width: 250, borderRight: '1px solid #ccc', overflowY: 'auto' }}>
-          <List disablePadding>
-            <ListItemButton onClick={() => handleToggle("Category")}>
-              <ListItemText primary="Category" />
-              {openCategory === "Category" ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
-
-            <Collapse in={openCategory === "Category"} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                {data.Category.map((item, index) => (
-                  <ListItemButton
-                    key={index}
-                    sx={{ pl: 4 }}
-                    selected={selectedItem === item}
-                    onClick={() => setSelectedItem(item)}
-                  >
-                    <ListItemText primary={item} />
-                  </ListItemButton>
-                ))}
-              </List>
-            </Collapse>
-          </List>
-        </Box>
-
-        {/* Right Side Content */}
-        <Box sx={{ flexGrow: 1, p: 2, overflowY: 'auto' }}>
-          {selectedItem ? renderContent(selectedItem) : (
-            <Typography sx={{ textAlign: 'center', mt: 1,backgroundColor:"#e2faa7",color:"#f29724" }} color="text.secondary">
-              Select a category to view its content.
-            </Typography>
-          )}
-        </Box>
+        </form>
       </Box>
-    </Box>
+    </DashboardCard>
   );
 };
 
+// Complaint Form Component
+const ComplaintForm = ({ showSnackbar, isMobile }) => {
+  const [category, setCategory] = useState('');
+  const [complaint, setComplaint] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { investorUUID, AccessToken } = useSelector((state) => state.auth || {});
 
-export default ResponseManager;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    if (!investorUUID || !AccessToken) {
+      showSnackbar("Please login to submit a complaint", "error");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `https://mrfranchisebackend.mrfranchise.in/complaint/createComplaint/${investorUUID}`,
+        { topic: category, complaint },
+        { headers: { "Content-Type": "application/json", Authorization: `Bearer ${AccessToken}` } }
+      );
+      showSnackbar(response.data.message || "Complaint submitted!", "success");
+      setCategory('');
+      setComplaint('');
+    } catch (error) {
+      showSnackbar(error.response?.data?.message || "Submission failed", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <DashboardCard>
+      <SectionHeader sx={{ backgroundColor: colors.lightOrange }}>
+        <Avatar sx={{ bgcolor: colors.white, color: colors.lightOrange, mr: 1, width: 32, height: 32 }}>
+          <Report fontSize="small" />
+        </Avatar>
+        <Typography variant={isMobile ? "body2" : "subtitle1"} fontWeight="600">File a Complaint</Typography>
+      </SectionHeader>
+      
+      <Box p={2}>
+        <form onSubmit={handleSubmit}>
+          <FormControl fullWidth sx={{ mb: 2 }} size="small">
+            <InputLabel sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>Issue Type</InputLabel>
+            <Select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              label="Issue Type"
+              required
+              sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}
+            >
+              {["Technical", "Billing", "Service", "Other"].map(item => (
+                <MenuItem key={item} value={item} sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>{item}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <TextField
+            label="Detailed Complaint"
+            multiline
+            rows={4}
+            fullWidth
+            size="small"
+            value={complaint}
+            onChange={(e) => setComplaint(e.target.value)}
+            sx={{ mb: 2, '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.875rem' } }}
+            InputLabelProps={{ style: { fontSize: isMobile ? '0.75rem' : '0.875rem' } }}
+            required
+          />
+
+          <Box display="flex" justifyContent="flex-end">
+            <SecondaryButton 
+              type="submit" 
+              disabled={isSubmitting}
+              startIcon={<Report fontSize="small" />}
+              sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
+            </SecondaryButton>
+          </Box>
+        </form>
+      </Box>
+    </DashboardCard>
+  );
+};
+
+// Contact Us Component
+const ContactUs = ({ isMobile }) => (
+  <DashboardCard>
+    <SectionHeader>
+      <Avatar sx={{ bgcolor: colors.white, color: colors.pistachio, mr: 1, width: 32, height: 32 }}>
+        <Email fontSize="small" />
+      </Avatar>
+      <Typography variant={isMobile ? "body2" : "subtitle1"} fontWeight="600">Contact Our Team</Typography>
+    </SectionHeader>
+    
+    <Box p={2} textAlign="center">
+      <Typography variant={isMobile ? "caption" : "body2"} color={colors.darkGray} mb={2}>
+        Have questions? Reach out to our support team directly.
+      </Typography>
+      
+      <Chip
+        icon={<Email fontSize="small" />}
+        label="support@mrfranchise.com"
+        component="a"
+        href="https://mail.google.com/mail/?view=cm&fs=1&to=support@mrfranchise.com&su=Support%20Request&body=Hi%20Team%2C%20I%20have%20a%20question..."
+        target="_blank"
+        rel="noopener noreferrer"
+        clickable
+        sx={{
+          p: 1,
+          fontSize: isMobile ? '0.75rem' : '0.875rem',
+          backgroundColor: colors.pistachio,
+          color: colors.white,
+          '&:hover': {
+            backgroundColor: '#7DA95D'
+          }
+        }}
+      />
+
+      <Typography variant="caption" color={colors.darkGray} mt={1} display="block" fontSize={isMobile ? '0.65rem' : '0.75rem'}>
+        We typically respond within 24 hours.
+      </Typography>
+    </Box>
+  </DashboardCard>
+);
+
+// Main Dashboard Component
+const ResponseManagerDashboard = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [activeTab, setActiveTab] = useState('feedback');
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity
+    });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const tabs = [
+    { 
+      id: 'feedback', 
+      label: 'Feedback', 
+      icon: <Feedback fontSize="small" />, 
+      component: <FeedbackForm showSnackbar={showSnackbar} isMobile={isMobile} /> 
+    },
+    { 
+      id: 'complaint', 
+      label: 'Complaint', 
+      icon: <Report fontSize="small" />, 
+      component: <ComplaintForm showSnackbar={showSnackbar} isMobile={isMobile} /> 
+    },
+    { 
+      id: 'contact', 
+      label: 'Contact Us', 
+      icon: <Email fontSize="small" />, 
+      component: <ContactUs isMobile={isMobile} /> 
+    }
+  ];
+
+  return (
+    <>
+      <DashboardContainer>
+        {isMobile ? (
+          <Box sx={{p:1,borderRadius:'88px'}}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                textAlign: 'center',
+                backgroundColor: colors.pistachio,
+                color: colors.white,
+                p: 1,
+                fontSize: '0.75rem',
+                letterSpacing: 0.5,
+                
+              }}
+            >
+              Support Center
+            </Typography>
+
+            {/* Compact Mobile Tab Bar */}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              p={0.5}
+              bgcolor={colors.white}
+              // boxShadow={2}
+              sx={{
+                borderBottom: `1px solid ${alpha(colors.darkGray, 0.2)}`,
+                position: 'sticky',
+                top: 0,
+                zIndex: 10
+              }}
+            >
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+
+                return (
+                  <Button
+                    key={tab.id}
+                    fullWidth
+                    onClick={() => setActiveTab(tab.id)}
+                    disableRipple
+                    sx={{
+                      mx: 0.25,
+                      py: 0.5,
+                      borderRadius: '6px',
+                      backgroundColor: isActive ? '#5C8542' : 'transparent',
+                      color: isActive ? colors.white : colors.darkGray,
+                      boxShadow: isActive ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
+                      transition: 'all 0.2s ease-in-out',
+                      minWidth: 0
+                    }}
+                    startIcon={React.cloneElement(tab.icon, {
+                      sx: {
+                        fontSize: '8px',
+                        color: isActive ? colors.white : colors.darkGray
+                      }
+                    })}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: '0.5rem',
+                        fontWeight: 500,
+                        textTransform: 'none'
+                      }}
+                    >
+                      {tab.label}
+                    </Typography>
+                  </Button>
+                );
+              })}
+            </Box>
+
+            {/* Active Tab Content */}
+            <Box p={1}>
+              {tabs.find((t) => t.id === activeTab)?.component}
+            </Box>
+          </Box>
+        ) : (
+          // Desktop View
+          <Box display="flex" maxWidth={1000} mx="auto">
+            {/* Sidebar */}
+            <Box width={200} mr={2}>
+              <DashboardCard>
+                <SectionHeader>
+                  <Typography variant="subtitle1" fontWeight="600">Support Center</Typography>
+                </SectionHeader>
+                
+                <Box p={1}>
+                  {tabs.map(tab => (
+                    <Box 
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        p: 1.5,
+                        mb: 0.5,
+                        borderRadius: '6px',
+                        backgroundColor: activeTab === tab.id ? alpha(colors.pistachio, 0.4) : 'transparent',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: activeTab === tab.id ? alpha(colors.pistachio, 0.5) : alpha(colors.pistachio, 0.1)
+                        }
+                      }}
+                    >
+                      <Avatar sx={{ 
+                        bgcolor: activeTab === tab.id ? alpha(colors.pistachio, 0.8) : colors.lightGray,
+                        color: activeTab === tab.id ? colors.white : colors.darkGray,
+                        mr: 1.5,
+                        width: 30,
+                        height: 30
+                      }}>
+                        {tab.icon}
+                      </Avatar>
+                      <Typography variant="body2" fontWeight={activeTab === tab.id ? 700 : 400}>
+                        {tab.label}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </DashboardCard>
+            </Box>
+            
+            {/* Main Content */}
+            <Box flex={1}>
+              {tabs.find(t => t.id === activeTab)?.component}
+            </Box>
+          </Box>
+        )}
+      </DashboardContainer>
+
+      {/* Global Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={2000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          <Typography variant="body2" sx={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>
+            {snackbar.message}
+          </Typography>
+        </Alert>
+      </Snackbar>
+    </>
+  );
+};
+
+export default ResponseManagerDashboard;

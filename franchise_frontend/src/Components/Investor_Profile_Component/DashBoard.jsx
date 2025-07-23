@@ -1,759 +1,659 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback, memo } from "react";
 import {
   Box,
   Typography,
   Avatar,
-  Tabs,
-  Tab,
   Card,
   CardContent,
   CardMedia,
   Grid,
   Button,
+  IconButton,
+  CircularProgress
 } from "@mui/material";
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import { useTheme, useMediaQuery } from '@mui/material';
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import PersonIcon from "@mui/icons-material/Person";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import {
+  Favorite,
+  Visibility,
+  AssignmentTurnedIn,
+  Close,
+  Business
+} from "@mui/icons-material";
+import { useMediaQuery, useTheme } from '@mui/material';
 import axios from "axios";
-import { useSelector,useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import img from "../../assets/images/brandLogo.jpg";
-import { openBrandDialog } from  "../../Redux/Slices/brandSlice.jsx"
-import BrandDetailsDialog from "../../Pages/AllCategoryPage/BrandDetailsDialog.jsx";
+import { api } from "../../Api/api";
+import { openBrandDialog } from "../../Hooks/Fetchbrands";
 
-const DashBoard = ({ selectedSection, sectionContent }) => {
+// Memoized StatCard component to prevent unnecessary re-renders
+const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
+  const theme = useTheme();
+  const isSm = useMediaQuery(theme.breakpoints.up('sm'));
 
-  const dispatch = useDispatch()
-     const theme = useTheme();
+  return (
+    <Card
+      onClick={onClick}
+      sx={{
+        width: '100%',
+        maxWidth: { xs: '100%', sm: 240, md: 260 },
+        minHeight: { xs: 40, sm: 72 },
+        borderRadius: 2,
+        px: { xs: 1, sm: 1.5 },
+        py: 0,
+        display: 'flex',
+        alignItems: 'center',
+        gap: { xs: 1, sm: 1.5 },
+        bgcolor: isSelected ? `rgba(${color}, 0.25)` : `rgba(${color}, 0.05)`,
+        border: '1px solid',
+        borderColor: isSelected ? `rgba(${color}, 0.5)` : `rgba(${color}, 0.1)`,
+        transition: 'all 0.2s ease-out',
+        boxShadow: isSelected ? `0 4px 16px -2px rgba(${color}, 0.4)` : 'none',
+        cursor: 'pointer',
+        position: 'relative',
+        overflow: 'hidden',
+        '&:hover': {
+          transform: { xs: 'none', sm: 'translateY(-2px)' },
+          boxShadow: isSelected 
+            ? `0 4px 16px -2px rgba(${color}, 0.4)`
+            : { xs: 'none', sm: `0 4px 12px -2px rgba(${color}, 0.15)` },
+          bgcolor: isSelected 
+            ? `rgba(${color}, 0.25)`
+            : { xs: `rgba(${color}, 0.05)`, sm: `rgba(${color}, 0.08)` },
+          '& .stat-icon': {
+            transform: { xs: 'none', sm: 'scale(1.05)' }
+          }
+        },
+        '@media (hover: none)': {
+          '&:active': {
+            bgcolor: `rgba(${color}, 0.1)`
+          }
+        }
+      }}
+    >
+      <Box
+        className="stat-icon"
+        sx={{
+          flexShrink: 0,
+          p: { sm: 1 },
+          borderRadius: '50%',
+          bgcolor: isSelected ? `rgba(${color}, 0.3)` : `rgba(${color}, 0.1)`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'transform 0.2s ease-out',
+          boxShadow: `inset 0 0 0 1px rgba(${color}, ${isSelected ? '0.4' : '0.15'})`,
+          '& > svg': {
+            fontSize: { xs: '13px', sm: '15px', md: '22px' }
+          },
+          flexDirection: { xs: 'column', sm: 'row' },
+        }}
+      >
+        {React.cloneElement(icon, {
+          sx: {
+            color: isSelected ? `rgba(${color}, 1)` : `rgb(${color})`,
+            fontSize: { xs: '16px', sm: '10px', md: '22px' },
+            transition: 'color 0.2s ease-out'
+          }
+        })}
+      </Box>
+
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-end', sm: 'center' },
+          justifyContent: 'end',
+          gap: { xs: 0.5, sm: 1 }
+        }}
+      >
+        {isSm && (
+          <Typography
+            variant="body2"
+            noWrap
+            sx={{
+              fontWeight: isSelected ? 600 : 500,
+              fontSize: { xs: '0.7rem', sm: '0.8125rem' },
+              color: isSelected ? `rgba(${color}, 0.9)` : 'text.secondary',
+              lineHeight: 1.3,
+              transition: 'all 0.2s ease-out'
+            }}
+          >
+            {title}
+          </Typography>
+        )}
+
+        <Typography
+          variant="h6"
+          noWrap
+          sx={{
+            fontWeight: isSelected ? 700 : 600,
+            fontSize: { xs: '0.6rem', sm: '1rem', md: '1.125rem' },
+            lineHeight: 1.2,
+            background: isSelected 
+              ? `linear-gradient(75deg, rgba(${color}, 1) 0%, rgba(${color}, 0.8) 100%)`
+              : `linear-gradient(75deg, rgb(${color}) 0%, rgba(${color}, 0.9) 100%)`,
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            color: 'transparent',
+            '@media (hover: hover)': {
+              textShadow: isSelected 
+                ? `0 0 8px rgba(${color}, 0.4)`
+                : `0 0 6px rgba(${color}, 0.2)`
+            },
+            transition: 'all 0.2s ease-out'
+          }}
+        >
+          {value}
+        </Typography>
+      </Box>
+    </Card>
+  );
+});
+
+// Memoized BrandCard component
+const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, onToggleViewClose }) => {
+  if (!item || typeof item !== 'object') return null;
+  
+  const brandId = item.uuid;
+  const isLiked = likedStates[brandId];
+  const brandName = item.brandDetails?.brandName || "Unnamed Brand";
+  const brandLogo = item.uploads?.brandLogo?.[0] || img;
+
+  console.log('===',isLiked);
+  
+  return (
+    <Box sx={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
+      <Card sx={{
+        width: '200px',
+        height: '100%',
+        display: "flex",
+        flexDirection: "column",
+        borderRadius: 3,
+        overflow: 'hidden',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+        border: '1px solid rgba(0,0,0,0.05)',
+        '&:hover': {
+          transform: 'translateY(-5px)',
+          boxShadow: '0 8px 25px rgba(255,107,0,0.15)',
+          borderColor: 'rgba(255,107,0,0.2)'
+        }
+      }}>
+        <Box sx={{ 
+          position: 'relative',
+          height: 140,
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '40%',
+            zIndex: 1
+          }
+        }}>
+          <CardMedia
+            component="img"
+            loading="lazy"
+            height="140"
+            image={brandLogo}
+            alt={brandName}
+            sx={{ 
+              objectFit: 'cover',
+              width: '100%',
+              height: '100%',
+              transition: 'transform 0.3s ease',
+              '&:hover': {
+                transform: 'scale(1.05)'
+              }
+            }}
+          />
+          
+          <Box sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            display: 'flex',
+            gap: 1,
+            zIndex: 2
+          }}>
+            {type === 'viewed' && (
+              <IconButton
+                size="small"
+                sx={{
+                  backgroundColor: 'rgba(255,255,255,0.9)',
+                  p: 0.5,
+                  '&:hover': { 
+                    backgroundColor: '#fff',
+                    transform: 'scale(1.1)',
+                    color: '#ff6d00'
+                  },
+                  transition: 'all 0.2s ease'
+                }}
+                onClick={() => onToggleViewClose(brandId)}
+              >
+                <Close fontSize="small" />
+              </IconButton>
+            )}
+            
+            {type === 'liked' && (
+              <IconButton
+                size="small"
+                sx={{
+                  backgroundColor: 'rgba(255,255,255,0.9)',
+                  p: 0.5,
+                  '&:hover': { 
+                    backgroundColor: '#fff',
+                    transform: 'scale(1.1)'
+                  },
+                  transition: 'all 0.2s ease'
+                }}
+                onClick={() => onToggleLike(brandId)}
+              >
+                <Favorite 
+                  fontSize="small" 
+                  sx={{ 
+                    fontSize: '1rem',
+                    color: isLiked ? '#ff3d00' : 'rgba(0,0,0,0.3)',
+                    transition: 'all 0.3s ease'
+                  }} 
+                />
+              </IconButton>
+            )}
+          </Box>
+        </Box>
+
+        <CardContent sx={{ 
+          flex: '1 1 auto',
+          p: 2.5,
+          display: 'flex',
+          flexDirection: 'column',
+          bgcolor: 'background.paper'
+        }}>
+          <Box sx={{ 
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            mb: 1.5
+          }}>
+            <Typography variant="caption" color="text.secondary">
+              {brandName}
+            </Typography>
+          </Box>
+        </CardContent>
+
+        <Box sx={{ 
+          p: 2,
+          pt: 0,
+          textAlign: 'center'
+        }}>
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={() => onViewDetails(item)}
+            sx={{
+              borderRadius: 2,
+              py: 1,
+              fontSize: '0.8rem',
+              textTransform: 'none',
+              fontWeight: 600,
+              letterSpacing: 0.5,
+              background: 'linear-gradient(135deg, #ff6d00 0%, #ff9100 100%)',
+              boxShadow: '0 2px 10px rgba(255,109,0,0.3)',
+              color: 'white',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #ff8500 0%, #ffa000 100%)',
+                boxShadow: '0 4px 14px rgba(255,109,0,0.4)',
+                transform: 'translateY(-1px)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            Explore Brand
+          </Button>
+        </Box>
+      </Card>
+    </Box>
+  );
+});
+
+const Dashboard = () => {
+  const theme = useTheme();
+  const isSm = useMediaQuery(theme.breakpoints.up('sm'));
+  const dispatch = useDispatch();
   const [tabValue, setTabValue] = useState(0);
-  const [investorInfo, setInvestorInfo] = useState(null);
   const [viewedBrands, setViewedBrands] = useState([]);
   const [likedBrands, setLikedBrands] = useState([]);
   const [appliedBrands, setAppliedBrands] = useState([]);
   const [likedStates, setLikedStates] = useState({});
-  const [showMore, setShowMore] = useState({});
-  const [removeMsg, setremoveMsg] = useState("");
-  const [viewStatus, setviewStatus] = useState({});
+  const [removeMsg, setRemoveMsg] = useState("");
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
-
-  useEffect(() => {
-    const fetchInvestor = async () => {
-      if (!investorUUID || !AccessToken) return;
-      try {
-        const response = await axios.get(
-          `https://franchise-backend-wgp6.onrender.com/api/v1/like/get-favbrands/${investorUUID}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${AccessToken}`,
-            },
-          }
-        );
-
-        const data = response?.data?.data || [];
-        setInvestorInfo(data);
-
-        setLikedBrands(data);
-
-        // console.log(" ==== :",data.length)
-
-        // Initialize likedStates
-        const initialLiked = {};
-        data.forEach((item, idx) => {
-          const id = item.brandDetails?.brandId || item._id || item.id || idx;
-          initialLiked[id] = true;
-        });
-        setLikedStates(initialLiked);
-      } catch (error) {
-        console.error("API Error:", error);
-      }
-    };
-     const fetchViewed = async () => {
-      if (!investorUUID || !AccessToken) return;
-      try {
-        const response = await axios.get(
-          `http://localhost:5000/api/v1/view/getAllViewBrands/${investorUUID}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${AccessToken}`,
-            },
-          }
-        );
-
-        const data = response?.data?.data || [];
-        setviewStatus(data);
-
-        setviewStatus(data);
-
-        // console.log(" ==== :",data.length)
-
-        // Initialize likedStates
-        const initialLiked = {};
-        data.forEach((item, idx) => {
-          const id = item.brandDetails?.brandId || item._id || item.id || idx;
-          initialLiked[id] = true;
-        });
-        setLikedStates(initialLiked);
-      } catch (error) {
-        console.error("API Error:", error);
-      }
-    };
-
-    fetchViewed();
-
-    fetchInvestor();
-  }, [investorUUID, AccessToken]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-//   console.log(" ========== :",isMobile)
+  console.log('likedBrands',likedBrands);
+  console.log('likedStates',likedStates);
   
+  // Memoized stats calculation
+  const stats = useMemo(() => ({
+    totalViews: viewedBrands.length,
+    totalLikes: likedBrands.length,
+    totalApplications: appliedBrands.length
+  }), [viewedBrands, likedBrands, appliedBrands]);
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
+  // Data fetching optimized with useCallback
+  const fetchData = useCallback(async () => {
+    if (!investorUUID || !AccessToken) {
+      setError("Go to home page ...");
+      setLoading(false);
+      return;
+    }
 
-  const toggleLike = async (brandID) => {
-  try {
-    // Optimistically update like state
-    setLikedStates((prev) => ({ ...prev, [brandID]: !prev[brandID] }));
-
-    
-    setTimeout(() => {
-        setLikedBrands((prev) => prev.filter((item) => item.uuid !== brandID));
-    }, 1000);
-
-    // Call delete API
-    const response = await axios.delete(
-      `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${investorUUID}`,
-      {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const config = {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${AccessToken}`,
         },
-        data: { brandID }, // Pass brandID correctly in request body
-      }
-    );
+        timeout: 10000
+      };
 
-    // Show success message
-    if (response.status === 200) {
-      setremoveMsg("Brand removed successfully.");
-    } else {
-      setremoveMsg("Failed to remove brand.");
+      // Parallel requests with Promise.all
+      const [likedRes, viewedRes, appliedRes, userRes] = await Promise.all([
+        axios.get(`${api.likeApi.get}/${investorUUID}`, config)
+          .then(res => res.data?.data || [])
+          .catch(() => []),
+        axios.get(`${api.viewApi.get.getAllViewBrandByID}/${investorUUID}`, config)
+          .then(res => res.data?.data || [])
+          .catch(() => []),
+        axios.get(`${api.instantApplyApi.get.getInstaApplyById}/${investorUUID}`, config)
+          .then(res => res.data?.data || [])
+          .catch(() => []),
+        axios.get(`${api.user.get.investor}/${investorUUID}`, config)
+          .then(res => res.data?.data || null)
+          .catch(() => null)
+      ]);
+
+      setLikedBrands(likedRes);
+      setViewedBrands(viewedRes);
+      setAppliedBrands(appliedRes);
+      setUserData(userRes);
+
+      // Initialize liked states
+      const initialLiked = {};
+      likedRes.forEach(item => {
+        if (item?.uuid) {
+          initialLiked[item.uuid] = true;
+        }
+      });
+      setLikedStates(initialLiked);
+
+    } catch (error) {
+      console.error("Error in fetchData:", error);
+      setError("Failed to load data");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Remove error:", error);
-    setremoveMsg("Something went wrong while removing the brand.");
-  }
+  }, [investorUUID, AccessToken]);
 
-  // Auto-hide message
-  setTimeout(() => {
-    setremoveMsg("");
-  }, 1000);
-};
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
+  // Optimized toggleLike with useCallback
+  const toggleLike = useCallback(async (brandId) => {
+    if (!investorUUID || !AccessToken || !brandId) return;
 
-  const toggleShowMore = (brandId) => {
-    setShowMore((prev) => ({ ...prev, [brandId]: !prev[brandId] }));
-  };
+    // Optimistic update
+    setLikedStates(prev => {
+      const newState = {...prev};
+      delete newState[brandId];
+      return newState;
+    });
+    setLikedBrands(prev => prev.filter(item => item?.uuid !== brandId));
 
-const handleViewBTN = (brandId) => {
-  console.log("Clicked brandId:", brandId);
+    try {
+      await axios.delete(
+        `${api.likeApi.delete}/${investorUUID}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+          data: { brandID: brandId },
+        }
+      );
 
-  viewStatus.map((value, index) => {
-    // console.log(value);
-    if (value.uuid === brandId) {
-      console.log(value.uuid);
-      console.log(value);
-      dispatch(openBrandDialog(value))
+      setRemoveMsg("Brand removed successfully");
+      setTimeout(() => setRemoveMsg(""), 3000);
+    } catch (error) {
+      console.error("Remove error:", error);
+      setRemoveMsg("Failed to remove brand");
+      // Revert optimistic update
+      setLikedStates(prev => ({...prev, [brandId]: true}));
+      fetchData(); // Refetch to ensure consistency
     }
-  });
+  }, [investorUUID, AccessToken, fetchData]);
 
-};
-const toggleViewClose = (brandId) => {
-  console.log("Clicked brandId:", brandId);
+  // Optimized toggleViewClose with useCallback
+  const toggleViewClose = useCallback(async (brandId) => {
+    if (!investorUUID || !AccessToken || !brandId) return;
 
-  const updatedStatus = viewStatus.filter(item => item.uuid !== brandId);
-  setviewStatus(updatedStatus);
-};
+    // Optimistic update
+    setViewedBrands(prev => prev.filter(item => item?.uuid !== brandId));
 
+    try {
+      await axios.delete(
+        `${api.viewApi.delete}/${investorUUID}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+          data: { brandID: brandId },
+        }
+      );
+    } catch (error) {
+      console.error("Error removing viewed brand:", error);
+      fetchData(); // Refetch to ensure consistency
+    }
+  }, [investorUUID, AccessToken, fetchData]);
 
-  const renderTabContent = () => {
-    switch (tabValue) {
-     case 0:
-  return viewStatus.length > 0 ? (
-    <Grid container spacing={3}>
-      {viewStatus.map((item, idx) => {
-        const brandId = item.uuid;
+  // Memoized handleViewDetails
+  const handleViewDetails = useCallback((brand) => {
+    dispatch(openBrandDialog(brand));
+  }, [dispatch]);
 
-        return (
-         <Grid item sm={6} md={4} lg={3} key={brandId} sx={{ display: "flex", justifyContent: "center" }}>
-  <Card
-    sx={{
-      width: "345px",
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      position: "relative",
-      boxShadow: 3,
-      "&:hover": { boxShadow: 6 },
-    }}
-  >
-    {/* Exit Button */}
-    <IconButton
-      size="small"
-      sx={{
-        position: "absolute",
-        top: 8,
-        right: 8,
-        zIndex: 2,
-        backgroundColor: "#fff",
-        boxShadow: 1,
-        "&:hover": {
-          backgroundColor: "#f5f5f5",
-        },
-      }}
-      // onClick={() => handleRemoveCard(brandId)} // your custom handler
-    >
-      <CloseIcon
-        onClick={() => toggleViewClose(brandId)}
-      fontSize="small" />
-    </IconButton>
+  const renderTabContent = useMemo(() => {
+    if (loading) {
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
 
-    {/* Brand Image */}
-    <CardMedia
-      component="img"
-      height="160"
-      image={
-        item.brandDetails?.brandLogo?.[0] ||
-        "https://via.placeholder.com/300x160?text=No+Image"
-      }
-      alt={item.personalDetails?.brandName || "Brand Image"}
-    />
+    if (error) {
+      return (
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          py: 10,
+          textAlign: 'center'
+        }}>
+          <Typography variant="h6" color="error" sx={{ mb: 2 }}>
+            Please Login ...
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {error}
+          </Typography>
+        </Box>
+      );
+    }
 
-    {/* Brand Info */}
-    <CardContent>
-      <Typography
-        variant="h6"
-        component="div"
-        noWrap
-        title={item.personalDetails?.brandName || "Unnamed Brand"}
-      >
-        {item.personalDetails?.brandName || "Unnamed Brand"}
-      </Typography>
+    const brands = tabValue === 0 ? viewedBrands : tabValue === 1 ? likedBrands : appliedBrands;
+    const emptyState = {
+      icon: tabValue === 0 ? <Visibility color="disabled" sx={{ fontSize: 60, mb: 2 }} /> : 
+            tabValue === 1 ? <Favorite color="disabled" sx={{ fontSize: 60, mb: 2 }} /> : 
+            <AssignmentTurnedIn color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
+      title: tabValue === 0 ? "No viewed brands" : 
+             tabValue === 1 ? "No liked brands yet" : 
+             "No applications yet",
+      description: tabValue === 0 ? "Brands you view will appear here" : 
+                  tabValue === 1 ? "Like brands to save them for later" : 
+                  "Your applications will appear here"
+    };
 
-      {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (
-        <Typography variant="body2" sx={{ mt: 1 }}>
-          <strong>Franchise Models: </strong>
-          {item.franchiseDetails.modelsOfFranchise.map((value, index) => (
-            <span key={index} style={{ marginRight: "6px" }}>
-              {value.franchiseModel}
-              {index !== item.franchiseDetails.modelsOfFranchise.length - 1 ? "," : ""}
-            </span>
-          ))}
+    return brands.length > 0 ? (
+      <Grid container spacing={3}>
+        {brands.map((item) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={item?.uuid || Math.random()}>
+            <BrandCard 
+              item={item} 
+              type={tabValue === 0 ? 'viewed' : tabValue === 1 ? 'liked' : 'applied'}
+              likedStates={likedStates}
+              onViewDetails={handleViewDetails}
+              onToggleLike={toggleLike}
+              onToggleViewClose={toggleViewClose}
+            />
+          </Grid>
+        ))}
+      </Grid>
+    ) : (
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        py: 10,
+        textAlign: 'center'
+      }}>
+        {emptyState.icon}
+        <Typography variant="h6" color="text.secondary">
+          {emptyState.title}
         </Typography>
-      )}
-    </CardContent>
-    <Button
-    sx={{backgroundColor:"green",color:"white"}}
-    onClick={() => handleViewBTN(brandId)}
-    >VIEW DETAILS</Button>
-  </Card>
-</Grid>
-        );
-      })}
-    </Grid>
-  ) : (
-    <Typography>No viewed brands available.</Typography>
-  );
-
-      case 1:
-        return likedBrands.length > 0 ? (
-          isMobile ? (
-            <Grid container spacing={3}
-            sx={{display:"flex", justifyContent:"center",alignItems:"center"}}
-          >
-            {likedBrands.map((item, idx) => {
-              const brandId = item.uuid;
-
-              return (
-                <Grid item sm={6} md={4} lg={3} key={brandId}
-                    sx={{display:"flex", justifyContent:"center",}}
-                >
-                 <Card
-                    sx={{
-                        width: "345px",
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        position: "relative",
-                        boxShadow: 3,
-                        "&:hover": { boxShadow: 6 },
-                        
-                    }}
-                    >
-                    {/* Favorite Icon */}
-                    <FavoriteIcon
-                        onClick={() => toggleLike(brandId)}
-                        sx={{
-                        position: "absolute",
-                        top: 8,
-                        right: 8,
-                        cursor: "pointer",
-                        color: likedStates[brandId] ? "gray" : "red",
-                        transition: "color 0.3s",
-                        zIndex: 10,
-                        }}
-                    />
-
-                    {/* Brand Image */}
-                    <CardMedia
-                        component="img"
-                        height="160"
-                        image={
-                        item.brandDetails?.brandLogo?.[0] ||
-                        "https://via.placeholder.com/300x160?text=No+Image"
-                        }
-                        alt={item.personalDetails?.brandName || "Brand Image"}
-                    />
-
-                    {/* Brand Info */}
-                    <CardContent>
-                        {/* Brand Name */}
-                        <Typography
-                        variant="h6"
-                        component="div"
-                        noWrap
-                        title={item.personalDetails?.brandName || "Unnamed Brand"}
-                        >
-                        {item.personalDetails?.brandName || "Unnamed Brand"}
-                        </Typography>
-
-                        {/* Franchise Models */}
-                        {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (
-                        <Typography variant="body2" sx={{ mt: 1 }}>
-                            <strong>Franchise Models: </strong>
-                            {item.franchiseDetails.modelsOfFranchise.map((value, index) => (
-                            <span key={index} style={{ marginRight: "6px" }}>
-                                {value.franchiseModel}
-                                {index !== item.franchiseDetails.modelsOfFranchise.length - 1 ? "," : ""}
-                            </span>
-                            ))}
-                        </Typography>
-                        )}
-                    </CardContent>
-
-                    {/* Brand Description */}
-                    <CardContent
-                        sx={{
-                        pt: 0,
-                        mt: "auto",
-                        wordWrap: "break-word",
-                        whiteSpace: "normal",
-                        }}
-                    >
-                        {/* Description Title */}
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                        Description:
-                        </Typography>
-
-                        {item.personalDetails?.brandDescription ? (
-                        showMore[brandId] ? (
-                            <Typography variant="body2" color="text.secondary">
-                            {item.personalDetails.brandDescription}
-                            <Typography
-                                component="span"
-                                onClick={() => toggleShowMore(brandId)}
-                                sx={{
-                                cursor: "pointer",
-                                color: "primary.main",
-                                ml: 0.5,
-                                userSelect: "none",
-                                fontWeight: "bold",
-                                }}
-                            >
-                                ...Less
-                            </Typography>
-                            </Typography>
-                        ) : (
-                            <Typography variant="body2" color="text.secondary">
-                            {item.personalDetails.brandDescription.slice(0, 100)}
-                            {item.personalDetails.brandDescription.length > 100 && (
-                                <Typography
-                                component="span"
-                                onClick={() => toggleShowMore(brandId)}
-                                sx={{
-                                    cursor: "pointer",
-                                    color: "primary.main",
-                                    ml: 0.5,
-                                    userSelect: "none",
-                                    fontWeight: "bold",
-                                }}
-                                >
-                                ...More
-                                </Typography>
-                            )}
-                            </Typography>
-                        )
-                        ) : (
-                        <Typography variant="body2" color="text.secondary">
-                            No description provided.
-                        </Typography>
-                        )}
-                    </CardContent>
-                    <Button
-    sx={{backgroundColor:"green",color:"white"}}
-    onClick={() => handleViewBTN(brandId)}
-    >VIEW DETAILS</Button>
-                </Card>
-
-
-                </Grid>
-              );
-            })}
-          </Grid>
-          ):(
-            <Grid container spacing={3}
-           
-          >
-            {likedBrands.map((item, idx) => {
-              const brandId = item.uuid;
-
-              return (
-                <Grid item sm={6} md={4} lg={3} key={brandId}
-                    sx={{
-                        justifyContent: {
-                            xs:"center",
-                            sm:"center",
-                        }
-                    }}
-                >
-                 <Card
-                    sx={{
-                        width: "345px",
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        position: "relative",
-                        boxShadow: 3,
-                        "&:hover": { boxShadow: 6 },
-                        
-                    }}
-                    >
-                    {/* Favorite Icon */}
-                    <FavoriteIcon
-                        onClick={() => toggleLike(brandId)}
-                        sx={{
-                        position: "absolute",
-                        top: 8,
-                        right: 8,
-                        cursor: "pointer",
-                        color: likedStates[brandId] ? "gray" : "red",
-                        transition: "color 0.3s",
-                        zIndex: 10,
-                        }}
-                    />
-
-                    {/* Brand Image */}
-                    <CardMedia
-                        component="img"
-                        height="160"
-                        image={
-                        item.brandDetails?.brandLogo?.[0] ||
-                        "https://via.placeholder.com/300x160?text=No+Image"
-                        }
-                        alt={item.personalDetails?.brandName || "Brand Image"}
-                    />
-
-                    {/* Brand Info */}
-                    <CardContent>
-                        {/* Brand Name */}
-                        <Typography
-                        variant="h6"
-                        component="div"
-                        noWrap
-                        title={item.personalDetails?.brandName || "Unnamed Brand"}
-                        >
-                        {item.personalDetails?.brandName || "Unnamed Brand"}
-                        </Typography>
-
-                        {/* Franchise Models */}
-                        {item.franchiseDetails?.modelsOfFranchise?.length > 0 && (
-                        <Typography variant="body2" sx={{ mt: 1 }}>
-                            <strong>Franchise Models: </strong>
-                            {item.franchiseDetails.modelsOfFranchise.map((value, index) => (
-                            <span key={index} style={{ marginRight: "6px" }}>
-                                {value.franchiseModel}
-                                {index !== item.franchiseDetails.modelsOfFranchise.length - 1 ? "," : ""}
-                            </span>
-                            ))}
-                        </Typography>
-                        )}
-                    </CardContent>
-
-                    {/* Brand Description */}
-                    <CardContent
-                        sx={{
-                        pt: 0,
-                        mt: "auto",
-                        wordWrap: "break-word",
-                        whiteSpace: "normal",
-                        }}
-                    >
-                        {/* Description Title */}
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                        Description:
-                        </Typography>
-
-                        {item.personalDetails?.brandDescription ? (
-                        showMore[brandId] ? (
-                            <Typography variant="body2" color="text.secondary">
-                            {item.personalDetails.brandDescription}
-                            <Typography
-                                component="span"
-                                onClick={() => toggleShowMore(brandId)}
-                                sx={{
-                                cursor: "pointer",
-                                color: "primary.main",
-                                ml: 0.5,
-                                userSelect: "none",
-                                fontWeight: "bold",
-                                }}
-                            >
-                                ...Less
-                            </Typography>
-                            </Typography>
-                        ) : (
-                            <Typography variant="body2" color="text.secondary">
-                            {item.personalDetails.brandDescription.slice(0, 100)}
-                            {item.personalDetails.brandDescription.length > 100 && (
-                                <Typography
-                                component="span"
-                                onClick={() => toggleShowMore(brandId)}
-                                sx={{
-                                    cursor: "pointer",
-                                    color: "primary.main",
-                                    ml: 0.5,
-                                    userSelect: "none",
-                                    fontWeight: "bold",
-                                }}
-                                >
-                                ...More
-                                </Typography>
-                            )}
-                            </Typography>
-                        )
-                        ) : (
-                        <Typography variant="body2" color="text.secondary">
-                            No description provided.
-                        </Typography>
-                        )}
-                    </CardContent>
-                </Card>
-
-
-                </Grid>
-              );
-            })}
-          </Grid>
-          )
-        ) : (
-          <Typography>No interested brands available.</Typography>
-        );
-
-      case 2:
-        return appliedBrands.length > 0 ? (
-          <ul>
-            {appliedBrands.map((item, idx) => (
-              <li key={idx}>{item.name || JSON.stringify(item)}</li>
-            ))}
-          </ul>
-        ) : (
-          <Typography>No applied brands available.</Typography>
-        );
-
-      default:
-        return <Typography>No data available.</Typography>;
-    }
-  };
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          {emptyState.description}
+        </Typography>
+      </Box>
+    );
+  }, [loading, error, tabValue, viewedBrands, likedBrands, appliedBrands, likedStates, handleViewDetails, toggleLike, toggleViewClose]);
 
   return (
-    <Box
-
-      sx={{
-        minHeight: "85vh",
-        bgcolor: "#f4f6f8",
-        p: 3,
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* Dashboard Title */}
-      <Typography
-        variant="h6"
-        fontWeight={600}
-        mb={2}
-        sx={{
-          textAlign: "center",
-          color: "#fafafa",
-          backgroundColor: "#689f38",
-          padding: "10px",
-          borderRadius: "5px",
-        }}
-      >
-        Dashboard
-      </Typography>
-
-      {/* Profile + Welcome Section */}
-      {!selectedSection || selectedSection === "Dashboard" ? (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            gap: 4,
-            alignItems: "center",
-            mb: 4,
-          }}
-        >
+    <Box sx={{ 
+      minHeight: '100vh',
+      p: { xs: 2, md: 4 }
+    }}>
+      {/* Profile Section */}
+      <Box sx={{ 
+        mb: 1,
+        borderRadius: 3,
+        boxShadow: 3,
+        overflow: 'hidden',
+      }}>
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          p: 2,
+          gap: 1
+        }}>
           <Avatar
+            src={userData?.profileImage || img}
+            loading="lazy"
+            alt="Profile"
             sx={{
-              width: 230,
-              height: 210,
-              bgcolor: "transparent",
-              position: "relative",
+              width: 60,
+              height: 60,
+              mr: { md: 3 },
+              border: '3px solid #689f38'
             }}
-          >
-            <img
-              src={img}
-              alt="Profile"
-              loading="lazy"
-              style={{
-                width: "90%",
-                height: "110%",
-                borderRadius: "40%",
-                objectFit: "cover",
-              }}
-            />
-            <PersonIcon
-              fontSize="large"
-              sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                color: "#ccc",
-              }}
-            />
-          </Avatar>
-
+          />
           <Box sx={{ flex: 1 }}>
-            <Typography variant="h4" fontWeight={600} sx={{ mb: 1 }}>
-              Welcome {investorInfo?.firstName || "Investor"}
+            <Typography variant="h5" fontWeight={600}>
+              {userData?.firstName || 'Investor'} {userData?.lastName || ''}
             </Typography>
-            <Typography color="text.secondary" variant="h5">
-              Investor
+            <Typography variant="body2" color="text.secondary">
+              {userData?.inveterID || ''}
             </Typography>
           </Box>
         </Box>
-      ) : (
-        sectionContent[selectedSection]
-      )}
+      </Box>
 
-      {/* Tabs */}
-      {!selectedSection || selectedSection === "Dashboard" ? (
-        <>
-          <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
-            centered
-            sx={{ mb: 3 }}
-            variant="fullWidth"
-            scrollButtons="auto"
-          >
-            <Tab
-              label={
-                
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <FavoriteIcon fontSize="small" />
-                <Typography variant="body2" fontWeight={500}>
-                  Viewed Brands 
-                </Typography>
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  color="primary"
-                  sx={{ ml: 0.5 }}
-                >
-                  ({viewStatus?.length || 0})
-                </Typography>
-              </Box>
+      {/* Stats Cards */}
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 3, 
+        justifyContent: { xs: 'center', md: 'space-between' }, 
+        mt: 3,
+        flexWrap: 'wrap'
+      }}>
+        <StatCard 
+          icon={<Business />} 
+          title="Viewed" 
+          value={stats.totalViews} 
+          color="76, 175, 80"
+          isSelected={tabValue === 0}
+          onClick={() => setTabValue(0)}
+        />
+        <StatCard 
+          icon={<Favorite />} 
+          title="Liked" 
+          value={stats.totalLikes} 
+          color="244, 67, 54"
+          isSelected={tabValue === 1}
+          onClick={() => setTabValue(1)}
+        />
+        <StatCard 
+          icon={<AssignmentTurnedIn />} 
+          title="Applied" 
+          value={stats.totalApplications} 
+          color="33, 150, 243"
+          isSelected={tabValue === 2}
+          onClick={() => setTabValue(2)}
+        />
+      </Box>
 
-              }
-            />
-            <Tab
-              label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <FavoriteIcon fontSize="small" />
-                <Typography variant="body2" fontWeight={500}>
-                  Interested Brands
-                </Typography>
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  color="primary"
-                  sx={{ ml: 0.5 }}
-                >
-                  ({likedBrands?.length || 0})
-                </Typography>
-              </Box>
-
-              }
-            />
-            <Tab
-              label={
-                
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <FavoriteIcon fontSize="small" />
-                <Typography variant="body2" fontWeight={500}>
-                  Applied List 
-                </Typography>
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  color="primary"
-                  sx={{ ml: 0.5 }}
-                >
-                  ({likedBrands?.length || 0})
-                </Typography>
-              </Box>               
-              }
-            />
-          </Tabs>
-
-          {/* Tab Content */}
-          <Box>{renderTabContent()}</Box>
-        </>
-      ) : (
-        sectionContent[selectedSection]
-      )}
-
-      <BrandDetailsDialog/>
+      {/* Main Content */}
+      <Card sx={{ 
+        borderRadius: 3,
+        boxShadow: 3,
+        overflow: 'hidden',
+        background: 'white',
+        mt: 3
+      }}>
+        <Box sx={{ p: 3 }}>
+          {removeMsg && (
+            <Box sx={{ 
+              mb: 3,
+              p: 2,
+              borderRadius: 2,
+              backgroundColor: '#4caf50',
+              color: 'white',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <Typography>{removeMsg}</Typography>
+              <IconButton size="small" onClick={() => setRemoveMsg("")}>
+                <Close sx={{ color: 'white' }} />
+              </IconButton>
+            </Box>
+          )}
+          
+          {renderTabContent}
+        </Box>
+      </Card>
     </Box>
   );
 };
 
-export default DashBoard;
+export default Dashboard;

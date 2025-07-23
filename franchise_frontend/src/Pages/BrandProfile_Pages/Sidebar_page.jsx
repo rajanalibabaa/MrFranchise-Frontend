@@ -2,9 +2,13 @@ import React from "react";
 import { Link as RouterLink, Outlet } from "react-router-dom";
 import { Box, Button } from "@mui/material";
 import img from "../../assets/Images/brandLogo.jpg";
+import Footer from "../../Components/Footers/Footer";
+import Navbar from "../../Components/Navbar/NavBar";
 
 const Sidebar = () => {
   return (
+    <>
+    {/* <Navbar/> */}
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
      
       <Box
@@ -61,14 +65,23 @@ const Sidebar = () => {
             Dashboard
           </RouterLink>
           
-          <RouterLink to="/brandDashboard/brandaddvedios" style={navLinkStyle}>
-            Add Videos
-          </RouterLink>
           <RouterLink to="/brandDashboard/brandlistingcontrol" style={navLinkStyle}>
             Brand Listing Controller
           </RouterLink>
+          {/* <RouterLink to="/brandDashboard/branddetailcontrol" style={navLinkStyle}>
+          Brand Details
+          </RouterLink>
+           <RouterLink to="/brandDashboard/franchisedetailcontrol" style={navLinkStyle}>
+          Franchise Details
+          </RouterLink>
+            <RouterLink to="/brandDashboard/expansionlocationcontrol" style={navLinkStyle}>
+          Expansion Location
+          </RouterLink>
+            <RouterLink to="/brandDashboard/uploadcontrol" style={navLinkStyle}>
+          Uploads
+          </RouterLink> */}
           <RouterLink to="/brandDashboard/brandsearchus" style={navLinkStyle}>
-            SearchUs
+            Reach Us
           </RouterLink>
         </Box>
 
@@ -113,6 +126,9 @@ const Sidebar = () => {
         <Outlet />
       </Box>
     </Box>
+    <Footer/>
+    </>
+    
   );
 };
 

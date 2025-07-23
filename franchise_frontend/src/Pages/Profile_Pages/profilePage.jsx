@@ -1,129 +1,211 @@
-import React from "react";
-import { Link as RouterLink, Outlet } from "react-router-dom";
-import { Box, Button } from "@mui/material";
-import img from "../../assets/Images/brandLogo.jpg";
+import React, { useMemo } from "react";
+import { Link as RouterLink, Outlet, useLocation } from "react-router-dom";
+import { 
+  Box, 
+  List, 
+  ListItem, 
+  ListItemIcon, 
+  ListItemText, 
+  useTheme,
+  Paper,
+  useMediaQuery,
+  Container,
+  styled
+} from "@mui/material";
+import {
+  Dashboard as DashboardIcon,
+  Person as ProfileIcon,
+  Email as ReachUsIcon
+} from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import Footer from "../../Components/Footers/Footer";
+import { useDispatch } from "react-redux";
+import Navbar from "../../Components/Navbar/NavBar";
 
-const ProfilePage = () => {
-  const navigate = useNavigate();
+// Moved colors outside component to prevent recreation on every render
+const COLORS = {
+  pistaGreen: '#93C572',
+  darkGreen: '#4A7729',
+  creamWhite: '#FFF9F0',
+  darkText: '#2D3436'
+};
+
+// Memoized NavItem component to prevent unnecessary re-renders
+const NavItem = React.memo(({ 
+  isMobile, 
+  location, 
+  path, 
+  icon: Icon, 
+  text,
+  navigate,
+  onClick
+}) => {
+  const isActive = location.pathname === path;
+  const handleClick = onClick ? () => onClick() : undefined;
+
   return (
-    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      {/* Sidebar */}
-      <Box
-        sx={{
-          width: 240,
-          backgroundColor: "#fff",
-          boxShadow: 3,
-          p: 2,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          height: "100vh",
-          boxSizing: "border-box",
-          flexShrink: 0,
-        }}
-      >
-        <Box>
-          {/* Clickable Logo */}
-          <Box sx={{ textAlign: "center", mb: 2, borderRadius: 2 }}>
-            <RouterLink to="/" style={{ textDecoration: "none" }}>
-              <Box
-                sx={{
-                  width: "100%",
-                  maxWidth: 250,
-                  mx: "1px",
-                  my: 3,
-                  ml: -1,
-                  mt: 1,
-                  p: 1,
-                  textAlign: "center",
-                  backgroundColor: "#ffffff",
-                  borderRadius: "5px",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  cursor: "pointer",
-                  border: "2px solid transparent",
-                  // backgroundImage:
-                  //   "linear-gradient(white, white), linear-gradient(90deg, #f29724, #e2faa7)",
-                  backgroundOrigin: "border-box",
-                  backgroundClip: "content-box, border-box",
-                  transition: "transform 0.4s ease, box-shadow 0.4s ease",
-                  "&:hover": {
-                    transform: "translateY(-8px)",
-                    boxShadow: "0 6px 25px rgba(0,0,0,0.15)",
-                  },
-                }}
-              >
-                <img
-                  src={img}
-                  alt="Profile"
-                  loading="lazy"
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    objectFit: "contain",
-                    borderRadius: "12px",
-                  }}
+    <ListItem
+      button
+      component={onClick ? undefined : RouterLink}
+      to={onClick ? undefined : path}
+      onClick={handleClick}
+      className={isActive ? 'active' : ''}
+      sx={{
+        minHeight: '48px',
+        borderRadius: '12px',
+        margin: '4px 8px',
+        padding: isMobile ? '12px 0' : '12px 16px',
+        justifyContent: isMobile ? 'center' : 'flex-start',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          backgroundColor: COLORS.pistaGreen + '20',
+          '& .MuiListItemIcon-root': {
+            color: COLORS.darkGreen,
+          },
+          '& .MuiListItemText-primary': {
+            color: COLORS.darkGreen,
+            fontWeight: 600
+          }
+        },
+        '&.active': {
+          backgroundColor: COLORS.pistaGreen + '30',
+          '& .MuiListItemIcon-root': {
+            color: COLORS.darkGreen,
+          },
+          '& .MuiListItemText-primary': {
+            color: COLORS.darkGreen,
+            fontWeight: 600
+          }
+        }
+      }}
+    >
+      <ListItemIcon sx={{ 
+        minWidth: 0,
+        color: COLORS.darkText,
+        justifyContent: 'center',
+        mr: isMobile ? 0 : 2
+      }}>
+        <Icon />
+      </ListItemIcon>
+      {!isMobile && (
+        <ListItemText 
+          primary={text} 
+          primaryTypographyProps={{ 
+            color: COLORS.darkText,
+            noWrap: true
+          }}
+        />
+      )}
+    </ListItem>
+  );
+});
+
+const InvestorDashboard = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const theme = useTheme();
+  const location = useLocation();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Memoized sidebar styles
+  const GlassSidebar = useMemo(() => {
+    return styled(Paper)(({ theme }) => ({
+      width: isMobile ? '64px' : '240px',
+      flexShrink: 0,
+      background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%)`,
+      backdropFilter: 'blur(12px)',
+      boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.1)',
+      borderRight: '1px solid rgba(255, 255, 255, 0.3)',
+      display: "flex",
+      flexDirection: "column",
+      height: "80vh",
+      position: "sticky",
+      top: 0,
+      borderRadius: 0,
+      borderTopRightRadius: '24px',
+      borderBottomRightRadius: '24px',
+      overflow: 'hidden',
+      marginTop: '1rem',
+      transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+    }));
+  }, [isMobile, theme]);
+
+  // Memoized nav items to prevent unnecessary recalculations
+  const navItems = useMemo(() => [
+    {
+      path: "/investordashboard",
+      icon: DashboardIcon,
+      text: "Dashboard",
+      exact: true
+    },
+    {
+      path: "/investordashboard/manageProfile",
+      icon: ProfileIcon,
+      text: "Profile",
+      onClick: () => navigate("/investordashboard/manageProfile")
+    },
+    {
+      path: "/investordashboard/respondemanager",
+      icon: ReachUsIcon,
+      text: "Reach Us"
+    }
+  ], [navigate]);
+
+  return (
+    <>
+      <Navbar/>
+      <Box sx={{ 
+        display: "flex", 
+        minHeight: "calc(100vh - 64px)",
+        backgroundColor: COLORS.creamWhite
+      }}>
+        {/* Sidebar with fixed width */}
+        <GlassSidebar elevation={3}>
+          <Box sx={{ p: isMobile ? 1 : 2, flexGrow: 1 }}>
+            <List sx={{ padding: 0 }}>
+              {navItems.map((item) => (
+                <NavItem
+                  key={item.path}
+                  isMobile={isMobile}
+                  location={location}
+                  path={item.path}
+                  icon={item.icon}
+                  text={item.text}
+                  navigate={navigate}
+                  onClick={item.onClick}
                 />
-              </Box>
-
-            </RouterLink>
+              ))}
+            </List>
           </Box>
+        </GlassSidebar>
 
-          {/* Upgrade and Nav Links */}
-          {/* <Button
-            variant="contained"
-            color="secondary"
-            sx={{ width: "100%", mb: 2, backgroundColor: "#f29724" }}
-          >
-            Upgrade Account
-          </Button> */}
-
-          <RouterLink to="/investordashboard" style={navLinkStyle}>Dashboard</RouterLink>
-          <RouterLink to="/investordashboard/manageProfile" style={navLinkStyle}>Manage Profile</RouterLink>
-          <RouterLink to="/investordashboard/respondemanager" style={navLinkStyle}>Searches</RouterLink>
-          {/* <RouterLink to="/investordashboard/upgradeaccount" style={navLinkStyle}> Upgrade Account</RouterLink> */}
-        </Box>
-        <Button
-          variant="contained"
-          color="secondary"
-          sx={{ width: "100%", mb: 2, backgroundColor: "#f29724" }}
-          onClick={() => navigate('/investordashboard/upgradeaccount')}
-        >
-          Upgrade Account
-        </Button>
-        {/* Footer Links */}
-        {/* <Box sx={{ mt: "auto", textAlign: "center" }}>
-          <RouterLink
-            to="/investordashboard/feedBack"
-            style={{ ...navLinkStyle, color: "#fafafa", backgroundColor: "#ffab00" }}
-          >
-            Feedback
-          </RouterLink>
-          <RouterLink
-            to="/investordashboard/complaint"
-            style={{ ...navLinkStyle, color: "#fafafa", backgroundColor: "#ffab00" }}
-          >
-            Complaint
-          </RouterLink>
-        </Box> */}
+        {/* Main Content */}
+        <Container sx={{ 
+          flexGrow: 1, 
+          overflowY: "auto",
+          p: isMobile ? 2 : 4,
+          background: `linear-gradient(to bottom right, ${COLORS.creamWhite}, #ffffff)`
+        }}>
+          <Box sx={{ 
+            maxWidth: 1400,
+            margin: '0 auto',
+            backgroundColor: 'white',
+            borderRadius: '24px',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.05)',
+            p: isMobile ? 2 : 4,
+            minHeight: 'calc(100vh - 128px)',
+            border: '1px solid rgba(0, 0, 0, 0.05)'
+          }}>
+            <Outlet />
+          </Box>
+        </Container>
       </Box>
-
-      {/* Right Content */}
-      <Box sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
-        <Outlet />
-      </Box>
-    </Box>
+      <Footer />
+    </>
   );
 };
 
-const navLinkStyle = {
-  display: "block",
-  textDecoration: "none",
-  color: "#333",
-  marginBottom: "10px",
-  padding: "10px",
-  backgroundColor: "#f9f9f9",
-  borderRadius: "4px",
-};
-
-export default ProfilePage;
+export default React.memo(InvestorDashboard);

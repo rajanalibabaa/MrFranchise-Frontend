@@ -1,4 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  lazy,
+} from "react";
 import {
   Box,
   Typography,
@@ -7,822 +12,1773 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  TableHead,
-  Paper,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  CircularProgress,
   IconButton,
   Grid,
+  Divider,
+  TableHead,
+  Card,
+  CardContent,
+  Fade,
+  Slide,
+  Zoom,
+  styled,
+  Chip,
 } from "@mui/material";
-import {
-  Description as DescriptionIcon,
-  Business,
-  AttachMoney,
-  Support,
-  AccountTree,
-  Close,
-  CheckCircleOutline,
-} from "@mui/icons-material";
-import { motion } from "framer-motion";
-import axios from "axios";
+
+const DescriptionIcon = lazy(() => import("@mui/icons-material/Description"));
+const Business = lazy(() => import("@mui/icons-material/Business"));
+const ArrowBack = lazy(() => import("@mui/icons-material/ArrowBack"));
+const Place = lazy(() => import("@mui/icons-material/Place"));
+const LocationCity = lazy(() => import("@mui/icons-material/LocationCity"));
+const LocationOff = lazy(() => import("@mui/icons-material/LocationOff"));
+const Map = lazy(() => import("@mui/icons-material/Map"));
+const FiberManualRecord = lazy(() =>
+  import("@mui/icons-material/FiberManualRecord")
+);
+const Public = lazy(() => import("@mui/icons-material/Public"));
+
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { keyframes } from "@emotion/react";
+import LeaderboardAd from "../../services/AdvertiseAds/LeaderBoardsAds";
+
+// Color palette
+const colors = {
+  primary: "#3f51b5",
+  secondary: "#ff9800",
+  success: "#4caf50",
+  error: "#f44336",
+  warning: "#ffc107",
+  info: "#2196f3",
+  dark: "#212121",
+  light: "#f5f5f5",
+};
+
+const float = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+`;
+
+// Styled components
+const AnimatedCard = styled(Card)(({ theme }) => ({
+  transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-5px)",
+    boxShadow: theme.shadows[10],
+  },
+}));
+
+const SectionHeader = styled(Typography)({
+  position: "relative",
+  paddingBottom: "10px",
+  marginBottom: "30px",
+  "&:after": {
+    content: '""',
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "60px",
+    height: "4px",
+    background: `linear-gradient(90deg, ${colors.secondary}, ${colors.primary})`,
+    borderRadius: "2px",
+  },
+});
 
 const OverviewTab = ({ brand }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const formRef = useRef(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const overviewRef = useRef(null);
+  const containerRef = useRef(null);
   const [selectedModel, setSelectedModel] = useState(null);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    investorEmail: "",
-    mobileNumber: "",
-    franchiseModel: "",
-    franchiseType: "",
-    investmentRange: "",
-    location: "",
-    planToInvest: "",
-    readyToInvest: "",
-  });
 
-  const franchiseModels = [
-    ...new Set(
-      brand?.franchiseDetails?.modelsOfFranchise?.map(
-        (m) => m.franchiseModel
-      ) || []
-    ),
-  ];
-  
-  const franchiseTypes = [
-    ...new Set(
-      brand?.franchiseDetails?.modelsOfFranchise?.map(
-        (m) => m.franchiseType
-      ) || []
-    ),
-  ];
-  
-  const investmentRanges = [
-    ...new Set(
-      brand?.franchiseDetails?.modelsOfFranchise?.map(
-        (m) => m.investmentRange
-      ) || []
-    ),
-  ];
-  
-  const investmentTimings = [
-    "Immediately",
-    "1-3 months",
-    "3-6 months",
-    "6+ months",
-  ];
-  
-  const readyToInvestOptions = [
-    "Own Investment",
-    "Going To Loan",
-    "Need Loan Assistance",
-  ];
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
 
-  const handleModelSelect = (model) => {
-    setSelectedModel(model);
-    setFormData((prev) => ({
-      ...prev,
-      franchiseModel: model.franchiseModel || prev.franchiseModel,
-      franchiseType: model.franchiseType || prev.franchiseType,
-      investmentRange: model.investmentRange || prev.investmentRange,
-    }));
-  };
+  useEffect(() => {
+    if (!isMobile || !containerRef.current) return;
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+    let scrollInterval;
+    const container = containerRef.current;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+    const startAutoScroll = () => {
+      if (scrollInterval) clearInterval(scrollInterval);
+      scrollInterval = setInterval(() => {
+        if (!container) return;
+        // scroll by 1px every 10ms
+        container.scrollLeft += 1;
+        // if reached end, go back to start
 
-    try {
-      const payload = {
-        ...formData,
-        brandId: brand?._id,
-        brandName: brand?.personalDetails?.brandName || "",
-        brandEmail: brand.personalDetails?.email || "",
-      };
-
-      const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createInstaApply",
-        payload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
+         if (container.scrollLeft >= container.scrollWidth / 2) {
+          container.scrollLeft = 0;
         }
-      );
-      
-      if (response.data.success) {
-        alert("✅ Your application has been submitted successfully!");
-        setSubmitSuccess(true);
-        setFormData({
-          fullName: "",
-          location: "",
-          franchiseModel: "",
-          franchiseType: "",
-          investmentRange: "",
-          planToInvest: "",
-          readyToInvest: "",
-        });
-        setIsModalOpen(false);
+      }, 10); // adjust speed
+    };
+
+    if (!isUserScrolling) startAutoScroll();
+
+    return () => {
+      if (scrollInterval) {
+        clearInterval(scrollInterval);
       }
-    } catch (error) {
-      console.error("Submission error:", error);
-      alert("❌Failed to submit application.");
-    } finally {
-      setIsSubmitting(false);
+    };
+  }, [isMobile, isUserScrolling]);
+
+  const handleUserScrollStart = () => {
+    setIsUserScrolling(true);
+  };
+
+  const handleUserScrollEnd = () => {
+    // restart auto-scroll after short delay
+    setTimeout(() => setIsUserScrolling(false), 100);
+  };
+
+  const tableRows = brand.franchiseDetails?.fico?.map((model, index) => (
+    <Fade in={true} key={index} timeout={index * 100}>
+      <TableRow
+        hover
+        selected={selectedModel?._id === model._id}
+        sx={{ "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.04)" } }}
+      >
+        {[
+          model.franchiseModel,
+          model.franchiseType,
+          model.investmentRange,
+          model.areaRequired,
+          model.agreementPeriod ? `${model.agreementPeriod} yrs` : "N/A",
+          model.franchiseFee
+            ? `₹${Number(model.franchiseFee).toLocaleString("en-IN")}`
+            : "N/A",
+          model.interiorCost
+            ? `₹${Number(model.interiorCost).toLocaleString("en-IN")}`
+            : "N/A",
+          model.stockInvestment
+            ? `₹${Number(model.stockInvestment).toLocaleString("en-IN")}`
+            : "N/A",
+          model.otherCost
+            ? `₹${Number(model.otherCost).toLocaleString("en-IN")}`
+            : "N/A",
+          model.requireWorkingCapital
+            ? `₹${Number(model.requireWorkingCapital).toLocaleString("en-IN")}`
+            : "N/A",
+          model.royaltyFee,
+          model.breakEven,
+          model.roi ? `${model.roi}%` : "N/A",
+          model.payBackPeriod,
+          model.marginOnSales ? `${model.marginOnSales}%` : "N/A",
+        ].map((value, j) => (
+          <TableCell
+            key={j}
+            align="center"
+            sx={{
+              borderBottom: "1px solid rgba(0,0,0,0.05)",
+              padding: "25px 16px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              fontWeight:
+                (j === 12 && model.roi) || (j === 14 && model.marginOnSales)
+                  ? 700
+                  : "inherit",
+              color:
+                j === 12 && parseFloat(model.roi) > 20
+                  ? "success.main"
+                  : j === 14 && parseFloat(model.marginOnSales) > 30
+                  ? "success.main"
+                  : "inherit",
+            }}
+          >
+            {value || "N/A"}
+          </TableCell>
+        ))}
+      </TableRow>
+    </Fade>
+  ));
+
+  const ExpansionLocationGrid = ({ data }) => {
+    const [expandedState, setExpandedState] = useState(0);
+    const [expandedDistrict, setExpandedDistrict] = useState(
+      data?.locations?.[0]?.districts?.length > 0 ? "0-0" : null
+    );
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+    if (!data || !Array.isArray(data.locations)) return null;
+
+    const visibleLocations = data.locations;
+    const hasData = data.locations.length > 0;
+
+    const toggleState = (stateIndex) => {
+      if (expandedState === stateIndex) {
+        setExpandedState(null);
+        setExpandedDistrict(null);
+      } else {
+        setExpandedState(stateIndex);
+        setExpandedDistrict(null);
+      }
+    };
+
+    const toggleDistrict = (stateIndex, distIndex) => {
+      const districtKey = `${stateIndex}-${distIndex}`;
+      setExpandedDistrict(
+        expandedDistrict === districtKey ? null : districtKey
+      );
+    };
+
+    return (
+      <Box
+        sx={{
+          mt: 2,
+          border: "1px solid #e0e0e0",
+          borderRadius: "8px",
+          overflow: "hidden",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
+      >
+        {!hasData ? (
+          <Box
+            sx={{
+              p: 3,
+              textAlign: "center",
+              color: "text.secondary",
+            }}
+          >
+            <Typography variant="body1">No locations available</Typography>
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              display: isMobile ? "block" : "flex",
+              height: isMobile ? "auto" : "400px",
+            }}
+          >
+            {/* Unified scroll container for desktop */}
+            <Box
+              sx={{
+                display: isMobile ? "block" : "flex",
+                flex: 1,
+                "&::-webkit-scrollbar": {
+                  height: "8px",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "rgba(0,0,0,0.2)",
+                  borderRadius: "4px",
+                },
+              }}
+            >
+              {/* States Column */}
+              <Box
+                sx={{
+                  width: isMobile ? "100%" : "300px",
+                  minWidth: isMobile ? "100%" : "300px",
+                  borderRight: isMobile ? "none" : "1px solid #e0e0e0",
+                  bgcolor: "background.paper",
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    p: 2,
+                    position: "sticky",
+                    top: 0,
+                    bgcolor: "#7ad03a",
+                    zIndex: 2,
+                    borderBottom: "1px solid #e0e0e0",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <Place sx={{ mr: 1, color: "#fff" }} />
+                  States
+                </Typography>
+                <Box
+                  sx={{
+                    p: 1,
+                    maxHeight: "calc(75vh - 200px)",
+                    overflowY: "auto",
+                  }}
+                >
+                  {visibleLocations.map((loc, stateIndex) => (
+                    <Card
+                      key={`state-${stateIndex}`}
+                      onClick={() => toggleState(stateIndex)}
+                      sx={{
+                        mb: 1,
+                        cursor: "pointer",
+                        borderRadius: "6px",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                        borderLeft: `4px solid ${
+                          expandedState === stateIndex
+                            ? theme.palette.primary.main
+                            : "transparent"
+                        }`,
+                        bgcolor:
+                          expandedState === stateIndex
+                            ? "rgba(25, 118, 210, 0.08)"
+                            : "background.paper",
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          transform: "translateY(-1px)",
+                          boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          p: 0.8,
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <Typography fontWeight={600}>
+                          {loc.state || "Unknown State"}
+                        </Typography>
+                      </Box>
+                    </Card>
+                  ))}
+                </Box>
+              </Box>
+
+              {/* Districts Column */}
+              <Box
+                sx={{
+                  width: isMobile ? "100%" : "300px",
+                  minWidth: isMobile ? "100%" : "300px",
+                  borderRight: isMobile ? "none" : "1px solid #e0e0e0",
+                  bgcolor:
+                    expandedState !== null
+                      ? "background.paper"
+                      : "rgba(0,0,0,0.02)",
+                  display: isMobile
+                    ? expandedState !== null
+                      ? "block"
+                      : "none"
+                    : "block",
+                  transition: "background-color 0.3s ease",
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    p: 2,
+                    position: "sticky",
+                    top: 0,
+                    bgcolor: "#7ad03a",
+                    zIndex: 2,
+                    borderBottom: "1px solid #e0e0e0",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <Map sx={{ mr: 1, color: "#fff" }} />
+                  Districts
+                  {isMobile && expandedState !== null && (
+                    <IconButton
+                      size="small"
+                      onClick={() => setExpandedState(null)}
+                      sx={{ ml: "auto" }}
+                    >
+                      <ArrowBack fontSize="small" />
+                    </IconButton>
+                  )}
+                </Typography>
+                <Box
+                  sx={{
+                    p: 1,
+                    maxHeight: "calc(75vh - 200px)",
+                    overflowY: "auto",
+                  }}
+                >
+                  {expandedState !== null &&
+                  Array.isArray(data.locations[expandedState].districts) ? (
+                    data.locations[expandedState].districts.length > 0 ? (
+                      data.locations[expandedState].districts.map(
+                        (dist, distIndex) => {
+                          const districtKey = `${expandedState}-${distIndex}`;
+                          return (
+                            <Card
+                              key={`district-${districtKey}`}
+                              onClick={() =>
+                                toggleDistrict(expandedState, distIndex)
+                              }
+                              sx={{
+                                mb: 1,
+                                cursor: "pointer",
+                                borderRadius: "6px",
+                                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                                borderLeft: `4px solid ${
+                                  expandedDistrict === districtKey
+                                    ? theme.palette.secondary.main
+                                    : "transparent"
+                                }`,
+                                bgcolor:
+                                  expandedDistrict === districtKey
+                                    ? "rgba(255, 152, 0, 0.08)"
+                                    : "background.paper",
+                                transition: "all 0.2s ease",
+                                "&:hover": {
+                                  transform: "translateY(-1px)",
+                                  boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                                },
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  p: 0.8,
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Typography variant="subtitle1">
+                                  {dist.district || "N/A"}
+                                </Typography>
+                              </Box>
+                            </Card>
+                          );
+                        }
+                      )
+                    ) : (
+                      <Box sx={{ p: 2, textAlign: "center" }}>
+                        <Typography variant="body2" color="text.secondary">
+                          <LocationOff
+                            sx={{
+                              fontSize: 40,
+                              color: "action.disabled",
+                              mb: 1,
+                            }}
+                          />
+                          <br />
+                          No districts available
+                        </Typography>
+                      </Box>
+                    )
+                  ) : (
+                    <Box sx={{ p: 2, textAlign: "center" }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {expandedState === null ? (
+                          <>
+                            <ArrowBack
+                              sx={{
+                                fontSize: 40,
+                                color: "action.disabled",
+                                mb: 1,
+                              }}
+                            />
+                            <br />
+                            Select a state
+                          </>
+                        ) : (
+                          "Loading districts..."
+                        )}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+
+              {/* Cities Column */}
+              <Box
+                sx={{
+                  flex: 1,
+                  bgcolor:
+                    expandedDistrict !== null
+                      ? "background.paper"
+                      : "rgba(0,0,0,0.02)",
+                  display: isMobile
+                    ? expandedDistrict !== null
+                      ? "block"
+                      : "none"
+                    : "block",
+                  transition: "background-color 0.3s ease",
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    p: 2,
+                    position: "sticky",
+                    top: 0,
+                    bgcolor: "#7ad03a",
+                    zIndex: 2,
+                    borderBottom: "1px solid #e0e0e0",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <LocationCity sx={{ mr: 1, color: "#fff" }} />
+                  Cities
+                  {isMobile && expandedDistrict !== null && (
+                    <IconButton
+                      size="small"
+                      onClick={() => setExpandedDistrict(null)}
+                      sx={{ ml: "auto" }}
+                    >
+                      <ArrowBack fontSize="small" />
+                    </IconButton>
+                  )}
+                </Typography>
+                <Box
+                  sx={{
+                    p: 1,
+                    display: "grid",
+                    gridTemplateColumns: isMobile
+                      ? "1fr"
+                      : "repeat(auto-fill, minmax(200px, 1fr))",
+                    gap: 1,
+                    maxHeight: "calc(75vh - 200px)",
+                    overflowY: "auto",
+                  }}
+                >
+                  {expandedDistrict !== null ? (
+                    (() => {
+                      const [stateIdx, districtIdx] = expandedDistrict
+                        .split("-")
+                        .map(Number);
+                      const cities =
+                        data.locations[stateIdx]?.districts[districtIdx]
+                          ?.cities;
+
+                      return Array.isArray(cities) && cities.length > 0 ? (
+                        cities.map((city, cityIndex) => (
+                          <Card
+                            key={`city-${cityIndex}`}
+                            sx={{
+                              borderRadius: "6px",
+                              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                              bgcolor: "background.paper",
+                              transition: "all 0.2s ease",
+                              "&:hover": {
+                                transform: "translateY(-1px)",
+                                boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                              },
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                p: 0.8,
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              <FiberManualRecord
+                                sx={{
+                                  fontSize: 8,
+                                  color: "primary.main",
+                                  mr: 1,
+                                }}
+                              />
+                              <Typography variant="body2">{city}</Typography>
+                            </Box>
+                          </Card>
+                        ))
+                      ) : (
+                        <Box sx={{ p: 2, textAlign: "center" }}>
+                          <Typography variant="body2" color="text.secondary">
+                            <LocationOff
+                              sx={{
+                                fontSize: 40,
+                                color: "action.disabled",
+                                mb: 1,
+                              }}
+                            />
+                            <br />
+                            No cities available
+                          </Typography>
+                        </Box>
+                      );
+                    })()
+                  ) : (
+                    <Box sx={{ p: 2, textAlign: "center" }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {expandedState === null ? (
+                          <>
+                            <ArrowBack
+                              sx={{
+                                fontSize: 40,
+                                color: "action.disabled",
+                                mb: 1,
+                              }}
+                            />
+                            <br />
+                            Select a district
+                          </>
+                        ) : (
+                          "Select a district to view cities"
+                        )}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+      </Box>
+    );
+  };
+  const ExpansionLocationGridInternational = ({ data }) => {
+    const [expandedCountry, setExpandedCountry] = useState(null);
+    const [expandedDistrict, setExpandedDistrict] = useState(null);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+    if (!data || !Array.isArray(data.country)) return null;
+
+    const visibleCountries = data.country;
+    const hasData = data.country.length > 0;
+
+    const toggleCountry = (countryIndex) => {
+      if (expandedCountry === countryIndex) {
+        setExpandedCountry(null);
+        setExpandedDistrict(null);
+      } else {
+        setExpandedCountry(countryIndex);
+        setExpandedDistrict(null);
+      }
+    };
+
+    const toggleDistrict = (countryIndex, distIndex) => {
+      const districtKey = `${countryIndex}-${distIndex}`;
+      setExpandedDistrict(
+        expandedDistrict === districtKey ? null : districtKey
+      );
+    };
+
+    return (
+      <Box
+        sx={{
+          mt: 2,
+          border: "1px solid #e0e0e0",
+          borderRadius: "8px",
+          overflow: "hidden",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
+      >
+        {!hasData ? (
+          <Box
+            sx={{
+              p: 3,
+              textAlign: "center",
+              color: "text.secondary",
+            }}
+          >
+            <Typography variant="body1">
+              No international locations available
+            </Typography>
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              display: isMobile ? "block" : "flex",
+              height: isMobile ? "auto" : "400px",
+              overflow: isMobile ? "visible" : "hidden",
+            }}
+          >
+            {/* Unified scroll container */}
+            <Box
+              sx={{
+                display: isMobile ? "block" : "flex",
+                flex: 1,
+                overflow: isMobile ? "visible" : "auto",
+                "&::-webkit-scrollbar": {
+                  height: "8px",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "rgba(0,0,0,0.2)",
+                  borderRadius: "4px",
+                },
+              }}
+            >
+              {/* Countries Column */}
+              <Box
+                sx={{
+                  width: isMobile ? "100%" : "300px",
+                  minWidth: isMobile ? "100%" : "300px",
+                  borderRight: isMobile ? "none" : "1px solid #e0e0e0",
+                  bgcolor: "background.paper",
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    p: 2,
+                    position: "sticky",
+                    top: 0,
+                    bgcolor: "#7ad03a",
+                    zIndex: 2,
+                    borderBottom: "1px solid #e0e0e0",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <Public sx={{ mr: 1, color: "primary.main" }} />
+                  Countries
+                </Typography>
+                <Box sx={{ p: 1 }}>
+                  {visibleCountries.map((countryItem, countryIndex) => (
+                    <Card
+                      key={`country-${countryIndex}`}
+                      onClick={() => toggleCountry(countryIndex)}
+                      sx={{
+                        mb: 1,
+                        cursor: "pointer",
+                        borderRadius: "6px",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                        borderLeft: `4px solid ${
+                          expandedCountry === countryIndex
+                            ? theme.palette.primary.main
+                            : "transparent"
+                        }`,
+                        bgcolor:
+                          expandedCountry === countryIndex
+                            ? "rgba(25, 118, 210, 0.08)"
+                            : "background.paper",
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          transform: "translateY(-1px)",
+                          boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                        },
+                      }}
+                    >
+                      <CardContent
+                        sx={{
+                          py: 1.5,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Box>
+                          <Typography fontWeight={600}>
+                            {countryItem.states || "Unknown Country"}
+                          </Typography>
+                          {countryItem.region && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {countryItem.region}
+                            </Typography>
+                          )}
+                        </Box>
+                        <Chip
+                          label={countryItem.district?.length || 0}
+                          size="small"
+                          color={
+                            expandedCountry === countryIndex
+                              ? "primary"
+                              : "default"
+                          }
+                        />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              </Box>
+
+              {/* Districts Column */}
+              <Box
+                sx={{
+                  width: isMobile ? "100%" : "300px",
+                  minWidth: isMobile ? "100%" : "300px",
+                  borderRight: isMobile ? "none" : "1px solid #e0e0e0",
+                  bgcolor:
+                    expandedCountry !== null
+                      ? "background.paper"
+                      : "rgba(0,0,0,0.02)",
+                  display: isMobile
+                    ? expandedCountry !== null
+                      ? "block"
+                      : "none"
+                    : "block",
+                  transition: "background-color 0.3s ease",
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    p: 2,
+                    position: "sticky",
+                    top: 0,
+                    bgcolor: "#7ad03a",
+                    zIndex: 2,
+                    borderBottom: "1px solid #e0e0e0",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <Map sx={{ mr: 1, color: "primary.main" }} />
+                  Districts/States
+                  {isMobile && expandedCountry !== null && (
+                    <IconButton
+                      size="small"
+                      onClick={() => setExpandedCountry(null)}
+                      sx={{ ml: "auto" }}
+                    >
+                      <ArrowBack fontSize="small" />
+                    </IconButton>
+                  )}
+                </Typography>
+                <Box sx={{ p: 1 }}>
+                  {expandedCountry !== null &&
+                  Array.isArray(data.country[expandedCountry].district) ? (
+                    data.country[expandedCountry].district.length > 0 ? (
+                      data.country[expandedCountry].district.map(
+                        (distItem, distIndex) => {
+                          const districtKey = `${expandedCountry}-${distIndex}`;
+                          return (
+                            <Card
+                              key={`district-${districtKey}`}
+                              onClick={() =>
+                                toggleDistrict(expandedCountry, distIndex)
+                              }
+                              sx={{
+                                mb: 1,
+                                cursor: "pointer",
+                                borderRadius: "6px",
+                                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                                borderLeft: `4px solid ${
+                                  expandedDistrict === districtKey
+                                    ? theme.palette.secondary.main
+                                    : "transparent"
+                                }`,
+                                bgcolor:
+                                  expandedDistrict === districtKey
+                                    ? "rgba(255, 152, 0, 0.08)"
+                                    : "background.paper",
+                                transition: "all 0.2s ease",
+                                "&:hover": {
+                                  transform: "translateY(-1px)",
+                                  boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                                },
+                              }}
+                            >
+                              <CardContent
+                                sx={{
+                                  py: 1.5,
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Typography variant="subtitle1">
+                                  {distItem.district || "N/A"}
+                                </Typography>
+                                <Chip
+                                  label={distItem.cities?.length || 0}
+                                  size="small"
+                                  color={
+                                    expandedDistrict === districtKey
+                                      ? "secondary"
+                                      : "default"
+                                  }
+                                />
+                              </CardContent>
+                            </Card>
+                          );
+                        }
+                      )
+                    ) : (
+                      <Box sx={{ p: 2, textAlign: "center" }}>
+                        <Typography variant="body2" color="text.secondary">
+                          <LocationOff
+                            sx={{
+                              fontSize: 40,
+                              color: "action.disabled",
+                              mb: 1,
+                            }}
+                          />
+                          <br />
+                          No districts/states available
+                        </Typography>
+                      </Box>
+                    )
+                  ) : (
+                    <Box sx={{ p: 2, textAlign: "center" }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {expandedCountry === null ? (
+                          <>
+                            <ArrowBack
+                              sx={{
+                                fontSize: 40,
+                                color: "action.disabled",
+                                mb: 1,
+                              }}
+                            />
+                            <br />
+                            Select a country
+                          </>
+                        ) : (
+                          "Loading districts..."
+                        )}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+
+              {/* Cities Column */}
+              <Box
+                sx={{
+                  flex: 1,
+                  bgcolor:
+                    expandedDistrict !== null
+                      ? "background.paper"
+                      : "rgba(0,0,0,0.02)",
+                  display: isMobile
+                    ? expandedDistrict !== null
+                      ? "block"
+                      : "none"
+                    : "block",
+                  transition: "background-color 0.3s ease",
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    p: 2,
+                    position: "sticky",
+                    top: 0,
+                    bgcolor: "#7ad03a",
+                    zIndex: 2,
+                    borderBottom: "1px solid #e0e0e0",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <LocationCity sx={{ mr: 1, color: "primary.main" }} />
+                  Cities
+                  {isMobile && expandedDistrict !== null && (
+                    <IconButton
+                      size="small"
+                      onClick={() => setExpandedDistrict(null)}
+                      sx={{ ml: "auto" }}
+                    >
+                      <ArrowBack fontSize="small" />
+                    </IconButton>
+                  )}
+                </Typography>
+                <Box
+                  sx={{
+                    p: 1,
+                    display: "grid",
+                    gridTemplateColumns: isMobile
+                      ? "1fr"
+                      : "repeat(auto-fill, minmax(200px, 1fr))",
+                    gap: 1,
+                  }}
+                >
+                  {expandedDistrict !== null ? (
+                    (() => {
+                      const [countryIdx, districtIdx] = expandedDistrict
+                        .split("-")
+                        .map(Number);
+                      const cities =
+                        data.country[countryIdx]?.district[districtIdx]?.cities;
+
+                      return Array.isArray(cities) && cities.length > 0 ? (
+                        cities.map((city, cityIndex) => (
+                          <Card
+                            key={`city-${cityIndex}`}
+                            sx={{
+                              borderRadius: "6px",
+                              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                              bgcolor: "background.paper",
+                              transition: "all 0.2s ease",
+                              "&:hover": {
+                                transform: "translateY(-1px)",
+                                boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                              },
+                            }}
+                          >
+                            <CardContent
+                              sx={{
+                                py: 1.5,
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              <FiberManualRecord
+                                sx={{
+                                  fontSize: 8,
+                                  color: "primary.main",
+                                  mr: 1,
+                                }}
+                              />
+                              <Typography variant="body2">{city}</Typography>
+                            </CardContent>
+                          </Card>
+                        ))
+                      ) : (
+                        <Box sx={{ p: 2, textAlign: "center" }}>
+                          <Typography variant="body2" color="text.secondary">
+                            <LocationOff
+                              sx={{
+                                fontSize: 40,
+                                color: "action.disabled",
+                                mb: 1,
+                              }}
+                            />
+                            <br />
+                            No cities available
+                          </Typography>
+                        </Box>
+                      );
+                    })()
+                  ) : (
+                    <Box sx={{ p: 2, textAlign: "center" }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {expandedCountry === null ? (
+                          <>
+                            <ArrowBack
+                              sx={{
+                                fontSize: 40,
+                                color: "action.disabled",
+                                mb: 1,
+                              }}
+                            />
+                            <br />
+                            Select a district
+                          </>
+                        ) : (
+                          "Select a district to view cities"
+                        )}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+      </Box>
+    );
+  };
+
+  //   const ExpansionLocationTags = ({ brand }) => {
+  //     const locations = Array.isArray(
+  //       brand.expansionLocationData?.expansionLocations?.domestic?.locations
+  //     )
+  //       ? brand.expansionLocationData.expansionLocations.domestic.locations.flatMap(
+  //           (loc) =>
+  //             Array.isArray(loc.districts)
+  //               ? loc.districts.flatMap((dist) =>
+  //                   Array.isArray(dist.cities)
+  //                     ? dist.cities.map((city) => ({
+  //                         city,
+  //                         district: dist.district,
+  //                         state: loc.state,
+  //                       }))
+  //                     : []
+  //                 )
+  //               : []
+  //         )
+  //       : [];
+
+  //     const category = brand.franchiseDetails?.brandCategories || {};
+  //     const formattedChipsState = locations.map((loc, index) => ({
+  //       key: `${loc.state}-${index}`,
+  //       label: ` ${category.child || ""} franchise in-${loc.state}`,
+  //     }));
+  //     const formattedChipsDistrict = locations.map((loc, index) => ({
+  //       key: `${loc.district}-${index}`,
+  //       label: ` ${category.child || ""} franchise in-${loc.district}`,
+  //     }));
+  //     const formattedChipsCity = locations.map((loc, index) => ({
+  //       key: `${loc.city}-${index}`,
+  //       label: ` ${category.child || ""} franchise in-${loc.city}`,
+  //     }));
+
+  //     return (
+  //       <Box
+  //   sx={{
+  //     border: "1px solid #e0e0e0",
+  //     borderRadius: "8px",
+  //     p: 2,
+  //     display: "grid",
+  //     gridTemplateColumns: "repeat(3, 1fr)",  // 👉 Creates 3 equal columns
+  //     gap: 2,
+  //     height: "90px",
+  //     overflowY: "auto",
+  //   }}
+  // >
+  //   {/* State Column */}
+  //   <Box>
+  //     {formattedChipsState.length > 0 ? (
+  //       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+  //         {formattedChipsState.map((chip) => (
+  //           <Typography
+  //             key={chip.key}
+  //             variant="caption"
+  //             sx={{
+  //               borderRadius: "4px",
+  //               color: colors.dark,
+  //               whiteSpace: "nowrap",
+  //             }}
+  //           >
+  //             {chip.label}
+  //           </Typography>
+  //         ))}
+  //       </Box>
+  //     ) : (
+  //       <Typography
+  //         variant="body2"
+  //         sx={{
+  //           color: "text.secondary",
+  //           textAlign: "center",
+  //           mt: 2,
+  //         }}
+  //       >
+  //         No locations available
+  //       </Typography>
+  //     )}
+  //   </Box>
+
+  //   {/* District Column */}
+  //   <Box>
+  //     {formattedChipsDistrict.length > 0 ? (
+  //       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+  //         {formattedChipsDistrict.map((chip) => (
+  //           <Typography
+  //             key={chip.key}
+  //             variant="caption"
+  //             sx={{
+  //               borderRadius: "4px",
+  //               color: colors.dark,
+  //               whiteSpace: "nowrap",
+  //             }}
+  //           >
+  //             {chip.label}
+  //           </Typography>
+  //         ))}
+  //       </Box>
+  //     ) : (
+  //       <Typography
+  //         variant="body2"
+  //         sx={{
+  //           color: "text.secondary",
+  //           textAlign: "center",
+  //           mt: 2,
+  //         }}
+  //       >
+  //         No locations available
+  //       </Typography>
+  //     )}
+  //   </Box>
+
+  //   {/* City Column */}
+  //   <Box>
+  //     {formattedChipsCity.length > 0 ? (
+  //       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+  //         {formattedChipsCity.map((chip) => (
+  //           <Typography
+  //             key={chip.key}
+  //             variant="caption"
+  //             sx={{
+  //               borderRadius: "4px",
+  //               color: colors.dark,
+  //               whiteSpace: "nowrap",
+  //             }}
+  //           >
+  //             {chip.label}
+  //           </Typography>
+  //         ))}
+  //       </Box>
+  //     ) : (
+  //       <Typography
+  //         variant="body2"
+  //         sx={{
+  //           color: "text.secondary",
+  //           textAlign: "center",
+  //           mt: 2,
+  //         }}
+  //       >
+  //         No locations available
+  //       </Typography>
+  //     )}
+  //   </Box>
+  // </Box>
+
+  //     );
+  //   };
+
+  const hasData = (sectionData) => {
+    if (Array.isArray(sectionData)) {
+      return sectionData.length > 0;
     }
+    return !!sectionData;
   };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setFormData({
-      fullName: "",
-      location: "",
-      franchiseModel: "",
-      franchiseType: "",
-      investmentRange: "",
-      planToInvest: "",
-      readyToInvest: "",
-    });
-    setSubmitSuccess(false);
-  };
-
-  const formatCurrency = (value) =>
-    new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(value || 0);
-
-  const formatList = (items) => items?.join(", ") || "Not specified";
-  const toArray = (val) => (Array.isArray(val) ? val : val ? [val] : []);
 
   const sections = [
     {
       title: "Brand Overview",
-      icon: <DescriptionIcon sx={{ color: "#ff9800" }} />,
-      items: [
-        { label: "Brand Name", value: brand.personalDetails?.brandName },
-        {
-          label: "Description",
-          value: brand.personalDetails?.brandDescription,
-        },
-        {
-          label: "Categories",
-          value: brand.personalDetails?.brandCategories?.map(
-            (categories, index) => (
-              <Box key={index} display={"flex"} flexDirection="row" gap={1}>
-                <Typography variant="body2">
-                  {categories.main || "Not specified"} & {categories.child || "Not specified"} & {categories.sub || "Not specified"}
-                </Typography>
-              </Box>
-            )
-          ),
-        },
-      ],
-    },
-    {
-      title: "Franchise Models",
-      icon: <AccountTree sx={{ color: "#ff9800" }} />,
+      icon: <Business sx={{ color: colors.secondary }} />,
       content: (
-        <>
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+        <Box>
+          {hasData(brand.franchiseDetails?.fico) && (
+            <>
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                sx={{ mb: 2, color: "#7ad03a" }}
+              >
+                Franchise Details
+              </Typography>
+               <Box sx={{ mb: 4 }}>
+      <TableContainer
+        ref={containerRef}
+        sx={{
+          borderRadius: "16px",
+          overflowX: "auto",
+          maxHeight: "calc(100vh - 300px)",
+          display: "flex",  // make sure content flows horizontally
+        }}
+        onTouchStart={handleUserScrollStart}
+        onTouchEnd={handleUserScrollEnd}
+        onMouseEnter={handleUserScrollStart}
+        onMouseLeave={handleUserScrollEnd}
+      >
+        <Box sx={{ display: "flex" }}>
+          {/* render original table */}
+          <Table
+            stickyHeader
+            sx={{
+              width: 2000,
+              tableLayout: "fixed",
+              flexShrink: 0,
+            }}
           >
-            <TableContainer 
-              component={Paper} 
-              sx={{ 
-                mb: 3,
-                overflow: "hidden",
-                borderRadius: "12px",
-                border: "1px solid rgba(0,0,0,0.1)"
+            <TableHead>
+              <TableRow>
+                {[
+                  "Model", "Type", "Investment", "Area", "Agreement",
+                  "Franchise Fee", "Interior Cost", "Stock", "Other Costs",
+                  "Working Capital", "Royalty Fee", "Break Even", "ROI",
+                  "Payback", "Margin"
+                ].map((header, i) => (
+                  <TableCell
+                    key={i}
+                    align="center"
+                    sx={{
+                      backgroundColor: "#7ad03a",
+                      color: "black",
+                      fontWeight: 700,
+                      padding: "12px 16px",
+                      borderBottom: "none",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {header}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>{tableRows}</TableBody>
+          </Table>
+
+          {/* duplicate table for seamless scroll */}
+          <Table
+            stickyHeader
+            sx={{
+              width: 2000,
+              tableLayout: "fixed",
+              flexShrink: 0,
+            }}
+          >
+            <TableHead>
+              <TableRow>
+                {[
+                  "Model", "Type", "Investment", "Area", "Agreement",
+                  "Franchise Fee", "Interior Cost", "Stock", "Other Costs",
+                  "Working Capital", "Royalty Fee", "Break Even", "ROI",
+                  "Payback", "Margin"
+                ].map((header, i) => (
+                  <TableCell
+                    key={i}
+                    align="center"
+                    sx={{
+                      backgroundColor: "#7ad03a",
+                      color: "black",
+                      fontWeight: 700,
+                      padding: "12px 16px",
+                      borderBottom: "none",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {header}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>{tableRows}</TableBody>
+          </Table>
+        </Box>
+      </TableContainer>
+    </Box>
+            </>
+          )}
+
+          {/* Brand Description - Only show if data exists */}
+          {brand.franchiseDetails?.brandDescription && (
+            <Box
+              sx={{
+                mb: 4,
+                p: 3,
+                borderRadius: "16px",
+                background: "#fff",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
               }}
             >
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ 
-                    bgcolor: "#7ad03a",
-                    "& th": {
-                      fontWeight: "bold",
-                      fontSize: "0.875rem",
-                    }
-                  }}>
-                    <TableCell sx={{ width: "8%" }}>Model</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Type</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Investment</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Area</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Franchise</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Royalty</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Interior</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Exterior</TableCell>
-                    <TableCell sx={{ width: "8%" }}>ROI</TableCell>
-                    <TableCell sx={{ width: "8%" }}>BreakEven</TableCell>
-                    <TableCell sx={{ width: "8%" }}>Select</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {brand.franchiseDetails?.modelsOfFranchise?.map(
-                    (model, index) => (
-                      <motion.tr
-                        key={index}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: index * 0.05 }}
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                sx={{ mb: 2, color: "#7ad03a" }}
+              >
+                Brand Description
+              </Typography>
+              <Divider sx={{ mb: 2, borderColor: "rgba(0,0,0,0.1)" }} />
+              <Box
+                dangerouslySetInnerHTML={{
+                  __html: brand.franchiseDetails.brandDescription,
+                }}
+                sx={{
+                  color: colors.dark,
+                  "& p": { mb: 2 },
+                  "& strong": { color: colors.primary },
+                }}
+              />
+              <Typography variant="body2" component="div">
+                {hasData(brand.franchiseDetails?.uniqueSellingPoints) && (
+                  <>
+                    <Typography
+                      variant="body1"
+                      sx={{ color: colors.dark, fontWeight: 600 }}
+                    >
+                      Unique Selling Points:
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: colors.dark }}>
+                      {brand.franchiseDetails.uniqueSellingPoints.join(", ")}
+                    </Typography>
+                  </>
+                )}
+              </Typography>
+            </Box>
+          )}
+
+          {/* Support Provided By Brand - Only show if data exists */}
+          {(hasData(brand.franchiseDetails?.trainingSupport) ||
+            brand.franchiseDetails?.aidFinancing ||
+            hasData(brand.franchiseDetails?.uniqueSellingPoints)) && (
+            <Grid container spacing={3} sx={{ mt: 2, mb: 3 }}>
+              <Grid xs={12} md={6}>
+                <Zoom in={true} timeout={700}>
+                  <AnimatedCard
+                    sx={{
+                      borderRadius: "16px",
+                      height: "100%",
+                    }}
+                  >
+                    <CardContent>
+                      <Typography
+                        variant="h6"
+                        fontWeight={700}
+                        gutterBottom
+                        display="flex"
+                        alignItems="center"
+                        color="#7ad03a"
+                      >
+                        <Business sx={{ color: colors.secondary, mr: 1 }} />{" "}
+                        Support Provided By Brand
+                      </Typography>
+                      <Divider sx={{ mb: 2, borderColor: "rgba(0,0,0,0.1)" }} />
+                      <Box
                         sx={{
-                          "&:hover": { backgroundColor: "#fff8e1" },
-                          backgroundColor:
-                            selectedModel?._id === model._id
-                              ? "#fff3e0"
-                              : "inherit",
+                          display: "grid",
+                          gridTemplateColumns: "180px auto",
+                          rowGap: 1,
+                          columnGap: 2,
+                          pl: 1,
                         }}
                       >
-                        <TableCell>
-                          {model.franchiseModel || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.franchiseType || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.investmentRange || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.areaRequired || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.franchiseFee || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.royaltyFee || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.interiorCost || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          {model.exteriorCost || "Not specified"}
-                        </TableCell>
-                        <TableCell>{model.roi || "Not specified"}</TableCell>
-                        <TableCell>
-                          {model.breakEven || "Not specified"}
-                        </TableCell>
-                        <TableCell>
-                          <motion.div whileHover={{ scale: 1.05 }}>
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              onClick={() => handleModelSelect(model)}
-                              sx={{
-                                color: "#ff9800",
-                                minWidth: 100,
-                                borderColor: "#ff9800",
-                                "&:hover": {
-                                  backgroundColor: "#ff9800",
-                                  color: "white",
-                                  borderColor: "#ff9800",
-                                },
-                              }}
+                        {hasData(brand.franchiseDetails?.trainingSupport) && (
+                          <>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: colors.dark, fontWeight: 600 }}
                             >
-                              {selectedModel?._id === model._id
-                                ? "Selected"
-                                : "Select"}
-                            </Button>
-                          </motion.div>
-                        </TableCell>
-                      </motion.tr>
-                    )
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </motion.div>
+                              Training Support:
+                            </Typography>
+                            <Typography
+  variant="body2"
+  sx={{
+    color: colors.dark,
+    display: "flex",
+    flexWrap: "wrap",
+    flexDirection: { xs: "column", sm: "row" }, // column on mobile
+    gap: 0.5, // small spacing between items
+  }}
+>
+  {brand.franchiseDetails.trainingSupport.map((item, index) => (
+    <span key={index}>✅ {item}</span>
+  ))}
+</Typography>
 
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Button 
-              variant="outlined" 
-              sx={{ 
-                color: "#ff9800", 
-                borderColor: "#ff9800",
-                fontWeight: 600,
-                px: 4,
-                py: 1.5,
-                borderRadius: "8px",
-                textTransform: "none",
-                fontSize: "1rem"
-              }} 
-              onClick={() => setIsModalOpen(true)}
-            >
-              Apply for Franchise
-            </Button>
-          </motion.div>
+                          </>
+                        )}
 
-          <Dialog
-            open={isModalOpen}
-            onClose={handleModalClose}
-            maxWidth="md"
-            fullWidth
-            PaperProps={{
-              sx: {
-                borderRadius: "12px",
-                overflow: "hidden"
-              }
-            }}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            >
-              <DialogTitle>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      <DescriptionIcon sx={{ color: "#ff9800", mr: 1 }} />{" "}
-                      Franchise Application
-                    </Typography>
-                  </Box>
+                        {brand.franchiseDetails?.aidFinancing && (
+                          <>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: colors.dark, fontWeight: 600 }}
+                            >
+                              Financing Aid:
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: colors.dark }}
+                            >
+                              {brand.franchiseDetails.aidFinancing}
+                            </Typography>
+                          </>
+                        )}
+                        <Typography
+                          id="expansion-location"
+                          variant="body2"
+                          sx={{ color: colors.dark, fontWeight: 600 }}
+                        >
+                          International Expansion:
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: colors.dark }}>
+                          {brand.expansionLocationData?.isInternationalExpansion
+                            ? "Yes"
+                            : "No"}
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </AnimatedCard>
+                </Zoom>
+              </Grid>
+            </Grid>
+          )}
 
-                  <Box>
-                    <IconButton onClick={handleModalClose}>
-                      <Close />
-                    </IconButton>
-                  </Box>
-                </Box>
-              </DialogTitle>
+          {/* Current Outlets (Domestic) - Only show if data exists */}
+          {hasData(
+            brand.expansionLocationData?.currentOutletLocations?.domestic
+              ?.locations
+          ) && (
+            <>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}
+              >
+                Current Outlets (India)
+              </Typography>
+              <ExpansionLocationGrid
+                data={
+                  brand.expansionLocationData.currentOutletLocations.domestic
+                }
+              />
+            </>
+          )}
 
-              <DialogContent>
-                {submitSuccess ? (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <Box sx={{ textAlign: "center", py: 4 }}>
-                      <CheckCircleOutline
-                        sx={{ fontSize: 60, color: "#4caf50", mb: 2 }}
-                      />
-                      <Typography variant="h6" sx={{ mb: 2 }}>
-                        Application Submitted Successfully!
-                      </Typography>
-                      <Typography variant="body1">
-                        We'll contact you soon regarding your franchise
-                        application.
-                      </Typography>
-                      <motion.div whileHover={{ scale: 1.03 }}>
-                        <Button
-                          variant="contained"
-                          onClick={handleModalClose}
-                          sx={{ 
-                            mt: 2, 
-                            bgcolor: "#4caf50",
-                            borderRadius: "8px",
-                            px: 4,
-                            py: 1.5,
-                            fontWeight: 600
+          {/* Current Outlets (International) - Only show if data exists */}
+          {hasData(
+            brand.expansionLocationData?.currentOutletLocations?.international
+              ?.country
+          ) && (
+            <>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}
+              >
+                Current Outlets (International)
+              </Typography>
+              <ExpansionLocationGridInternational
+                data={
+                  brand.expansionLocationData.currentOutletLocations
+                    .international
+                }
+              />
+            </>
+          )}
+
+          {/* Expansion Locations (Domestic) - Only show if data exists */}
+          {hasData(
+            brand.expansionLocationData?.expansionLocations?.domestic?.locations
+          ) && (
+            <>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}
+              >
+                Expansion Locations (India)
+              </Typography>
+              <ExpansionLocationGrid
+                data={brand.expansionLocationData.expansionLocations.domestic}
+              />
+            </>
+          )}
+
+          {/* Expansion Locations (International) - Only show if data exists */}
+          {hasData(
+            brand.expansionLocationData?.expansionLocations?.international
+              ?.country
+          ) && (
+            <>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}
+              >
+                Expansion Locations (International)
+              </Typography>
+              <ExpansionLocationGridInternational
+                data={
+                  brand.expansionLocationData.expansionLocations.international
+                }
+              />
+            </>
+          )}
+
+          {hasData(brand.uploads?.awards) && (
+            <>
+              <Typography
+                variant="h6"
+                fontWeight={600}
+                gutterBottom
+                sx={{ mt: 4, color: "#7ad03a" }}
+              >
+                Awards
+              </Typography>
+              {Array.isArray(brand.uploads?.awards) &&
+              brand.uploads.awards.length > 0 ? (
+                <Grid container spacing={2}>
+                  {brand.uploads.awards.map((award, idx) => (
+                    <Grid xs={12} sm={6} md={4} key={idx}>
+                      <Slide direction="up" in={true} timeout={idx * 200}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            mb: 2,
+                            p: 2,
+                            borderRadius: "12px",
+                            background: "white",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                            transition: "all 0.3s ease",
+                            "&:hover": {
+                              transform: "translateY(-5px)",
+                              boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+                            },
                           }}
                         >
-                          Close
-                        </Button>
-                      </motion.div>
-                    </Box>
-                  </motion.div>
-                ) : (
-                  <form onSubmit={handleSubmit}>
-                    <Grid
-                      container
-                      spacing={2}
-                      sx={{
-                        display: "grid",
-                        pt: 2,
-                        gridTemplateColumns: "repeat(5, 1fr)",
-                      }}
-                    >
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Full Name"
-                          name="fullName"
-                          value={formData.fullName}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Email"
-                          name="investorEmail"
-                          value={formData.investorEmail}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Mobile Number"
-                          name="mobileNumber"
-                          value={formData.mobileNumber}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Location"
-                          name="location"
-                          value={formData.location}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} md={4}>
-                        <TextField
-                          select
-                          fullWidth
-                          label="Franchise Model"
-                          name="franchiseModel"
-                          value={formData.franchiseModel}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        >
-                          {franchiseModels.map((model, i) => (
-                            <MenuItem key={i} value={model}>
-                              {model}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </Grid>
-
-                      <Grid item xs={12} md={4}>
-                        <TextField
-                          select
-                          fullWidth
-                          label="Franchise Type"
-                          name="franchiseType"
-                          value={formData.franchiseType}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        >
-                          {franchiseTypes.map((type, i) => (
-                            <MenuItem key={i} value={type}>
-                              {type}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </Grid>
-
-                      <Grid item xs={12} md={4}>
-                        <TextField
-                          select
-                          fullWidth
-                          label="Investment Range"
-                          name="investmentRange"
-                          value={formData.investmentRange}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        >
-                          {investmentRanges.map((range, i) => (
-                            <MenuItem key={i} value={range}>
-                              {range}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <TextField
-                          select
-                          fullWidth
-                          label="Plan to Invest"
-                          name="planToInvest"
-                          value={formData.planToInvest}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        >
-                          {investmentTimings.map((option, i) => (
-                            <MenuItem key={i} value={option}>
-                              {option}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          select
-                          fullWidth
-                          label="Ready to Invest"
-                          name="readyToInvest"
-                          value={formData.readyToInvest}
-                          onChange={handleChange}
-                          required
-                          variant="outlined"
-                          size="small"
-                          sx={{ mb: 2 }}
-                        >
-                          {readyToInvestOptions.map((option, i) => (
-                            <MenuItem key={i} value={option}>
-                              {option}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <motion.div
-                          whileHover={{ scale: 1.01 }}
-                          whileTap={{ scale: 0.99 }}
-                        >
-                          <Button
-                            type="submit"
-                            variant="contained"
-                            fullWidth
-                            size="large"
-                            disabled={isSubmitting}
-                            sx={{
-                              bgcolor: "#ff9800",
-                              fontWeight: 600,
-                              "&:hover": {
-                                bgcolor: "#fb8c00",
-                              },
-                              ml: 0,
-                              borderRadius: "8px",
-                              py: 1.5,
-                              fontSize: "1rem"
-                            }}
+                          {award.awardImage && (
+                            <img
+                              src={award.awardImage}
+                              loading="lazy"
+                              alt={`Award ${idx + 1}`}
+                              style={{
+                                width: "100%",
+                                maxWidth: 180,
+                                height: 120,
+                                borderRadius: 8,
+                                marginBottom: 12,
+                                objectFit: "cover",
+                                background: "#f0f0f0",
+                                display: award.awardImage ? "block" : "none",
+                              }}
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                              }}
+                            />
+                          )}
+                          {!award.awardImage && (
+                            <Box
+                              sx={{
+                                width: "100%",
+                                maxWidth: 180,
+                                height: 120,
+                                borderRadius: 2,
+                                background: "#f0f0f0",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                mb: 2,
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                No Image
+                              </Typography>
+                            </Box>
+                          )}
+                          <Typography
+                            variant="body2"
+                            align="center"
+                            sx={{ color: colors.dark }}
                           >
-                            {isSubmitting ? (
-                              <CircularProgress size={24} color="inherit" />
-                            ) : (
-                              "Submit"
-                            )}
-                          </Button>
-                        </motion.div>
-                      </Grid>
+                            {award.awardDescription || "No Description"}
+                          </Typography>
+                        </Box>
+                      </Slide>
                     </Grid>
-                  </form>
-                )}
-              </DialogContent>
-            </motion.div>
-          </Dialog>
-        </>
-      ),
-    },
-    {
-      title: "Company Details",
-      icon: <Business sx={{ color: "#ff9800" }} />,
-      items: [
-        { label: "Company Name", value: brand.personalDetails?.companyName },
-        {
-          label: "Established Year",
-          value: brand.personalDetails?.establishedYear,
-        },
-        {
-          label: "Franchising Since",
-          value: brand.personalDetails?.franchiseSinceYear,
-        },
-      ],
-    },
-    {
-      title: "Franchise Details",
-      icon: <AttachMoney sx={{ color: "#ff9800" }} />,
-      content: (
-        <motion.div>
-          <TableContainer 
-            component={Paper}
+                  ))}
+                </Grid>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No awards available.
+                </Typography>
+              )}
+            </>
+          )}
+
+          {/* Business Plan Documentation - New Section */}
+          {hasData(brand.uploads?.businessPlan) && (
+            <>
+              <Typography
+                variant="h6"
+                fontWeight={600}
+                gutterBottom
+                sx={{ mt: 4, color: "#7ad03a" }}
+              >
+                Business Plan Documentation
+              </Typography>
+              <Grid container spacing={2}>
+                {brand.uploads.businessPlan.map((doc, idx) => (
+                  <Grid xs={12} sm={6} md={4} key={idx}>
+                    <Slide direction="up" in={true} timeout={idx * 200}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          mb: 2,
+                          p: 2,
+                          borderRadius: "12px",
+                          background: "white",
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            transform: "translateY(-5px)",
+                            boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+                          },
+                        }}
+                      >
+                        <DescriptionIcon
+                          sx={{
+                            fontSize: 60,
+                            color: colors.primary,
+                            mb: 1,
+                          }}
+                        />
+                        <Typography
+                          variant="body2"
+                          align="center"
+                          sx={{
+                            color: colors.dark,
+                            fontWeight: 500,
+                            mb: 1,
+                          }}
+                        >
+                          {doc.title || "Business Document"}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          sx={{
+                            backgroundColor: "#ff9800",
+                            color: "white",
+                            mt: 1,
+                          }}
+                          href={doc.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          View Document
+                        </Button>
+                      </Box>
+                    </Slide>
+                  </Grid>
+                ))}
+              </Grid>
+            </>
+          )}
+
+          <Box
             sx={{
+              mt: 4,
+              p: 3,
               borderRadius: "12px",
-              overflow: "hidden",
-              border: "1px solid rgba(0,0,0,0.1)"
+              bgcolor: "rgba(244, 67, 54, 0.05)",
+              // borderLeft: `4px solid ${colors.error}`
             }}
           >
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 500 }}>Agreement Period</TableCell>
-                  <TableCell>
-                    {brand?.franchiseDetails?.agreementPeriod ||
-                      "Not specified"}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 500 }}>companyOwned Outlets</TableCell>
-                  <TableCell>
-                    {brand?.franchiseDetails?.franchiseOutlets ||
-                      "Not specified"}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 500 }}>Franchise Outlets</TableCell>
-                  <TableCell>
-                    {brand?.franchiseDetails?.companyOwnedOutlets ||
-                      "Not specified"}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </motion.div>
+            <Typography variant="body1" fontWeight={700} color={colors.error}>
+              Disclaimer:
+            </Typography>
+            <Typography variant="caption" color={colors.dark}>
+              Mr Franchise and the site sponsors accept no liability for the
+              accuracy of any information contained on this site or on other
+              linked sites. We recommend you take advice from a lawyer,
+              accountant and franchise consultant experienced in franchising
+              before you commit yourself. It is user's responsibility to satisfy
+              yourself as to the accuracy and reliability of the information
+              supplied. Please read the terms & conditions on MrFranchise.in
+            </Typography>
+          </Box>
+        </Box>
       ),
-    },
-    {
-      title: "Support & Training",
-      icon: <Support sx={{ color: "#ff9800" }} />,
-      items: [
-        {
-          label: "Training Provided By",
-          value: brand.franchiseDetails?.trainingProvidedBy,
-        },
-        {
-          label: "Requirement Support",
-          value: brand.franchiseDetails?.requirementSupport,
-        },
-        {
-          label: "Expansion Locations",
-          value: brand.personalDetails?.expansionLocation?.map(
-            (location, index) => (
-              <Box key={index} sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
-                <Typography>{location.city}</Typography> ,
-                <Typography>{location.state}</Typography> ,
-                <Typography>{location.country}</Typography>
-              </Box>
-            )
-          ),
-        },
-      ],
     },
   ];
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut"
-      }
-    }
-  };
-
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", lg: "row" }}
-        gap={4}
-        sx={{ mt: 2 }}
-      >
-        <Box flex={1}>
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
+    <Box ref={overviewRef}>
+      {sections.map((section, index) => (
+        <Box key={index} sx={{ mb: 6 }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent:'space-evenly' }}>
+             <SectionHeader>
+            <Box
+            component="div"
+            variant="h5"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
           >
-            {sections.map((section, index) => (
-              <motion.div
-                key={index}
-                variants={itemVariants}
-              >
-                <Box
-                  sx={{
-                    mb: 4,
-                    bgcolor: "background.paper",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    p: 3,
-                    borderLeft: "4px solid #ff9800",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      boxShadow: "0 8px 24px rgba(0,0,0,0.1)"
-                    }
-                  }}
-                >
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      mb: 2,
-                      color: "text.primary",
-                      pb: 1,
-                      borderBottom: "2px solid #ff9800",
-                    }}
-                  >
-                    {section.icon}
-                    {section.title}
-                  </Typography>
-
-                  {section.content || (
-                    <TableContainer 
-                      component={Paper}
-                      sx={{
-                        borderRadius: "8px",
-                        overflow: "hidden"
-                      }}
-                    >
-                      <Table size="medium">
-                        <TableBody>
-                          {section.items.map((item, itemIndex) => (
-                            <TableRow key={itemIndex}>
-                              <TableCell
-                                sx={{
-                                  fontWeight: 600,
-                                  color: "text.secondary",
-                                  width: "30%",
-                                  fontSize: "0.875rem"
-                                }}
-                              >
-                                {item.label}
-                              </TableCell>
-                              <TableCell
-                                sx={{ 
-                                  color: "text.primary", 
-                                  wordBreak: "break-word",
-                                  fontSize: "0.875rem"
-                                }}
-                              >
-                                {item.value || "Not specified"}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  )}
-                </Box>
-              </motion.div>
-            ))}
-          </motion.div>
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 48,
+                height: 48,
+                borderRadius: "50%",
+                bgcolor: "rgba(255, 152, 0, 0.1)",
+                animation: `${float} 4s ease-in-out infinite`,
+              }}
+            >
+              {section.icon}
+            </Box>
+            <Typography variant="h4" fontWeight={700} color="#ff9800" >
+              {section.title}
+            </Typography>
+            
+          </Box>
+          
+          </SectionHeader>
+          {/* <LeaderboardAd /> */}
+              
+               </Box>
+         
+          {section.content}
         </Box>
-      </Box>
+      ))}
     </Box>
   );
 };
 
-export default OverviewTab;
+export default React.memo(OverviewTab); // Use React.memo to optimize OverviewTab;

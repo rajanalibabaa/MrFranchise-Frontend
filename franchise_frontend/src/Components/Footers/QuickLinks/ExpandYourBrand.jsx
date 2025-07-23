@@ -1,277 +1,449 @@
 import React from "react";
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Box,
   Typography,
   Grid,
   Container,
-  Stack,
-  Chip,
-  Divider
+  Card,
+  Link,         
+  CardContent,
+  Button,
+  useTheme,
+  useMediaQuery
 } from "@mui/material";
+import BusinessIcon from '@mui/icons-material/Business';
+import  ExpandBrand from "../../../assets/Images/ExpandBusiness.jpg";
+import GroupsIcon from '@mui/icons-material/Groups';
+import BuildCircleIcon from '@mui/icons-material/BuildCircle';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
 import Navbar from '../../Navbar/NavBar';
 import Footer from '../Footer';
 
-const planBoxStyle = {
-  borderRadius: 5,
-  background: "linear-gradient(120deg, #fffbe7 80%, #e3f2fd 100%)",
-  border: "2px solid #ffe082",
-  p: { xs: 3, md: 4 },
-  minHeight: 340,
-  boxShadow: "0 8px 32px rgba(255,186,0,0.08)",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  mb: 3,
-  transition: "box-shadow 0.3s, transform 0.3s",
-  "&:hover": {
-    boxShadow: "0 16px 40px rgba(255,186,0,0.18)",
-    transform: "translateY(-6px) scale(1.03)",
-    borderColor: "#ffba00"
-  },
-};
 
-const priceStyle = color => ({
-  fontWeight: 700,
-  fontSize: 22,
-  color,
-  mb: 1,
-  letterSpacing: 1
-});
+// Inject custom styles for the page
+const customStyle = `
+@keyframes gradientMove {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(30px);}
+  100% { opacity: 1; transform: translateY(0);}
+}
+.expand-bg {
+  min-height: 100vh;
+  // background: linear-gradient(120deg, #fffbe7 0%, #ffe0b2 40%, #e3f2fd 100%);
+  background-size: 200% 200%;
+  animation: gradientMove 12s ease-in-out infinite;
+}
+.section-box {
+  background: rgba(255,255,255,0.95);
+  border-radius: 18px;
+  box-shadow: 0 4px 32px #ffe08255;
+  padding: 17px 6px;
+  margin-bottom: 32px;
+  transition: box-shadow 0.3s, transform 0.3s;
+  animation: fadeInUp 0.8s;
+}
+.section-box:hover {
+  // box-shadow: 0 12px 48px #ffe08299;
+  transform: translateY(-6px) scale(1.02);
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  margin-bottom: 18px;
+  font-size: 1.25rem;
+  color: #ff9800;
+  letter-spacing: 1px;
+}
+.section-list {
+  padding-left: 24px;
+  margin-bottom: 0;
+}
+.section-list li {
+  margin-bottom: 10px;
+  font-size: 1.08rem;
+  color: #444;
+  line-height: 1.7;
+  position: relative;
+  list-style: none;
+}
+.section-list li::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(90deg, #ff9800 60%, #ffd54f 100%);
+  border-radius: 50%;
+  margin-right: 12px;
+  vertical-align: middle;
+}
+@media (max-width: 900px) {
+  .section-box {
+    padding: 20px 10px;
+  }
+}
+`;
 
-const FranchisePromotion = () => {
+
+if (!document.head.querySelector('style[data-expand-custom]')) {
+  const styleTag = document.createElement("style");
+  styleTag.setAttribute("data-expand-custom", "true");
+  styleTag.innerText = customStyle;
+  document.head.appendChild(styleTag);
+}
+
+// Section component with ul/li, no map
+const Section = ({ title, icon, items, image, description }) => (
+  image ? (
+    <Grid container spacing={3} alignItems="center" className="section-box" sx={{ mb: 2 }}>
+      <Grid  xs={12} md={5}>
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+          <img
+            src={image}
+            loading="lazy"
+            alt={title}
+            style={{
+              maxWidth: "100%",
+              maxHeight: 300,
+              mr:3,
+             marginLeft:16,
+              borderRadius: 16,
+              boxShadow: "0 4px 24px #ffe08255",
+              objectFit: "contain",
+              background: "#fffbe7"
+            }}
+          />
+        </Box>
+      </Grid>
+      <Grid  xs={12} md={7} >
+        <span className="section-title" >
+          {icon}
+          <Box ml={1}>{title}</Box>
+        </span>
+        {description && (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {description}
+          </Typography>
+        )}
+        <ul className="section-list">
+          {items.map((item, index) =>
+            item ? <li key={index}>{item}</li> : null
+          )}
+        </ul>
+      </Grid>
+    </Grid>
+  ) : (
+    <Box className="section-box">
+      <span className="section-title">
+        {icon}
+        <Box ml={1}>{title}</Box>
+      </span>
+      {description && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          {description}
+        </Typography>
+      )}
+      <ul className="section-list">
+        {items.map((item, index) =>
+          item ? <li key={index}>{item}</li> : null
+        )}
+      </ul>
+    </Box>
+  )
+);
+
+const ExpandYourBrand = () => {
+   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  // const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
   return (
-    <Box>
+    <Box className="expand-bg">
       <Box sx={{ position: 'fixed', top: 0, width: '100%', zIndex: 10 }}>
         <Navbar />
       </Box>
-      <Container
-        sx={{
-          py: 4,
-          borderRadius: 4,
-          mt: 15,
-          mb: 6,
-        }}
-      >
-        <Typography
-          variant="h4"
-          fontWeight="bold"
+
+      <Container sx={{ py: 2 }}>
+        {/* Header */}
+        <Box
+          textAlign="center"
+          // mt={2}
+          mb={3}
           sx={{
-            color: "#ff9800",
-            textAlign: "center",
-            letterSpacing: 1,
+            animation: "fadeInUp 1s",
+            borderRadius: 4,
+            px: { xs: 2, md: 6 },
+            py: { xs: 3, md: 4 },
+            mt: {xs:5, sm:15, lg:5}
+
+            // background: "rgba(255,255,255,0.98)",
+            // boxShadow: "0 4px 32px #ffe08255"
           }}
         >
-          Franchise Promotion & Lead Distribution Packages
-        </Typography>
+          <Typography
+            variant={isMobile ? "h5" : "h3"}
+            fontWeight="bold"
+            gutterBottom
+            color="#ff9800"
+            sx={{ letterSpacing: 1, textShadow: "0 2px 12px #fffbe7" }}
+          >
+            Expand Your Brand
+          </Typography>
+          <Typography
+            variant={isMobile ? "h6" : "h4"}
+            gutterBottom
+            sx={{ color: "#7ad03a", fontWeight: 600, letterSpacing: 0.5 }}
+          >
+            Transform Your Business into a Scalable Franchise with MrFranchise.in
+          </Typography>
+          <Typography variant="body1" color="text.secondary" mt={2}>
+            Are you running a successful business and ready to take it to the next level?
+          </Typography>
+          <Typography variant="body1" color="text.secondary" mt={1}>
+            At <Link
+              component={RouterLink}
+              to="/"
+              underline="hover"
+              color="black"
+              fontWeight="bold"
+            >
+              MrFranchise.in
+            </Link>{" "}, we specialize in helping business owners expand their brand through franchising — strategically, professionally, and profitably. Whether you own a local outlet, a regional chain, or an emerging startup, we help you structure your model, position your brand, and attract serious investors across Tamil Nadu and beyond.
+          </Typography>
+        </Box>
+
+        {/* Why Franchise */}
+        <Section
+  title="Why Franchise Your Business?"
+  description="Franchising is the smartest way to grow without losing control or investing all your own capital. With the right model and strategy, you can:"
+  icon={<BusinessIcon color="primary" />}
+  items={[
+    "Multiply your presence across locations",
+    "Build brand equity and recognition",
+    "Generate recurring franchise income",
+    "Attract investor capital without dilution"
+  ]}
+/>
+
+        {/* Who Is This For? */}
+        <Section
+          title="Who Is This For?"
+          icon={<GroupsIcon color="primary" />}
+          image={ExpandBrand}
+          items={[
+            "Business owners ready to grow beyond one location",
+            "Regional brands aiming to enter new cities or states",
+            "Startups with a proven concept and scalable model",
+            "Professionals looking to replicate a niche service business"
+          ]}
+        />
+
+        {/* What We Do */}
         <Typography
-          variant="subtitle1"
-          sx={{ color: "black", textAlign: "center", mb: 2 }}
+          variant="h5"
+          textAlign="center"
+          fontWeight="bold"
+          color="#7ad03a"
+          gutterBottom
+          sx={{
+            mb: 2,
+            mt: 4,
+            animation: "fadeInUp 1.2s"
+         
+          }}
         >
-          Built for Food & Beverage Brands. Powered by MrFranchise.in
+          {/* <BuildCircleIcon color="primary" sx={{ mr: 1 }} /> */}
+          ⚙️ What We Do
         </Typography>
-        <Typography sx={{ mb: 4, textAlign: "center", color: "#444" }}>
-          Our packages are designed to give brands maximum control over lead
-          quality, volume, and visibility — whether you want exclusive investor
-          enquiries, shared leads, or unlimited growth campaigns.
+        <Typography variant="body1" textAlign="center" color="text.secondary" mb={3} sx={{ animation: "fadeInUp 1.2s" }}>
+          As your franchise consulting partner, we provide an end-to-end solution:
         </Typography>
 
-        <Grid container spacing={4}>
-          {/* Starter Plan */}
-          <Grid item xs={12} md={6}>
-            <Box sx={planBoxStyle}>
-              <Chip label="Starter" color="primary" sx={{ mb: 2, fontWeight: 600, fontSize: 16 }} />
-              <Typography variant="h6" fontWeight="bold" sx={{ color: "#1976d2", mb: 1 }}>
-                🔰 Starter Visibility Plan
-              </Typography>
-              <Typography sx={priceStyle("#ff9800")}>
-                ₹15,000 / Month
-              </Typography>
-              <Divider sx={{ my: 1, width: "100%" }} />
-              <Stack spacing={1} sx={{ width: "100%" }}>
-                <Typography sx={{ color: "#444" }}>
-                  <b>Best for:</b> Entry-level brands testing market demand
-                </Typography>
-                <Typography sx={{ color: "#444" }}>
-                  <b>Lead Type:</b> Shared Leads (non-exclusive)
-                </Typography>
-                <ul style={{ margin: 0, paddingLeft: 18, color: "#444" }}>
-                  <li>Branded listing on fnb.MrFranchise.in</li>
-                  <li>Appear in "All F&B Brands" section</li>
-                  <li>Visible to all investor filters</li>
-                  <li>Shared investor leads (up to 15/month)</li>
-                  <li>Email/WhatsApp inclusion in 1 investor campaign</li>
-                  <li>CRM access for lead tracking</li>
-                  <li>Standard brand analytics report</li>
-                </ul>
-              </Stack>
-            </Box>
+       <Grid container spacing={2} sx={{alignItems: "center", display: "flex", justifyContent: "center"}} alignItems="stretch">
+          {/* First row - 3 sections */}
+          <Grid  xs={12} sm={8} md={4} >
+            <Section
+              title="1. Strategic Franchise Planning"
+              items={[
+                "Business model evaluation",
+                "Franchise structure, revenue models & roles",
+                "Territory, training, and support setup",
+                ""
+              ]}
+            />
           </Grid>
-
-          {/* Growth Lead Plan */}
-          <Grid item xs={12} md={6}>
-            <Box sx={planBoxStyle}>
-              <Chip label="Growth" sx={{ mb: 2, background: "#ff9800", color: "#fff", fontWeight: 600, fontSize: 16 }} />
-              <Typography variant="h6" fontWeight="bold" sx={{ color: "#ff9800", mb: 1 }}>
-                🟠 Growth Lead Plan
-              </Typography>
-              <Typography sx={priceStyle("#ff9800")}>
-                ₹35,000 / Month
-              </Typography>
-              <Divider sx={{ my: 1, width: "100%" }} />
-              <Stack spacing={1} sx={{ width: "100%" }}>
-                <Typography sx={{ color: "#444" }}>
-                  <b>Best for:</b> Active growth-stage brands with a proven model
-                </Typography>
-                <Typography sx={{ color: "#444" }}>
-                  <b>Lead Type:</b> Priority Shared Leads (rotated among 2–4 advertisers)
-                </Typography>
-                <ul style={{ margin: 0, paddingLeft: 18, color: "#444" }}>
-                  <li>Priority visibility in category-based searches (e.g., Café, QSR)</li>
-                  <li>Dedicated brand page with video, gallery, and pitch deck</li>
-                  <li>Up to 30+ leads/month from shared investor pool</li>
-                  <li>WhatsApp Broadcast Inclusion – 2 campaigns</li>
-                  <li>Brand featured in email newsletters</li>
-                  <li>Investor follow-up support (semi-automated)</li>
-                  <li>CRM & lead tracking dashboard</li>
-                </ul>
-              </Stack>
-            </Box>
+          <Grid  xs={12} md={4}>
+            <Section
+              title="2. Legal & Financial Documentation"
+              items={[
+                "Franchise Agreement",
+                "Franchise Disclosure Document (FDD)",
+                "SOPs and brand guidelines",
+                ""
+              ]}
+            />
           </Grid>
-
-          {/* Premium Visibility + Lead Share */}
-          <Grid item xs={12} md={6}>
-            <Box sx={planBoxStyle}>
-              <Chip label="Premium" sx={{ mb: 2, background: "#f57c00", color: "#fff", fontWeight: 600, fontSize: 16 }} />
-              <Typography variant="h6" fontWeight="bold" sx={{ color: "#f57c00", mb: 1 }}>
-                🔶 Premium Visibility + Lead Share
-              </Typography>
-              <Typography sx={priceStyle("#f57c00")}>
-                ₹60,000 / Month
-              </Typography>
-              <Divider sx={{ my: 1, width: "100%" }} />
-              <Stack spacing={1} sx={{ width: "100%" }}>
-                <Typography sx={{ color: "#444" }}>
-                  <b>Best for:</b> Established brands looking for scale + smart visibility
-                </Typography>
-                <Typography sx={{ color: "#444" }}>
-                  <b>Lead Type:</b> All Leads in Category (Shared)
-                </Typography>
-                <ul style={{ margin: 0, paddingLeft: 18, color: "#444" }}>
-                  <li>Featured Brand Spotlight on homepage + “Top Brands” carousel</li>
-                  <li>Listed in 2+ investor segments (e.g., ₹10–20L & ₹20–50L)</li>
-                  <li>Brand priority in shared lead distribution</li>
-                  <li>Unlimited shared leads (all investor applications in category)</li>
-                  <li>2 WhatsApp + 2 Meta Ad Campaigns</li>
-                  <li>Brand Boost email blast to 10,000+ subscribers</li>
-                  <li>Dedicated success manager</li>
-                </ul>
-              </Stack>
-            </Box>
+          <Grid  xs={12} md={4}>
+            <Section
+              title="3. Franchise Kit & Investor Pitch Deck"
+              items={[
+                "Visual brand pitch",
+                "Unit economics & ROI projections",
+                "Franchisee onboarding workflow",
+                ""
+              ]}
+            />
           </Grid>
-
-          {/* Exclusive Lead Partner */}
-          <Grid item xs={12} md={6}>
-            <Box sx={planBoxStyle}>
-              <Chip label="Exclusive" sx={{ mb: 2, background: "#388e3c", color: "#fff", fontWeight: 600, fontSize: 16 }} />
-              <Typography variant="h6" fontWeight="bold" sx={{ color: "#388e3c", mb: 1 }}>
-                🟢 Exclusive Lead Partner
-              </Typography>
-              <Typography sx={priceStyle("#388e3c")}>
-                ₹1,20,000 / Month
-              </Typography>
-              <Divider sx={{ my: 1, width: "100%" }} />
-              <Stack spacing={1} sx={{ width: "100%" }}>
-                <Typography sx={{ color: "#444" }}>
-                  <b>Best for:</b> High-ticket F&B brands seeking exclusive investor targeting
-                </Typography>
-                <Typography sx={{ color: "#444" }}>
-                  <b>Lead Type:</b> Exclusive Leads Only
-                </Typography>
-                <ul style={{ margin: 0, paddingLeft: 18, color: "#444" }}>
-                  <li>Exclusive visibility in targeted campaigns (location + budget based)</li>
-                  <li>All investor leads from those campaigns routed only to your brand</li>
-                  <li>Landing page + standalone lead funnel with ad optimization</li>
-                  <li>4 WhatsApp Campaigns + Dedicated Meta & Google Ad Campaign</li>
-                  <li>Investor qualification support (via phone/WhatsApp team)</li>
-                  <li>Custom reports + weekly lead summary</li>
-                  <li>Monthly strategy session with senior consultant</li>
-                </ul>
-              </Stack>
-            </Box>
-          </Grid>
-
-          {/* Custom Performance-Based Plan */}
-          <Grid item xs={12}>
-            <Box sx={planBoxStyle}>
-              <Chip label="Performance" sx={{ mb: 2, background: "#7b1fa2", color: "#fff", fontWeight: 600, fontSize: 16 }} />
-              <Typography variant="h6" fontWeight="bold" sx={{ color: "#7b1fa2", mb: 1 }}>
-                🏆 Custom Performance-Based Plan
-              </Typography>
-              <Typography sx={priceStyle("#7b1fa2")}>
-                ₹2L to ₹5L+ (One-Time or Quarterly)
-              </Typography>
-              <Divider sx={{ my: 1, width: "100%" }} />
-              <Stack spacing={1} sx={{ width: "100%" }}>
-                <Typography sx={{ color: "#444" }}>
-                  <b>Best for:</b> Brands seeking full-service franchise expansion
-                </Typography>
-                <Typography sx={{ color: "#444" }}>
-                  <b>Lead Type:</b> Performance-based, full-service
-                </Typography>
-                <ul style={{ margin: 0, paddingLeft: 18, color: "#444" }}>
-                  <li>Franchise Blueprint (Docs, Kit, Strategy)</li>
-                  <li>Website Microsite + CRM</li>
-                  <li>Performance-focused ad campaigns</li>
-                  <li>100+ verified investor leads (guaranteed within campaign cycle)</li>
-                  <li>Full end-to-end lead follow-up support</li>
-                  <li>Master franchise pitching support</li>
-                  <li>NRI and VC investor outreach (upon request)</li>
-                </ul>
-              </Stack>
-            </Box>
+          
+          {/* Second row - 2 centered sections */}
+          <Grid  xs={12}>
+            <Grid container justifyContent="center" spacing={4}>
+              <Grid  xs={12} md={6} lg={5}>
+                <Section
+                  title="4. Brand Promotion & Investor Outreach"
+                  items={[
+                    "Franchise listing on MrFranchise.in",
+                    "Targeted investor lead generation",
+                    "WhatsApp & CRM-integrated communications",
+                    ""
+                  ]}
+                />
+              </Grid>
+              <Grid  xs={12} md={6} lg={5}>
+                <Section
+                  title="5. Franchisee Screening & Growth Support"
+                  items={[
+                    "Shortlisting qualified leads",
+                    "Initial interviews & support",
+                    "Regional expansion planning",
+                    ""
+                  ]}
+                />
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
 
-        <Box
-          textAlign="center"
+        {/* Team Section */}
+        <Card
+          variant="outlined"
           sx={{
-            mt: 6,
-            background: "linear-gradient(90deg, #fffbe7 60%, #fff 100%)",
             borderRadius: 3,
-            boxShadow: 1,
-            py: 3,
+            mb: 4,
+            background: "linear-gradient(90deg, #fffde7 60%, #e8f5e9 100%)",
+            boxShadow: "0 2px 12px #aed58133",
+            animation: "fadeInUp 1.3s"
           }}
         >
-          <Typography variant="h6" gutterBottom sx={{ color: "#ff9800" }}>
-            📞 Ready to Expand with Results?
+          <CardContent>
+            <Typography variant="h6" gutterBottom color="#7ad03a">
+              🧑‍💼 Led by Experts, Built for Scale
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Under the leadership of <strong>Suresh Muthuvel</strong>, senior franchise consultant and CEO of MrFranchise, we’ve helped businesses across Tamil Nadu grow into successful multi-location franchises.
+            </Typography>
+          </CardContent>
+        </Card>
+
+        {/* Call to Action */}
+        <Box
+          textAlign="center"
+          mt={6}
+          sx={{
+            animation: "fadeInUp 1.4s",
+            background: "rgba(255,255,255,0.95)",
+            borderRadius: 4,
+            boxShadow: "0 4px 24px #ffe08233",
+            px: { xs: 2, md: 6 },
+            py: { xs: 3, md: 4 }
+          }}
+        >
+          <Typography variant="h5" fontWeight="bold" gutterBottom>
+            📞 Ready to Expand?
           </Typography>
-          <Typography sx={{ color: "#1976d2" }}>
-            👉 Book a demo with our Franchise Marketing Team
+          <Typography variant="body1" mb={3}>
+            Let our experts build your franchise model and connect you with serious investors.
           </Typography>
-          <Typography sx={{ mt: 1, color: "#444" }}>
-            📧 <strong>Email:</strong> ceo@MrFranchise.in
-          </Typography>
-          <Typography sx={{ color: "#444" }}>
-            📞 <strong>Phone:</strong> +91 98413 23388
-          </Typography>
-          <Typography sx={{ color: "#444" }}>
-            🌐 <strong>Visit:</strong>{" "}
-            <a
-              href="https://fnb.mrfranchise.in/advertise"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "#1976d2", fontWeight: "bold" }}
-            >
-              fnb.MrFranchise.in/advertise
-            </a>
-          </Typography>
+
+          <Grid container spacing={2} justifyContent="center">
+            <Grid>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                startIcon={<PhoneIcon />}
+                sx={{
+                  // boxShadow: "0 2px 8px #1976d233",
+                  fontWeight: 700,
+                  px: 3,
+                  borderRadius: 3,
+                                  background: "linear-gradient(90deg, #ff9800 60%, #ffd54f 100%)",
+                  color: "#fff",
+                  "&:hover": {
+                    background: "linear-gradient(90deg, #ffd54f 60%, #ff9800 100%)"
+
+                  }
+                }}
+                href="tel:+919841323388"
+              >
+                Call Now: +91 98413 23388
+              </Button>
+            </Grid>
+            <Grid >
+              <Button
+                variant="outlined"
+                size="large"
+                startIcon={<EmailIcon />}
+                sx={{
+                  fontWeight: 700,
+                  px: 3,
+                  borderRadius: 3,
+                  borderColor: "#ff9800",
+                  color: "#ff9800",
+                  "&:hover": {
+                    background: "#fff3e0",
+                    borderColor: "#ff9800"
+                  }
+                }}
+                href="mailto:ceo@MrFranchise.in"
+              >
+                Email: ceo@MrFranchise.in
+              </Button>
+            </Grid>
+            <Grid >
+              <Button
+                variant="contained"
+                color="secondary"
+                size="large"
+                sx={{
+                  fontWeight: 700,
+                  px: 3,
+                  borderRadius: 3,
+                  background: "linear-gradient(90deg, #ff9800 60%, #ffd54f 100%)",
+                  color: "#fff",
+                  "&:hover": {
+                    background: "linear-gradient(90deg, #ffd54f 60%, #ff9800 100%)"
+                  }
+                }}
+                href="/brand-listing"
+              >
+                Add Your Brand Listing
+              </Button>
+            </Grid>
+          </Grid>
         </Box>
       </Container>
-      <Box sx={{ mt: 6, backgroundColor: 'background.default', py: 4 }}>
-        <Footer />
-      </Box>
+
+      <Footer />
     </Box>
   );
 };
 
-export default FranchisePromotion;
+export default ExpandYourBrand;

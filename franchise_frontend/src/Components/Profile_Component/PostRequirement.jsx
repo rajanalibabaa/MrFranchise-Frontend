@@ -51,15 +51,15 @@ const PostRequirement = () => {
         Object.entries(postRequirementData).map(([key, value]) => [key, value.trim()])
       );
 
-      console.log("Sending cleaned data:", cleanData);
+      // console.log("Sending cleaned data:", cleanData);
 
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/post/createPostRequirement",
+        "http://localhost:5000/api/post/createPostRequirement",
         cleanData,
         { headers: { "Content-Type": "application/json" } }
       );
 
-      console.log("Requirement submitted:", response.data);
+      // console.log("Requirement submitted:", response.data);
       alert("Requirement submitted successfully!");
 
       setPostRequirementData({

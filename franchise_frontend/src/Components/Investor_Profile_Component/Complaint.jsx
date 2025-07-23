@@ -24,11 +24,11 @@ function Complaint() {
       complaint: complaintText,
     };
 
-    console.log(formattedData);
+    // console.log(formattedData);
 
     try {
       const response = await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/complaint/createComplaint",
+        "http://localhost:5000/api/complaint/createComplaint",
         formattedData,
         {
           headers: {
@@ -36,7 +36,7 @@ function Complaint() {
           }
         }
       );
-      console.log("Complaint submitted:", response.data);
+      // console.log("Complaint submitted:", response.data);
       alert("Complaint submitted successfully!");
       setSelectedTopic('');
       setComplaintText('');

@@ -10,14 +10,9 @@ import {
   StepConnector,
   stepConnectorClasses,
   styled,
-  Toolbar,
-  FormControl,
-  Select,
-  MenuItem,
   Chip,
   Paper,
   Grid,
-  Divider,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -26,7 +21,6 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TableRow,
   Snackbar,
   Alert,
@@ -34,28 +28,33 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
-
+import { useTheme, useMediaQuery } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import CloseIcon from "@mui/icons-material/Close";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@mui/icons-material/Delete";
 import BrandDetails from "./BrandDetails";
 import FranchiseDetails from "./FranchiseDetails";
 import Uploads from "../BrandLIstingRegister/BrandRegisterUploads";
 import {
   validateBrandDetails,
   validateFranchiseDetails,
+  validateExpansionLocationDetails,
 } from "./BrandRegisterValidation";
 import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress from "@mui/material/CircularProgress";
-import Navbar from "../../../Components/Navbar/NavBar";
-import Footer from "../../../Components/Footers/Footer";
+import BrandExpansionLocationDetails from "./BrandExpansionLocationDetails";
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import { useDispatch } from "react-redux";
+import { showLoading } from "../../../Redux/Slices/loadingSlice";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
 const FORM_STEP_KEY = "brandRegistrationActiveStep";
 
-const steps = ["Brand Details", "Franchise Details", "Uploads"];
+const steps = [
+  "Brand Details",
+  "Franchise Details",
+  "Expansion Locations",
+  "Uploads",
+];
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -128,50 +127,91 @@ const countries = [
 const initialFormData = {
   brandDetails: {
     fullName: "",
-    brandName: "",
-    companyName: "",
     email: "",
     mobileNumber: "",
-    country: "IN",
     whatsappNumber: "",
+    companyName: "",
+    brandName: "",
+    tagLine: "",
+    ceoMobile: "",
+    ceoEmail: "",
+    ceoName: "",
+    officeEmail: "",
+    officeMobile: "",
     headOfficeAddress: "",
+    country: "",
     state: "",
+    district: "",
     city: "",
     pincode: "",
-    establishedYear: "",
-    franchiseSinceYear: "",
-    brandCategories: [],
-    brandDescription: "",
-    expansionLocation: [],
     website: "",
     facebook: "",
     instagram: "",
     linkedin: "",
     gstNumber: "",
     pancardNumber: "",
+    awardText: [],
   },
   franchiseDetails: {
+    brandCategories: {
+      groupId: "",
+      main: "",
+      sub: "",
+      child: "",
+    },
+    brandDescription: "",
     fico: [],
+    establishedYear: "",
+    franchiseSinceYear: "",
     companyOwnedOutlets: "",
     franchiseOutlets: "",
     totalOutlets: "",
-    requirementSupport: "",
-    trainingProvidedBy: "",
-    agreementPeriod: "",
+    aidFinancing: "",
+    franchiseDevelopment: "",
+    consultationOrAssistance: "",
+    trainingSupport: "",
+    uniqueSellingPoints: [],
   },
+
+  expansionLocationData: {
+    isInternationalExpansion: null,
+    currentOutletLocations: {
+      domestic: {
+        locations: [],
+      },
+      international: {
+        locations: [],
+      },
+    },
+    expansionLocations: {
+      domestic: {
+        locations: [],
+      },
+      international: {
+        locations: [],
+      },
+    },
+  },
+
   uploads: {
     franchisePromotionVideo: [],
-    brandPromotionVideo: [],
     pancard: [],
     gstCertificate: [],
     brandLogo: [],
     exteriorOutlet: [],
     interiorOutlet: [],
+    awardDoc: [], // Added for awards section
+    businessPlan: [], // Added for business plan section
   },
 };
 
 const BrandRegisterForm = () => {
   const navigate = useNavigate();
+const dispatch = useDispatch();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // <600px
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md")); // 600px - 900px
+  const isLaptop = useMediaQuery(theme.breakpoints.up("md")); // >=900px
 
   const [formData, setFormData] = useState(() => {
     const savedData = localStorage.getItem(FORM_DATA_KEY);
@@ -236,6 +276,12 @@ const BrandRegisterForm = () => {
           isValid = Object.keys(errors.franchiseDetails).length === 0;
           break;
         case 2:
+          errors.expansionLocationDetails = validateExpansionLocationDetails(
+            formData.expansionLocationDetails || {}
+          );
+          isValid = Object.keys(errors.expansionLocationDetails).length === 0;
+          break;
+        case 3:
           errors.uploads = validateUploadsDetails(formData.uploads || {});
           isValid = Object.keys(errors.uploads).length === 0;
           break;
@@ -248,7 +294,7 @@ const BrandRegisterForm = () => {
       if (!isValid) {
         setSnackbar({
           open: true,
-          message: "Please fill all required fields correctly",
+          message: "Please fill all required field correctly",
           severity: "error",
         });
       }
@@ -269,6 +315,11 @@ const BrandRegisterForm = () => {
     setActiveStep((prev) => prev - 1);
   };
 
+  const handleHomeClick = () => {
+    dispatch(showLoading());
+      navigate("/");   
+  };
+
   const handleSubmit = async () => {
     const isValid = validateStep(activeStep);
 
@@ -277,52 +328,78 @@ const BrandRegisterForm = () => {
         setIsSubmitting(true);
         setSubmitSuccess(false);
 
-        // Your submit logic here
-        //form data to submit
         const formDataSend = new FormData();
 
+        // Append brand details
         formDataSend.append(
-          "personalDetails",
+          "brandDetails",
           JSON.stringify({
             fullName: formData.brandDetails.fullName,
+            brandName: formData.brandDetails.brandName,
+            ceoEmail: formData.brandDetails.ceoEmail,
+            ceoMobile: formData.brandDetails.ceoMobile,
+            ceoName: formData.brandDetails.ceoName,
+            tagLine: formData.brandDetails.tagLine,
+            companyName: formData.brandDetails.companyName,
             email: formData.brandDetails.email,
             mobileNumber: formData.brandDetails.mobileNumber,
-            brandName: formData.brandDetails.brandName,
-            companyName: formData.brandDetails.companyName,
             country:
               countries.find((c) => c.code === formData.brandDetails.country)
                 ?.name || formData.brandDetails.country,
-            pincode: formData.brandDetails.pincode,
+            whatsappNumber: formData.brandDetails.whatsappNumber,
+            officeEmail: formData.brandDetails.officeEmail,
+            officeMobile: formData.brandDetails.officeMobile,
             headOfficeAddress: formData.brandDetails.headOfficeAddress,
             state: formData.brandDetails.state,
+            district: formData.brandDetails.district,
             city: formData.brandDetails.city,
-            establishedYear: formData.brandDetails.establishedYear,
-            franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
-            brandCategories: formData.brandDetails.brandCategories,
-            brandDescription: formData.brandDetails.brandDescription,
-            expansionLocation: formData.brandDetails.expansionLocation,
-            pancardNumber: formData.brandDetails.pancardNumber,
-            gstNumber: formData.brandDetails.gstNumber,
+            pincode: formData.brandDetails.pincode,
             website: formData.brandDetails.website,
             facebook: formData.brandDetails.facebook,
             instagram: formData.brandDetails.instagram,
             linkedin: formData.brandDetails.linkedin,
+            gstNumber: formData.brandDetails.gstNumber,
+            pancardNumber: formData.brandDetails.pancardNumber,
+            awardText: formData.brandDetails.awardText || [], // Include award texts
           })
         );
+
+        // Append franchise details
         formDataSend.append(
           "franchiseDetails",
           JSON.stringify({
-            modelsOfFranchise: formData.franchiseDetails.fico,
+            brandCategories: formData.franchiseDetails.brandCategories,
+            brandDescription: formData.franchiseDetails.brandDescription,
+            fico: formData.franchiseDetails.fico,
+            establishedYear: formData.franchiseDetails.establishedYear,
+            franchiseSinceYear: formData.franchiseDetails.franchiseSinceYear,
             companyOwnedOutlets: formData.franchiseDetails.companyOwnedOutlets,
             franchiseOutlets: formData.franchiseDetails.franchiseOutlets,
             totalOutlets: formData.franchiseDetails.totalOutlets,
-            requirementSupport: formData.franchiseDetails.requirementSupport,
-            trainingProvidedBy: formData.franchiseDetails.trainingProvidedBy,
-            agreementPeriod: formData.franchiseDetails.agreementPeriod,
+            aidFinancing: formData.franchiseDetails.aidFinancing,
+            franchiseDevelopment:
+              formData.franchiseDetails.franchiseDevelopment,
+            consultationOrAssistance:
+              formData.franchiseDetails.consultationOrAssistance,
+            trainingSupport: formData.franchiseDetails.trainingSupport,
+            uniqueSellingPoints: formData.franchiseDetails.uniqueSellingPoints,
           })
         );
-        formDataSend.append("brandDetails", JSON.stringify({}));
-        // Add files to formData
+
+        // Append expansion location data
+        formDataSend.append(
+          "expansionLocationData",
+          JSON.stringify({
+            isInternationalExpansion:
+              formData.expansionLocationData.isInternationalExpansion,
+            currentOutletLocations:
+              formData.expansionLocationData.currentOutletLocations,
+            expansionLocations:
+              formData.expansionLocationData.expansionLocations,
+          })
+        );
+
+        // Append all files
         const fileFields = {
           brandLogo: formData.uploads.brandLogo,
           gstCertificate: formData.uploads.gstCertificate,
@@ -330,8 +407,10 @@ const BrandRegisterForm = () => {
           exteriorOutlet: formData.uploads.exteriorOutlet,
           interiorOutlet: formData.uploads.interiorOutlet,
           franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
-          brandPromotionVideo: formData.uploads.brandPromotionVideo,
+          awardDoc: formData.uploads.awardDoc || [], // Include award documents
+          businessPlan: formData.uploads.businessPlan,
         };
+
         Object.entries(fileFields).forEach(([fieldName, files]) => {
           if (files && files.length > 0) {
             files.forEach((file) => {
@@ -339,45 +418,9 @@ const BrandRegisterForm = () => {
             });
           }
         });
-        //   const apiData = {
-        //   personalDetails: {
-        //     fullName: formData.brandDetails.fullName,
-        //     email: formData.brandDetails.email,
-        //     mobileNumber: formData.brandDetails.mobileNumber,
-        //     brandName: formData.brandDetails.brandName,
-        //     companyName: formData.brandDetails.companyName,
-        //     country: countries.find(c => c.code === formData.brandDetails.country)?.name || formData.brandDetails.country,
-        //     pincode: formData.brandDetails.pincode,
-        //     headOfficeAddress: formData.brandDetails.headOfficeAddress,
-        //     state: formData.brandDetails.state,
-        //     city: formData.brandDetails.city,
-        //     establishedYear: formData.brandDetails.establishedYear,
-        //     franchiseSinceYear: formData.brandDetails.franchiseSinceYear,
-        //     brandCategories: formData.brandDetails.brandCategories,
-        //     brandDescription: formData.brandDetails.brandDescription,
-        //     expansionLocation: formData.brandDetails.expansionLocation,
-        //     pancardNumber: formData.brandDetails.pancardNumber,
-        //     gstNumber: formData.brandDetails.gstNumber,
-        //     website: formData.brandDetails.website,
-        //     facebook: formData.brandDetails.facebook,
-        //     instagram: formData.brandDetails.instagram,
-        //     linkedin: formData.brandDetails.linkedin,
-        //   },
-        //   franchiseDetails: {
-        //             },
-        //   brandDetails: {
-        //     pancard: formData.uploads.pancard,
-        //     gstCertificate: formData.uploads.gstCertificate,
-        //     brandLogo: formData.uploads.brandLogo,
-        //     exterioroutlet: formData.uploads.exteriorOutlet,
-        //     interiorOutlet: formData.uploads.interiorOutlet,
-        //     franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
-        //     brandPromotionVideo: formData.uploads.brandPromotionVideo,
-        //   }
-        // };
 
         const response = await axios.post(
-          "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/createBrandListing",
+          "https://mrfranchisebackend.mrfranchise.in/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {
@@ -386,49 +429,38 @@ const BrandRegisterForm = () => {
           }
         );
 
-        console.log(response.data);
+        if (response.status === 200) {
+          setSubmitSuccess(true);
+          setSnackbar({
+            open: true,
+            message: "Form submitted successfully!",
+            severity: "success",
+          });
 
-        // if (response.status !== 200 && response.status !== 201) {
-        //   throw new Error(response.data.message || "Submission failed");
-        // }
-        setSubmitSuccess(true);
-        setSnackbar({
-          open: true,
-          message: "Form submitted successfully!",
-          severity: "success",
-        });
-
-        // Reset form after successful submission
-        localStorage.removeItem(FORM_DATA_KEY);
-        localStorage.removeItem(FORM_STEP_KEY);
-        setFormData(initialFormData);
-        setActiveStep(0);
-        setTimeout(() => {
-          navigate("/");
-        }, 1500);
-
+          // Reset form after successful submission
+          localStorage.removeItem(FORM_DATA_KEY);
+          localStorage.removeItem(FORM_STEP_KEY);
+          setFormData(initialFormData);
+          setActiveStep(0);
+          setTimeout(() => {
+            navigate("/");
+          }, 1500);
+        }
       } catch (error) {
-        console.log("submission error", error);
+        console.error("Submission error:", error);
         setSnackbar({
           open: true,
-          message: "Submission failed. Please try again.",
+          message:
+            error.response?.data?.message ||
+            "Submission failed. Please try again.",
           severity: "error",
         });
-      }finally {
-        setIsSubmitting(false); // Stop loading regardless of success/failure
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
-
-  const handleCountryChange = (event) => {
-    setFormData((prev) => ({
-      ...prev,
-      brandDetails: {
-        ...prev.brandDetails,
-        country: event.target.value,
-      },
-    }));
-  };
+ 
 
   const handleBrandDetailsChange = (update) => {
     setFormData((prev) => ({
@@ -480,6 +512,8 @@ const BrandRegisterForm = () => {
     }));
   };
 
+
+
   const handlePreviewOpen = () => {
     setOpenPreview(true);
   };
@@ -488,6 +522,7 @@ const BrandRegisterForm = () => {
     setOpenPreview(false);
   };
 
+  
   const handleCancel = () => {
     // Show confirmation dialog
     const confirmCancel = window.confirm(
@@ -546,12 +581,32 @@ const BrandRegisterForm = () => {
         );
       case 2:
         return (
+          <BrandExpansionLocationDetails
+            data={formData.expansionLocationData}
+            errors={validationErrors.BrandExpansionLocationDetails}
+            onChange={(newData) =>
+              setFormData((prev) => ({
+                ...prev,
+                expansionLocationData: {
+                  ...prev.expansionLocationData,
+                  ...newData,
+                },
+              }))
+            }
+          />
+        );
+      case 3:
+        return (
           <Uploads
             data={formData.uploads}
             errors={validationErrors.uploads}
             onChange={handleUploadsChange}
             gstNumber={formData.brandDetails.gstNumber}
             pancardNumber={formData.brandDetails.pancardNumber}
+            awardText={formData.brandDetails.awardText}
+            onAwardTextChange={(texts) =>
+              handleBrandDetailsChange({ awardText: texts })
+            }
             onGstNumberChange={handleGstNumberChange}
             onPancardNumberChange={handlePancardNumberChange}
           />
@@ -561,173 +616,9 @@ const BrandRegisterForm = () => {
     }
   };
 
-  const handleRemoveCategory = (index) => {
-    const updatedCategories = [...formData.brandDetails.brandCategories];
-    updatedCategories.splice(index, 1);
-    setFormData((prev) => ({
-      ...prev,
-      brandDetails: {
-        ...prev.brandDetails,
-        brandCategories: updatedCategories,
-      },
-    }));
-  };
 
-  const handleRemoveExpansionLocation = (index) => {
-    const updatedLocations = [...formData.brandDetails.expansionLocation];
-    updatedLocations.splice(index, 1);
-    setFormData((prev) => ({
-      ...prev,
-      brandDetails: {
-        ...prev.brandDetails,
-        expansionLocation: updatedLocations,
-      },
-    }));
-  };
 
-  const handleRemoveFicoModel = (index) => {
-    const updatedFico = [...formData.franchiseDetails.fico];
-    updatedFico.splice(index, 1);
-    setFormData((prev) => ({
-      ...prev,
-      franchiseDetails: {
-        ...prev.franchiseDetails,
-        fico: updatedFico,
-      },
-    }));
-  };
 
-  const renderSelectedCategories = () => {
-    if (!formData.brandDetails.brandCategories?.length) return null;
-
-    return (
-      <Box sx={{ mt: 2 }}>
-        <Accordion elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-              Selected Categories (
-              {formData.brandDetails.brandCategories.length})
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={1}>
-              {formData.brandDetails.brandCategories.map((category, index) => (
-                <Grid item key={index}>
-                  <Chip
-                    label={`${category.main} > ${category.sub} > ${category.child}`}
-                    variant="outlined"
-                    sx={{ mr: 1, mb: 1 }}
-                    onDelete={() => handleRemoveCategory(index)}
-                    deleteIcon={<CloseIcon />}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
-    );
-  };
-
-  const renderExpansionLocations = () => {
-    if (!formData.brandDetails.expansionLocation?.length) return null;
-
-    return (
-      <Box sx={{ mt: 2 }}>
-        <Accordion elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-              Expansion Locations (
-              {formData.brandDetails.expansionLocation.length})
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={1}>
-              {formData.brandDetails.expansionLocation.map(
-                (location, index) => (
-                  <Grid item key={index}>
-                    <Chip
-                      label={`${location.city}, ${location.state}, ${location.country}`}
-                      variant="outlined"
-                      sx={{ mr: 1, mb: 1 }}
-                      onDelete={() => handleRemoveExpansionLocation(index)}
-                      deleteIcon={<CloseIcon />}
-                    />
-                  </Grid>
-                )
-              )}
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
-    );
-  };
-
-  const renderFicoModels = () => {
-    if (!formData.franchiseDetails.fico?.length) return null;
-
-    // Define the order of fields you want to display
-    const fieldOrder = [
-      "franchiseModel",
-      "franchiseType",
-      "investmentRange",
-      "areaRequired",
-      "franchiseFee",
-      "royaltyFee",
-      "interiorCost",
-      "exteriorCost",
-      "otherCost",
-      "roi",
-      "roiPeriod",
-      "breakEven",
-      "requireInvestmentCapital",
-      "propertyType",
-    ];
-
-    return (
-      <Box sx={{ mt: 2 }}>
-        <Accordion elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-              FICO Models ({formData.franchiseDetails.fico.length})
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={2}>
-              {formData.franchiseDetails.fico.map((model, index) => (
-                <Grid item xs={12} key={index}>
-                  <Paper
-                    sx={{
-                      p: 2,
-                      position: "relative",
-                      border: "1px solid #e0e0e0",
-                    }}
-                  >
-                    <IconButton
-                      sx={{ position: "absolute", top: 8, right: 8 }}
-                      onClick={() => handleRemoveFicoModel(index)}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                    <Grid container spacing={1}>
-                      {fieldOrder.map((field) => (
-                        <Grid item xs={12} sm={6} key={field}>
-                          <Typography variant="body2">
-                            <strong>{formatFieldName(field)}:</strong>{" "}
-                            {model[field] || "Not specified"}
-                          </Typography>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
-    );
-  };
 
   const formatFieldName = (name) => {
     return name
@@ -737,204 +628,109 @@ const BrandRegisterForm = () => {
       .replace(/Pancard/i, "PAN Card");
   };
 
-  const formatFieldValue = (value) => {
-    if (Array.isArray(value)) {
-      return value.length > 0 ? value.join(", ") : "None";
-    }
-    return value || "Not provided";
-  };
+
   const renderPreviewContent = () => {
-    // Add null checks for all form data sections
-    const brandDetails = formData.brandDetails || {};
-    const franchiseDetails = formData.franchiseDetails || {};
-    const uploads = formData.uploads || {};
+    const {
+      brandDetails = {},
+      franchiseDetails = {},
+      expansionLocationData = {},
+      uploads = {},
+    } = formData;
 
     // Helper function to render file previews
     const renderFilePreviews = (files) => {
-      if (!files || !Array.isArray(files) || files.length === 0)
-        return "No files uploaded";
+      if (!files || !Array.isArray(files) || files.length === 0) {
+        return (
+          <Typography variant="body2" color="textSecondary">
+            No files uploaded
+          </Typography>
+        );
+      }
 
       return (
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
           {files.map((file, index) => {
-            // Handle both string URLs and File objects
-            let url =
-              typeof file === "string"
-                ? file
-                : file instanceof File
-                ? URL.createObjectURL(file)
-                : "";
+            // Handle case where file is already a URL string
+            if (typeof file === "string") {
+              const fileName = file.split("/").pop();
+              const isImage = fileName.match(/\.(jpeg|jpg|gif|png)$/i);
+              const isVideo = fileName.match(/\.(mp4|mov|avi)$/i);
 
-            // Determine file type
-            const isImage =
-              typeof file === "string"
-                ? file.match(/\.(jpeg|jpg|gif|png)$/i)
-                : file.type?.includes("image");
-            const isVideo =
-              typeof file === "string"
-                ? file.match(/\.(mp4|mov|avi)$/i)
-                : file.type?.includes("video");
-            const fileName =
-              typeof file === "string" ? file.split("/").pop() : file.name;
-
-            return (
-              <Box key={index} sx={{ width: 150 }}>
-                {isImage ? (
-                  <img
-                    src={url}
-                    alt={`Preview ${index}`}
-                    style={{ width: "100%", height: "auto", borderRadius: 4 }}
-                  />
-                ) : isVideo ? (
-                  <video controls style={{ width: "100%", borderRadius: 4 }}>
-                    <source src={url} type={file.type || "video/mp4"} />
-                    Your browser does not support the video tag.
-                  </video>
-                ) : (
-                  <Paper sx={{ p: 1, textAlign: "center" }}>
-                    <Typography variant="caption">{fileName}</Typography>
-                  </Paper>
-                )}
-                <Typography
-                  variant="caption"
-                  noWrap
-                  sx={{ display: "block", mt: 0.5 }}
-                >
-                  {fileName}
-                </Typography>
-              </Box>
-            );
-          })}
-        </Box>
-      );
-    };
-
-    // Helper function to render brand categories
-    const renderBrandCategories = (categories) => {
-      if (!categories || categories.length === 0)
-        return "No categories selected";
-
-      return (
-        <Box>
-          {categories.map((category, index) => (
-            <Box
-              key={index}
-              sx={{
-                mb: 1,
-                p: 1,
-                border: "1px solid #e0e0e0",
-                borderRadius: 1,
-              }}
-            >
-              <Typography variant="body2">
-                <strong>Main Category:</strong>{" "}
-                {category.main || "Not specified"}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Sub Category:</strong> {category.sub || "Not specified"}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Child Category:</strong>{" "}
-                {category.child || "Not specified"}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-      );
-    };
-
-    // Helper function to render expansion locations
-    const renderExpansionLocations = (locations) => {
-      if (!locations || locations.length === 0) return "No locations added";
-
-      return (
-        <Box>
-          {locations.map((location, index) => (
-            <Box
-              key={index}
-              sx={{
-                mb: 1,
-                p: 1,
-                border: "1px solid #e0e0e0",
-                borderRadius: 1,
-              }}
-            >
-              <Typography variant="body2">
-                <strong>Country:</strong> {location.country || "Not specified"}
-              </Typography>
-              <Typography variant="body2">
-                <strong>State:</strong> {location.state || "Not specified"}
-              </Typography>
-              <Typography variant="body2">
-                <strong>District:</strong>{" "}
-                {location.district || "Not specified"}
-              </Typography>
-              <Typography variant="body2">
-                <strong>City:</strong> {location.city || "Not specified"}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-      );
-    };
-
-    // Helper function to render FICO models with all details
-    const renderFicoModels = (ficoModels) => {
-      if (!ficoModels || ficoModels.length === 0) return "No FICO models added";
-
-      return (
-        <Box>
-          {ficoModels.map((model, index) => {
-            // Filter out empty/null/undefined fields
-            const modelFields = Object.entries(model).filter(
-              ([, value]) =>
-                value !== "" && value !== null && value !== undefined
-            );
-
-            if (modelFields.length === 0) {
               return (
-                <Box
-                  key={index}
-                  sx={{
-                    mb: 2,
-                    p: 2,
-                    border: "1px solid #e0e0e0",
-                    borderRadius: 1,
-                  }}
-                >
-                  <Typography variant="body2">
-                    Model {index + 1} (No details provided)
+                <Box key={index} sx={{ width: 150 }}>
+                  {isImage ? (
+                    <img
+                      src={file}
+                      loading="lazy"
+                      alt={`Preview ${index}`}
+                      style={{ width: "100%", height: "auto", borderRadius: 4 }}
+                    />
+                  ) : isVideo ? (
+                    <video controls style={{ width: "100%", borderRadius: 4 }}>
+                      <source src={file} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <Paper sx={{ p: 1, textAlign: "center" }}>
+                      <Typography variant="caption">{fileName}</Typography>
+                    </Paper>
+                  )}
+                  <Typography
+                    variant="caption"
+                    noWrap
+                    sx={{ display: "block", mt: 0.5 }}
+                  >
+                    {fileName}
                   </Typography>
                 </Box>
               );
             }
 
-            return (
-              <Box
-                key={index}
-                sx={{
-                  mb: 2,
-                  p: 2,
-                  border: "1px solid #e0e0e0",
-                  borderRadius: 1,
-                }}
-              >
-                <Typography
-                  variant="subtitle2"
-                  sx={{ mb: 1, fontWeight: "bold" }}
-                >
-                  Model {index + 1}
-                </Typography>
+            // Handle case where file is a File object
+            if (file instanceof File) {
+              const url = URL.createObjectURL(file);
+              const fileName = file.name;
+              const isImage = fileName.match(/\.(jpeg|jpg|gif|png)$/i);
+              const isVideo = fileName.match(/\.(mp4|mov|avi)$/i);
 
-                <Grid container spacing={1}>
-                  {modelFields.map(([key, value]) => (
-                    <Grid item xs={12} sm={6} key={key}>
-                      <Typography variant="body2">
-                        <strong>{formatFieldName(key)}:</strong> {value}
-                      </Typography>
-                    </Grid>
-                  ))}
-                </Grid>
+              return (
+                <Box key={index} sx={{ width: 150 }}>
+                  {isImage ? (
+                    <img
+                      src={url}
+                      loading="lazy"
+                      alt={`Preview ${index}`}
+                      style={{ width: "100%", height: "auto", borderRadius: 4 }}
+                    />
+                  ) : isVideo ? (
+                    <video controls style={{ width: "100%", borderRadius: 4 }}>
+                      <source src={url} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <Paper sx={{ p: 1, textAlign: "center" }}>
+                      <Typography variant="caption">{fileName}</Typography>
+                    </Paper>
+                  )}
+                  <Typography
+                    variant="caption"
+                    noWrap
+                    sx={{ display: "block", mt: 0.5 }}
+                  >
+                    {fileName}
+                  </Typography>
+                </Box>
+              );
+            }
+
+            // Fallback for other cases
+            return (
+              <Box key={index} sx={{ width: 150 }}>
+                <Paper sx={{ p: 1, textAlign: "center" }}>
+                  <Typography variant="caption">
+                    Unsupported file type
+                  </Typography>
+                </Paper>
               </Box>
             );
           })}
@@ -942,283 +738,879 @@ const BrandRegisterForm = () => {
       );
     };
 
-    return (
-      <Box sx={{ mt: 2 }}>
-        <TableContainer component={Paper} sx={{ mb: 4 }}>
-          <Typography
-            variant="subtitle1"
-            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5" }}
-          >
+    // Improved location rendering with proper formatting
+    const renderLocationDetails = (location, index) => (
+      <Paper key={index} sx={{ p: 2, mb: 2, border: "1px solid #e0e0e0" }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography variant="body2">
+              <strong>Country:</strong> {location.country || "Not specified"}
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography variant="body2">
+              <strong>State:</strong> {location.state || "Not specified"}
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography variant="body2">
+              <strong>District:</strong> {location.district || "Not specified"}
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography variant="body2">
+              <strong>City:</strong> {location.city || "Not specified"}
+            </Typography>
+          </Grid>
+          {location.pincode && (
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2">
+                <strong>Pincode:</strong> {location.pincode}
+              </Typography>
+            </Grid>
+          )}
+        </Grid>
+      </Paper>
+    );
+
+    const renderExpansionDetails = () => {
+      const {
+        isInternationalExpansion,
+        currentOutletLocations = {},
+        expansionLocations = {},
+      } = expansionLocationData;
+
+      // Helper function to count locations and sub-items
+      const countLocationDetails = (locations) => {
+        if (!locations || !Array.isArray(locations))
+          return {
+            countries: 0,
+            states: 0,
+            districts: 0,
+            cities: 0,
+          };
+
+        const countrySet = new Set();
+        const stateSet = new Set();
+        const districtSet = new Set();
+        let cityCount = 0;
+
+        locations.forEach((location) => {
+          if (location.country) countrySet.add(location.country);
+          if (location.state) stateSet.add(location.state);
+
+          if (location.districts && Array.isArray(location.districts)) {
+            location.districts.forEach((district) => {
+              if (district.district) districtSet.add(district.district);
+
+              if (district.cities && Array.isArray(district.cities)) {
+                cityCount += district.cities.length;
+              }
+            });
+          }
+
+          // Count international states and cities
+          if (location.states && Array.isArray(location.states)) {
+            location.states.forEach((state) => {
+              stateSet.add(state.state || state.name || "Unnamed state");
+              if (state.cities && Array.isArray(state.cities)) {
+                cityCount += state.cities.length;
+              }
+            });
+          }
+        });
+
+        return {
+          countries: countrySet.size,
+          states: stateSet.size,
+          districts: districtSet.size,
+          cities: cityCount,
+        };
+      };
+
+      // Count current locations
+      const currentDomesticCounts = countLocationDetails(
+        currentOutletLocations?.domestic?.locations || []
+      );
+      const currentInternationalCounts = countLocationDetails(
+        currentOutletLocations?.international?.locations || []
+      );
+
+      // Count expansion locations
+      const expansionDomesticCounts = countLocationDetails(
+        expansionLocations?.domestic?.locations || []
+      );
+      const expansionInternationalCounts = countLocationDetails(
+        expansionLocations?.international?.locations || []
+      );
+
+      return (
+        <Accordion defaultExpanded sx={{ mb: 3 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="subtitle1" fontWeight="bold" color="#5bb949">
+              Expansion & Location Details
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body1" gutterBottom>
+                <strong>International Expansion Planned:</strong>
+                {isInternationalExpansion ? " Yes" : " No"}
+              </Typography>
+            </Box>
+
+            {/* Current Outlet Locations */}
+            <Accordion sx={{ mb: 3 }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="subtitle1" fontWeight="bold">
+                  Current Outlet Locations
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Grid container spacing={2}>
+                  {/* Domestic Locations Summary */}
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, height: "110px" }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Domestic Locations
+                      </Typography>
+                      <Box>
+                        <Typography variant="body2">
+                          <strong>Countries:</strong>{" "}
+                          {currentDomesticCounts.countries}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>States:</strong>{" "}
+                          {currentDomesticCounts.states}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Districts:</strong>{" "}
+                          {currentDomesticCounts.districts}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Cities:</strong>{" "}
+                          {currentDomesticCounts.cities}
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  </Grid>
+
+                  {/* International Locations Summary */}
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, height: "110px"}}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        International Locations
+                      </Typography>
+                      <Box>
+                        <Typography variant="body2">
+                          <strong>Countries:</strong>{" "}
+                          {currentInternationalCounts.countries}
+                        </Typography>
+
+                        <Typography variant="body2">
+                          <strong>States/Regions:</strong>{" "}
+                          {currentInternationalCounts.states}
+                        </Typography>
+
+                        <Typography variant="body2">
+                          <strong>Cities:</strong>{" "}
+                          {currentInternationalCounts.cities}
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  </Grid>
+                </Grid>
+              </AccordionDetails>
+            </Accordion>
+
+            {/* Expansion Locations */}
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="subtitle1" fontWeight="bold">
+                  Planned Expansion Locations
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Grid container spacing={2}>
+                  {/* Domestic Expansion Summary */}
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, height: "110px" }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Domestic Expansion
+                      </Typography>
+                      <Box>
+                        <Typography variant="body2">
+                          <strong>Countries:</strong>{" "}
+                          {expansionDomesticCounts.countries}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>States:</strong>{" "}
+                          {expansionDomesticCounts.states}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Districts:</strong>{" "}
+                          {expansionDomesticCounts.districts}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Cities:</strong>{" "}
+                          {expansionDomesticCounts.cities}
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  </Grid>
+
+                  {/* International Expansion Summary */}
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, height: "110px" }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        International Expansion
+                      </Typography>
+                      <Box>
+                        <Typography variant="body2">
+                          <strong>Countries:</strong>{" "}
+                          {expansionInternationalCounts.countries}
+                        </Typography>
+                        {expansionInternationalCounts.states > 0 && (
+                          <Typography variant="body2">
+                            <strong>States/Regions:</strong>{" "}
+                            {expansionInternationalCounts.states}
+                          </Typography>
+                        )}
+                        {expansionInternationalCounts.cities > 0 && (
+                          <Typography variant="body2">
+                            <strong>Cities:</strong>{" "}
+                            {expansionInternationalCounts.cities}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Paper>
+                  </Grid>
+                </Grid>
+              </AccordionDetails>
+            </Accordion>
+          </AccordionDetails>
+        </Accordion>
+      );
+    };
+    // Brand details section
+    const renderBrandDetails = () => (
+      <Accordion defaultExpanded sx={{ mb: 3 }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="subtitle1" fontWeight="bold" color="#5bb949">
             Brand Details
           </Typography>
-          <Table size="small">
-            <TableBody>
-              {Object.entries(brandDetails).map(([key, value]) => {
-                // Skip brandCategories and expansionLocation as we'll render them separately
-                if (key === "brandCategories" || key === "expansionLocation") {
+        </AccordionSummary>
+        <AccordionDetails>
+          <TableContainer component={Paper} sx={{ mb: 2 }}>
+            <Table size="small">
+              <TableBody>
+                {Object.entries(brandDetails).map(([key, value]) => {
+                  if (key === "awardText") {
+                    return (
+                      <TableRow key={key}>
+                        <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                          Awards
+                        </TableCell>
+                        <TableCell>
+                          {value?.length > 0 ? (
+                            <Box
+                              sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}
+                            >
+                              {value.map((award, idx) => (
+                                <Chip
+                                  key={idx}
+                                  label={award}
+                                  variant="outlined"
+                                />
+                              ))}
+                            </Box>
+                          ) : (
+                            "None"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+
+                  if (typeof value !== "object" || value === null) {
+                    return (
+                      <TableRow key={key}>
+                        <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                          {formatFieldName(key)}
+                        </TableCell>
+                        <TableCell>{value || "Not provided"}</TableCell>
+                      </TableRow>
+                    );
+                  }
                   return null;
-                }
-                return (
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </AccordionDetails>
+      </Accordion>
+    );
+
+    // Franchise details section
+    const renderFranchiseDetails = () => (
+      <Accordion defaultExpanded sx={{ mb: 3 }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="subtitle1" fontWeight="bold" color="#5bb949">
+            Franchise Details
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <TableContainer component={Paper} sx={{ mb: 2 }}>
+            <Table size="small">
+              <TableBody>
+                {Object.entries(franchiseDetails).map(([key, value]) => {
+                  if (key === "brandCategories") {
+                    return (
+                      <TableRow key={key}>
+                        <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                          Brand Categories
+                        </TableCell>
+                        <TableCell>
+                          {value.main && (
+                            <Box>
+                              <Typography>
+                                <strong>Main:</strong> {value.main}
+                              </Typography>
+                              {value.sub && (
+                                <Typography>
+                                  <strong>Sub:</strong> {value.sub}
+                                </Typography>
+                              )}
+                              {value.child && (
+                                <Typography>
+                                  <strong>Child:</strong> {value.child}
+                                </Typography>
+                              )}
+                            </Box>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+
+                  if (key === "fico") {
+                    return (
+                      <TableRow key={key}>
+                        <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                          FICO Models
+                        </TableCell>
+                        <TableCell>
+                          {value?.length > 0 ? (
+                            <Box sx={{ mt: 1 }}>
+                              {value.map((model, idx) => (
+                                <Accordion key={idx} sx={{ mb: 2 }}>
+                                  <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                  >
+                                    <Typography>
+                                      FICO Model {idx + 1}
+                                    </Typography>
+                                  </AccordionSummary>
+                                  <AccordionDetails>
+                                    <Grid container spacing={2}>
+                                      {Object.entries(model).map(
+                                        ([field, val]) => (
+                                          <Grid item xs={12} sm={6} key={field}>
+                                            <Typography variant="body2">
+                                              <strong>
+                                                {formatFieldName(field)}:
+                                              </strong>{" "}
+                                              {val || "Not specified"}
+                                            </Typography>
+                                          </Grid>
+                                        )
+                                      )}
+                                    </Grid>
+                                  </AccordionDetails>
+                                </Accordion>
+                              ))}
+                            </Box>
+                          ) : (
+                            "No FICO models added"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+
+                  if (typeof value !== "object" || value === null) {
+                    return (
+                      <TableRow key={key}>
+                        <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+                          {formatFieldName(key)}
+                        </TableCell>
+                        <TableCell>
+                          {Array.isArray(value) ? (
+                            value.length > 0 ? (
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexWrap: "wrap",
+                                  gap: 1,
+                                }}
+                              >
+                                {value.map((item, idx) => (
+                                  <Chip
+                                    key={idx}
+                                    label={item}
+                                    variant="outlined"
+                                  />
+                                ))}
+                              </Box>
+                            ) : (
+                              "None"
+                            )
+                          ) : (
+                            value || "Not provided"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+                  return null;
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </AccordionDetails>
+      </Accordion>
+    );
+
+    // Uploads section
+    const renderUploads = () => (
+      <Accordion defaultExpanded sx={{ mb: 2 }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="subtitle1" fontWeight="bold" color="#5bb949">
+            Uploads
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableBody>
+                {Object.entries(uploads).map(([key, value]) => (
                   <TableRow key={key}>
                     <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
                       {formatFieldName(key)}
                     </TableCell>
-                    <TableCell>{formatFieldValue(value)}</TableCell>
+                    <TableCell>{renderFilePreviews(value)}</TableCell>
                   </TableRow>
-                );
-              })}
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </AccordionDetails>
+      </Accordion>
+    );
 
-              {/* Brand Categories row */}
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
-                  Brand Categories
-                </TableCell>
-                <TableCell>
-                  {renderBrandCategories(brandDetails.brandCategories)}
-                </TableCell>
-              </TableRow>
-
-              {/* Expansion Locations row */}
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
-                  Expansion Locations
-                </TableCell>
-                <TableCell>
-                  {renderExpansionLocations(brandDetails.expansionLocation)}
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        <TableContainer component={Paper} sx={{ mb: 4 }}>
-          <Typography
-            variant="subtitle1"
-            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5" }}
-          >
-            Franchise Details
-          </Typography>
-          <Table size="small">
-            <TableBody>
-              {Object.entries(franchiseDetails).map(([key, value]) => (
-                <TableRow key={key}>
-                  <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
-                    {formatFieldName(key)}
-                  </TableCell>
-                  <TableCell>
-                    {key === "fico"
-                      ? renderFicoModels(value)
-                      : formatFieldValue(value)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        <TableContainer component={Paper}>
-          <Typography
-            variant="subtitle1"
-            sx={{ p: 2, fontWeight: "bold", backgroundColor: "#f5f5f5" }}
-          >
-            Uploads
-          </Typography>
-          <Table size="small">
-            <TableBody>
-              {Object.entries(uploads).map(([key, value]) => (
-                <TableRow key={key}>
-                  <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
-                    {formatFieldName(key)}
-                  </TableCell>
-                  <TableCell>
-                    {value.length > 0 ? (
-                      <>
-                        <Typography variant="body2" sx={{ mb: 1 }}>
-                          {value.length} file(s) uploaded
-                        </Typography>
-                        {renderFilePreviews(value)}
-                      </>
-                    ) : (
-                      "No files uploaded"
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+    return (
+      <Box sx={{ p: 2 }}>
+        {renderBrandDetails()}
+        {renderFranchiseDetails()}
+        {renderExpansionDetails()}
+        {renderUploads()}
       </Box>
     );
   };
   return (
     <>
-    <Navbar/>
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Box
         sx={{
-          flexGrow: 1,
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden",
-          p: 2,
+          height: "100vh",
         }}
       >
-        <Box>
-          <Stepper
-            activeStep={activeStep}
-            alternativeLabel
-            connector={<ColorlibConnector />}
-          >
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel StepIconComponent={ColorlibStepIcon}>
-                  {label}
-                </StepLabel>
-              </Step>
-            ))}
-            <Toolbar sx={{ justifyContent: "flex-end" }}>
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <Select
-                  value={formData.brandDetails.country}
-                  onChange={handleCountryChange}
-                  displayEmpty
-                  inputProps={{ "aria-label": "Select country" }}
-                >
-                  {countries.map((country) => (
-                    <MenuItem key={country.code} value={country.code}>
-                      {country.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Toolbar>
-          </Stepper>
-          <Box sx={{ display: "flex", flexDirection: "row", mb: 1, gap: 2 }}>
-            <Box width="30%">
-              {" "}
-              {activeStep >= 0 && renderSelectedCategories()}
-            </Box>
-            <Box width="25%">
-              {" "}
-              {activeStep >= 0 && renderExpansionLocations()}
-            </Box>
-            <Box width="45%"> {activeStep >= 1 && renderFicoModels()}</Box>
-          </Box>
-        </Box>
-
         <Box
           sx={{
             flexGrow: 1,
-            border: "1px solid #e0e0e0",
-            borderRadius: 2,
-            mb: 0,
-            pl: 1,
-            overflow: "auto",
-          }}
-        >
-          <Box sx={{ p: 2 }}>{getStepContent(activeStep)}</Box>
-        </Box>
-
-        <Box
-          sx={{
             display: "flex",
-            justifyContent: "center",
-            pt: 2,
-            borderTop: "1px solid #e0e0e0",
+            flexDirection: "column",
+            overflow: "hidden",
+            p: 0,
           }}
         >
-           <Button
-          disabled={activeStep === 0 || isSubmitting}
-          onClick={handleBack}
-          sx={{ mr: 2 }}
-        >
-          Back
-        </Button>
-
-          <Button 
-          variant="outlined" 
-          onClick={handlePreviewOpen} 
-          sx={{ mr: 2 }}
-          disabled={isSubmitting}
-        >
-          Preview
-        </Button>
-
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={handleCancel}
-            sx={{ mr: 2 }}
-            disabled={isSubmitting}
+          <Box
+            sx={{ display: "grid", gridTemplateColumns: "auto 1fr" }}
+            mb={1}
+            mt={1}
           >
-            Cancel
-          </Button>
+            <Button
+              onClick={handleHomeClick}
+              sx={{
+                backgroundColor: "#7ad03a",
+                color: "white",
+                height: "40px",
+                pr: 3,
+                pl: 2,
+                py: 0,
+                mt: 2,
+           
+                ml: { md: 6, xs: 3 },
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                transition: "all 0.3s ease",
+                display: "flex", // Ensure flex layout
+                gap: 1, // Adds spacing (theme.spacing(1) = 8px by default)
+                alignItems: "center", // Vertically center items
+                "&:hover": {
+                  backgroundColor: "#5db024",
+                  transform: "scale(1.05)",
+                  boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.2)",
+                },
+                "&:active": {
+                  transform: "scale(0.97)",
+                },
+              }}
+            >
+              <HomeOutlinedIcon fontSize="small" /> Home
+            </Button>
 
-              {activeStep === steps.length - 1 ? (
-          <Button 
-            variant="contained" 
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            startIcon={
-              isSubmitting ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : submitSuccess ? (
-                <CheckCircleIcon />
-              ) : null
-            }
+            {/* Stepper ==> To Navigate The Particular Page */}
+            <Stepper
+              activeStep={activeStep}
+              alternativeLabel
+              connector={<ColorlibConnector />}
+            >
+              {steps.map((label, index) => (
+                <Step key={label}>
+                  <StepLabel
+                    StepIconComponent={ColorlibStepIcon}
+                    onClick={() => setActiveStep(index)}
+                    sx={{
+                      cursor: "pointer",
+                      transition: "transform 0.3s ease, color 0.3s ease",
+                      "&:hover": {
+                        transform: "scale(1.1)",
+                        color: "primary.main", // or any custom color
+                      },
+                    }}
+                  >
+                    {label}
+                  </StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </Box>
+
+          <Box
+            sx={{
+              flexGrow: 1,
+              border: "1px solid #e0e0e0",
+              borderRadius: 2,
+              mt: 0,
+              overflow: "auto",
+            }}
+            // maxHeight={"calc(100vh - 200px)"}
           >
-            {isSubmitting ? "Submitting..." : submitSuccess ? "Submitted!" : "Submit"}
-          </Button>
-        ) : (
-          <Button 
-            variant="contained" 
-            onClick={handleNext}
-            disabled={isSubmitting}
+            <Box sx={{ p: 2 }}>{getStepContent(activeStep)}</Box>
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              pt: 2,
+              pb: 2,
+              borderTop: "1px solid #e0e0e0",
+            }}
           >
-            Next
-          </Button>
-        )}
+            <Button
+              disabled={activeStep === 0 || isSubmitting}
+              onClick={handleBack}
+              sx={{
+                background:
+                  "linear-gradient(to bottom right,rgb(246, 175, 33), #FF9A5A)",
+                border: 0,
+                mr: 2,
+                borderRadius: "12px",
+                color: "#FFFFFF",
+                cursor: "pointer",
+                display: "inline-block",
+                fontFamily:
+                  '-apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                fontSize: "16px",
+                fontWeight: 500,
+                lineHeight: 0,
+                outline: "transparent",
+                px: "1rem", // padding-left and padding-right
+                py: "0.2rem",
+                textAlign: "center",
+                textDecoration: "none",
+                transition: "box-shadow .2s ease-in-out",
+                userSelect: "none",
+                WebkitUserSelect: "none",
+                touchAction: "manipulation",
+                whiteSpace: "nowrap",
+                "&:not([disabled]):focus": {
+                  boxShadow:
+                    "0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgb(246, 175, 33), .125rem .125rem 1rem rgba(255, 154, 90, 0.5)",
+                },
+                "&:not([disabled]):hover": {
+                  boxShadow:
+                    "0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgb(246, 175, 33), .125rem .125rem 1rem rgba(255, 154, 90, 0.5)",
+                },
+              }}
+            >
+              Back
+            </Button>
+
+            <Button
+              variant="outlined"
+              onClick={handlePreviewOpen}
+              sx={{
+                backgroundColor: "#c2fbd7",
+                borderRadius: "100px",
+                boxShadow: `
+      rgba(44, 187, 99, 0.2) 0 -25px 18px -14px inset,
+      rgba(44, 187, 99, 0.15) 0 1px 2px,
+      rgba(44, 187, 99, 0.15) 0 2px 4px,
+      rgba(44, 187, 99, 0.15) 0 4px 8px,
+      rgba(44, 187, 99, 0.15) 0 8px 16px,
+      rgba(44, 187, 99, 0.15) 0 16px 32px
+    `,
+                mr: 2,
+                color: "green",
+                fontFamily:
+                  "CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif",
+                padding: "7px 20px",
+                fontSize: "16px",
+                textTransform: "none", // Prevents uppercase transformation
+                transition: "all 250ms",
+                border: 0,
+                userSelect: "none",
+                WebkitUserSelect: "none",
+                touchAction: "manipulation",
+                "&:hover": {
+                  boxShadow: `
+        rgba(44, 187, 99, 0.35) 0 -25px 18px -14px inset,
+        rgba(44, 187, 99, 0.25) 0 1px 2px,
+        rgba(44, 187, 99, 0.25) 0 2px 4px,
+        rgba(44, 187, 99, 0.25) 0 4px 8px,
+        rgba(44, 187, 99, 0.25) 0 8px 16px,
+        rgba(44, 187, 99, 0.25) 0 16px 32px
+      `,
+                  transform: "scale(1.05) rotate(-1deg)",
+                  backgroundColor: "#c2fbd7", // Maintain same background on hover
+                },
+                "&:active": {
+                  transform: "scale(1) rotate(0deg)", // Reset on click
+                },
+              }}
+              disabled={isSubmitting}
+            >
+              Preview
+            </Button>
+
+            <Button
+              variant="outlined"
+              sx={{
+                backgroundColor: "#c2fbd7",
+                borderRadius: "100px",
+                boxShadow: `
+      rgba(44, 187, 99, 0.2) 0 -25px 18px -14px inset,
+      rgba(44, 187, 99, 0.15) 0 1px 2px,
+      rgba(44, 187, 99, 0.15) 0 2px 4px,
+      rgba(44, 187, 99, 0.15) 0 4px 8px,
+      rgba(44, 187, 99, 0.15) 0 8px 16px,
+      rgba(44, 187, 99, 0.15) 0 16px 32px
+    `,
+                mr: 2,
+                color: "red",
+                fontFamily:
+                  "CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif",
+                padding: "7px 20px",
+                fontSize: "16px",
+                textTransform: "none", // Prevents uppercase transformation
+                transition: "all 250ms",
+                border: 0,
+                userSelect: "none",
+                WebkitUserSelect: "none",
+                touchAction: "manipulation",
+                "&:hover": {
+                  boxShadow: `
+        rgba(44, 187, 99, 0.35) 0 -25px 18px -14px inset,
+        rgba(44, 187, 99, 0.25) 0 1px 2px,
+        rgba(44, 187, 99, 0.25) 0 2px 4px,
+        rgba(44, 187, 99, 0.25) 0 4px 8px,
+        rgba(44, 187, 99, 0.25) 0 8px 16px,
+        rgba(44, 187, 99, 0.25) 0 16px 32px
+      `,
+                  transform: "scale(1.05) rotate(-1deg)",
+                  backgroundColor: "#c2fbd7", // Maintain same background on hover
+                },
+                "&:active": {
+                  transform: "scale(1) rotate(0deg)", // Reset on click
+                },
+              }}
+              onClick={handleCancel}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+
+            {activeStep === steps.length - 1 ? (
+              <Button
+                variant="contained"
+                sx={{
+                  background:
+                    "linear-gradient(to bottom right,rgb(82, 209, 105),rgb(132, 237, 47))",
+                  border: 0,
+                  mr: 2,
+                  borderRadius: "12px",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  display: "inline-block",
+                  fontFamily:
+                    '-apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  lineHeight: 0,
+                  outline: "transparent",
+                  px: "1rem", // padding-left and padding-right
+                  textAlign: "center",
+                  textDecoration: "none",
+                  transition: "box-shadow .2s ease-in-out",
+                  userSelect: "none",
+                  WebkitUserSelect: "none",
+                  touchAction: "manipulation",
+                  whiteSpace: "nowrap",
+                  "&:not([disabled]):focus": {
+                    boxShadow:
+                      "0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgb(82, 209, 105), .125rem .125rem 1rem rgba(192, 230, 123, 0.5)",
+                  },
+                  "&:not([disabled]):hover": {
+                    boxShadow:
+                      "0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgb(82, 209, 105), .125rem .125rem 1rem rgba(175, 203, 122, 0.5)",
+                  },
+                }}
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                startIcon={
+                  isSubmitting ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : submitSuccess ? (
+                    <CheckCircleIcon />
+                  ) : null
+                }
+              >
+                {isSubmitting
+                  ? "Submitting..."
+                  : submitSuccess
+                  ? "Submitted!"
+                  : "Submit"}
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                sx={{
+                  background:
+                    "linear-gradient(to bottom right,rgb(246, 175, 33), #FF9A5A)",
+                  border: 0,
+                  mr: 2,
+                  borderRadius: "12px",
+                  color: "#FFFFFF",
+                  cursor: "pointer",
+                  display: "inline-block",
+                  fontFamily:
+                    '-apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  lineHeight: 0,
+                  outline: "transparent",
+                  px: "1rem", // padding-left and padding-right
+                  textAlign: "center",
+                  textDecoration: "none",
+                  transition: "box-shadow .2s ease-in-out",
+                  userSelect: "none",
+                  WebkitUserSelect: "none",
+                  touchAction: "manipulation",
+                  whiteSpace: "nowrap",
+                  "&:not([disabled]):focus": {
+                    boxShadow:
+                      "0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgb(246, 175, 33), .125rem .125rem 1rem rgba(255, 154, 90, 0.5)",
+                  },
+                  "&:not([disabled]):hover": {
+                    boxShadow:
+                      "0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgb(246, 175, 33), .125rem .125rem 1rem rgba(255, 154, 90, 0.5)",
+                  },
+                }}
+                onClick={handleNext}
+                disabled={isSubmitting}
+              >
+                Next
+              </Button>
+            )}
+          </Box>
         </Box>
-      </Box>
 
-      {/* Preview Dialog */}
-      <Dialog
-        open={openPreview}
-        onClose={handlePreviewClose}
-        maxWidth="md"
-        fullWidth
-        scroll="paper"
-      >
-        <DialogTitle sx={{ borderBottom: "1px solid #e0e0e0" }}>
-          Form Data Preview
-        </DialogTitle>
-        <DialogContent dividers>{renderPreviewContent()}</DialogContent>
-        <DialogActions sx={{ borderTop: "1px solid #e0e0e0" }}>
-          <Button onClick={handlePreviewClose} variant="contained">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
+        {/* Preview Dialog */}
+        <Dialog
+          open={openPreview}
+          onClose={handlePreviewClose}
+          maxWidth="lg" // Changed from "md" to "lg" for wider view
+          fullWidth
+          scroll="paper"
+          sx={{
+            "& .MuiDialog-paper": {
+              width: "90%", // Take up 90% of screen width
+              maxWidth: "1200px", // Set a maximum width
+              height: "90vh", // Take up 90% of viewport height
+            },
+          }}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
-    <Footer/>
+          <DialogTitle
+            sx={{
+              borderBottom: "1px solid #e0e0e0",
+              position: "sticky",
+              top: 0,
+              backgroundColor: "background.paper",
+              zIndex: 1,
+              color:"#f9a505"
+            }}
+          >
+            Form Data Preview
+          </DialogTitle>
+          <DialogContent dividers sx={{ overflowY: "auto" }}>
+            {renderPreviewContent()}
+          </DialogContent>
+          <DialogActions
+            sx={{
+              borderTop: "1px solid #e0e0e0",
+              position: "sticky",
+              bottom: 0,
+              backgroundColor: "background.paper",
+              zIndex: 1,
+            }}
+          >
+            <Button onClick={handlePreviewClose} variant="contained" color="error">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Box>
+      {/* <Footer /> */}
     </>
   );
 };
-
 export default BrandRegisterForm;

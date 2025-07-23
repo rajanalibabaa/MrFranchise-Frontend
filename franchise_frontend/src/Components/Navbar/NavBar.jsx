@@ -10,17 +10,15 @@ import {
   Typography,
   Button,
   MenuItem,
-  Select,
-  FormControl,
+ 
   useMediaQuery,
   useTheme,
   Menu,
-  Badge,
-  Container,
+  
   Divider
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { User, MessageSquare, Globe, LogOut, LogIn, UserPlus, Home, Plus, Search } from "lucide-react";
+import { User, LogOut, LogIn, UserPlus, Home, Plus, Search } from "lucide-react";
 import SideViewContent from "../SideViewContentMenu/SideHoverMenu";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { useSelector, useDispatch } from "react-redux";
@@ -33,8 +31,9 @@ import { logout } from "../../Redux/Slices/AuthSlice/authSlice";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../../assets/Images/logo.png";
+import { showLoading } from "../../Redux/Slices/loadingSlice";
+import NavbarSearch from "../Navbar/NavbarSearch";
 // import backgroundPattern from "../../assets/Images/network-pattern.png";
-import FilterDropdowns from "./FilterDropdownsData";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -51,14 +50,16 @@ function Navbar() {
   const [anchorEl, setAnchorEl] = useState(null);
   const menuRef = useRef(null);
   const avatarRef = useRef(null);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [logoutLoading, setlogoutLoading] = useState(false);
 
   // Fallback for ID if Redux state is empty (e.g., after refresh)
   const ID =
     localStorage.getItem("brandUUID") ||
-    localStorage.getItem("investorUUID");
-
+    localStorage.getItem("investorUUID") 
+    ;
+ 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -68,6 +69,7 @@ function Navbar() {
   }, []);
 
   useEffect(() => {
+
     const handleClickOutside = (event) => {
       if (
         menuOpen &&
@@ -87,9 +89,12 @@ function Navbar() {
     navigate(path);
     dispatch(toggleMenu(false));
     setAnchorEl(null);
+    
   };
 
   const handleLoginSuccess = (userData) => {
+
+    // console.log("User Data:", userData);
     dispatch(loginSuccess(userData));
     setLoginModalOpen(false);
   };
@@ -103,9 +108,8 @@ function Navbar() {
     setlogoutLoading(true)
     try {
       const response = await axios.post(
-        // `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
-        `http://localhost:5000/api/v1/logout/${ID}`,
-        `https://franchise-backend-wgp6.onrender.com/api/v1/logout/${ID}`,
+      
+        `https://mrfranchisebackend.mrfranchise.in/logout/${ID}`,
         {},
         {
           headers: {
@@ -115,6 +119,8 @@ function Navbar() {
           withCredentials: true,
         }
       );
+
+      // console.log("===logout===")
 
       if (response.status === 200) {
         setTimeout(() => {
@@ -130,15 +136,24 @@ function Navbar() {
   };
 
   const handleMyProfileNavigate = () => {
-    if(localStorage.getItem("investorUUID")){
-      navigate("/investordashboard")
-    }else if(localStorage.getItem("brandUUID")){
-      navigate("/brandDashboard")
-    }else{
-      navigate("/")
-    }
-    dispatch(toggleMenu(false));
+  const investorUUID = localStorage.getItem("investorUUID");
+  const brandUUID = localStorage.getItem("brandUUID");
+  const userName = localStorage.getItem("userName") || "Guest";
+
+  let url = "/";
+
+  if (investorUUID) {
+    url = `/investordashboard?id=${encodeURIComponent(investorUUID)}&name=${encodeURIComponent(userName)}`;
+  } else if (brandUUID) {
+    url = `/brandDashboard?id=${encodeURIComponent(brandUUID)}&name=${encodeURIComponent(userName)}`;
   }
+
+  // Opens in a new tab/window
+  window.open(url, "_blank", "noopener,noreferrer");
+
+  dispatch(toggleMenu(false));
+};
+
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -149,22 +164,26 @@ function Navbar() {
     setAnchorEl(null);
     dispatch(toggleMenu(false));
   };
+  const handleLogoClick = () => {
+    dispatch(showLoading());
+      navigate("/");
+  };
 
   // Animation variants
-  const fadeIn = {
-    hidden: { opacity: 0, y: -20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-  };
+  // const fadeIn = {
+  //   hidden: { opacity: 0, y: -20 },
+  //   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  // };
 
-  const pulse = {
-    scale: [1, 1.05, 1],
-    transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-  };
+  // const pulse = {
+  //   scale: [1, 1.05, 1],
+  //   transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+  // };
 
   return (
     <>
       {/* Top Bar - Secondary Navigation */}
-      <Box
+      {/* <Box
         sx={{
           background: "linear-gradient(135deg, rgba(242, 168, 50, 0.9) 0%, rgba(185, 230, 21, 0.9) 100%)",
           backdropFilter: "blur(8px)",
@@ -192,87 +211,9 @@ function Navbar() {
         initial="hidden"
         animate="visible"
         variants={fadeIn}
-      >
-        <Box sx={{ 
-          display: "flex", 
-          flexWrap: "wrap", 
-          gap: isMobile ? 0.5 : 1,
-          position: 'relative',
-          zIndex: 1
-        }}>
-          {['Expand Your Franchise', 'Investor', 'Advertise'].map((text, index) => (
-            <motion.div
-              key={text}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button
-                component={Link}
-                to={
-                  text === 'Expand Your Franchise' ? '/expandyourbrand' :
-                  text === 'Investor' ? '/investfranchise' :
-                  '/advertisewithus'
-                }
-                size="small"
-                sx={{ 
-                  textTransform: 'none',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  '&:hover': {
-                    color: 'black',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                  }
-                }}
-              >
-                {text}
-              </Button>
-            </motion.div>
-          ))}
-        </Box>
-
-        <Box sx={{ 
-          display: "flex", 
-          alignItems: "center", 
-          gap: isMobile ? 2 : 4,
-          position: 'relative',
-          zIndex: 1
-        }}>
-          <motion.div whileHover={{ scale: 1.1 }}>
-            <IconButton size="small" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-              <Badge badgeContent={3} color="error">
-                <MessageSquare size={18} />
-              </Badge>
-            </IconButton>
-          </motion.div>
-          
-          <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 100 }}>
-            <Select
-              value="en"
-              disableUnderline
-              sx={{
-                color: 'rgba(255, 255, 255, 0.9)',
-                '& .MuiSelect-icon': {
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  right: 8,
-                  top: 'calc(50% - 8px)'
-                },
-                '&:before': {
-                  borderBottom: 'none'
-                },
-                '&:hover:not(.Mui-disabled):before': {
-                  borderBottom: 'none'
-                }
-              }}
-            >
-              <MenuItem value="en" sx={{ color: 'rgba(0, 0, 0, 0.9)' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Globe size={14} color="rgba(0, 0, 0, 0.9)" /> 
-                  <span>EN</span>
-                </Box>
-              </MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </Box>
+      >*/}
+        
+       
 
       {/* Main Navigation Bar */}
       <AppBar 
@@ -292,7 +233,6 @@ function Navbar() {
             left: 0,
             right: 0,
             height: '4px',
-            background: 'linear-gradient(90deg, #ff9800, #ff5722, #ff9800)',
             backgroundSize: '200% 100%',
             animation: 'gradient 3s ease infinite',
           },
@@ -309,6 +249,47 @@ function Navbar() {
           }
         }}
       >
+        <Box sx={{ 
+          display:{ xs: "none", sm: "flex"}, 
+          flexWrap: "wrap",
+          ml: "40px", 
+          
+          gap: isMobile ? 0.5 : 1,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          {['Expand Your Franchise', 'Investor', 'Advertise','Other Industries',"Blogs"].map((text, index) => (
+            <motion.div
+              key={text}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                component={Link}
+                to={
+                  text === 'Expand Your Franchise' ? '/expandyourbrand' :
+                  text === 'Investor' ? '/investfranchise' :
+                  text === 'Advertise' ? '/advertisewithus' :
+                  // text === 'Lead Distribution Packages' ? '/franchisepromotion' : 
+                  text === 'Other Industries' ? '/otherindustries' : 
+                  text === 'Blogs' ? '/blogs' : '/'
+                }
+                size="small"
+                sx={{ 
+                  fontSize: isMobile ? '0.75rem' : '0.875rem',
+                  textTransform: 'none',
+                  color: 'black',
+                  '&:hover': {
+                    color: '#ff9800',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                  }
+                }}
+              >
+                {text}
+              </Button>
+            </motion.div>
+          ))}
+        </Box>
         <Toolbar
           sx={{
             display: "flex",
@@ -316,10 +297,10 @@ function Navbar() {
             alignItems: "center",
             px: { xs: 1, sm: 2 },
             minHeight: "64px !important",
-            gap: isMobile ? 1 : 2
+            gap: isMobile ? 0 : 2
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap:isMobile?0: 1 }}>
             <motion.div whileHover={{ scale: 1.1 }}>
               <IconButton 
                 edge="start" 
@@ -335,8 +316,7 @@ function Navbar() {
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <Box 
-                component={Link} 
-                to="/" 
+                onClick={handleLogoClick}
                 sx={{ 
                   display: 'flex', 
                   alignItems: 'center', 
@@ -346,6 +326,7 @@ function Navbar() {
                 <img 
                   src={logo} 
                   alt="brand logo" 
+                  loading="lazy"
                   style={{ 
                     width: isMobile ? 120 : 170, 
                     height: isMobile ? 50 : 70,
@@ -358,37 +339,54 @@ function Navbar() {
             
           </Box>
 
+
             
-          {/* <Box sx={{ flexGrow: isMobile ? 1 : 0 }} /> */}
+          <Box sx={{ flexGrow: isMobile ? 0 : 1 }} />
 
 <Box  sx={{ 
               display: 'flex', 
-              gap: 5,
+              gap:isMobile?1: 5,
               flex: isTablet ? 1 : 'none',
-              justifyContent: isTablet ? 'center' : 'flex-start'
+              justifyContent: isTablet ? 'center' : 'flex-end',
+              alignItems:"center"
             }}>
+
+              <motion.div >
+    <IconButton 
+      onClick={() => setSearchOpen(true)}  >
+      <Search  size={25}  />
+      <Typography sx={{display:{xs:"none", sm:"flex"}}}>Search</Typography>
+    </IconButton>
+  </motion.div>
               <motion.div whileHover={{ y: -2 }}>
                 <Button 
-                onClick={() => navigate('/brandlistingform')}
-                  startIcon={<Plus size={18} />}
-                  sx={{ 
-                    color: '#ff9800',  
-                    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                onClick={() => {
+  const url = `/brandlistingform?source=${encodeURIComponent("mr franchise")}&ref=${encodeURIComponent("homepage")}`;
+  window.open(url, "_blank");
+}}
+
+                  startIcon={<Plus size={20} />}
+                  
+                  sx={{
+                    color: 'black',  
+                    backgroundColor: ' #6fff00fa',
                     borderRadius: '8px',
-                    px: 3,
-                    py: 1,
+                    px: {4: 3, xs: 2},
+                    py:isMobile?0: 1,
+                    margin:{ xs:"5px"},
                     textTransform: 'none',
+                    fontSize: isMobile ? '0.5': '1rem',
                     fontWeight: 500,
                     '&:hover': {
-                      backgroundColor: 'rgba(255, 152, 0, 0.2)'
+                      backgroundColor: '#7ad03a'
                     }
                   }}
                 >
-                  Add Your Business To Franchise
+                  Add Your Brand
                 </Button>
               </motion.div>
               
-              <motion.div whileHover={{ y: -2 }}>
+              {/* <motion.div whileHover={{ y: -2 }}>
                 <Button 
                   startIcon={<Search size={18} />}
                   onClick={() => navigate('/brandviewpage')}
@@ -407,7 +405,7 @@ function Navbar() {
                 >
                   Find Your Brand To Franchise
                 </Button>
-              </motion.div>
+              </motion.div> */}
             </Box>
 
           <Box ref={avatarRef} sx={{ position: "relative" }}>
@@ -562,6 +560,50 @@ function Navbar() {
               )}
             </Menu>
           </Box>
+
+          <Box sx={{ 
+          display: "flex", 
+          alignItems: "center", 
+          gap: isMobile ? 2 : 1,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          {/* <motion.div whileHover={{ scale: 1.1 }}>
+            <IconButton size="small" sx={{ color: 'rgba(253, 182, 16, 0.9)' }}>
+              <Badge badgeContent={3} color="error">
+                <MessageSquare size={18} />
+              </Badge>
+            </IconButton>
+          </motion.div> */}
+          
+          {/* <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 10 }}>
+            <Select
+              value="en"
+              disableUnderline
+              sx={{
+                color: '#ff9800',
+                '& .MuiSelect-icon': {
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  right: 8,
+                  top: 'calc(50% - 8px)'
+                },
+                '&:before': {
+                  borderBottom: 'none'
+                },
+                '&:hover:not(.Mui-disabled):before': {
+                  borderBottom: 'none'
+                }
+              }}
+            > 
+              {/* <MenuItem value="en" sx={{ color: '#ff9800'}}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Globe size={18} color="rgba(5, 5, 5, 0.9)" /> 
+                  <span>EN</span>
+                </Box>
+              </MenuItem> 
+            </Select>
+          </FormControl> */}
+        </Box>
         </Toolbar>
 
        
@@ -671,6 +713,7 @@ function Navbar() {
           </Box>
         )}
       </AnimatePresence>
+      <NavbarSearch open={searchOpen} handleClose={() => setSearchOpen(false)} />
     </>
   );
 }

@@ -17,7 +17,6 @@ import {
   Select,
   InputLabel,
   FormControl,
-  Slider,
   Chip,
   Drawer,
   IconButton,
@@ -30,7 +29,6 @@ import {
   Tab,
   Tabs,
   Rating,
-  Fade,
   TableContainer,
   Table,
   TableBody,
@@ -54,9 +52,7 @@ import {
   Share,
   Business as BusinessIcon,
   Description as DescriptionIcon,
-  Facebook,
-  Instagram,
-  LinkedIn,
+  
   AccountTree,
   Support,
   Favorite,
@@ -67,7 +63,6 @@ import { CheckCircleOutline } from "@mui/icons-material";
 import {motion} from "framer-motion"
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { set } from "react-hook-form";
 import LoginPage from "../LoginPage/LoginPage.jsx";
 
 function BrandList() {
@@ -96,17 +91,17 @@ function BrandList() {
   const [showLogin, setShowLogin] = useState(false);
 
   const investmentRangeOptions = [
-    { label: "All Ranges", value: "" },
-    { label: "Rs.10,000-50,000", value: "Below - Rs.50 " },
-    { label: "Rs.2L-5L", value: "Rs.2L-5L" },
-    { label: "Rs.5L-10L", value: "Rs.5 L - 10 L" },
-    { label: "Rs.10L-20L", value: "Rs.10 L - 20 L" },
-    { label: "Rs.20L-30L", value: "Rs.20 L - 30 L" },
-    { label: "Rs.30L-50L", value: "Rs.30 L - 50 L" },
-    { label: "Rs.50L-1Cr", value: "Rs.50 L - 1 Cr" },
-    { label: "Rs.1Cr-2Cr", value: "Rs.1 Cr - 2 Cr" },
-    { label: "Rs.2Cr-5Cr", value: "Rs.2 Cr - 5 Cr" },
-    { label: "Rs.5Cr-above", value: "Rs.5 Cr - Above" },
+    { label: "Below ₹50K", value:"Below-50,000" },
+  { label: "₹50K - ₹2 Lakhs", value:"Rs.50,000-2L" },
+  { label: "₹2 - ₹5 Lakhs", value:"Rs.2L-5L" },
+  { label: "₹5 - ₹10 Lakhs", value:"Rs.5L-10L" },
+  { label: "₹10 - ₹20 Lakhs", value:"Rs.10L-20L" },
+  { label: "₹20 - ₹30 Lakhs", value:"Rs.20L-30L"},
+  { label: "₹30 - ₹50 Lakhs", value:"Rs.30L-50L" },
+  { label: "₹50 Lakhs - ₹1 Crore", value:"Rs.50L-1Cr" },
+  { label: "₹1 - ₹2 Crores", value:"Rs.1Cr-2Cr" },
+  { label: "₹2 - ₹5 Crores", value:"Rs.2Cr-5Cr" },
+  { label: "Above ₹5 Crores", value:"Rs.5Cr-above" },
   ];
 
   // Application form states
@@ -121,7 +116,7 @@ function BrandList() {
 
     if (!AccessToken) {
       response = await axios.get(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/brandlisting/getAllBrandListing",
+        "https://mrfranchisebackend.mrfranchise.in/brandlisting/getAllBrandListing",
         {
           headers: {
             "Content-Type": "application/json",
@@ -130,7 +125,7 @@ function BrandList() {
       );
     } else {
       response = await axios.get(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
+        `https://mrfranchisebackend.mrfranchise.in/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -282,9 +277,9 @@ function BrandList() {
 
   const handleOpenBrand = async(brand) => {
 
-    console.log(brand.uuid)
+    // console.log(brand.uuid)
 
-    const viewResponse = await axios.post(`http://localhost:5000/api/v1/view/postViewBrands/${Id}`,
+    const viewResponse = await axios.post(`https://mrfranchisebackend.mrfranchise.in/view/postViewBrands/${Id}`,
       {viewedID:brand.uuid},
       {
           headers: {
@@ -294,7 +289,7 @@ function BrandList() {
         }
     )
 
-    console.log(viewResponse.data)
+    // console.log(viewResponse.data)
     setSelectedBrand(brand);
     setOpenDialog(true);
     setTabValue(0);
@@ -509,7 +504,7 @@ const toggleLike = async (brandId) => {
     if (updatedLikedStatus) {
       // Add to favorites
       await axios.post(
-        "https://franchise-backend-wgp6.onrender.com/api/v1/like/post-favbrands",
+        "https://mrfranchisebackend.mrfranchise.in/like/post-favbrands",
         { branduuid: brandId },
         {
           headers: {
@@ -522,7 +517,7 @@ const toggleLike = async (brandId) => {
     } else {
       // Remove from favorites
       const unlike = await axios.delete(
-        `https://franchise-backend-wgp6.onrender.com/api/v1/like/delete-favbrand/${Id}`,
+        `https://mrfranchisebackend.mrfranchise.in/like/delete-favbrand/${Id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -803,7 +798,7 @@ const closePopup = () => {
             };
 
             const response = await axios.post(
-                "http://localhost:5000/api/v1/brandlisting/createInstaApply",
+                "https://mrfranchisebackend.mrfranchise.in/brandlisting/createInstaApply",
                 payload,
                 {
                     headers: {
@@ -1734,10 +1729,10 @@ const closePopup = () => {
           brandId: selectedBrand?._id,
           brandName: selectedBrand?.personalDetails?.brandName || "",
         };
-        console.log(payload);
+        // console.log(payload);
 
         const response = await axios.post(
-          "http://localhost:5000/api/v1/brandlisting/createInstaApply",
+          "https://mrfranchisebackend.mrfranchise.in/brandlisting/createInstaApply",
           payload,
           {
             headers: {
@@ -1812,6 +1807,7 @@ const closePopup = () => {
                 <img
                   src={selectedBrand?.brandDetails?.brandLogo}
                   alt={selectedBrand?.personalDetails?.brandName}
+                  loading="lazy"
                   style={{
                     width: 100,
                     height: 100,
@@ -2048,6 +2044,7 @@ const closePopup = () => {
                               >
                                 <img
                                   src={imageUrl}
+                                  loading="lazy"
                                   alt={`Gallery ${index}`}
                                   style={{
                                     width: "100%",
@@ -2325,6 +2322,7 @@ const closePopup = () => {
               ) : (
                 <img
                   src={selectedMedia}
+                  loading="lazy"
                   alt="Full view"
                   style={{
                     width: "100%",

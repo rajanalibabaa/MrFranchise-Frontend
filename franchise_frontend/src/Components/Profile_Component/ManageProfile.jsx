@@ -11,14 +11,14 @@ const ManageProfile = () => {
     const [investorData, setInvestorData] = useState({});
 const id = useSelector((state) => state.user.investorUUID);
     const AccessToken = useSelector((state) => state.auth.AccessToken);
-    console.log(id);
-    console.log(AccessToken);
+    // console.log(id);
+    // console.log(AccessToken);
     
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await axios.get(
-                    `https://franchise-backend-wgp6.onrender.com/api/investor/getInvestor/${id}`,
+                    `http://localhost:5000/api/investor/getInvestor/${id}`,
                     {
                         headers: {
                             "Content-Type": "application/json",
@@ -159,6 +159,7 @@ const id = useSelector((state) => state.user.investorUUID);
                             <Avatar sx={{ width: 200, height: 200, mx: "auto", mb: 2 }}>
                                 <img
                                     src={img}
+                                    loading='lazy'
                                     alt="Profile"
                                     style={{ width: "140%", height: "105%", borderRadius: "50%" }}
                                 />
