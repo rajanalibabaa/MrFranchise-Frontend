@@ -47,7 +47,6 @@ import BrandDetailsControl from './Components/BrandProfile_Component/BrandDashbo
 import FranchiseDetailsControl from './Components/BrandProfile_Component/BrandDashboardController/FranchiseDetailsControl.jsx';
 import ExpansionLocationControl from './Components/BrandProfile_Component/BrandDashboardController/ExpansionLocationControl.jsx';
 import UploadsControl from './Components/BrandProfile_Component/BrandDashboardController/UploadsControl.jsx';
-import AllBrandsApi from './Api/AllBrandsApi.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -91,7 +90,6 @@ function App() {
   }, [AccessToken, dispatch]);
   return (
     <>
-    <AllBrandsApi />
    <GlobalLoader/>
         <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 1100 }}>
         {/* <Navbar /> */}

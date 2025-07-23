@@ -6,19 +6,48 @@ const brandSlice = createSlice({
         data: [],
         loading: false,
         error: null,
+        toggleLikedata : null
     },
     reducers: {
-        
         fetchAllBrands(state, action) {
             state.data = action.payload;  
-            console.log("action.payload :",action.payload)
-            
+            state.loading = true;
         },
+        toggleBrandLike(state, action) {
+            const singleData = action.payload;
+            state.toggleLikedata = singleData
+            console.log("action.payload toggleBrandLike:",action.payload)
+            state.data = state.data.map(brand => {
+                if (brand.uuid === singleData.brandId) {
+                    return {
+                        ...brand,
+                        isLiked: !brand.isLiked,
+                    };
+                }
+                return brand;
+            });
+        },
+        toggleShortlist(state, action) {
+            const singleData = action.payload;
+            state.toggleLikedata = singleData
+            console.log("action.payload toggleShortlist:",action.payload)
+            state.data = state.data.map(brand => {
+                if (brand.uuid === singleData.brandId) {
+                    return {
+                        ...brand,
+                        isShortListed: !brand.isShortListed,
+                    };
+                }
+                return brand;
+            });
+        }
     }
 });
 
 export const { 
-    fetchAllBrands
+    fetchAllBrands,
+    toggleBrandLike,
+    toggleShortlist
 } = brandSlice.actions;
 
 export default brandSlice.reducer;
