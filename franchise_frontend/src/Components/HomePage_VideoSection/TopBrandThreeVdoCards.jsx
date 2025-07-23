@@ -46,7 +46,7 @@ function TopBrandVdoCards() {
   const CARD_SIZES = {
     main: {
       width: isMobile ? "100%" : isTablet ? "100%" : "68%",
-      height: isMobile ? 470 : isTablet ? 480 : 550,
+      height: isMobile ? 520 : isTablet ? 480 : 550,
       videoHeight: isMobile ? 240 : isTablet ? 300 : 450,
     },
     side: {
@@ -288,6 +288,7 @@ function TopBrandVdoCards() {
                     cursor: "pointer",
                     backgroundColor: "#000",
                     overflow: "hidden",
+                  
                   }}
                   onClick={() => togglePlayPause(0)}
                 >
@@ -465,7 +466,7 @@ function TopBrandVdoCards() {
                       direction={{ xs: "row" }}
                       alignItems={{ xs: "flex-start", sm: "center" }}
                       spacing={5}
-                      sx={{ flex: 1, minWidth: 0,mt:0 }}
+                      sx={{ flex: 1, minWidth: 0,mt:0,pt:0 }}
                     >
                       <Stack direction="column" spacing={1}>
                         <Fact

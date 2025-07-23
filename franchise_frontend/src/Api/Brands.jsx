@@ -25,16 +25,30 @@ export const fetchBrands = async () => {
   const url = id 
     ? `${api.allBrandsApi.get.likeAndUnlikeBrands}/${id}`
     : api.allBrandsApi.get.defaultBrands;
-  
+
   try {
     const response = await apiClient.get(url);
-    console.log("Fetched Brands:", response.data.data);
-    return response.data.data;
+    const brands = response.data.data;
+
+    console.log("Fetched Brands before shuffle:", brands);
+
+    // Make a shallow copy before shuffling
+    const shuffled = brands.slice();
+
+    // Fisher–Yates shuffle
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    console.log("Shuffled Brands:", shuffled);
+    return shuffled;
   } catch (error) {
     console.error("Error fetching brands:", error);
     throw error;
   }
 };
+
 
 export const fetchBrandById = async (brandId) => {
   try {

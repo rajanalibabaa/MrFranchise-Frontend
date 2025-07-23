@@ -447,11 +447,11 @@ const HomeBannerSec = () => {
           backgroundPosition: "center",
           backgroundAttachment: isMobile ? "scroll" : "fixed",
           py: 1,
-          px: 2,
+          // px: 2,
           position: "relative",
           overflow: "hidden",
           color: "white",
-          minHeight: isMobile ? "95vh" : "40vh",
+          minHeight: isMobile ? "75vh" : "40vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -479,9 +479,11 @@ const HomeBannerSec = () => {
       >
         <Container
           sx={{
-            position: "relative",
+            position: "",
             zIndex: 2,
             textAlign: isMobile ? "center" : "center",
+            height:"100%",
+            mt:3
           }}
         >
           <motion.div
@@ -502,9 +504,10 @@ const HomeBannerSec = () => {
                   WebkitTextFillColor: "transparent",
                   textShadow: "none",
                   display: "inline",
-                  fontSize: isMobile ? "1.5rem" : "2.2rem",
+                  fontSize: isMobile ? "1.1rem" : "1.6rem",
                   fontWeight: 900,
-                  px: 1,
+                  // px: 2,
+                  mb:5
                 }}
               >
                 {currentText.title.text}
@@ -520,12 +523,15 @@ const HomeBannerSec = () => {
                 textAlign: "center",
                 color: "rgba(255,255,255,0.9)",
                 fontWeight: 300,
-                mb: 3,
+                mt:2,
+                mb: 5,
                 maxWidth: "800px",
                 mx: "auto",
                 lineHeight: 1.5,
-                fontSize: isMobile ? "0.85rem" : "1.1rem",
+                fontSize: isMobile ? "0.6rem" : ".8rem",
                 textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                position:"relative",
+                
               }}
               component={motion.div}
             >
@@ -540,6 +546,7 @@ const HomeBannerSec = () => {
                   fontWeight: currentText.subtitle.highlight.fontWeight,
                   color: currentText.subtitle.highlight.color,
                   display: "inline",
+                  mb:5
                 }}
                 component="span"
               >

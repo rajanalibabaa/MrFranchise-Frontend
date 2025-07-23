@@ -51,7 +51,7 @@ function RegisterHandleUser({boolean = true}) {
   };
   const handleSocialLogin = (provider) => {
     setIsSubmitting(true);
-    window.location.href = `https://mrfranchisebackend.mrfranchise.in/auth/${provider}`;
+    window.location.href = `http://localhost:5000/auth/${provider}`;
   };
 
   return (
