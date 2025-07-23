@@ -34,7 +34,7 @@ function Footer() {
   const handleSubscribe = async () => {
     try {
       const res = await axios.post(
-        "https://mrfranchisebackend.mrfranchise.in/subcribe/getsubscribe",
+        "https://mrfranchisebackend.mrfranchise.in/api/v1/subcribe/getsubscribe",
         { email },
         {
           headers: {

@@ -30,9 +30,11 @@ import { useBrands, useToggleLike, openBrandDialog } from "../../Hooks/Fetchbran
 import { useDispatch } from "react-redux";
 
 const CARD_DIMENSIONS = {
-  mobile: { width: 280, height: 520 },
+  mobile: { width: 280, height: 500 },
   tablet: { width: 320, height: 560 },
-  desktop: { width: 327, height: 500 },
+  smallDesktop: { width: 280, height: 500 },
+  desktop: { width: 267, height: 480 },
+  largeDesktop: { width: 327, height: 500 },
 };
 
 const cardVariants = {
@@ -337,9 +339,12 @@ const BrandCard = React.memo(({
 });
 
 const SimilarBrands = ({ brandData }) => {
-  const theme = useTheme();
+ const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+  const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
+  const isDesktop = useMediaQuery(theme.breakpoints.between("lg", "xl"));
+  const isLargeDesktop = useMediaQuery(theme.breakpoints.up("xl"));
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const isPaused = useRef(false);
@@ -382,8 +387,27 @@ const SimilarBrands = ({ brandData }) => {
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
-    return CARD_DIMENSIONS.desktop;
-  }, [isMobile, isTablet]);
+    if (isSmallDesktop) return CARD_DIMENSIONS.smallDesktop;
+    if (isDesktop) return CARD_DIMENSIONS.desktop;
+    return CARD_DIMENSIONS.largeDesktop;
+  }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
+
+   // Calculate visible cards based on container width
+  useEffect(() => {
+    const updateVisibleCards = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
+        const count = Math.floor(containerWidth / cardWidthWithGap);
+        // setVisibleCardCount(Math.max(1, Math.min(count, 6)));
+      }
+    };
+
+    updateVisibleCards();
+    window.addEventListener("resize", updateVisibleCards);
+    return () => window.removeEventListener("resize", updateVisibleCards);
+  }, [dimensions.width, isMobile]);
+
 
   const handleLikeClick = useCallback((brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");

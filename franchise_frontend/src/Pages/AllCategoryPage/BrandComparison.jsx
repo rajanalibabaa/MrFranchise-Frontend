@@ -16,9 +16,11 @@ import {
   Paper,
   Typography,
   Avatar,
+   Badge, Tooltip,
   Chip,
 } from "@mui/material";
-import { Close, ArrowBack, ArrowForward } from "@mui/icons-material";
+import { Close, ArrowBack, ArrowForward, PlaylistAddCheckCircleOutlined } from "@mui/icons-material";
+import { StarIcon } from "lucide-react";
 
 const BrandComparison = ({
   open,
@@ -144,20 +146,31 @@ const BrandComparison = ({
                   <TableCell sx={{ fontWeight: "bold", width: "200px" }}>Feature</TableCell>
                   {selectedBrands.map((brand) => (
                     <TableCell key={brand.uuid} align="center" sx={{ width: `${80/selectedBrands.length}%` }}>
-                      <Box display="flex" flexDirection="column" alignItems="center">
-                        <Avatar
-                          src={brand.uploads?.brandLogo || ""}
-                          alt={brand.brandDetails?.brandName}
-                          sx={{ 
-                            width: 80, 
-                            height: 80, 
-                            borderRadius:"50%",
-                            mb: 1,
-                            border: "2px solid #ff9800",
-                            bgcolor: "white",
-                            p: 0.5
-                          }}
-                        />
+                      <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
+<Tooltip title="Shortlisted" arrow>
+  <Badge
+    overlap="rectangular"
+    anchorOrigin={{ vertical: "top", horizontal: "right" }}
+    badgeContent={
+      <PlaylistAddCheckCircleOutlined  />
+    }
+  >
+    <Avatar
+      variant="square" // <-- Makes the avatar rectangular
+      src={brand.uploads?.brandLogo || ""}
+      alt={brand.brandDetails?.brandName}
+      sx={{
+        width: 100,       // Adjust as needed
+        height: 80,       // Adjust as needed
+        borderRadius: "8px", // Optional rounded corners
+        mb: 1,
+        border: "2px solid #ff9800",
+        bgcolor: "white",
+        p: 0.5,
+      }}
+    />
+  </Badge>
+</Tooltip>
                         <Typography variant="subtitle1" sx={{ fontWeight: "bold", color: "#4caf50" }}>
                           {brand.brandDetails?.brandName || "-"}
                         </Typography>

@@ -92,7 +92,7 @@ const OverviewTab = ({ brand }) => {
   const overviewRef = useRef(null);
   const containerRef = useRef(null);
   const [selectedModel, setSelectedModel] = useState(null);
-
+const [hasHoveredOnce, setHasHoveredOnce] = useState(false);
   const [isUserScrolling, setIsUserScrolling] = useState(false);
 
   useEffect(() => {
@@ -124,13 +124,22 @@ const OverviewTab = ({ brand }) => {
     };
   }, [isMobile, isUserScrolling]);
 
+
+  const handleMouseEnter = () => {
+  if (!hasHoveredOnce) {
+    setHasHoveredOnce(true);
+    startScroll(); 
+  }
+};
+
+
   const handleUserScrollStart = () => {
     setIsUserScrolling(true);
   };
 
   const handleUserScrollEnd = () => {
     // restart auto-scroll after short delay
-    setTimeout(() => setIsUserScrolling(false), 100);
+stopScroll();
   };
 
   const tableRows = brand.franchiseDetails?.fico?.map((model, index) => (
@@ -1238,7 +1247,7 @@ const OverviewTab = ({ brand }) => {
         onMouseEnter={handleUserScrollStart}
         onMouseLeave={handleUserScrollEnd}
       >
-        <Box sx={{ display: "flex" }}>
+        <Box sx={{ display: "flex" }} onMouseEnter={handleMouseEnter}>
           {/* render original table */}
           <Table
             stickyHeader
@@ -1354,7 +1363,7 @@ const OverviewTab = ({ brand }) => {
                       variant="body1"
                       sx={{ color: colors.dark, fontWeight: 600 }}
                     >
-                      Unique Selling Points:
+                      Unique Points:
                     </Typography>
                     <Typography variant="body2" sx={{ color: colors.dark }}>
                       {brand.franchiseDetails.uniqueSellingPoints.join(", ")}
@@ -1719,15 +1728,33 @@ const OverviewTab = ({ brand }) => {
             <Typography variant="body1" fontWeight={700} color={colors.error}>
               Disclaimer:
             </Typography>
-            <Typography variant="caption" color={colors.dark}>
-              Mr Franchise and the site sponsors accept no liability for the
-              accuracy of any information contained on this site or on other
-              linked sites. We recommend you take advice from a lawyer,
-              accountant and franchise consultant experienced in franchising
-              before you commit yourself. It is user's responsibility to satisfy
-              yourself as to the accuracy and reliability of the information
-              supplied. Please read the terms & conditions on MrFranchise.in
-            </Typography>
+      {!isMobile &&      <Typography variant="caption" color={colors.dark}>
+      Mr Franchise and the site sponsors accept no liability for the
+      accuracy of any information contained on this site or on other
+      linked sites. We recommend you take advice from a lawyer,
+      accountant and franchise consultant experienced in franchising
+      before you commit yourself. It is user's responsibility to satisfy
+      yourself as to the accuracy and reliability of the information
+      supplied. Please read the terms & conditions on MrFranchise.in
+    </Typography>}
+           {isMobile && 
+  <Box sx={{ 
+    overflowX: 'auto',
+    whiteSpace: 'nowrap',
+    minWidth: '300px', // or whatever minimum width you prefer
+    py: 1 // optional padding
+  }}>
+    <Typography variant="caption" color={colors.dark}>
+      Mr Franchise and the site sponsors accept no liability for the
+      accuracy of any information contained on this site or on other
+      linked sites. We recommend you take advice from a lawyer,
+      accountant and franchise consultant experienced in franchising
+      before you commit yourself. It is user's responsibility to satisfy
+      yourself as to the accuracy and reliability of the information
+      supplied. Please read the terms & conditions on MrFranchise.in
+    </Typography>
+  </Box>
+}
           </Box>
         </Box>
       ),

@@ -419,7 +419,7 @@ const handleSendOtp = async (field) => {
 
   try {
     const response = await axios.post(
-      "https://mrfranchisebackend.mrfranchise.in/otpverify/send-otp-email",
+      "https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-email",
       {
         [field === "email" ? "email" : "phone"]: data[field],
         type: field,
@@ -503,7 +503,7 @@ const handleVerifyOtp = async (field) => {
     console.log("Verifying with token:", otpToken); // Debug log
     
     const response = await axios.post(
-      "https://mrfranchisebackend.mrfranchise.in/otpverify/verify-otp",
+      "https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/verify-otp",
       {
         identifier: data[field],
         otp: otpInput,

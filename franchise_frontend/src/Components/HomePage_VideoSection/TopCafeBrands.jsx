@@ -419,7 +419,7 @@ const TopCafeFranchises = () => {
         const containerWidth = containerRef.current.offsetWidth;
         const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
         const count = Math.floor(containerWidth / cardWidthWithGap);
-        setVisibleCardCount(Math.max(1, Math.min(count, 6)));
+        // setVisibleCardCount(Math.max(1, Math.min(count, 6)));
       }
     };
 

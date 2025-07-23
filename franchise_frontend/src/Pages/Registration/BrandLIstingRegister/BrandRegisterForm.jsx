@@ -420,7 +420,7 @@ const dispatch = useDispatch();
         });
 
         const response = await axios.post(
-          "https://mrfranchisebackend.mrfranchise.in/brandlisting/createBrandListing",
+          "https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {

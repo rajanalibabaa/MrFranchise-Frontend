@@ -708,7 +708,7 @@ const ManageProfile = () => {
 
     try {
       const response = await axios.patch(
-        `https://mrfranchisebackend.mrfranchise.in/investor/updateInvestor/${investorUUID}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/updateInvestor/${investorUUID}`,
         formData,
         {
           headers: {
@@ -1062,7 +1062,7 @@ const ManageProfile = () => {
       setSnackbarOpen(false);
       
       const response = await axios.patch(
-        `https://mrfranchisebackend.mrfranchise.in/investor/deleteInvestorProfileImage/${investorUUID}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/deleteInvestorProfileImage/${investorUUID}`,
         { removeProfileImage: true },
         {
           headers: {
