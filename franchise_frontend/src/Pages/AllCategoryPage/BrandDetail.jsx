@@ -149,7 +149,7 @@ const BrandDetails = ({ brandData }) => {
 
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        `https://mrfranchisebackend.mrfranchise.in/investor/getInvestorByUUID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -398,7 +398,7 @@ const BrandDetails = ({ brandData }) => {
         }
 
         const response = await axios.post(
-          "http://localhost:5000/api/v1/instantapply/postApplication",
+          "https://mrfranchisebackend.mrfranchise.in/instantapply/postApplication",
           payload,
           {
             headers: { "Content-Type": "application/json" },

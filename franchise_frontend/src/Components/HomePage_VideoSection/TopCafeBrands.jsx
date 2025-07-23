@@ -1,3 +1,4 @@
+
 import React, {
   useCallback,
   useEffect,
@@ -20,7 +21,7 @@ import {
   Divider,
   Avatar,
   Stack,
-  Tooltip,
+  Tooltip
 } from "@mui/material";
 import { motion } from "framer-motion";
 import Favorite from "@mui/icons-material/Favorite";
@@ -32,21 +33,19 @@ import AreaChart from "@mui/icons-material/AreaChart";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 import { postView } from "../../Utils/function/view";
-import {
-  useBrands,
-  useToggleLike,
-  openBrandDialog,
-} from "../../Hooks/Fetchbrands";
+import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import { showLoading } from "../../Redux/Slices/loadingSlice";
+import { useDispatch } from "react-redux";
 import { handleShortList } from "../../Api/shortListApi";
-import { shuffleArray } from "./ShuffleData";
 
 const CARD_DIMENSIONS = {
-  mobile: { width: 280, height: 520 },
+  mobile: { width: 280, height: 500 },
   tablet: { width: 320, height: 560 },
   smallDesktop: { width: 280, height: 500 },
   desktop: { width: 267, height: 480 },
   largeDesktop: { width: 327, height: 500 },
 };
+
 
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
@@ -74,11 +73,17 @@ const BrandCard = React.memo(
     const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
     const brandLogo = brand?.uploads?.brandLogo?.[0] || "";
     const brandName = brand?.brandDetails?.brandName || "Brand";
-const mediaHeight = dimensions.height * 0.4; // 40% of card height
+    const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
+
     const {
       investmentRange = "Not specified",
       areaRequired = "Not specified",
+      franchiseType = "N/A",
       franchiseModel: modelType = "N/A",
+      franchiseFee = "N/A",
+      royaltyFee = "N/A",
+      roi = "N/A",
+      payBackPeriod = "N/A",
     } = franchiseModel;
 
     useEffect(() => {
@@ -103,17 +108,17 @@ const mediaHeight = dimensions.height * 0.4; // 40% of card height
       };
     }, []);
 
-    const [shortListed, setShortListed] = useState(brand.isShortListed);
-    const handleToggleShortList = async (brand) => {
-      try {
-        const response = await handleShortList(brand);
-        if (response.success) {
-          setShortListed(!shortListed);
-        }
-      } catch (error) {
-        console.error("Error toggling shortlist:", error);
-      }
-    };
+       const [shortListed, setShortListed] = useState(brand.isShortListed)
+        const handleToggleShortList = async (brand) => {
+           try {
+             const response = await handleShortList(brand);
+             if (response.success) {
+               setShortListed(!shortListed);
+             }
+           } catch (error) {
+             console.error("Error toggling shortlist:", error);
+           }
+         };
     return (
       <motion.div
         key={brandId}
@@ -131,7 +136,6 @@ const mediaHeight = dimensions.height * 0.4; // 40% of card height
             borderRadius: 3,
             overflow: "hidden",
             width: "100%",
-            height: dimensions.height,
             border: "1px solid #eee",
             // boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
           }}
@@ -198,28 +202,32 @@ const mediaHeight = dimensions.height * 0.4; // 40% of card height
                 }}
               >
                 <Box
-                  component="img"
-                  src={brand?.uploads?.brandLogo?.[0]}
-                  alt={brand.uploads?.brandName}
-                  loading="lazy"
-                  sx={{
-                    width: 100,
-                    height: 50,
-                    border: "1px solid #f29724",
-                    mb: 1,
-                    objectFit: "contain",
-                  }}
-                />
-                <IconButton
-                  onClick={() => handleToggleShortList(brand)}
-                  sx={{
-                    color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
-                  }}
-                >
-                  <Tooltip title={"ShortList"}>
-                    <PlaylistAddCheckCircleOutlined />
-                  </Tooltip>
-                </IconButton>
+                                            component="img"
+                                            src={brand?.uploads?.brandLogo?.[0]}
+                                            alt={brand.uploads?.brandName}
+                                            loading="lazy"
+                                            sx={{
+                                              width: 100,
+                                              height: 50,
+                                              border: '1px solid #f29724',
+                                              mb: 1,
+                                              objectFit: 'contain',  
+                                            }}
+                                          />
+                                           <IconButton
+                      onClick={() => handleToggleShortList(brand)}
+                       sx={{
+                        color: shortListed
+                          ? "#7ef400ff"
+                          : "rgba(0, 0, 0, 0.23)",
+                      }}
+                    >
+                      <Tooltip title={'ShortList'}
+                        
+                      ><PlaylistAddCheckCircleOutlined
+                     
+                      /></Tooltip>
+                    </IconButton>
                 {/* <Avatar
                   src={brandLogo}
                   sx={{
@@ -229,7 +237,7 @@ const mediaHeight = dimensions.height * 0.4; // 40% of card height
                     flexShrink: 0,
                   }}
                 /> */}
-
+               
                 <IconButton
                   onClick={() => handleLikeClick(brandId, brand?.isLiked)}
                   disabled={likeProcessing[brandId]}
@@ -247,26 +255,26 @@ const mediaHeight = dimensions.height * 0.4; // 40% of card height
                   )}
                 </IconButton>
               </Box>
-              <Typography
-                variant="body1"
-                fontWeight={800}
-                sx={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  flex: 1,
-                  mb: 1,
-                }}
-              >
-                {brandName}
-              </Typography>
+ <Typography
+                                variant="body1"
+                                fontWeight={800}
+                                sx={{
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  flex: 1,
+                                  mb:1
+                                }}
+                              >
+                  {brandName}
+                </Typography>
               {category?.child && (
                 <Box sx={{ mb: 2 }}>
                   <Stack
                     direction="row"
                     spacing={3}
-                    justifyContent="space-between"
-                    alignItems="center"
+                    justifyContent="space-between" 
+                    alignItems="center" 
                   >
                     <Chip
                       label={category.child}
@@ -278,6 +286,8 @@ const mediaHeight = dimensions.height * 0.4; // 40% of card height
                         mb: 1,
                       }}
                     />
+
+                   
                   </Stack>
                 </Box>
               )}
@@ -357,9 +367,9 @@ const mediaHeight = dimensions.height * 0.4; // 40% of card height
 );
 
 const TopCafeFranchises = () => {
- const theme = useTheme();
+  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
   const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
   const isDesktop = useMediaQuery(theme.breakpoints.between("lg", "xl"));
   const isLargeDesktop = useMediaQuery(theme.breakpoints.up("xl"));
@@ -371,8 +381,6 @@ const TopCafeFranchises = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
-    const [shuffledBrands, setShuffledBrands] = useState([]);
-  const [visibleCardCount, setVisibleCardCount] = useState(4);
 
   // REACT-QUERY HOOKS
   const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
@@ -380,10 +388,11 @@ const TopCafeFranchises = () => {
 
   // Filter brands that belong to Coffee & Tea Cafes category
   const coffeeTeaBrands = useMemo(() => {
-   return brands.filter((brand) => {
+    const filtered = brands.filter((brand) => {
       const category = brand?.franchiseDetails?.brandCategories || {};
       const categoryName = category?.child?.toLowerCase() || "";
       const subCategory = category?.sub?.toLowerCase() || "";
+
       return (
         categoryName.includes("coffee") ||
         categoryName.includes("tea") ||
@@ -392,19 +401,26 @@ const TopCafeFranchises = () => {
         subCategory === "beverage franchises"
       );
     });
+
+    return filtered;
   }, [brands]);
 
- const dimensions = useMemo(() => {
-     if (isMobile) return CARD_DIMENSIONS.mobile;
+  const dimensions = useMemo(() => {
+    if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
     if (isSmallDesktop) return CARD_DIMENSIONS.smallDesktop;
     if (isDesktop) return CARD_DIMENSIONS.desktop;
     return CARD_DIMENSIONS.largeDesktop;
   }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
 
-    // Calculate visible cards based on container width
-  useEffect(() => {
+ useEffect(() => {
     const updateVisibleCards = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
+        const count = Math.floor(containerWidth / cardWidthWithGap);
+        setVisibleCardCount(Math.max(1, Math.min(count, 6)));
+      }
     };
 
     updateVisibleCards();
@@ -412,6 +428,7 @@ const TopCafeFranchises = () => {
     return () => window.removeEventListener("resize", updateVisibleCards);
   }, [dimensions.width, isMobile]);
 
+  
   const handleLikeClick = useCallback(
     (brandId, isLiked) => {
       const token = localStorage.getItem("accessToken");
@@ -549,7 +566,7 @@ const TopCafeFranchises = () => {
   }
 
   // Only show if we have brands
-  const shouldShow = shuffledBrands.length > 0;
+  const shouldShow = coffeeTeaBrands.length > 0;
 
   return (
     <>
@@ -578,7 +595,7 @@ const TopCafeFranchises = () => {
               variant={isMobile ? "body1" : "h5"}
               fontWeight="bold"
               sx={{
-                color: "black",
+                color:"black",
                 mb: 1,
                 textAlign: "left",
                 position: "relative",
@@ -611,7 +628,7 @@ const TopCafeFranchises = () => {
                 },
               }}
               onClick={async () => {
-                window.open("/brandviewpage", "_blank");
+                window.open('/brandviewpage', '_blank')
               }}
             >
               View More
@@ -680,7 +697,7 @@ const TopCafeFranchises = () => {
               initial="initial"
               animate="animate"
               ref={scrollContainerRef}
-              sx={{
+             sx={{
                 display: "flex",
                 gap: isMobile ? 2 : 3,
                 borderRadius: 3,
@@ -688,35 +705,34 @@ const TopCafeFranchises = () => {
                 overflowX: "auto",
                 perspective: "1000px",
                 // Custom attractive scrollbar design
-                "&::-webkit-scrollbar": {
-                  height: isMobile ? "10px" : "8px",
-                  backgroundColor: "transparent",
+                '&::-webkit-scrollbar': {
+                  height: isMobile ? '10px' : '8px',
+                  backgroundColor: 'transparent',
                 },
-                "&::-webkit-scrollbar-track": {
-                  background:
-                    "linear-gradient(90deg, transparent, rgba(242, 151, 36, 0.1), transparent)",
-                  borderRadius: "10px",
-                  marginX: isMobile ? 0 : "10%",
+                '&::-webkit-scrollbar-track': {
+                  background: 'linear-gradient(90deg, transparent, rgba(242, 151, 36, 0.1), transparent)',
+                  borderRadius: '10px',
+                  marginX: isMobile ? 0 : '10%',
                 },
-                "&::-webkit-scrollbar-thumb": {
-                  background: "linear-gradient(90deg, #f29724, #98dd2e)",
-                  borderRadius: "10px",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                  border: "2px solid white",
-                  backgroundSize: "200%",
-                  transition: "background-position 0.3s ease",
-                  "&:hover": {
-                    backgroundPosition: "right center",
+                '&::-webkit-scrollbar-thumb': {
+                  background: 'linear-gradient(90deg, #f29724, #98dd2e)',
+                  borderRadius: '10px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  border: '2px solid white',
+                  backgroundSize: '200%',
+                  transition: 'background-position 0.3s ease',
+                  '&:hover': {
+                    backgroundPosition: 'right center',
                   },
                 },
                 // Firefox scrollbar
                 scrollbarColor: `transparent`,
-                scrollbarWidth: "thin",
+                scrollbarWidth: 'thin',
                 // Extra bottom padding for mobile
-                paddingBottom: isMobile ? "24px" : "16px",
+                paddingBottom: isMobile ? '24px' : '16px',
               }}
             >
-              {shuffledBrands.slice(0, visibleCardCount).map((brand) => (
+              {coffeeTeaBrands.map((brand) => (
                 <motion.div
                   key={brand?.uuid}
                   whileHover={{
