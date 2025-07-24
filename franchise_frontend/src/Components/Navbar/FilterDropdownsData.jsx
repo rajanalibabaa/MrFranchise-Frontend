@@ -55,11 +55,30 @@ const FilterDropdowns = () => {
       const investmentRange = brand.franchiseDetails?.fico?.[0]?.investmentRange;
       if (investmentRange) investmentRangesSet.add(investmentRange);
     }
-
+ const extractMin = (range) => {
+    const match = range.match(/\d+/g);
+    return match ? parseInt(match[0]) : Number.MAX_SAFE_INTEGER;
+  };
     return {
       subCategories: Array.from(subCategoriesMap.values()),
       states: Array.from(statesSet).sort(),
-      investmentRanges: Array.from(investmentRangesSet).sort()
+investmentRanges: Array.from(investmentRangesSet).sort((a, b) => {
+  const parseAmount = (text) => {
+    const match = text.match(/([\d.,]+)\s*(L|Cr|Crs)/i);
+    if (!match) return Number.MAX_SAFE_INTEGER;
+
+    let [_, num, unit] = match;
+    num = parseFloat(num.replace(/,/g, ''));
+    if (unit.toLowerCase() === 'l') return num * 1_00_000;
+    if (unit.toLowerCase().startsWith('cr')) return num * 1_00_00_000;
+    return num;
+  };
+
+  const minA = parseAmount(a);
+  const minB = parseAmount(b);
+
+  return minA - minB;
+})
     };
   }, [brands]);
 

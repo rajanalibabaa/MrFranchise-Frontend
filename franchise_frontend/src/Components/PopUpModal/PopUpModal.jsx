@@ -182,7 +182,7 @@ const PopupModal = ({ open, onClose }) => {
             <CloseIcon fontSize={isMobile ? 'small' : 'medium'} />
           </IconButton>
 
-          {/* Image with lazy loading and placeholder */}
+     
           <Box sx={{ position: 'relative',overflow: 'hidden',width: '100%',height:'auto' }}>
             <img 
               src={pop1} 
