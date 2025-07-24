@@ -12,7 +12,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import { useBrands } from "../../Hooks/Fetchbrands";
-
+ 
 const FilterDropdowns = () => {
   const navigate = useNavigate();
   const [filters, setFilters] = useState({
@@ -20,37 +20,37 @@ const FilterDropdowns = () => {
     selectedState: "",
     selectedInvestmentRange: ""
   });
-  
-  const { 
-    data: brands = [], 
-    isLoading, 
-    error 
+ 
+  const {
+    data: brands = [],
+    isLoading,
+    error
   } = useBrands();
-
+ 
   // Memoize the extraction of unique subcategories, states, and investment ranges
   const { subCategories, states, investmentRanges } = useMemo(() => {
     if (!brands || brands.length === 0) return { subCategories: [], states: [], investmentRanges: [] };
-
+ 
     const subCategoriesMap = new Map();
     const statesSet = new Set();
     const investmentRangesSet = new Set();
-
+ 
     for (let i = 0; i < brands.length; i++) {
       const brand = brands[i];
-      
+     
       // Process subcategories
       const subCategory = brand.franchiseDetails?.brandCategories?.sub;
       if (subCategory && !subCategoriesMap.has(subCategory)) {
         subCategoriesMap.set(subCategory, { id: subCategory, name: subCategory });
       }
-      
+     
       // Process states
       const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
       for (let j = 0; j < locations.length; j++) {
         const loc = locations[j];
         if (loc.state) statesSet.add(loc.state);
       }
-
+ 
       // Process investment ranges
       const investmentRange = brand.franchiseDetails?.fico?.[0]?.investmentRange;
       if (investmentRange) investmentRangesSet.add(investmentRange);
@@ -66,48 +66,48 @@ investmentRanges: Array.from(investmentRangesSet).sort((a, b) => {
   const parseAmount = (text) => {
     const match = text.match(/([\d.,]+)\s*(L|Cr|Crs)/i);
     if (!match) return Number.MAX_SAFE_INTEGER;
-
+ 
     let [_, num, unit] = match;
     num = parseFloat(num.replace(/,/g, ''));
     if (unit.toLowerCase() === 'l') return num * 1_00_000;
     if (unit.toLowerCase().startsWith('cr')) return num * 1_00_00_000;
     return num;
   };
-
+ 
   const minA = parseAmount(a);
   const minB = parseAmount(b);
-
+ 
   return minA - minB;
 })
     };
   }, [brands]);
-
+ 
   // Format investment ranges for dropdown with "All Ranges" option
   const formattedInvestmentRanges = useMemo(() => {
     const ranges = [{ label: "All Ranges", value: "" }];
-    
+   
     investmentRanges.forEach(range => {
       ranges.push({
         label: range,
         value: range
       });
     });
-
+ 
     return ranges;
   }, [investmentRanges]);
-
+ 
   const handleFilterChange = useCallback((name, value) => {
     setFilters(prev => ({ ...prev, [name]: value }));
   }, []);
-
+ 
  const handleFindBrands = useCallback(() => {
   const url = `/brandviewpage?filters=${encodeURIComponent(
     JSON.stringify(filters)
   )}`;
   window.open(url, "_blank"); // Opens in a new tab
 }, [filters]);
-
-
+ 
+ 
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" p={4}>
@@ -115,7 +115,7 @@ investmentRanges: Array.from(investmentRangesSet).sort((a, b) => {
       </Box>
     );
   }
-
+ 
   if (error) {
     return (
       <Box p={4}>
@@ -123,7 +123,7 @@ investmentRanges: Array.from(investmentRangesSet).sort((a, b) => {
       </Box>
     );
   }
-
+ 
   return (
     <Box>
       <Box
@@ -161,9 +161,9 @@ investmentRanges: Array.from(investmentRangesSet).sort((a, b) => {
             ))}
           </Select>
         </FormControl>
-
+ 
        
-
+ 
         {/* Investment Range Filter */}
         <FormControl fullWidth sx={{ minWidth: 180 }}>
           <InputLabel>Investment Range</InputLabel>
@@ -209,7 +209,7 @@ investmentRanges: Array.from(investmentRangesSet).sort((a, b) => {
             ))}
           </Select>
         </FormControl>
-
+ 
         <Button
           variant="contained"
           onClick={handleFindBrands}
@@ -231,5 +231,6 @@ investmentRanges: Array.from(investmentRangesSet).sort((a, b) => {
     </Box>
   );
 };
-
+ 
 export default React.memo(FilterDropdowns);
+ 

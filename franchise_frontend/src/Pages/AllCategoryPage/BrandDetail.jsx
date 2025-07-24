@@ -270,7 +270,7 @@ const BrandDetails = ({ brandData }) => {
   );
 
   const readyToInvestOptions = useMemo(
-    () => ["Own Investment", "Going To Loan", "Need Loan Assistance"],
+    () => ["Own Investment", "Going For Loan", "Need Loan Assistance"],
     []
   );
 

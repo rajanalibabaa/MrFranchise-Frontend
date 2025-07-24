@@ -469,7 +469,7 @@ function TopBrandVdoCards() {
                       alignItems={{ xs: "flex-start", sm: "center" }}
                       spacing={6}
                       
-                      sx={{ flex: 1, minWidth: 0,mt:0 }}
+                      // sx={{ flex: 1, minWidth: 0,mt:0 }}
                     >
                       <Stack direction="column" spacing={1} >
                         <Fact
@@ -839,14 +839,14 @@ function TopBrandVdoCards() {
                       fullWidth
                       size="small"
                       sx={{
-                        mt: isMobile?2:2,
+                        // mt: isMobile?2:2,
                         background:
                           theme.palette.mode === "dark"
                             ? "linear-gradient(45deg, #ffb74d, #ff9800)"
                             : "linear-gradient(45deg, #f57c00, #ff9800)",
                         textTransform: "none",
                         fontSize: "0.75rem",
-                        px: 4,
+                        // px: 4,
                         color: "#fff",
                         fontWeight: 600,
                         minWidth: 100,
