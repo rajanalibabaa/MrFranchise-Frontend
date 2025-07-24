@@ -35,6 +35,7 @@ import {
   ShareOutlined,
   PlaylistAddCheckCircleOutlined,
   ArrowUpward,
+  Info,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useBrand } from "../../Hooks/Fetchbrands.jsx";
@@ -48,6 +49,7 @@ import SimilarBrands from "../../Components/HomePage_VideoSection/SimilarBrands.
 import ShareDialogActions from "./ShareDialogActions.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
 import BillboardAd from "../../services/AdvertiseAds/BillBoardsAdsBrandViewPage.jsx";
+import { InfoIcon } from "lucide-react";
 
 // Component for expansion location tags to reduce main component size
 const ExpansionLocationTags = ({ brand, isMobile, isTablet, isSmallDesktop, isLargeDesktop }) => {
@@ -661,26 +663,28 @@ const BrandDetails = ({ brandData }) => {
             zIndex: 1000,
           }}
         >
-          <Button
-            ref={applyNowButtonRef}
-            variant="contained"
-            size={isMobile ? "medium" : "large"}
-            onClick={toggleDrawer(true)}
-            sx={{
-              backgroundColor: "#ff9800",
-              color: "white",
-              borderRadius: 50,
-              px: 4,
-              py: 1.5,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-              "&:hover": {
-                backgroundColor: "#e65100",
-              },
-              fontSize: isMobile ? "0.875rem" : "1rem",
-            }}
-          >
-            Apply Now
-          </Button>
+         <Button
+  ref={applyNowButtonRef}
+  variant="contained"
+  size={isMobile ? "medium" : "large"}
+  onClick={toggleDrawer(true)}
+  sx={{
+    backgroundColor: "#ff9800",
+    color: "white",
+    borderRadius: 50,
+    px: 4,
+    py: 1.5,
+    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+    "&:hover": {
+      backgroundColor: "#e65100",
+    },
+    fontSize: isMobile ? "0.875rem" : "1rem",
+  }}
+>
+  Apply Now&nbsp; for&nbsp; 
+   <strong > {selectedBrand?.brandDetails?.brandName}</strong>
+</Button>
+
         </Box>
 
         {/* Mobile/Tablet Drawer */}
@@ -709,7 +713,15 @@ const BrandDetails = ({ brandData }) => {
               }}
             >
               <Typography variant="h6" fontWeight={700} color="#ff9800">
-                Apply for Franchise
+                Apply for Franchise  
+                <Typography display={'flex'} flexDirection={'column'}>
+                <Typography fontSize={'0.7rem'} color="black">
+                  Brand Name: {selectedBrand?.brandDetails?.brandName}
+                  </Typography>  
+                <Typography fontSize={'0.7rem'} color="black">
+                  Brand Category: {selectedBrand?.franchiseDetails?.brandCategories?.child}
+                  </Typography>  
+              </Typography>
               </Typography>
               <IconButton onClick={toggleDrawer(false)}>
                 <Close />
@@ -763,6 +775,7 @@ const BrandDetails = ({ brandData }) => {
                     size="small"
                   />
                 </Grid>
+  Select your Store Location
 
                 {/* State Dropdown */}
                 <Grid item xs={12}>
@@ -1177,10 +1190,10 @@ const BrandDetails = ({ brandData }) => {
                           },
                         }}
                       >
-                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
+                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
                           <strong>Category</strong>
                         </TableCell>
-                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
+                        <TableCell sx={{ width: "18%", textAlign: "center" }}>
                           <strong>Area</strong>
                         </TableCell>
                         <TableCell sx={{ width: "15%", textAlign: "center" }}>
@@ -1388,7 +1401,7 @@ const BrandDetails = ({ brandData }) => {
                         style={{
                           width: "100%",
                           height: "100%",
-                          objectFit: "cover",
+                          objectFit: "contain",
                         }}
                       />
                     </Box>
@@ -1620,7 +1633,7 @@ const BrandDetails = ({ brandData }) => {
         </Dialog>
 
         {/* Desktop Application Form - responsive layout */}
-        {!isMobile && (
+        {/* {!isMobile && (
           <Box
             sx={{
               mt: 4,
@@ -1699,7 +1712,7 @@ const BrandDetails = ({ brandData }) => {
                   />
                 </Grid>
 
-                {/* State Dropdown */}
+                {/* State Dropdown 
                 <Grid item xs={12} md={4}>
                   <TextField
                     select
@@ -1720,7 +1733,7 @@ const BrandDetails = ({ brandData }) => {
                   </TextField>
                 </Grid>
 
-                {/* District Dropdown */}
+                {/* District Dropdown 
                 <Grid item xs={12} md={4}>
                   <TextField
                     select
@@ -1742,7 +1755,7 @@ const BrandDetails = ({ brandData }) => {
                   </TextField>
                 </Grid>
 
-                {/* City Dropdown */}
+                {/* City Dropdown 
                 <Grid item xs={12} md={4}>
                   <TextField
                     select
@@ -1873,7 +1886,7 @@ const BrandDetails = ({ brandData }) => {
               </Typography>
             </Box>
           </Box>
-        )}
+        )} */}
       </Box>
 
       {/* Liked brands and tags section */}

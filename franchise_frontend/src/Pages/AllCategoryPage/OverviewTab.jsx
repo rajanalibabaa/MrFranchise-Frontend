@@ -1763,42 +1763,8 @@ stopScroll();
     <Box ref={overviewRef}>
       {sections.map((section, index) => (
         <Box key={index} sx={{ mb: 6 }}>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent:'space-evenly' }}>
-             <SectionHeader>
-            <Box
-            component="div"
-            variant="h5"
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            <Box
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                bgcolor: "rgba(255, 152, 0, 0.1)",
-                animation: `${float} 4s ease-in-out infinite`,
-              }}
-            >
-              {section.icon}
-            </Box>
-            <Typography variant="h4" fontWeight={700} color="#ff9800" >
-              {section.title}
-            </Typography>
-            
-          </Box>
-          
-          </SectionHeader>
-          {/* <LeaderboardAd /> */}
-              
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent:'space-evenly' }}>              
                </Box>
-         
           {section.content}
         </Box>
       ))}
