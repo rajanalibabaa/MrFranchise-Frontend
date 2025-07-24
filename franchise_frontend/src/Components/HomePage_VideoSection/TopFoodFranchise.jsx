@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo, useLayoutEffect } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useLayoutEffect,
+} from "react";
 import {
   Box,
   Typography,
@@ -17,9 +24,7 @@ import {
   viewApi,
   openBrandDialog,
 } from "../../Redux/Slices/brandSlice";
-import { shuffleArray } from "./ShuffleData";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-
 import { motion } from "framer-motion";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
 
@@ -57,7 +62,6 @@ const TopFoodFranchises = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(true);
-  const [shuffledBrands, setShuffledBrands] = useState([]);
   const [visibleCardCount, setVisibleCardCount] = useState(4);
 
   const coffeeTeaBrands = useMemo(() => {
@@ -76,20 +80,12 @@ const TopFoodFranchises = () => {
     return CARD_DIMENSIONS.largeDesktop;
   }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
 
-  // Fetch and shuffle brands
   useEffect(() => {
     if (brands.length === 0) {
       dispatch(fetchBrands());
     }
   }, [dispatch, brands.length]);
 
-  useEffect(() => {
-    if (coffeeTeaBrands.length > 0) {
-      setShuffledBrands(shuffleArray(coffeeTeaBrands));
-    }
-  }, [coffeeTeaBrands]);
-
-  // Calculate visible cards
   useLayoutEffect(() => {
     const updateVisibleCards = () => {
       if (containerRef.current) {
@@ -136,7 +132,8 @@ const TopFoodFranchises = () => {
     return dimensions.width + (isMobile ? 16 : 24);
   }, [dimensions.width, isMobile]);
 
-  const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+  const easeInOutQuad = (t) =>
+    t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
   const smoothScrollTo = useCallback((target, immediate = false) => {
     const container = scrollContainerRef.current;
@@ -204,15 +201,25 @@ const TopFoodFranchises = () => {
   };
 
   if (brandsLoading) {
-    return <Box sx={{ textAlign: "center", p: 4 }}><CircularProgress /></Box>;
+    return (
+      <Box sx={{ textAlign: "center", p: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
-    return <Box sx={{ textAlign: "center", p: 4 }}><Typography color="error">{error.message || "Failed to load brands."}</Typography></Box>;
+    return (
+      <Box sx={{ textAlign: "center", p: 4 }}>
+        <Typography color="error">
+          {error.message || "Failed to load brands."}
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    shuffledBrands.length > 0 && (
+    coffeeTeaBrands.length > 0 && (
       <Box
         ref={containerRef}
         sx={{
@@ -224,110 +231,108 @@ const TopFoodFranchises = () => {
         }}
       >
         <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 1,
+            px: isMobile ? 2 : 0,
+          }}
+        >
+          <Typography
+            variant={isMobile ? "body1" : "h5"}
+            fontWeight="bold"
             sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              color: "black",
               mb: 1,
-              px: isMobile ? 2 : 0,
+              textAlign: "left",
+              position: "relative",
+              "&:after": {
+                content: '""',
+                display: "block",
+                width: "80px",
+                height: "4px",
+                background:
+                  theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                mt: 1,
+                borderRadius: 2,
+              },
             }}
           >
-            <Typography
-              variant={isMobile ? "body1" : "h5"}
-              fontWeight="bold"
-              sx={{
-                color: 'black',
-                mb: 1,
-                textAlign: "left",
-                position: "relative",
-                "&:after": {
-                  content: '""',
-                  display: "block",
-                  width: "80px",
-                  height: "4px",
-                  background:
-                    theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                  mt: 1,
-                  borderRadius: 2,
-                },
-              }}
-            >
-              Top Food Franchises
-            </Typography>
+            Top Food Franchises
+          </Typography>
 
-            <Button
-              variant="text"
-              size="small"
-              endIcon={<ArrowRight />}
-              sx={{
-                textTransform: "none",
-                fontSize: isMobile ? 14 : 16,
-                color: theme.palette.text.secondary,
-                "&:hover": {
-                  color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                  backgroundColor: "transparent",
-                },
-              }}
-              onClick={async () => {
-                window.open('/brandviewpage', '_blank');            
-              }}
-            >
-              View More
-            </Button>
-          </Box>
+          <Button
+            variant="text"
+            size="small"
+            endIcon={<ArrowRight />}
+            sx={{
+              textTransform: "none",
+              fontSize: isMobile ? 14 : 16,
+              color: theme.palette.text.secondary,
+              "&:hover": {
+                color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                backgroundColor: "transparent",
+              },
+            }}
+            onClick={() => window.open("/brandviewpage", "_blank")}
+          >
+            View More
+          </Button>
+        </Box>
 
         <Box sx={{ position: "relative" }}>
-          <Button 
-  onClick={handlePrevClick} 
-  disabled={!showStartShadow}
-  sx={{
-    position: "absolute",
-    left: isMobile ? 4 : 8,
-    top: "50%",
-    transform: "translateY(-50%)",
-    zIndex: 1,
-    minWidth: 40,
-    height: 40,
-    borderRadius: "50%",
-    backgroundColor: "background.paper",
-    boxShadow: 2,
-    "&:hover": {
-      backgroundColor: "action.hover",
-    },
-    "&:disabled": {
-      opacity: 0,
-      pointerEvents: "none",
-    },
-  }}
->
-  <ArrowBack fontSize="small" />
-</Button>
+          <Button
+            onClick={handlePrevClick}
+            disabled={!showStartShadow}
+            sx={{
+              position: "absolute",
+              left: isMobile ? 4 : 8,
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 1,
+              minWidth: 40,
+              height: 40,
+              borderRadius: "50%",
+              backgroundColor: "background.paper",
+              boxShadow: 2,
+              "&:hover": {
+                backgroundColor: "action.hover",
+              },
+              "&:disabled": {
+                opacity: 0,
+                pointerEvents: "none",
+              },
+            }}
+          >
+            <ArrowBack fontSize="small" />
+          </Button>
 
-<Button 
-  onClick={handleNextClick} 
-  disabled={!showEndShadow}
-  sx={{
-    position: "absolute",
-    right: isMobile ? 4 : 8,
-    top: "50%",
-    transform: "translateY(-50%)",
-    zIndex: 1,
-    minWidth: 40,
-    height: 40,
-    borderRadius: "50%",
-    backgroundColor: "background.paper",
-    boxShadow: 2,
-    "&:hover": {
-      backgroundColor: "action.hover",
-    },
-    "&:disabled": {
-      opacity: 0,
-      pointerEvents: "none",
-    },
-  }}
->
-  <ArrowForward fontSize="small" />
-</Button>
+          <Button
+            onClick={handleNextClick}
+            disabled={!showEndShadow}
+            sx={{
+              position: "absolute",
+              right: isMobile ? 4 : 8,
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 1,
+              minWidth: 40,
+              height: 40,
+              borderRadius: "50%",
+              backgroundColor: "background.paper",
+              boxShadow: 2,
+              "&:hover": {
+                backgroundColor: "action.hover",
+              },
+              "&:disabled": {
+                opacity: 0,
+                pointerEvents: "none",
+              },
+            }}
+          >
+            <ArrowForward fontSize="small" />
+          </Button>
 
           <Box
             ref={scrollContainerRef}
@@ -341,7 +346,7 @@ const TopFoodFranchises = () => {
               "&::-webkit-scrollbar": { display: "none" },
             }}
           >
-            {shuffledBrands.map((brand) => (
+            {coffeeTeaBrands.map((brand) => (
               <motion.div key={brand.uuid}>
                 <HomePageBrandCard
                   brand={brand}

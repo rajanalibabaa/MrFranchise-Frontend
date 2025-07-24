@@ -17,7 +17,6 @@ import {
   viewApi,
   openBrandDialog,
 } from "../../Redux/Slices/brandSlice";
-import { shuffleArray } from "./ShuffleData";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 import { motion } from "framer-motion";
@@ -57,7 +56,6 @@ const TopRestaurantsFranchise     = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(true);
-  const [shuffledBrands, setShuffledBrands] = useState([]);
   const [visibleCardCount, setVisibleCardCount] = useState(4);
 
   const coffeeTeaBrands = useMemo(() => {
@@ -76,18 +74,14 @@ const TopRestaurantsFranchise     = () => {
     return CARD_DIMENSIONS.largeDesktop;
   }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
 
-  // Fetch and shuffle brands
+  // Fetch brands
   useEffect(() => {
     if (brands.length === 0) {
       dispatch(fetchBrands());
     }
   }, [dispatch, brands.length]);
 
-  useEffect(() => {
-    if (coffeeTeaBrands.length > 0) {
-      setShuffledBrands(shuffleArray(coffeeTeaBrands));
-    }
-  }, [coffeeTeaBrands]);
+ 
 
   // Calculate visible cards
   useLayoutEffect(() => {
@@ -212,7 +206,7 @@ const TopRestaurantsFranchise     = () => {
   }
 
   return (
-    shuffledBrands.length > 0 && (
+    coffeeTeaBrands.length > 0 && (
       <Box
         ref={containerRef}
         sx={{
@@ -341,7 +335,7 @@ const TopRestaurantsFranchise     = () => {
               "&::-webkit-scrollbar": { display: "none" },
             }}
           >
-            {shuffledBrands.map((brand) => (
+            {coffeeTeaBrands.map((brand) => (
               <motion.div key={brand.uuid}>
                 <HomePageBrandCard
                   brand={brand}
