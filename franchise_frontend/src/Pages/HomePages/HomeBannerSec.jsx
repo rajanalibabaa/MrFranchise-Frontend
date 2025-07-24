@@ -101,12 +101,12 @@ const pageConfig = {
     },
     {
        component: "LikedBrands",
-      background: "#fffaf7",
+      background: "#white",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     },
     {
        component: "ViewBrands",
-      background: "#fffaf7",
+      background: "rgba(255, 250, 247, 1)",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     },
     {
@@ -558,7 +558,7 @@ const HomeBannerSec = () => {
       </Box>
 
       {/* Render all sections from config */}
-      <Box sx={{ backgroundColor: "#fffaf7" }}>
+      <Box>
         {pageConfig.sections.map((section, index) =>
           renderSection(section, index)
         )}

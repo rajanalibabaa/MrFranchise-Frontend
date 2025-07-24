@@ -34,8 +34,8 @@ const MembershipSelection = ({ onNext }) => {
         color: theme.palette.mode === 'dark' ? '#C0C0C0' : '#A0A0A0',
         plans: {
             BASIC: { months: 3, leads: 15, totalLeads:15, price: 0 },
-            PRO: { months: 6, leads: 15, totalLeads: 15, price: 0 },
-            GROWTH: { months: 12, leads: 15, totalLeads: 15, price: 0 }
+            // PRO: { months: 6, leads: 15, totalLeads: 15, price: 0 },
+            // GROWTH: { months: 12, leads: 15, totalLeads: 15, price: 0 }
         }
     },
     {

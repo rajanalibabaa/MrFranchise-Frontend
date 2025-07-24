@@ -15,11 +15,14 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 import Favorite from "@mui/icons-material/Favorite";
-import PlaylistAddCheckCircleOutlined from "@mui/icons-material/PlaylistAddCheckCircleOutlined";
+// import PlaylistAddCheckCircleOutlined from "@mui/icons-material/PlaylistAddCheckCircleOutlined";
 import Business from "@mui/icons-material/Business";
 import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { handleShortList } from "../../Api/shortListApi";
+// import { BsFillBookmarkStarFill } from "react-icons/bs";
+import { RiBookmark3Fill } from "react-icons/ri";
+
 
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
@@ -34,8 +37,7 @@ const HomePageBrandCard = React.memo(
     likeProcessing,
     dimensions,
     theme,
-    isMobile,
-    isTablet,
+
   }) => {
     const videoRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
@@ -165,7 +167,7 @@ const HomePageBrandCard = React.memo(
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 2,
+                  gap: 1,
                   justifyContent: "space-between",
                 }}
               >
@@ -179,9 +181,12 @@ const HomePageBrandCard = React.memo(
                     height: 50,
                     border: "1px solid #f29724",
                     mb: 1,
+                    borderRadius:2,
                     objectFit: "contain",
                   }}
                 />
+
+                 <Box >
                 <IconButton
                   onClick={() => handleToggleShortList(brand)}
                   sx={{
@@ -189,7 +194,7 @@ const HomePageBrandCard = React.memo(
                   }}
                 >
                   <Tooltip title={"ShortList"}>
-                    <PlaylistAddCheckCircleOutlined />
+                    <RiBookmark3Fill  size={21}/>
                   </Tooltip>
                 </IconButton>
 
@@ -209,6 +214,7 @@ const HomePageBrandCard = React.memo(
                     />
                   )}
                 </IconButton>
+                </Box>
               </Box>
               <Typography
                 variant="body1"

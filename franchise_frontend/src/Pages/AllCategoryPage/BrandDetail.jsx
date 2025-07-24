@@ -40,12 +40,15 @@ import { motion } from "framer-motion";
 import { useBrand } from "../../Hooks/Fetchbrands.jsx";
 import axios from "axios";
 import OverviewTab from "./OverviewTab.jsx";
+
 import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx";
+import SimilarBrands from "../../Components/HomePage_VideoSection/SimilarBrands.jsx";
 import ShareDialogActions from "./ShareDialogActions.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
+import BillboardAd from "../../services/AdvertiseAds/BillBoardsAdsBrandViewPage.jsx";
 
 const BrandDetails = ({ brandData }) => {
   const location = useLocation();
@@ -146,7 +149,7 @@ const BrandDetails = ({ brandData }) => {
 
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        `https://mrfranchisebackend.mrfranchise.in/investor/getInvestorByUUID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -395,7 +398,7 @@ const BrandDetails = ({ brandData }) => {
         }
 
         const response = await axios.post(
-          "http://localhost:5000/api/v1/instantapply/postApplication",
+          "https://mrfranchisebackend.mrfranchise.in/instantapply/postApplication",
           payload,
           {
             headers: { "Content-Type": "application/json" },
@@ -1917,6 +1920,9 @@ const BrandDetails = ({ brandData }) => {
 
       {/* Liked brands and tags section */}
       <LikedBrands />
+{/* <BillboardAd /> */}
+<SimilarBrands brandData={selectedBrand} />
+
       <Box
         sx={{
           width: "90%",

@@ -415,7 +415,7 @@ function TopBrandVdoCards() {
                           fontWeight={700}
                           noWrap
                           sx={{
-                            backgroundColor: "#7ad03a",
+                            backgroundColor: "black",
                             WebkitBackgroundClip: "text",
                             WebkitTextFillColor: "transparent",
                              whiteSpace: "normal",
@@ -465,7 +465,7 @@ function TopBrandVdoCards() {
                       direction={{ xs: "row" }}
                       alignItems={{ xs: "flex-start", sm: "center" }}
                       spacing={5}
-                      sx={{ flex: 1, minWidth: 0 }}
+                      sx={{ flex: 1, minWidth: 0,mt:0 }}
                     >
                       <Stack direction="column" spacing={1}>
                         <Fact
@@ -718,8 +718,7 @@ function TopBrandVdoCards() {
                       <Tooltip title={brand.brandDetails?.brandName || brand.title}>
                         <Typography
                           variant={isMobile ? "caption" : "body1"}
-                          color="#7ad03a"
-                          // fontWeight="bold"
+                          color="black"
                           noWrap={false}
                           sx={{
                             flex: 1,

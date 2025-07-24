@@ -49,6 +49,7 @@ const TopBeverageFranchises = () => {
   const isDesktop = useMediaQuery(theme.breakpoints.between("lg", "xl"));
   const isLargeDesktop = useMediaQuery(theme.breakpoints.up("xl"));
 
+
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const scrollRequestRef = useRef(null);
@@ -134,6 +135,7 @@ const TopBeverageFranchises = () => {
 
   const getScrollDistance = useCallback(() => {
     return dimensions.width + (isMobile ? 16 : 24);
+  
   }, [dimensions.width, isMobile]);
 
   const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
@@ -154,12 +156,14 @@ const TopBeverageFranchises = () => {
       const ease = easeInOutQuad(progress);
       container.scrollLeft = start + change * ease;
 
+
       if (progress < 1) {
         scrollRequestRef.current = requestAnimationFrame(animateScroll);
       } else {
         handleScroll();
       }
     };
+
 
     scrollRequestRef.current = requestAnimationFrame(animateScroll);
   }, []);
@@ -177,8 +181,10 @@ const TopBeverageFranchises = () => {
     const container = scrollContainerRef.current;
     if (container) {
       container.addEventListener("scroll", handleScroll);
+      container.addEventListener("scroll", handleScroll);
       handleScroll();
     }
+
 
     return () => {
       container?.removeEventListener("scroll", handleScroll);
