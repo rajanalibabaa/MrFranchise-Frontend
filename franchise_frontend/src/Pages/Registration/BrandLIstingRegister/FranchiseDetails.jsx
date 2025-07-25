@@ -362,16 +362,16 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
   const investmentRanges = [
     { label: "Below ₹50K", value: "Below - 50,000" },
-    { label: "₹50K - ₹2 Lakhs", value: "Rs. 50,000-2 L" },
+    { label: "₹50K - ₹2 Lakhs", value: "Rs. 50,000 - 2 L" },
     { label: "₹2 - ₹5 Lakhs", value: "Rs. 2 L - 5 L" },
-    { label: "₹5 - ₹10 Lakhs", value: "Rs.5 L - 10 L" },
+    { label: "₹5 - ₹10 Lakhs", value: "Rs. 5 L - 10 L" },
     { label: "₹10 - ₹20 Lakhs", value: "Rs. 10 L - 20 L" },
     { label: "₹20 - ₹30 Lakhs", value: "Rs. 20 L - 30 L" },
-    { label: "₹30 - ₹50 Lakhs", value: "Rs. 30 L- 50 L" },
+    { label: "₹30 - ₹50 Lakhs", value: "Rs. 30 L - 50 L" },
     { label: "₹50 Lakhs - ₹1 Crore", value: "Rs. 50 L - 1 Cr" },
     { label: "₹1 - ₹2 Crores", value: "Rs. 1 Cr - 2 Crs" },
     { label: "₹2 - ₹5 Crores", value: "Rs. 2 Cr - 5 Crs" },
-    { label: "Above ₹5 Crores", value: "Rs. 5Crs - above" },
+    { label: "Above ₹5 Crores", value: "Rs. 5 Crs - above" },
   ];
 
   const aidFinancing = ["Yes", "No"];
