@@ -114,7 +114,7 @@ const FilterDropdowns = () => {
 
     console.log("Filtered Brands:", filteredBrands); // ✅ Debug check
 
-    // Pass data to the next page
+  
     navigate("/brandviewpage", {
       state: {
         filteredBrands,

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Container, Typography, Divider, Link } from "@mui/material";
+import { Box, Container, Typography, Divider, Link,useMediaQuery, useTheme } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "../../Navbar/NavBar";
@@ -7,6 +7,7 @@ import Footer from "../Footer";
 import { Email, Phone } from '@mui/icons-material';
 
 const FONT_FAMILY = "'Poppins', 'Roboto', 'Arial', sans-serif";
+
 
 // Animation variants for sections
 const sectionVariants = {
@@ -60,6 +61,8 @@ const Section = ({ title, children }) => (
 );
 
 const TermsAndConditions = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   return (
     <Box
       sx={{
@@ -71,22 +74,23 @@ const TermsAndConditions = () => {
       <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 10 }}>
         <Navbar />
       </Box>
-      <Container sx={{ py: 3, pt: 20 }}>
+<Container sx={{ py: 3, pt: isMobile ? 11 : 15, maxWidth: "lg" }}>
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <Typography
-            variant="h4"
-            align="center"
-            fontWeight={700}
+ variant={isMobile ? "h5" : "h4"}
+             align="center"
+            fontWeight={800}
+            
             gutterBottom
             sx={{
               color: "#ffba00",
               fontFamily: FONT_FAMILY,
               letterSpacing: 1,
-              mb: 2,
+             
               textShadow: "0 2px 8px rgba(255,186,0,0.08)"
             }}
           >
@@ -106,7 +110,7 @@ const TermsAndConditions = () => {
         </Section>
 
         <Section title="1. Definitions">
-          <ul style={{ paddingLeft: "2.2em", marginTop: "0.5em" }}>
+          <ul style={{ paddingLeft: "2.2em",  }}>
             <li>
               “We”, “Us”, “Our” refers to{" "}
               <Link component={RouterLink} to="/" underline="hover" color="black">

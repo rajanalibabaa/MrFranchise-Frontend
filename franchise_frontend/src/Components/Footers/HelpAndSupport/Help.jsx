@@ -93,14 +93,14 @@ const Help = () => {
       <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 10 }}>
         <Navbar />
       </Box>
-      <Box sx={{ maxWidth: 1200, mx: "auto", p: 3, mt: 15 }}>
+      <Box sx={{ maxWidth: 1200, mx: "auto", p: 3, mt: 12 }}>
         {/* Header */}
         <motion.div
           variants={fadeInUp}
           initial="hidden"
           animate="visible"
         >
-          <Typography align="center" variant="h4" fontWeight="bold" color="orange">
+          <Typography align="center" variant="h3" fontWeight="bold" color="orange">
             Help Center
           </Typography>
           <Typography align="center" variant="h6" fontWeight="medium" mb={3}>
