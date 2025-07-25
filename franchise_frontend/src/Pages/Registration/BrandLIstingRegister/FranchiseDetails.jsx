@@ -1876,28 +1876,17 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               </Typography>
             )}
           </Typography>
-          <Editor
-            // apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
-            apiKey="boluah8zob0ss11ayrzgbdqqwev9m79lyvth1j28m0y5o9fm"
-            value={data.brandDescription || ""}
-            init={{
-              height: 400,
-              menubar: true,
-              plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image',
-                'charmap', 'preview', 'anchor', 'searchreplace',
-                'visualblocks', 'code', 'fullscreen', 'insertdatetime',
-                'media', 'table', 'help'
-              ],
-              toolbar:
-                "undo redo | formatselect | bold italic backcolor | " +
-                "alignleft aligncenter alignright alignjustify | " +
-                "bullist numlist outdent indent | removeformat | help | image",
-              images_upload_url: "/api/upload-image",
-              automatic_uploads: true,
-            }}
-            onEditorChange={handleDescriptionChange}
-          />
+           <TextField
+    multiline
+    minRows={8}
+    fullWidth
+    value={data.brandDescription || ""}
+    onChange={(e) => handleDescriptionChange(e.target.value)}
+    variant="outlined"
+    placeholder="Enter brand description here..."
+    error={!!errors.brandDescription}
+    helperText={errors.brandDescription}
+  />
         </Box>
       </Grid>
     </Box>
