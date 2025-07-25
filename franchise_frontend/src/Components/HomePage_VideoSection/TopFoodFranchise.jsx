@@ -218,6 +218,7 @@ const BrandCard = React.memo(
                 }}
               >
                 <Box
+                                onClick={() => handleApply(brand)}
                                                             component="img"
                                                             src={brand?.uploads?.brandLogo?.[0]}
                                                             alt={brand.uploads?.brandName}
@@ -226,7 +227,7 @@ const BrandCard = React.memo(
                                                               width: 100,
                                                               height: 50,
                                                               border: '1px solid #f29724',
-                                                        
+                                                        cursor: 'pointer',
                                                               objectFit: 'contain',  
                                                             }}
                                                           />

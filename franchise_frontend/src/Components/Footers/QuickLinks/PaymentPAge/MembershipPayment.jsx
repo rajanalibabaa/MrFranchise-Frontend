@@ -12,7 +12,8 @@ import {
   Tabs,
   Tab,
   Badge,
-  Avatar
+  Avatar,
+  Stack
 } from '@mui/material';
 import {
   Diamond as DiamondIcon,
@@ -29,19 +30,19 @@ const MembershipSelection = ({ onNext }) => {
 
   const membershipOptions = [
     {
-        tier:'Free',
-        icon: <CheckCircleIcon fontSize="small" />,
-        color: theme.palette.mode === 'dark' ? '#C0C0C0' : '#A0A0A0',
-        plans: {
-            BASIC: { months: 3, leads: 15, totalLeads:15, price: 0 },
-            // PRO: { months: 6, leads: 15, totalLeads: 15, price: 0 },
-            // GROWTH: { months: 12, leads: 15, totalLeads: 15, price: 0 }
-        }
+      tier: 'Free',
+      icon: <CheckCircleIcon fontSize="small" />,
+      color: theme.palette.mode === 'dark' ? '#6b7280' : '#9ca3af',
+      gradient: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
+      plans: {
+        BASIC: { months: 3, leads: 15, totalLeads: 15, price: 0 },
+      }
     },
     {
       tier: 'Silver',
       icon: <DiamondIcon fontSize="small" />,
-      color: theme.palette.mode === 'dark' ? '#C0C0C0' : '#A0A0A0',
+      color: '#a1a1aa',
+      gradient: 'linear-gradient(135deg, #e5e7eb, #d1d5db)',
       plans: {
         BASIC: { months: 3, leads: 30, totalLeads: 90, price: 13500 },
         PRO: { months: 6, leads: 45, totalLeads: 270, price: 27000 },
@@ -51,7 +52,8 @@ const MembershipSelection = ({ onNext }) => {
     {
       tier: 'Gold',
       icon: <PremiumIcon fontSize="small" />,
-      color: '#FFD700',
+      color: '#d4b01e',
+      gradient: 'linear-gradient(135deg, #fef3c7, #fde68a)',
       popular: true,
       plans: {
         BASIC: { months: 3, leads: 45, totalLeads: 135, price: 20250 },
@@ -62,7 +64,8 @@ const MembershipSelection = ({ onNext }) => {
     {
       tier: 'Platinum',
       icon: <StarIcon fontSize="small" />,
-      color: theme.palette.mode === 'dark' ? '#E5E4E2' : '#C5C4C2',
+      color: '#a5b4fc',
+      gradient: 'linear-gradient(135deg, #e0e7ff, #c7d2fe)',
       plans: {
         BASIC: { months: 3, leads: 60, totalLeads: 180, price: 27000 },
         PRO: { months: 6, leads: 75, totalLeads: 450, price: 54000 },
@@ -81,7 +84,8 @@ const MembershipSelection = ({ onNext }) => {
       tier,
       plan,
       ...details,
-      color: membershipOptions.find(m => m.tier === tier).color
+      color: membershipOptions.find(m => m.tier === tier).color,
+      gradient: membershipOptions.find(m => m.tier === tier).gradient
     });
   };
 
@@ -89,17 +93,7 @@ const MembershipSelection = ({ onNext }) => {
 
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
-      {/* <Typography variant="h4" align="center" gutterBottom sx={{ 
-        mb: 2, 
-        fontWeight: 800,
-        background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent'
-      }}>
-        Choose Your Advertising Plan
-      </Typography> */}
-      
-      <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 1 }}>
+      <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 4 }}>
         Select the perfect package for your business growth
       </Typography>
 
@@ -108,16 +102,7 @@ const MembershipSelection = ({ onNext }) => {
         display: 'flex', 
         justifyContent: 'center',
         mb: 4,
-        position: 'relative',
-        '&:before': {
-          content: '""',
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 2,
-          backgroundColor: theme.palette.divider
-        }
+        position: 'relative'
       }}>
         <Tabs 
           value={tabValue} 
@@ -161,7 +146,8 @@ const MembershipSelection = ({ onNext }) => {
                         theme.palette.getContrastText(currentTier.color) : 
                         theme.palette.text.secondary,
                       width: 32,
-                      height: 32
+                      height: 32,
+                      background: option.gradient
                     }}>
                       {option.icon}
                     </Avatar>
@@ -196,12 +182,13 @@ const MembershipSelection = ({ onNext }) => {
                   display: 'flex',
                   flexDirection: 'column',
                   border: isSelected ? `2px solid ${currentTier.color}` : `1px solid ${theme.palette.divider}`,
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                   position: 'relative',
                   overflow: 'hidden',
+                  boxShadow: isSelected ? `0 10px 25px -5px ${currentTier.color}40` : '0 4px 6px -1px rgba(0,0,0,0.1)',
                   '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: `0 10px 20px rgba(0,0,0,0.1)`,
+                    transform: 'translateY(-4px)',
+                    boxShadow: `0 20px 25px -5px ${currentTier.color}20, 0 10px 10px -5px ${currentTier.color}10`,
                     borderColor: currentTier.color
                   },
                   '&:before': {
@@ -210,25 +197,36 @@ const MembershipSelection = ({ onNext }) => {
                     top: 0,
                     left: 0,
                     right: 0,
-                    height: 4,
-                    backgroundColor: currentTier.color
+                    height: 6,
+                    background: currentTier.gradient
                   }
                 }}
               >
-                <CardContent sx={{ flexGrow: 1 }}>
+                <CardContent sx={{ 
+                  flexGrow: 1,
+                  p: 3,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%'
+                }}>
                   <Box sx={{ 
                     display: 'flex', 
                     justifyContent: 'space-between',
                     alignItems: 'flex-start',
                     mb: 2
                   }}>
-                    <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: 1,
+                      color: 'text.primary'
+                    }}>
                       {plan}
                     </Typography>
                     <Checkbox
                       checked={isSelected}
                       onChange={() => handlePlanSelect(currentTier.tier, plan, details)}
-                      icon={<BoltIcon />}
+                      icon={<BoltIcon color="action" />}
                       checkedIcon={<CheckCircleIcon sx={{ color: currentTier.color }} />}
                       sx={{
                         p: 0,
@@ -240,13 +238,14 @@ const MembershipSelection = ({ onNext }) => {
                   </Box>
 
                   <Box sx={{ 
-                    backgroundColor: `${currentTier.color}15`,
-                    p: 2,
-                    borderRadius: 1,
+                    background: currentTier.gradient,
+                    p: 2.5,
+                    borderRadius: 1.5,
                     mb: 3,
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    border: `1px solid ${theme.palette.divider}`
                   }}>
-                    <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5 }}>
                       ₹{details.price.toLocaleString()}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -254,14 +253,14 @@ const MembershipSelection = ({ onNext }) => {
                     </Typography>
                   </Box>
 
-                  <Box sx={{ mb: 3 }}>
+                  <Stack spacing={1.5} sx={{ mb: 3, flexGrow: 1 }}>
                     <Box sx={{ 
                       display: 'flex', 
                       justifyContent: 'space-between',
-                      py: 1,
+                      py: 1.5,
                       borderBottom: `1px solid ${theme.palette.divider}`
                     }}>
-                      <Typography variant="body2">Monthly Leads:</Typography>
+                      <Typography variant="body2" color="text.secondary">Monthly Leads:</Typography>
                       <Typography variant="body2" fontWeight={600}>
                         {details.leads}
                       </Typography>
@@ -269,26 +268,28 @@ const MembershipSelection = ({ onNext }) => {
                     <Box sx={{ 
                       display: 'flex', 
                       justifyContent: 'space-between',
-                      py: 1,
+                      py: 1.5,
                       borderBottom: `1px solid ${theme.palette.divider}`
                     }}>
-                      <Typography variant="body2">Total Leads:</Typography>
+                      <Typography variant="body2" color="text.secondary">Total Leads:</Typography>
                       <Typography variant="body2" fontWeight={600}>
                         {details.totalLeads}
                       </Typography>
                     </Box>
-                   
-                  </Box>
+                  </Stack>
 
                   {plan === 'PRO' && (
                     <Chip 
                       label="Best Value" 
                       size="small" 
                       sx={{ 
-                        mt: 1,
+                        mt: 'auto',
+                        alignSelf: 'center',
                         backgroundColor: currentTier.color,
                         color: theme.palette.getContrastText(currentTier.color),
-                        fontWeight: 600
+                        fontWeight: 600,
+                        px: 1.5,
+                        py: 0.5
                       }} 
                     />
                   )}
@@ -308,21 +309,23 @@ const MembershipSelection = ({ onNext }) => {
           alignItems: 'center'
         }}>
           <Box sx={{
-            backgroundColor: `${currentTier.color}15`,
+            background: selectedPlan.gradient,
             p: 3,
-            borderRadius: 3,
+            borderRadius: 2,
             width: '100%',
             maxWidth: 600,
             textAlign: 'center',
-            mb: 3
+            mb: 3,
+            border: `1px solid ${theme.palette.divider}`,
+            boxShadow: `0 4px 6px -1px ${selectedPlan.color}20`
           }}>
-            <Typography variant="h6" sx={{ mb: 1 }}>
-              You selected: <span style={{ color: currentTier.color }}>{selectedPlan.tier} {selectedPlan.plan}</span>
+            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+              You selected: <span style={{ color: selectedPlan.color, fontWeight: 700 }}>{selectedPlan.tier} {selectedPlan.plan}</span>
             </Typography>
-            <Typography variant="body1">
+            <Typography variant="body1" color="text.secondary">
               {selectedPlan.leads} leads/month for {selectedPlan.months} months
             </Typography>
-            <Typography variant="h5" sx={{ mt: 2, fontWeight: 700 }}>
+            <Typography variant="h5" sx={{ mt: 2, fontWeight: 800 }}>
               Total: ₹{selectedPlan.price.toLocaleString()}
             </Typography>
           </Box>
@@ -332,16 +335,16 @@ const MembershipSelection = ({ onNext }) => {
             size="large"
             onClick={() => onNext(selectedPlan)}
             sx={{
-              px: 8,
+              px: 6,
               py: 1.5,
-              fontSize: '1.1rem',
+              fontSize: '1rem',
               fontWeight: 700,
-              borderRadius: 50,
-              background: `linear-gradient(90deg, ${currentTier.color}, ${theme.palette.secondary.main})`,
-              boxShadow: `0 4px 15px ${currentTier.color}80`,
+              borderRadius: 2,
+              background: selectedPlan.gradient,
+              boxShadow: `0 4px 15px ${selectedPlan.color}40`,
               '&:hover': {
                 transform: 'translateY(-2px)',
-                boxShadow: `0 6px 20px ${currentTier.color}80`
+                boxShadow: `0 6px 20px ${selectedPlan.color}60`
               }
             }}
           >
@@ -353,4 +356,4 @@ const MembershipSelection = ({ onNext }) => {
   );
 };
 
-export default MembershipSelection; 
+export default MembershipSelection;

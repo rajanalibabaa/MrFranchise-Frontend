@@ -820,11 +820,8 @@ useEffect(() => {
       dispatch(showLoading());
       const response = await axios.post(
        
-       // "http://localhost:5000/investor/createInvestor",
-         `http://localhost:5000/investor/createInvestor`,
+         `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/createInvestor`,
         
-        "http://localhost:5000/investor/createInvestor",
-        // "http://localhost:5000/investor/createInvestor",
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );

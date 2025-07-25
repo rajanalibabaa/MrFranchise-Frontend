@@ -116,7 +116,11 @@ function BrandList() {
 
     if (!AccessToken) {
       response = await axios.get(
+<<<<<<< HEAD
         "http://localhost:5000/brandlisting/getAllBrandListing",
+=======
+        "https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getAllBrandListing",
+>>>>>>> d37056e415ba37cc491d4faf137ee52e6e87e872
         {
           headers: {
             "Content-Type": "application/json",
@@ -125,7 +129,11 @@ function BrandList() {
       );
     } else {
       response = await axios.get(
+<<<<<<< HEAD
         `http://localhost:5000/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
+=======
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${Id}`,
+>>>>>>> d37056e415ba37cc491d4faf137ee52e6e87e872
         {
           headers: {
             "Content-Type": "application/json",
@@ -279,7 +287,11 @@ function BrandList() {
 
     // console.log(brand.uuid)
 
+<<<<<<< HEAD
     const viewResponse = await axios.post(`http://localhost:5000/view/postViewBrands/${Id}`,
+=======
+    const viewResponse = await axios.post(`https://mrfranchisebackend.mrfranchise.in/api/v1/view/postViewBrands/${Id}`,
+>>>>>>> d37056e415ba37cc491d4faf137ee52e6e87e872
       {viewedID:brand.uuid},
       {
           headers: {
@@ -504,7 +516,11 @@ const toggleLike = async (brandId) => {
     if (updatedLikedStatus) {
       // Add to favorites
       await axios.post(
+<<<<<<< HEAD
         "http://localhost:5000/like/post-favbrands",
+=======
+        "https://mrfranchisebackend.mrfranchise.in/api/v1/like/post-favbrands",
+>>>>>>> d37056e415ba37cc491d4faf137ee52e6e87e872
         { branduuid: brandId },
         {
           headers: {
@@ -517,7 +533,11 @@ const toggleLike = async (brandId) => {
     } else {
       // Remove from favorites
       const unlike = await axios.delete(
+<<<<<<< HEAD
         `http://localhost:5000/like/delete-favbrand/${Id}`,
+=======
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/like/delete-favbrand/${Id}`,
+>>>>>>> d37056e415ba37cc491d4faf137ee52e6e87e872
         {
           headers: {
             "Content-Type": "application/json",
@@ -798,7 +818,11 @@ const closePopup = () => {
             };
 
             const response = await axios.post(
+<<<<<<< HEAD
                 "http://localhost:5000/brandlisting/createInstaApply",
+=======
+                "https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/createInstaApply",
+>>>>>>> d37056e415ba37cc491d4faf137ee52e6e87e872
                 payload,
                 {
                     headers: {
@@ -1732,7 +1756,11 @@ const closePopup = () => {
         // console.log(payload);
 
         const response = await axios.post(
+<<<<<<< HEAD
           "http://localhost:5000/brandlisting/createInstaApply",
+=======
+          "https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/createInstaApply",
+>>>>>>> d37056e415ba37cc491d4faf137ee52e6e87e872
           payload,
           {
             headers: {

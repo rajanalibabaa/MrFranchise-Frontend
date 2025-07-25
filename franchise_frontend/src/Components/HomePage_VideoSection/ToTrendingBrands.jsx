@@ -145,6 +145,7 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
         {/* Brand Logo */}
 
 <Box
+                onClick={() => handleApply(brand)}
   component="img"
   src={brand.uploads?.brandLogo}
   alt={brand.uploads?.brandName}
@@ -154,6 +155,7 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
     height: 80,
     border: '1px solid #f29724',
     mb: 1,
+    cursor: 'pointer',
     objectFit: 'contain',  // or 'cover'
   }}
 />
@@ -169,8 +171,8 @@ const handleLikeClick = useCallback((brandId, isLiked) => {
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            width: '100%', // Take full width of card
-            px: 0.5 // Add small padding
+            width: '100%',
+            px: 0.5,
           }}
         >
           {brand.brandDetails?.brandName}

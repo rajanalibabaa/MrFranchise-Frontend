@@ -92,7 +92,7 @@ const OverviewTab = ({ brand }) => {
   const overviewRef = useRef(null);
   const containerRef = useRef(null);
   const [selectedModel, setSelectedModel] = useState(null);
-
+const [hasHoveredOnce, setHasHoveredOnce] = useState(false);
   const [isUserScrolling, setIsUserScrolling] = useState(false);
 
   useEffect(() => {
@@ -105,18 +105,14 @@ const OverviewTab = ({ brand }) => {
       if (scrollInterval) clearInterval(scrollInterval);
       scrollInterval = setInterval(() => {
         if (!container) return;
-        // scroll by 1px every 10ms
         container.scrollLeft += 1;
-        // if reached end, go back to start
-
          if (container.scrollLeft >= container.scrollWidth / 2) {
           container.scrollLeft = 0;
         }
-      }, 10); // adjust speed
+      }, 10);
     };
 
     if (!isUserScrolling) startAutoScroll();
-
     return () => {
       if (scrollInterval) {
         clearInterval(scrollInterval);
@@ -124,13 +120,22 @@ const OverviewTab = ({ brand }) => {
     };
   }, [isMobile, isUserScrolling]);
 
+
+  const handleMouseEnter = () => {
+  if (!hasHoveredOnce) {
+    setHasHoveredOnce(true);
+    startScroll(); 
+  }
+};
+
+
   const handleUserScrollStart = () => {
     setIsUserScrolling(true);
   };
 
   const handleUserScrollEnd = () => {
     // restart auto-scroll after short delay
-    setTimeout(() => setIsUserScrolling(false), 100);
+stopScroll();
   };
 
   const tableRows = brand.franchiseDetails?.fico?.map((model, index) => (
@@ -195,7 +200,7 @@ const OverviewTab = ({ brand }) => {
     </Fade>
   ));
 
-  const ExpansionLocationGrid = ({ data }) => {
+ const ExpansionLocationGrid = ({ data }) => {
     const [expandedState, setExpandedState] = useState(0);
     const [expandedDistrict, setExpandedDistrict] = useState(
       data?.locations?.[0]?.districts?.length > 0 ? "0-0" : null
@@ -223,6 +228,14 @@ const OverviewTab = ({ brand }) => {
       setExpandedDistrict(
         expandedDistrict === districtKey ? null : districtKey
       );
+    };
+
+    // Function to render items with fallback to parent name
+    const renderItemsWithFallback = (items, parentName) => {
+      if (Array.isArray(items) && items.length > 0) {
+        return items;
+      }
+      return [parentName]; // Return parent name as single item if no items exist
     };
 
     return (
@@ -298,7 +311,7 @@ const OverviewTab = ({ brand }) => {
                     overflowY: "auto",
                   }}
                 >
-                  {visibleLocations.map((loc, stateIndex) => (
+                  {renderItemsWithFallback(visibleLocations, "Country").map((loc, stateIndex) => (
                     <Card
                       key={`state-${stateIndex}`}
                       onClick={() => toggleState(stateIndex)}
@@ -331,7 +344,7 @@ const OverviewTab = ({ brand }) => {
                         }}
                       >
                         <Typography fontWeight={600}>
-                          {loc.state || "Unknown State"}
+                          {typeof loc === 'string' ? loc : (loc.state || "Unknown State")}
                         </Typography>
                       </Box>
                     </Card>
@@ -389,69 +402,53 @@ const OverviewTab = ({ brand }) => {
                     overflowY: "auto",
                   }}
                 >
-                  {expandedState !== null &&
-                  Array.isArray(data.locations[expandedState].districts) ? (
-                    data.locations[expandedState].districts.length > 0 ? (
-                      data.locations[expandedState].districts.map(
-                        (dist, distIndex) => {
-                          const districtKey = `${expandedState}-${distIndex}`;
-                          return (
-                            <Card
-                              key={`district-${districtKey}`}
-                              onClick={() =>
-                                toggleDistrict(expandedState, distIndex)
-                              }
-                              sx={{
-                                mb: 1,
-                                cursor: "pointer",
-                                borderRadius: "6px",
-                                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                                borderLeft: `4px solid ${
-                                  expandedDistrict === districtKey
-                                    ? theme.palette.secondary.main
-                                    : "transparent"
-                                }`,
-                                bgcolor:
-                                  expandedDistrict === districtKey
-                                    ? "rgba(255, 152, 0, 0.08)"
-                                    : "background.paper",
-                                transition: "all 0.2s ease",
-                                "&:hover": {
-                                  transform: "translateY(-1px)",
-                                  boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
-                                },
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  p: 0.8,
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <Typography variant="subtitle1">
-                                  {dist.district || "N/A"}
-                                </Typography>
-                              </Box>
-                            </Card>
-                          );
-                        }
-                      )
-                    ) : (
-                      <Box sx={{ p: 2, textAlign: "center" }}>
-                        <Typography variant="body2" color="text.secondary">
-                          <LocationOff
+                  {expandedState !== null ? (
+                    renderItemsWithFallback(
+                      data.locations[expandedState]?.districts,
+                      data.locations[expandedState]?.state || "Unknown State"
+                    ).map((dist, distIndex) => {
+                      const districtKey = `${expandedState}-${distIndex}`;
+                      return (
+                        <Card
+                          key={`district-${districtKey}`}
+                          onClick={() =>
+                            typeof dist !== 'string' && toggleDistrict(expandedState, distIndex)
+                          }
+                          sx={{
+                            mb: 1,
+                            cursor: "pointer",
+                            borderRadius: "6px",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                            borderLeft: `4px solid ${
+                              expandedDistrict === districtKey
+                                ? theme.palette.secondary.main
+                                : "transparent"
+                            }`,
+                            bgcolor:
+                              expandedDistrict === districtKey
+                                ? "rgba(255, 152, 0, 0.08)"
+                                : "background.paper",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                            },
+                          }}
+                        >
+                          <Box
                             sx={{
-                              fontSize: 40,
-                              color: "action.disabled",
-                              mb: 1,
+                              p: 0.8,
+                              display: "flex",
+                              justifyContent: "space-between",
                             }}
-                          />
-                          <br />
-                          No districts available
-                        </Typography>
-                      </Box>
-                    )
+                          >
+                            <Typography variant="subtitle1">
+                              {typeof dist === 'string' ? dist : (dist.district || "N/A")}
+                            </Typography>
+                          </Box>
+                        </Card>
+                      );
+                    })
                   ) : (
                     <Box sx={{ p: 2, textAlign: "center" }}>
                       <Typography variant="body2" color="text.secondary">
@@ -506,7 +503,9 @@ const OverviewTab = ({ brand }) => {
                   }}
                 >
                   <LocationCity sx={{ mr: 1, color: "#fff" }} />
-                  Cities
+                  {expandedDistrict !== null 
+                    ? `${data.locations[expandedDistrict.split("-")[0]]?.districts[expandedDistrict.split("-")[1]]?.name} Cities`
+                    : "Cities"}
                   {isMobile && expandedDistrict !== null && (
                     <IconButton
                       size="small"
@@ -530,63 +529,41 @@ const OverviewTab = ({ brand }) => {
                   }}
                 >
                   {expandedDistrict !== null ? (
-                    (() => {
-                      const [stateIdx, districtIdx] = expandedDistrict
-                        .split("-")
-                        .map(Number);
-                      const cities =
-                        data.locations[stateIdx]?.districts[districtIdx]
-                          ?.cities;
-
-                      return Array.isArray(cities) && cities.length > 0 ? (
-                        cities.map((city, cityIndex) => (
-                          <Card
-                            key={`city-${cityIndex}`}
+                    renderItemsWithFallback(
+                      data.locations[expandedDistrict.split("-")[0]]?.districts[expandedDistrict.split("-")[1]]?.cities,
+                      data.locations[expandedDistrict.split("-")[0]]?.districts[expandedDistrict.split("-")[1]]?.name || "Unknown District"
+                    ).map((item, cityIndex) => (
+                      <Card
+                        key={`city-${cityIndex}`}
+                        sx={{
+                          borderRadius: "6px",
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                          bgcolor: "background.paper",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            transform: "translateY(-1px)",
+                            boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                          },
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            p: 0.8,
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <FiberManualRecord
                             sx={{
-                              borderRadius: "6px",
-                              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                              bgcolor: "background.paper",
-                              transition: "all 0.2s ease",
-                              "&:hover": {
-                                transform: "translateY(-1px)",
-                                boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
-                              },
+                              fontSize: 8,
+                              color: "primary.main",
+                              mr: 1,
                             }}
-                          >
-                            <Box
-                              sx={{
-                                p: 0.8,
-                                display: "flex",
-                                alignItems: "center",
-                              }}
-                            >
-                              <FiberManualRecord
-                                sx={{
-                                  fontSize: 8,
-                                  color: "primary.main",
-                                  mr: 1,
-                                }}
-                              />
-                              <Typography variant="body2">{city}</Typography>
-                            </Box>
-                          </Card>
-                        ))
-                      ) : (
-                        <Box sx={{ p: 2, textAlign: "center" }}>
-                          <Typography variant="body2" color="text.secondary">
-                            <LocationOff
-                              sx={{
-                                fontSize: 40,
-                                color: "action.disabled",
-                                mb: 1,
-                              }}
-                            />
-                            <br />
-                            No cities available
-                          </Typography>
+                          />
+                          <Typography variant="body2">{item}</Typography>
                         </Box>
-                      );
-                    })()
+                      </Card>
+                    ))
                   ) : (
                     <Box sx={{ p: 2, textAlign: "center" }}>
                       <Typography variant="body2" color="text.secondary">
@@ -615,7 +592,7 @@ const OverviewTab = ({ brand }) => {
         )}
       </Box>
     );
-  };
+};
   const ExpansionLocationGridInternational = ({ data }) => {
     const [expandedCountry, setExpandedCountry] = useState(null);
     const [expandedDistrict, setExpandedDistrict] = useState(null);
@@ -1202,6 +1179,8 @@ const OverviewTab = ({ brand }) => {
   //     );
   //   };
 
+
+
   const hasData = (sectionData) => {
     if (Array.isArray(sectionData)) {
       return sectionData.length > 0;
@@ -1238,7 +1217,7 @@ const OverviewTab = ({ brand }) => {
         onMouseEnter={handleUserScrollStart}
         onMouseLeave={handleUserScrollEnd}
       >
-        <Box sx={{ display: "flex" }}>
+        <Box sx={{ display: "flex" }} onMouseEnter={handleMouseEnter}>
           {/* render original table */}
           <Table
             stickyHeader
@@ -1354,7 +1333,7 @@ const OverviewTab = ({ brand }) => {
                       variant="body1"
                       sx={{ color: colors.dark, fontWeight: 600 }}
                     >
-                      Unique Selling Points:
+                      Unique Points:
                     </Typography>
                     <Typography variant="body2" sx={{ color: colors.dark }}>
                       {brand.franchiseDetails.uniqueSellingPoints.join(", ")}
@@ -1719,15 +1698,33 @@ const OverviewTab = ({ brand }) => {
             <Typography variant="body1" fontWeight={700} color={colors.error}>
               Disclaimer:
             </Typography>
-            <Typography variant="caption" color={colors.dark}>
-              Mr Franchise and the site sponsors accept no liability for the
-              accuracy of any information contained on this site or on other
-              linked sites. We recommend you take advice from a lawyer,
-              accountant and franchise consultant experienced in franchising
-              before you commit yourself. It is user's responsibility to satisfy
-              yourself as to the accuracy and reliability of the information
-              supplied. Please read the terms & conditions on MrFranchise.in
-            </Typography>
+      {!isMobile &&      <Typography variant="caption" color={colors.dark}>
+      Mr Franchise and the site sponsors accept no liability for the
+      accuracy of any information contained on this site or on other
+      linked sites. We recommend you take advice from a lawyer,
+      accountant and franchise consultant experienced in franchising
+      before you commit yourself. It is user's responsibility to satisfy
+      yourself as to the accuracy and reliability of the information
+      supplied. Please read the terms & conditions on MrFranchise.in
+    </Typography>}
+           {isMobile && 
+  <Box sx={{ 
+    overflowX: 'auto',
+    whiteSpace: 'nowrap',
+    minWidth: '300px', // or whatever minimum width you prefer
+    py: 1 // optional padding
+  }}>
+    <Typography variant="caption" color={colors.dark}>
+      Mr Franchise and the site sponsors accept no liability for the
+      accuracy of any information contained on this site or on other
+      linked sites. We recommend you take advice from a lawyer,
+      accountant and franchise consultant experienced in franchising
+      before you commit yourself. It is user's responsibility to satisfy
+      yourself as to the accuracy and reliability of the information
+      supplied. Please read the terms & conditions on MrFranchise.in
+    </Typography>
+  </Box>
+}
           </Box>
         </Box>
       ),
@@ -1738,42 +1735,8 @@ const OverviewTab = ({ brand }) => {
     <Box ref={overviewRef}>
       {sections.map((section, index) => (
         <Box key={index} sx={{ mb: 6 }}>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent:'space-evenly' }}>
-             <SectionHeader>
-            <Box
-            component="div"
-            variant="h5"
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            <Box
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                bgcolor: "rgba(255, 152, 0, 0.1)",
-                animation: `${float} 4s ease-in-out infinite`,
-              }}
-            >
-              {section.icon}
-            </Box>
-            <Typography variant="h4" fontWeight={700} color="#ff9800" >
-              {section.title}
-            </Typography>
-            
-          </Box>
-          
-          </SectionHeader>
-          {/* <LeaderboardAd /> */}
-              
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent:'space-evenly' }}>              
                </Box>
-         
           {section.content}
         </Box>
       ))}

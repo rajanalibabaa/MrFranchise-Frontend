@@ -109,7 +109,7 @@ function Navbar() {
     try {
       const response = await axios.post(
       
-        `http://localhost:5000/logout/${ID}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/logout/${ID}`,
         {},
         {
           headers: {
@@ -165,56 +165,15 @@ function Navbar() {
     dispatch(toggleMenu(false));
   };
   const handleLogoClick = () => {
+    if (location.pathname === '/') {
+    window.location.reload();
+  } else {
     dispatch(showLoading());
-      navigate("/");
+      navigate("/");}
   };
-
-  // Animation variants
-  // const fadeIn = {
-  //   hidden: { opacity: 0, y: -20 },
-  //   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-  // };
-
-  // const pulse = {
-  //   scale: [1, 1.05, 1],
-  //   transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-  // };
 
   return (
     <>
-      {/* Top Bar - Secondary Navigation */}
-      {/* <Box
-        sx={{
-          background: "linear-gradient(135deg, rgba(242, 168, 50, 0.9) 0%, rgba(185, 230, 21, 0.9) 100%)",
-          backdropFilter: "blur(8px)",
-          p: 1,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            // backgroundImage: `url(${backgroundPattern})`,
-            // backgroundSize: '300px',
-            // opacity: 0.1,
-            // zIndex: 0
-          }
-        }}
-        component={motion.div}
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-      >*/}
-        
-       
-
       {/* Main Navigation Bar */}
       <AppBar 
         position="sticky" 
