@@ -1,24 +1,20 @@
 
-export const API_BASE_URL =  "https://mrfranchisebackend.mrfranchise.in/api/v1";
-// export const API_BASE_URL =  "https://mrfranchisebackend.mrfranchise.in";
+// export const API_BASE_URL =  "http://localhost:5000/api/v1";
+export const API_BASE_URL =  "http://localhost:5000/api/v1";
 // export const API_BASE_URL =  "https://mrfranchisebackend.mrfranchise.in";
 // export const API_BASE_URL =  "https://mrfranchisebackend.mrfranchise.in";
 // export const API_BASE_URL =  "https://mrfranchisebackend.mrfranchise.in";
 // export const API_BASE_URL =  "https://mrfranchisebackend.mrfranchise.in";
 
 
-
-
-  // API Endpoints
+// API Endpoints
 export const api = {
-
   allBrandsApi : {
     get : {
       defaultBrands : `${API_BASE_URL}/brandlisting/getAllBrandListing`,
       likeAndUnlikeBrands :`${API_BASE_URL}/like/favbrands/getAllLikedAndUnlikedBrand`
     }
   },
-
 
   viewApi: {
     post: `${API_BASE_URL}/view/postViewBrands`,

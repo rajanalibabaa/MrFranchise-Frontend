@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   Box,
@@ -35,12 +35,12 @@ import {
   ShareOutlined,
   PlaylistAddCheckCircleOutlined,
   ArrowUpward,
+  Info,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useBrand } from "../../Hooks/Fetchbrands.jsx";
 import axios from "axios";
 import OverviewTab from "./OverviewTab.jsx";
-
 import Footer from "../../Components/Footers/Footer.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
@@ -49,17 +49,185 @@ import SimilarBrands from "../../Components/HomePage_VideoSection/SimilarBrands.
 import ShareDialogActions from "./ShareDialogActions.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
 import BillboardAd from "../../services/AdvertiseAds/BillBoardsAdsBrandViewPage.jsx";
+import { InfoIcon } from "lucide-react";
+
+// Component for expansion location tags to reduce main component size
+const ExpansionLocationTags = ({ brand, isMobile, isTablet, isSmallDesktop, isLargeDesktop }) => {
+  const locations = Array.isArray(
+    brand.expansionLocationData?.expansionLocations?.domestic?.locations
+  )
+    ? brand.expansionLocationData.expansionLocations.domestic.locations.flatMap(
+        (loc) =>
+          Array.isArray(loc.districts)
+            ? loc.districts.flatMap((dist) =>
+                Array.isArray(dist.cities)
+                  ? dist.cities.map((city) => ({
+                      city,
+                      district: dist.district,
+                      state: loc.state,
+                    }))
+                  : []
+              )
+            : []
+      )
+    : [];
+
+  const category = brand.franchiseDetails?.brandCategories || {};
+  const formattedChipsState = locations.map((loc, index) => ({
+    key: `${loc.state}-${index}`,
+    label: ` ${category.child || ""} franchise in-${loc.state}`,
+  }));
+  const formattedChipsDistrict = locations.map((loc, index) => ({
+    key: `${loc.district}-${index}`,
+    label: ` ${category.child || ""} franchise in-${loc.district}`,
+  }));
+  const formattedChipsCity = locations.map((loc, index) => ({
+    key: `${loc.city}-${index}`,
+    label: ` ${category.child || ""} franchise in-${loc.city}`,
+  }));
+
+  return (
+    <Box
+      sx={{
+        border: "1px solid #e0e0e0",
+        borderRadius: "8px",
+        p: 2,
+        display: "grid",
+        gridTemplateColumns: isMobile
+          ? "1fr"
+          : isTablet
+          ? "repeat(2, 1fr)"
+          : "repeat(3, 1fr)",
+        gap: 2,
+        height: isMobile ? "auto" : "90px",
+        overflowY: "auto",
+      }}
+    >
+      {/* State Column */}
+      <Box>
+        {formattedChipsState.length > 0 ? (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            {formattedChipsState
+              .slice(0, isMobile ? 3 : formattedChipsState.length)
+              .map((chip) => (
+                <Typography
+                  key={chip.key}
+                  variant="caption"
+                  sx={{
+                    borderRadius: "4px",
+                    color: "black",
+                    whiteSpace: "nowrap",
+                    fontSize: isMobile ? "0.7rem" : "0.8rem",
+                  }}
+                >
+                  {chip.label}
+                </Typography>
+              ))}
+          </Box>
+        ) : (
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              textAlign: "center",
+              mt: 2,
+            }}
+          >
+            No locations available
+          </Typography>
+        )}
+      </Box>
+
+      {/* District Column - hidden on mobile if no space */}
+      {!isMobile && (
+        <Box>
+          {formattedChipsDistrict.length > 0 ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {formattedChipsDistrict
+                .slice(0, isMobile ? 3 : formattedChipsDistrict.length)
+                .map((chip) => (
+                  <Typography
+                    key={chip.key}
+                    variant="caption"
+                    sx={{
+                      borderRadius: "4px",
+                      color: "black",
+                      whiteSpace: "nowrap",
+                      fontSize: isMobile ? "0.7rem" : "0.8rem",
+                    }}
+                  >
+                    {chip.label}
+                  </Typography>
+                ))}
+            </Box>
+          ) : (
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                textAlign: "center",
+                mt: 2,
+              }}
+            >
+              No locations available
+            </Typography>
+          )}
+        </Box>
+      )}
+
+      {/* City Column - hidden on mobile and tablet if no space */}
+      {(isLargeDesktop || isSmallDesktop) && (
+        <Box>
+          {formattedChipsCity.length > 0 ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {formattedChipsCity.map((chip) => (
+                <Typography
+                  key={chip.key}
+                  variant="caption"
+                  sx={{
+                    borderRadius: "4px",
+                    color: "black",
+                    whiteSpace: "nowrap",
+                    fontSize: isMobile ? "0.7rem" : "0.8rem",
+                  }}
+                >
+                  {chip.label}
+                </Typography>
+              ))}
+            </Box>
+          ) : (
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                textAlign: "center",
+                mt: 2,
+              }}
+            >
+              No locations available
+            </Typography>
+          )}
+        </Box>
+      )}
+    </Box>
+  );
+};
 
 const BrandDetails = ({ brandData }) => {
   const location = useLocation();
   const theme = useTheme();
-  // Enhanced media queries for better responsiveness
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // < 600px
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md")); // 600px - 900px
-  const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg")); // 900px - 1200px
-  const isLargeDesktop = useMediaQuery(theme.breakpoints.up("lg")); // > 1200px
-
   const navigate = useNavigate();
+  const { uuid } = useParams();
+  
+  // Media queries
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
+  const isLargeDesktop = useMediaQuery(theme.breakpoints.up("lg"));
+
+  // Refs for frequently accessed elements
+  const mainContainerRef = useRef(null);
+  const applyNowButtonRef = useRef(null);
 
   // State management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -75,12 +243,52 @@ const BrandDetails = ({ brandData }) => {
     districts: [],
     cities: [],
   });
-
   const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
   const [isProcessingLike, setIsProcessingLike] = useState(false);
+  const [shortListed, setShortListed] = useState(brandData);
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
+  // Memoized data
+  const selectedBrand = brandData || {};
+  const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
+  const AccessToken = useMemo(() => localStorage.getItem("accessToken"), []);
   const { mutate: toggleLike } = useToggleLike();
 
+  // Memoized derived data
+  const investmentRanges = useMemo(
+    () => [
+      ...new Set(
+        selectedBrand?.franchiseDetails?.fico?.map((m) => m.investmentRange) || []
+      ),
+    ],
+    [selectedBrand]
+  );
+
+  const investmentTimings = useMemo(
+    () => ["Immediately", "1 - 3 Months", "3 - 6 Months", "6 + Months"],
+    []
+  );
+
+  const readyToInvestOptions = useMemo(
+    () => ["Own Investment", "Going For Loan", "Need Loan Assistance"],
+    []
+  );
+
+  const allVideos = useMemo(
+    () => selectedBrand?.uploads?.franchisePromotionVideo || [],
+    [selectedBrand]
+  );
+
+  const allImages = useMemo(
+    () => [
+      ...(selectedBrand?.uploads?.brandLogo ? [selectedBrand.uploads.brandLogo] : []),
+      ...(selectedBrand?.uploads?.exteriorOutlet || []),
+      ...(selectedBrand?.uploads?.interiorOutlet || []),
+    ],
+    [selectedBrand]
+  );
+
+  // Form data state
   const [formData, setFormData] = useState({
     fullName: "",
     investorEmail: "",
@@ -93,41 +301,19 @@ const BrandDetails = ({ brandData }) => {
     readyToInvest: "",
   });
 
-  const [showBackToTop, setShowBackToTop] = useState(false);
-
-  const handleOpenShareClick = (event) => {
+  // Event handlers
+  const handleOpenShareClick = useCallback((event) => {
     setAnchorEl(event.currentTarget);
-  };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.pageYOffset > 300) {
-        setShowBackToTop(true);
-      } else {
-        setShowBackToTop(false);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const { uuid } = useParams();
-  const selectedBrand = brandData || {};
-
-  // Get investor data from localStorage with caching
-  const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
-  const AccessToken = useMemo(() => localStorage.getItem("accessToken"), []);
 
   const handleLikeClick = useCallback(() => {
     if (isProcessingLike) return;
-
-    console.log("brandData handleLikeClick :",brandData)
 
     setIsProcessingLike(true);
     const newLikeStatus = !localIsLiked;
 
     // Optimistic update
-    setLocalIsLiked(!localIsLiked);
+    setLocalIsLiked(newLikeStatus);
 
     toggleLike(
       { brandId: brandData.uuid, isLiked: brandData.isLiked },
@@ -141,199 +327,20 @@ const BrandDetails = ({ brandData }) => {
         },
       }
     );
-  }, [uuid, localIsLiked, isProcessingLike, toggleLike]);
+  }, [brandData.uuid, brandData.isLiked, isProcessingLike, localIsLiked, toggleLike]);
 
-  // Memoized API calls
-  const fetchInvestorDetails = useCallback(async () => {
-    if (!investorUUID || !AccessToken) return;
-
+  const handleToggleShortList = useCallback(async (brandData) => {
     try {
-      const response = await axios.get(
-        `https://mrfranchisebackend.mrfranchise.in/investor/getInvestorByUUID/${investorUUID}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${AccessToken}`,
-          },
-          signal: AbortSignal.timeout(5000),
-        }
-      );
-
-      if (response.data?.data) {
-        setUserData(response.data.data);
-        setFormData((prev) => ({
-          ...prev,
-          fullName: response.data.data.firstName || "",
-          investorEmail: response.data.data.email || "",
-          mobileNumber: response.data.data.mobileNumber || "",
-        }));
+      const response = await handleShortList(brandData);
+      if (response.success) {
+        setShortListed(prev => !prev);
       }
     } catch (error) {
-      if (!axios.isCancel(error)) {
-        console.error("Failed to fetch investor details:", error);
-      }
+      console.error("Error toggling shortlist:", error);
     }
-  }, [investorUUID, AccessToken]);
-
-  // Fetch brand data with error handling
-  useEffect(() => {
-    if (!uuid) return;
-
-    const controller = new AbortController();
-
-    const fetchBrand = async () => {
-      try {
-        await useBrand(uuid).unwrap();
-      } catch (error) {
-        console.error("Failed to fetch brand details:", error);
-      }
-    };
-
-    fetchBrand();
-
-    return () => controller.abort();
-  }, [uuid]);
-
-  // Fetch investor data on mount if logged in (with caching)
-  useEffect(() => {
-    if (investorUUID && AccessToken) {
-      const controller = new AbortController();
-      fetchInvestorDetails();
-      return () => controller.abort();
-    }
-  }, [fetchInvestorDetails, investorUUID, AccessToken]);
-
-  // Extract location data from brand
-  useEffect(() => {
-    if (
-      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
-        ?.locations
-    ) {
-      const locations =
-        selectedBrand.expansionLocationData.expansionLocations.domestic
-          .locations;
-      const states = [
-        ...new Set(locations.map((loc) => loc.state).filter(Boolean)),
-      ];
-      setLocationData((prev) => ({
-        ...prev,
-        states,
-        districts: [],
-        cities: [],
-      }));
-    }
-  }, [selectedBrand]);
-
-  // Update districts when state changes
-  useEffect(() => {
-    if (
-      formData.state &&
-      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
-        ?.locations
-    ) {
-      const locations =
-        selectedBrand.expansionLocationData.expansionLocations.domestic
-          .locations;
-      const stateObj = locations.find((loc) => loc.state === formData.state);
-      const districts = [
-        ...new Set(stateObj?.districts?.map((d) => d.district) || []),
-      ];
-      setLocationData((prev) => ({
-        ...prev,
-        districts,
-        cities: [],
-      }));
-      setFormData((prev) => ({
-        ...prev,
-        district: "",
-        city: "",
-      }));
-    }
-  }, [formData.state, selectedBrand]);
-
-  // Update cities when district changes
-  useEffect(() => {
-    if (
-      formData.state &&
-      formData.district &&
-      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
-        ?.locations
-    ) {
-      const locations =
-        selectedBrand.expansionLocationData.expansionLocations.domestic
-          .locations;
-      const stateObj = locations.find((loc) => loc.state === formData.state);
-      const districtObj = stateObj?.districts?.find(
-        (d) => d.district === formData.district
-      );
-      const cities = [...new Set(districtObj?.cities || [])];
-      setLocationData((prev) => ({
-        ...prev,
-        cities,
-      }));
-      setFormData((prev) => ({
-        ...prev,
-        city: "",
-      }));
-    }
-  }, [formData.district, formData.state, selectedBrand]);
-
-  // Memoized derived data for better performance
-  const investmentRanges = useMemo(
-    () => [
-      ...new Set(
-        selectedBrand?.franchiseDetails?.fico?.map((m) => m.investmentRange) ||
-          []
-      ),
-    ],
-    [selectedBrand]
-  );
-
-  const investmentTimings = useMemo(
-    () => ["Immediately", "1 - 3 Months", "3 - 6 Months", "6 + Months"],
-    []
-  );
-
-  const readyToInvestOptions = useMemo(
-    () => ["Own Investment", "Going To Loan", "Need Loan Assistance"],
-    []
-  );
-
-  const allVideos = useMemo(
-    () => selectedBrand?.uploads?.franchisePromotionVideo || [],
-    [selectedBrand]
-  );
-
-  const allImages = useMemo(
-    () => [
-      ...(selectedBrand?.uploads?.brandLogo
-        ? [selectedBrand.uploads.brandLogo]
-        : []),
-      ...(selectedBrand?.uploads?.exteriorOutlet || []),
-      ...(selectedBrand?.uploads?.interiorOutlet || []),
-    ],
-    [selectedBrand]
-  );
-
-  // Responsive image box sizing
-  const getImageBoxSize = useCallback(() => {
-    if (isMobile) return 120; // Slightly larger for better mobile touch targets
-    if (isTablet) return 160;
-    if (isSmallDesktop) return 180;
-    return 204; // Large desktop
-  }, [isMobile, isTablet, isSmallDesktop]);
-
-  const getOutletRange = useCallback((value) => {
-    const numericValue = Number(value);
-    if (isNaN(numericValue)) return "N/A";
-    if (numericValue < 10) return "Below 10";
-    const lower = Math.floor(numericValue / 10) * 10;
-    const upper = lower + 10;
-    return `${lower} - ${upper}`;
   }, []);
 
-  // Event handlers
-  const handleOpenContact = useCallback(() => setOpenContactModal(true), []);
+  // const handleOpenContact = useCallback(() => setOpenContactModal(true), []);
   const handleCloseContact = useCallback(() => setOpenContactModal(false), []);
 
   const toggleDrawer = useCallback(
@@ -398,7 +405,7 @@ const BrandDetails = ({ brandData }) => {
         }
 
         const response = await axios.post(
-          "https://mrfranchisebackend.mrfranchise.in/instantapply/postApplication",
+          "http://localhost:5000/api/v1/instantapply/postApplication",
           payload,
           {
             headers: { "Content-Type": "application/json" },
@@ -452,19 +459,171 @@ const BrandDetails = ({ brandData }) => {
     );
   }, [allImages.length]);
 
-  // Scroll to top on component mount
+  // API calls
+  const fetchInvestorDetails = useCallback(async () => {
+    if (!investorUUID || !AccessToken) return;
+
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken}`,
+          },
+          signal: AbortSignal.timeout(5000),
+        }
+      );
+
+      if (response.data?.data) {
+        setUserData(response.data.data);
+        setFormData((prev) => ({
+          ...prev,
+          fullName: response.data.data.firstName || "",
+          investorEmail: response.data.data.email || "",
+          mobileNumber: response.data.data.mobileNumber || "",
+        }));
+      }
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        console.error("Failed to fetch investor details:", error);
+      }
+    }
+  }, [investorUUID, AccessToken]);
+
+  // Effects
+  useEffect(() => {
+    if (!uuid) return;
+
+    const controller = new AbortController();
+    const fetchBrand = async () => {
+      try {
+        await useBrand(uuid).unwrap();
+      } catch (error) {
+        console.error("Failed to fetch brand details:", error);
+      }
+    };
+
+    fetchBrand();
+    return () => controller.abort();
+  }, [uuid]);
+
+  useEffect(() => {
+    if (investorUUID && AccessToken) {
+      const controller = new AbortController();
+      fetchInvestorDetails();
+      return () => controller.abort();
+    }
+  }, [fetchInvestorDetails, investorUUID, AccessToken]);
+
+  useEffect(() => {
+    if (
+      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
+        ?.locations
+    ) {
+      const locations =
+        selectedBrand.expansionLocationData.expansionLocations.domestic
+          .locations;
+      const states = [
+        ...new Set(locations.map((loc) => loc.state).filter(Boolean)),
+      ];
+      setLocationData((prev) => ({
+        ...prev,
+        states,
+        districts: [],
+        cities: [],
+      }));
+    }
+  }, [selectedBrand]);
+
+  useEffect(() => {
+    if (
+      formData.state &&
+      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
+        ?.locations
+    ) {
+      const locations =
+        selectedBrand.expansionLocationData.expansionLocations.domestic
+          .locations;
+      const stateObj = locations.find((loc) => loc.state === formData.state);
+      const districts = [
+        ...new Set(stateObj?.districts?.map((d) => d.district) || []),
+      ];
+      setLocationData((prev) => ({
+        ...prev,
+        districts,
+        cities: [],
+      }));
+      setFormData((prev) => ({
+        ...prev,
+        district: "",
+        city: "",
+      }));
+    }
+  }, [formData.state, selectedBrand]);
+
+  useEffect(() => {
+    if (
+      formData.state &&
+      formData.district &&
+      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
+        ?.locations
+    ) {
+      const locations =
+        selectedBrand.expansionLocationData.expansionLocations.domestic
+          .locations;
+      const stateObj = locations.find((loc) => loc.state === formData.state);
+      const districtObj = stateObj?.districts?.find(
+        (d) => d.district === formData.district
+      );
+      const cities = [...new Set(districtObj?.cities || [])];
+      setLocationData((prev) => ({
+        ...prev,
+        cities,
+      }));
+      setFormData((prev) => ({
+        ...prev,
+        city: "",
+      }));
+    }
+  }, [formData.district, formData.state, selectedBrand]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.pageYOffset > 300);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Mask email for privacy
-  const maskEmail = (email) => {
+  // Utility functions
+  const getImageBoxSize = useCallback(() => {
+    if (isMobile) return 120;
+    if (isTablet) return 160;
+    if (isSmallDesktop) return 180;
+    return 204;
+  }, [isMobile, isTablet, isSmallDesktop]);
+
+  const getOutletRange = useCallback((value) => {
+    const numericValue = Number(value);
+    if (isNaN(numericValue)) return "N/A";
+    if (numericValue < 10) return "Below 10";
+    const lower = Math.floor(numericValue / 10) * 10;
+    const upper = lower + 10;
+    return `${lower} - ${upper}`;
+  }, []);
+
+  const maskEmail = useCallback((email) => {
     const [name, domain] = email.split("@");
     if (!name || !domain) return email;
     const visiblePart = name.slice(0, 2);
     const maskedPart = "*".repeat(name.length - 2);
     return `${visiblePart}${maskedPart}@${domain}`;
-  };
+  }, []);
 
   if (!selectedBrand) {
     return (
@@ -479,199 +638,20 @@ const BrandDetails = ({ brandData }) => {
     );
   }
 
-  // ExpansionLocationTags component for responsive location display
-  const ExpansionLocationTags = ({ brand }) => {
-    const locations = Array.isArray(
-      brand.expansionLocationData?.expansionLocations?.domestic?.locations
-    )
-      ? brand.expansionLocationData.expansionLocations.domestic.locations.flatMap(
-          (loc) =>
-            Array.isArray(loc.districts)
-              ? loc.districts.flatMap((dist) =>
-                  Array.isArray(dist.cities)
-                    ? dist.cities.map((city) => ({
-                        city,
-                        district: dist.district,
-                        state: loc.state,
-                      }))
-                    : []
-                )
-              : []
-        )
-      : [];
-
-    const category = brand.franchiseDetails?.brandCategories || {};
-    const formattedChipsState = locations.map((loc, index) => ({
-      key: `${loc.state}-${index}`,
-      label: ` ${category.child || ""} franchise in-${loc.state}`,
-    }));
-    const formattedChipsDistrict = locations.map((loc, index) => ({
-      key: `${loc.district}-${index}`,
-      label: ` ${category.child || ""} franchise in-${loc.district}`,
-    }));
-    const formattedChipsCity = locations.map((loc, index) => ({
-      key: `${loc.city}-${index}`,
-      label: ` ${category.child || ""} franchise in-${loc.city}`,
-    }));
-
-    return (
-      <Box
-        sx={{
-          border: "1px solid #e0e0e0",
-          borderRadius: "8px",
-          p: 2,
-          display: "grid",
-          // Responsive grid columns
-          gridTemplateColumns: isMobile
-            ? "1fr"
-            : isTablet
-            ? "repeat(2, 1fr)"
-            : "repeat(3, 1fr)",
-          gap: 2,
-          height: isMobile ? "auto" : "90px",
-          overflowY: "auto",
-        }}
-      >
-        {/* State Column */}
-        <Box>
-          {formattedChipsState.length > 0 ? (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              {formattedChipsState
-                .slice(0, isMobile ? 3 : formattedChipsState.length)
-                .map((chip) => (
-                  <Typography
-                    key={chip.key}
-                    variant="caption"
-                    sx={{
-                      borderRadius: "4px",
-                      color: "black",
-                      whiteSpace: "nowrap",
-                      fontSize: isMobile ? "0.7rem" : "0.8rem",
-                    }}
-                  >
-                    {chip.label}
-                  </Typography>
-                ))}
-            </Box>
-          ) : (
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-                textAlign: "center",
-                mt: 2,
-              }}
-            >
-              No locations available
-            </Typography>
-          )}
-        </Box>
-
-        {/* District Column - hidden on mobile if no space */}
-        {!isMobile && (
-          <Box>
-            {formattedChipsDistrict.length > 0 ? (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {formattedChipsDistrict
-                  .slice(0, isMobile ? 3 : formattedChipsDistrict.length)
-                  .map((chip) => (
-                    <Typography
-                      key={chip.key}
-                      variant="caption"
-                      sx={{
-                        borderRadius: "4px",
-                        color: "black",
-                        whiteSpace: "nowrap",
-                        fontSize: isMobile ? "0.7rem" : "0.8rem",
-                      }}
-                    >
-                      {chip.label}
-                    </Typography>
-                  ))}
-              </Box>
-            ) : (
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                  textAlign: "center",
-                  mt: 2,
-                }}
-              >
-                No locations available
-              </Typography>
-            )}
-          </Box>
-        )}
-
-        {/* City Column - hidden on mobile and tablet if no space */}
-        {(isLargeDesktop || isSmallDesktop) && (
-          <Box>
-            {formattedChipsCity.length > 0 ? (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {formattedChipsCity.map((chip) => (
-                  <Typography
-                    key={chip.key}
-                    variant="caption"
-                    sx={{
-                      borderRadius: "4px",
-                      color: "black",
-                      whiteSpace: "nowrap",
-                      fontSize: isMobile ? "0.7rem" : "0.8rem",
-                    }}
-                  >
-                    {chip.label}
-                  </Typography>
-                ))}
-              </Box>
-            ) : (
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                  textAlign: "center",
-                  mt: 2,
-                }}
-              >
-                No locations available
-              </Typography>
-            )}
-          </Box>
-        )}
-      </Box>
-    );
-  };
-
- const [shortListed, setShortListed] = useState(brandData)
-          const handleToggleShortList = async (brandData) => {
-
-            console.log("===brandData=== :",brandData)
-                 try {
-                   const response = await handleShortList(brandData);
-                   if (response.success) {
-                     setShortListed(!shortListed);
-                   }
-                 } catch (error) {
-                   console.error("Error toggling shortlist:", error);
-                 }
-               };
-
-  
-
   return (
     <>
       <Navbar />
-      {/* Main container with responsive width and padding */}
       <Box
+        ref={mainContainerRef}
         sx={{
           width: "90%",
-          maxWidth: 1200, // Increased max width for larger screens
+          maxWidth: 1200,
           mx: "auto",
           my: isMobile ? 2 : 4,
           px: isMobile ? 1 : isTablet ? 3 : 4,
         }}
       >
-        {/* Floating Apply Now Button - responsive positioning */}
+        {/* Floating Apply Now Button */}
         <Box
           sx={{
             position: "fixed",
@@ -683,29 +663,31 @@ const BrandDetails = ({ brandData }) => {
             zIndex: 1000,
           }}
         >
-          <Button
-            variant="contained"
-            size={isMobile ? "medium" : "large"}
-            onClick={toggleDrawer(true)}
-            sx={{
-              backgroundColor: "#ff9800",
-              color: "white",
-              borderRadius: 50,
-              px: 4,
-              py: 1.5,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-              "&:hover": {
-                backgroundColor: "#e65100",
-              },
-              fontSize: isMobile ? "0.875rem" : "1rem",
-              // width: isMobile ? "100%" : "auto",
-            }}
-          >
-            Apply Now
-          </Button>
+         <Button
+  ref={applyNowButtonRef}
+  variant="contained"
+  size={isMobile ? "medium" : "large"}
+  onClick={toggleDrawer(true)}
+  sx={{
+    backgroundColor: "#ff9800",
+    color: "white",
+    borderRadius: 50,
+    px: 4,
+    py: 1.5,
+    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+    "&:hover": {
+      backgroundColor: "#e65100",
+    },
+    fontSize: isMobile ? "0.875rem" : "1rem",
+  }}
+>
+  Apply Now&nbsp; for&nbsp; 
+   <strong > {selectedBrand?.brandDetails?.brandName}</strong>
+</Button>
+
         </Box>
 
-        {/* Mobile/Tablet Drawer (Bottom) */}
+        {/* Mobile/Tablet Drawer */}
         <Drawer
           anchor={isMobile || isTablet ? "bottom" : "right"}
           open={drawerOpen}
@@ -731,7 +713,15 @@ const BrandDetails = ({ brandData }) => {
               }}
             >
               <Typography variant="h6" fontWeight={700} color="#ff9800">
-                Apply for Franchise
+                Apply for Franchise  
+                <Typography display={'flex'} flexDirection={'column'}>
+                <Typography fontSize={'0.7rem'} color="black">
+                  Brand Name: {selectedBrand?.brandDetails?.brandName}
+                  </Typography>  
+                <Typography fontSize={'0.7rem'} color="black">
+                  Brand Category: {selectedBrand?.franchiseDetails?.brandCategories?.child}
+                  </Typography>  
+              </Typography>
               </Typography>
               <IconButton onClick={toggleDrawer(false)}>
                 <Close />
@@ -785,6 +775,7 @@ const BrandDetails = ({ brandData }) => {
                     size="small"
                   />
                 </Grid>
+  Select your Store Location
 
                 {/* State Dropdown */}
                 <Grid item xs={12}>
@@ -954,8 +945,8 @@ const BrandDetails = ({ brandData }) => {
           open={openContactModal}
           onClose={handleCloseContact}
           fullWidth
-          maxWidth={isMobile ? "xs" : "sm"} // Responsive dialog size
-          fullScreen={isMobile} // Full screen on mobile
+          maxWidth={isMobile ? "xs" : "sm"}
+          fullScreen={isMobile}
         >
           <DialogTitle
             sx={{
@@ -1005,16 +996,6 @@ const BrandDetails = ({ brandData }) => {
               </Typography>
             </Box>
           </DialogContent>
-
-          <DialogActions>
-            <Button
-              variant="contained"
-              color="success"
-              size={isMobile ? "small" : "medium"}
-            >
-              View contact details
-            </Button>
-          </DialogActions>
         </Dialog>
 
         {/* Brand header with animation */}
@@ -1043,8 +1024,6 @@ const BrandDetails = ({ brandData }) => {
                 sx={{
                   border: "3px solid orange",
                   borderRadius: "10px",
-                  // width: isMobile ? 120 : isTablet ? 150 : 200,
-                  // height: isMobile ? 120 : isTablet ? 150 : 200,
                 }}
               >
                 <Avatar
@@ -1121,15 +1100,15 @@ const BrandDetails = ({ brandData }) => {
                     <Box
                       sx={{
                         mt: isMobile ? 1 : 0,
-                        // alignSelf: isMobile ? "center" : "flex-end",
                         ml: isMobile ? 0 : 2,
                       }}
                     >
                       <Button
+                       ref={applyNowButtonRef}
                         variant="contained"
                         size={isMobile ? "small" : "medium"}
                         startIcon={<Phone />}
-                        onClick={handleOpenContact}
+                        onClick={toggleDrawer(true)}
                         sx={{
                           px: isMobile ? 1 : 1.5,
                           py: isMobile ? 1 : 2,
@@ -1149,7 +1128,6 @@ const BrandDetails = ({ brandData }) => {
                         aria-label={
                           localIsLiked ? "Unlike brand" : "Like brand"
                         }
-                        // size={isMobile ? "small" : "medium"}
                       >
                         {isProcessingLike ? (
                           <CircularProgress size={isMobile ? 20 : 24} />
@@ -1159,27 +1137,20 @@ const BrandDetails = ({ brandData }) => {
                               color: brandData?.isLiked
                                 ? "#f44336"
                                 : "rgba(0, 0, 0, 0.23)",
-                              // fontSize: isMobile ? "1.2rem" : "1.5rem",
                             }}
                           />
                         )}
                       </IconButton>
                       <IconButton
-                      onClick={() => handleToggleShortList(shortListed)}
-                       sx={{
-                        color: shortListed
-                          ? "#7ef400ff"
-                          : "rgba(0, 0, 0, 0.23)",
-                      }}
-                    >
-                      {/* <Tooltip title={'ShortList'}
-                        
-                      > */}
-                        <PlaylistAddCheckCircleOutlined
-                     
-                      />
-                      {/* </Tooltip> */}
-                    </IconButton>
+                        onClick={() => handleToggleShortList(shortListed)}
+                        sx={{
+                          color: shortListed
+                            ? "#7ef400ff"
+                            : "rgba(0, 0, 0, 0.23)",
+                        }}
+                      >
+                        <PlaylistAddCheckCircleOutlined />
+                      </IconButton>
                       <IconButton
                         onClick={handleOpenShareClick}
                         size={isMobile ? "small" : "medium"}
@@ -1219,10 +1190,10 @@ const BrandDetails = ({ brandData }) => {
                           },
                         }}
                       >
-                        <TableCell sx={{ width: "30%", textAlign: "center" }}>
+                        <TableCell sx={{ width: "25%", textAlign: "center" }}>
                           <strong>Category</strong>
                         </TableCell>
-                        <TableCell sx={{ width: "15%", textAlign: "center" }}>
+                        <TableCell sx={{ width: "18%", textAlign: "center" }}>
                           <strong>Area</strong>
                         </TableCell>
                         <TableCell sx={{ width: "15%", textAlign: "center" }}>
@@ -1360,6 +1331,7 @@ const BrandDetails = ({ brandData }) => {
                 {allVideos.length > 0 ? (
                   <video
                     controls
+                    preload="metadata"
                     style={{
                       width: "100%",
                       height: "100%",
@@ -1429,7 +1401,7 @@ const BrandDetails = ({ brandData }) => {
                         style={{
                           width: "100%",
                           height: "100%",
-                          objectFit: "cover",
+                          objectFit: "contain",
                         }}
                       />
                     </Box>
@@ -1661,7 +1633,7 @@ const BrandDetails = ({ brandData }) => {
         </Dialog>
 
         {/* Desktop Application Form - responsive layout */}
-        {!isMobile && (
+        {/* {!isMobile && (
           <Box
             sx={{
               mt: 4,
@@ -1695,7 +1667,6 @@ const BrandDetails = ({ brandData }) => {
                 spacing={2}
                 sx={{
                   display: "grid",
-                  // Responsive grid columns
                   gridTemplateColumns: isTablet
                     ? "repeat(2, 1fr)"
                     : "repeat(3, 1fr)",
@@ -1741,7 +1712,7 @@ const BrandDetails = ({ brandData }) => {
                   />
                 </Grid>
 
-                {/* State Dropdown */}
+                {/* State Dropdown 
                 <Grid item xs={12} md={4}>
                   <TextField
                     select
@@ -1762,7 +1733,7 @@ const BrandDetails = ({ brandData }) => {
                   </TextField>
                 </Grid>
 
-                {/* District Dropdown */}
+                {/* District Dropdown 
                 <Grid item xs={12} md={4}>
                   <TextField
                     select
@@ -1784,7 +1755,7 @@ const BrandDetails = ({ brandData }) => {
                   </TextField>
                 </Grid>
 
-                {/* City Dropdown */}
+                {/* City Dropdown 
                 <Grid item xs={12} md={4}>
                   <TextField
                     select
@@ -1915,13 +1886,12 @@ const BrandDetails = ({ brandData }) => {
               </Typography>
             </Box>
           </Box>
-        )}
+        )} */}
       </Box>
 
       {/* Liked brands and tags section */}
       <LikedBrands />
-{/* <BillboardAd /> */}
-<SimilarBrands brandData={selectedBrand} />
+      <SimilarBrands brandData={selectedBrand} />
 
       <Box
         sx={{
@@ -1939,7 +1909,13 @@ const BrandDetails = ({ brandData }) => {
         >
           Tags
         </Typography>
-        <ExpansionLocationTags brand={selectedBrand} />
+        <ExpansionLocationTags 
+          brand={selectedBrand} 
+          isMobile={isMobile}
+          isTablet={isTablet}
+          isSmallDesktop={isSmallDesktop}
+          isLargeDesktop={isLargeDesktop}
+        />
       </Box>
 
       {/* Back to top button - responsive positioning */}

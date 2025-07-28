@@ -46,8 +46,8 @@ function TopBrandVdoCards() {
   const CARD_SIZES = {
     main: {
       width: isMobile ? "100%" : isTablet ? "100%" : "68%",
-      height: isMobile ? 470 : isTablet ? 480 : 550,
-      videoHeight: isMobile ? 240 : isTablet ? 300 : 450,
+      height: isMobile ? 500 : isTablet ? 480 : 550,
+      videoHeight: isMobile ? 275 : isTablet ? 300 : 450,
     },
     side: {
       width: isMobile ? "100%" : isTablet ? "100%" : "30%",
@@ -388,16 +388,18 @@ function TopBrandVdoCards() {
                     direction={{ xs: "column", sm: "row" }}
                     alignItems={{ xs: "flex-start", sm: "center" }}
                     ml={{ xs: 2 }}
+                    mt={1}
                     spacing={1}
-                    sx={{ flex: 1, minWidth: 0 }}
+                    // sx={{ flex: 1, minWidth: 0 }}
                   >
                     <Stack
                       direction="row"
                       spacing={1}
                       alignItems="center"
-                      sx={{ minWidth: 0, flex: 1 }}
+                      sx={{ minWidth: 0, flex: 1, paddingBottom: "10px" }}
                     >
                       <Avatar
+                                                  onClick={() => handleApply(mainBrand)}
                         src={mainBrand.uploads?.brandLogo?.[0]}
                         alt={mainBrand.brandDetails?.brandName}
                         sx={{
@@ -405,9 +407,9 @@ function TopBrandVdoCards() {
                           height: 50,
                           border: `2px solid ${theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00"}`,
                           boxShadow: theme.shadows[2],
+                          cursor: "pointer",
                         }}
                       />
-
                       <Box sx={{ minWidth: 0, flex: 1 }}>
                        <Box display="flex" alignItems="center"> 
                         <Typography
@@ -452,6 +454,7 @@ function TopBrandVdoCards() {
                           overflow="hidden"
                           textOverflow="ellipsis"
                           color="text.secondary"
+
                         >
                           {mainBrand.franchiseDetails?.brandCategories
                             ? `${mainBrand.franchiseDetails.brandCategories.child}`
@@ -464,10 +467,11 @@ function TopBrandVdoCards() {
                     <Stack
                       direction={{ xs: "row" }}
                       alignItems={{ xs: "flex-start", sm: "center" }}
-                      spacing={5}
-                      sx={{ flex: 1, minWidth: 0,mt:0 }}
+                      spacing={6}
+                      
+                      // sx={{ flex: 1, minWidth: 0,mt:0 }}
                     >
-                      <Stack direction="column" spacing={1}>
+                      <Stack direction="column" spacing={1} >
                         <Fact
                           label="Investment"
                           value={mainBrand.franchiseDetails?.fico?.[0]?.investmentRange}
@@ -485,8 +489,8 @@ function TopBrandVdoCards() {
                             variant="contained"
                             onClick={() => handleApply(mainBrand)}
                             sx={{
-                              // px: 3,
-                              fontWeight: 600,
+                              // mx:"auto",
+                              fontWeight: 800,
                               textTransform: "none",
                               color: "#fff",
                               background:
@@ -835,14 +839,14 @@ function TopBrandVdoCards() {
                       fullWidth
                       size="small"
                       sx={{
-                        mt: isMobile?2:2,
+                        // mt: isMobile?2:2,
                         background:
                           theme.palette.mode === "dark"
                             ? "linear-gradient(45deg, #ffb74d, #ff9800)"
                             : "linear-gradient(45deg, #f57c00, #ff9800)",
                         textTransform: "none",
                         fontSize: "0.75rem",
-                        px: 4,
+                        // px: 4,
                         color: "#fff",
                         fontWeight: 600,
                         minWidth: 100,

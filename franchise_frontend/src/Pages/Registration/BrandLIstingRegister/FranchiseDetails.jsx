@@ -362,16 +362,16 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
 
   const investmentRanges = [
     { label: "Below ₹50K", value: "Below - 50,000" },
-    { label: "₹50K - ₹2 Lakhs", value: "Rs. 50,000-2 L" },
+    { label: "₹50K - ₹2 Lakhs", value: "Rs. 50,000 - 2 L" },
     { label: "₹2 - ₹5 Lakhs", value: "Rs. 2 L - 5 L" },
-    { label: "₹5 - ₹10 Lakhs", value: "Rs.5 L - 10 L" },
+    { label: "₹5 - ₹10 Lakhs", value: "Rs. 5 L - 10 L" },
     { label: "₹10 - ₹20 Lakhs", value: "Rs. 10 L - 20 L" },
     { label: "₹20 - ₹30 Lakhs", value: "Rs. 20 L - 30 L" },
-    { label: "₹30 - ₹50 Lakhs", value: "Rs. 30 L- 50 L" },
+    { label: "₹30 - ₹50 Lakhs", value: "Rs. 30 L - 50 L" },
     { label: "₹50 Lakhs - ₹1 Crore", value: "Rs. 50 L - 1 Cr" },
     { label: "₹1 - ₹2 Crores", value: "Rs. 1 Cr - 2 Crs" },
     { label: "₹2 - ₹5 Crores", value: "Rs. 2 Cr - 5 Crs" },
-    { label: "Above ₹5 Crores", value: "Rs. 5Crs - above" },
+    { label: "Above ₹5 Crores", value: "Rs. 5 Crs - above" },
   ];
 
   const aidFinancing = ["Yes", "No"];
@@ -1876,28 +1876,17 @@ const FranchiseDetails = ({ data = {}, errors = {}, onChange = () => {} }) => {
               </Typography>
             )}
           </Typography>
-          <Editor
-            // apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
-            apiKey="boluah8zob0ss11ayrzgbdqqwev9m79lyvth1j28m0y5o9fm"
-            value={data.brandDescription || ""}
-            init={{
-              height: 400,
-              menubar: true,
-              plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image',
-                'charmap', 'preview', 'anchor', 'searchreplace',
-                'visualblocks', 'code', 'fullscreen', 'insertdatetime',
-                'media', 'table', 'help'
-              ],
-              toolbar:
-                "undo redo | formatselect | bold italic backcolor | " +
-                "alignleft aligncenter alignright alignjustify | " +
-                "bullist numlist outdent indent | removeformat | help | image",
-              images_upload_url: "/api/upload-image",
-              automatic_uploads: true,
-            }}
-            onEditorChange={handleDescriptionChange}
-          />
+           <TextField
+    multiline
+    minRows={8}
+    fullWidth
+    value={data.brandDescription || ""}
+    onChange={(e) => handleDescriptionChange(e.target.value)}
+    variant="outlined"
+    placeholder="Enter brand description here..."
+    error={!!errors.brandDescription}
+    helperText={errors.brandDescription}
+  />
         </Box>
       </Grid>
     </Box>

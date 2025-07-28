@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import Navbar from '../../Navbar/NavBar';
 import Footer from '../Footer';
-import { Box, Container, Typography, List, ListItem, ListItemIcon, ListItemText, Grid, Card, CardContent, Link } from '@mui/material';
+import { Box, Container, Typography, List, ListItem, ListItemIcon, ListItemText, Grid, Card, CardContent, Link,useTheme, useMediaQuery } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { motion } from 'framer-motion';
 import { Link as RouterLink } from "react-router-dom";
@@ -25,6 +25,8 @@ const fadeInUp = {
 };
 
 const AboutUs = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const renderList =  useMemo(()=> (items) => (
     <List>
       {items.map((item, index) => (
@@ -50,7 +52,7 @@ const AboutUs = () => {
         <Navbar />
       </Box>
 
-      <Box sx={{ mt: 15, pb: 8, backgroundColor:"white" }}>
+<Box sx={{ mt: isMobile ? 10 : 15, pb: 8, backgroundColor: "white" }}>
         <Container>
           {/* Main Heading */}
           <motion.div
@@ -60,7 +62,7 @@ const AboutUs = () => {
             viewport={{ once: true, amount: 0.2 }}
           >
             <Typography
-              variant="h4"
+              variant= {isMobile ? "h5" : "h4"}
               fontWeight={700}
               textAlign="center"
               gutterBottom
@@ -75,7 +77,7 @@ const AboutUs = () => {
             >
               About MrFranchise.in
             </Typography>
-            <Typography variant="h6" fontWeight="bold" textAlign="center" sx={{ mb: 4 }}>
+            <Typography variant= {isMobile ? "h6" : "h6"}  textAlign="center" sx={{ mb: 4 }}>
               Strategic Franchise Growth. Expert-Led Execution.
             </Typography>
           </motion.div>

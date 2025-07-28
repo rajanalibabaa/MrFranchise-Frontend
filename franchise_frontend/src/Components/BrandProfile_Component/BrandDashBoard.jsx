@@ -5,7 +5,7 @@ import axios from 'axios';
 import { Person, Visibility, ThumbUp, MailOutline, Search, Close, FilterList,  } from '@mui/icons-material';
 
 // const API_BASE_URL = 'https://mrfranchisebackend.mrfranchise.in';
-const API_BASE_URL = 'https://mrfranchisebackend.mrfranchise.in';
+const API_BASE_URL = 'http://localhost:5000/api/v1';
 const colors = {
   primary: '#2c3e50', secondary: '#34495e', accent: '#3498db', background: '#f8f9fa',
   cardBackground: '#ffffff', textPrimary: '#2c3e50', textSecondary: '#7f8c8d', divider: '#ecf0f1'

@@ -346,47 +346,45 @@ const handleLikeClick = useCallback(
       {/* Comparison Button */}
 
 
-<Box
-  sx={{
-    position: "fixed",
-    top: 290,
-    right: 25,
-    zIndex: 1000,
-  }}
->
-  <Badge badgeContent={selectedForComparison.length} color="primary">
-    <Tooltip
-      title={
-        selectedForComparison.length === 0
-          ? "Select brands to enable comparison"
-          : "Click to compare selected brands"
-      }
-      placement="left"
-      arrow
-    >
-      <span>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<Compare />}
-          onClick={() => setComparisonOpen(true)}
-          disabled={selectedForComparison.length === 0}
-          sx={{
-            borderRadius: 4,
-            boxShadow: 3,
-            bgcolor: "#ff9800",
-            "&:hover": {
-              bgcolor: "#fb8c00",
-              boxShadow: 6,
-            },
-          }}
-        >
-          Compare
-        </Button>
-      </span>
-    </Tooltip>
-  </Badge>
-</Box>
+{selectedForComparison.length > 0 && (
+  <Box
+    sx={{
+      position: "fixed",
+      top: 290,
+      right: 25,
+      zIndex: 1000,
+    }}
+  >
+    <Badge badgeContent={selectedForComparison.length} color="primary">
+      <Tooltip
+        title="Click to compare selected brands"
+        placement="left"
+        arrow
+      >
+        <span>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Compare />}
+            onClick={() => setComparisonOpen(true)}
+            sx={{
+              borderRadius: 4,
+              boxShadow: 3,
+              bgcolor: "#ff9800",
+              "&:hover": {
+                bgcolor: "#fb8c00",
+                boxShadow: 6,
+              },
+            }}
+          >
+            Compare
+          </Button>
+        </span>
+      </Tooltip>
+    </Badge>
+  </Box>
+)}
+
 
       {/* Scroll to Top Button */}
       {scrollPosition > 300 && (

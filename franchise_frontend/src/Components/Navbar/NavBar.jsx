@@ -109,7 +109,7 @@ function Navbar() {
     try {
       const response = await axios.post(
       
-        `https://mrfranchisebackend.mrfranchise.in/logout/${ID}`,
+        `http://localhost:5000/api/v1/logout/${ID}`,
         {},
         {
           headers: {
@@ -165,8 +165,11 @@ function Navbar() {
     dispatch(toggleMenu(false));
   };
   const handleLogoClick = () => {
+    if (location.pathname === '/') {
+    window.location.reload();
+  } else {
     dispatch(showLoading());
-      navigate("/");
+      navigate("/");}
   };
 
   // Animation variants

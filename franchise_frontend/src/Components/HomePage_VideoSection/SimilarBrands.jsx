@@ -30,9 +30,11 @@ import { useBrands, useToggleLike, openBrandDialog } from "../../Hooks/Fetchbran
 import { useDispatch } from "react-redux";
 
 const CARD_DIMENSIONS = {
-  mobile: { width: 280, height: 520 },
+  mobile: { width: 280, height: 500 },
   tablet: { width: 320, height: 560 },
-  desktop: { width: 327, height: 500 },
+  smallDesktop: { width: 280, height: 500 },
+  desktop: { width: 267, height: 480 },
+  largeDesktop: { width: 327, height: 500 },
 };
 
 const cardVariants = {
@@ -106,7 +108,7 @@ const BrandCard = React.memo(({
     <motion.div
       key={brandId}
       variants={cardVariants}
-      whileHover={{ scale: 1.03 }}
+      // whileHover={{ scale: 1.03 }}
       style={{
         width: dimensions.width,
         flexShrink: 0,
@@ -119,12 +121,12 @@ const BrandCard = React.memo(({
           borderRadius: 3,
           overflow: "hidden",
           width: "100%",
-          border: "1px solid #eee",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+          // border: "1px solid #eee",
+          // boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
           transition: "all 0.3s ease",
-          "&:hover": {
-            boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
-          },
+          // "&:hover": {
+          //   boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
+          // },
         }}
       >
         {/* Video/Image Section */}
@@ -192,30 +194,23 @@ const BrandCard = React.memo(({
                 justifyContent: "space-between",
               }}
             >
-              <Avatar
-                src={brand?.uploads?.brandLogo?.[0]}
-                sx={{
-                  width: 50,
-                  height: 50,
-                  border: "1px solid #eee",
-                  flexShrink: 0,
-                }}
-              />
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Tooltip title={brandName} placement="top">
-                  <Typography
-                    variant="h6"
-                    fontWeight={600}
-                    sx={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {brandName}
-                  </Typography>
-                </Tooltip>
-              </Box>
+              <Box
+                              onClick={()=>handleApply(brand)}
+                                component="img"
+                                src={brand?.uploads?.brandLogo?.[0]}
+                                alt={brand.uploads?.brandName}
+                                loading="lazy"
+                                sx={{
+                                  width: 100,
+                                  height: 50,
+                                  border: "1px solid #f29724",
+              cursor:'pointer',
+                                  objectFit: "contain",
+                                }}
+                              />
+              <IconButton>
+                      <Tooltip title={'ShortList'}><PlaylistAddCheckCircleOutlined /></Tooltip>
+                    </IconButton>
               <IconButton
                 onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
                 disabled={likeProcessing[brand.uuid]}
@@ -234,7 +229,21 @@ const BrandCard = React.memo(({
                 )}
               </IconButton>
             </Box>
-
+ <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Tooltip title={brandName} placement="top">
+                  <Typography
+                    variant="h6"
+                    fontWeight={700}
+                    sx={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {brandName}
+                  </Typography>
+                </Tooltip>
+              </Box>
             {/* Categories */}
             {(category.main || category.child) && (
               <Box sx={{ mb: 2 }}>
@@ -254,9 +263,7 @@ const BrandCard = React.memo(({
                       }}
                     />
                   )}
-                    <IconButton>
-                      <Tooltip title={'ShortList'}><PlaylistAddCheckCircleOutlined /></Tooltip>
-                    </IconButton>
+                   
                 </Stack>
               </Box>
             )}
@@ -337,9 +344,12 @@ const BrandCard = React.memo(({
 });
 
 const SimilarBrands = ({ brandData }) => {
-  const theme = useTheme();
+ const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+  const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
+  const isDesktop = useMediaQuery(theme.breakpoints.between("lg", "xl"));
+  const isLargeDesktop = useMediaQuery(theme.breakpoints.up("xl"));
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const isPaused = useRef(false);
@@ -382,8 +392,27 @@ const SimilarBrands = ({ brandData }) => {
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
-    return CARD_DIMENSIONS.desktop;
-  }, [isMobile, isTablet]);
+    if (isSmallDesktop) return CARD_DIMENSIONS.smallDesktop;
+    if (isDesktop) return CARD_DIMENSIONS.desktop;
+    return CARD_DIMENSIONS.largeDesktop;
+  }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
+
+   // Calculate visible cards based on container width
+  useEffect(() => {
+    const updateVisibleCards = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
+        const count = Math.floor(containerWidth / cardWidthWithGap);
+        // setVisibleCardCount(Math.max(1, Math.min(count, 6)));
+      }
+    };
+
+    updateVisibleCards();
+    window.addEventListener("resize", updateVisibleCards);
+    return () => window.removeEventListener("resize", updateVisibleCards);
+  }, [dimensions.width, isMobile]);
+
 
   const handleLikeClick = useCallback((brandId, isLiked) => {
     const token = localStorage.getItem("accessToken");
@@ -584,7 +613,7 @@ const SimilarBrands = ({ brandData }) => {
           variant={isMobile ? "h6" : "h5"}
           fontWeight="bold"
           sx={{
-            color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+            color: "black",
             mb: 3,
             textAlign: "left",
             position: "relative",
@@ -619,11 +648,11 @@ const SimilarBrands = ({ brandData }) => {
                 height: '36px',
                 borderRadius: '50%',
                 padding: 0,
-                backgroundColor: '#98dd2e',
+                backgroundColor: 'rgba(111, 255, 0, 0.98)',
                 color: 'white',
                 boxShadow: theme.shadows[4],
                 '&:hover': {
-                  backgroundColor: '#b7f92b',
+                  backgroundColor: '#7ad03a',
                 },
               }}
             >
@@ -647,11 +676,11 @@ const SimilarBrands = ({ brandData }) => {
                 height: '36px',
                 borderRadius: '50%',
                 padding: 0,
-                backgroundColor: '#98dd2e',
+                backgroundColor: 'rgba(111, 255, 0, 0.98)',
                 color: 'white',
                 boxShadow: theme.shadows[4],
                 '&:hover': {
-                  backgroundColor: '#b7f92b',
+                  backgroundColor: '#7ad03a',
                 },
               }}
             >
@@ -665,15 +694,40 @@ const SimilarBrands = ({ brandData }) => {
             animate="animate"
             ref={scrollContainerRef}
             sx={{
-              display: "flex",
-              gap: isMobile ? 2 : 3,
-              borderRadius: 3,
-              p: 2,
-              overflowX: "auto",
-              scrollbarWidth: "none",
-              "&::-webkit-scrollbar": { display: "none" },
-              perspective: '1000px',
-            }}
+                display: "flex",
+                gap: isMobile ? 2 : 3,
+                borderRadius: 3,
+                p: 2,
+                overflowX: "auto",
+                perspective: "1000px",
+                // Custom attractive scrollbar design
+                "&::-webkit-scrollbar": {
+                  height: isMobile ? "10px" : "8px",
+                  backgroundColor: "transparent",
+                },
+                "&::-webkit-scrollbar-track": {
+                  background:
+                    "linear-gradient(90deg, transparent, rgba(242, 151, 36, 0.1), transparent)",
+                  borderRadius: "10px",
+                  marginX: isMobile ? 0 : "10%",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  background: "linear-gradient(90deg, #f29724, #98dd2e)",
+                  borderRadius: "10px",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                  border: "2px solid white",
+                  backgroundSize: "200%",
+                  transition: "background-position 0.3s ease",
+                  "&:hover": {
+                    backgroundPosition: "right center",
+                  },
+                },
+                // Firefox scrollbar
+                scrollbarColor: ` transparent`,
+                scrollbarWidth: "thin",
+                // Extra bottom padding for mobile
+                paddingBottom: isMobile ? "24px" : "16px",
+              }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
@@ -683,7 +737,7 @@ const SimilarBrands = ({ brandData }) => {
                 whileHover={{ 
                   scale: 1.03,
                   zIndex: 10,
-                  boxShadow: theme.shadows[6],
+                  // boxShadow: theme.shadows[6],
                   transition: { duration: 0.3 }
                 }}
                 whileTap={{ scale: 0.98 }}

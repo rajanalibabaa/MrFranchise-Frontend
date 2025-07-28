@@ -203,6 +203,7 @@ const BrandCard = React.memo(
               >
                 <Box
                                             component="img"
+                                                            onClick={() => handleApply(brand)}
                                             src={brand?.uploads?.brandLogo?.[0]}
                                             alt={brand.uploads?.brandName}
                                             loading="lazy"
@@ -212,6 +213,7 @@ const BrandCard = React.memo(
                                               border: '1px solid #f29724',
                                               mb: 1,
                                               objectFit: 'contain',  
+                                              cursor: 'pointer'
                                             }}
                                           />
                                            <IconButton
@@ -419,7 +421,7 @@ const TopCafeFranchises = () => {
         const containerWidth = containerRef.current.offsetWidth;
         const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
         const count = Math.floor(containerWidth / cardWidthWithGap);
-        setVisibleCardCount(Math.max(1, Math.min(count, 6)));
+        // setVisibleCardCount(Math.max(1, Math.min(count, 6)));
       }
     };
 
