@@ -530,9 +530,9 @@ const handleLikeClick = useCallback(
                 Food & Beverage Brands
               </Typography>
              )}
-              {/* <Typography sx={{ml: 2,mb: 2}} variant="body2" gutterBottom>
+              <Typography sx={{ml: 2,mb: 2}} variant="body2" gutterBottom>
                 Showing {filteredBrands.length} of {brands.length} brands
-              </Typography> */}
+              </Typography>
 
               <Grid container spacing={3}>
                 {filteredBrands.map((brand) => (
