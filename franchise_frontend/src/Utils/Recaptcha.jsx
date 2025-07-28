@@ -17,7 +17,7 @@ const CaptchaOnly = () => {
     setStatus(null);
 
     try {
-      const response = await fetch('https://mrfranchisebackend.mrfranchise.in/verify-captcha', {
+      const response = await fetch('http://localhost:5000/verify-captcha', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: captchaValue }),

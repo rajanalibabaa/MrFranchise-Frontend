@@ -33,8 +33,7 @@ const apiCache = {
   cities: {},
 };
 
-
-const ExpansionLocationControl = ({ data, onChange, errors }) => {
+const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   const { enqueueSnackbar } = useSnackbar();
 
   // Location type state
@@ -197,7 +196,7 @@ const ExpansionLocationControl = ({ data, onChange, errors }) => {
     }
   }, [enqueueSnackbar]);
 
-  // Define updateFormData first
+  // Function to update form data
   const updateFormData = useCallback(
     (type, locationType, selections) => {
       const locationKey = type === "current" ? "currentOutletLocations" : "expansionLocations";
@@ -344,6 +343,139 @@ const ExpansionLocationControl = ({ data, onChange, errors }) => {
     [data, onChange]
   );
 
+  // Initialize component with data
+  useEffect(() => {
+    fetchDomesticData();
+    fetchCountries();
+
+    // Initialize current outlet locations from props
+    if (data?.currentOutletLocations) {
+      // Domestic locations
+      if (data.currentOutletLocations.domestic?.locations?.length > 0) {
+        const domesticLocations = data.currentOutletLocations.domestic.locations;
+        const selectedStates = domesticLocations.map(loc => loc.state);
+        const selectedDistricts = domesticLocations.flatMap(loc => 
+          loc.districts?.map(district => ({
+            state: loc.state,
+            district: district.district
+          })) || []
+        );
+        const selectedCities = domesticLocations.flatMap(loc => 
+          loc.districts?.flatMap(district => 
+            district.cities?.map(city => ({
+              state: loc.state,
+              district: district.district,
+              city
+            })) || []
+          ) || []
+        );
+        
+        setCurrentDomesticSelections({
+          selectedStates,
+          selectedDistricts,
+          selectedCities
+        });
+      }
+
+      // International locations
+      if (data.currentOutletLocations.international?.locations?.length > 0) {
+        const intlLocations = data.currentOutletLocations.international.locations;
+        const selectedCountries = intlLocations.map(loc => loc.country);
+        const selectedStates = {};
+        const selectedCities = {};
+        
+        intlLocations.forEach(loc => {
+          if (loc.states?.length > 0) {
+            selectedStates[loc.country] = loc.states.map(state => state.state);
+            
+            loc.states.forEach(state => {
+              const stateKey = `${loc.country}-${state.state}`;
+              if (state.cities?.length > 0) {
+                selectedCities[stateKey] = state.cities;
+              }
+            });
+          }
+        });
+        
+        setCurrentInternationalSelections({
+          selectedCountries,
+          selectedStates,
+          selectedCities
+        });
+      }
+    }
+
+    // Initialize expansion locations from props
+    if (data?.expansionLocations) {
+      // Domestic expansion locations
+      if (data.expansionLocations.domestic?.locations?.length > 0) {
+        const domesticLocations = data.expansionLocations.domestic.locations;
+        const selectedStates = domesticLocations.map(loc => loc.state);
+        const selectedDistricts = domesticLocations.flatMap(loc => 
+          loc.districts?.map(district => ({
+            state: loc.state,
+            district: district.district
+          })) || []
+        );
+        const selectedCities = domesticLocations.flatMap(loc => 
+          loc.districts?.flatMap(district => 
+            district.cities?.map(city => ({
+              state: loc.state,
+              district: district.district,
+              city
+            })) || []
+          ) || []
+        );
+        
+        setDomesticSelections({
+          selectedStates,
+          selectedDistricts,
+          selectedCities
+        });
+      }
+
+      // International expansion locations
+      if (data.expansionLocations.international?.locations?.length > 0) {
+        const intlLocations = data.expansionLocations.international.locations;
+        const selectedCountries = intlLocations.map(loc => loc.country);
+        const selectedStates = {};
+        const selectedCities = {};
+        
+        intlLocations.forEach(loc => {
+          if (loc.states?.length > 0) {
+            selectedStates[loc.country] = loc.states.map(state => state.state);
+            
+            loc.states.forEach(state => {
+              const stateKey = `${loc.country}-${state.state}`;
+              if (state.cities?.length > 0) {
+                selectedCities[stateKey] = state.cities;
+              }
+            });
+          }
+        });
+        
+        setInternationalSelections({
+          selectedCountries,
+          selectedStates,
+          selectedCities
+        });
+      }
+    }
+
+    // Set initial location type based on which has data
+    if (data?.currentOutletLocations?.domestic?.locations?.length > 0) {
+      setCurrentOutletLocationType('domestic');
+    } else if (data?.currentOutletLocations?.international?.locations?.length > 0) {
+      setCurrentOutletLocationType('international');
+    }
+
+    if (data?.expansionLocations?.domestic?.locations?.length > 0) {
+      setLocationType('domestic');
+    } else if (data?.expansionLocations?.international?.locations?.length > 0) {
+      setLocationType('international');
+    }
+  }, [data, fetchDomesticData, fetchCountries]);
+
   // Fetch states for a country
   const getStatesByCountry = useCallback(
     async (countryName, callback) => {
@@ -416,100 +548,12 @@ const ExpansionLocationControl = ({ data, onChange, errors }) => {
     [getCitiesByCountryAndState]
   );
 
-  // Initialize component with data
-  useEffect(() => {
-    fetchDomesticData();
-    fetchCountries();
-
-    // Initialize current outlet locations
-    if (data?.currentOutletLocations) {
-      // Domestic locations
-      if (data.currentOutletLocations.domestic?.locations?.length > 0) {
-        const domesticLocations = data.currentOutletLocations.domestic.locations;
-        const selectedStates = domesticLocations.map(loc => loc.state);
-        const selectedDistricts = domesticLocations.flatMap(loc => 
-          loc.districts?.map(district => ({
-            state: loc.state,
-            district: district.district
-          })) || []
-        );
-        const selectedCities = domesticLocations.flatMap(loc => 
-          loc.districts?.flatMap(district => 
-            district.cities?.map(city => ({
-              state: loc.state,
-              district: district.district,
-              city
-            })) || []
-          ) || []
-        );
-        
-        setCurrentDomesticSelections({
-          selectedStates,
-          selectedDistricts,
-          selectedCities
-        });
-      }
-
-      // International locations
-      if (data.currentOutletLocations.international?.locations?.length > 0) {
-        const intlLocations = data.currentOutletLocations.international.locations;
-        const selectedCountries = intlLocations.map(loc => loc.country);
-        const selectedStates = {};
-        const selectedCities = {};
-        
-        intlLocations.forEach(loc => {
-          if (loc.states?.length > 0) {
-            selectedStates[loc.country] = loc.states.map(state => state.state);
-            
-            loc.states.forEach(state => {
-              const stateKey = `${loc.country}-${state.state}`;
-              if (state.cities?.length > 0) {
-                selectedCities[stateKey] = state.cities;
-              }
-            });
-          }
-        });
-        
-        setCurrentInternationalSelections({
-          selectedCountries,
-          selectedStates,
-          selectedCities
-        });
-
-        // Load states and cities for the selected countries
-        selectedCountries.forEach(country => {
-          debouncedGetStatesByCountry(country, (states) => {
-            setCurrentInternationalStates(prev => ({ ...prev, [country]: states }));
-          });
-        });
-
-        Object.entries(selectedStates).forEach(([country, states]) => {
-          states.forEach(state => {
-            const stateKey = `${country}-${state}`;
-            debouncedGetCitiesByCountryAndState(country, state, (cities) => {
-              setCurrentInternationalCities(prev => ({ ...prev, [stateKey]: cities }));
-            });
-          });
-        });
-      }
-    }
-
-    // Set initial location type based on which has data
-    if (data?.currentOutletLocations?.domestic?.locations?.length > 0) {
-      setCurrentOutletLocationType('domestic');
-    } else if (data?.currentOutletLocations?.international?.locations?.length > 0) {
-      setCurrentOutletLocationType('international');
-    }
-
-  }, [data, fetchDomesticData, fetchCountries, debouncedGetStatesByCountry, debouncedGetCitiesByCountryAndState]);
-
   // Handle international expansion selection
   const handleInternationalExpansionChange = useCallback(
     (value) => {
-      const newValue = value === data?.isInternationalExpansion ? null : value;
       onChange({
         ...data,
-        isInternationalExpansion: newValue,
+        isInternationalExpansion: value,
       });
     },
     [data, onChange]
@@ -620,6 +664,7 @@ const ExpansionLocationControl = ({ data, onChange, errors }) => {
     [updateFormData]
   );
 
+  // Handle "Select All" for districts in a state
   const handleSelectAllDistricts = useCallback(
     (stateName, districts, isSelected, type) => {
       const setSelections = type === "current" ? setCurrentDomesticSelections : setDomesticSelections;
@@ -2276,7 +2321,7 @@ const ExpansionLocationControl = ({ data, onChange, errors }) => {
         </Typography>
         <RadioGroup
           row
-          value={data?.isInternationalExpansion === null ? "" : data?.isInternationalExpansion}
+          value={data?.isInternationalExpansion || "false"}
           sx={{ gap: 11, justifyContent: "start", ml: 15 }}
           onChange={(e) => handleInternationalExpansionChange(e.target.value === "true")}
         >
@@ -2352,7 +2397,7 @@ const ExpansionLocationControl = ({ data, onChange, errors }) => {
 
       {/* Loading and Error Handling */}
       <Backdrop
-        open={loading.states || loading.countries || loading.formSubmit}
+        open={loading.states || loading.countries}
         sx={{ zIndex: 9999 }}
       >
         <CircularProgress color="inherit" />
@@ -2366,4 +2411,4 @@ const ExpansionLocationControl = ({ data, onChange, errors }) => {
   );
 };
 
-export default ExpansionLocationControl;
+export default BrandExpansionLocationDetails;

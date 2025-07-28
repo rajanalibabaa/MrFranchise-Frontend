@@ -91,7 +91,7 @@ const BrandCard = React.memo(({
 
 
 
-    const [shortListed, setShortListed] = useState(brand.isShortListed)
+    const [shortListed, setShortListed] = useState(brand)
     const handleToggleShortList = async (brand) => {
        try {
          const response = await handleShortList(brand);
