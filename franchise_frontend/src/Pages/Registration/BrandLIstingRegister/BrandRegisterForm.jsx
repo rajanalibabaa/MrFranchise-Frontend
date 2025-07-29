@@ -42,7 +42,7 @@ import axios from "axios";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress from "@mui/material/CircularProgress";
 import BrandExpansionLocationDetails from "./BrandExpansionLocationDetails";
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import { useDispatch } from "react-redux";
 import { showLoading } from "../../../Redux/Slices/loadingSlice";
 
@@ -207,7 +207,7 @@ const initialFormData = {
 
 const BrandRegisterForm = () => {
   const navigate = useNavigate();
-const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // <600px
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md")); // 600px - 900px
@@ -317,7 +317,7 @@ const dispatch = useDispatch();
 
   const handleHomeClick = () => {
     dispatch(showLoading());
-      navigate("/");   
+    navigate("/");
   };
 
   const handleSubmit = async () => {
@@ -459,7 +459,6 @@ const dispatch = useDispatch();
       }
     }
   };
- 
 
   const handleBrandDetailsChange = (update) => {
     setFormData((prev) => ({
@@ -511,8 +510,6 @@ const dispatch = useDispatch();
     }));
   };
 
-
-
   const handlePreviewOpen = () => {
     setOpenPreview(true);
   };
@@ -521,7 +518,6 @@ const dispatch = useDispatch();
     setOpenPreview(false);
   };
 
-  
   const handleCancel = () => {
     // Show confirmation dialog
     const confirmCancel = window.confirm(
@@ -615,10 +611,6 @@ const dispatch = useDispatch();
     }
   };
 
-
-
-
-
   const formatFieldName = (name) => {
     return name
       .replace(/([A-Z])/g, " $1")
@@ -626,7 +618,6 @@ const dispatch = useDispatch();
       .replace(/Gst/i, "GST")
       .replace(/Pancard/i, "PAN Card");
   };
-
 
   const renderPreviewContent = () => {
     const {
@@ -896,7 +887,7 @@ const dispatch = useDispatch();
 
                   {/* International Locations Summary */}
                   <Grid item xs={12} md={6}>
-                    <Paper sx={{ p: 2, height: "110px"}}>
+                    <Paper sx={{ p: 2, height: "110px" }}>
                       <Typography variant="subtitle2" gutterBottom>
                         International Locations
                       </Typography>
@@ -1249,7 +1240,7 @@ const dispatch = useDispatch();
                 pl: 2,
                 py: 0,
                 mt: 2,
-           
+
                 ml: { md: 6, xs: 3 },
                 boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
                 transition: "all 0.3s ease",
@@ -1569,7 +1560,7 @@ const dispatch = useDispatch();
               top: 0,
               backgroundColor: "background.paper",
               zIndex: 1,
-              color:"#f9a505"
+              color: "#f9a505",
             }}
           >
             Form Data Preview
@@ -1586,7 +1577,11 @@ const dispatch = useDispatch();
               zIndex: 1,
             }}
           >
-            <Button onClick={handlePreviewClose} variant="contained" color="error">
+            <Button
+              onClick={handlePreviewClose}
+              variant="contained"
+              color="error"
+            >
               Close
             </Button>
           </DialogActions>

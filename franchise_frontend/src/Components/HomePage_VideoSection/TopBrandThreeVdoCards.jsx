@@ -821,7 +821,7 @@ function TopBrandVdoCards() {
                         lineHeight: 1.5,
                       }}
                     >
-                     Franchising Model: {brand.franchiseDetails?.fico?.[0]?.franchiseModel}
+                    Model: {brand.franchiseDetails?.fico?.[0]?.franchiseModel}
                     </Typography>
                   </Box>
 

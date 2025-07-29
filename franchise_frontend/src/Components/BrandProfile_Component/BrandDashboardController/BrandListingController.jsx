@@ -290,8 +290,8 @@ const BrandListingController = () => {
 
     try {
       const response = await axios.post(
-      //  `http://localhost:5000/api/v1/otpverify/verify-otp`,
        `http://localhost:5000/api/v1/otpverify/verify-otp`,
+      //  `http://localhost:5000/otpverify/verify-otp`,
         {
           identifier: formData.email,
           otp: otp,
@@ -319,34 +319,85 @@ const BrandListingController = () => {
   };
 
   const handleSave = async () => {
-    const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
-    if (!uuid) return;
+  const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
+  if (!uuid) return;
 
-    setSaveStatus({ loading: true, success: false, error: '' });
+  setSaveStatus({ loading: true, success: false, error: '' });
 
-    try {
-      const apiData = unflattenFormData(formData);
-      const response = await axios.patch(
-       ` http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
-      // `https://mrfranchisebackend.mrfranchise.in/v1/api/brandlisting/updateBrandListingByUUID/${uuid}`,
-        apiData
-      );
+  try {
+    const apiData = unflattenFormData(formData);
 
-      if (response.data.success) {
-        setOriginalData(response.data.brandListing || response.data.data);
-        setSaveStatus({ loading: false, success: true, error: '' });
-        setIsEditing(false);
-      } else {
-        throw new Error(response.data.message || "Failed to save.");
+    console.log(apiData)
+    const formDataSend = new FormData();
+
+    // Append brandDetails
+    formDataSend.append("brandDetails", JSON.stringify({
+      ...apiData.brandDetails,
+      awardText: apiData.brandDetails?.awardText || [],
+    }));
+
+    // Append franchiseDetails
+    formDataSend.append("franchiseDetails", JSON.stringify({
+      ...apiData.franchiseDetails,
+    }));
+
+    // Append expansionLocationData
+    formDataSend.append("expansionLocationData", JSON.stringify({
+      ...apiData.expansionLocationData,
+    }));
+
+    // File fields
+    const fileFields = {
+      brandLogo: formData.uploads.brandLogo,
+      gstCertificate: formData.uploads.gstCertificate,
+      pancard: formData.uploads.pancard,
+      exteriorOutlet: formData.uploads.exteriorOutlet,
+      interiorOutlet: formData.uploads.interiorOutlet,
+      franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
+      awardDoc: formData.uploads.awardDoc || [],
+      businessPlan: formData.uploads.businessPlan,
+    };
+
+    // Append files (handling both single file and array of files)
+    Object.entries(fileFields).forEach(([fieldName, fileValue]) => {
+      if (Array.isArray(fileValue)) {
+        fileValue
+          .filter(f => f instanceof File && f.size > 0)
+          .forEach((file, index) => {
+            formDataSend.append(`${fieldName}[${index}]`, file);
+          });
+      } else if (fileValue instanceof File && fileValue.size > 0) {
+        formDataSend.append(fieldName, fileValue);
       }
-    } catch (err) {
-      setSaveStatus({
-        loading: false,
-        success: false,
-        error: err.response?.data?.message || "Save failed."
-      });
+    });
+
+    console.log("formDataSend:", formDataSend);
+
+    const response = await axios.patch(
+      `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
+      formDataSend,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    if (response.data.success) {
+      setOriginalData(response.data.brandListing || response.data.data);
+      setSaveStatus({ loading: false, success: true, error: '' });
+      setIsEditing(false);
+    } else {
+      throw new Error(response.data.message || "Failed to save.");
     }
-  };
+  } catch (err) {
+    setSaveStatus({
+      loading: false,
+      success: false,
+      error: err.response?.data?.message || "Save failed.",
+    });
+  }
+};
 
   const handleCancel = () => {
     setFormData(flattenBrandData(originalData));

@@ -4,66 +4,28 @@ import {
   Grid,
   Typography,
   InputAdornment,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
   Box,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Button,
   CircularProgress,
   Snackbar,
   Alert,
-  RadioGroup,
-  Radio,
-  Chip,
-  Checkbox,
   Autocomplete,
-  FormControlLabel,
-  IconButton,
-  Divider,
-  Avatar,
-  Badge,
   Tooltip,
 } from "@mui/material";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import categories from "./BrandCategories.jsx";
-import AddIcon from "@mui/icons-material/Add";
 import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
-import CloseIcon from "@mui/icons-material/Close";
-
-import LanguageIcon from "@mui/icons-material/Language";
 import FlagIcon from "@mui/icons-material/Flag";
-import { Editor } from "@tinymce/tinymce-react";
-import { fontSize, width } from "@mui/system";
-import {
-  fetchGlobalLocationByPostalCode,
-  getSupportedCountries,
-} from "../../../Utils/PincodeFetch.jsx";
-import coutryCode from "../../../Utils/AllCountryCode.jsx";
 
-// const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-// const checkedIcon = <CheckBoxIcon fontSize="small" />;
+import { fetchGlobalLocationByPostalCode } from "../../../Utils/PincodeFetch.jsx";
+import coutryCode from "../../../Utils/AllCountryCode.jsx";
 
 const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const [showWhatsappSnackbar, setShowWhatsappSnackbar] = useState(false);
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
-
-  // const [phoneVerifyStatus, setPhoneVerifyStatus] = useState({
-  //   mobileNumber: {
-  //     loading: false,
-  //     verified: false,
-  //   },
-  // });
 
   const formData = {
     companyName: "",
@@ -81,52 +43,25 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   const [loadingPincode, setLoadingPincode] = useState(false);
 
   // Inside your BrandDetails component, add these state variables
-const [supportedCountries, setSupportedCountries] = useState([]);
-const [selectedCountry, setSelectedCountry] = useState(''); 
-const [countryInputValue, setCountryInputValue] = useState("");
+  const [supportedCountries, setSupportedCountries] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [countryInputValue, setCountryInputValue] = useState("");
 
-useEffect(() => {
-  fetch("https://countriesnow.space/api/v0.1/countries")
-    .then(res => res.json())
-    .then(data => {
-      if (data.data) {
-        setSupportedCountries(
-          data.data.map(c => ({
-            name: c.country,
-            code: c.iso2,
-            dial_code: c.phone_code ? `+${c.phone_code}` : "",
-          }))
-        );
-      }
-    });
-}, []);
-// const handleCountryChange = (event, newValue) => {
-//   if (newValue) {
-//     setSelectedCountry(newValue.code);
-//     onChange({ country: newValue.name });
-//   } else {
-//     setSelectedCountry('');
-//     onChange({ country: '' });
-//   }
-// };
-
-  // const [supportedCountries] = useState(getSupportedCountries());
-  // const [selectedCountry, setSelectedCountry] = useState("IN"); // Default to India
-  // const [countryInputValue, setCountryInputValue] = useState("");
-
- 
-
-  // Add this function to handle country change
-  const handleCountryChange = (event, newValue) => {
-    if (newValue) {
-      setSelectedCountry(newValue.code);
-      onChange({ country: newValue.name });
-    } else {
-      setSelectedCountry("");
-      onChange({ country: "" });
-    }
-  };
-
+  useEffect(() => {
+    fetch("https://countriesnow.space/api/v0.1/countries")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.data) {
+          setSupportedCountries(
+            data.data.map((c) => ({
+              name: c.country,
+              code: c.iso2,
+              dial_code: c.phone_code ? `+${c.phone_code}` : "",
+            }))
+          );
+        }
+      });
+  }, []);
   useEffect(() => {
     if (
       data.mobileNumber?.length === 10 &&
@@ -183,66 +118,6 @@ useEffect(() => {
 
     return () => clearTimeout(timer);
   }, [data.pincode, selectedCountry]);
-
-  const handleMainCategoryChange = (e) => {
-    const mainCat = e.target.value;
-    setSelectedCategory({
-      main: mainCat,
-      sub: "",
-      child: "",
-      groupId: "",
-    });
-  };
-
-  const handleSubCategoryChange = (e) => {
-    const subCat = e.target.value;
-    const mainCatObj = categories.find(
-      (cat) => cat.name === selectedCategory.main
-    );
-    const subCatObj = mainCatObj?.children?.find((sub) => sub.name === subCat);
-
-    setSelectedCategory((prev) => ({
-      ...prev,
-      sub: subCat,
-      groupId: subCatObj?.groupId || "",
-      child: "",
-    }));
-  };
-
-  const handleChildCategoryChange = (e) => {
-    setSelectedCategory((prev) => ({
-      ...prev,
-      child: e.target.value,
-    }));
-  };
-
-  const handleAddCategory = () => {
-    if (selectedCategory.child) {
-      const isDuplicate =
-        Array.isArray(data.brandCategories) &&
-        data.brandCategories.some(
-          (cat) =>
-            cat.main === selectedCategory.main &&
-            cat.sub === selectedCategory.sub &&
-            cat.child === selectedCategory.child
-        );
-
-      if (!isDuplicate) {
-        const updatedCategories = [
-          ...(Array.isArray(data.brandCategories) ? data.brandCategories : []),
-          {
-            main: selectedCategory.main,
-            sub: selectedCategory.sub,
-            child: selectedCategory.child,
-            groupId: selectedCategory.groupId,
-          },
-        ];
-        onChange({ brandCategories: updatedCategories });
-        // Reset the child category selection after adding
-        setSelectedCategory((prev) => ({ ...prev, child: "" }));
-      }
-    }
-  };
 
   // State for country codes
   const [mobileCountryCode, setMobileCountryCode] = useState({
@@ -403,166 +278,178 @@ useEffect(() => {
     setOtpInput("");
   };
 
-const [otpToken, setOtpToken] = useState(null); // Add this state for token storage
-          console.log("Token:", otpToken);
+  const [otpToken, setOtpToken] = useState(null); // Add this state for token storage
+  console.log("Token:", otpToken);
 
-// OTP Verification Functions - Fixed Version
-const handleSendOtp = async (field) => {
-  setVerificationState((prev) => ({
-    ...prev,
-    [field]: {
-      ...prev[field],
-      loading: true,
-      error: null,
-    },
-  }));
-
-  try {
-    const response = await axios.post(
-      "http://localhost:5000/api/v1/otpverify/send-otp-email",
-      {
-        [field === "email" ? "email" : "phone"]: data[field],
-        type: field,
+  // OTP Verification Functions - Fixed Version
+  const handleSendOtp = async (field) => {
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        loading: true,
+        error: null,
       },
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    }));
 
-    // Modified success check to match backend response
-    if (response.data.token) {
-      setOtpToken(response.data.token);
-      console.log("OTP Token stored:", response.data.token);
-      
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/otpverify/send-otp-email",
+        {
+          [field === "email" ? "email" : "phone"]: data[field],
+          type: field,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Modified success check to match backend response
+      if (response.data.token) {
+        setOtpToken(response.data.token);
+        console.log("OTP Token stored:", response.data.token);
+
+        setVerificationState((prev) => ({
+          ...prev,
+          [field]: {
+            ...prev[field],
+            otpSent: true,
+            loading: false,
+            verified: false,
+          },
+        }));
+
+        setSnackbar({
+          open: true,
+          message: `OTP sent successfully to your ${field}`,
+          severity: "success",
+        });
+      } else {
+        throw new Error(response.data.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.error(`Error sending OTP for ${field}:`, error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to send OTP";
+
       setVerificationState((prev) => ({
         ...prev,
         [field]: {
           ...prev[field],
-          otpSent: true,
           loading: false,
-          verified: false,
+          error: errorMessage,
         },
       }));
-      
+
       setSnackbar({
         open: true,
-        message: `OTP sent successfully to your ${field}`,
-        severity: "success",
+        message: errorMessage,
+        severity: "error",
       });
-    } else {
-      throw new Error(response.data.message || "Failed to send OTP");
     }
-  } catch (error) {
-    console.error(`Error sending OTP for ${field}:`, error);
-    const errorMessage = error.response?.data?.message || 
-                       error.response?.data?.error || 
-                       error.message || 
-                       "Failed to send OTP";
-    
-    setVerificationState((prev) => ({
-      ...prev,
-      [field]: {
-        ...prev[field],
-        loading: false,
-        error: errorMessage,
-      },
-    }));
-    
-    setSnackbar({
-      open: true,
-      message: errorMessage,
-      severity: "error",
-    });
-  }
-};
+  };
 
-const handleVerifyOtp = async (field) => {
-  if (!otpInput || otpInput.length !== 6) {
-    setVerificationState((prev) => ({
-      ...prev,
-      [field]: {
-        ...prev[field],
-        error: "Please enter a valid 6-digit OTP",
-      },
-    }));
-    return;
-  }
-
-  setVerificationState((prev) => ({
-    ...prev,
-    [field]: {
-      ...prev[field],
-      loading: true,
-      error: null,
-    },
-  }));
-
-  try {
-    console.log("Verifying with token:", otpToken); // Debug log
-    
-    const response = await axios.post(
-      "http://localhost:5000/api/v1/otpverify/verify-otp",
-      {
-        identifier: data[field],
-        otp: otpInput,
-        type: field,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${otpToken}`
-        }
-      }
-    );
-
-    // Modified success check to match backend response
-    if (response.data.message && response.data.message.includes("verified successfully")) {
+  const handleVerifyOtp = async (field) => {
+    if (!otpInput || otpInput.length !== 6) {
       setVerificationState((prev) => ({
         ...prev,
         [field]: {
           ...prev[field],
-          verified: true,
-          showDialog: false,
-          loading: false,
+          error: "Please enter a valid 6-digit OTP",
         },
       }));
-      
-      setSnackbar({
-        open: true,
-        message: response.data.message || `${field === "email" ? "Email" : "Mobile number"} verified successfully!`,
-        severity: "success",
-      });
-      
-      setOtpInput('');
-    } else {
-      throw new Error(response.data.error || "OTP verification failed");
+      return;
     }
-  } catch (error) {
-    console.error(`Error verifying OTP for ${field}:`, error.response?.data || error);
-    
-    const errorMessage = error.response?.data?.message || 
-                       error.response?.data?.error || 
-                       error.message || 
-                       "OTP verification failed";
-    
+
     setVerificationState((prev) => ({
       ...prev,
       [field]: {
         ...prev[field],
-        loading: false,
-        error: errorMessage,
+        loading: true,
+        error: null,
       },
     }));
-    
-    setSnackbar({
-      open: true,
-      message: errorMessage,
-      severity: "error",
-    });
-  }
-};
+
+    try {
+      console.log("Verifying with token:", otpToken); // Debug log
+
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/otpverify/verify-otp",
+        {
+          identifier: data[field],
+          otp: otpInput,
+          type: field,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${otpToken}`,
+          },
+        }
+      );
+
+      // Modified success check to match backend response
+      if (
+        response.data.message &&
+        response.data.message.includes("verified successfully")
+      ) {
+        setVerificationState((prev) => ({
+          ...prev,
+          [field]: {
+            ...prev[field],
+            verified: true,
+            showDialog: false,
+            loading: false,
+          },
+        }));
+
+        setSnackbar({
+          open: true,
+          message:
+            response.data.message ||
+            `${
+              field === "email" ? "Email" : "Mobile number"
+            } verified successfully!`,
+          severity: "success",
+        });
+
+        setOtpInput("");
+      } else {
+        throw new Error(response.data.error || "OTP verification failed");
+      }
+    } catch (error) {
+      console.error(
+        `Error verifying OTP for ${field}:`,
+        error.response?.data || error
+      );
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "OTP verification failed";
+
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          loading: false,
+          error: errorMessage,
+        },
+      }));
+
+      setSnackbar({
+        open: true,
+        message: errorMessage,
+        severity: "error",
+      });
+    }
+  };
   // Resend OTP
   const handleResendOtp = (field) => {
     handleSendOtp(field);
@@ -572,11 +459,6 @@ const handleVerifyOtp = async (field) => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  // ... (keep all your existing state and functions)
-
-  // Update your mobile number fields to include country code selectors:
-
-  // Mobile Number Field
   const renderMobileNumberField = () => (
     <Grid item xs={12} sm={6} md={2.4}>
       <TextField
@@ -812,64 +694,6 @@ const handleVerifyOtp = async (field) => {
     </Grid>
   );
 
-  // Location card component
-  const LocationCard = ({ location, onRemove }) => {
-    return (
-      <Paper
-        elevation={2}
-        sx={{
-          p: 1.5,
-          borderRadius: 2,
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          position: "relative",
-          borderLeft: `4px solid ${
-            location.type === "domestic" ? "#4caf50" : "#2196f3"
-          }`,
-          "&:hover": {
-            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-          },
-        }}
-      >
-        <Avatar
-          sx={{
-            bgcolor: location.type === "domestic" ? "#4caf50" : "#2196f3",
-            width: 40,
-            height: 40,
-          }}
-        >
-          {location.type === "domestic" ? <LocationOnIcon /> : <PublicIcon />}
-        </Avatar>
-
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-            {location.city}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {location.type === "domestic"
-              ? `${location.district}, ${location.state}, ${location.country}`
-              : `${location.state}, ${location.country}`}
-          </Typography>
-        </Box>
-
-        <IconButton
-          size="medium"
-          onClick={onRemove}
-          sx={{
-            color: "#757575",
-            "&:hover": {
-              color: "#f44336",
-              backgroundColor: "rgba(244, 67, 54, 0.08)",
-            },
-          }}
-        >
-          <CloseIcon fontSize="medium" />
-        </IconButton>
-      </Paper>
-    );
-  };
-
   return (
     <Box
       sx={{
@@ -878,9 +702,10 @@ const handleVerifyOtp = async (field) => {
         // ml: { sm: 0, md: 25 },
         // mt: 0,
         // maxWidth: "100%",
-         pr: 1, mr: { sm: 0, md: 10 }, ml: { sm: 0, md: 10 }
+        pr: 1,
+        mr: { sm: 0, md: 10 },
+        ml: { sm: 0, md: 10 },
       }}
-      
     >
       {/* Brand Details Section */}
       <Typography
@@ -919,55 +744,59 @@ const handleVerifyOtp = async (field) => {
         </Grid>
         {/* Email with Verification */}
         <Grid item xs={12} sm={6} md={2.4}>
-  <TextField
-    fullWidth
-    label="Email"
-    name="email"
-    type="email"
-    value={data.email || ""}
-    onChange={handleChange}
-    error={!!errors.email}
-    helperText={errors.email}
-    variant="outlined"
-    size="medium"
-    required
-    InputProps={{
-      endAdornment: (
-        <InputAdornment position="end">
-          {verificationState.email.verified ? (
-            <Box display="flex" alignItems="center" color="success.main">
-              <CheckCircleIcon fontSize="medium" />
-              <Typography variant="caption" sx={{ ml: 0.5 }}>
-                Verified
-              </Typography>
-            </Box>
-          ) : (
-            <Button
-              variant="outlined"
-              size="medium"
-              onClick={async () => {
-                // First open the dialog
-                handleVerificationDialog("email", true);
-                // Then immediately send OTP
-                await handleSendOtp("email");
-              }}
-              disabled={!data.email || verificationState.email.loading}
-              startIcon={
-                verificationState.email.loading ? (
-                  <CircularProgress size={14} />
-                ) : (
-                  <SendIcon fontSize="medium" />
-                )
-              }
-            >
-              Verify
-            </Button>
-          )}
-        </InputAdornment>
-      ),
-    }}
-  />
-</Grid>
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            type="email"
+            value={data.email || ""}
+            onChange={handleChange}
+            error={!!errors.email}
+            helperText={errors.email}
+            variant="outlined"
+            size="medium"
+            required
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  {verificationState.email.verified ? (
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      color="success.main"
+                    >
+                      <CheckCircleIcon fontSize="medium" />
+                      <Typography variant="caption" sx={{ ml: 0.5 }}>
+                        Verified
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      size="medium"
+                      onClick={async () => {
+                        // First open the dialog
+                        handleVerificationDialog("email", true);
+                        // Then immediately send OTP
+                        await handleSendOtp("email");
+                      }}
+                      disabled={!data.email || verificationState.email.loading}
+                      startIcon={
+                        verificationState.email.loading ? (
+                          <CircularProgress size={14} />
+                        ) : (
+                          <SendIcon fontSize="medium" />
+                        )
+                      }
+                    >
+                      Verify
+                    </Button>
+                  )}
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
 
         {/* Mobile Number with Verification */}
         <Grid item xs={12} sm={6} md={2.4}>
@@ -1264,19 +1093,16 @@ const handleVerifyOtp = async (field) => {
         </Grid>
       </Grid>
 
-   
-  <Grid
-  container
-  spacing={2}
-  sx={{
-    mt: 2,
-    display: "grid",
-    gridTemplateColumns: { md: "3fr 1fr", xs: "1fr" }, // 3:1 ratio on desktop
-    gap: 1.5,
-    
-  }}
->
-
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: { md: "3fr 1fr", xs: "1fr" }, // 3:1 ratio on desktop
+          gap: 1.5,
+        }}
+      >
         {/* Head Office Address - spans 3 columns */}
         <Grid item size={{ xs: 12, md: 12.05 }}>
           <TextField
@@ -1332,14 +1158,14 @@ const handleVerifyOtp = async (field) => {
               />
             )}
             renderOption={(props, option) => {
-  const { key, ...rest } = props;
-  return (
-    <Box component="li" key={key} {...rest}>
-      <FlagIcon sx={{ mr: 1 }} />
-      {option.name}
-    </Box>
-  );
-}}
+              const { key, ...rest } = props;
+              return (
+                <Box component="li" key={key} {...rest}>
+                  <FlagIcon sx={{ mr: 1 }} />
+                  {option.name}
+                </Box>
+              );
+            }}
           />
         </Grid>
         {/* Pincode - spans 1 column */}
