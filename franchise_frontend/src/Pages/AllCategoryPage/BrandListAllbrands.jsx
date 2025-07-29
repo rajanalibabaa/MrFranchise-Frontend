@@ -20,7 +20,7 @@ import {
   IconButton,
   useMediaQuery,
   useTheme,
-  Tooltip
+  Tooltip,
 } from "@mui/material";
 import {
   Close,
@@ -34,7 +34,7 @@ import {
   useToggleLike,
   openBrandDialog,
   filterBrands,
-} from "../../Hooks/Fetchbrands";
+} from "../../Hooks/Fetchbrands.jsx";
 import { useLocation } from "react-router-dom";
 import LoginPage from "../LoginPage/LoginPage.jsx";
 
@@ -64,7 +64,7 @@ const FilterPanelSkeleton = React.memo(() => (
 ));
 
 // Lazy load heavy components
-const BrandComparison = lazy(() => import("./BrandComparison"));
+const BrandComparison = lazy(() => import("./BrandComparison.jsx"));
 const FilterPanel = lazy(() => import("./FillterPannel.jsx"));
 // const BrandDetail = lazy(() => import("./BrandDetail.jsx"));
 const BrandCard = lazy(() => import("./BrandCard.jsx"));
@@ -99,33 +99,33 @@ function BrandList() {
   const [selectedForComparison, setSelectedForComparison] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
 
-const handleLikeClick = useCallback(
-  async (brandId, isLiked) => {
-    if (likeProcessing[brandId]) return;
-    const token = localStorage.getItem("accessToken");
-    
-    if (!token) {
-      setShowLogin(true);
-      return;
-    }
+  const handleLikeClick = useCallback(
+    async (brandId, isLiked) => {
+      if (likeProcessing[brandId]) return;
+      const token = localStorage.getItem("accessToken");
 
-    setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-    
-    try {
-      await toggleLike.mutateAsync({ brandId, isLiked });
-    } catch (error) {
-      console.error("Like operation failed:", error);
-      // Show error to user if needed
-      if (error.response?.data?.message) {
-        // You could show this in a snackbar/toast
-        console.error("Error details:", error.response.data.message);
+      if (!token) {
+        setShowLogin(true);
+        return;
       }
-    } finally {
-      setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
-    }
-  },
-  [likeProcessing, toggleLike]
-);
+
+      setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
+
+      try {
+        await toggleLike.mutateAsync({ brandId, isLiked });
+      } catch (error) {
+        console.error("Like operation failed:", error);
+        // Show error to user if needed
+        if (error.response?.data?.message) {
+          // You could show this in a snackbar/toast
+          console.error("Error details:", error.response.data.message);
+        }
+      } finally {
+        setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
+      }
+    },
+    [likeProcessing, toggleLike]
+  );
 
   // Throttled scroll handler
   const handleScroll = useCallback(() => {
@@ -254,16 +254,13 @@ const handleLikeClick = useCallback(
     setSelectedForComparison((prev) => prev.filter((b) => b.uuid !== brandId));
   }, []);
 
-  const handleOpenBrand = useCallback(
-    async (brand) => {
-      try {
-        openBrandDialog(brand);
-      } catch (error) {
-        console.error("Failed to record view:", error);
-      }
-    },
-    []
-  );
+  const handleOpenBrand = useCallback(async (brand) => {
+    try {
+      openBrandDialog(brand);
+    } catch (error) {
+      console.error("Failed to record view:", error);
+    }
+  }, []);
 
   const handleFilterChange = useCallback((name, value) => {
     setFilters((prev) => {
@@ -300,7 +297,6 @@ const handleLikeClick = useCallback(
       selectedInvestmentRange: "",
     });
   }, []);
-
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -345,46 +341,44 @@ const handleLikeClick = useCallback(
     <Container maxWidth="xl" sx={{ mt: 0, mb: 6 }}>
       {/* Comparison Button */}
 
-
-{selectedForComparison.length > 0 && (
-  <Box
-    sx={{
-      position: "fixed",
-      top: 290,
-      right: 25,
-      zIndex: 1000,
-    }}
-  >
-    <Badge badgeContent={selectedForComparison.length} color="primary">
-      <Tooltip
-        title="Click to compare selected brands"
-        placement="left"
-        arrow
-      >
-        <span>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Compare />}
-            onClick={() => setComparisonOpen(true)}
-            sx={{
-              borderRadius: 4,
-              boxShadow: 3,
-              bgcolor: "#ff9800",
-              "&:hover": {
-                bgcolor: "#fb8c00",
-                boxShadow: 6,
-              },
-            }}
-          >
-            Compare
-          </Button>
-        </span>
-      </Tooltip>
-    </Badge>
-  </Box>
-)}
-
+      {selectedForComparison.length > 0 && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 290,
+            right: 25,
+            zIndex: 1000,
+          }}
+        >
+          <Badge badgeContent={selectedForComparison.length} color="primary">
+            <Tooltip
+              title="Click to compare selected brands"
+              placement="left"
+              arrow
+            >
+              <span>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<Compare />}
+                  onClick={() => setComparisonOpen(true)}
+                  sx={{
+                    borderRadius: 4,
+                    boxShadow: 3,
+                    bgcolor: "#ff9800",
+                    "&:hover": {
+                      bgcolor: "#fb8c00",
+                      boxShadow: 6,
+                    },
+                  }}
+                >
+                  Compare
+                </Button>
+              </span>
+            </Tooltip>
+          </Badge>
+        </Box>
+      )}
 
       {/* Scroll to Top Button */}
       {scrollPosition > 300 && (
@@ -463,7 +457,7 @@ const handleLikeClick = useCallback(
 
         {/* Mobile Filters Button */}
         {isMobile && (
-          <Box sx={{ mb: 2 ,mt:8,}}>
+          <Box sx={{ mb: 2, mt: 8 }}>
             <Button
               variant="outlined"
               startIcon={<FilterAlt sx={{ color: "#ff9800" }} />}
@@ -520,17 +514,27 @@ const handleLikeClick = useCallback(
             </Box>
           ) : (
             <>
-             {!isMobile && (
-                <Typography sx={{ml: 2,}} variant="h4"  gutterBottom color="#ff9800">
-                Food & Beverage Brands
-              </Typography>
-             )}
-             {isMobile && (
-                <Typography sx={{ml: 2,}} variant="h5"  gutterBottom color="#ff9800">
-                Food & Beverage Brands
-              </Typography>
-             )}
-              <Typography sx={{ml: 2,mb: 2}} variant="body2" gutterBottom>
+              {!isMobile && (
+                <Typography
+                  sx={{ ml: 2 }}
+                  variant="h4"
+                  gutterBottom
+                  color="#ff9800"
+                >
+                  Food & Beverage Brands
+                </Typography>
+              )}
+              {isMobile && (
+                <Typography
+                  sx={{ ml: 2 }}
+                  variant="h5"
+                  gutterBottom
+                  color="#ff9800"
+                >
+                  Food & Beverage Brands
+                </Typography>
+              )}
+              <Typography sx={{ ml: 2, mb: 2 }} variant="body2" gutterBottom>
                 Showing {filteredBrands.length} of {brands.length} brands
               </Typography>
 
@@ -583,7 +587,6 @@ const handleLikeClick = useCallback(
             display="flex"
             justifyContent="space-between"
             alignItems="center"
-
             mb={2}
           >
             <Typography variant="h6">Filters</Typography>
@@ -638,10 +641,9 @@ const handleLikeClick = useCallback(
         />
       </Suspense>
 
-        {showLogin && (
-              <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
-            )}
-      
+      {showLogin && (
+        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+      )}
     </Container>
   );
 }

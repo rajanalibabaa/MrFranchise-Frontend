@@ -37,6 +37,7 @@ import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
 import { showLoading } from "../../Redux/Slices/loadingSlice";
 import { useDispatch } from "react-redux";
 import { handleShortList } from "../../Api/shortListApi";
+import { initializeShortlist } from "../../Redux/Slices/shortlistslice";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 500 },
@@ -107,13 +108,17 @@ const BrandCard = React.memo(
         }
       };
     }, []);
-
+const dispatch = useDispatch()
        const [shortListed, setShortListed] = useState(brand.isShortListed)
         const handleToggleShortList = async (brand) => {
            try {
              const response = await handleShortList(brand);
              if (response.success) {
                setShortListed(!shortListed);
+               dispatch(initializeShortlist({
+                brandId : brand.uuid,
+                isShortListed: shortListed
+               }))
              }
            } catch (error) {
              console.error("Error toggling shortlist:", error);
