@@ -9,7 +9,7 @@ export const handleShortList = async(brandId) => {
     // if (!brand.isShortListed) {
         const res = await axios.post(`${api.shortListApi.post}/${id}`,
         {
-            shortListedId: brandId
+            shortListedId: brandId 
         },
         {
           headers: {
