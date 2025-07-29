@@ -7,7 +7,7 @@ export const handleShortList = async(brand) => {
     const token = localStorage.getItem("accessToken");
 
     // if (!brand.isShortListed) {
-        const res = await axios.post(`${api.shortListApi.post}/${id}`,
+        const res = await axios.post(`${api.shortListApi.post}/${id}`,  
         {
             shortListedId: brand.uuid
         },
