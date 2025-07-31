@@ -7,7 +7,7 @@ import navReducer from "../Slices/navbarSlice";
 import loadingReducer  from "../Slices/loadingSlice.jsx";
 
 import getAllBrands  from "../Slices/GetAllBrandsDataUpdationFile.jsx";
-import topFoodsfranchise from "../Slices/TopFoodFranchiseSlice.jsx";
+import topFoodsfranchise from "../Slices/TopCardFetchingSlice.jsx";
  const store = configureStore({
   reducer: {
     navbar:navReducer,

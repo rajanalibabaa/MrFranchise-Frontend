@@ -21,7 +21,7 @@ import { useSelector, useDispatch } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { motion } from "framer-motion";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
-import { fetchTopFoodFranchises } from '../../Redux/Slices/TopFoodFranchiseSlice.jsx';
+import { fetchTopFoodFranchises } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -64,7 +64,8 @@ const TopFoodFranchises = () => {
 
 
    // Debugging: Add console.log to check Redux state
-const foodFranchiseState = useSelector((state) => state.foodfranchise);
+const foodFranchiseState = useSelector((state) => state.foodfranchise.foodFranchises);
+ console.log("foodFranchiseState:", foodFranchiseState);
 
 const {
   brands = [],
