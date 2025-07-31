@@ -109,11 +109,11 @@ const pageConfig = {
     //   background: "rgba(255, 250, 247, 1)",
     //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     // },
-    // {
-    //   component: "TopCafeFranchises",
-    //   background: "#fffaf7",
-    //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    // },
+    {
+      component: "TopCafeFranchises",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    },
     {
       component: "TopFoodFranchise",
       background: "#fffaf7",

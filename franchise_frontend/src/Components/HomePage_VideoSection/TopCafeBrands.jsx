@@ -18,12 +18,7 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  fetchBrands,
-  toggleLikeBrand,
-  viewApi,
-  openBrandDialog,
-} from "../../Redux/Slices/brandSlice";
+import { fetchTopFoodFranchises , fetchTopCafes } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { motion } from "framer-motion";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
@@ -41,13 +36,21 @@ const TopCafeFranchises = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
 
-  const {
-    data: brands = [],
-    filteredData = [],
-    loading: brandsLoading,
-    error,
-  } = useSelector((state) => state.brands);
-  console.log("brands", brands);
+     // Debugging: Add console.log to check Redux state
+  const cafeFranchiseState = useSelector((state) => state.foodfranchise.cafe);
+   console.log("cafeFranchiseState:", cafeFranchiseState);
+
+
+   const {
+     brands = [],
+     isLoading,
+     error,
+     pagination
+   } = cafeFranchiseState || {};
+   
+   console.log("cafe:", brands);
+     // Load initial data
+
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
@@ -64,13 +67,13 @@ const TopCafeFranchises = () => {
   const [showEndShadow, setShowEndShadow] = useState(true);
   const [visibleCardCount, setVisibleCardCount] = useState(4);
 
-  const coffeeTeaBrands = useMemo(() => {
-    if (!filteredData?.length) return [];
-    return filteredData.filter((brand) => {
-      const category = brand?.franchiseDetails?.brandCategories?.child || "";
-      return category.includes("Coffee & Tea Cafes");
-    });
-  }, [filteredData]);
+  // const coffeeTeaBrands = useMemo(() => {
+  //   if (!filteredData?.length) return [];
+  //   return filteredData.filter((brand) => {
+  //     const category = brand?.franchiseDetails?.brandCategories?.child || "";
+  //     return category.includes("Coffee & Tea Cafes");
+  //   });
+  // }, [filteredData]);
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
