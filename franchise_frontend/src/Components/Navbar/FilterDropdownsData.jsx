@@ -33,17 +33,17 @@ const FilterDropdowns = () => {
     const subCategoriesMap = new Map();
     const statesSet = new Set();
  
-    brands.forEach((brand) => {
-      const subCategory = brand.franchiseDetails?.brandCategories?.sub;
-      if (subCategory && !subCategoriesMap.has(subCategory)) {
-        subCategoriesMap.set(subCategory, { id: subCategory, name: subCategory });
-      }
+    // brands.forEach((brand) => {
+    //   const subCategory = brand.franchiseDetails?.brandCategories?.sub;
+    //   if (subCategory && !subCategoriesMap.has(subCategory)) {
+    //     subCategoriesMap.set(subCategory, { id: subCategory, name: subCategory });
+    //   }
  
-      const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
-      locations.forEach((loc) => {
-        if (loc.state) statesSet.add(loc.state);
-      });
-    });
+    //   const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
+    //   locations.forEach((loc) => {
+    //     if (loc.state) statesSet.add(loc.state);
+    //   });
+    // });
  
     return {
       subCategories: Array.from(subCategoriesMap.values()),
@@ -56,10 +56,10 @@ const FilterDropdowns = () => {
  
     const investmentRangesSet = new Set();
  
-    brands.forEach((brand) => {
-      const range = brand.franchiseDetails?.fico?.[0]?.investmentRange;
-      if (range) investmentRangesSet.add(range);
-    });
+    // brands.forEach((brand) => {
+    //   const range = brand.franchiseDetails?.fico?.[0]?.investmentRange;
+    //   if (range) investmentRangesSet.add(range);
+    // });
  
     const convertToRupees = (val) => {
       val = val.trim().replace(/Rs\.?\s*/i, "");
