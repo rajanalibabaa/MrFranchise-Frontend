@@ -18,7 +18,8 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchTopFoodFranchises , fetchTopCafes } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
+import { fetchTopCafes  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
+
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { motion } from "framer-motion";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
@@ -36,20 +37,8 @@ const TopCafeFranchises = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
 
-     // Debugging: Add console.log to check Redux state
-  const cafeFranchiseState = useSelector((state) => state.foodfranchise.cafe);
-   console.log("cafeFranchiseState:", cafeFranchiseState);
+  
 
-
-   const {
-     brands = [],
-     isLoading,
-     error,
-     pagination
-   } = cafeFranchiseState || {};
-   
-   console.log("cafe:", brands);
-     // Load initial data
 
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -67,13 +56,7 @@ const TopCafeFranchises = () => {
   const [showEndShadow, setShowEndShadow] = useState(true);
   const [visibleCardCount, setVisibleCardCount] = useState(4);
 
-  // const coffeeTeaBrands = useMemo(() => {
-  //   if (!filteredData?.length) return [];
-  //   return filteredData.filter((brand) => {
-  //     const category = brand?.franchiseDetails?.brandCategories?.child || "";
-  //     return category.includes("Coffee & Tea Cafes");
-  //   });
-  // }, [filteredData]);
+ 
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -83,11 +66,18 @@ const TopCafeFranchises = () => {
     return CARD_DIMENSIONS.largeDesktop;
   }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
 
-  useEffect(() => {
-    if (brands.length === 0) {
-      dispatch(fetchBrands());
-    }
-  }, [dispatch, brands.length]);
+  const cafeFranchiseState = useSelector((state) => state.foodfranchise.cafes);
+  console.log('cafeFranchiseState',cafeFranchiseState)
+const {
+  brands = [],
+  isLoading,
+  error,
+  pagination
+} = cafeFranchiseState || {};
+
+useEffect(() => {
+    dispatch(fetchTopCafes({ page: 1 }));
+  }, [dispatch]);
 
   useLayoutEffect(() => {
     const updateVisibleCards = () => {
@@ -212,7 +202,7 @@ const TopCafeFranchises = () => {
     smoothScrollTo(newScroll);
   };
 
-  if (brandsLoading) {
+  if (isLoading) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <CircularProgress />
@@ -231,7 +221,7 @@ const TopCafeFranchises = () => {
   }
 
   return (
-    coffeeTeaBrands.length > 0 && (
+    brands.length > 0 && (
       <Box
         ref={containerRef}
         sx={{
@@ -360,7 +350,7 @@ const TopCafeFranchises = () => {
               "&::-webkit-scrollbar": { display: "none" },
             }}
           >
-            {coffeeTeaBrands.map((brand) => (
+            {brands.map((brand) => (
               <motion.div key={brand.uuid}>
                 <HomePageBrandCard
                   brand={brand}

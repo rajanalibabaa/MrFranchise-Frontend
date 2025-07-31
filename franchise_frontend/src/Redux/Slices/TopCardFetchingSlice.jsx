@@ -10,6 +10,7 @@ export const fetchTopFoodFranchises = createAsyncThunk(
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopFoodFranchise`, {
         params: { page }
       });
+console.log("✅ Foods Cafes API Response:", response.data);
 
       if (!response.data.data || !response.data.data.brands) {
         console.error('Unexpected API response structure:', response.data);
@@ -40,6 +41,7 @@ export const fetchTopCafes = createAsyncThunk(
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopCafes`, {
         params: { page }
       });
+console.log("✅ Top Cafes API Response:", response.data);
 
       if (!response.data.data || !response.data.data.brands) {
         console.error('Unexpected API response structure:', response.data);

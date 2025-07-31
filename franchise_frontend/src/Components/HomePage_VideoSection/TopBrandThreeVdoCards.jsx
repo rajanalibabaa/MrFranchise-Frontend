@@ -602,15 +602,15 @@ function TopBrandVdoCards() {
                       <Stack direction="column" spacing={1}>
                         <Fact
                           label="Investment"
-                          value={mainBrand.fico?.[0]?.investmentRange}
+                          value={mainBrand.fico?.investmentRange}
                         />
                         <Fact
                           label="Area Required"
-                          value={mainBrand.fico?.[0]?.areaRequired}
+                          value={mainBrand.fico?.areaRequired}
                         />
                         <Fact
                           label="Franchise Model"
-                          value={mainBrand.fico?.[0]?.franchiseModel}
+                          value={mainBrand.fico?.franchiseModel}
                         />
                         {isMobile && (
                           <Button
@@ -944,7 +944,7 @@ function TopBrandVdoCards() {
                         lineHeight: 1.4,
                       }}
                     >
-                      Investment: {brand.fico?.[0]?.investmentRange}
+                      Investment: {brand.fico?.investmentRange}
                     </Typography>
                     {!isMobile && (
                       <Typography
@@ -961,7 +961,7 @@ function TopBrandVdoCards() {
                           lineHeight: 1.4,
                         }}
                       >
-                        Area: {brand.fico?.[0]?.areaRequired}
+                        Area: {brand.fico?.areaRequired}
                       </Typography>
                     )}
                     <Typography
@@ -978,7 +978,7 @@ function TopBrandVdoCards() {
                         lineHeight: 1.5,
                       }}
                     >
-                      Model: {brand.fico?.[0]?.franchiseModel}
+                      Model: {brand.fico?.franchiseModel}
                     </Typography>
                   </Box>
 

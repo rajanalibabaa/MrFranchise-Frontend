@@ -65,9 +65,8 @@ const TopFoodFranchises = () => {
 
    // Debugging: Add console.log to check Redux state
 const foodFranchiseState = useSelector((state) => state.foodfranchise.foodFranchises);
- console.log("foodFranchiseState:", foodFranchiseState);
 
- 
+
 
 const {
   brands = [],
@@ -76,7 +75,6 @@ const {
   pagination
 } = foodFranchiseState || {};
 
-console.log("brands:", brands);
   // Load initial data
   useEffect(() => {
     dispatch(fetchTopFoodFranchises({ page: 1 }));

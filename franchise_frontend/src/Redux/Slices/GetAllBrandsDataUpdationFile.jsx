@@ -13,7 +13,6 @@ export const fetchBrands = createAsyncThunk(
           page, // directly use page
         }
       });
-
       return {
         brands: response.data.data.brands,
         pagination: response.data.data.pagination,
