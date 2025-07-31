@@ -5,30 +5,25 @@ import { API_BASE_URL } from '../../Api/api';
 
 export const fetchBrands = createAsyncThunk(
   'brands/fetchAll',
-  async ({ page = 1, limit = 10, viewedCount = 0 }, { rejectWithValue }) => {
+  async ({ page = 1 }, { rejectWithValue }) => {
     try {
-      // Calculate the actual page number based on viewedCount
-      // Every 10 views = 1 page increment
-      const calculatedPage = page + Math.floor(viewedCount / 10);
-      
+      // Send the page directly in query params
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getAllBrandListing`, {
-        params: { 
-          page: calculatedPage, 
-          limit,
-          viewedCount // Send viewedCount to backend if needed
+        params: {
+          page, // directly use page
         }
       });
-      
+
       return {
         brands: response.data.data.brands,
         pagination: response.data.data.pagination,
-        viewedCount // Pass this back to update state
       };
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Unknown error" });
     }
   }
 );
+
 
 const initialState = {
   brands: [],

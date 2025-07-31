@@ -878,6 +878,8 @@
 // }
 
 // export default TopBrandVdoCards;
+
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Box,
@@ -905,7 +907,7 @@ import { useNavigate } from "react-router-dom";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { postView } from "../../Utils/function/view";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBrands,incrementViewedCount, resetBrands, } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
+import { fetchBrands, resetBrands, } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
 
 function TopBrandVdoCards() {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -913,13 +915,15 @@ function TopBrandVdoCards() {
   const [activeVideo, setActiveVideo] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   const [likeProcessing, setLikeProcessing] = useState({});
+
+
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
   const timeoutRef = useRef(null);
   const videoRefs = useRef([]);
-  const observerRef = useRef();
-  const lastBrandRef = useRef(null);
+  // const observerRef = useRef();
+  // const lastBrandRef = useRef(null);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -944,37 +948,18 @@ function TopBrandVdoCards() {
   const { brands, isLoading, pagination, error } = useSelector((state) => state.brands);
 
   // Initial load
-  useEffect(() => {
+ useEffect(() => {
     dispatch(resetBrands());
-    dispatch(fetchBrands({ page: 1, limit: 10 }));
+    dispatch(fetchBrands({ page: 1 }));
   }, [dispatch]);
 
   // Update hasMore when pagination changes
   useEffect(() => {
     if (pagination) {
-      setHasMore(pagination.hasNextPage);
+      setHasMore(pagination.hasNext);
     }
   }, [pagination]);
 
-  // Infinite scroll observer
-  const lastBrandElementRef = useCallback(
-    (node) => {
-      if (isLoading) return;
-      if (observerRef.current) observerRef.current.disconnect();
-      
-      observerRef.current = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting && hasMore && !isLoading) {
-            setPage((prev) => prev + 1);
-          }
-        },
-        { threshold: 0.1 }
-      );
-      
-      if (node) observerRef.current.observe(node);
-    },
-    [isLoading, hasMore]
-  );
 
   // Fetch more brands when page changes
   useEffect(() => {
@@ -984,34 +969,36 @@ function TopBrandVdoCards() {
   }, [page, dispatch, hasMore]);
 
   // Auto-slide functionality
+ // Auto-slide functionality
+
+  // Auto-slide functionality
   const handleNext = useCallback(() => {
     if (brands.length === 0) return;
 
-    setCurrentIndex((prev) => {
-      const nextIndex = prev + 1;
-      
-      // If we're at the end of current brands and more exist
-      if (nextIndex >= brands.length - 3 && hasMore && !isLoading) {
-        setPage((prev) => prev + 1);
-      }
-      
-      return nextIndex % brands.length;
-    });
-  }, [brands.length, hasMore, isLoading]);
-
-  const handlePrev = useCallback(() => {
+    const isLastBrand = currentIndex === brands.length - 1;
+    
+    if (isLastBrand && hasMore && !isLoading) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      dispatch(fetchBrands({ page: nextPage })).then(() => {
+        setCurrentIndex(0); // Reset to first brand after loading new page
+      });
+    } else {
+      setCurrentIndex((prev) => (prev + 1) % brands.length);
+    }
+  }, [brands.length, currentIndex, hasMore, isLoading, page, dispatch]);
+const handlePrev = () => {
     if (brands.length > 0) {
       setCurrentIndex((prev) => (prev - 1 + brands.length) % brands.length);
     }
-  }, [brands.length]);
+  };
 
-  const startAutoSlide = useCallback(() => {
+const startAutoSlide = () => {
     clearTimeout(timeoutRef.current);
     if (!isHovered && brands.length > 0) {
       timeoutRef.current = setTimeout(() => handleNext(), 5000);
     }
-  }, [isHovered, handleNext, brands.length]);
-
+  };
   // Video controls
   useEffect(() => {
     videoRefs.current.forEach((video) => {
@@ -1070,6 +1057,15 @@ function TopBrandVdoCards() {
     postView(brand.uuid);
     // Implement your brand dialog functionality here
   };
+  
+    const handleLoadMore = () => {
+    if (!isLoading && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      dispatch(fetchBrands({ page: nextPage }));
+    }
+  };
+
 
   if (isLoading && brands.length === 0) {
     return (
@@ -1253,37 +1249,72 @@ function TopBrandVdoCards() {
                     </Box>
                   )}
 
-                  {!isMobile && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 16,
-                        right: 16,
-                        zIndex: 2,
-                      }}
-                    >
-                      <Button
-                        variant="outlined"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleNext();
-                        }}
-                        endIcon={<ChevronRight />}
-                        sx={{
-                          textTransform: "none",
-                          color: theme.palette.mode === "dark" ? "#fff" : "#fff",
-                          borderColor: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                          "&:hover": {
-                            borderColor: theme.palette.mode === "dark" ? "#43ea5e" : "#43ea5e",
-                            backgroundColor: theme.palette.mode === "dark" ? "rgba(67, 234, 94, 0.15)" : "rgba(67, 234, 94, 0.10)",
-                          },
-                        }}
-                      >
-                        Next Brand
-                      </Button>
-                    </Box>
-                  )}
+                 {!isMobile && (
+    <Box
+      sx={{
+        position: "absolute",
+        top: 16,
+        right: 16,
+        zIndex: 2,
+      }}
+    >
+      <Button
+        variant="outlined"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleNext();
+        }}
+        endIcon={<ChevronRight />}
+        disabled={isLoading || (!hasMore && currentIndex === brands.length - 1)}
+        sx={{
+          textTransform: "none",
+          color: theme.palette.mode === "dark" ? "#fff" : "#fff",
+          borderColor: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+          "&:hover": {
+            borderColor: theme.palette.mode === "dark" ? "#43ea5e" : "#43ea5e",
+            backgroundColor: theme.palette.mode === "dark" ? "rgba(67, 234, 94, 0.15)" : "rgba(67, 234, 94, 0.10)",
+          },
+          "&:disabled": {
+            opacity: 0.5,
+          },
+        }}
+      >
+        {isLoading ? "Loading..." : "Next Brand"}
+      </Button>
+    </Box>
+  )}
 
+{hasMore && (
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Button
+        variant="contained"
+        onClick={handleLoadMore}
+        disabled={isLoading}
+        sx={{
+          px: 4,
+          py: 1.5,
+          fontWeight: 600,
+          background: theme.palette.mode === "dark" 
+            ? "linear-gradient(45deg, #ffb74d, #ff9800)" 
+            : "linear-gradient(45deg, #f57c00, #ff9800)",
+          "&:hover": {
+            background: theme.palette.mode === "dark" 
+              ? "linear-gradient(45deg, #ff9800, #ffb74d)" 
+              : "linear-gradient(45deg, #ff9800, #f57c00)",
+          },
+        }}
+      >
+        {isLoading ? (
+          <>
+            <CircularProgress size={20} sx={{ color: "white", mr: 1 }} />
+            Loading...
+          </>
+        ) : (
+          "Load More Brands"
+        )}
+      </Button>
+    </Box>
+  )}
                   <video
                     ref={(el) => (videoRefs.current[0] = el)}
                     loading="lazy"
