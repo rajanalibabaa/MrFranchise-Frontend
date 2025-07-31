@@ -40,13 +40,13 @@ const HomePageBrandCard = React.memo(
     const videoRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
     const observerRef = useRef();
-
+    
     const brandId = brand?.uuid || "";
-    const franchiseModel = brand?.franchiseDetails?.fico?.[0] || {};
-    const category = brand?.franchiseDetails?.brandCategories || {};
-    const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
-    const brandLogo = brand?.uploads?.brandLogo?.[0] || "";
-    const brandName = brand?.brandDetails?.brandName || "Brand";
+    const franchiseModel = brand?.fico?.[0] || {}; // Changed to match the array structure
+    const category = brand?.brandCategories || {}; // Changed to match the new structure
+    const videoUrl = brand?.franchiseVideos || ""; // Direct URL now
+    const brandLogo = brand?.logo || "";
+    const brandName = brand?.brandname || "Brand";
     const mediaHeight = dimensions.height * 0.4;
 
     const {
@@ -171,8 +171,8 @@ const HomePageBrandCard = React.memo(
               >
                 <Box
                   component="img"
-                  src={brand?.uploads?.brandLogo?.[0]}
-                  alt={brand.uploads?.brandName}
+                  src={brandLogo}
+                  alt={brandName}
                   loading="lazy"
                   sx={{
                     width: 100,
@@ -288,7 +288,7 @@ const HomePageBrandCard = React.memo(
                     }}
                   />
                   <Typography variant="body2">
-                    <strong>Type:</strong> {modelType}
+                    <strong>Model :</strong> {modelType}
                   </Typography>
                 </Box>
               </Stack>

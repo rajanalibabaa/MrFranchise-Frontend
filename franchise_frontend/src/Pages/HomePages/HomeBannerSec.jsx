@@ -47,9 +47,9 @@ const dynamicComponents = {
   TopCafeFranchises: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
   )),
-//   TopFoodFranchise: withSuspense(React.lazy(() =>
-//     import("../../Components/HomePage_VideoSection/TopFoodFranchise.jsx")
-//   )),
+  TopFoodFranchise: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/TopFoodFranchise.jsx")
+  )),
 //   TopBeverageFranchise: withSuspense(React.lazy(() =>
 //     import("../../Components/HomePage_VideoSection/TopBeverageFranchise.jsx")
 //   )),
@@ -109,16 +109,16 @@ const pageConfig = {
     //   background: "rgba(255, 250, 247, 1)",
     //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     // },
-    {
-      component: "TopCafeFranchises",
-      background: "#fffaf7",
-      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    },
     // {
-    //   component: "TopFoodFranchise",
+    //   component: "TopCafeFranchises",
     //   background: "#fffaf7",
     //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     // },
+    {
+      component: "TopFoodFranchise",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    },
     // {
     //   component: "TopBeverageFranchise",
     //   background: "#fffaf7",

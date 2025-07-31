@@ -29,12 +29,7 @@ import {
   Compare,
 } from "@mui/icons-material";
 
-import {
-  useBrands,
-  useToggleLike,
-  openBrandDialog,
-  filterBrands,
-} from "../../Hooks/Fetchbrands.jsx";
+
 import { useLocation } from "react-router-dom";
 import LoginPage from "../LoginPage/LoginPage.jsx";
 

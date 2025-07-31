@@ -18,17 +18,11 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  fetchBrands,
-  toggleLikeBrand,
-  viewApi,
-  openBrandDialog,
-} from "../../Redux/Slices/brandSlice";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { motion } from "framer-motion";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
+import { fetchTopFoodFranchises } from '../../Redux/Slices/TopFoodFranchiseSlice.jsx';
 
-// Breakpoints
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
@@ -41,12 +35,7 @@ const TopFoodFranchises = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
 
-  const {
-    data: brands = [],
-    filteredData = [],
-    loading: brandsLoading,
-    error,
-  } = useSelector((state) => state.brands);
+ 
 
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -63,14 +52,7 @@ const TopFoodFranchises = () => {
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(true);
   const [visibleCardCount, setVisibleCardCount] = useState(4);
-
-  const coffeeTeaBrands = useMemo(() => {
-    if (!filteredData?.length) return [];
-    return filteredData.filter((brand) => {
-      const category = brand?.franchiseDetails?.brandCategories?.sub || "";
-      return category.includes("Food Franchi");
-    });
-  }, [filteredData]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -80,12 +62,59 @@ const TopFoodFranchises = () => {
     return CARD_DIMENSIONS.largeDesktop;
   }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
 
-  useEffect(() => {
-    if (brands.length === 0) {
-      dispatch(fetchBrands());
-    }
-  }, [dispatch, brands.length]);
 
+   // Debugging: Add console.log to check Redux state
+const foodFranchiseState = useSelector((state) => state.foodfranchise);
+
+const {
+  brands = [],
+  isLoading,
+  error,
+  pagination
+} = foodFranchiseState || {};
+
+  // Load initial data
+  useEffect(() => {
+    dispatch(fetchTopFoodFranchises({ page: 1 }));
+  }, [dispatch]);
+
+  // Handle scroll to load more
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    setShowStartShadow(scrollLeft > 10);
+    setShowEndShadow(scrollLeft < scrollWidth - clientWidth - 10);
+
+    // Load more when scrolled to end and there are more pages
+    if (
+      scrollLeft + clientWidth >= scrollWidth - 100 && 
+      pagination?.hasNextPage && 
+      !isLoading
+    ) {
+      const nextPage = currentPage + 1;
+      setCurrentPage(nextPage);
+      dispatch(fetchTopFoodFranchises({ page: nextPage }));
+    }
+  }, [pagination, isLoading, currentPage, dispatch]);
+
+  // Set up scroll event listener
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      handleScroll(); // Initial check
+    }
+    return () => {
+      container?.removeEventListener("scroll", handleScroll);
+      if (scrollRequestRef.current) {
+        cancelAnimationFrame(scrollRequestRef.current);
+      }
+    };
+  }, [handleScroll]);
+
+  // Calculate visible cards based on container width
   useLayoutEffect(() => {
     const updateVisibleCards = () => {
       if (containerRef.current) {
@@ -102,40 +131,7 @@ const TopFoodFranchises = () => {
     return () => window.removeEventListener("resize", updateVisibleCards);
   }, [dimensions.width, isMobile]);
 
-  const handleLikeClick = useCallback(
-    (brandId, isLiked) => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        setShowLogin(true);
-        return;
-      }
-
-      setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-      dispatch(toggleLikeBrand({ brandId, isLiked }))
-        .unwrap()
-        .finally(() => {
-          setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
-        });
-    },
-    [dispatch]
-  );
-
-  const handleApply = useCallback(
-    (brand) => {
-      const token = localStorage.getItem("accessToken");
-      const id =
-        localStorage.getItem("investorUUID") ||
-        localStorage.getItem("brandUUID");
-
-      if (token && id) {
-        dispatch(viewApi(brand.uuid));
-      }
-
-      dispatch(openBrandDialog(brand));
-    },
-    [dispatch]
-  );
-
+  // Smooth scroll functions
   const getScrollDistance = useCallback(() => {
     return dimensions.width + (isMobile ? 16 : 24);
   }, [dimensions.width, isMobile]);
@@ -145,8 +141,9 @@ const TopFoodFranchises = () => {
   const smoothScrollTo = useCallback((target, immediate = false) => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    if (scrollRequestRef.current)
+    if (scrollRequestRef.current) {
       cancelAnimationFrame(scrollRequestRef.current);
+    }
 
     const start = container.scrollLeft;
     const change = target - start;
@@ -167,29 +164,6 @@ const TopFoodFranchises = () => {
     };
 
     scrollRequestRef.current = requestAnimationFrame(animateScroll);
-  }, []);
-
-  const handleScroll = useCallback(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const { scrollLeft, scrollWidth, clientWidth } = container;
-    setShowStartShadow(scrollLeft > 10);
-    setShowEndShadow(scrollLeft < scrollWidth - clientWidth - 10);
-  }, []);
-
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-      handleScroll();
-    }
-
-    return () => {
-      container?.removeEventListener("scroll", handleScroll);
-      if (scrollRequestRef.current)
-        cancelAnimationFrame(scrollRequestRef.current);
-    };
   }, [handleScroll]);
 
   const handleNextClick = () => {
@@ -209,7 +183,22 @@ const TopFoodFranchises = () => {
     smoothScrollTo(newScroll);
   };
 
-  if (brandsLoading) {
+  const handleApply = (brand) => {
+    // Your apply logic here
+    console.log("Apply for brand:", brand);
+  };
+
+  const handleLikeClick = (brandId) => {
+    // Your like logic here
+    console.log("Like brand:", brandId);
+    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+    // Simulate API call
+    setTimeout(() => {
+      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
+    }, 1000);
+  };
+
+  if (isLoading && brands.length === 0) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <CircularProgress />
@@ -228,155 +217,157 @@ const TopFoodFranchises = () => {
   }
 
   return (
-    coffeeTeaBrands.length > 0 && (
+    <Box
+      ref={containerRef}
+      sx={{
+        py: isMobile ? 1 : 2,
+        px: isMobile ? 0 : 2,
+        maxWidth: isMobile ? "100%" : 1400,
+        mx: "auto",
+        position: "relative",
+      }}
+    >
       <Box
-        ref={containerRef}
         sx={{
-          py: isMobile ? 1 : 2,
-          px: isMobile ? 0 : 2,
-          maxWidth: isMobile ? "100%" : 1400,
-          mx: "auto",
-          position: "relative",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 1,
+          px: isMobile ? 2 : 0,
         }}
       >
-        <Box
+        <Typography
+          variant={isMobile ? "body1" : "h5"}
+          fontWeight="bold"
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            color: "black",
             mb: 1,
-            px: isMobile ? 2 : 0,
+            textAlign: "left",
+            position: "relative",
+            "&:after": {
+              content: '""',
+              display: "block",
+              width: "80px",
+              height: "4px",
+              background: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+              mt: 1,
+              borderRadius: 2,
+            },
           }}
         >
-          <Typography
-            variant={isMobile ? "body1" : "h5"}
-            fontWeight="bold"
-            sx={{
-              color: "black",
-              mb: 1,
-              textAlign: "left",
-              position: "relative",
-              "&:after": {
-                content: '""',
-                display: "block",
-                width: "80px",
-                height: "4px",
-                background:
-                  theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                mt: 1,
-                borderRadius: 2,
-              },
-            }}
-          >
-            Top Food Franchises
-          </Typography>
+          Top Food Franchises
+        </Typography>
 
-          <Button
-            variant="text"
-            size="small"
-            endIcon={<ArrowRight />}
-            sx={{
-              textTransform: "none",
-              fontSize: isMobile ? 14 : 16,
-              color: theme.palette.text.secondary,
-              "&:hover": {
-                color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                backgroundColor: "transparent",
-              },
-            }}
-            onClick={() => window.open("/brandviewpage", "_blank")}
-          >
-            View More
-          </Button>
-        </Box>
-
-        <Box sx={{ position: "relative" }}>
-          <Button
-            onClick={handlePrevClick}
-            disabled={!showStartShadow}
-            sx={{
-              position: "absolute",
-              left: isMobile ? 4 : 8,
-              top: "50%",
-              transform: "translateY(-50%)",
-              zIndex: 1,
-              minWidth: 40,
-              height: 40,
-              borderRadius: "50%",
-              backgroundColor: "background.paper",
-              boxShadow: 2,
-              "&:hover": {
-                backgroundColor: "action.hover",
-              },
-              "&:disabled": {
-                opacity: 0,
-                pointerEvents: "none",
-              },
-            }}
-          >
-            <ArrowBack fontSize="small" />
-          </Button>
-
-          <Button
-            onClick={handleNextClick}
-            disabled={!showEndShadow}
-            sx={{
-              position: "absolute",
-              right: isMobile ? 4 : 8,
-              top: "50%",
-              transform: "translateY(-50%)",
-              zIndex: 1,
-              minWidth: 40,
-              height: 40,
-              borderRadius: "50%",
-              backgroundColor: "background.paper",
-              boxShadow: 2,
-              "&:hover": {
-                backgroundColor: "action.hover",
-              },
-              "&:disabled": {
-                opacity: 0,
-                pointerEvents: "none",
-              },
-            }}
-          >
-            <ArrowForward fontSize="small" />
-          </Button>
-
-          <Box
-            ref={scrollContainerRef}
-            sx={{
-              display: "flex",
-              overflowX: "auto",
-              gap: isMobile ? 2 : 3,
-              p: 2,
-              scrollBehavior: "smooth",
-              scrollbarWidth: "none",
-              "&::-webkit-scrollbar": { display: "none" },
-            }}
-          >
-            {coffeeTeaBrands.map((brand) => (
-              <motion.div key={brand.uuid}>
-                <HomePageBrandCard
-                  brand={brand}
-                  handleApply={handleApply}
-                  handleLikeClick={handleLikeClick}
-                  likeProcessing={likeProcessing}
-                  dimensions={dimensions}
-                  theme={theme}
-                  isMobile={isMobile}
-                  isTablet={isTablet}
-                />
-              </motion.div>
-            ))}
-          </Box>
-        </Box>
-
-        {showLogin && (
-          <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
-        )}
+        <Button
+          variant="text"
+          size="small"
+          endIcon={<ArrowRight />}
+          sx={{
+            textTransform: "none",
+            fontSize: isMobile ? 14 : 16,
+            color: theme.palette.text.secondary,
+            "&:hover": {
+              color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+              backgroundColor: "transparent",
+            },
+          }}
+          onClick={() => window.open("/brandviewpage", "_blank")}
+        >
+          View More
+        </Button>
       </Box>
-    )
+
+      <Box sx={{ position: "relative" }}>
+        <Button
+          onClick={handlePrevClick}
+          disabled={!showStartShadow}
+          sx={{
+            position: "absolute",
+            left: isMobile ? 4 : 8,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 1,
+            minWidth: 40,
+            height: 40,
+            borderRadius: "50%",
+            backgroundColor: "background.paper",
+            boxShadow: 2,
+            "&:hover": {
+              backgroundColor: "action.hover",
+            },
+            "&:disabled": {
+              opacity: 0,
+              pointerEvents: "none",
+            },
+          }}
+        >
+          <ArrowBack fontSize="small" />
+        </Button>
+
+        <Button
+          onClick={handleNextClick}
+          disabled={!showEndShadow}
+          sx={{
+            position: "absolute",
+            right: isMobile ? 4 : 8,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 1,
+            minWidth: 40,
+            height: 40,
+            borderRadius: "50%",
+            backgroundColor: "background.paper",
+            boxShadow: 2,
+            "&:hover": {
+              backgroundColor: "action.hover",
+            },
+            "&:disabled": {
+              opacity: 0,
+              pointerEvents: "none",
+            },
+          }}
+        >
+          <ArrowForward fontSize="small" />
+        </Button>
+
+        <Box
+          ref={scrollContainerRef}
+          sx={{
+            display: "flex",
+            overflowX: "auto",
+            gap: isMobile ? 2 : 3,
+            p: 2,
+            scrollBehavior: "smooth",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
+        >
+          {brands.map((brand) => (
+            <motion.div key={brand.uuid || brand.id}>
+              <HomePageBrandCard
+                brand={brand}
+                handleApply={handleApply}
+                handleLikeClick={handleLikeClick}
+                likeProcessing={likeProcessing}
+                dimensions={dimensions}
+                theme={theme}
+                isMobile={isMobile}
+                isTablet={isTablet}
+              />
+            </motion.div>
+          ))}
+          {isLoading && brands.length > 0 && (
+            <Box sx={{ display: "flex", alignItems: "center", pl: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          )}
+        </Box>
+      </Box>
+
+      {showLogin && (
+        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+      )}
+    </Box>
   );
 };
 
