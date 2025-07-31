@@ -61,6 +61,9 @@ const brandSlice = createSlice({
       })
       .addCase(fetchBrands.fulfilled, (state, action) => {
         state.isLoading = false;
+        // Always replace brands with new ones rather than appending
+  state.brands = action.payload.brands;
+  state.pagination = action.payload.pagination;
         
         // If it's the first page, replace brands, otherwise append
         if (action.payload.pagination.currentPage === 1) {
