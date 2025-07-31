@@ -18,12 +18,8 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  fetchBrands,
-  toggleLikeBrand,
-  viewApi,
-  openBrandDialog,
-} from "../../Redux/Slices/brandSlice";
+import { fetchDesertAndBakery  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
+
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { motion } from "framer-motion";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
@@ -41,12 +37,13 @@ const TopDesertBakerys = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
 
-  const {
-    data: brands = [],
-    filteredData = [],
-    loading: brandsLoading,
-    error,
-  } = useSelector((state) => state.brands);
+ const fetchDesertAndBakeryState = useSelector((state) => state.foodfranchise.desertAndBakery);
+ const {
+   brands = [],
+   isLoading,
+   error,
+   pagination
+ } = fetchDesertAndBakeryState || {};
 
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -64,13 +61,13 @@ const TopDesertBakerys = () => {
   const [showEndShadow, setShowEndShadow] = useState(true);
   const [visibleCardCount, setVisibleCardCount] = useState(4);
 
-  const dessertBakeryBrands = useMemo(() => {
-    if (!filteredData?.length) return [];
-    return filteredData.filter((brand) => {
-      const category = brand?.franchiseDetails?.brandCategories?.sub || "";
-      return category.includes("Dessert & Bakery");
-    });
-  }, [filteredData]);
+  // const dessertBakeryBrands = useMemo(() => {
+  //   if (!filteredData?.length) return [];
+  //   return filteredData.filter((brand) => {
+  //     const category = brand?.franchiseDetails?.brandCategories?.sub || "";
+  //     return category.includes("Dessert & Bakery");
+  //   });
+  // }, [filteredData]);
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -80,11 +77,9 @@ const TopDesertBakerys = () => {
     return CARD_DIMENSIONS.largeDesktop;
   }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
 
-  useEffect(() => {
-    if (brands.length === 0) {
-      dispatch(fetchBrands());
-    }
-  }, [dispatch, brands.length]);
+useEffect(() => {
+    dispatch(fetchDesertAndBakery({ page: 1 }));
+  }, [dispatch]);
 
   useLayoutEffect(() => {
     const updateVisibleCards = () => {
@@ -209,7 +204,7 @@ const TopDesertBakerys = () => {
     smoothScrollTo(newScroll);
   };
 
-  if (brandsLoading) {
+  if (isLoading) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <CircularProgress />
@@ -228,7 +223,7 @@ const TopDesertBakerys = () => {
   }
 
   return (
-    dessertBakeryBrands.length > 0 && (
+    brands.length > 0 && (
       <Box
         ref={containerRef}
         sx={{
@@ -357,7 +352,7 @@ const TopDesertBakerys = () => {
               "&::-webkit-scrollbar": { display: "none" },
             }}
           >
-            {dessertBakeryBrands.map((brand) => (
+            {brands.map((brand) => (
               <motion.div key={brand.uuid}>
                 <HomePageBrandCard
                   brand={brand}

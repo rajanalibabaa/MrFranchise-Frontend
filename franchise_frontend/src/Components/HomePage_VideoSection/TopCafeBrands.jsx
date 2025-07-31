@@ -67,7 +67,6 @@ const TopCafeFranchises = () => {
   }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
 
   const cafeFranchiseState = useSelector((state) => state.foodfranchise.cafes);
-  console.log('cafeFranchiseState',cafeFranchiseState)
 const {
   brands = [],
   isLoading,

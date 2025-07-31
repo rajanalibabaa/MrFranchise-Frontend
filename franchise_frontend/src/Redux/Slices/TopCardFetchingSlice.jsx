@@ -10,7 +10,6 @@ export const fetchTopFoodFranchises = createAsyncThunk(
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopFoodFranchise`, {
         params: { page }
       });
-console.log("✅ Foods Cafes API Response:", response.data);
 
       if (!response.data.data || !response.data.data.brands) {
         console.error('Unexpected API response structure:', response.data);
@@ -41,7 +40,95 @@ export const fetchTopCafes = createAsyncThunk(
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopCafes`, {
         params: { page }
       });
-console.log("✅ Top Cafes API Response:", response.data);
+
+      if (!response.data.data || !response.data.data.brands) {
+        console.error('Unexpected API response structure:', response.data);
+        throw new Error('Invalid API response structure');
+      }
+
+      return {
+        brands: response.data.data.brands,
+        pagination: response.data.data.pagination || {
+          currentPage: page,
+          totalPages: 1,
+          totalItems: 0,
+          hasNextPage: false,
+          hasPreviousPage: false
+        }
+      };
+    } catch (error) {
+      console.error('API Error:', error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || { message: error.message });
+    }
+  }
+);
+
+export const fetchTopBeverageFranchises = createAsyncThunk(
+  'topBeverageFranchises/fetchAll',
+  async ({ page = 1 }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopBeverageFranchise`, {
+        params: { page }
+      });
+
+      if (!response.data.data || !response.data.data.brands) {
+        console.error('Unexpected API response structure:', response.data);
+        throw new Error('Invalid API response structure');
+      }
+
+      return {
+        brands: response.data.data.brands,
+        pagination: response.data.data.pagination || {
+          currentPage: page,
+          totalPages: 1,
+          totalItems: 0,
+          hasNextPage: false,
+          hasPreviousPage: false
+        }
+      };
+    } catch (error) {
+      console.error('API Error:', error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || { message: error.message });
+    }
+  }
+);
+export const fetchTopTruckAndKiosksFranchises = createAsyncThunk(
+  'topTruckAndKiosksFranchises/fetchAll',
+  async ({ page = 1 }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopTrucksAndKiosks`, {
+        params: { page }
+      });
+
+      if (!response.data.data || !response.data.data.brands) {
+        console.error('Unexpected API response structure:', response.data);
+        throw new Error('Invalid API response structure');
+      }
+
+      return {
+        brands: response.data.data.brands,
+        pagination: response.data.data.pagination || {
+          currentPage: page,
+          totalPages: 1,
+          totalItems: 0,
+          hasNextPage: false,
+          hasPreviousPage: false
+        }
+      };
+    } catch (error) {
+      console.error('API Error:', error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || { message: error.message });
+    }
+  }
+);
+
+export const fetchDesertAndBakery = createAsyncThunk(
+  'topdesertAndBakeryFranchises/fetchAll',
+  async ({ page = 1 }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/brandlisting/getDesertAndBakery`, {
+        params: { page }
+      });
 
       if (!response.data.data || !response.data.data.brands) {
         console.error('Unexpected API response structure:', response.data);
@@ -91,6 +178,45 @@ const initialState = {
     isLoading: false,
     error: null,
     viewedBrandsCount: 0
+  },
+  topbeveragefranchises: {
+    brands: [],
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 0,
+      hasNextPage: false,
+      hasPreviousPage: false
+    },
+    isLoading: false,
+    error: null,
+    viewedBrandsCount: 0
+  },
+  desertAndBakery: {
+    brands: [],
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 0,
+      hasNextPage: false,
+      hasPreviousPage: false
+    },
+    isLoading: false,
+    error: null,
+    viewedBrandsCount: 0
+  },
+  trucksAndKiosks: {
+    brands: [],
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 0,
+      hasNextPage: false,
+      hasPreviousPage: false
+    },
+    isLoading: false,
+    error: null,
+    viewedBrandsCount: 0
   }
 };
 
@@ -104,59 +230,148 @@ const topFoodFranchiseSlice = createSlice({
     resetTopCafes: (state) => {
       state.cafes = initialState.cafes;
     },
+    resetTopBeverageFranchises: (state) => {
+      state.topbeveragefranchises = initialState.topbeveragefranchises;
+    },
+     resetDesertAndBakery: (state) => {
+      state.desertAndBakery = initialState.desertAndBakery;
+     },
+
+     resetTrucksAndKiosks: (state) => {
+      state.trucksAndKiosks = initialState.trucksAndKiosks;
+     },
+
+
     incrementFoodFranchiseViewedCount: (state) => {
       state.foodFranchises.viewedBrandsCount += 1;
     },
     incrementCafesViewedCount: (state) => {
       state.cafes.viewedBrandsCount += 1;
     },
+    incrementBeverageViewedCount: (state) => {
+      state.topbeveragefranchises.viewedBrandsCount += 1;
+    },
+    incrementDesertAndBakeryViewedCount: (state) => {
+      state.desertAndBakery.viewedBrandsCount += 1;
+    },
+    incrementTrucksAndKiosksViewedCount: (state) => {
+      state.trucksAndKiosks.viewedBrandsCount += 1;
+    },
+
+
     resetFoodFranchiseViewedCount: (state) => {
       state.foodFranchises.viewedBrandsCount = 0;
     },
     resetCafesViewedCount: (state) => {
       state.cafes.viewedBrandsCount = 0;
-    }
+    },
+    resetBeverageViewedCount: (state) => {
+      state.topbeveragefranchises.viewedBrandsCount = 0;
+    },
+    resetDesertAndBakeryViewedCount: (state) => {
+      state.desertAndBakery.viewedBrandsCount = 0;
+    },
+    resetTrucksAndKiosksViewedCount: (state) => {
+      state.trucksAndKiosks.viewedBrandsCount = 0;
+    },
+
   },
   extraReducers: (builder) => {
-    // Food Franchises cases
-    builder.addCase(fetchTopFoodFranchises.pending, (state) => {
-      state.foodFranchises.isLoading = true;
-      state.foodFranchises.error = null;
-    });
-    builder.addCase(fetchTopFoodFranchises.fulfilled, (state, action) => {
-      state.foodFranchises.isLoading = false;
-      state.foodFranchises.brands = action.payload.brands;
-      state.foodFranchises.pagination = action.payload.pagination;
-    });
-    builder.addCase(fetchTopFoodFranchises.rejected, (state, action) => {
-      state.foodFranchises.isLoading = false;
-      state.foodFranchises.error = action.payload?.message || action.error.message;
-    });
+    builder
+      // Food Franchises
+      .addCase(fetchTopFoodFranchises.pending, (state) => {
+        state.foodFranchises.isLoading = true;
+        state.foodFranchises.error = null;
+      })
+      .addCase(fetchTopFoodFranchises.fulfilled, (state, action) => {
+        state.foodFranchises.isLoading = false;
+        state.foodFranchises.brands = action.payload.brands;
+        state.foodFranchises.pagination = action.payload.pagination;
+      })
+      .addCase(fetchTopFoodFranchises.rejected, (state, action) => {
+        state.foodFranchises.isLoading = false;
+        state.foodFranchises.error = action.payload?.message || action.error.message;
+      })
 
-    // Cafes cases
-    builder.addCase(fetchTopCafes.pending, (state) => {
-      state.cafes.isLoading = true;
-      state.cafes.error = null;
-    });
-    builder.addCase(fetchTopCafes.fulfilled, (state, action) => {
-      state.cafes.isLoading = false;
-      state.cafes.brands = action.payload.brands;
-      state.cafes.pagination = action.payload.pagination;
-    });
-    builder.addCase(fetchTopCafes.rejected, (state, action) => {
-      state.cafes.isLoading = false;
-      state.cafes.error = action.payload?.message || action.error.message;
-    });
+      // Cafes
+      .addCase(fetchTopCafes.pending, (state) => {
+        state.cafes.isLoading = true;
+        state.cafes.error = null;
+      })
+      .addCase(fetchTopCafes.fulfilled, (state, action) => {
+        state.cafes.isLoading = false;
+        state.cafes.brands = action.payload.brands;
+        state.cafes.pagination = action.payload.pagination;
+      })
+      .addCase(fetchTopCafes.rejected, (state, action) => {
+        state.cafes.isLoading = false;
+        state.cafes.error = action.payload?.message || action.error.message;
+      })
+
+      // Beverages
+      .addCase(fetchTopBeverageFranchises.pending, (state) => {
+        state.topbeveragefranchises.isLoading = true;
+        state.topbeveragefranchises.error = null;
+      })
+      .addCase(fetchTopBeverageFranchises.fulfilled, (state, action) => {
+        state.topbeveragefranchises.isLoading = false;
+        state.topbeveragefranchises.brands = action.payload.brands;
+        state.topbeveragefranchises.pagination = action.payload.pagination;
+      })
+      .addCase(fetchTopBeverageFranchises.rejected, (state, action) => {
+        state.topbeveragefranchises.isLoading = false;
+        state.topbeveragefranchises.error = action.payload?.message || action.error.message;
+      })
+
+      // desert&Bakerys
+      .addCase(fetchDesertAndBakery.pending, (state) => {
+        state.desertAndBakery.isLoading = true;
+        state.desertAndBakery.error = null;
+      })
+      .addCase(fetchDesertAndBakery.fulfilled, (state, action) => {
+        state.desertAndBakery.isLoading = false;
+        state.desertAndBakery.brands = action.payload.brands;
+        state.desertAndBakery.pagination = action.payload.pagination;
+      })
+      .addCase(fetchDesertAndBakery.rejected, (state, action) => {
+        state.desertAndBakery.isLoading = false;
+        state.desertAndBakery.error = action.payload?.message || action.error.message;
+      })
+
+      //trucks and Kiosks
+
+      .addCase(fetchTopTruckAndKiosksFranchises.pending, (state) => {
+        state.trucksAndKiosks.isLoading = true;
+        state.trucksAndKiosks.error = null;
+      })
+      .addCase(fetchTopTruckAndKiosksFranchises.fulfilled, (state, action) => {
+        state.trucksAndKiosks.isLoading = false;
+        state.trucksAndKiosks.brands = action.payload.brands;
+        state.trucksAndKiosks.pagination = action.payload.pagination;
+      })
+      .addCase(fetchTopTruckAndKiosksFranchises.rejected, (state, action) => {
+        state.trucksAndKiosks.isLoading = false;
+        state.trucksAndKiosks.error = action.payload?.message || action.error.message;
+      });
   }
 });
 
-export const { 
+export const {
   resetTopFoodFranchises,
   resetTopCafes,
+  resetTopBeverageFranchises,
+   resetDesertAndBakery,
+  resetTrucksAndKiosks,
   incrementFoodFranchiseViewedCount,
   incrementCafesViewedCount,
+  incrementBeverageViewedCount,
+  incrementDesertAndBakeryViewedCount,
+  incrementTrucksAndKiosksViewedCount,
   resetFoodFranchiseViewedCount,
-  resetCafesViewedCount
+  resetCafesViewedCount,
+  resetBeverageViewedCount,
+  resetDesertAndBakeryViewedCount,
+  resetTrucksAndKiosksViewedCount
 } = topFoodFranchiseSlice.actions;
 
 export default topFoodFranchiseSlice.reducer;
