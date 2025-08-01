@@ -11,60 +11,81 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
-import { useBrands } from "../../Hooks/Fetchbrands";
- 
+import { useSelector, useDispatch } from "react-redux";
+import {
+  fetchFilterOptions,
+  resetChildCategories,
+  resetDistricts,
+  resetCities,
+  clearErrors,
+} from "../../Redux/Slices/filterDropdownData.jsx"
+
 const FilterDropdowns = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [filters, setFilters] = useState({
     selectedSubCategory: "",
     selectedState: "",
-    selectedInvestmentRange: ""
+    selectedInvestmentRange: "",
   });
- 
+
+  // Get filter data from Redux store
   const {
-    data: brands = [],
-    isLoading,
-    error
-  } = useBrands();
- 
-  const { subCategories, states } = useMemo(() => {
-    if (!brands || brands.length === 0) return { subCategories: [], states: [] };
- 
-    const subCategoriesMap = new Map();
-    const statesSet = new Set();
- 
-    // brands.forEach((brand) => {
-    //   const subCategory = brand.franchiseDetails?.brandCategories?.sub;
-    //   if (subCategory && !subCategoriesMap.has(subCategory)) {
-    //     subCategoriesMap.set(subCategory, { id: subCategory, name: subCategory });
-    //   }
- 
-    //   const locations = brand.expansionLocationData?.expansionLocations?.domestic?.locations || [];
-    //   locations.forEach((loc) => {
-    //     if (loc.state) statesSet.add(loc.state);
-    //   });
-    // });
- 
-    return {
-      subCategories: Array.from(subCategoriesMap.values()),
-      states: Array.from(statesSet).sort(),
+    subCategories,
+    states,
+    investmentRanges,
+    loading,
+    error,
+  } = useSelector((state) => state.filterDropdown);
+
+  // Fetch initial filter options when component mounts
+  useEffect(() => {
+    dispatch(fetchFilterOptions());
+    return () => {
+      dispatch(clearErrors());
     };
-  }, [brands]);
- 
+  }, [dispatch]);
+
+  // Handle filter changes
+  const handleFilterChange = useCallback(
+    (name, value) => {
+      setFilters((prev) => {
+        const newFilters = { ...prev, [name]: value };
+
+        // Reset dependent filters when parent changes
+        if (name === "selectedSubCategory") {
+          newFilters.selectedState = "";
+          newFilters.selectedDistrict = "";
+          newFilters.selectedCity = "";
+        } else if (name === "selectedState") {
+          newFilters.selectedDistrict = "";
+          newFilters.selectedCity = "";
+        }
+
+        return newFilters;
+      });
+
+      // Fetch dependent data if needed
+      if (name === "selectedSubCategory" && value) {
+        dispatch(fetchFilterOptions({ sub: value }));
+      } else if (name === "selectedState" && value) {
+        dispatch(fetchFilterOptions({ state: value }));
+      }
+    },
+    [dispatch]
+  );
+
+  // Format investment ranges for display
   const formattedInvestmentRanges = useMemo(() => {
-    if (!brands || brands.length === 0) return [{ label: "All Ranges", value: "" }];
- 
-    const investmentRangesSet = new Set();
- 
-    // brands.forEach((brand) => {
-    //   const range = brand.franchiseDetails?.fico?.[0]?.investmentRange;
-    //   if (range) investmentRangesSet.add(range);
-    // });
- 
+    if (!investmentRanges || investmentRanges.length === 0) {
+      return [{ label: "All Ranges", value: "" }];
+    }
+
     const convertToRupees = (val) => {
+      if (!val) return 0;
       val = val.trim().replace(/Rs\.?\s*/i, "");
       if (val.includes(",")) val = val.replace(/,/g, "");
- 
+
       if (val.toLowerCase().includes("cr")) {
         return parseFloat(val) * 1_00_00_000;
       } else if (val.toLowerCase().includes("l")) {
@@ -73,72 +94,62 @@ const FilterDropdowns = () => {
         return parseFloat(val);
       }
     };
- 
+
     const getMinValue = (range) => {
       const matches = range.match(/Rs\.?\s*([\d,\.]+\s*(L|Cr|Crs)?)/gi);
       if (!matches) return Number.MAX_SAFE_INTEGER;
- 
+
       const values = matches.map((m) => convertToRupees(m));
       return Math.min(...values);
     };
- 
-    const sortedFormattedRanges = Array.from(investmentRangesSet)
+
+    const sortedRanges = [...investmentRanges]
       .map((range) => ({
         label: range,
         value: range,
         sortValue: getMinValue(range),
       }))
       .sort((a, b) => a.sortValue - b.sortValue);
- 
-    return [{ label: "All Ranges", value: "" }, ...sortedFormattedRanges.map(({ label, value }) => ({ label, value }))];
-  }, [brands]);
- 
-  const handleFilterChange = useCallback((name, value) => {
-    setFilters(prev => ({ ...prev, [name]: value }));
-  }, []);
- 
+
+    return [
+      { label: "All Ranges", value: "" },
+      ...sortedRanges.map(({ label, value }) => ({ label, value })),
+    ];
+  }, [investmentRanges]);
+
+  // Handle search button click
   const handleFindBrands = useCallback(() => {
-    const { selectedInvestmentRange, selectedSubCategory, selectedState } = filters;
- 
-    const filteredBrands = brands.filter((brand) => {
-      const brandRange = brand.franchiseDetails?.fico?.[0]?.investmentRange || "";
-      const brandSub = brand.franchiseDetails?.brandCategories?.sub || "";
-      const brandStates = brand.expansionLocationData?.expansionLocations?.domestic?.locations?.map(loc => loc.state) || [];
- 
-      const matchesRange = !selectedInvestmentRange || brandRange === selectedInvestmentRange;
-      const matchesSubCategory = !selectedSubCategory || brandSub === selectedSubCategory;
-      const matchesState = !selectedState || brandStates.includes(selectedState);
- 
-      return matchesRange && matchesSubCategory && matchesState;
-    });
- 
-    console.log("Filtered Brands:", filteredBrands); // ✅ Debug check
- 
-    // Pass data to the next page
-    navigate("/brandviewpage", {
-      state: {
-        filteredBrands,
-        filters
-      }
-    });
-  }, [brands, filters, navigate]);
- 
-  if (isLoading) {
+    const queryParams = new URLSearchParams();
+    
+    if (filters.selectedSubCategory) {
+      queryParams.append("category", filters.selectedSubCategory);
+    }
+    if (filters.selectedInvestmentRange) {
+      queryParams.append("investment", filters.selectedInvestmentRange);
+    }
+    if (filters.selectedState) {
+      queryParams.append("location", filters.selectedState);
+    }
+
+    navigate(`/brandviewpage?${queryParams.toString()}`);
+  }, [filters, navigate]);
+
+  if (loading && !subCategories.length && !states.length) {
     return (
       <Box display="flex" justifyContent="center" p={4}>
         <CircularProgress />
       </Box>
     );
   }
- 
+
   if (error) {
     return (
       <Box p={4}>
-        <Typography color="error">Error loading brands. Please try again later.</Typography>
+        <Typography color="error">Error loading filter options: {error}</Typography>
       </Box>
     );
   }
- 
+
   return (
     <Box>
       <Box
@@ -158,28 +169,29 @@ const FilterDropdowns = () => {
           <InputLabel>Category</InputLabel>
           <Select
             value={filters.selectedSubCategory}
-            onChange={(e) => handleFilterChange("selectedSubCategory", e.target.value)}
+            onChange={(e) =>
+              handleFilterChange("selectedSubCategory", e.target.value)
+            }
             label="Category"
             MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
           >
             <MenuItem value="">All Categories</MenuItem>
             {subCategories.map((category) => (
-              <MenuItem key={category.id} value={category.id}>
-                {category.name}
+              <MenuItem key={category} value={category}>
+                {category}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
- 
+
         {/* Investment Range Filter */}
         <FormControl fullWidth sx={{ minWidth: 180 }}>
           <InputLabel>Investment Range</InputLabel>
           <Select
             value={filters.selectedInvestmentRange}
-            onChange={(e) => {
-              console.log("Selected Investment Range:", e.target.value);
-              handleFilterChange("selectedInvestmentRange", e.target.value);
-            }}
+            onChange={(e) =>
+              handleFilterChange("selectedInvestmentRange", e.target.value)
+            }
             label="Investment Range"
             MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
           >
@@ -190,7 +202,7 @@ const FilterDropdowns = () => {
             ))}
           </Select>
         </FormControl>
- 
+
         {/* State Filter */}
         <FormControl fullWidth sx={{ minWidth: 180 }}>
           <InputLabel>Location</InputLabel>
@@ -208,7 +220,7 @@ const FilterDropdowns = () => {
             ))}
           </Select>
         </FormControl>
- 
+
         <Button
           variant="contained"
           onClick={handleFindBrands}
@@ -222,13 +234,13 @@ const FilterDropdowns = () => {
               backgroundColor: "#7ad03a",
             },
           }}
-          disabled={isLoading}
+          disabled={loading}
         >
-          {isLoading ? <CircularProgress size={24} /> : "Find Brands"}
+          {loading ? <CircularProgress size={24} /> : "Find Brands"}
         </Button>
       </Box>
     </Box>
   );
 };
- 
+
 export default React.memo(FilterDropdowns);

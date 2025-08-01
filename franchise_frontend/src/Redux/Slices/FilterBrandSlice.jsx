@@ -1,0 +1,143 @@
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:5000/api/v1/';
+
+// Async thunk for fetching filtered brands
+export const fetchFilteredBrands = createAsyncThunk(
+  'filterBrands/fetchFilteredBrands',
+  async (filters, { rejectWithValue }) => {
+    try {
+      const {
+        page = 1,
+        limit = 20,
+        id,
+        maincat,
+        subcat,
+        childcat,
+        serchterm,
+        country,
+        state,
+        district,
+        city,
+        investmentRange,
+        modelType,
+      } = filters;
+
+      const params = new URLSearchParams();
+      params.append('page', page);
+      params.append('limit', limit);
+      if (id) params.append('id', id);
+      if (maincat) params.append('maincat', maincat);
+      if (subcat) params.append('subcat', subcat);
+      if (childcat) params.append('childcat', childcat);
+      if (serchterm) params.append('serchterm', serchterm);
+      if (country) params.append('country', country);
+      if (state) params.append('state', state);
+      if (district) params.append('district', district);
+      if (city) params.append('city', city);
+      if (investmentRange) params.append('investmentRange', investmentRange);
+      if (modelType) params.append('modelType', modelType);
+
+      const response = await axios.post(`${API_BASE_URL}filter/getAllBrandsAndFilter?${params.toString()}`);
+      
+         return response.data.data || response.data; // Assuming your API returns data in response.data.data
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+const initialState = {
+  brands: [],
+  loading: false,
+  error: null,
+  pagination: {
+    currentPage: 1,
+    totalPages: 1,
+    limit: 20,
+    total: 0,
+    hasNext: false,
+    hasPrevious: false,
+  },
+  filters: {
+    id: null,
+    maincat: null,
+    subcat: null,
+    childcat: null,
+    serchterm: '',
+    country: null,
+    state: null,
+    district: null,
+    city: null,
+    investmentRange: null,
+    modelType: null,
+  }
+};
+
+const filterBrandSlice = createSlice({
+  name: 'filterBrands',
+  initialState,
+  reducers: {
+    setFilter: (state, action) => {
+      const { filterName, value } = action.payload;
+      state.filters[filterName] = value;
+      
+      // Reset dependent filters when parent changes
+      if (filterName === 'maincat') {
+        state.filters.subcat = null;
+        state.filters.childcat = null;
+      } else if (filterName === 'subcat') {
+        state.filters.childcat = null;
+      } else if (filterName === 'state') {
+        state.filters.district = null;
+        state.filters.city = null;
+      } else if (filterName === 'district') {
+        state.filters.city = null;
+      }
+      
+      // Reset to first page when filters change
+      state.pagination.currentPage = 1;
+    },
+    resetFilters: (state) => {
+      state.filters = initialState.filters;
+      state.pagination.currentPage = 1;
+    },
+    setPage: (state, action) => {
+      state.pagination.currentPage = action.payload;
+    },
+    clearError: (state) => {
+      state.error = null;
+    }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchFilteredBrands.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchFilteredBrands.fulfilled, (state, action) => {
+        state.loading = false;
+        state.brands = action.payload.brands || [];
+        
+        // Update pagination info
+        if (action.payload.pagination) {
+          state.pagination = {
+            currentPage: action.payload.pagination.currentPage,
+            totalPages: action.payload.pagination.totalPages,
+            limit: action.payload.pagination.limit,
+            total: action.payload.pagination.total,
+            hasNext: action.payload.pagination.hasNext,
+            hasPrevious: action.payload.pagination.hasPrevious,
+          };
+        }
+      })
+      .addCase(fetchFilteredBrands.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to fetch brands';
+      });
+  }
+});
+
+export const { setFilter, resetFilters, setPage, clearError } = filterBrandSlice.actions;
+
+export default filterBrandSlice.reducer;

@@ -50,12 +50,15 @@ const dynamicComponents = {
   TopFoodFranchise: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopFoodFranchise.jsx")
   )),
-//   TopBeverageFranchise: withSuspense(React.lazy(() =>
-//     import("../../Components/HomePage_VideoSection/TopBeverageFranchise.jsx")
-//   )),
-//   TopDesertBakeryFranchise: withSuspense(React.lazy(() =>
-//     import("../../Components/HomePage_VideoSection/TopDesertBakerys.jsx")
-//   )),
+  TopBeverageFranchise: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/TopBeverageFranchise.jsx")
+  )),
+  TopDesertBakeryFranchise: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/TopDesertBakerys.jsx")
+  )),
+  TopTruckAndKiosks: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/TopTruckAndKiosks.jsx")
+  )),
 //   TopLeadingFranchise: withSuspense(React.lazy(() =>
 //     import("../../Components/HomePage_VideoSection/TopLeadingFranchise.jsx")
 //   )),
@@ -65,9 +68,9 @@ const dynamicComponents = {
 //   FindFranchiseLocations: withSuspense(React.lazy(() =>
 //     import("../../Components/HomePage_VideoSection/FindFranchiseLocations.jsx")
 //   )),
-//   ToTrendingBrands: withSuspense(React.lazy(() =>
-//     import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
-//   )),
+  ToTrendingBrands: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
+  )),
 };
 
 // Configuration object for the entire page
@@ -119,16 +122,21 @@ const pageConfig = {
       background: "#fffaf7",
       dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     },
-    // {
-    //   component: "TopBeverageFranchise",
-    //   background: "#fffaf7",
-    //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    // },
-    // {
-    //   component: "TopDesertBakeryFranchise",
-    //   background: "#fffaf7",
-    //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    // },
+    {
+      component: "TopBeverageFranchise",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    },
+    {
+      component: "TopDesertBakeryFranchise",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    },
+    {
+      component: "TopTruckAndKiosks",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    },
     // {
     //   component: "TopLeadingFranchise",
     //   background: "white",
@@ -144,11 +152,11 @@ const pageConfig = {
     //   background: "#fffaf7",
     //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     // },
-    // {
-    //   component: "ToTrendingBrands",
-    //   title: "Trending Brands",
-    //   dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-    // },
+    {
+      component: "ToTrendingBrands",
+      title: "Trending Brands",
+      dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
+    },
   ],
 
   // Global Animation Settings

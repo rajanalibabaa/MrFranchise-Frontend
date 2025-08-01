@@ -124,17 +124,21 @@ const PopupModal = ({ open, onClose }) => {
   return (
     <>
       <Modal 
-        open={open} 
-        onClose={handleClose}
-        aria-labelledby="popup-title"
-        aria-describedby="popup-description"
-        sx={{
-          backdropFilter: 'blur(3px)',
-          animation: `${fadeIn} 0.3s ease-out`,
-        }}
-        // Disable backdrop click on mobile to prevent accidental closes
-        disableBackdropClick={isMobile}
-      >
+  open={open} 
+  onClose={(event, reason) => {
+    if (isMobile && reason === "backdropClick") {
+      // Ignore backdrop click on mobile
+      return;
+    }
+    handleClose(event, reason); // allow close otherwise
+  }}
+  aria-labelledby="popup-title"
+  aria-describedby="popup-description"
+  sx={{
+    backdropFilter: 'blur(3px)',
+    animation: `${fadeIn} 0.3s ease-out`,
+  }}
+>
         <Box sx={styles.modal}>
           {/* Header Section */}
           <Box sx={styles.header}>

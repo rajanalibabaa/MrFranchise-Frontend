@@ -8,12 +8,16 @@ import loadingReducer  from "../Slices/loadingSlice.jsx";
 
 import getAllBrands  from "../Slices/GetAllBrandsDataUpdationFile.jsx";
 import topFoodsfranchise from "../Slices/TopCardFetchingSlice.jsx";
+import filterDropdown from "../../Redux/Slices/filterDropdownData.jsx"
+import filterBrandReducer from "../../Redux/Slices/FilterBrandSlice.jsx"
  const store = configureStore({
   reducer: {
     navbar:navReducer,
     auth: authReducer,
     // likedBrands : likedBrandsSlice,
     // brands : brandReducer,
+    filterBrands: filterBrandReducer,
+    filterDropdown:filterDropdown,
     loading :loadingReducer,
     brands:getAllBrands,
     foodfranchise:topFoodsfranchise
