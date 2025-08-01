@@ -262,7 +262,6 @@ const validateFranchiseDetails = (data) => {
   return errors;
 };
 
-
 const validateExpansionLocationDetails = (data) => {
   const errors = {};
   
@@ -291,8 +290,9 @@ const validateExpansionLocationDetails = (data) => {
   //   errors.expansionLocations = "Please select at least one location (India or International) for expansion";
   // }
 
-  return errors;
-};
+  return errors
+
+}
 
 export { validateBrandDetails, validateFranchiseDetails ,validateExpansionLocationDetails};
 

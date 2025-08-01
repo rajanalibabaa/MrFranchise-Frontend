@@ -73,7 +73,7 @@ const Likeshow = async () => {
 // Fetch All Brands
 export const fetchBrands = createAsyncThunk(
   "brands/fetchBrands",
-  async (_, { rejectWithValue }) => {
+  async ({ page = 1 }, { rejectWithValue }) => {
     try {
       let response;
       const baseUrl = "http://localhost:5000/api/v1";
@@ -362,11 +362,20 @@ const brandSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchBrands.fulfilled, (state, action) => {
-        state.loading = false;
-        state.data = action.payload || [];
-        state.filteredData = applyFiltersToBrands(action.payload, state.filters);
+     .addCase(fetchBrands.fulfilled, (state, action) => {
+  state.loading = false;
+  
+  const incomingBrands = action.payload || [];
+  const isPaginated = action.meta.arg?.page && action.meta.arg.page > 1;
 
+  // Append for pagination, otherwise reset
+  if (isPaginated) {
+    state.data = [...state.data, ...incomingBrands];
+  } else {
+    state.data = incomingBrands;
+  }
+
+  state.filteredData = applyFiltersToBrands(state.data, state.filters);
         // Extract unique values for filters
         const categoryMap = {};
         const subCategoryMap = {};

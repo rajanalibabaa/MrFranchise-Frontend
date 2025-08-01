@@ -37,9 +37,9 @@ const dynamicComponents = {
   TopBrandThreevdocards: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")
   )),
-//   LikedBrands: withSuspense(React.lazy(() =>
-//     import("../../Components/HomePage_VideoSection/LikedBrands.jsx")
-//   )),
+  LikedBrands: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/LikedBrands.jsx")
+  )),
 //   ViewBrands: withSuspense(React.lazy(() =>
 //     import("../../Components/HomePage_VideoSection/ViewBrands.jsx")
 // )),
@@ -62,9 +62,9 @@ const dynamicComponents = {
 //   TopLeadingFranchise: withSuspense(React.lazy(() =>
 //     import("../../Components/HomePage_VideoSection/TopLeadingFranchise.jsx")
 //   )),
-//   TopRestaurantsFranchise: withSuspense(React.lazy(() =>
-//     import("../../Components/HomePage_VideoSection/TopRestaurantsFranchise.jsx")
-//   )),
+  TopRestaurantsFranchise: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/TopRestaurantsFranchise.jsx")
+  )),
 //   FindFranchiseLocations: withSuspense(React.lazy(() =>
 //     import("../../Components/HomePage_VideoSection/FindFranchiseLocations.jsx")
 //   )),
@@ -102,11 +102,11 @@ const pageConfig = {
       background: "white",
       backgroundOpacity: 0.1,
     },
-    // {
-    //    component: "LikedBrands",
-    //   background: "#white",
-    //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    // },
+    {
+       component: "LikedBrands",
+      background: "#white",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    },
     // {
     //    component: "ViewBrands",
     //   background: "rgba(255, 250, 247, 1)",
@@ -142,11 +142,11 @@ const pageConfig = {
     //   background: "white",
     //   dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
     // },
-    // {
-    //   component: "TopRestaurantsFranchise",
-    //   background: "white",
-    //   dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-    // },
+    {
+      component: "TopRestaurantsFranchise",
+      background: "white",
+      dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
+    },
     // {
     //   component: "FindFranchiseLocations",
     //   background: "#fffaf7",
@@ -198,7 +198,7 @@ const pageConfig = {
 const bannerTexts = [
   {
     title: {
-      text: "1000+ Food Brands One Platform Endless Possibilities",
+      text: "1000+ Food Brands \n One Platform Endless Possibilities",
       gradient:
         "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
@@ -214,7 +214,7 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "Turn Your Investment Into A Tasteful Venture",
+      text: "Turn Your Investment \n Into A Tasteful Venture",
       gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
@@ -229,7 +229,7 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "India's #1 F&B Franchise Marketplace Your Food Business Starts Here",
+      text: "India's #1 F&B Franchise Marketplace\n Your Food Business Starts Here",
      gradient:
         "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
@@ -246,7 +246,7 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "Serve Success Hot - Choose the Right F&B Franchise Today",
+      text: "Serve Success Hot \n Choose the Right F&B Franchise Today",
        gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
@@ -261,7 +261,7 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "From Local Taste to Global Plates - Start Your Food Business Now",
+      text: "From Local Taste to Global Plates \n Start Your Food Business Now",
        gradient:
         "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
@@ -277,7 +277,7 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "Low Investment . High Appetite for Growth",
+      text: "Low Investment.\nHigh Appetite for Growth",
      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
@@ -292,7 +292,7 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "Franchise a Restaurant. Own a Cafe Lead a Cloud Kitchen",
+      text: "Franchise a Restaurant.\n Own a Cafe Lead a Cloud Kitchen",
        gradient:
         "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
@@ -308,7 +308,7 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "F&B Franchise Made Easy with MrFranchise.in",
+      text: "F&B Franchise Made Easy \n with MrFranchise.in",
       gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
@@ -323,7 +323,7 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "No Experience? No Problem! Proven Food Franchise Models Await You",
+      text: "No Experience? No Problem!\n Proven Food Franchise Models Await You",
       gradient:
         "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
@@ -339,7 +339,7 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "Your Food Franchise Future Starts At foodandbeverage MrFranchise.in",
+      text: "Your Food Franchise Future\n Starts At foodandbeverage MrFranchise.in",
       gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
@@ -455,11 +455,11 @@ const HomeBannerSec = () => {
           backgroundPosition: "center",
           backgroundAttachment: isMobile ? "scroll" : "fixed",
           py: 1,
-          px: 2,
+          // px: 2,
           position: "relative",
           overflow: "hidden",
           color: "white",
-          minHeight: isMobile ? "95vh" : "40vh",
+          minHeight: isMobile ? "75vh" : "40vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -487,9 +487,11 @@ const HomeBannerSec = () => {
       >
         <Container
           sx={{
-            position: "relative",
+            position: "",
             zIndex: 2,
             textAlign: isMobile ? "center" : "center",
+            height:"100%",
+            mt:3
           }}
         >
           <motion.div
@@ -509,10 +511,11 @@ const HomeBannerSec = () => {
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   textShadow: "none",
-                  display: "inline",
+                 display: "inline-block",
                   fontSize: isMobile ? "1.5rem" : "2.2rem",
                   fontWeight: 900,
                   px: 1,
+                  whiteSpace: "pre-line",
                 }}
               >
                 {currentText.title.text}
@@ -528,12 +531,15 @@ const HomeBannerSec = () => {
                 textAlign: "center",
                 color: "rgba(255,255,255,0.9)",
                 fontWeight: 300,
-                mb: 3,
+                mt:2,
+                mb: 5,
                 maxWidth: "800px",
                 mx: "auto",
                 lineHeight: 1.5,
-                fontSize: isMobile ? "0.85rem" : "1.1rem",
+                fontSize: isMobile ? "0.6rem" : ".8rem",
                 textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                position:"relative",
+                
               }}
               component={motion.div}
             >
@@ -548,6 +554,7 @@ const HomeBannerSec = () => {
                   fontWeight: currentText.subtitle.highlight.fontWeight,
                   color: currentText.subtitle.highlight.color,
                   display: "inline",
+                  mb:5
                 }}
                 component="span"
               >

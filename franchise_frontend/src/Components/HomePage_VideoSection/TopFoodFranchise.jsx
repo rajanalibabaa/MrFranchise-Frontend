@@ -21,7 +21,10 @@ import { useSelector, useDispatch } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { motion } from "framer-motion";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
-import { fetchTopFoodFranchises  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
+import { fetchTopFoodFranchises, toggleHomeCardLike  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
+import { token } from "../../Utils/autherId.jsx";
+import { likeApiFunction } from "../../Api/likeApi.jsx";
+import { toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -190,14 +193,15 @@ const {
     console.log("Apply for brand:", brand);
   };
 
-  const handleLikeClick = (brandId) => {
-    // Your like logic here
-    console.log("Like brand:", brandId);
-    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
-    // Simulate API call
-    setTimeout(() => {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-    }, 1000);
+  const handleLikeClick = async(brandId) => {
+    if (!token) {
+            setShowLogin(true);
+            return;
+          }
+    
+          dispatch(toggleHomeCardLike(brandId))
+          dispatch(toggleBrandLike(brandId))
+          await likeApiFunction(brandId)
   };
 
   if (isLoading && brands.length === 0) {

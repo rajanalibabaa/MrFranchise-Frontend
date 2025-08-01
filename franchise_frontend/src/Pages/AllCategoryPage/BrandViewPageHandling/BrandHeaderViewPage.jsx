@@ -23,7 +23,7 @@ import {
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import ShareDialogActions from "../ShareDialogActions";
-
+ 
 const BrandHeader = ({
   brand,
   isMobile,
@@ -37,6 +37,7 @@ const BrandHeader = ({
   toggleDrawer,
   getOutletRange,
 }) => {
+  console.log("Brand Header Data:", brand);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -64,8 +65,8 @@ const BrandHeader = ({
             sx={{ border: "3px solid orange", borderRadius: "10px" }}
           >
             <Avatar
-              src={brand.uploads?.brandLogo}
-              alt={brand.brandDetails?.brandName}
+              src={brand[0].uploads?.logo}
+              alt={brand[0].brandDetails?.brandName}
               sx={{
                 width: isMobile ? 150 : 200,
                 height: isMobile ? 150 : 200,
@@ -73,7 +74,7 @@ const BrandHeader = ({
               }}
             />
           </Box>
-
+ 
           <Box width="100%">
             {/* Brand name and actions */}
             <Box>
@@ -96,7 +97,7 @@ const BrandHeader = ({
                       textAlign: isMobile ? "center" : "left",
                     }}
                   >
-                    {brand.brandDetails?.brandName}
+                    {brand[0]?.brandDetails?.brandName}
                   </Typography>
                   <Typography
                     variant="body1"
@@ -104,7 +105,7 @@ const BrandHeader = ({
                     textAlign={isMobile ? "center" : "left"}
                     fontSize={isMobile ? "0.875rem" : "1rem"}
                   >
-                    {brand.brandDetails?.tagLine}
+                    {brand[0]?.brandDetails?.tagLine}
                   </Typography>
                   <Box
                     sx={{
@@ -119,13 +120,13 @@ const BrandHeader = ({
                     <Typography fontSize={isMobile ? "0.8rem" : "0.9rem"}>
                       Established Year:{" "}
                       <label variant="body1" color="text.secondary">
-                        {brand.franchiseDetails?.establishedYear || "N/A"}
+{brand?.[0]?.brandfranchisedetails?.franchiseDetails?.establishedYear || "N/A"}
                       </label>
                     </Typography>
                     <Typography fontSize={isMobile ? "0.8rem" : "0.9rem"}>
                       Franchise Since:{" "}
                       <label variant="body1" color="text.secondary">
-                        {brand.franchiseDetails?.franchiseSinceYear || "N/A"}
+                        {brand?.[0]?.brandfranchisedetails?.franchiseDetails?.franchiseSinceYear || "N/A"}
                       </label>
                     </Typography>
                   </Box>
@@ -179,7 +180,7 @@ const BrandHeader = ({
                       sx={{ fontSize: isMobile ? "1.2rem" : "1.5rem" }}
                     />
                   </IconButton>
-
+ 
                   <ShareDialogActions
                     anchorEl={anchorEl}
                     setAnchorEl={setAnchorEl}
@@ -187,7 +188,7 @@ const BrandHeader = ({
                 </Box>
               </Box>
             </Box>
-
+ 
             {/* Brand details table */}
             <Box sx={{ width: "100%", overflow: "hidden", mt: 2 }}>
               <TableContainer
@@ -258,8 +259,7 @@ const BrandHeader = ({
                           py: isMobile ? "8px" : "12px",
                         }}
                       >
-                        {brand.franchiseDetails?.brandCategories?.child ||
-                          "N/A"}
+{brand?.[0]?.brandfranchisedetails?.franchiseDetails?.brandCategories?.child || "N/A"}
                       </TableCell>
                       <TableCell
                         sx={{
@@ -270,8 +270,7 @@ const BrandHeader = ({
                           py: isMobile ? "8px" : "12px",
                         }}
                       >
-                        {brand.franchiseDetails?.fico?.[0]?.areaRequired ||
-                          "N/A"}
+{brand?.[0]?.brandfranchisedetails?.franchiseDetails?.fico?.[0]?.areaRequired || "N/A"}
                       </TableCell>
                       <TableCell
                         sx={{
@@ -282,8 +281,7 @@ const BrandHeader = ({
                           py: isMobile ? "8px" : "12px",
                         }}
                       >
-                        {brand.franchiseDetails?.fico?.[0]?.investmentRange ||
-                          "N/A"}
+{brand?.[0]?.brandfranchisedetails?.franchiseDetails?.fico?.[0]?.investmentRange || "N/A"}
                       </TableCell>
                       <TableCell
                         sx={{
@@ -294,7 +292,8 @@ const BrandHeader = ({
                           py: isMobile ? "8px" : "12px",
                         }}
                       >
-                        {getOutletRange(brand.franchiseDetails?.totalOutlets)}
+{getOutletRange(brand?.[0]?.brandfranchisedetails?.franchiseDetails?.
+totalOutlets || "N/A")}
                       </TableCell>
                       <TableCell
                         sx={{
@@ -307,19 +306,19 @@ const BrandHeader = ({
                       >
                         {(() => {
                           const locations =
-                            brand.expansionLocationData?.expansionLocations
-                              ?.domestic?.locations || [];
+  brand?.[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
+ 
                           const states = locations
                             .map((loc) => loc.state)
                             .filter(Boolean);
                           const hasMore = states.length > 2;
-
+ 
                           if (states.length === 0) {
                             return "Multiple Locations";
                           }
-
+ 
                           const visibleStates = states.slice(0, 2).join(", ");
-
+ 
                           return (
                             <>
                               {visibleStates}
@@ -353,5 +352,7 @@ const BrandHeader = ({
     </motion.div>
   );
 };
-
+ 
 export default BrandHeader;
+ 
+ 

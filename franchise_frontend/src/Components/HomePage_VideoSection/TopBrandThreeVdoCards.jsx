@@ -28,7 +28,12 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBrands,
   resetBrands,
+  toggleBrandLike,
 } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+import { likeApiFunction } from "../../Api/likeApi";
+import { toggleHomeCardLike } from "../../Redux/Slices/TopCardFetchingSlice";
+import { token } from "../../Utils/autherId";
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -162,19 +167,20 @@ function TopBrandVdoCards() {
     }
   };
 
-  const handleLikeClick = (brandId, isLiked) => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      setShowLogin(true);
-      return;
-    }
-    setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-    // Implement your like functionality here
-  };
+ const handleLikeClick = async(brandId) => {
+  if (!token) {
+    setShowLogin(true);
+    return;
+  }
+  dispatch(toggleBrandLike(brandId));
+  dispatch(toggleHomeCardLike(brandId));
+  await likeApiFunction(brandId)
+};
 
   const handleApply = (brand) => {
     postView(brand.uuid);
     // Implement your brand dialog functionality here
+    dispatch(openBrandDialog(brand));
   };
 
   const handleLoadMore = () => {
@@ -341,6 +347,7 @@ function TopBrandVdoCards() {
                     cursor: "pointer",
                     backgroundColor: "#000",
                     overflow: "hidden",
+                  
                   }}
                   onClick={() => togglePlayPause(0)}
                 >
@@ -477,8 +484,8 @@ function TopBrandVdoCards() {
                   <video
                     ref={(el) => (videoRefs.current[0] = el)}
                     loading="lazy"
-                    src={mainBrand.franchiseVideos}
-                    alt={mainBrand.brandname}
+                    src={mainBrand?.franchiseVideos}
+                    alt={mainBrand?.brandname}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -570,6 +577,12 @@ function TopBrandVdoCards() {
                                   disabled={
                                     isLoading || likeProcessing[mainBrand.uuid]
                                   }
+                                  sx={{
+                                    color: mainBrand.isLiked ? 'red' : 'gray',
+                                    '&:hover': {
+                                      // color: mainBrand.isLiked ? 'darkred' : 'darkgray',
+                                    }
+                                  }}
                                 >
                                   {mainBrand.isLiked ? (
                                     <Favorite color="error" />
@@ -897,12 +910,10 @@ function TopBrandVdoCards() {
                         }
                         disabled={isLoading || likeProcessing[brand.uuid]}
                         sx={{
-                          color: brand.isLiked
-                            ? theme.palette.error.main
-                            : "text.secondary",
-                          "&:hover": {
-                            color: theme.palette.error.main,
-                            backgroundColor: "rgba(244, 67, 54, 0.08)",
+                          color: brand.isLiked ? 'red' : 'gray',
+                          '&:hover': {
+                            // color: brand.isLiked ? 'darkred' : 'darkgray',
+                            // backgroundColor: 'rgba(0, 0, 0, 0.04)',
                           },
                         }}
                       >

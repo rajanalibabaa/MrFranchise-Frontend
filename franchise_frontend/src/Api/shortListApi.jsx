@@ -1,27 +1,17 @@
-import axios from "axios"
 import { api } from "./api"
+import { postApi } from "./DefaultApi"
+import { userId } from "../Utils/autherId"
 
 export const handleShortList = async(brandId) => {
-    const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID")
-
-    const token = localStorage.getItem("accessToken");
-
-    // if (!brand.isShortListed) {
-        const res = await axios.post(`${api.shortListApi.post}/${id}`,
-        {
+  console.log("handleShortList :",brandId)
+   
+      const url = `${api.shortListApi.post}/${userId}`
+    const data = {
             shortListedId: brandId 
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          
         }
-    )
+    await postApi(url,data)
 
-    console.log("res shortlist :",res.data)
-    return res.data
+    return
 
     
 
