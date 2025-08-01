@@ -1,5 +1,5 @@
 // src/features/brandSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, combineSlices } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { API_BASE_URL } from '../../Api/api';
 
@@ -36,7 +36,12 @@ const initialState = {
   isLoading: false,
   error: null,
   viewedBrandsCount: 0 // Track how many times brands have been viewed
+
+
+  
 };
+
+
 
 const brandSlice = createSlice({
   name: 'brands',
@@ -50,7 +55,20 @@ const brandSlice = createSlice({
     },
     resetViewedCount: (state) => {
       state.viewedBrandsCount = 0;
+    },
+    toggleBrandLike: (state, action) => {
+      const { uuid } = action.payload;
+      state.brands = state.brands.map((brand) => {
+        if (brand.uuid === uuid) {
+          return {
+            ...brand,
+            isLiked: !brand.isLiked, 
+          };
+        }
+        return brand;
+      });
     }
+
   },
   extraReducers: (builder) => {
     builder
@@ -67,6 +85,7 @@ const brandSlice = createSlice({
         // If it's the first page, replace brands, otherwise append
         if (action.payload.pagination.currentPage === 1) {
           state.brands = action.payload.brands;
+          console.log("action.payload.brands :",action.payload.brands)
         } else {
           state.brands = [...state.brands, ...action.payload.brands];
         }
