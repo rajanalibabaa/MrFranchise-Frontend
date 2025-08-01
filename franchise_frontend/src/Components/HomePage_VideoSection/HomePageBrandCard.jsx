@@ -199,16 +199,17 @@ const HomePageBrandCard = React.memo(
                   <IconButton
                     onClick={() => handleLikeClick(brandId, brand?.isLiked)}
                     disabled={likeProcessing[brandId]}
+                    sx={{
+                          color: brand?.isLiked
+                            ? "#f44336"
+                            : "rgba(0, 0, 0, 0.23)",
+                        }}
                   >
                     {likeProcessing[brandId] ? (
                       <CircularProgress size={24} />
                     ) : (
                       <Favorite
-                        sx={{
-                          color: brand?.isLiked
-                            ? "#f44336"
-                            : "rgba(0, 0, 0, 0.23)",
-                        }}
+                        
                       />
                     )}
                   </IconButton>

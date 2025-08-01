@@ -18,11 +18,14 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchTopBeverageFranchises  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
+import { fetchTopBeverageFranchises, toggleHomeCardLike  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
 
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { motion } from "framer-motion";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
+import { token } from "../../Utils/autherId.jsx";
+import { toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
+import { likeApiFunction } from "../../Api/likeApi.jsx";
 
 // Breakpoints
 const CARD_DIMENSIONS = {
@@ -97,20 +100,16 @@ const {
   }, [dimensions.width, isMobile]);
 
   const handleLikeClick = useCallback(
-    (brandId, isLiked) => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        setShowLogin(true);
-        return;
-      }
-
-      setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-      dispatch(toggleLikeBrand({ brandId, isLiked }))
-        .unwrap()
-        .finally(() => {
-          setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
-        });
-    },
+    async (brandId) => {
+         if (!token) {
+              setShowLogin(true);
+              return;
+            }
+            dispatch(toggleBrandLike(brandId))
+            dispatch(toggleHomeCardLike(brandId))
+            await likeApiFunction(brandId)
+          },
+   
     [dispatch]
   );
 

@@ -14,8 +14,12 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { postView } from "../../Utils/function/view";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBrands } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
+import { fetchBrands, toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
 // import { toast } from "react-toastify";
+import { likeApiFunction } from "../../Api/likeApi";
+import { toggleHomeCardLike } from "../../Redux/Slices/TopCardFetchingSlice";
+import { token } from "../../Utils/autherId";
+
 
 const TopInvestVdocardround = () => {
   // const toggleLike = useToggleLike();
@@ -47,33 +51,18 @@ const TopInvestVdocardround = () => {
     }
   }, [brands, page, pagination]);
 
-  // const handleLikeClick = useCallback(
-  //   (brandId, isLiked) => {
-  //     const token = localStorage.getItem("accessToken");
-  //     if (!token) {
-  //       setShowLogin(true);
-  //       return;
-  //     }
 
-  //     toggleLike.mutate(
-  //       { brandId, isLiked },
-  //       {
-  //         onMutate: () => {
-  //           setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-  //         },
-  //         onError: (error) => {
-  //           console.error("Like operation failed:", error);
-  //           console.error("Failed to update like status");
-  //         },
-  //         onSettled: () => {
-  //           setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
-  //         },
-  //       }
-  //     );
-  //   },
-  //   [toggleLike]
-  // );
+const handleLikeClick = async(brandId) => {
 
+  console.log(brandId)
+  if (!token) {
+    setShowLogin(true);
+    return;
+  }
+  dispatch(toggleBrandLike(brandId));
+  dispatch(toggleHomeCardLike(brandId));
+  await likeApiFunction(brandId)
+};
   const handleApply = useCallback((brand) => {
     postView(brand.uuid);
     openBrandDialog(brand);

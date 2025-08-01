@@ -2,13 +2,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { API_BASE_URL } from '../../Api/api';
+import { userId } from '../../Utils/autherId';
 
 export const fetchTopFoodFranchises = createAsyncThunk(
   'topFoodFranchises/fetchAll',
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopFoodFranchise`, {
-        params: { page }
+        params: { page,id:userId }
       });
 
       if (!response.data.data || !response.data.data.brands) {
@@ -38,7 +39,7 @@ export const fetchTopCafes = createAsyncThunk(
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopCafes`, {
-        params: { page }
+        params: { page,id:userId }
       });
 
       if (!response.data.data || !response.data.data.brands) {
@@ -68,7 +69,7 @@ export const fetchTopBeverageFranchises = createAsyncThunk(
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopBeverageFranchise`, {
-        params: { page }
+        params: { page,id:userId }
       });
 
       if (!response.data.data || !response.data.data.brands) {
@@ -97,7 +98,7 @@ export const fetchTopTruckAndKiosksFranchises = createAsyncThunk(
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopTrucksAndKiosks`, {
-        params: { page }
+        params: { page,id:userId }
       });
 
       if (!response.data.data || !response.data.data.brands) {
@@ -127,7 +128,7 @@ export const fetchDesertAndBakery = createAsyncThunk(
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopDesertAndBakery`, {
-        params: { page }
+        params: { page,id:userId }
       });
 
       if (!response.data.data || !response.data.data.brands) {
@@ -256,8 +257,6 @@ const topFoodFranchiseSlice = createSlice({
     incrementTrucksAndKiosksViewedCount: (state) => {
       state.trucksAndKiosks.viewedBrandsCount += 1;
     },
-
-
     resetFoodFranchiseViewedCount: (state) => {
       state.foodFranchises.viewedBrandsCount = 0;
     },
@@ -272,6 +271,57 @@ const topFoodFranchiseSlice = createSlice({
     },
     resetTrucksAndKiosksViewedCount: (state) => {
       state.trucksAndKiosks.viewedBrandsCount = 0;
+    },
+
+    
+    toggleHomeCardLike : (state,action) => {
+      const brandId = action.payload
+      console.log("toggleHomeCardLike :",brandId)
+      state.cafes.brands = state.cafes.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isLiked: !brand.isLiked,
+      };
+        }
+        return brand;
+      })
+      state.desertAndBakery.brands = state.desertAndBakery.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isLiked: !brand.isLiked,
+      };
+        }
+        return brand;
+      })
+      state.foodFranchises.brands = state.foodFranchises.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isLiked: !brand.isLiked,
+      };
+        }
+        return brand;
+      })
+      state.topbeveragefranchises.brands = state.topbeveragefranchises.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isLiked: !brand.isLiked,
+      };
+        }
+        return brand;
+      })
+      state.trucksAndKiosks.brands = state.trucksAndKiosks.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isLiked: !brand.isLiked,
+      };
+        }
+        return brand;
+      })
     },
 
   },
@@ -370,7 +420,8 @@ export const {
   resetCafesViewedCount,
   resetBeverageViewedCount,
   resetDesertAndBakeryViewedCount,
-  resetTrucksAndKiosksViewedCount
+  resetTrucksAndKiosksViewedCount,
+  toggleHomeCardLike
 } = topFoodFranchiseSlice.actions;
 
 export default topFoodFranchiseSlice.reducer;

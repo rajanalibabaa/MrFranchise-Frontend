@@ -30,6 +30,9 @@ import {
   resetBrands,
   toggleBrandLike,
 } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
+import { likeApiFunction } from "../../Api/likeApi";
+import { toggleHomeCardLike } from "../../Redux/Slices/TopCardFetchingSlice";
+import { token } from "../../Utils/autherId";
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -163,13 +166,14 @@ function TopBrandVdoCards() {
     }
   };
 
- const handleLikeClick = (brandId) => {
-  const token = localStorage.getItem("accessToken");
+ const handleLikeClick = async(brandId) => {
   if (!token) {
     setShowLogin(true);
     return;
   }
   dispatch(toggleBrandLike(brandId));
+  dispatch(toggleHomeCardLike(brandId));
+  await likeApiFunction(brandId)
 };
 
   const handleApply = (brand) => {
@@ -573,7 +577,7 @@ function TopBrandVdoCards() {
                                   sx={{
                                     color: mainBrand.isLiked ? 'red' : 'gray',
                                     '&:hover': {
-                                      color: mainBrand.isLiked ? 'darkred' : 'darkgray',
+                                      // color: mainBrand.isLiked ? 'darkred' : 'darkgray',
                                     }
                                   }}
                                 >
@@ -905,8 +909,8 @@ function TopBrandVdoCards() {
                         sx={{
                           color: brand.isLiked ? 'red' : 'gray',
                           '&:hover': {
-                            color: brand.isLiked ? 'darkred' : 'darkgray',
-                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                            // color: brand.isLiked ? 'darkred' : 'darkgray',
+                            // backgroundColor: 'rgba(0, 0, 0, 0.04)',
                           },
                         }}
                       >
