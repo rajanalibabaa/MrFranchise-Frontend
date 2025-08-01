@@ -3,73 +3,97 @@ import {
   Box,
   Button,
   Card,
-  Avatar,
   IconButton,
   Stack,
   CircularProgress,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { postView } from "../../Utils/function/view";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-import {
-  useBrands,
-  useToggleLike,
-  openBrandDialog,
-} from "../../Hooks/Fetchbrands";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchBrands } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
+// import { toast } from "react-toastify";
+
 const TopInvestVdocardround = () => {
-  const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
-  const toggleLike = useToggleLike();
+  // const toggleLike = useToggleLike();
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
+  const [page, setPage] = useState(1);
+  const [allBrands, setAllBrands] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
 
-  const handleLikeClick = useCallback(
-    (brandId, isLiked) => {
-      // Immediate UI update - no waiting for API response
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        setShowLogin(true);
-        return;
-      }
-
-      // Optimistically update the UI first
-      toggleLike.mutate(
-        { brandId, isLiked },
-        {
-          onMutate: () => {
-            // Local state to prevent double clicks
-            setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-          },
-          onError: (error) => {
-            console.error("Like operation failed:", error);
-            // Optionally show error feedback to user
-            toast.error("Failed to update like status");
-          },
-          onSettled: () => {
-            // Reset processing state when done
-            setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
-          },
-        }
-      );
-    },
-    [toggleLike]
+  const dispatch = useDispatch();
+  const { brands, isLoading, pagination, error } = useSelector(
+    (state) => state.brands
   );
+
+  // Initial load and pagination
+  useEffect(() => {
+    dispatch(fetchBrands({ page, })); // Adjust limit as needed
+  }, [dispatch, page]);
+
+  // Accumulate brands when new data loads
+  useEffect(() => {
+    if (brands && brands.length > 0) {
+      if (page === 1) {
+        setAllBrands(brands);
+      } else {
+        setAllBrands(prev => [...prev, ...brands]);
+      }
+      setHasMore(pagination?.totalPages > page);
+    }
+  }, [brands, page, pagination]);
+
+  // const handleLikeClick = useCallback(
+  //   (brandId, isLiked) => {
+  //     const token = localStorage.getItem("accessToken");
+  //     if (!token) {
+  //       setShowLogin(true);
+  //       return;
+  //     }
+
+  //     toggleLike.mutate(
+  //       { brandId, isLiked },
+  //       {
+  //         onMutate: () => {
+  //           setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
+  //         },
+  //         onError: (error) => {
+  //           console.error("Like operation failed:", error);
+  //           console.error("Failed to update like status");
+  //         },
+  //         onSettled: () => {
+  //           setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
+  //         },
+  //       }
+  //     );
+  //   },
+  //   [toggleLike]
+  // );
 
   const handleApply = useCallback((brand) => {
     postView(brand.uuid);
     openBrandDialog(brand);
   }, []);
 
-  if (brandsLoading)
+  const loadMoreBrands = () => {
+    if (hasMore) {
+      setPage(prev => prev + 1);
+    }
+  };
+
+  if (isLoading && page === 1) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
         <CircularProgress size={60} thickness={4} sx={{ color: "#f29724" }} />
       </Box>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <Typography color="error">
@@ -77,6 +101,7 @@ const TopInvestVdocardround = () => {
         </Typography>
       </Box>
     );
+  }
 
   return (
     <Box component="section" sx={{ maxWidth: 1300, mx: "auto" }}>
@@ -99,30 +124,28 @@ const TopInvestVdocardround = () => {
         sx={{
           display: "grid",
           gridTemplateColumns: {
-            xs: "repeat(2, 1fr)", // 2 columns on extra small screens
+            xs: "repeat(2, 1fr)",
             sm: "repeat(3, 1fr)",
             md: "repeat(4, 1fr)",
             lg: "repeat(5, 1fr)",
           },
-          gap: { xs: 4, sm: 3, md: 4, lg: 5 }, // Responsive gap
+          gap: { xs: 4, sm: 3, md: 4, lg: 5 },
           mb: 6,
           width: "100%",
-          px: { xs: 1, sm: 2 }, // Add horizontal padding
-          scrollbarWidth: "none", // Firefox
-          msOverflowStyle: "none", // Internet Explorer
+          px: { xs: 1, sm: 2 },
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
           "&::-webkit-scrollbar": {
-            display: "none", // Chrome, Safari
+            display: "none",
           },
         }}
       >
-        {brands.map((brand) => (
+        {allBrands.map((brand) => (
           <motion.div
             key={brand.uuid}
             whileHover={{ y: -5 }}
             transition={{ duration: 0.2 }}
-            style={{
-              minWidth: 0, // Prevent flex items from overflowing
-            }}
+            style={{ minWidth: 0 }}
           >
             <Card
               sx={{
@@ -137,8 +160,8 @@ const TopInvestVdocardround = () => {
                 "&:hover": {
                   boxShadow: "0 4px 12px rgba(242, 151, 36, 0.2)",
                 },
-                maxWidth: "100%", // Ensure card doesn't overflow
-                overflow: "hidden", // Hide any potential overflow
+                maxWidth: "100%",
+                overflow: "hidden",
               }}
             >
               {/* Like Button */}
@@ -166,22 +189,21 @@ const TopInvestVdocardround = () => {
               </IconButton>
 
               {/* Brand Logo */}
-
               <Box
                 component="img"
-                src={brand.uploads?.brandLogo}
-                alt={brand.uploads?.brandName}
+                src={brand.logo}
+                alt={brand.brandname}
                 loading="lazy"
                 sx={{
                   width: 100,
                   height: 80,
                   border: "1px solid #f29724",
                   mb: 1,
-                  objectFit: "contain", // or 'cover'
+                  objectFit: "contain",
                 }}
               />
 
-              {/* Brand Name - Improved text truncation */}
+              {/* Brand Name */}
               <Typography
                 variant="caption"
                 fontWeight={600}
@@ -191,11 +213,11 @@ const TopInvestVdocardround = () => {
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  width: "100%", // Take full width of card
-                  px: 0.5, // Add small padding
+                  width: "100%",
+                  px: 0.5,
                 }}
               >
-                {brand.brandDetails?.brandName}
+                {brand.brandname}
               </Typography>
 
               {/* Category Chips */}
@@ -212,10 +234,10 @@ const TopInvestVdocardround = () => {
                   textAlign: "center",
                 }}
               >
-                {brand?.franchiseDetails?.brandCategories?.child}
+                {brand.brandCategories?.child}
               </Typography>
 
-              {/* Investment - Improved spacing */}
+              {/* Investment Details */}
               <Stack
                 direction="column"
                 spacing={0.5}
@@ -231,7 +253,7 @@ const TopInvestVdocardround = () => {
                   }}
                 >
                   Investment :{" "}
-                  {brand.franchiseDetails?.fico?.[0]?.investmentRange || "N/A"}
+                  {brand.fico?.investmentRange || "N/A"}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -243,7 +265,7 @@ const TopInvestVdocardround = () => {
                   }}
                 >
                   Area :{" "}
-                  {brand.franchiseDetails?.fico?.[0]?.areaRequired || "N/A"}
+                  {brand.fico?.areaRequired || "N/A"}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -255,7 +277,7 @@ const TopInvestVdocardround = () => {
                   }}
                 >
                   Type :{" "}
-                  {brand.franchiseDetails?.fico?.[0]?.franchiseModel || "N/A"}
+                  {brand.fico?.franchiseModel || "N/A"}
                 </Typography>
               </Stack>
 
@@ -284,29 +306,36 @@ const TopInvestVdocardround = () => {
         ))}
       </Box>
 
-      {/* {brands.length > visibleBrands && (
-        <Box sx={{ textAlign: 'center', mt: 2 }}>
+      {/* Load More Button */}
+      {hasMore && (
+        <Box sx={{ textAlign: "center", mt: 2, mb: 4 }}>
           <Button
             variant="contained"
             sx={{
               borderRadius: 2,
               px: 4,
               py: 1,
-              background: 'linear-gradient(45deg, #f29724 30%, #ffcc80 90%)',
+              background: "linear-gradient(45deg, #f29724 30%, #ffcc80 90%)",
               fontWeight: 600,
-              fontSize: '0.875rem',
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: '0 4px 8px rgba(242, 151, 36, 0.3)'
+              fontSize: "0.875rem",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 4px 8px rgba(242, 151, 36, 0.3)",
               },
-              transition: 'all 0.3s ease'
+              transition: "all 0.3s ease",
             }}
-            onClick={handleShowMore}
+            onClick={loadMoreBrands}
+            disabled={isLoading}
           >
-            Show More Brands
+            {isLoading ? (
+              <CircularProgress size={24} sx={{ color: "white" }} />
+            ) : (
+              "Load More Brands"
+            )}
           </Button>
         </Box>
-      )} */}
+      )}
+
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}

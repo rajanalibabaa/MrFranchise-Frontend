@@ -18,7 +18,7 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchTopBeverageFranchises  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
+import { fetchTopTruckAndKiosksFranchises  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
 
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { motion } from "framer-motion";
@@ -33,16 +33,17 @@ const CARD_DIMENSIONS = {
   largeDesktop: { width: 327, height: 500 },
 };
 
-const TopBeverageFranchises = () => {
+const TopTruckAndKiosks = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
-const beveragesFranchiseState = useSelector((state) => state.foodfranchise.topbeveragefranchises);
-const {
-  brands = [],
-  isLoading,
-  error,
-  pagination
-} = beveragesFranchiseState || {};
+
+ const fetchTopTruckAndKiosks = useSelector((state) => state.foodfranchise.trucksAndKiosks);
+ const {
+   brands = [],
+   isLoading,
+   error,
+   pagination
+ } = fetchTopTruckAndKiosks || {};
 
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -60,11 +61,11 @@ const {
   const [showEndShadow, setShowEndShadow] = useState(true);
   const [visibleCardCount, setVisibleCardCount] = useState(4);
 
-  // const coffeeTeaBrands = useMemo(() => {
+  // const dessertBakeryBrands = useMemo(() => {
   //   if (!filteredData?.length) return [];
   //   return filteredData.filter((brand) => {
-  //     const category = brand?.franchiseDetails?.brandCategories?.main || "";
-  //     return category.includes("Food & Beverages");
+  //     const category = brand?.franchiseDetails?.brandCategories?.sub || "";
+  //     return category.includes("Dessert & Bakery");
   //   });
   // }, [filteredData]);
 
@@ -76,9 +77,9 @@ const {
     return CARD_DIMENSIONS.largeDesktop;
   }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
 
- useEffect(() => {
-     dispatch(fetchTopBeverageFranchises({ page: 1 }));
-   }, [dispatch]);
+useEffect(() => {
+    dispatch(fetchTopTruckAndKiosksFranchises({ page: 1 }));
+  }, [dispatch]);
 
   useLayoutEffect(() => {
     const updateVisibleCards = () => {
@@ -262,7 +263,7 @@ const {
               },
             }}
           >
-            Top Beverage Brands
+            Top Truck & Kiosks Brands
           </Typography>
 
           <Button
@@ -292,7 +293,7 @@ const {
             disabled={!showStartShadow}
             sx={{
               position: "absolute",
-              left: isMobile ? 4 : 8,
+              left: isMobile ? 2 : 8,
               top: "50%",
               transform: "translateY(-50%)",
               zIndex: 1,
@@ -376,4 +377,4 @@ const {
   );
 };
 
-export default React.memo(TopBeverageFranchises);
+export default React.memo(TopTruckAndKiosks);
