@@ -2,15 +2,20 @@
 import { createSlice, createAsyncThunk, combineSlices } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { API_BASE_URL } from '../../Api/api';
+import { userId } from '../../Utils/autherId';
+
 
 export const fetchBrands = createAsyncThunk(
   'brands/fetchAll',
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
+
+      console.log("userId :",userId)
       // Send the page directly in query params
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getAllBrandListing`, {
         params: {
-          page, // directly use page
+          page,
+          id:userId, // directly use page
         }
       });
       return {
@@ -57,17 +62,25 @@ const brandSlice = createSlice({
       state.viewedBrandsCount = 0;
     },
     toggleBrandLike: (state, action) => {
-      const { uuid } = action.payload;
-      state.brands = state.brands.map((brand) => {
-        if (brand.uuid === uuid) {
-          return {
-            ...brand,
-            isLiked: !brand.isLiked, 
-          };
-        }
-        return brand;
-      });
+  const brandId = action.payload;
+
+  console.log("Toggling like for brandId:", brandId);
+  console.log("Current brands state:", state.brands);
+
+  state.brands = state.brands.map((brand) => {
+    if (brand.uuid === brandId) {
+      console.log(`Toggling isLiked for brand: ${brand.uuid}`);
+      return {
+        ...brand,
+        isLiked: !brand.isLiked,
+      };
     }
+    return brand; // Don't forget to return the unchanged brand
+  });
+
+  console.log("Updated brands list:", state.brands);
+}
+
 
   },
   extraReducers: (builder) => {
@@ -100,5 +113,5 @@ const brandSlice = createSlice({
   }
 });
 
-export const { resetBrands, incrementViewedCount, resetViewedCount } = brandSlice.actions;
+export const { resetBrands, incrementViewedCount, resetViewedCount, toggleBrandLike } = brandSlice.actions;
 export default brandSlice.reducer;
