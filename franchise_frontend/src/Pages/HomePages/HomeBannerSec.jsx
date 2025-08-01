@@ -37,9 +37,9 @@ const dynamicComponents = {
   TopBrandThreevdocards: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")
   )),
-//   LikedBrands: withSuspense(React.lazy(() =>
-//     import("../../Components/HomePage_VideoSection/LikedBrands.jsx")
-//   )),
+  LikedBrands: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/LikedBrands.jsx")
+  )),
 //   ViewBrands: withSuspense(React.lazy(() =>
 //     import("../../Components/HomePage_VideoSection/ViewBrands.jsx")
 // )),
@@ -68,9 +68,9 @@ const dynamicComponents = {
 //   FindFranchiseLocations: withSuspense(React.lazy(() =>
 //     import("../../Components/HomePage_VideoSection/FindFranchiseLocations.jsx")
 //   )),
-  // ToTrendingBrands: withSuspense(React.lazy(() =>
-  //   import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
-  // )),
+  ToTrendingBrands: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
+  )),
 };
 
 // Configuration object for the entire page
@@ -102,11 +102,11 @@ const pageConfig = {
       background: "white",
       backgroundOpacity: 0.1,
     },
-    // {
-    //    component: "LikedBrands",
-    //   background: "#white",
-    //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    // },
+    {
+       component: "LikedBrands",
+      background: "#white",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    },
     // {
     //    component: "ViewBrands",
     //   background: "rgba(255, 250, 247, 1)",
@@ -152,11 +152,11 @@ const pageConfig = {
     //   background: "#fffaf7",
     //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     // },
-    // {
-    //   component: "ToTrendingBrands",
-    //   title: "Trending Brands",
-    //   dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
-    // },
+    {
+      component: "ToTrendingBrands",
+      title: "Trending Brands",
+      dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
+    },
   ],
 
   // Global Animation Settings
@@ -455,11 +455,11 @@ const HomeBannerSec = () => {
           backgroundPosition: "center",
           backgroundAttachment: isMobile ? "scroll" : "fixed",
           py: 1,
-          px: 2,
+          // px: 2,
           position: "relative",
           overflow: "hidden",
           color: "white",
-          minHeight: isMobile ? "95vh" : "40vh",
+          minHeight: isMobile ? "75vh" : "40vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -487,9 +487,11 @@ const HomeBannerSec = () => {
       >
         <Container
           sx={{
-            position: "relative",
+            position: "",
             zIndex: 2,
             textAlign: isMobile ? "center" : "center",
+            height:"100%",
+            mt:3
           }}
         >
           <motion.div
@@ -529,12 +531,15 @@ const HomeBannerSec = () => {
                 textAlign: "center",
                 color: "rgba(255,255,255,0.9)",
                 fontWeight: 300,
-                mb: 3,
+                mt:2,
+                mb: 5,
                 maxWidth: "800px",
                 mx: "auto",
                 lineHeight: 1.5,
-                fontSize: isMobile ? "0.85rem" : "1.1rem",
+                fontSize: isMobile ? "0.6rem" : ".8rem",
                 textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                position:"relative",
+                
               }}
               component={motion.div}
             >
@@ -549,6 +554,7 @@ const HomeBannerSec = () => {
                   fontWeight: currentText.subtitle.highlight.fontWeight,
                   color: currentText.subtitle.highlight.color,
                   display: "inline",
+                  mb:5
                 }}
                 component="span"
               >

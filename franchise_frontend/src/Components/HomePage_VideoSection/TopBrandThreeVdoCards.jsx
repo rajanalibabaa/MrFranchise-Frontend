@@ -347,6 +347,7 @@ function TopBrandVdoCards() {
                     cursor: "pointer",
                     backgroundColor: "#000",
                     overflow: "hidden",
+                  
                   }}
                   onClick={() => togglePlayPause(0)}
                 >
