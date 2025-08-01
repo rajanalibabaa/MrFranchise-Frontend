@@ -22,6 +22,7 @@ import AreaChart from "@mui/icons-material/AreaChart";
 import { handleShortList } from "../../Api/shortListApi";
 // import { BsFillBookmarkStarFill } from "react-icons/bs";
 import { RiBookmark3Fill } from "react-icons/ri";
+import { toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
 
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
@@ -80,10 +81,13 @@ const HomePageBrandCard = React.memo(
     const [shortListed, setShortListed] = useState(brand.isShortListed);
     const handleToggleShortList = async (brand) => {
       try {
-        const response = await handleShortList(brand);
-        if (response.success) {
-          setShortListed(!shortListed);
-        }
+        // const response = await handleShortList(brand);
+        // if (response.success) {
+        //   setShortListed(!shortListed);
+        // }
+        toggleHomeCardShortlist(brand.uuid)
+        await handleShortList(brand.uuid)
+        setShortListed(!shortListed)
       } catch (error) {
         console.error("Error toggling shortlist:", error);
       }

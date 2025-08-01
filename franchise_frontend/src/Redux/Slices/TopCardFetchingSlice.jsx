@@ -324,6 +324,56 @@ const topFoodFranchiseSlice = createSlice({
       })
     },
 
+
+    toggleHomeCardShortlist : (state,action) => {
+      const brandId = action.payload
+      console.log("toggleHomeCardLike :",brandId)
+      state.cafes.brands = state.cafes.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isShortListed: !brand.isShortListed,
+      };
+        }
+        return brand;
+      })
+      state.desertAndBakery.brands = state.desertAndBakery.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isShortListed: !brand.isShortListed,
+      };
+        }
+        return brand;
+      })
+      state.foodFranchises.brands = state.foodFranchises.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isShortListed: !brand.isShortListed,
+      };
+        }
+        return brand;
+      })
+      state.topbeveragefranchises.brands = state.topbeveragefranchises.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isShortListed: !brand.isShortListed,
+      };
+        }
+        return brand;
+      })
+      state.trucksAndKiosks.brands = state.trucksAndKiosks.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isShortListed: !brand.isShortListed,
+      };
+        }
+        return brand;
+      })
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -421,7 +471,8 @@ export const {
   resetBeverageViewedCount,
   resetDesertAndBakeryViewedCount,
   resetTrucksAndKiosksViewedCount,
-  toggleHomeCardLike
+  toggleHomeCardLike,
+  toggleHomeCardShortlist
 } = topFoodFranchiseSlice.actions;
 
 export default topFoodFranchiseSlice.reducer;
