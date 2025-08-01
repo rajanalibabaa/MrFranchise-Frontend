@@ -383,6 +383,12 @@ const Dashboard = () => {
           .catch(() => null)
       ]);
 
+
+      console.log('likedRes',likedRes);
+      console.log('viewedRes',viewedRes);
+      console.log('appliedRes',appliedRes);
+      console.log('userRes',userRes);
+      
       setLikedBrands(likedRes);
       setViewedBrands(viewedRes);
       setAppliedBrands(appliedRes);

@@ -6,7 +6,6 @@ import {
   Box,
   Paper,
   styled,
-  CircularProgress,
   IconButton,
   Table,
   TableBody,
@@ -18,9 +17,6 @@ import {
   FormControl,
   InputLabel,
   Chip,
-  ImageList,
-  ImageListItem,
-  ImageListItemBar,
   TextField,
   useTheme,
 } from "@mui/material";
@@ -203,7 +199,6 @@ const Uploads = ({
     <Box sx={{ pr: 1, mr: { sm: 0, md: 10 }, ml: { sm: 0, md: 10 } }}>
       {/* Section 1: Brand Identity */}
 
-     
       {/* Section 1: Brand Identity */}
       <StyledPaper>
         <SectionTitle variant="h6">
@@ -366,8 +361,8 @@ const Uploads = ({
             </FormControl>
           </Grid>
         </Grid>
-      </StyledPaper> 
-   
+      </StyledPaper>
+
       {/* Section 2: Company Credentials */}
       <StyledPaper>
         <SectionTitle variant="h6">
@@ -404,7 +399,7 @@ const Uploads = ({
           spacing={3}
         >
           {/* PAN Details */}
-          <Grid item xs={12} md={6} sx={{mr:{md:2}}}>
+          <Grid item xs={12} md={6} sx={{ mr: { md: 2 } }}>
             <TextField
               label="PAN Number"
               fullWidth
@@ -470,7 +465,12 @@ const Uploads = ({
           </Grid>
 
           {/* GST Details */}
-          <Grid item xs={12} md={6} sx={{ mt: { xs: 3, md: 0 },ml:{md:2} }}>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{ mt: { xs: 3, md: 0 }, ml: { md: 2 } }}
+          >
             <TextField
               label="GST Number"
               fullWidth
@@ -871,15 +871,18 @@ const Uploads = ({
           </Tooltip>{" "}
         </SectionTitle>
 
-        <Grid container spacing={2} sx={{ display:{md:"flex",xs:"grid"}}}>
+        <Grid
+          container
+          spacing={2}
+          sx={{ display: { md: "flex", xs: "grid" } }}
+        >
           {/* Award Description Field */}
-          <Grid item >
+          <Grid item>
             <TextField
               label="Award Description"
               value={currentAward.text}
               onChange={handleAwardTextChange}
-              
-              sx={{width:{xs:"100%",md:900}}}
+              sx={{ width: { xs: "100%", md: 900 } }}
               error={!currentAward.text && formSubmitted}
               helperText={
                 !currentAward.text && formSubmitted
@@ -890,7 +893,7 @@ const Uploads = ({
           </Grid>
 
           {/* Document Upload with Error Handling */}
-          <Grid item >
+          <Grid item>
             <Box sx={{ display: "flex", flexDirection: "column" }}>
               <UploadButton
                 component="label"
@@ -919,8 +922,7 @@ const Uploads = ({
                   onChange={handleAwardFileChange}
                 />
               </UploadButton>
-               
-           
+
               {/* Document name and error message */}
               <Box sx={{ mt: 0.5, minHeight: 24 }}>
                 {currentAward.document ? (
@@ -936,7 +938,6 @@ const Uploads = ({
                 )}
               </Box>
             </Box>
-      
           </Grid>
 
           {/* Add Button */}
@@ -1027,55 +1028,54 @@ const Uploads = ({
           </Tooltip>{" "}
         </SectionTitle>
 
-        <Grid sx={{ml:{md:5,xs:0},mr:{md:5,xs:0}}}>
+        <Grid sx={{ ml: { md: 5, xs: 0 }, mr: { md: 5, xs: 0 } }}>
+          <UploadButton
+            fullWidth
+            component="label"
+            variant="outlined"
+            size="small"
+            color="success"
+            startIcon={<Description />}
+          >
+            Upload (PDF JPEG, PNG)
+            <VisuallyHiddenInput
+              type="file"
+              accept=".pdf,.doc,.docx,"
+              onChange={handleFileChange("businessPlan", {
+                maxFiles: 1,
+                allowedTypes: [
+                  "application/pdf",
+                  "application/msword",
+                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ],
+                maxSize: 1,
+              })}
+            />
+          </UploadButton>
+          <Typography
+            variant="caption"
+            color={errors.businessPlan ? "error" : "textSecondary"}
+          >
+            {errors.businessPlan ||
+              "Accepted formats: PDF, DOC, DOCX (up to 10MB)"}
+          </Typography>
 
-        <UploadButton
-          fullWidth
-          component="label"
-          variant="outlined"
-          size="small"
-          color="success"
-          startIcon={<Description />}
-        >
-          Upload (PDF JPEG, PNG)
-          <VisuallyHiddenInput
-            type="file"
-            accept=".pdf,.doc,.docx,"
-            onChange={handleFileChange("businessPlan", {
-              maxFiles: 1,
-              allowedTypes: [
-                "application/pdf",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-              ],
-              maxSize: 1,
-            })}
-          />
-        </UploadButton>
-        <Typography
-          variant="caption"
-          color={errors.businessPlan ? "error" : "textSecondary"}
-        >
-          {errors.businessPlan ||
-            "Accepted formats: PDF, DOC, DOCX (up to 10MB)"}
-        </Typography>
-
-        {safeData.businessPlan?.length > 0 && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}>
-            <Description color="primary" />
-            <Typography variant="body2">
-              {safeData.businessPlan[0].name}
-            </Typography>
-            <IconButton
-              onClick={() => handleRemoveFile("businessPlan", 0)}
-              size="small"
-              color="error"
-              sx={{ ml: "auto" }}
-            >
-              <Delete fontSize="small" />
-            </IconButton>
-          </Box>
-        )}
+          {safeData.businessPlan?.length > 0 && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}>
+              <Description color="primary" />
+              <Typography variant="body2">
+                {safeData.businessPlan[0].name}
+              </Typography>
+              <IconButton
+                onClick={() => handleRemoveFile("businessPlan", 0)}
+                size="small"
+                color="error"
+                sx={{ ml: "auto" }}
+              >
+                <Delete fontSize="small" />
+              </IconButton>
+            </Box>
+          )}
         </Grid>
       </StyledPaper>
     </Box>

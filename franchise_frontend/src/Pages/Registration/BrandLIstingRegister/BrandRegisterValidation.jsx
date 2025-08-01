@@ -259,45 +259,36 @@ const validateFranchiseDetails = (data) => {
 //     }
 //   }
 
-//   return errors;
-// };
-
-
-// const validateExpansionLocationDetails = (data) => {
-//   const errors = {};
-  
-//   // 1. Validate "Is your brand expanding internationally?" (required boolean)
-//   if (data?.isInternationalExpansion === null || data?.isInternationalExpansion === undefined) {
-//     errors.isInternationalExpansion = "Please specify if your brand is expanding internationally";
-//   }
-
-//   // 2. Validate current outlet locations (must have either domestic or international)
-//   const hasCurrentDomestic = 
-//     data?.currentOutletLocations?.domestic?.locations?.length > 0;
-//   const hasCurrentInternational = 
-//     data?.currentOutletLocations?.international?.locations?.length > 0;
-  
-//   if (!hasCurrentDomestic && !hasCurrentInternational) {
-//     errors.currentOutletLocations = "Please select at least one location (India or International) for current outlets";
-//   }
-
-//   // 3. Validate expansion locations (must have either domestic or international)
-//   const hasExpansionDomestic = 
-//     data?.expansionLocations?.domestic?.locations?.length > 0;
-//   const hasExpansionInternational = 
-//     data?.expansionLocations?.international?.locations?.length > 0;
-  
-//   if (!hasExpansionDomestic && !hasExpansionInternational) {
-//     errors.expansionLocations = "Please select at least one location (India or International) for expansion";
-//   }
-
   return errors;
 };
 
 const validateExpansionLocationDetails = (data) => {
   const errors = {};
+  
+  // // 1. Validate "Is your brand expanding internationally?" (required boolean)
+  // if (data?.isInternationalExpansion === null || data?.isInternationalExpansion === undefined) {
+  //   errors.isInternationalExpansion = "Please specify if your brand is expanding internationally";
+  // }
 
+  // // 2. Validate current outlet locations (must have either domestic or international)
+  // const hasCurrentDomestic = 
+  //   data?.currentOutletLocations?.domestic?.locations?.length > 0;
+  // const hasCurrentInternational = 
+  //   data?.currentOutletLocations?.international?.locations?.length > 0;
+  
+  // if (!hasCurrentDomestic && !hasCurrentInternational) {
+  //   errors.currentOutletLocations = "Please select at least one location (India or International) for current outlets";
+  // }
 
+  // // 3. Validate expansion locations (must have either domestic or international)
+  // const hasExpansionDomestic = 
+  //   data?.expansionLocations?.domestic?.locations?.length > 0;
+  // const hasExpansionInternational = 
+  //   data?.expansionLocations?.international?.locations?.length > 0;
+  
+  // if (!hasExpansionDomestic && !hasExpansionInternational) {
+  //   errors.expansionLocations = "Please select at least one location (India or International) for expansion";
+  // }
 
   return errors
 

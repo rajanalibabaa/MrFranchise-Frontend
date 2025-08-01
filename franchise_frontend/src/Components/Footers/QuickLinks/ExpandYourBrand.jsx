@@ -181,7 +181,7 @@ const ExpandYourBrand = () => {
             borderRadius: 4,
             px: { xs: 2, md: 6 },
             py: { xs: 3, md: 4 },
-            mt: {xs:5, sm:15, lg:5}
+            mt: {xs:5, sm:15, lg:8}
 
             // background: "rgba(255,255,255,0.98)",
             // boxShadow: "0 4px 32px #ffe08255"

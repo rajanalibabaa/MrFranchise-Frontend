@@ -1,6 +1,8 @@
 // api/brands.js
 import axios from "axios"
 import { api, API_BASE_URL } from "./api";
+import { useDispatch } from "react-redux";
+import { initializeShortlist } from "../Redux/Slices/shortlistslice";
 
 // Create a single axios instance with default headers
 const apiClient = axios.create({
@@ -22,27 +24,16 @@ apiClient.interceptors.request.use(config => {
 const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
 
 export const fetchBrands = async () => {
+
+  // const dispatch = useDispatch()
   const url = id 
     ? `${api.allBrandsApi.get.likeAndUnlikeBrands}/${id}`
     : api.allBrandsApi.get.defaultBrands;
 
   try {
     const response = await apiClient.get(url);
-    const brands = response.data.data;
-
-    console.log("Fetched Brands before shuffle:", brands);
-
-    // Make a shallow copy before shuffling
-    const shuffled = brands.slice();
-
-    // Fisher–Yates shuffle
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-
-    console.log("Shuffled Brands:", shuffled);
-    return shuffled;
+    // console.log("Fetched Brands:", response.data.data);
+    return response.data.data;
   } catch (error) {
     console.error("Error fetching brands:", error);
     throw error;
@@ -171,3 +162,7 @@ export const recordBrandView = async (brandID) => {
     throw error;
   }
 };
+
+export const redux = () => {
+  
+}

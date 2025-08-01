@@ -88,10 +88,14 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
       try {
         const response = await axios.get(
 <<<<<<< HEAD
+<<<<<<< HEAD
           `http://localhost:5000/investor/getInvestorByUUID/${investorUUID}`,
 =======
           `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
 >>>>>>> d37056e415ba37cc491d4faf137ee52e6e87e872
+=======
+          `http://localhost:5000/investor/getInvestorByUUID/${investorUUID}`,
+>>>>>>> a3052b1240b3bb00e5924676e6d11e51b5697864
           {
             headers: {
               "Content-Type": "application/json",
@@ -214,10 +218,14 @@ const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
       const response = await axios.post(
 <<<<<<< HEAD
+<<<<<<< HEAD
         `http://localhost:5000/instantapply/postApplication/${id}`,
 =======
         `https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication/${id}`,
 >>>>>>> d37056e415ba37cc491d4faf137ee52e6e87e872
+=======
+        `http://localhost:5000/instantapply/postApplication/${id}`,
+>>>>>>> a3052b1240b3bb00e5924676e6d11e51b5697864
         payload,
         {
           headers: {

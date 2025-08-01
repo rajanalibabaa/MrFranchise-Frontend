@@ -38,7 +38,8 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
   // Location type state
   const [locationType, setLocationType] = useState("domestic");
-  const [currentOutletLocationType, setCurrentOutletLocationType] = useState("domestic");
+  const [currentOutletLocationType, setCurrentOutletLocationType] =
+    useState("domestic");
 
   // Domestic selections for expansion locations
   const [domesticSelections, setDomesticSelections] = useState({
@@ -61,11 +62,12 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
     selectedCities: [],
   });
 
-  const [currentInternationalSelections, setCurrentInternationalSelections] = useState({
-    selectedCountries: [],
-    selectedStates: {},
-    selectedCities: {},
-  });
+  const [currentInternationalSelections, setCurrentInternationalSelections] =
+    useState({
+      selectedCountries: [],
+      selectedStates: {},
+      selectedCities: {},
+    });
 
   // Location data
   const [statesData, setStatesData] = useState([]);
@@ -73,8 +75,12 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   const [countries, setCountries] = useState([]);
   const [internationalStates, setInternationalStates] = useState({});
   const [internationalCities, setInternationalCities] = useState({});
-  const [currentInternationalStates, setCurrentInternationalStates] = useState({});
-  const [currentInternationalCities, setCurrentInternationalCities] = useState({});
+  const [currentInternationalStates, setCurrentInternationalStates] = useState(
+    {}
+  );
+  const [currentInternationalCities, setCurrentInternationalCities] = useState(
+    {}
+  );
 
   const [loading, setLoading] = useState({
     states: false,
@@ -134,14 +140,18 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Memoized sorted and filtered states
   const sortedStates = useMemo(() => {
     return states
-      .filter((state) => state.name.toLowerCase().includes(searchFilters.states))
+      .filter((state) =>
+        state.name.toLowerCase().includes(searchFilters.states)
+      )
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [states, searchFilters.states]);
 
   // Memoized sorted and filtered countries
   const sortedCountries = useMemo(() => {
     return countries
-      .filter((country) => country.name.toLowerCase().includes(searchFilters.countries))
+      .filter((country) =>
+        country.name.toLowerCase().includes(searchFilters.countries)
+      )
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [countries, searchFilters.countries]);
 
@@ -149,7 +159,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   const fetchDomesticData = useCallback(async () => {
     if (apiCache.domestic) {
       setStatesData(apiCache.domestic);
-      setStates(apiCache.domestic.map((state) => ({ id: state.iso2, name: state.name })));
+      setStates(
+        apiCache.domestic.map((state) => ({ id: state.iso2, name: state.name }))
+      );
       return;
     }
 
@@ -160,11 +172,15 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
       );
       apiCache.domestic = response.data;
       setStatesData(response.data);
-      setStates(response.data.map((state) => ({ id: state.iso2, name: state.name })));
+      setStates(
+        response.data.map((state) => ({ id: state.iso2, name: state.name }))
+      );
     } catch (error) {
       console.error("Error fetching domestic data:", error);
       setError("Failed to load domestic locations. Please try again later.");
-      enqueueSnackbar("Failed to load domestic locations", { variant: "error" });
+      enqueueSnackbar("Failed to load domestic locations", {
+        variant: "error",
+      });
     } finally {
       setLoading((prev) => ({ ...prev, states: false }));
     }
@@ -179,7 +195,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
     setLoading((prev) => ({ ...prev, countries: true }));
     try {
-      const response = await axios.get("https://countriesnow.space/api/v0.1/countries");
+      const response = await axios.get(
+        "https://countriesnow.space/api/v0.1/countries"
+      );
       const countryData = response.data.data.map((country) => ({
         id: country.iso2,
         name: country.country,
@@ -199,14 +217,17 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Define updateFormData first
   const updateFormData = useCallback(
     (type, locationType, selections) => {
-      const locationKey = type === "current" ? "currentOutletLocations" : "expansionLocations";
+      const locationKey =
+        type === "current" ? "currentOutletLocations" : "expansionLocations";
 
       if (locationType === "domestic") {
         const newLocations = [];
 
         // Process states
         selections.selectedStates.forEach((stateName) => {
-          const existingStateIndex = newLocations.findIndex((loc) => loc.state === stateName);
+          const existingStateIndex = newLocations.findIndex(
+            (loc) => loc.state === stateName
+          );
 
           if (existingStateIndex === -1) {
             newLocations.push({
@@ -218,7 +239,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
         // Process districts
         selections.selectedDistricts.forEach(({ state, district }) => {
-          const stateIndex = newLocations.findIndex((loc) => loc.state === state);
+          const stateIndex = newLocations.findIndex(
+            (loc) => loc.state === state
+          );
 
           if (stateIndex !== -1) {
             const districtExists = newLocations[stateIndex].districts.some(
@@ -236,7 +259,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
         // Process cities
         selections.selectedCities.forEach(({ state, district, city }) => {
-          const stateIndex = newLocations.findIndex((loc) => loc.state === state);
+          const stateIndex = newLocations.findIndex(
+            (loc) => loc.state === state
+          );
 
           if (stateIndex !== -1) {
             const districtIndex = newLocations[stateIndex].districts.findIndex(
@@ -249,8 +274,14 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                 cities: [city],
               });
             } else {
-              if (!newLocations[stateIndex].districts[districtIndex].cities.includes(city)) {
-                newLocations[stateIndex].districts[districtIndex].cities.push(city);
+              if (
+                !newLocations[stateIndex].districts[
+                  districtIndex
+                ].cities.includes(city)
+              ) {
+                newLocations[stateIndex].districts[districtIndex].cities.push(
+                  city
+                );
               }
             }
           }
@@ -273,7 +304,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
         // Process countries
         selections.selectedCountries.forEach((country) => {
-          const countryExists = newLocations.some((loc) => loc.country === country);
+          const countryExists = newLocations.some(
+            (loc) => loc.country === country
+          );
           if (!countryExists) {
             newLocations.push({
               country,
@@ -283,49 +316,63 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
         });
 
         // Process states
-        Object.entries(selections.selectedStates).forEach(([country, states]) => {
-          const countryIndex = newLocations.findIndex((loc) => loc.country === country);
-
-          if (countryIndex !== -1) {
-            states.forEach((state) => {
-              const stateExists = newLocations[countryIndex].states.some(
-                (s) => s.state === state
-              );
-
-              if (!stateExists) {
-                newLocations[countryIndex].states.push({
-                  state,
-                  cities: [],
-                });
-              }
-            });
-          }
-        });
-
-        // Process cities
-        Object.entries(selections.selectedCities).forEach(([stateKey, cities]) => {
-          const [country, state] = stateKey.split("-");
-          const countryIndex = newLocations.findIndex((loc) => loc.country === country);
-
-          if (countryIndex !== -1) {
-            const stateIndex = newLocations[countryIndex].states.findIndex(
-              (s) => s.state === state
+        Object.entries(selections.selectedStates).forEach(
+          ([country, states]) => {
+            const countryIndex = newLocations.findIndex(
+              (loc) => loc.country === country
             );
 
-            if (stateIndex === -1) {
-              newLocations[countryIndex].states.push({
-                state,
-                cities,
-              });
-            } else {
-              cities.forEach((city) => {
-                if (!newLocations[countryIndex].states[stateIndex].cities.includes(city)) {
-                  newLocations[countryIndex].states[stateIndex].cities.push(city);
+            if (countryIndex !== -1) {
+              states.forEach((state) => {
+                const stateExists = newLocations[countryIndex].states.some(
+                  (s) => s.state === state
+                );
+
+                if (!stateExists) {
+                  newLocations[countryIndex].states.push({
+                    state,
+                    cities: [],
+                  });
                 }
               });
             }
           }
-        });
+        );
+
+        // Process cities
+        Object.entries(selections.selectedCities).forEach(
+          ([stateKey, cities]) => {
+            const [country, state] = stateKey.split("-");
+            const countryIndex = newLocations.findIndex(
+              (loc) => loc.country === country
+            );
+
+            if (countryIndex !== -1) {
+              const stateIndex = newLocations[countryIndex].states.findIndex(
+                (s) => s.state === state
+              );
+
+              if (stateIndex === -1) {
+                newLocations[countryIndex].states.push({
+                  state,
+                  cities,
+                });
+              } else {
+                cities.forEach((city) => {
+                  if (
+                    !newLocations[countryIndex].states[
+                      stateIndex
+                    ].cities.includes(city)
+                  ) {
+                    newLocations[countryIndex].states[stateIndex].cities.push(
+                      city
+                    );
+                  }
+                });
+              }
+            }
+          }
+        );
 
         const updatedData = {
           ...data,
@@ -424,43 +471,50 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
     if (data?.currentOutletLocations) {
       // Domestic locations
       if (data.currentOutletLocations.domestic?.locations?.length > 0) {
-        const domesticLocations = data.currentOutletLocations.domestic.locations;
-        const selectedStates = domesticLocations.map(loc => loc.state);
-        const selectedDistricts = domesticLocations.flatMap(loc => 
-          loc.districts?.map(district => ({
-            state: loc.state,
-            district: district.district
-          })) || []
-        );
-        const selectedCities = domesticLocations.flatMap(loc => 
-          loc.districts?.flatMap(district => 
-            district.cities?.map(city => ({
+        const domesticLocations =
+          data.currentOutletLocations.domestic.locations;
+        const selectedStates = domesticLocations.map((loc) => loc.state);
+        const selectedDistricts = domesticLocations.flatMap(
+          (loc) =>
+            loc.districts?.map((district) => ({
               state: loc.state,
               district: district.district,
-              city
             })) || []
-          ) || []
         );
-        
+        const selectedCities = domesticLocations.flatMap(
+          (loc) =>
+            loc.districts?.flatMap(
+              (district) =>
+                district.cities?.map((city) => ({
+                  state: loc.state,
+                  district: district.district,
+                  city,
+                })) || []
+            ) || []
+        );
+
         setCurrentDomesticSelections({
           selectedStates,
           selectedDistricts,
-          selectedCities
+          selectedCities,
         });
       }
 
       // International locations
       if (data.currentOutletLocations.international?.locations?.length > 0) {
-        const intlLocations = data.currentOutletLocations.international.locations;
-        const selectedCountries = intlLocations.map(loc => loc.country);
+        const intlLocations =
+          data.currentOutletLocations.international.locations;
+        const selectedCountries = intlLocations.map((loc) => loc.country);
         const selectedStates = {};
         const selectedCities = {};
-        
-        intlLocations.forEach(loc => {
+
+        intlLocations.forEach((loc) => {
           if (loc.states?.length > 0) {
-            selectedStates[loc.country] = loc.states.map(state => state.state);
-            
-            loc.states.forEach(state => {
+            selectedStates[loc.country] = loc.states.map(
+              (state) => state.state
+            );
+
+            loc.states.forEach((state) => {
               const stateKey = `${loc.country}-${state.state}`;
               if (state.cities?.length > 0) {
                 selectedCities[stateKey] = state.cities;
@@ -468,25 +522,31 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
             });
           }
         });
-        
+
         setCurrentInternationalSelections({
           selectedCountries,
           selectedStates,
-          selectedCities
+          selectedCities,
         });
 
         // Load states and cities for the selected countries
-        selectedCountries.forEach(country => {
+        selectedCountries.forEach((country) => {
           debouncedGetStatesByCountry(country, (states) => {
-            setCurrentInternationalStates(prev => ({ ...prev, [country]: states }));
+            setCurrentInternationalStates((prev) => ({
+              ...prev,
+              [country]: states,
+            }));
           });
         });
 
         Object.entries(selectedStates).forEach(([country, states]) => {
-          states.forEach(state => {
+          states.forEach((state) => {
             const stateKey = `${country}-${state}`;
             debouncedGetCitiesByCountryAndState(country, state, (cities) => {
-              setCurrentInternationalCities(prev => ({ ...prev, [stateKey]: cities }));
+              setCurrentInternationalCities((prev) => ({
+                ...prev,
+                [stateKey]: cities,
+              }));
             });
           });
         });
@@ -495,12 +555,19 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
     // Set initial location type based on which has data
     if (data?.currentOutletLocations?.domestic?.locations?.length > 0) {
-      setCurrentOutletLocationType('domestic');
-    } else if (data?.currentOutletLocations?.international?.locations?.length > 0) {
-      setCurrentOutletLocationType('international');
+      setCurrentOutletLocationType("domestic");
+    } else if (
+      data?.currentOutletLocations?.international?.locations?.length > 0
+    ) {
+      setCurrentOutletLocationType("international");
     }
-
-  }, [data, fetchDomesticData, fetchCountries, debouncedGetStatesByCountry, debouncedGetCitiesByCountryAndState]);
+  }, [
+    data,
+    fetchDomesticData,
+    fetchCountries,
+    debouncedGetStatesByCountry,
+    debouncedGetCitiesByCountryAndState,
+  ]);
 
   // Handle international expansion selection
   const handleInternationalExpansionChange = useCallback(
@@ -525,28 +592,37 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   }, []);
 
   // Handle domestic state selection
-  const handleDomesticStateSelection = useCallback((selectedStates, type) => {
-    const setSelections = type === "current" ? setCurrentDomesticSelections : setDomesticSelections;
+  const handleDomesticStateSelection = useCallback(
+    (selectedStates, type) => {
+      const setSelections =
+        type === "current"
+          ? setCurrentDomesticSelections
+          : setDomesticSelections;
 
-    setSelections((prev) => ({
-      ...prev,
-      selectedStates,
-      selectedDistricts: [],
-      selectedCities: [],
-    }));
+      setSelections((prev) => ({
+        ...prev,
+        selectedStates,
+        selectedDistricts: [],
+        selectedCities: [],
+      }));
 
-    // Update form data immediately
-    updateFormData(type, "domestic", {
-      selectedStates,
-      selectedDistricts: [],
-      selectedCities: [],
-    });
-  }, [updateFormData]);
+      // Update form data immediately
+      updateFormData(type, "domestic", {
+        selectedStates,
+        selectedDistricts: [],
+        selectedCities: [],
+      });
+    },
+    [updateFormData]
+  );
 
   // Handle domestic district selection
   const handleDomesticDistrictSelection = useCallback(
     (stateName, districtName, isSelected, type) => {
-      const setSelections = type === "current" ? setCurrentDomesticSelections : setDomesticSelections;
+      const setSelections =
+        type === "current"
+          ? setCurrentDomesticSelections
+          : setDomesticSelections;
 
       setSelections((prev) => {
         const newSelections = {
@@ -561,14 +637,17 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
             { state: stateName, district: districtName },
           ];
           newSelections.selectedCities = newSelections.selectedCities.filter(
-            (city) => !(city.state === stateName && city.district === districtName)
+            (city) =>
+              !(city.state === stateName && city.district === districtName)
           );
         } else {
-          newSelections.selectedDistricts = newSelections.selectedDistricts.filter(
-            (d) => !(d.state === stateName && d.district === districtName)
-          );
+          newSelections.selectedDistricts =
+            newSelections.selectedDistricts.filter(
+              (d) => !(d.state === stateName && d.district === districtName)
+            );
           newSelections.selectedCities = newSelections.selectedCities.filter(
-            (city) => !(city.state === stateName && city.district === districtName)
+            (city) =>
+              !(city.state === stateName && city.district === districtName)
           );
         }
 
@@ -584,7 +663,10 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Handle domestic city selection
   const handleDomesticCitySelection = useCallback(
     (stateName, districtName, cityName, isSelected, type) => {
-      const setSelections = type === "current" ? setCurrentDomesticSelections : setDomesticSelections;
+      const setSelections =
+        type === "current"
+          ? setCurrentDomesticSelections
+          : setDomesticSelections;
 
       setSelections((prev) => {
         const newSelectedCities = [...prev.selectedCities];
@@ -598,7 +680,10 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           newSelectedCities.push(cityObj);
         } else {
           const index = newSelectedCities.findIndex(
-            (c) => c.state === stateName && c.district === districtName && c.city === cityName
+            (c) =>
+              c.state === stateName &&
+              c.district === districtName &&
+              c.city === cityName
           );
           if (index !== -1) {
             newSelectedCities.splice(index, 1);
@@ -621,7 +706,10 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
   const handleSelectAllDistricts = useCallback(
     (stateName, districts, isSelected, type) => {
-      const setSelections = type === "current" ? setCurrentDomesticSelections : setDomesticSelections;
+      const setSelections =
+        type === "current"
+          ? setCurrentDomesticSelections
+          : setDomesticSelections;
 
       setSelections((prev) => {
         let newSelectedDistricts = [...prev.selectedDistricts];
@@ -630,12 +718,17 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
         if (isSelected) {
           // Add all districts and remove any cities from these districts
           districts.forEach((district) => {
-            if (!newSelectedDistricts.some(d => d.state === stateName && d.district === district)) {
+            if (
+              !newSelectedDistricts.some(
+                (d) => d.state === stateName && d.district === district
+              )
+            ) {
               newSelectedDistricts.push({ state: stateName, district });
             }
             // Remove any cities from this district
             newSelectedCities = newSelectedCities.filter(
-              (city) => !(city.state === stateName && city.district === district)
+              (city) =>
+                !(city.state === stateName && city.district === district)
             );
           });
         } else {
@@ -666,7 +759,10 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Handle "Select All" for cities in a district
   const handleSelectAllCities = useCallback(
     (stateName, districtName, cities, isSelected, type) => {
-      const setSelections = type === "current" ? setCurrentDomesticSelections : setDomesticSelections;
+      const setSelections =
+        type === "current"
+          ? setCurrentDomesticSelections
+          : setDomesticSelections;
 
       setSelections((prev) => {
         let newSelectedCities = [...prev.selectedCities];
@@ -674,9 +770,14 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
         if (isSelected) {
           // Add all cities
           cities.forEach((city) => {
-            if (!newSelectedCities.some(
-              c => c.state === stateName && c.district === districtName && c.city === city
-            )) {
+            if (
+              !newSelectedCities.some(
+                (c) =>
+                  c.state === stateName &&
+                  c.district === districtName &&
+                  c.city === city
+              )
+            ) {
               newSelectedCities.push({
                 state: stateName,
                 district: districtName,
@@ -708,8 +809,14 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Handle international country selection
   const handleInternationalCountrySelection = useCallback(
     async (selectedCountries, type) => {
-      const setSelections = type === "current" ? setCurrentInternationalSelections : setInternationalSelections;
-      const setStatesData = type === "current" ? setCurrentInternationalStates : setInternationalStates;
+      const setSelections =
+        type === "current"
+          ? setCurrentInternationalSelections
+          : setInternationalSelections;
+      const setStatesData =
+        type === "current"
+          ? setCurrentInternationalStates
+          : setInternationalStates;
 
       setSelections((prev) => ({
         ...prev,
@@ -741,7 +848,10 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Handle international state selection
   const handleInternationalStateSelection = useCallback(
     async (countryName, stateName, isSelected, type) => {
-      const setSelections = type === "current" ? setCurrentInternationalSelections : setInternationalSelections;
+      const setSelections =
+        type === "current"
+          ? setCurrentInternationalSelections
+          : setInternationalSelections;
 
       setSelections((prev) => {
         const newSelectedStates = { ...prev.selectedStates };
@@ -752,9 +862,14 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
         }
 
         if (isSelected) {
-          newSelectedStates[countryName] = [...newSelectedStates[countryName], stateName];
+          newSelectedStates[countryName] = [
+            ...newSelectedStates[countryName],
+            stateName,
+          ];
         } else {
-          newSelectedStates[countryName] = newSelectedStates[countryName].filter((s) => s !== stateName);
+          newSelectedStates[countryName] = newSelectedStates[
+            countryName
+          ].filter((s) => s !== stateName);
           if (newSelectedStates[countryName].length === 0) {
             delete newSelectedStates[countryName];
           }
@@ -780,13 +895,20 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
       // Fetch cities for newly selected states
       if (isSelected) {
-        const setCitiesData = type === "current" ? setCurrentInternationalCities : setInternationalCities;
+        const setCitiesData =
+          type === "current"
+            ? setCurrentInternationalCities
+            : setInternationalCities;
         const cacheKey = `${countryName}-${stateName}`;
 
         if (!apiCache.cities[cacheKey]) {
-          debouncedGetCitiesByCountryAndState(countryName, stateName, (cities) => {
-            setCitiesData((prev) => ({ ...prev, [cacheKey]: cities }));
-          });
+          debouncedGetCitiesByCountryAndState(
+            countryName,
+            stateName,
+            (cities) => {
+              setCitiesData((prev) => ({ ...prev, [cacheKey]: cities }));
+            }
+          );
         }
       }
     },
@@ -796,7 +918,10 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Handle international city selection
   const handleInternationalCitySelection = useCallback(
     (countryName, stateName, cityName, isSelected, type) => {
-      const setSelections = type === "current" ? setCurrentInternationalSelections : setInternationalSelections;
+      const setSelections =
+        type === "current"
+          ? setCurrentInternationalSelections
+          : setInternationalSelections;
 
       setSelections((prev) => {
         const newSelectedCities = { ...prev.selectedCities };
@@ -807,9 +932,14 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
         }
 
         if (isSelected) {
-          newSelectedCities[stateKey] = [...newSelectedCities[stateKey], cityName];
+          newSelectedCities[stateKey] = [
+            ...newSelectedCities[stateKey],
+            cityName,
+          ];
         } else {
-          newSelectedCities[stateKey] = newSelectedCities[stateKey].filter((c) => c !== cityName);
+          newSelectedCities[stateKey] = newSelectedCities[stateKey].filter(
+            (c) => c !== cityName
+          );
           if (newSelectedCities[stateKey].length === 0) {
             delete newSelectedCities[stateKey];
           }
@@ -832,7 +962,10 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Handle "Select All" for states in a country
   const handleSelectAllStates = useCallback(
     (countryName, states, isSelected, type) => {
-      const setSelections = type === "current" ? setCurrentInternationalSelections : setInternationalSelections;
+      const setSelections =
+        type === "current"
+          ? setCurrentInternationalSelections
+          : setInternationalSelections;
 
       setSelections((prev) => {
         const newSelectedStates = { ...prev.selectedStates };
@@ -841,9 +974,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
         if (isSelected) {
           // Add all states for this country
           newSelectedStates[countryName] = states;
-          
+
           // Remove any cities for states that are being selected (since we're selecting the whole state)
-          states.forEach(stateName => {
+          states.forEach((stateName) => {
             const stateKey = `${countryName}-${stateName}`;
             if (newSelectedCities[stateKey]) {
               delete newSelectedCities[stateKey];
@@ -852,9 +985,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
         } else {
           // Remove all states for this country
           delete newSelectedStates[countryName];
-          
+
           // Remove all cities for this country
-          Object.keys(newSelectedCities).forEach(key => {
+          Object.keys(newSelectedCities).forEach((key) => {
             if (key.startsWith(`${countryName}-`)) {
               delete newSelectedCities[key];
             }
@@ -879,7 +1012,10 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Handle "Select All" for cities in a state
   const handleSelectAllStateCities = useCallback(
     (countryName, stateName, cities, isSelected, type) => {
-      const setSelections = type === "current" ? setCurrentInternationalSelections : setInternationalSelections;
+      const setSelections =
+        type === "current"
+          ? setCurrentInternationalSelections
+          : setInternationalSelections;
 
       setSelections((prev) => {
         const newSelectedCities = { ...prev.selectedCities };
@@ -928,7 +1064,10 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           locations[stateIndex].districts &&
           locations[stateIndex].districts[districtIndex]
         ) {
-          locations[stateIndex].districts[districtIndex].cities.splice(cityIndex, 1);
+          locations[stateIndex].districts[districtIndex].cities.splice(
+            cityIndex,
+            1
+          );
         }
       } else if (field === "country" && locationType === "international") {
         locations.splice(index, 1);
@@ -947,7 +1086,10 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           locations[countryIndex].states &&
           locations[countryIndex].states[stateIndex]
         ) {
-          locations[countryIndex].states[stateIndex].cities.splice(cityIndex, 1);
+          locations[countryIndex].states[stateIndex].cities.splice(
+            cityIndex,
+            1
+          );
         }
       }
 
@@ -1034,11 +1176,14 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Render domestic state drawer
   const renderDomesticStateDrawer = useCallback(
     (type) => {
-      const selections = type === "current" ? currentDomesticSelections : domesticSelections;
+      const selections =
+        type === "current" ? currentDomesticSelections : domesticSelections;
       const toggle = (open) => toggleDrawer(type, { states: open });
 
-      const allStatesSelected = selections.selectedStates.length === sortedStates.length;
-      const someStatesSelected = selections.selectedStates.length > 0 && !allStatesSelected;
+      const allStatesSelected =
+        selections.selectedStates.length === sortedStates.length;
+      const someStatesSelected =
+        selections.selectedStates.length > 0 && !allStatesSelected;
 
       return (
         <Box sx={{ mt: 4, mb: 3 }}>
@@ -1059,7 +1204,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           {/* Main State Drawer */}
           <Drawer
             anchor="top"
-            open={type === "current" ? currentDrawerOpen.states : drawerOpen.states}
+            open={
+              type === "current" ? currentDrawerOpen.states : drawerOpen.states
+            }
             onClose={() => toggle(false)}
             PaperProps={{
               sx: {
@@ -1073,11 +1220,26 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
             }}
           >
             {/* Header */}
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-              <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800" }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 3,
+              }}
+            >
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                sx={{ color: "#ff9800" }}
+              >
                 Select States
               </Typography>
-              <Button variant="outlined" color="warning" onClick={() => toggle(false)}>
+              <Button
+                variant="outlined"
+                color="warning"
+                onClick={() => toggle(false)}
+              >
                 Done
               </Button>
             </Box>
@@ -1113,9 +1275,18 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
             {/* States Grid */}
             <Box sx={{ flex: 1, overflow: "auto", mt: 1 }}>
-              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 1, px: 5 }}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(5, 1fr)",
+                  gap: 1,
+                  px: 5,
+                }}
+              >
                 {sortedStates.map((state) => {
-                  const isSelected = selections.selectedStates.includes(state.name);
+                  const isSelected = selections.selectedStates.includes(
+                    state.name
+                  );
                   return (
                     <FormControlLabel
                       key={`state-${state.name}`}
@@ -1124,7 +1295,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                           checked={isSelected}
                           onChange={() => {
                             const updated = isSelected
-                              ? selections.selectedStates.filter((s) => s !== state.name)
+                              ? selections.selectedStates.filter(
+                                  (s) => s !== state.name
+                                )
                               : [...selections.selectedStates, state.name];
                             handleDomesticStateSelection(updated, type);
                           }}
@@ -1148,13 +1321,22 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 1 }}>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fill, minmax(200px, 1fr))",
+                      gap: 1,
+                    }}
+                  >
                     {selections.selectedStates.map((state, index) => (
                       <Chip
                         key={`selected-state-${index}`}
                         label={state}
                         onDelete={() => {
-                          const updated = selections.selectedStates.filter((_, i) => i !== index);
+                          const updated = selections.selectedStates.filter(
+                            (_, i) => i !== index
+                          );
                           handleDomesticStateSelection(updated, type);
                         }}
                         variant="outlined"
@@ -1184,23 +1366,30 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Render domestic district drawer
   const renderDomesticDistrictDrawer = useCallback(
     (type) => {
-      const selections = type === "current" ? currentDomesticSelections : domesticSelections;
+      const selections =
+        type === "current" ? currentDomesticSelections : domesticSelections;
       const toggle = (open) => toggleDrawer(type, { districts: open });
 
       if (selections.selectedStates.length === 0) return null;
 
       // Group selected districts by state
-      const districtsByState = selections.selectedDistricts.reduce((acc, { state, district }) => {
-        if (!acc[state]) acc[state] = [];
-        acc[state].push(district);
-        return acc;
-      }, {});
+      const districtsByState = selections.selectedDistricts.reduce(
+        (acc, { state, district }) => {
+          if (!acc[state]) acc[state] = [];
+          acc[state].push(district);
+          return acc;
+        },
+        {}
+      );
 
       // Calculate total available districts
-      const totalDistricts = selections.selectedStates.reduce((total, stateName) => {
-        const state = statesData.find((s) => s.name === stateName);
-        return total + (state?.districts?.length || 0);
-      }, 0);
+      const totalDistricts = selections.selectedStates.reduce(
+        (total, stateName) => {
+          const state = statesData.find((s) => s.name === stateName);
+          return total + (state?.districts?.length || 0);
+        },
+        0
+      );
 
       return (
         <Box sx={{ mt: 3, mb: 3 }}>
@@ -1221,7 +1410,11 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           {/* Drawer for District Selection */}
           <Drawer
             anchor="top"
-            open={type === "current" ? currentDrawerOpen.districts : drawerOpen.districts}
+            open={
+              type === "current"
+                ? currentDrawerOpen.districts
+                : drawerOpen.districts
+            }
             onClose={() => toggle(false)}
             PaperProps={{
               sx: {
@@ -1234,11 +1427,26 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
               },
             }}
           >
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-              <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800" }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                sx={{ color: "#ff9800" }}
+              >
                 Select Districts
               </Typography>
-              <Button variant="outlined" color="warning" onClick={() => toggle(false)}>
+              <Button
+                variant="outlined"
+                color="warning"
+                onClick={() => toggle(false)}
+              >
                 Done
               </Button>
             </Box>
@@ -1259,8 +1467,14 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
             {/* Select All */}
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <Checkbox
-                checked={selections.selectedDistricts.length > 0 && selections.selectedDistricts.length === totalDistricts}
-                indeterminate={selections.selectedDistricts.length > 0 && selections.selectedDistricts.length < totalDistricts}
+                checked={
+                  selections.selectedDistricts.length > 0 &&
+                  selections.selectedDistricts.length === totalDistricts
+                }
+                indeterminate={
+                  selections.selectedDistricts.length > 0 &&
+                  selections.selectedDistricts.length < totalDistricts
+                }
                 onChange={() => {
                   selections.selectedStates.forEach((stateName) => {
                     const state = statesData.find((s) => s.name === stateName);
@@ -1287,7 +1501,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                 if (!state) return null;
 
                 const districts = (state.districts || [])
-                  .filter((d) => d.toLowerCase().includes(searchFilters.districts))
+                  .filter((d) =>
+                    d.toLowerCase().includes(searchFilters.districts)
+                  )
                   .sort((a, b) => a.localeCompare(b));
 
                 if (districts.length === 0) return null;
@@ -1296,26 +1512,46 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                   .filter((d) => d.state === stateName)
                   .map((d) => d.district);
 
-                const allSelected = districts.every((d) => selectedDistrictsForState.includes(d));
+                const allSelected = districts.every((d) =>
+                  selectedDistrictsForState.includes(d)
+                );
 
                 return (
                   <Box key={`districts-section-${stateName}`} sx={{ mb: 4 }}>
                     <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                       <Checkbox
                         checked={allSelected}
-                        indeterminate={selectedDistrictsForState.length > 0 && !allSelected}
+                        indeterminate={
+                          selectedDistrictsForState.length > 0 && !allSelected
+                        }
                         onChange={() =>
-                          handleSelectAllDistricts(stateName, districts, !allSelected, type)
+                          handleSelectAllDistricts(
+                            stateName,
+                            districts,
+                            !allSelected,
+                            type
+                          )
                         }
                       />
-                      <Typography variant="subtitle1" sx={{ color: "orange", ml: 1 }}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ color: "orange", ml: 1 }}
+                      >
                         {stateName}
                       </Typography>
                     </Box>
 
-                    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 1, ml: 4 }}>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(5, 1fr)",
+                        gap: 1,
+                        ml: 4,
+                      }}
+                    >
                       {districts.map((district) => {
-                        const isSelected = selectedDistrictsForState.includes(district);
+                        const isSelected =
+                          selectedDistrictsForState.includes(district);
                         return (
                           <FormControlLabel
                             key={`district-${stateName}-${district}`}
@@ -1349,30 +1585,49 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
               <Accordion>
                 <AccordionSummary expandIcon={<ChevronDown />}>
                   <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                    View Selected Districts ({selections.selectedDistricts.length})
+                    View Selected Districts (
+                    {selections.selectedDistricts.length})
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  {Object.entries(districtsByState).map(([state, districts]) => (
-                    <Box key={`selected-districts-${state}`} sx={{ mb: 4 }}>
-                      <Typography variant="subtitle1" sx={{ color: "orange", mb: 1 }}>
-                        {state}
-                      </Typography>
-                      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 1, ml: 2 }}>
-                        {districts.map((district, index) => (
-                          <Chip
-                            key={`selected-district-${state}-${district}-${index}`}
-                            label={district}
-                            onDelete={() =>
-                              handleDomesticDistrictSelection(state, district, false, type)
-                            }
-                            variant="outlined"
-                            sx={{ mb: 1 }}
-                          />
-                        ))}
+                  {Object.entries(districtsByState).map(
+                    ([state, districts]) => (
+                      <Box key={`selected-districts-${state}`} sx={{ mb: 4 }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ color: "orange", mb: 1 }}
+                        >
+                          {state}
+                        </Typography>
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns:
+                              "repeat(auto-fill, minmax(200px, 1fr))",
+                            gap: 1,
+                            ml: 2,
+                          }}
+                        >
+                          {districts.map((district, index) => (
+                            <Chip
+                              key={`selected-district-${state}-${district}-${index}`}
+                              label={district}
+                              onDelete={() =>
+                                handleDomesticDistrictSelection(
+                                  state,
+                                  district,
+                                  false,
+                                  type
+                                )
+                              }
+                              variant="outlined"
+                              sx={{ mb: 1 }}
+                            />
+                          ))}
+                        </Box>
                       </Box>
-                    </Box>
-                  ))}
+                    )
+                  )}
                 </AccordionDetails>
               </Accordion>
             </Box>
@@ -1397,31 +1652,42 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Render domestic city drawer
   const renderDomesticCityDrawer = useCallback(
     (type) => {
-      const selections = type === "current" ? currentDomesticSelections : domesticSelections;
+      const selections =
+        type === "current" ? currentDomesticSelections : domesticSelections;
       const toggle = (open) => toggleDrawer(type, { cities: open });
 
       if (selections.selectedDistricts.length === 0) return null;
 
       // Group districts by state
-      const districtsByState = selections.selectedDistricts.reduce((acc, { state, district }) => {
-        if (!acc[state]) acc[state] = [];
-        acc[state].push(district);
-        return acc;
-      }, {});
+      const districtsByState = selections.selectedDistricts.reduce(
+        (acc, { state, district }) => {
+          if (!acc[state]) acc[state] = [];
+          acc[state].push(district);
+          return acc;
+        },
+        {}
+      );
 
       // Group selected cities by district key
-      const citiesByDistrict = selections.selectedCities.reduce((acc, { state, district, city }) => {
-        const key = `${state}-${district}`;
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(city);
-        return acc;
-      }, {});
+      const citiesByDistrict = selections.selectedCities.reduce(
+        (acc, { state, district, city }) => {
+          const key = `${state}-${district}`;
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(city);
+          return acc;
+        },
+        {}
+      );
 
-      const totalCities = selections.selectedDistricts.reduce((total, { state, district }) => {
-        const stateData = statesData.find((s) => s.name === state);
-        const cities = stateData?.cities?.filter((c) => c.district === district) || [];
-        return total + cities.length;
-      }, 0);
+      const totalCities = selections.selectedDistricts.reduce(
+        (total, { state, district }) => {
+          const stateData = statesData.find((s) => s.name === state);
+          const cities =
+            stateData?.cities?.filter((c) => c.district === district) || [];
+          return total + cities.length;
+        },
+        0
+      );
 
       return (
         <Box sx={{ mt: 3, mb: 3 }}>
@@ -1442,7 +1708,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           {/* Drawer */}
           <Drawer
             anchor="top"
-            open={type === "current" ? currentDrawerOpen.cities : drawerOpen.cities}
+            open={
+              type === "current" ? currentDrawerOpen.cities : drawerOpen.cities
+            }
             onClose={() => toggle(false)}
             PaperProps={{
               sx: {
@@ -1455,11 +1723,25 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
             }}
           >
             {/* Header */}
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-              <Typography variant="h6" sx={{ color: "#ff9800", fontWeight: 700 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{ color: "#ff9800", fontWeight: 700 }}
+              >
                 Select Cities
               </Typography>
-              <Button variant="outlined" color="warning" onClick={() => toggle(false)}>
+              <Button
+                variant="outlined"
+                color="warning"
+                onClick={() => toggle(false)}
+              >
                 Done
               </Button>
             </Box>
@@ -1486,19 +1768,24 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                   selections.selectedCities.length < totalCities
                 }
                 onChange={() => {
-                  selections.selectedDistricts.forEach(({ state, district }) => {
-                    const stateData = statesData.find((s) => s.name === state);
-                    const cities = stateData?.cities
-                      ?.filter((c) => c.district === district)
-                      .map((c) => c.name) || [];
-                    handleSelectAllCities(
-                      state,
-                      district,
-                      cities,
-                      selections.selectedCities.length !== totalCities,
-                      type
-                    );
-                  });
+                  selections.selectedDistricts.forEach(
+                    ({ state, district }) => {
+                      const stateData = statesData.find(
+                        (s) => s.name === state
+                      );
+                      const cities =
+                        stateData?.cities
+                          ?.filter((c) => c.district === district)
+                          .map((c) => c.name) || [];
+                      handleSelectAllCities(
+                        state,
+                        district,
+                        cities,
+                        selections.selectedCities.length !== totalCities,
+                        type
+                      );
+                    }
+                  );
                 }}
               />
               <Typography variant="subtitle1" sx={{ ml: 1 }}>
@@ -1508,70 +1795,90 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
             {/* City List */}
             <Box sx={{ flex: 1, overflow: "auto" }}>
-              {Object.entries(districtsByState).map(([stateName, districts]) => {
-                const state = statesData.find((s) => s.name === stateName);
-                if (!state) return null;
+              {Object.entries(districtsByState).map(
+                ([stateName, districts]) => {
+                  const state = statesData.find((s) => s.name === stateName);
+                  if (!state) return null;
 
-                return districts.map((districtName) => {
-                  const districtKey = `${stateName}-${districtName}`;
-                  const cities = state.cities
-                    .filter((c) => c.district === districtName)
-                    .map((c) => c.name)
-                    .filter((c) => c.toLowerCase().includes(searchFilters.cities))
-                    .sort();
+                  return districts.map((districtName) => {
+                    const districtKey = `${stateName}-${districtName}`;
+                    const cities = state.cities
+                      .filter((c) => c.district === districtName)
+                      .map((c) => c.name)
+                      .filter((c) =>
+                        c.toLowerCase().includes(searchFilters.cities)
+                      )
+                      .sort();
 
-                  if (cities.length === 0) return null;
+                    if (cities.length === 0) return null;
 
-                  const selectedCities = citiesByDistrict[districtKey] || [];
-                  const allSelected = cities.every((city) => selectedCities.includes(city));
+                    const selectedCities = citiesByDistrict[districtKey] || [];
+                    const allSelected = cities.every((city) =>
+                      selectedCities.includes(city)
+                    );
 
-                  return (
-                    <Box key={`cities-section-${districtKey}`} sx={{ mb: 4 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                        <Checkbox
-                          checked={allSelected}
-                          indeterminate={selectedCities.length > 0 && !allSelected}
-                          onChange={() =>
-                            handleSelectAllCities(
-                              stateName,
-                              districtName,
-                              cities,
-                              !allSelected,
-                              type
-                            )
-                          }
-                        />
-                        <Typography variant="subtitle1" sx={{ color: "orange", ml: 1 }}>
-                          {stateName} - {districtName}
-                        </Typography>
-                      </Box>
-
-                      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 1, ml: 4 }}>
-                        {cities.map((city) => (
-                          <FormControlLabel
-                            key={`city-${districtKey}-${city}`}
-                            control={
-                              <Checkbox
-                                checked={selectedCities.includes(city)}
-                                onChange={() =>
-                                  handleDomesticCitySelection(
-                                    stateName,
-                                    districtName,
-                                    city,
-                                    !selectedCities.includes(city),
-                                    type
-                                  )
-                                }
-                              />
+                    return (
+                      <Box key={`cities-section-${districtKey}`} sx={{ mb: 4 }}>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", mb: 1 }}
+                        >
+                          <Checkbox
+                            checked={allSelected}
+                            indeterminate={
+                              selectedCities.length > 0 && !allSelected
                             }
-                            label={city}
+                            onChange={() =>
+                              handleSelectAllCities(
+                                stateName,
+                                districtName,
+                                cities,
+                                !allSelected,
+                                type
+                              )
+                            }
                           />
-                        ))}
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ color: "orange", ml: 1 }}
+                          >
+                            {stateName} - {districtName}
+                          </Typography>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(5, 1fr)",
+                            gap: 1,
+                            ml: 4,
+                          }}
+                        >
+                          {cities.map((city) => (
+                            <FormControlLabel
+                              key={`city-${districtKey}-${city}`}
+                              control={
+                                <Checkbox
+                                  checked={selectedCities.includes(city)}
+                                  onChange={() =>
+                                    handleDomesticCitySelection(
+                                      stateName,
+                                      districtName,
+                                      city,
+                                      !selectedCities.includes(city),
+                                      type
+                                    )
+                                  }
+                                />
+                              }
+                              label={city}
+                            />
+                          ))}
+                        </Box>
                       </Box>
-                    </Box>
-                  );
-                });
-              })}
+                    );
+                  });
+                }
+              )}
             </Box>
           </Drawer>
 
@@ -1589,16 +1896,33 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                     const [state, district] = key.split("-");
                     return (
                       <Box key={`selected-cities-${key}`} sx={{ mb: 4 }}>
-                        <Typography variant="subtitle1" sx={{ color: "orange", mb: 1 }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ color: "orange", mb: 1 }}
+                        >
                           {state} - {district}
                         </Typography>
-                        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 1, ml: 2 }}>
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns:
+                              "repeat(auto-fill, minmax(200px, 1fr))",
+                            gap: 1,
+                            ml: 2,
+                          }}
+                        >
                           {cities.map((city, i) => (
                             <Chip
                               key={`selected-city-${key}-${city}-${i}`}
                               label={city}
                               onDelete={() =>
-                                handleDomesticCitySelection(state, district, city, false, type)
+                                handleDomesticCitySelection(
+                                  state,
+                                  district,
+                                  city,
+                                  false,
+                                  type
+                                )
                               }
                               color="success"
                               variant="outlined"
@@ -1633,11 +1957,16 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Render international country drawer
   const renderInternationalCountryDrawer = useCallback(
     (type) => {
-      const selections = type === "current" ? currentInternationalSelections : internationalSelections;
+      const selections =
+        type === "current"
+          ? currentInternationalSelections
+          : internationalSelections;
       const toggle = (open) => toggleDrawer(type, { countries: open });
 
-      const allSelected = selections.selectedCountries.length === sortedCountries.length;
-      const someSelected = selections.selectedCountries.length > 0 && !allSelected;
+      const allSelected =
+        selections.selectedCountries.length === sortedCountries.length;
+      const someSelected =
+        selections.selectedCountries.length > 0 && !allSelected;
 
       return (
         <Box sx={{ mt: 3, mb: 3 }}>
@@ -1658,7 +1987,11 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           {/* Drawer */}
           <Drawer
             anchor="top"
-            open={type === "current" ? currentDrawerOpen.countries : drawerOpen.countries}
+            open={
+              type === "current"
+                ? currentDrawerOpen.countries
+                : drawerOpen.countries
+            }
             onClose={() => toggle(false)}
             PaperProps={{
               sx: {
@@ -1672,11 +2005,22 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
             }}
           >
             {/* Header */}
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 Select Countries
               </Typography>
-              <Button variant="outlined" color="warning" onClick={() => toggle(false)}>
+              <Button
+                variant="outlined"
+                color="warning"
+                onClick={() => toggle(false)}
+              >
                 Done
               </Button>
             </Box>
@@ -1700,7 +2044,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                 checked={allSelected}
                 indeterminate={someSelected}
                 onChange={async () => {
-                  const updated = allSelected ? [] : sortedCountries.map((c) => c.name);
+                  const updated = allSelected
+                    ? []
+                    : sortedCountries.map((c) => c.name);
                   await handleInternationalCountrySelection(updated, type);
                 }}
               />
@@ -1711,13 +2057,23 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
             {/* Country List */}
             <Box sx={{ flex: 1, overflow: "auto" }}>
-              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 1 }}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(5, 1fr)",
+                  gap: 1,
+                }}
+              >
                 {sortedCountries
                   .filter((country) =>
-                    country.name.toLowerCase().includes(searchFilters.countries.toLowerCase())
+                    country.name
+                      .toLowerCase()
+                      .includes(searchFilters.countries.toLowerCase())
                   )
                   .map((country) => {
-                    const isSelected = selections.selectedCountries.includes(country.name);
+                    const isSelected = selections.selectedCountries.includes(
+                      country.name
+                    );
                     return (
                       <FormControlLabel
                         key={`country-${country.name}`}
@@ -1726,9 +2082,17 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                             checked={isSelected}
                             onChange={async () => {
                               const updated = isSelected
-                                ? selections.selectedCountries.filter((c) => c !== country.name)
-                                : [...selections.selectedCountries, country.name];
-                              await handleInternationalCountrySelection(updated, type);
+                                ? selections.selectedCountries.filter(
+                                    (c) => c !== country.name
+                                  )
+                                : [
+                                    ...selections.selectedCountries,
+                                    country.name,
+                                  ];
+                              await handleInternationalCountrySelection(
+                                updated,
+                                type
+                              );
                             }}
                           />
                         }
@@ -1746,18 +2110,31 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
               <Accordion>
                 <AccordionSummary expandIcon={<ChevronDown />}>
                   <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                    View Selected Countries ({selections.selectedCountries.length})
+                    View Selected Countries (
+                    {selections.selectedCountries.length})
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 1 }}>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fill, minmax(200px, 1fr))",
+                      gap: 1,
+                    }}
+                  >
                     {selections.selectedCountries.map((country, index) => (
                       <Chip
                         key={`selected-country-${index}`}
                         label={country}
                         onDelete={async () => {
-                          const updated = selections.selectedCountries.filter((_, i) => i !== index);
-                          await handleInternationalCountrySelection(updated, type);
+                          const updated = selections.selectedCountries.filter(
+                            (_, i) => i !== index
+                          );
+                          await handleInternationalCountrySelection(
+                            updated,
+                            type
+                          );
                         }}
                         color="success"
                         variant="outlined"
@@ -1787,8 +2164,12 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Render international state drawer
   const renderInternationalStateDrawer = useCallback(
     (type) => {
-      const selections = type === "current" ? currentInternationalSelections : internationalSelections;
-      const statesData = type === "current" ? currentInternationalStates : internationalStates;
+      const selections =
+        type === "current"
+          ? currentInternationalSelections
+          : internationalSelections;
+      const statesData =
+        type === "current" ? currentInternationalStates : internationalStates;
       const toggle = (open) => toggleDrawer(type, { intStates: open });
 
       if (selections.selectedCountries.length === 0) return null;
@@ -1797,10 +2178,13 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
       const statesByCountry = selections.selectedStates;
 
       // Calculate total available states
-      const totalStates = selections.selectedCountries.reduce((total, country) => {
-        const states = statesData[country] || [];
-        return total + states.length;
-      }, 0);
+      const totalStates = selections.selectedCountries.reduce(
+        (total, country) => {
+          const states = statesData[country] || [];
+          return total + states.length;
+        },
+        0
+      );
 
       const selectedCount = Object.values(statesByCountry).reduce(
         (acc, states) => acc + states.length,
@@ -1826,7 +2210,11 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           {/* Drawer for State Selection */}
           <Drawer
             anchor="top"
-            open={type === "current" ? currentDrawerOpen.intStates : drawerOpen.intStates}
+            open={
+              type === "current"
+                ? currentDrawerOpen.intStates
+                : drawerOpen.intStates
+            }
             onClose={() => toggle(false)}
             PaperProps={{
               sx: {
@@ -1839,11 +2227,26 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
               },
             }}
           >
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-              <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800" }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                sx={{ color: "#ff9800" }}
+              >
                 Select States
               </Typography>
-              <Button variant="outlined" color="warning" onClick={() => toggle(false)}>
+              <Button
+                variant="outlined"
+                color="warning"
+                onClick={() => toggle(false)}
+              >
                 Done
               </Button>
             </Box>
@@ -1868,7 +2271,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                 indeterminate={selectedCount > 0 && selectedCount < totalStates}
                 onChange={() => {
                   selections.selectedCountries.forEach((country) => {
-                    const states = (statesData[country] || []).map((s) => s.name);
+                    const states = (statesData[country] || []).map(
+                      (s) => s.name
+                    );
                     handleSelectAllStates(
                       country,
                       states,
@@ -1889,7 +2294,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                 const allStates = statesData[country] || [];
                 const filteredStates = allStates
                   .filter((s) =>
-                    s.name.toLowerCase().includes(searchFilters.intStates.toLowerCase())
+                    s.name
+                      .toLowerCase()
+                      .includes(searchFilters.intStates.toLowerCase())
                   )
                   .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -1905,7 +2312,9 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                     <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                       <Checkbox
                         checked={allSelected}
-                        indeterminate={selectedStates.length > 0 && !allSelected}
+                        indeterminate={
+                          selectedStates.length > 0 && !allSelected
+                        }
                         onChange={() => {
                           const stateNames = filteredStates.map((s) => s.name);
                           handleSelectAllStates(
@@ -1916,12 +2325,22 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                           );
                         }}
                       />
-                      <Typography variant="subtitle1" sx={{ color: "orange", ml: 1 }}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ color: "orange", ml: 1 }}
+                      >
                         {country}
                       </Typography>
                     </Box>
 
-                    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 1, ml: 4 }}>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(5, 1fr)",
+                        gap: 1,
+                        ml: 4,
+                      }}
+                    >
                       {filteredStates.map((state) => {
                         const isSelected = selectedStates.includes(state.name);
                         return (
@@ -1963,10 +2382,21 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                 <AccordionDetails>
                   {Object.entries(statesByCountry).map(([country, states]) => (
                     <Box key={`selected-states-${country}`} sx={{ mb: 4 }}>
-                      <Typography variant="subtitle1" sx={{ color: "orange", mb: 1 }}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ color: "orange", mb: 1 }}
+                      >
                         {country}
                       </Typography>
-                      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 1, ml: 2 }}>
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(auto-fill, minmax(200px, 1fr))",
+                          gap: 1,
+                          ml: 2,
+                        }}
+                      >
                         {states.map((state, index) => (
                           <Chip
                             key={`selected-state-${country}-${state}-${index}`}
@@ -2012,8 +2442,12 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Render international city drawer
   const renderInternationalCityDrawer = useCallback(
     (type) => {
-      const selections = type === "current" ? currentInternationalSelections : internationalSelections;
-      const citiesData = type === "current" ? currentInternationalCities : internationalCities;
+      const selections =
+        type === "current"
+          ? currentInternationalSelections
+          : internationalSelections;
+      const citiesData =
+        type === "current" ? currentInternationalCities : internationalCities;
       const toggle = (open) => toggleDrawer(type, { intCities: open });
 
       if (Object.keys(selections.selectedStates).length === 0) return null;
@@ -2030,7 +2464,8 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
         0
       );
 
-      const selectedCityCount = Object.values(selections.selectedCities).flat().length;
+      const selectedCityCount = Object.values(selections.selectedCities).flat()
+        .length;
 
       return (
         <Box sx={{ mt: 3, mb: 3 }}>
@@ -2051,7 +2486,11 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           {/* Drawer UI */}
           <Drawer
             anchor="top"
-            open={type === "current" ? currentDrawerOpen.intCities : drawerOpen.intCities}
+            open={
+              type === "current"
+                ? currentDrawerOpen.intCities
+                : drawerOpen.intCities
+            }
             onClose={() => toggle(false)}
             PaperProps={{
               sx: {
@@ -2065,11 +2504,26 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
             }}
           >
             {/* Header */}
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-              <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800" }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                sx={{ color: "#ff9800" }}
+              >
                 Select Cities
               </Typography>
-              <Button variant="outlined" color="warning" onClick={() => toggle(false)}>
+              <Button
+                variant="outlined"
+                color="warning"
+                onClick={() => toggle(false)}
+              >
                 Done
               </Button>
             </Box>
@@ -2090,8 +2544,12 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
             {/* Select All Cities */}
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <Checkbox
-                checked={selectedCityCount > 0 && selectedCityCount === totalCities}
-                indeterminate={selectedCityCount > 0 && selectedCityCount < totalCities}
+                checked={
+                  selectedCityCount > 0 && selectedCityCount === totalCities
+                }
+                indeterminate={
+                  selectedCityCount > 0 && selectedCityCount < totalCities
+                }
                 onChange={() => {
                   const shouldSelectAll = selectedCityCount !== totalCities;
 
@@ -2127,11 +2585,14 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
                     const filteredCities = cities
                       .filter((city) =>
-                        city.toLowerCase().includes(searchFilters.intCities.toLowerCase())
+                        city
+                          .toLowerCase()
+                          .includes(searchFilters.intCities.toLowerCase())
                       )
                       .sort((a, b) => a.localeCompare(b));
 
-                    const selectedCities = selections.selectedCities[stateKey] || [];
+                    const selectedCities =
+                      selections.selectedCities[stateKey] || [];
                     const allSelected = filteredCities.every((city) =>
                       selectedCities.includes(city)
                     );
@@ -2140,10 +2601,14 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
                     return (
                       <Box key={`cities-section-${stateKey}`} sx={{ mb: 4 }}>
-                        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", mb: 1 }}
+                        >
                           <Checkbox
                             checked={allSelected}
-                            indeterminate={selectedCities.length > 0 && !allSelected}
+                            indeterminate={
+                              selectedCities.length > 0 && !allSelected
+                            }
                             onChange={() =>
                               handleSelectAllStateCities(
                                 country,
@@ -2154,12 +2619,22 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                               )
                             }
                           />
-                          <Typography variant="subtitle1" sx={{ color: "orange", ml: 1 }}>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ color: "orange", ml: 1 }}
+                          >
                             {country} - {state}
                           </Typography>
                         </Box>
 
-                        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 1, ml: 4 }}>
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(5, 1fr)",
+                            gap: 1,
+                            ml: 4,
+                          }}
+                        >
                           {filteredCities.map((city) => {
                             const isSelected = selectedCities.includes(city);
                             return (
@@ -2206,10 +2681,21 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
                       const [country, state] = stateKey.split("-");
                       return (
                         <Box key={`selected-cities-${stateKey}`} sx={{ mb: 4 }}>
-                          <Typography variant="subtitle1" sx={{ color: "orange", mb: 1 }}>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ color: "orange", mb: 1 }}
+                          >
                             {country} - {state}
                           </Typography>
-                          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 1, ml: 2 }}>
+                          <Box
+                            sx={{
+                              display: "grid",
+                              gridTemplateColumns:
+                                "repeat(auto-fill, minmax(200px, 1fr))",
+                              gap: 1,
+                              ml: 2,
+                            }}
+                          >
                             {cities.map((city, index) => (
                               <Chip
                                 key={`selected-city-${stateKey}-${city}-${index}`}
@@ -2264,7 +2750,11 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
   // Main render
   return (
     <Box sx={{ pr: 1, mr: { sm: 0, md: 10 }, ml: { sm: 0, md: 10 } }}>
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 3, color: "#ff9800" }}>
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}
+      >
         Brand Expansion Location Details
       </Typography>
 
@@ -2275,9 +2765,15 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
         </Typography>
         <RadioGroup
           row
-          value={data?.isInternationalExpansion === null ? "" : data?.isInternationalExpansion}
+          value={
+            data?.isInternationalExpansion === null
+              ? ""
+              : data?.isInternationalExpansion
+          }
           sx={{ gap: 11, justifyContent: "start", ml: 15 }}
-          onChange={(e) => handleInternationalExpansionChange(e.target.value === "true")}
+          onChange={(e) =>
+            handleInternationalExpansionChange(e.target.value === "true")
+          }
         >
           <FormControlLabel value="true" control={<Radio />} label="Yes" />
           <FormControlLabel value="false" control={<Radio />} label="No" />
@@ -2292,7 +2788,11 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
       {/* Current Outlet Locations */}
       <Divider sx={{ my: 2 }} />
 
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 0, color: "#ff9800" }}>
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mb: 0, color: "#ff9800" }}
+      >
         Current Outlet Locations
       </Typography>
 
@@ -2303,7 +2803,11 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
         onChange={handleCurrentOutletLocationTypeChange}
       >
         <FormControlLabel value="domestic" control={<Radio />} label="India" />
-        <FormControlLabel value="international" control={<Radio />} label="International" />
+        <FormControlLabel
+          value="international"
+          control={<Radio />}
+          label="International"
+        />
       </RadioGroup>
 
       {currentOutletLocationType === "domestic" ? (
@@ -2322,7 +2826,11 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
 
       {/* Expansion Locations */}
       <Divider sx={{ my: 2 }} />
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 3, color: "#ff9800" }}>
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ mb: 3, color: "#ff9800" }}
+      >
         Expansion Locations
       </Typography>
       <RadioGroup
@@ -2332,7 +2840,11 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
         sx={{ justifyContent: "center", gap: 10 }}
       >
         <FormControlLabel value="domestic" control={<Radio />} label="India" />
-        <FormControlLabel value="international" control={<Radio />} label="International" />
+        <FormControlLabel
+          value="international"
+          control={<Radio />}
+          label="International"
+        />
       </RadioGroup>
 
       {locationType === "domestic" ? (
@@ -2356,8 +2868,16 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-      <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
-        <Alert onClose={() => setError(null)} severity="error" sx={{ width: "100%" }}>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+      >
+        <Alert
+          onClose={() => setError(null)}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
           {error}
         </Alert>
       </Snackbar>

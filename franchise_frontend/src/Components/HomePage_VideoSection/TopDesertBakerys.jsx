@@ -1,40 +1,30 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useLayoutEffect,
+} from "react";
 import {
   Box,
   Typography,
   Button,
-  Card,
-  CardContent,
-  CardMedia,
   CircularProgress,
-  IconButton,
   useMediaQuery,
   useTheme,
-  Chip,
-  Divider,
-  Avatar,
-  Stack,
-  Tooltip,
-  
 } from "@mui/material";
-import { motion } from "framer-motion";
-import Favorite from "@mui/icons-material/Favorite";
-import PlaylistAddCheckCircleOutlined from "@mui/icons-material/PlaylistAddCheckCircleOutlined";
+import ArrowBack from "@mui/icons-material/ArrowBack";
+import ArrowForward from "@mui/icons-material/ArrowForward";
 import ArrowRight from "@mui/icons-material/ArrowRight";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchDesertAndBakery  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
 
-import MonetizationOn from "@mui/icons-material/MonetizationOn";
-import Business from "@mui/icons-material/Business";
-import AreaChart from "@mui/icons-material/AreaChart";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-import {useBrands, useToggleLike,openBrandDialog} from "../../Hooks/Fetchbrands"
+import { motion } from "framer-motion";
+import HomePageBrandCard from "./HomePageBrandCard.jsx";
 
-import { postView } from "../../Utils/function/view";
-import { showLoading } from "../../Redux/Slices/loadingSlice";
-import { handleShortList } from "../../Api/shortListApi";
-import { shuffleArray } from "./ShuffleData";
-
+// Breakpoints
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
@@ -42,329 +32,25 @@ const CARD_DIMENSIONS = {
   desktop: { width: 267, height: 480 },
   largeDesktop: { width: 327, height: 500 },
 };
-const cardVariants = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-};
-
-const BrandCard = React.memo(({ 
-  brand, 
-  handleApply, 
-  handleLikeClick, 
-  likeProcessing, 
-  dimensions,
-  theme,
-  isMobile,
-  isTablet
-}) => {
-  const videoRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const observerRef = useRef();
-   const brandId = brand.uuid;
-  const franchiseModels = brand.franchiseDetails?.fico?.[0] || {};
-  const firstModel = franchiseModels || {};
-  const categories = brand.franchiseDetails?.brandCategories || {};
-  const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
-  const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
-
-          const {
-      investmentRange = "Not specified",
-      areaRequired = "Not specified",
-      // franchiseType = "N/A",
-      franchiseModel: modelType = "N/A",
-      // franchiseFee = "N/A",
-      // royaltyFee = "N/A",
-      // roi = "N/A",
-      // payBackPeriod = "N/A",
-    } = firstModel;
-  
-
-  useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observerRef.current.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (videoRef.current) {
-      observerRef.current.observe(videoRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, []);
-
-  const [shortListed, setShortListed] = useState(brand.isShortListed)
-          const handleToggleShortList = async (brand) => {
-             try {
-               const response = await handleShortList(brand);
-               if (response.success) {
-                 setShortListed(!shortListed);
-               }
-             } catch (error) {
-               console.error("Error toggling shortlist:", error);
-             }
-           };
-
-  return (
-    <motion.div
-      key={brandId}
-      variants={cardVariants}
-      // whileHover={{ scale: 1.03 }}
-      style={{
-        width: dimensions.width,
-        flexShrink: 0,
-      }}
-    >
-      <Card
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          borderRadius: 3,
-          overflow: "hidden",
-          width: "100%",
-          // border: "1px solid #eee",
-          // boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-          transition: "all 0.3s ease",
-          // "&:hover": {
-          //   boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
-          // },
-        }}
-      >
-        <Box
-          ref={videoRef}
-          sx={{
-            height: mediaHeight,
-            width: "100%",
-            overflow: "hidden",
-            position: "relative",
-            backgroundColor: theme.palette.grey[200],
-          }}
-        >
-          {isVisible && videoUrl ? (
-            <CardMedia
-              component="video"
-              loading="lazy"
-              poster={brand?.uploads?.brandLogo?.[0] || ""}
-              src={videoUrl}
-              alt={brand.personalDetails?.brandName || "Brand"}
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-              }}
-              controls
-              muted
-              loop
-              preload="none"
-            />
-          ) : (
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Typography variant="body2" color="text.secondary">
-                No video available
-              </Typography>
-            </Box>
-          )}
-        </Box>
-
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <CardContent sx={{ pb: 1 }}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-                mb: 0.5,
-                justifyContent: "space-between",
-              }}
-            >
-
-              <Box
-                              onClick={() => handleApply(brand)}
-                component="img"
-                src={brand?.uploads?.brandLogo?.[0]}
-                alt={brand.uploads?.brandName}
-                loading="lazy"
-                sx={{
-                  width: 100,
-                  height: 50,
-                  border: '1px solid #f29724',
-                  mb: 1,
-                  objectFit: 'contain',  
-                  cursor: 'pointer'
-                }}
-              />
-              
-              <IconButton
-                      onClick={() => handleToggleShortList(brand)}
-                       sx={{
-                        color: shortListed
-                          ? "#7ef400ff"
-                          : "rgba(0, 0, 0, 0.23)",
-                      }}
-                    >
-                      <Tooltip title={'ShortList'}
-                        
-                      ><PlaylistAddCheckCircleOutlined
-                     
-                      /></Tooltip>
-                    </IconButton>
-              
-              <IconButton
-                onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
-                disabled={likeProcessing[brand.uuid]}
-              >
-                {likeProcessing[brand.uuid] ? (
-                  <CircularProgress size={24} />
-                ) : (
-                  <Favorite
-                    sx={{
-                      color: brand.isLiked
-                        ? "#f44336"
-                        : "rgba(0, 0, 0, 0.23)",
-                    }}
-                  />
-                )}
-              </IconButton>
-            </Box>
-<Typography
-                              variant="body1"
-                              fontWeight={800}
-                              sx={{
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                flex: 1,
-                                mb:1
-                              }}
-                            >
-                {brand.brandDetails.brandName}
-              </Typography>
-            {categories && (
-              <Box sx={{ mb: 2 }}>
-                <Stack direction="row" spacing={1} 
-                justifyContent="space-between"
-                alignItems="center"
-                
-                sx={{ flexWrap: "wrap" }}>
-                
-                    <Chip
-                      label={categories.child}
-                      size="small"
-                      sx={{
-                        bgcolor: "rgba(255, 152, 0, 0.1)",
-                        color: "orange.dark",
-                        fontWeight: 500,
-                        mb: 1,
-                      }}
-                    />
-                   
-                   
-                  
-                </Stack>
-              </Box>
-            )}
-              <Stack spacing={1} sx={{ mb: 2 }}>
-                <Box display="flex" alignItems="center">
-                  <Business
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    <strong>Investment:</strong> {investmentRange}
-                  </Typography>
-                </Box>
-
-                <Box display="flex" alignItems="center">
-                  <MonetizationOn
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    <strong>Area:</strong> {areaRequired}
-                  </Typography>
-                </Box>
-
-                <Box display="flex" alignItems="center">
-                  <AreaChart
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    <strong>Type:</strong> {modelType}
-                  </Typography>
-                </Box>
-              </Stack>
-
-            <Divider sx={{ my: 1 }} />
-          </CardContent>
-
-          <Box sx={{ px: 2, pb: 2 }}>
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={() => handleApply(brand)}
-              sx={{
-                backgroundColor: "#f29724",
-                "&:hover": {
-                  backgroundColor: "#e68a1e",
-                  boxShadow: 2,
-                },
-                py: 1,
-                borderRadius: 1,
-                textTransform: "none",
-                fontWeight: 500,
-              }}
-            >
-              View Details
-            </Button>
-          </Box>
-        </Box>
-      </Card>
-    </motion.div>
-  );
-});
 
 const TopDesertBakerys = () => {
-const theme = useTheme();
+  const theme = useTheme();
+  const dispatch = useDispatch();
+
+ const fetchDesertAndBakeryState = useSelector((state) => state.foodfranchise.desertAndBakery);
+ const {
+   brands = [],
+   isLoading,
+   error,
+   pagination
+ } = fetchDesertAndBakeryState || {};
+
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
   const isDesktop = useMediaQuery(theme.breakpoints.between("lg", "xl"));
   const isLargeDesktop = useMediaQuery(theme.breakpoints.up("xl"));
+
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const scrollRequestRef = useRef(null);
@@ -372,39 +58,44 @@ const theme = useTheme();
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
   const [showStartShadow, setShowStartShadow] = useState(false);
-  const [showEndShadow, setShowEndShadow] = useState(false);
+  const [showEndShadow, setShowEndShadow] = useState(true);
+  const [visibleCardCount, setVisibleCardCount] = useState(4);
 
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
-  const toggleLike = useToggleLike();
+  // const dessertBakeryBrands = useMemo(() => {
+  //   if (!filteredData?.length) return [];
+  //   return filteredData.filter((brand) => {
+  //     const category = brand?.franchiseDetails?.brandCategories?.sub || "";
+  //     return category.includes("Dessert & Bakery");
+  //   });
+  // }, [filteredData]);
 
-  // Filter brands that belong to Dessert & Bakery category
-  const dessertBrands = useMemo(() => {
-    return brands.filter(brand => {
-      const categories = brand.franchiseDetails?.brandCategories || {};
-      return categories.sub === "Dessert & Bakery";
-    });
-  }, [brands]);
-
-const dimensions = useMemo(() => {
-     if (isMobile) return CARD_DIMENSIONS.mobile;
+  const dimensions = useMemo(() => {
+    if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
     if (isSmallDesktop) return CARD_DIMENSIONS.smallDesktop;
     if (isDesktop) return CARD_DIMENSIONS.desktop;
     return CARD_DIMENSIONS.largeDesktop;
   }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
 
-  // Calculate visible cards based on container width
-  useEffect(() => {
+useEffect(() => {
+    dispatch(fetchDesertAndBakery({ page: 1 }));
+  }, [dispatch]);
+
+  useLayoutEffect(() => {
     const updateVisibleCards = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const cardWidth = dimensions.width;
+        const gap = isMobile ? 16 : 24;
+        const count = Math.floor(containerWidth / (cardWidth + gap));
+        setVisibleCardCount(Math.max(1, count));
+      }
     };
 
     updateVisibleCards();
     window.addEventListener("resize", updateVisibleCards);
     return () => window.removeEventListener("resize", updateVisibleCards);
   }, [dimensions.width, isMobile]);
-  
 
   const handleLikeClick = useCallback(
     (brandId, isLiked) => {
@@ -415,44 +106,47 @@ const dimensions = useMemo(() => {
       }
 
       setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-      toggleLike.mutate(
-        { brandId, isLiked },
-        {
-          onSettled: () => {
-            setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
-          },
-        }
-      );
+      dispatch(toggleLikeBrand({ brandId, isLiked }))
+        .unwrap()
+        .finally(() => {
+          setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
+        });
     },
-    [toggleLike]
+    [dispatch]
   );
 
   const handleApply = useCallback(
     (brand) => {
-      postView(brand.uuid);
-      openBrandDialog(brand);
+      const token = localStorage.getItem("accessToken");
+      const id =
+        localStorage.getItem("investorUUID") ||
+        localStorage.getItem("brandUUID");
+
+      if (token && id) {
+        dispatch(viewApi(brand.uuid));
+      }
+
+      dispatch(openBrandDialog(brand));
     },
-    [openBrandDialog]
+    [dispatch]
   );
 
-  // Calculate the scroll distance for 1 card (including gap)
   const getScrollDistance = useCallback(() => {
     return dimensions.width + (isMobile ? 16 : 24);
   }, [dimensions.width, isMobile]);
 
-  // Smooth scroll function
-  const smoothScrollTo = useCallback((target, immediate = false) => {
-    if (!scrollContainerRef.current) return;
+  const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
+  const smoothScrollTo = useCallback((target, immediate = false) => {
     const container = scrollContainerRef.current;
-    if (scrollRequestRef.current) {
+    if (!container) return;
+    if (scrollRequestRef.current)
       cancelAnimationFrame(scrollRequestRef.current);
-    }
 
     const start = container.scrollLeft;
-    let change = target - start;
+    const change = target - start;
+    const duration = immediate ? 0 : 500;
     const startTime = performance.now();
-    const duration = immediate ? 0 : 1000; // 1 second scroll duration
 
     const animateScroll = (currentTime) => {
       const elapsed = currentTime - startTime;
@@ -463,50 +157,22 @@ const dimensions = useMemo(() => {
       if (progress < 1) {
         scrollRequestRef.current = requestAnimationFrame(animateScroll);
       } else {
-        handleScroll(); // Update shadow states after scroll completes
+        handleScroll();
       }
     };
 
     scrollRequestRef.current = requestAnimationFrame(animateScroll);
   }, []);
 
-  // Easing function for smooth scrolling
-  const easeInOutQuad = (t) => {
-    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-  };
-
-  // Track scroll position for shadow effects
   const handleScroll = useCallback(() => {
-    if (!scrollContainerRef.current || dessertBrands.length === 0) return;
+    const container = scrollContainerRef.current;
+    if (!container) return;
 
-    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+    const { scrollLeft, scrollWidth, clientWidth } = container;
     setShowStartShadow(scrollLeft > 10);
     setShowEndShadow(scrollLeft < scrollWidth - clientWidth - 10);
-  }, [dessertBrands.length]);
+  }, []);
 
-  // Handle next button click - scroll forward 1 card
-  const handleNextClick = useCallback(() => {
-    if (!scrollContainerRef.current || dessertBrands.length === 0) return;
-
-    const container = scrollContainerRef.current;
-    const scrollDistance = getScrollDistance();
-    const newScrollLeft = container.scrollLeft + scrollDistance;
-
-    smoothScrollTo(newScrollLeft);
-  }, [dessertBrands.length, getScrollDistance, smoothScrollTo]);
-
-  // Handle previous button click - scroll backward 1 card
-  const handlePrevClick = useCallback(() => {
-    if (!scrollContainerRef.current || dessertBrands.length === 0) return;
-
-    const container = scrollContainerRef.current;
-    const scrollDistance = getScrollDistance();
-    const newScrollLeft = container.scrollLeft - scrollDistance;
-
-    smoothScrollTo(newScrollLeft);
-  }, [dessertBrands.length, getScrollDistance, smoothScrollTo]);
-
-  // Initialize and clean up
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (container) {
@@ -515,16 +181,30 @@ const dimensions = useMemo(() => {
     }
 
     return () => {
-      if (container) {
-        container.removeEventListener("scroll", handleScroll);
-      }
-      if (scrollRequestRef.current) {
+      container?.removeEventListener("scroll", handleScroll);
+      if (scrollRequestRef.current)
         cancelAnimationFrame(scrollRequestRef.current);
-      }
     };
   }, [handleScroll]);
 
-  if (brandsLoading) {
+  const handleNextClick = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const distance = getScrollDistance() * visibleCardCount;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    const newScroll = Math.min(container.scrollLeft + distance, maxScroll);
+    smoothScrollTo(newScroll);
+  };
+
+  const handlePrevClick = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const distance = getScrollDistance() * visibleCardCount;
+    const newScroll = Math.max(container.scrollLeft - distance, 0);
+    smoothScrollTo(newScroll);
+  };
+
+  if (isLoading) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <CircularProgress />
@@ -542,210 +222,159 @@ const dimensions = useMemo(() => {
     );
   }
 
-  // Only show if we have brands
-  const shouldShow = dessertBrands.length > 0;
-
   return (
-    <>
-      {shouldShow && (
+    brands.length > 0 && (
+      <Box
+        ref={containerRef}
+        sx={{
+          py: isMobile ? 1 : 2,
+          px: isMobile ? 0 : 2,
+          maxWidth: isMobile ? "100%" : 1400,
+          mx: "auto",
+          position: "relative",
+        }}
+      >
         <Box
           sx={{
-            py: isMobile ? 1 : 2,
-            px: isMobile ? 0 : 2,
-            maxWidth: isMobile ? "100%" : 1400,
-            mx: "auto",
-            mb: isMobile ? 0 : 2,
-            position: "relative",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 1,
+            px: isMobile ? 2 : 0,
           }}
-          ref={containerRef}
         >
-          <Box
+          <Typography
+            variant={isMobile ? "body1" : "h5"}
+            fontWeight="bold"
             sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              color: "black",
               mb: 1,
-              px: isMobile ? 2 : 0,
+              textAlign: "left",
+              position: "relative",
+              "&:after": {
+                content: '""',
+                display: "block",
+                width: "80px",
+                height: "4px",
+                background:
+                  theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                mt: 1,
+                borderRadius: 2,
+              },
             }}
           >
-            <Typography
-              variant={isMobile ? "body1" : "h5"}
-              fontWeight="bold"
-              sx={{
-                color: "black",
-                mb: 1,
-                textAlign: "left",
-                position: "relative",
-                "&:after": {
-                  content: '""',
-                  display: "block",
-                  width: "80px",
-                  height: "4px",
-                  background:
-                    theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                  mt: 1,
-                  borderRadius: 2,
-                },
-              }}
-            >
-              Top Dessert & Bakery Brands
-            </Typography>
+            Top Dessert & Bakery Brands
+          </Typography>
 
-            <Button
-              variant="text"
-              size="small"
-              endIcon={<ArrowRight />}
-              sx={{
-                textTransform: "none",
-                fontSize: isMobile ? 14 : 16,
-                color: theme.palette.text.secondary,
-                "&:hover": {
-                  color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                  backgroundColor: "transparent",
-                },
-              }}
-              onClick={async () => {
-                window.open('/brandviewpage', '_blank');            
-              }}
-            >
-              View More
-            </Button>
-          </Box>
-
-          <Box sx={{ position: "relative", px: isMobile ? 2 : 0 }}>
-            {/* Previous button */}
-            {showStartShadow && (
-              <Button
-                variant="contained"
-                onClick={handlePrevClick}
-                sx={{
-                  position: "absolute",
-                  left: isMobile ? 4 : -12,
-                  top: `calc(50% + ${isMobile ? 20 : 40}px)`,
-                  transform: "translateY(-50%)",
-                  zIndex: 2,
-                  minWidth: "36px",
-                  width: "36px",
-                  height: "36px",
-                  borderRadius: "50%",
-                  padding: 0,
-                  backgroundColor: 'rgba(111, 255, 0, 0.98)',
-                  color: 'white',
-                  boxShadow: theme.shadows[4],
-                  '&:hover': {
-                    backgroundColor: '#7ad03a',
-                  },
-                }}
-              >
-                &lt;
-              </Button>
-            )}
-
-            {/* Next button */}
-            {showEndShadow && (
-              <Button
-                variant="contained"
-                onClick={handleNextClick}
-                sx={{
-                  position: "absolute",
-                  right: isMobile ? 4 : -12,
-                  top: `calc(50% + ${isMobile ? 20 : 40}px)`,
-                  transform: "translateY(-50%)",
-                  zIndex: 2,
-                  minWidth: "36px",
-                  width: "36px",
-                  height: "36px",
-                  borderRadius: "50%",
-                  padding: 0,
-                  backgroundColor: 'rgba(111, 255, 0, 0.98)',
-                  color: 'white',
-                  boxShadow: theme.shadows[4],
-                  '&:hover': {
-                    backgroundColor: '#7ad03a',
-                  },
-                }}
-              >
-                &gt;
-              </Button>
-            )}
-
-            <Box
-              component={motion.div}
-              initial="initial"
-              animate="animate"
-              ref={scrollContainerRef}
+          <Button
+            variant="text"
+            size="small"
+            endIcon={<ArrowRight />}
             sx={{
-                display: "flex",
-                gap: isMobile ? 2 : 3,
-                borderRadius: 3,
-                p: 2,
-                overflowX: "auto",
-                perspective: "1000px",
-                // Custom attractive scrollbar design
-                '&::-webkit-scrollbar': {
-                  height: isMobile ? '10px' : '8px',
-                  backgroundColor: 'transparent',
-                },
-                '&::-webkit-scrollbar-track': {
-                  background: 'linear-gradient(90deg, transparent, rgba(242, 151, 36, 0.1), transparent)',
-                  borderRadius: '10px',
-                  marginX: isMobile ? 0 : '10%',
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  background: 'linear-gradient(90deg, #f29724, #98dd2e)',
-                  borderRadius: '10px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                  border: '2px solid white',
-                  backgroundSize: '200%',
-                  transition: 'background-position 0.3s ease',
-                  '&:hover': {
-                    backgroundPosition: 'right center',
-                  },
-                },
-                // Firefox scrollbar
-                scrollbarColor: `transparent`,
-                scrollbarWidth: 'thin',
-                // Extra bottom padding for mobile
-                paddingBottom: isMobile ? '24px' : '16px',
-              }}
-            >
-              {dessertBrands.map((brand) => (
-                <motion.div
-                  key={brand.uuid}
-                  whileHover={{
-                    scale: 1.03,
-                    zIndex: 10,
-                    // boxShadow: theme.shadows[6],
-                    transition: { duration: 0.3 }
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <BrandCard
-                    brand={brand}
-                    handleApply={handleApply}
-                    handleLikeClick={handleLikeClick}
-                    likeProcessing={likeProcessing}
-                    dimensions={dimensions}
-                    theme={theme}
-                    isMobile={isMobile}
-                    isTablet={isTablet}
-                  />
-                </motion.div>
-              ))}
-            </Box>
-          </Box>
-
-          {showLogin && (
-            <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
-          )}
+              textTransform: "none",
+              fontSize: isMobile ? 14 : 16,
+              color: theme.palette.text.secondary,
+              "&:hover": {
+                color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                backgroundColor: "transparent",
+              },
+            }}
+            onClick={() => {
+              window.open("/brandviewpage", "_blank");
+            }}
+          >
+            View More
+          </Button>
         </Box>
-      )}
-    </>
+
+        <Box sx={{ position: "relative" }}>
+          <Button
+            onClick={handlePrevClick}
+            disabled={!showStartShadow}
+            sx={{
+              position: "absolute",
+              left: isMobile ? 2 : 8,
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 1,
+              minWidth: 40,
+              height: 40,
+              borderRadius: "50%",
+              backgroundColor: "background.paper",
+              boxShadow: 2,
+              "&:hover": {
+                backgroundColor: "action.hover",
+              },
+              "&:disabled": {
+                opacity: 0,
+                pointerEvents: "none",
+              },
+            }}
+          >
+            <ArrowBack fontSize="small" />
+          </Button>
+
+          <Button
+            onClick={handleNextClick}
+            disabled={!showEndShadow}
+            sx={{
+              position: "absolute",
+              right: isMobile ? 4 : 8,
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 1,
+              minWidth: 40,
+              height: 40,
+              borderRadius: "50%",
+              backgroundColor: "background.paper",
+              boxShadow: 2,
+              "&:hover": {
+                backgroundColor: "action.hover",
+              },
+              "&:disabled": {
+                opacity: 0,
+                pointerEvents: "none",
+              },
+            }}
+          >
+            <ArrowForward fontSize="small" />
+          </Button>
+
+          <Box
+            ref={scrollContainerRef}
+            sx={{
+              display: "flex",
+              overflowX: "auto",
+              gap: isMobile ? 2 : 3,
+              p: 2,
+              scrollBehavior: "smooth",
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
+          >
+            {brands.map((brand) => (
+              <motion.div key={brand.uuid}>
+                <HomePageBrandCard
+                  brand={brand}
+                  handleApply={handleApply}
+                  handleLikeClick={handleLikeClick}
+                  likeProcessing={likeProcessing}
+                  dimensions={dimensions}
+                  theme={theme}
+                  isMobile={isMobile}
+                  isTablet={isTablet}
+                />
+              </motion.div>
+            ))}
+          </Box>
+        </Box>
+
+        {showLogin && (
+          <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+        )}
+      </Box>
+    )
   );
 };
 
 export default React.memo(TopDesertBakerys);
-

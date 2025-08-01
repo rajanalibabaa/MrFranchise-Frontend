@@ -9,32 +9,16 @@ import {
   Typography,
   Box,
   Button,
-  Card,
-  CardContent,
-  CardMedia,
   CircularProgress,
-  IconButton,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Avatar,
-  Chip,
-  Grid,
-  Stack,
-  Paper,
   useMediaQuery,
   useTheme,
-  Divider,
-  Tooltip,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import Favorite from "@mui/icons-material/Favorite";
-import PlaylistAddCheckCircleOutlined from "@mui/icons-material/PlaylistAddCheckCircleOutlined";
 import ArrowRight from "@mui/icons-material/ArrowRight";
-import MonetizationOn from "@mui/icons-material/MonetizationOn";
-import Business from "@mui/icons-material/Business";
-import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
 import {
   useBrands,
@@ -43,354 +27,21 @@ import {
 } from "../../Hooks/Fetchbrands";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { postView } from "../../Utils/function/view";
-import { handleShortList } from "../../Api/shortListApi";
+// import { handleShortList } from "../../Api/shortListApi";
+import HomePageBrandCard from "./HomePageBrandCard";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
- smallDesktop: { width: 280, height: 500 },
+  smallDesktop: { width: 280, height: 500 },
   desktop: { width: 267, height: 480 },
   largeDesktop: { width: 327, height: 500 },
 };
 
-const cardVariants = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-};
-
-const BrandCard = React.memo(
-  ({
-    brand,
-    handleApply,
-    handleLikeClick,
-    likeProcessing,
-    dimensions,
-    theme,
-    isMobile,
-    isTablet,
-  }) => {
-    const videoRef = useRef(null);
-    const [isVisible, setIsVisible] = useState(false);
-    const observerRef = useRef();
-
-    const brandId = brand.uuid;
-    const franchiseModel = brand.franchiseDetails?.fico?.[0] || {};
-    const category = brand.franchiseDetails?.brandCategories || {};
-    const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
-    const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
-
-    // Extract brand details with fallbacks
-    const brandDetails = brand.brandDetails || {};
-    const { brandName = "N/A", tagLine = "" } = brandDetails;
-
-    // Extract franchise details with fallbacks
-    const {
-      investmentRange = "Not specified",
-      areaRequired = "Not specified",
-      franchiseType = "N/A",
-      franchiseModel: modelType = "N/A",
-      franchiseFee = "N/A",
-      royaltyFee = "N/A",
-      roi = "N/A",
-      payBackPeriod = "N/A",
-    } = franchiseModel;
-
-    // Get the first state from domestic locations for display
-    const domesticLocations =
-      brand?.expansionLocationData?.expansionLocations?.domestic?.locations ||
-      [];
-    const displayState = domesticLocations[0]?.state || "N/A";
-
-    useEffect(() => {
-      observerRef.current = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-            observerRef.current.disconnect();
-          }
-        },
-        { threshold: 0.1 }
-      );
-
-      if (videoRef.current) {
-        observerRef.current.observe(videoRef.current);
-      }
-
-      return () => {
-        if (observerRef.current) {
-          observerRef.current.disconnect();
-        }
-      };
-    }, []);
-
-    const [shortListed, setShortListed] = useState(brand.isShortListed);
-    const handleToggleShortList = async (brand) => {
-      try {
-        const response = await handleShortList(brand);
-        if (response.success) {
-          setShortListed(!shortListed);
-        }
-      } catch (error) {
-        console.error("Error toggling shortlist:", error);
-      }
-    };
-
-    return (
-      <motion.div
-        key={brandId}
-        variants={cardVariants}
-        // whileHover={{ scale: 1.03 }}
-        style={{
-          width: dimensions.width,
-          flexShrink: 0,
-        }}
-      >
-        <Card
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            borderRadius: 3,
-            overflow: "hidden",
-            width: "100%",
-            // border: "1px solid #eee",
-            // boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-            transition: "all 0.3s ease",
-            // "&:hover": {
-            //   boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
-            // },
-          }}
-        >
-          {/* Video/Image Section */}
-          <Box
-            ref={videoRef}
-            sx={{
-              height: mediaHeight,
-              width: "100%",
-              overflow: "hidden",
-              position: "relative",
-              backgroundColor: theme.palette.grey[200],
-            }}
-          >
-            {isVisible && videoUrl ? (
-              <CardMedia
-                component="video"
-                loading="lazy"
-                poster={brand?.uploads?.brandLogo?.[0] || ""}
-                src={videoUrl}
-                alt={brandName}
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                }}
-                controls
-                muted
-                loop
-                preload="none"
-              />
-            ) : (
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: theme.palette.grey[300],
-                }}
-              >
-                <Typography variant="body2" color="text.secondary">
-                  No media available
-                </Typography>
-              </Box>
-            )}
-          </Box>
-
-          {/* Content Section */}
-          <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-            <CardContent sx={{ pb: 1 }}>
-              {/* Brand Header */}
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  mb: 1.5,
-                  justifyContent: "space-between",
-                }}
-              >
-                  <Box
-                                  onClick={() => handleApply(brand)}
-                                                                                          component="img"
-                                                                                          src={brand?.uploads?.brandLogo?.[0]}
-                                                                                          alt={brand.uploads?.brandName}
-                                                                                          loading="lazy"
-                                                                                          sx={{
-                                                                                            width: 100,
-                                                                                            height: 50,
-                                                                                            border: '1px solid #f29724',
-                                                                                      cursor: 'pointer',
-                                                                                            objectFit: 'contain',  
-                                                                                          }}
-                                                                                        />
-                                 <IconButton
-                                     onClick={() => handleToggleShortList(brand)}
-                                      sx={{
-                                       color: shortListed
-                                         ? "#7ef400ff"
-                                         : "rgba(0, 0, 0, 0.23)",
-                                     }}
-                                   >
-                                     <Tooltip title={'ShortList'}
-                                       
-                                     ><PlaylistAddCheckCircleOutlined
-                                    
-                                     /></Tooltip>
-                                   </IconButton>
-                <IconButton
-                  onClick={() => handleLikeClick(brandId, brand?.isLiked)}
-                  disabled={likeProcessing[brandId]}
-                >
-                  {likeProcessing[brandId] ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    <Favorite
-                      sx={{
-                        color: brand?.isLiked
-                          ? "#f44336"
-                          : "rgba(0, 0, 0, 0.23)",
-                      }}
-                    />
-                  )}
-                </IconButton>
-              </Box>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Tooltip title={brandName} placement="top">
-                  <Typography
-                    variant="body1"
-                    fontWeight={800}
-                    sx={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      flex: 1,
-                      mb: 1,
-                    }}
-                  >
-                    {brandName}
-                  </Typography>
-                </Tooltip>
-              </Box>
-              {/* Categories */}
-              {category.child && (
-                <Box sx={{ mb: 2 }}>
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    justifyContent="space-between"
-                    alignItems="center"
-                    sx={{ flexWrap: "wrap" }}
-                  >
-                    <Chip
-                      label={category.child}
-                      size="small"
-                      sx={{
-                        bgcolor: "rgba(255, 152, 0, 0.1)",
-                        color: "orange.dark",
-                        fontWeight: 500,
-                        mb: 1,
-                      }}
-                    />
-                  </Stack>
-                </Box>
-              )}
-
-              {/* Franchise Details */}
-              <Stack spacing={1} sx={{ mb: 2 }}>
-                <Box display="flex" alignItems="center">
-                  <Business
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    <strong>Investment:</strong> {investmentRange}
-                  </Typography>
-                </Box>
-
-                <Box display="flex" alignItems="center">
-                  <MonetizationOn
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    <strong>Area:</strong> {areaRequired}
-                  </Typography>
-                </Box>
-
-                <Box display="flex" alignItems="center">
-                  <AreaChart
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    <strong>Type:</strong> {modelType}
-                  </Typography>
-                </Box>
-              </Stack>
-
-              <Divider sx={{ my: 1 }} />
-            </CardContent>
-
-            {/* Action Button */}
-            <Box sx={{ px: 2, pb: 2, mt: "auto" }}>
-              <Button
-                variant="contained"
-                fullWidth
-                onClick={() => handleApply(brand)}
-                sx={{
-                  backgroundColor: "#f29724",
-                  "&:hover": {
-                    backgroundColor: "#e68a1e",
-                    boxShadow: 2,
-                  },
-                  py: 1,
-                  borderRadius: 1,
-                  textTransform: "none",
-                  fontWeight: 500,
-                }}
-              >
-                View Full Details
-              </Button>
-            </Box>
-          </Box>
-        </Card>
-      </motion.div>
-    );
-  }
-);
-
 const TopInvestVdo2 = React.memo(() => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.down("sm","md"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("sm", "md"));
   const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
   const isDesktop = useMediaQuery(theme.breakpoints.between("lg", "xl"));
   const isLargeDesktop = useMediaQuery(theme.breakpoints.up("xl"));
@@ -436,8 +87,8 @@ const TopInvestVdo2 = React.memo(() => {
     });
   }, [brands, selectedState]);
 
- const dimensions = useMemo(() => {
-     if (isMobile) return CARD_DIMENSIONS.mobile;
+  const dimensions = useMemo(() => {
+    if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
     if (isSmallDesktop) return CARD_DIMENSIONS.smallDesktop;
     if (isDesktop) return CARD_DIMENSIONS.desktop;
@@ -445,8 +96,7 @@ const TopInvestVdo2 = React.memo(() => {
   }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
 
   useEffect(() => {
-    const updateVisibleCards = () => {
-    };
+    const updateVisibleCards = () => {};
 
     updateVisibleCards();
     window.addEventListener("resize", updateVisibleCards);
@@ -779,7 +429,7 @@ const TopInvestVdo2 = React.memo(() => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <BrandCard
+              <HomePageBrandCard
                 brand={brand}
                 handleApply={handleApply}
                 handleLikeClick={handleLikeClick}
