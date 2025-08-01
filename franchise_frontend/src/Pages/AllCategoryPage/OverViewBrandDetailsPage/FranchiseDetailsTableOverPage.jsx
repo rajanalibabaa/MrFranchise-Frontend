@@ -22,6 +22,8 @@ const FranchiseDetailsTable = ({ data, isMobile }) => {
   const scrollIntervalRef = useRef(null);
   const touchStartPosRef = useRef(null);
 
+  console.log('data',data)
+
   // Column configuration with flexible widths
   const columns = [
     { header: "Model", field: "franchiseModel", width: 150 },

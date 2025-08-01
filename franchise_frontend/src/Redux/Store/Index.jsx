@@ -7,6 +7,7 @@ import navReducer from "../Slices/navbarSlice";
 import loadingReducer  from "../Slices/loadingSlice.jsx";
 
 import getAllBrands  from "../Slices/GetAllBrandsDataUpdationFile.jsx";
+import openBrandViewPage  from "../Slices/OpenBrandNewPageSlice.jsx";
 import topFoodsfranchise from "../Slices/TopCardFetchingSlice.jsx";
  const store = configureStore({
   reducer: {
@@ -16,7 +17,8 @@ import topFoodsfranchise from "../Slices/TopCardFetchingSlice.jsx";
     // brands : brandReducer,
     loading :loadingReducer,
     brands:getAllBrands,
-    foodfranchise:topFoodsfranchise
+    foodfranchise:topFoodsfranchise,
+    openBrandDialog: openBrandViewPage
   },
 });
 export default store;

@@ -6,7 +6,9 @@ import {
   IconButton,
   Stack,
   CircularProgress,
+  Tooltip ,
 } from "@mui/material";
+import { RiBookmark3Fill } from "react-icons/ri";
 import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -15,25 +17,38 @@ import { postView } from "../../Utils/function/view";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBrands } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
-// import { toast } from "react-toastify";
 
 const TopInvestVdocardround = () => {
-  // const toggleLike = useToggleLike();
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
   const [page, setPage] = useState(1);
   const [allBrands, setAllBrands] = useState([]);
   const [hasMore, setHasMore] = useState(true);
-
   const dispatch = useDispatch();
-  const { brands, isLoading, pagination, error } = useSelector(
-    (state) => state.brands
-  );
+  const { brands, isLoading, error, pagination, fetchedPages } = useSelector((state) => state.brands);
+
+  const handleToggleShortList = async (brand) => {
+    try {
+      const response = await handleShortList(brand);
+      if (response.success) {
+        setAllBrands((prevBrands) =>
+          prevBrands.map((b) =>
+            b.uuid === brand.uuid ? { ...b, isShortListed: !b.isShortListed } : b
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling shortlist:", error);
+    }
+  };
 
   // Initial load and pagination
   useEffect(() => {
-    dispatch(fetchBrands({ page, })); // Adjust limit as needed
-  }, [dispatch, page]);
+    if (!fetchedPages.includes(page)) {
+      console.log("DISPATCHING BRANDS PAGE:", page);
+      dispatch(fetchBrands({ page }));
+    }
+  }, [dispatch, page, fetchedPages]);
 
   // Accumulate brands when new data loads
   useEffect(() => {
@@ -41,38 +56,15 @@ const TopInvestVdocardround = () => {
       if (page === 1) {
         setAllBrands(brands);
       } else {
-        setAllBrands(prev => [...prev, ...brands]);
+        setAllBrands((prev) => {
+          const existingIds = new Set(prev.map((b) => b.uuid));
+          const newUnique = brands.filter((b) => !existingIds.has(b.uuid));
+          return [...prev, ...newUnique];
+        });
       }
       setHasMore(pagination?.totalPages > page);
     }
   }, [brands, page, pagination]);
-
-  // const handleLikeClick = useCallback(
-  //   (brandId, isLiked) => {
-  //     const token = localStorage.getItem("accessToken");
-  //     if (!token) {
-  //       setShowLogin(true);
-  //       return;
-  //     }
-
-  //     toggleLike.mutate(
-  //       { brandId, isLiked },
-  //       {
-  //         onMutate: () => {
-  //           setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-  //         },
-  //         onError: (error) => {
-  //           console.error("Like operation failed:", error);
-  //           console.error("Failed to update like status");
-  //         },
-  //         onSettled: () => {
-  //           setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
-  //         },
-  //       }
-  //     );
-  //   },
-  //   [toggleLike]
-  // );
 
   const handleApply = useCallback((brand) => {
     postView(brand.uuid);
@@ -81,7 +73,7 @@ const TopInvestVdocardround = () => {
 
   const loadMoreBrands = () => {
     if (hasMore) {
-      setPage(prev => prev + 1);
+      setPage((prev) => prev + 1);
     }
   };
 
@@ -164,31 +156,44 @@ const TopInvestVdocardround = () => {
                 overflow: "hidden",
               }}
             >
-              {/* Like Button */}
-              <IconButton
+              <Stack
+                direction="column"
+                spacing={0.5}
                 sx={{
                   position: "absolute",
                   top: 4,
                   right: 4,
                   zIndex: 2,
-                  color: brand?.isLiked ? "#ff5252" : "rgba(0,0,0,0.2)",
-                  "&:hover": {
-                    color: "#ff5252",
-                  },
                 }}
-                onClick={() => handleLikeClick(brand.uuid, brand?.isLiked)}
-                disabled={likeProcessing[brand.uuid]}
               >
-                {likeProcessing[brand.uuid] ? (
-                  <CircularProgress size={24} />
-                ) : brand?.isLiked ? (
-                  <FavoriteIcon fontSize="small" />
-                ) : (
-                  <FavoriteBorderIcon fontSize="small" />
-                )}
-              </IconButton>
+                <IconButton
+                  sx={{
+                    color: brand?.isLiked ? "#ff5252" : "rgba(0,0,0,0.2)",
+                    "&:hover": { color: "#ff5252" },
+                  }}
+                  onClick={() => handleLikeClick(brand.uuid, brand?.isLiked)}
+                  disabled={likeProcessing[brand.uuid]}
+                >
+                  {likeProcessing[brand.uuid] ? (
+                    <CircularProgress size={24} />
+                  ) : brand?.isLiked ? (
+                    <FavoriteIcon fontSize="small" />
+                  ) : (
+                    <FavoriteBorderIcon fontSize="small" />
+                  )}
+                </IconButton>
 
-              {/* Brand Logo */}
+                <IconButton
+                  onClick={() => handleToggleShortList(brand)}
+                  sx={{
+                    color: brand?.isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                  }}
+                >
+                  <Tooltip title="ShortList">
+                    <RiBookmark3Fill size={21} />
+                  </Tooltip>
+                </IconButton>
+              </Stack>
               <Box
                 component="img"
                 src={brand.logo}
@@ -202,25 +207,20 @@ const TopInvestVdocardround = () => {
                   objectFit: "contain",
                 }}
               />
-
-              {/* Brand Name */}
               <Typography
                 variant="caption"
                 fontWeight={600}
                 textAlign="center"
                 sx={{
                   mb: 0.5,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
+                  whiteSpace: "normal",
+                  overflowWrap: "break-word",
                   width: "100%",
                   px: 0.5,
                 }}
               >
                 {brand.brandname}
               </Typography>
-
-              {/* Category Chips */}
               <Typography
                 variant="caption"
                 sx={{
@@ -236,52 +236,17 @@ const TopInvestVdocardround = () => {
               >
                 {brand.brandCategories?.child}
               </Typography>
-
-              {/* Investment Details */}
-              <Stack
-                direction="column"
-                spacing={0.5}
-                sx={{ mb: 0.5, width: "100%" }}
-              >
-                <Typography
-                  variant="caption"
-                  fontWeight={500}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  Investment :{" "}
-                  {brand.fico?.investmentRange || "N/A"}
+              <Stack direction="column" spacing={0.5} sx={{ mb: 0.5, width: "100%" }}>
+                <Typography variant="caption" fontWeight={500} sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  Investment : {brand.fico?.investmentRange || "N/A"}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  fontWeight={500}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  Area :{" "}
-                  {brand.fico?.areaRequired || "N/A"}
+                <Typography variant="caption" fontWeight={500} sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  Area : {brand.fico?.areaRequired || "N/A"}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  fontWeight={500}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  Type :{" "}
-                  {brand.fico?.franchiseModel || "N/A"}
+                <Typography variant="caption" fontWeight={500} sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  Type : {brand.fico?.franchiseModel || "N/A"}
                 </Typography>
               </Stack>
-
-              {/* View Button */}
               <Button
                 variant="outlined"
                 size="small"
@@ -306,35 +271,39 @@ const TopInvestVdocardround = () => {
         ))}
       </Box>
 
-      {/* Load More Button */}
-      {hasMore && (
-        <Box sx={{ textAlign: "center", mt: 2, mb: 4 }}>
-          <Button
-            variant="contained"
-            sx={{
-              borderRadius: 2,
-              px: 4,
-              py: 1,
-              background: "linear-gradient(45deg, #f29724 30%, #ffcc80 90%)",
-              fontWeight: 600,
-              fontSize: "0.875rem",
-              "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: "0 4px 8px rgba(242, 151, 36, 0.3)",
-              },
-              transition: "all 0.3s ease",
-            }}
-            onClick={loadMoreBrands}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <CircularProgress size={24} sx={{ color: "white" }} />
-            ) : (
-              "Load More Brands"
-            )}
-          </Button>
-        </Box>
+     {hasMore && (
+  <Box sx={{ textAlign: "center", mt: 2, mb: 4 }}>
+    <Button
+      variant="contained"
+      sx={{
+        borderRadius: 2,
+        px: 4,
+        py: 1,
+        background: "linear-gradient(45deg, #f29724 30%, #ffcc80 90%)",
+        fontWeight: 600,
+        fontSize: "0.875rem",
+        "&:hover": {
+          transform: "translateY(-2px)",
+          boxShadow: "0 4px 8px rgba(242, 151, 36, 0.3)",
+        },
+        transition: "all 0.3s ease",
+      }}
+      onMouseEnter={() => {
+        if (!isLoading) {
+          loadMoreBrands(); // Trigger on hover
+        }
+      }}
+      disabled={isLoading}
+    >
+      {isLoading ? (
+        <CircularProgress size={24} sx={{ color: "white" }} />
+      ) : (
+        "Load More Brands"
       )}
+    </Button>
+  </Box>
+)}
+
 
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
@@ -343,4 +312,4 @@ const TopInvestVdocardround = () => {
   );
 };
 
-export default React.memo(TopInvestVdocardround);
+export default React.memo(TopInvestVdocardround);  

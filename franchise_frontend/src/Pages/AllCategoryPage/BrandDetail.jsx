@@ -81,6 +81,8 @@ const BrandDetails = ({ brandData }) => {
 
   // Memoized data
   const selectedBrand = brandData || {};
+  console.log("selectedBrand:", selectedBrand);
+
   const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
   const AccessToken = useMemo(() => localStorage.getItem("accessToken"), []);
   const { mutate: toggleLike } = useToggleLike();
@@ -106,17 +108,17 @@ const BrandDetails = ({ brandData }) => {
   );
 
   const allVideos = useMemo(
-    () => selectedBrand?.uploads?.franchisePromotionVideo || [],
+    () => selectedBrand[0].uploads?.franchiseVideos || [],
     [selectedBrand]
   );
 
   const allImages = useMemo(
     () => [
-      ...(selectedBrand?.uploads?.brandLogo
-        ? [selectedBrand.uploads.brandLogo]
+      ...(selectedBrand[0]?.uploads?.logo
+        ? [selectedBrand[0]?.uploads?.logo]
         : []),
-      ...(selectedBrand?.uploads?.exteriorOutlet || []),
-      ...(selectedBrand?.uploads?.interiorOutlet || []),
+      ...(selectedBrand[0]?.uploads?.exteriorOutlet || []),
+      ...(selectedBrand[0]?.uploads?.interiorOutlet || []),
     ],
     [selectedBrand]
   );

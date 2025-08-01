@@ -29,6 +29,7 @@ import {
   fetchBrands,
   resetBrands,
 } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -175,6 +176,7 @@ function TopBrandVdoCards() {
   const handleApply = (brand) => {
     postView(brand.uuid);
     // Implement your brand dialog functionality here
+    dispatch(openBrandDialog(brand));
   };
 
   const handleLoadMore = () => {

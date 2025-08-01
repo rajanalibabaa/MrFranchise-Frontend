@@ -7,22 +7,20 @@ export const fetchBrands = createAsyncThunk(
   'brands/fetchAll',
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
-      // Send the page directly in query params
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getAllBrandListing`, {
-        params: {
-          page, // directly use page
-        }
+        params: { page },
       });
+
       return {
         brands: response.data.data.brands,
         pagination: response.data.data.pagination,
+        page,
       };
     } catch (error) {
-      return rejectWithValue(error.response?.data || { message: "Unknown error" });
+      return rejectWithValue(error.response?.data || { message: 'Unknown error' });
     }
   }
 );
-
 
 const initialState = {
   brands: [],
@@ -31,11 +29,12 @@ const initialState = {
     totalPages: 1,
     totalItems: 0,
     hasNextPage: false,
-    hasPreviousPage: false
+    hasPreviousPage: false,
   },
   isLoading: false,
   error: null,
-  viewedBrandsCount: 0 // Track how many times brands have been viewed
+  viewedBrandsCount: 0,
+ fetchedPages: [],
 };
 
 const brandSlice = createSlice({
@@ -43,14 +42,17 @@ const brandSlice = createSlice({
   initialState,
   reducers: {
     resetBrands: (state) => {
-      return initialState;
+      return {
+        ...initialState,
+        fetchedPages: [],
+      };
     },
     incrementViewedCount: (state) => {
       state.viewedBrandsCount += 1;
     },
     resetViewedCount: (state) => {
       state.viewedBrandsCount = 0;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -59,26 +61,26 @@ const brandSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchBrands.fulfilled, (state, action) => {
+        const { brands, pagination, page } = action.payload;
         state.isLoading = false;
-        // Always replace brands with new ones rather than appending
-  state.brands = action.payload.brands;
-  state.pagination = action.payload.pagination;
-        
-        // If it's the first page, replace brands, otherwise append
-        if (action.payload.pagination.currentPage === 1) {
-          state.brands = action.payload.brands;
-        } else {
-          state.brands = [...state.brands, ...action.payload.brands];
-        }
-        
-        state.pagination = action.payload.pagination;
-        state.viewedBrandsCount = action.payload.viewedCount || 0;
+        state.pagination = pagination;
+
+       if (!state.fetchedPages.includes(page)) {
+  state.fetchedPages.push(page);
+
+  if (page === 1) {
+    state.brands = brands;
+  } else {
+    state.brands = [...state.brands, ...brands];
+  }
+}
+
       })
       .addCase(fetchBrands.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload?.message || action.error.message;
       });
-  }
+  },
 });
 
 export const { resetBrands, incrementViewedCount, resetViewedCount } = brandSlice.actions;
