@@ -126,7 +126,7 @@ export const fetchDesertAndBakery = createAsyncThunk(
   'topdesertAndBakeryFranchises/fetchAll',
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/brandlisting/getDesertAndBakery`, {
+      const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopDesertAndBakery`, {
         params: { page }
       });
 
@@ -134,7 +134,6 @@ export const fetchDesertAndBakery = createAsyncThunk(
         console.error('Unexpected API response structure:', response.data);
         throw new Error('Invalid API response structure');
       }
-
       return {
         brands: response.data.data.brands,
         pagination: response.data.data.pagination || {
