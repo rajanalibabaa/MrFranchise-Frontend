@@ -20,9 +20,12 @@ import Business from "@mui/icons-material/Business";
 import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { handleShortList } from "../../Api/shortListApi";
+import LoginPage from "../../Pages/LoginPage/LoginPage";
+
 // import { BsFillBookmarkStarFill } from "react-icons/bs";
 import { RiBookmark3Fill } from "react-icons/ri";
-
+import { toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
+import {token} from "../../Utils/autherId.jsx"
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -40,6 +43,7 @@ const HomePageBrandCard = React.memo(
     const videoRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
     const observerRef = useRef();
+    const [showLogin, setShowLogin] = useState(false);
     
     const brandId = brand?.uuid || "";
     const franchiseModel = brand?.fico?.[0] || {}; // Changed to match the array structure
@@ -80,10 +84,17 @@ const HomePageBrandCard = React.memo(
     const [shortListed, setShortListed] = useState(brand.isShortListed);
     const handleToggleShortList = async (brand) => {
       try {
-        const response = await handleShortList(brand);
-        if (response.success) {
-          setShortListed(!shortListed);
-        }
+        // const response = await handleShortList(brand);
+        // if (response.success) {
+        //   setShortListed(!shortListed);
+        // }
+        if (!token) {
+                                setShowLogin(true);
+                                return;
+                              }
+        toggleHomeCardShortlist(brand.uuid)
+        await handleShortList(brand.uuid)
+        setShortListed(!shortListed)
       } catch (error) {
         console.error("Error toggling shortlist:", error);
       }
@@ -199,16 +210,17 @@ const HomePageBrandCard = React.memo(
                   <IconButton
                     onClick={() => handleLikeClick(brandId, brand?.isLiked)}
                     disabled={likeProcessing[brandId]}
+                    sx={{
+                          color: brand?.isLiked
+                            ? "#f44336"
+                            : "rgba(0, 0, 0, 0.23)",
+                        }}
                   >
                     {likeProcessing[brandId] ? (
                       <CircularProgress size={24} />
                     ) : (
                       <Favorite
-                        sx={{
-                          color: brand?.isLiked
-                            ? "#f44336"
-                            : "rgba(0, 0, 0, 0.23)",
-                        }}
+                        
                       />
                     )}
                   </IconButton>
@@ -318,6 +330,9 @@ const HomePageBrandCard = React.memo(
             </Box>
           </Box>
         </Card>
+        {showLogin && (
+                  <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+                )}
       </motion.div>
     );
   }

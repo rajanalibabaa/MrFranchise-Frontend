@@ -2,13 +2,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { API_BASE_URL } from '../../Api/api';
+import { userId } from '../../Utils/autherId';
 
 export const fetchTopFoodFranchises = createAsyncThunk(
   'topFoodFranchises/fetchAll',
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopFoodFranchise`, {
-        params: { page }
+        params: { page,id:userId }
       });
 
       if (!response.data.data || !response.data.data.brands) {
@@ -38,7 +39,7 @@ export const fetchTopCafes = createAsyncThunk(
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopCafes`, {
-        params: { page }
+        params: { page,id:userId }
       });
 
       if (!response.data.data || !response.data.data.brands) {
@@ -68,7 +69,7 @@ export const fetchTopBeverageFranchises = createAsyncThunk(
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopBeverageFranchise`, {
-        params: { page }
+        params: { page,id:userId }
       });
 
       if (!response.data.data || !response.data.data.brands) {
@@ -97,7 +98,7 @@ export const fetchTopTruckAndKiosksFranchises = createAsyncThunk(
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopTrucksAndKiosks`, {
-        params: { page }
+        params: { page,id:userId }
       });
 
       if (!response.data.data || !response.data.data.brands) {
@@ -127,7 +128,35 @@ export const fetchDesertAndBakery = createAsyncThunk(
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopDesertAndBakery`, {
-        params: { page }
+        params: { page,id:userId }
+      });
+
+      if (!response.data.data || !response.data.data.brands) {
+        console.error('Unexpected API response structure:', response.data);
+        throw new Error('Invalid API response structure');
+      }
+      return {
+        brands: response.data.data.brands,
+        pagination: response.data.data.pagination || {
+          currentPage: page,
+          totalPages: 1,
+          totalItems: 0,
+          hasNextPage: false,
+          hasPreviousPage: false
+        }
+      };
+    } catch (error) {
+      console.error('API Error:', error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || { message: error.message });
+    }
+  }
+);
+export const fetchTopRestarunt = createAsyncThunk(
+  'toprestaurant/fetchAll',
+  async ({ page = 1 }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopRestaurants`, {
+        params: { page,id:userId }
       });
 
       if (!response.data.data || !response.data.data.brands) {
@@ -216,7 +245,20 @@ const initialState = {
     isLoading: false,
     error: null,
     viewedBrandsCount: 0
-  }
+  },
+  restaurant: {
+    brands: [],
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 0,
+      hasNextPage: false,
+      hasPreviousPage: false
+    },
+    isLoading: false,
+    error: null,
+    viewedBrandsCount: 0
+  },
 };
 
 const topFoodFranchiseSlice = createSlice({
@@ -240,6 +282,10 @@ const topFoodFranchiseSlice = createSlice({
       state.trucksAndKiosks = initialState.trucksAndKiosks;
      },
 
+     resetRestaurant: (state) => {
+      state.restaurant = initialState.restaurant;
+     },
+
 
     incrementFoodFranchiseViewedCount: (state) => {
       state.foodFranchises.viewedBrandsCount += 1;
@@ -256,8 +302,6 @@ const topFoodFranchiseSlice = createSlice({
     incrementTrucksAndKiosksViewedCount: (state) => {
       state.trucksAndKiosks.viewedBrandsCount += 1;
     },
-
-
     resetFoodFranchiseViewedCount: (state) => {
       state.foodFranchises.viewedBrandsCount = 0;
     },
@@ -272,6 +316,130 @@ const topFoodFranchiseSlice = createSlice({
     },
     resetTrucksAndKiosksViewedCount: (state) => {
       state.trucksAndKiosks.viewedBrandsCount = 0;
+    },
+     resetRestaurantViewedCount: (state) => {
+      state.restaurant.viewedBrandsCount = 0;
+     },
+
+    
+    toggleHomeCardLike : (state,action) => {
+      const brandId = action.payload
+      console.log("toggleHomeCardLike :",brandId)
+      state.cafes.brands = state.cafes.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isLiked: !brand.isLiked,
+      };
+        }
+        return brand;
+      })
+      state.desertAndBakery.brands = state.desertAndBakery.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isLiked: !brand.isLiked,
+      };
+        }
+        return brand;
+      })
+      state.foodFranchises.brands = state.foodFranchises.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isLiked: !brand.isLiked,
+      };
+        }
+        return brand;
+      })
+      state.topbeveragefranchises.brands = state.topbeveragefranchises.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isLiked: !brand.isLiked,
+      };
+        }
+        return brand;
+      })
+      state.trucksAndKiosks.brands = state.trucksAndKiosks.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isLiked: !brand.isLiked,
+      };
+        }
+        return brand;
+      })
+      state.restaurant.brands = state.restaurant.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isLiked: !brand.isLiked,
+      };
+        }
+        return brand;
+      });
+    },
+
+
+    toggleHomeCardShortlist : (state,action) => {
+      const brandId = action.payload
+      console.log("toggleHomeCardLike :",brandId)
+      state.cafes.brands = state.cafes.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isShortListed: !brand.isShortListed,
+      };
+        }
+        return brand;
+      })
+      state.desertAndBakery.brands = state.desertAndBakery.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isShortListed: !brand.isShortListed,
+      };
+        }
+        return brand;
+      })
+      state.foodFranchises.brands = state.foodFranchises.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isShortListed: !brand.isShortListed,
+      };
+        }
+        return brand;
+      })
+      state.topbeveragefranchises.brands = state.topbeveragefranchises.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isShortListed: !brand.isShortListed,
+      };
+        }
+        return brand;
+      })
+      state.trucksAndKiosks.brands = state.trucksAndKiosks.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isShortListed: !brand.isShortListed,
+      };
+        }
+        return brand;
+      })
+      state.restaurant.brands = state.restaurant.brands.map((brand) => {
+        if (brand.uuid === brandId) {
+          return {
+        ...brand,
+        isShortListed: !brand.isShortListed,
+      };
+        }
+        return brand;
+      })
+
     },
 
   },
@@ -351,6 +519,22 @@ const topFoodFranchiseSlice = createSlice({
       .addCase(fetchTopTruckAndKiosksFranchises.rejected, (state, action) => {
         state.trucksAndKiosks.isLoading = false;
         state.trucksAndKiosks.error = action.payload?.message || action.error.message;
+      })
+
+      //restarunt
+
+      .addCase(fetchTopRestarunt.pending, (state) => {
+        state.restaurant.isLoading = true;
+        state.restaurant.error = null;
+      })
+      .addCase(fetchTopRestarunt.fulfilled, (state, action) => {
+        state.restaurant.isLoading = false;
+        state.restaurant.brands = action.payload.brands;
+        state.restaurant.pagination = action.payload.pagination;
+      })
+      .addCase(fetchTopRestarunt.rejected, (state, action) => {
+        state.restaurant.isLoading = false;
+        state.restaurant.error = action.payload?.message || action.error.message;
       });
   }
 });
@@ -361,16 +545,24 @@ export const {
   resetTopBeverageFranchises,
    resetDesertAndBakery,
   resetTrucksAndKiosks,
+   resetRestarunt,
+
   incrementFoodFranchiseViewedCount,
   incrementCafesViewedCount,
   incrementBeverageViewedCount,
   incrementDesertAndBakeryViewedCount,
   incrementTrucksAndKiosksViewedCount,
+  incrementRestaruntViewedCount,
+
   resetFoodFranchiseViewedCount,
   resetCafesViewedCount,
   resetBeverageViewedCount,
   resetDesertAndBakeryViewedCount,
-  resetTrucksAndKiosksViewedCount
+  resetTrucksAndKiosksViewedCount,
+  resetRestaruntViewedCount,
+
+  toggleHomeCardLike,
+  toggleHomeCardShortlist
 } = topFoodFranchiseSlice.actions;
 
 export default topFoodFranchiseSlice.reducer;
