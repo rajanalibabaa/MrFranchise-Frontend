@@ -26,6 +26,7 @@ import HomePageBrandCard from "./HomePageBrandCard.jsx";
 import { token } from "../../Utils/autherId.jsx";
 import { toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
 import { likeApiFunction } from "../../Api/likeApi.jsx";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 
 // Breakpoints
 const CARD_DIMENSIONS = {
@@ -47,6 +48,7 @@ const {
   pagination
 } = beveragesFranchiseState || {};
 
+console.log("beveragesFranchiseState",beveragesFranchiseState);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));

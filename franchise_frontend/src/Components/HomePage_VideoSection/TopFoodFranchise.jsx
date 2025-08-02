@@ -25,6 +25,7 @@ import { fetchTopFoodFranchises, toggleHomeCardLike  } from '../../Redux/Slices/
 import { token } from "../../Utils/autherId.jsx";
 import { likeApiFunction } from "../../Api/likeApi.jsx";
 import { toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -191,6 +192,7 @@ const {
   const handleApply = (brand) => {
     // Your apply logic here
     console.log("Apply for brand:", brand);
+    dispatch(openBrandDialog(brand));
   };
 
   const handleLikeClick = async(brandId) => {

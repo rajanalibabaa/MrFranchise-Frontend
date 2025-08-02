@@ -6,7 +6,7 @@ import {
   IconButton,
   Stack,
   CircularProgress,
-  Tooltip ,
+  Tooltip,
 } from "@mui/material";
 import { RiBookmark3Fill } from "react-icons/ri";
 import { motion } from "framer-motion";
@@ -16,12 +16,15 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { postView } from "../../Utils/function/view";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBrands, toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
+import {
+  fetchBrands,
+  toggleBrandLike,
+} from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
 // import { toast } from "react-toastify";
 import { likeApiFunction } from "../../Api/likeApi";
 import { toggleHomeCardLike } from "../../Redux/Slices/TopCardFetchingSlice";
 import { token } from "../../Utils/autherId";
-
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 
 const TopInvestVdocardround = () => {
   const [likeProcessing, setLikeProcessing] = useState({});
@@ -30,7 +33,9 @@ const TopInvestVdocardround = () => {
   const [allBrands, setAllBrands] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const dispatch = useDispatch();
-  const { brands, isLoading, error, pagination, fetchedPages } = useSelector((state) => state.brands);
+  const { brands, isLoading, error, pagination, fetchedPages } = useSelector(
+    (state) => state.brands
+  );
 
   const handleToggleShortList = async (brand) => {
     try {
@@ -38,7 +43,9 @@ const TopInvestVdocardround = () => {
       if (response.success) {
         setAllBrands((prevBrands) =>
           prevBrands.map((b) =>
-            b.uuid === brand.uuid ? { ...b, isShortListed: !b.isShortListed } : b
+            b.uuid === brand.uuid
+              ? { ...b, isShortListed: !b.isShortListed }
+              : b
           )
         );
       }
@@ -49,8 +56,7 @@ const TopInvestVdocardround = () => {
 
   // Initial load and pagination
   useEffect(() => {
-    if (!fetchedPages.includes(page)) {
-      console.log("DISPATCHING BRANDS PAGE:", page);
+    if (!fetchedPages?.includes?.(page)) {
       dispatch(fetchBrands({ page }));
     }
   }, [dispatch, page, fetchedPages]);
@@ -71,21 +77,19 @@ const TopInvestVdocardround = () => {
     }
   }, [brands, page, pagination]);
 
-
-const handleLikeClick = async(brandId) => {
-
-  console.log(brandId)
-  if (!token) {
-    setShowLogin(true);
-    return;
-  }
-  dispatch(toggleBrandLike(brandId));
-  dispatch(toggleHomeCardLike(brandId));
-  await likeApiFunction(brandId)
-};
+  const handleLikeClick = async (brandId) => {
+    console.log(brandId);
+    if (!token) {
+      setShowLogin(true);
+      return;
+    }
+    dispatch(toggleBrandLike(brandId));
+    dispatch(toggleHomeCardLike(brandId));
+    await likeApiFunction(brandId);
+  };
   const handleApply = useCallback((brand) => {
     postView(brand.uuid);
-    openBrandDialog(brand);
+    dispatch(openBrandDialog(brand));
   }, []);
 
   const loadMoreBrands = () => {
@@ -149,9 +153,9 @@ const handleLikeClick = async(brandId) => {
           },
         }}
       >
-        {allBrands.map((brand) => (
+        {allBrands.map((brand, index) => (
           <motion.div
-            key={brand.uuid}
+            key={`${brand.uuid}-${index}`} // ✅ Always unique
             whileHover={{ y: -5 }}
             transition={{ duration: 0.2 }}
             style={{ minWidth: 0 }}
@@ -203,7 +207,9 @@ const handleLikeClick = async(brandId) => {
                 <IconButton
                   onClick={() => handleToggleShortList(brand)}
                   sx={{
-                    color: brand?.isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                    color: brand?.isShortListed
+                      ? "#7ef400ff"
+                      : "rgba(0, 0, 0, 0.23)",
                   }}
                 >
                   <Tooltip title="ShortList">
@@ -216,6 +222,8 @@ const handleLikeClick = async(brandId) => {
                 src={brand.logo}
                 alt={brand.brandname}
                 loading="lazy"
+                onClick={() => handleApply(brand)}
+                cursor="pointer"
                 sx={{
                   width: 100,
                   height: 80,
@@ -253,14 +261,42 @@ const handleLikeClick = async(brandId) => {
               >
                 {brand.brandCategories?.child}
               </Typography>
-              <Stack direction="column" spacing={0.5} sx={{ mb: 0.5, width: "100%" }}>
-                <Typography variant="caption" fontWeight={500} sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <Stack
+                direction="column"
+                spacing={0.5}
+                sx={{ mb: 0.5, width: "100%" }}
+              >
+                <Typography
+                  variant="caption"
+                  fontWeight={500}
+                  sx={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
                   Investment : {brand.fico?.investmentRange || "N/A"}
                 </Typography>
-                <Typography variant="caption" fontWeight={500} sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <Typography
+                  variant="caption"
+                  fontWeight={500}
+                  sx={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
                   Area : {brand.fico?.areaRequired || "N/A"}
                 </Typography>
-                <Typography variant="caption" fontWeight={500} sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <Typography
+                  variant="caption"
+                  fontWeight={500}
+                  sx={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
                   Type : {brand.fico?.franchiseModel || "N/A"}
                 </Typography>
               </Stack>
@@ -288,39 +324,38 @@ const handleLikeClick = async(brandId) => {
         ))}
       </Box>
 
-     {hasMore && (
-  <Box sx={{ textAlign: "center", mt: 2, mb: 4 }}>
-    <Button
-      variant="contained"
-      sx={{
-        borderRadius: 2,
-        px: 4,
-        py: 1,
-        background: "linear-gradient(45deg, #f29724 30%, #ffcc80 90%)",
-        fontWeight: 600,
-        fontSize: "0.875rem",
-        "&:hover": {
-          transform: "translateY(-2px)",
-          boxShadow: "0 4px 8px rgba(242, 151, 36, 0.3)",
-        },
-        transition: "all 0.3s ease",
-      }}
-      onMouseEnter={() => {
-        if (!isLoading) {
-          loadMoreBrands(); // Trigger on hover
-        }
-      }}
-      disabled={isLoading}
-    >
-      {isLoading ? (
-        <CircularProgress size={24} sx={{ color: "white" }} />
-      ) : (
-        "Load More Brands"
+      {hasMore && (
+        <Box sx={{ textAlign: "center", mt: 2, mb: 4 }}>
+          <Button
+            variant="contained"
+            sx={{
+              borderRadius: 2,
+              px: 4,
+              py: 1,
+              background: "linear-gradient(45deg, #f29724 30%, #ffcc80 90%)",
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 4px 8px rgba(242, 151, 36, 0.3)",
+              },
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={() => {
+              if (!isLoading) {
+                loadMoreBrands(); // Trigger on hover
+              }
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <CircularProgress size={24} sx={{ color: "white" }} />
+            ) : (
+              "Load More Brands"
+            )}
+          </Button>
+        </Box>
       )}
-    </Button>
-  </Box>
-)}
-
 
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
@@ -329,4 +364,4 @@ const handleLikeClick = async(brandId) => {
   );
 };
 
-export default React.memo(TopInvestVdocardround);  
+export default React.memo(TopInvestVdocardround);

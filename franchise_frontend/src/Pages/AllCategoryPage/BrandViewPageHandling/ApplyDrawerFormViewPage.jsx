@@ -37,7 +37,7 @@ const ApplyDrawer = ({
         sx: {
           borderTopLeftRadius: 16,
           borderTopRightRadius: 16,
-          maxHeight: isMobile ? "80vh" : isTablet ? "70vh" : "93vh",
+          maxHeight: isMobile ? "80vh" : isTablet ? "70vh" : "99vh",
           width: isMobile ? "100%" : isTablet ? "80%" : 430,
           overflow: "auto",
           mx: "auto",
@@ -50,10 +50,13 @@ const ApplyDrawer = ({
             Apply for Franchise
             <Typography display="flex" flexDirection="column">
               <Typography fontSize="0.7rem" color="black">
-                Brand Name: {selectedBrand?.brandDetails?.brandName}
+                Brand Name: {selectedBrand[0]?.brandDetails?.brandName}
               </Typography>
               <Typography fontSize="0.7rem" color="black">
-                Brand Category: {selectedBrand?.franchiseDetails?.brandCategories?.child}
+                Brand Category: {selectedBrand[0]?.brandfranchisedetails
+?.franchiseDetails
+?.brandCategories
+?.child}
               </Typography>
             </Typography>
           </Typography>

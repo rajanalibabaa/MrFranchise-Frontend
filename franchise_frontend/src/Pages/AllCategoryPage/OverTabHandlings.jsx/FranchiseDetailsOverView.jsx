@@ -48,10 +48,13 @@ const FranchiseDetailsTable = ({ ficoDetails, formatCurrency }) => {
             align="center"
             sx={{
               borderBottom: "1px solid rgba(0,0,0,0.05)",
-              padding: "25px 16px",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
+              padding: "16px",
+              minWidth: j === 0 ? "180px" : "120px", // Adjust minimum widths as needed
+              maxWidth: "200px",
+              whiteSpace: "normal",
+              wordBreak: "break-word",
+              overflow: "visible",
+              textOverflow: "unset",
               fontWeight:
                 (j === 12 && model.roi) || (j === 14 && model.marginOnSales)
                   ? 700
@@ -96,6 +99,13 @@ const FranchiseDetailsTable = ({ ficoDetails, formatCurrency }) => {
           borderRadius: "16px",
           overflowX: "auto",
           maxHeight: "calc(100vh - 300px)",
+          "&::-webkit-scrollbar": {
+            height: "8px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#7ad03a",
+            borderRadius: "4px",
+          },
         }}
         onTouchStart={handleUserScrollStart}
         onTouchEnd={handleUserScrollEnd}
@@ -104,8 +114,8 @@ const FranchiseDetailsTable = ({ ficoDetails, formatCurrency }) => {
         <Table
           stickyHeader
           sx={{
-            minWidth: 2000,
-            tableLayout: "fixed",
+            minWidth: "100%",
+            tableLayout: "auto", // Changed to auto for better content-based sizing
           }}
         >
           <TableHead>
@@ -126,6 +136,10 @@ const FranchiseDetailsTable = ({ ficoDetails, formatCurrency }) => {
                     padding: "12px 16px",
                     borderBottom: "none",
                     whiteSpace: "nowrap",
+                    minWidth: i === 0 ? "180px" : "120px", // Match cell widths
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1,
                   }}
                 >
                   {header}

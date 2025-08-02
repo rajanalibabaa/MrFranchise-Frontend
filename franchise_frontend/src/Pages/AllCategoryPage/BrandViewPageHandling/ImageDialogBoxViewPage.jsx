@@ -129,8 +129,8 @@ const ImageDialog = ({
               key={index}
               onClick={() => setCurrentImageIndex(index)}
               sx={{
-                width: 60,
-                height: 60,
+                width: 80,
+                height: 80,
                 borderRadius: 1,
                 overflow: "hidden",
                 cursor: "pointer",

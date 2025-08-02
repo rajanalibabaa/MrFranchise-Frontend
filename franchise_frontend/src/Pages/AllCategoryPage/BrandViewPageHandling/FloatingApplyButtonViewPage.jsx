@@ -31,7 +31,7 @@ const FloatingApplyButton = ({ isMobile, brand, toggleDrawer }) => {
           fontSize: isMobile ? "0.875rem" : "1rem",
         }}
       >
-        Apply Now&nbsp; for&nbsp; <strong>{brand?.brandDetails?.brandName}</strong>
+        Apply Now&nbsp; for&nbsp; <strong>{brand[0]?.brandDetails?.brandName}</strong>
       </Button>
     </Box>
   );
