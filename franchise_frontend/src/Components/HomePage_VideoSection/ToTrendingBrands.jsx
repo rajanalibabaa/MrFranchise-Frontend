@@ -7,6 +7,8 @@ import {
   Stack,
   CircularProgress,
   Tooltip,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { RiBookmark3Fill } from "react-icons/ri";
 import { motion } from "framer-motion";
@@ -26,7 +28,9 @@ const TopInvestVdocardround = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [page, setPage] = useState(1);
   const [allBrands, setAllBrands] = useState([]);
- 
+  const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const dispatch = useDispatch();
  
   const {
@@ -134,15 +138,24 @@ const TopInvestVdocardround = () => {
   return (
     <Box component="section" sx={{ maxWidth: 1300, mx: "auto" }}>
       <Typography
-        variant="h5"
-        sx={{
-          mb: 2,
-          fontWeight: 800,
-          textAlign: "center",
-          background: "linear-gradient(45deg, #f29724 30%, #ffcc80 90%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}
+        variant={isMobile ? "body1" : "h5"}
+             fontWeight="bold"
+             sx={{
+               color: "black",
+               mb: 1,
+               textAlign: "left",
+               position: "relative",
+               "&:after": {
+                 content: '""',
+                 display: "block",
+                 width: "80px",
+                 height: "4px",
+                 background:
+                   theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                 mt: 1,
+                 borderRadius: 2,
+               },
+             }}
       >
         Franchise Opportunities
       </Typography>

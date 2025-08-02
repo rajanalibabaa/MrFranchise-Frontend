@@ -23,7 +23,8 @@ import {
   ListItemText,
   Divider,
   Chip,
-  CircularProgress
+  CircularProgress,
+  Autocomplete
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
@@ -53,8 +54,7 @@ const NavbarSearch = ({ open, handleClose }) => {
   const [activeSuggestion, setActiveSuggestion] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Filter options from Redux
-  const filterOptions = useSelector(state => state.filterDropdown);
+  // Get filter options from Redux store
   const {
     mainCategories = [],
     subCategories = [],
@@ -64,9 +64,9 @@ const NavbarSearch = ({ open, handleClose }) => {
     districts = [],
     cities = [],
     loading: dropdownLoading
-  } = filterOptions;
+  } = useSelector(state => state.filterDropdown);
 
-  // Selected filters
+  // Selected filters state
   const [selectedMainCategory, setSelectedMainCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
   const [selectedChildCategory, setSelectedChildCategory] = useState('');
@@ -77,6 +77,9 @@ const NavbarSearch = ({ open, handleClose }) => {
 
   // Search terms for filter dropdowns
   const [searchTerms, setSearchTerms] = useState({
+    mainCategory: '',
+    subCategory: '',
+    childCategory: '',
     state: '',
     district: '',
     city: '',
@@ -92,6 +95,8 @@ const NavbarSearch = ({ open, handleClose }) => {
   useEffect(() => {
     if (selectedMainCategory) {
       dispatch(fetchFilterOptions({ main: selectedMainCategory }));
+      setSelectedSubCategory('');
+      setSelectedChildCategory('');
     }
   }, [selectedMainCategory, dispatch]);
 
@@ -99,6 +104,7 @@ const NavbarSearch = ({ open, handleClose }) => {
   useEffect(() => {
     if (selectedSubCategory) {
       dispatch(fetchFilterOptions({ sub: selectedSubCategory }));
+      setSelectedChildCategory('');
     }
   }, [selectedSubCategory, dispatch]);
 
@@ -106,6 +112,8 @@ const NavbarSearch = ({ open, handleClose }) => {
   useEffect(() => {
     if (selectedState) {
       dispatch(fetchFilterOptions({ state: selectedState }));
+      setSelectedDistrict('');
+      setSelectedCity('');
     }
   }, [selectedState, dispatch]);
 
@@ -113,8 +121,69 @@ const NavbarSearch = ({ open, handleClose }) => {
   useEffect(() => {
     if (selectedDistrict) {
       dispatch(fetchFilterOptions({ district: selectedDistrict }));
+      setSelectedCity('');
     }
   }, [selectedDistrict, dispatch]);
+
+  // Filter main categories based on search term
+  const filteredMainCategories = useMemo(() => {
+    const term = searchTerms.mainCategory.toLowerCase();
+    return mainCategories.filter(cat => 
+      cat.toLowerCase().includes(term)
+    ).slice(0, 100);
+  }, [mainCategories, searchTerms.mainCategory]);
+
+  // Filter sub categories based on selected main category and search term
+  const filteredSubCategories = useMemo(() => {
+    if (!selectedMainCategory) return [];
+    const term = searchTerms.subCategory.toLowerCase();
+    return subCategories.filter(sub => 
+      sub.toLowerCase().includes(term)
+    ).slice(0, 100);
+  }, [selectedMainCategory, subCategories, searchTerms.subCategory]);
+
+  // Filter child categories based on selected sub category and search term
+  const filteredChildCategories = useMemo(() => {
+    if (!selectedSubCategory) return [];
+    const term = searchTerms.childCategory.toLowerCase();
+    return childCategories.filter(child => 
+      child.toLowerCase().includes(term)
+    ).slice(0, 100);
+  }, [selectedSubCategory, childCategories, searchTerms.childCategory]);
+
+  // Filter states based on search term
+  const filteredStates = useMemo(() => {
+    const term = searchTerms.state.toLowerCase();
+    return states.filter(state => 
+      state.toLowerCase().includes(term)
+    ).slice(0, 100);
+  }, [states, searchTerms.state]);
+
+  // Filter districts based on selected state and search term
+  const filteredDistricts = useMemo(() => {
+    if (!selectedState) return [];
+    const term = searchTerms.district.toLowerCase();
+    return districts.filter(district => 
+      district.toLowerCase().includes(term)
+    ).slice(0, 100);
+  }, [selectedState, districts, searchTerms.district]);
+
+  // Filter cities based on selected district and search term
+  const filteredCities = useMemo(() => {
+    if (!selectedDistrict) return [];
+    const term = searchTerms.city.toLowerCase();
+    return cities.filter(city => 
+      city.toLowerCase().includes(term)
+    ).slice(0, 100);
+  }, [selectedDistrict, cities, searchTerms.city]);
+
+  // Filter investment ranges based on search term
+  const filteredInvestmentRanges = useMemo(() => {
+    const term = searchTerms.investment.toLowerCase();
+    return investmentRanges.filter(range => 
+      range.toLowerCase().includes(term)
+    ).slice(0, 50);
+  }, [investmentRanges, searchTerms.investment]);
 
   // Generate search suggestions
   const searchSuggestions = useMemo(() => {
@@ -268,13 +337,10 @@ const NavbarSearch = ({ open, handleClose }) => {
     switch (suggestion.filterType) {
       case 'maincat':
         setSelectedMainCategory(suggestion.filterValue);
-        setSelectedSubCategory('');
-        setSelectedChildCategory('');
         setTab(0);
         break;
       case 'subcat':
         setSelectedSubCategory(suggestion.filterValue);
-        setSelectedChildCategory('');
         setTab(0);
         break;
       case 'childcat':
@@ -283,13 +349,10 @@ const NavbarSearch = ({ open, handleClose }) => {
         break;
       case 'state':
         setSelectedState(suggestion.filterValue);
-        setSelectedDistrict('');
-        setSelectedCity('');
         setTab(1);
         break;
       case 'district':
         setSelectedDistrict(suggestion.filterValue);
-        setSelectedCity('');
         setTab(1);
         break;
       case 'city':
@@ -360,56 +423,15 @@ const NavbarSearch = ({ open, handleClose }) => {
     setSelectedCity('');
     setSelectedInvestmentRange('');
     setSearchTerms({
+      mainCategory: '',
+      subCategory: '',
+      childCategory: '',
       state: '',
       district: '',
       city: '',
       investment: ''
     });
   };
-
-  // Filtered states for dropdown
-  const filteredStates = useMemo(() => {
-    const term = searchTerms.state.toLowerCase();
-    return states.filter(state => 
-      state.toLowerCase().includes(term)
-    );
-  }, [states, searchTerms.state]);
-
-  // Filtered districts for dropdown - filtered by selected state
-  const filteredDistricts = useMemo(() => {
-    const term = searchTerms.district.toLowerCase();
-    return districts.filter(district => 
-      district.toLowerCase().includes(term)
-    );
-  }, [districts, searchTerms.district]);
-
-  // Filtered cities for dropdown - filtered by selected district
-  const filteredCities = useMemo(() => {
-    const term = searchTerms.city.toLowerCase();
-    return cities.filter(city => 
-      city.toLowerCase().includes(term)
-    );
-  }, [cities, searchTerms.city]);
-
-  // Filtered investment ranges for dropdown
-  const filteredInvestmentRanges = useMemo(() => {
-    const term = searchTerms.investment.toLowerCase();
-    return investmentRanges.filter(range => 
-      range.toLowerCase().includes(term)
-    );
-  }, [investmentRanges, searchTerms.investment]);
-
-  // Get sub categories for selected main category
-  const currentSubCategories = useMemo(() => {
-    if (!selectedMainCategory) return [];
-    return subCategories.filter(sub => sub.maincat === selectedMainCategory);
-  }, [selectedMainCategory, subCategories]);
-
-  // Get child categories for selected sub category
-  const currentChildCategories = useMemo(() => {
-    if (!selectedSubCategory) return [];
-    return childCategories.filter(child => child.subcat === selectedSubCategory);
-  }, [selectedSubCategory, childCategories]);
 
   // Count active filters
   const activeFiltersCount = useMemo(() => {
@@ -620,60 +642,114 @@ const NavbarSearch = ({ open, handleClose }) => {
         {/* Tab Content */}
         {tab === 0 && (
           <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center" mb={3}>
+            {/* Main Category Filter */}
             <FormControl sx={{ minWidth: 200 }}>
-              <InputLabel>Industry</InputLabel>
-              <Select
+              <Autocomplete
+                options={filteredMainCategories}
                 value={selectedMainCategory}
-                onChange={(e) => {
-                  setSelectedMainCategory(e.target.value);
+                onChange={(_, newValue) => {
+                  setSelectedMainCategory(newValue);
                   setSelectedSubCategory('');
                   setSelectedChildCategory('');
                 }}
-                label="Industry"
+                inputValue={searchTerms.mainCategory}
+                onInputChange={(_, newInputValue) => {
+                  handleSearchChange('mainCategory', newInputValue);
+                }}
+                renderInput={(params) => (
+                  <TextField 
+                    {...params} 
+                    label="Industry" 
+                    variant="outlined" 
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {dropdownLoading && selectedMainCategory && (
+                            <CircularProgress color="inherit" size={20} />
+                          )}
+                          {params.InputProps.endAdornment}
+                        </>
+                      )
+                    }}
+                  />
+                )}
+                loading={dropdownLoading}
                 disabled={dropdownLoading}
-              >
-                <MenuItem value="">Select Industry</MenuItem>
-                {mainCategories.map((category, index) => (
-                  <MenuItem key={`cat-${index}`} value={category}>
-                    {category}
-                  </MenuItem>
-                ))}
-              </Select>
+              />
             </FormControl>
 
-            <FormControl sx={{ minWidth: 200 }} disabled={!selectedMainCategory || dropdownLoading}>
-              <InputLabel>Main Category</InputLabel>
-              <Select
+            {/* Sub Category Filter - dependent on selected main category */}
+            <FormControl sx={{ minWidth: 200 }}>
+              <Autocomplete
+                options={filteredSubCategories}
                 value={selectedSubCategory}
-                onChange={(e) => {
-                  setSelectedSubCategory(e.target.value);
+                onChange={(_, newValue) => {
+                  setSelectedSubCategory(newValue);
                   setSelectedChildCategory('');
                 }}
-                label="Main Category"
-              >
-                <MenuItem value="">Select Main Category</MenuItem>
-                {currentSubCategories.map((sub, index) => (
-                  <MenuItem key={`sub-cat-${index}`} value={sub.subcat}>
-                    {sub.subcat}
-                  </MenuItem>
-                ))}
-              </Select>
+                inputValue={searchTerms.subCategory}
+                onInputChange={(_, newInputValue) => {
+                  handleSearchChange('subCategory', newInputValue);
+                }}
+                renderInput={(params) => (
+                  <TextField 
+                    {...params} 
+                    label="Main Category" 
+                    variant="outlined"
+                    disabled={!selectedMainCategory || dropdownLoading}
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {dropdownLoading && selectedSubCategory && (
+                            <CircularProgress color="inherit" size={20} />
+                          )}
+                          {params.InputProps.endAdornment}
+                        </>
+                      )
+                    }}
+                  />
+                )}
+                loading={dropdownLoading}
+                disabled={!selectedMainCategory || dropdownLoading}
+              />
             </FormControl>
 
-            <FormControl sx={{ minWidth: 200 }} disabled={!selectedSubCategory || dropdownLoading}>
-              <InputLabel>Sub Category</InputLabel>
-              <Select
+            {/* Child Category Filter - dependent on selected sub category */}
+            <FormControl sx={{ minWidth: 200 }}>
+              <Autocomplete
+                options={filteredChildCategories}
                 value={selectedChildCategory}
-                onChange={(e) => setSelectedChildCategory(e.target.value)}
-                label="Sub Category"
-              >
-                <MenuItem value="">Select Sub Category</MenuItem>
-                {currentChildCategories.map((child, index) => (
-                  <MenuItem key={`child-cat-${index}`} value={child.childcat}>
-                    {child.childcat}
-                  </MenuItem>
-                ))}
-              </Select>
+                onChange={(_, newValue) => {
+                  setSelectedChildCategory(newValue);
+                }}
+                inputValue={searchTerms.childCategory}
+                onInputChange={(_, newInputValue) => {
+                  handleSearchChange('childCategory', newInputValue);
+                }}
+                renderInput={(params) => (
+                  <TextField 
+                    {...params} 
+                    label="Sub Category" 
+                    variant="outlined"
+                    disabled={!selectedSubCategory || dropdownLoading}
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {dropdownLoading && selectedChildCategory && (
+                            <CircularProgress color="inherit" size={20} />
+                          )}
+                          {params.InputProps.endAdornment}
+                        </>
+                      )
+                    }}
+                  />
+                )}
+                loading={dropdownLoading}
+                disabled={!selectedSubCategory || dropdownLoading}
+              />
             </FormControl>
           </Box>
         )}
@@ -682,133 +758,112 @@ const NavbarSearch = ({ open, handleClose }) => {
           <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center" mb={3}>
             {/* State Filter */}
             <FormControl sx={{ minWidth: 200 }}>
-              <InputLabel>State</InputLabel>
-              <Select
+              <Autocomplete
+                options={filteredStates}
                 value={selectedState}
-                onChange={(e) => {
-                  setSelectedState(e.target.value);
+                onChange={(_, newValue) => {
+                  setSelectedState(newValue);
                   setSelectedDistrict('');
                   setSelectedCity('');
                 }}
-                label="State"
-                disabled={dropdownLoading}
-                MenuProps={{
-                  PaperProps: {
-                    style: {
-                      maxHeight: 300,
-                    },
-                  },
+                inputValue={searchTerms.state}
+                onInputChange={(_, newInputValue) => {
+                  handleSearchChange('state', newInputValue);
                 }}
-              >
-                <MenuItem value="">All States</MenuItem>
-                <Box px={2} pb={1}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    variant="outlined"
-                    placeholder="Search states..."
-                    value={searchTerms.state}
-                    onChange={(e) => handleSearchChange('state', e.target.value)}
+                renderInput={(params) => (
+                  <TextField 
+                    {...params} 
+                    label="State" 
+                    variant="outlined" 
                     InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {dropdownLoading && selectedState && (
+                            <CircularProgress color="inherit" size={20} />
+                          )}
+                          {params.InputProps.endAdornment}
+                        </>
+                      )
                     }}
                   />
-                </Box>
-                {filteredStates.map((state, index) => (
-                  <MenuItem key={`state-${index}`} value={state}>
-                    {state}
-                  </MenuItem>
-                ))}
-              </Select>
+                )}
+                loading={dropdownLoading}
+                disabled={dropdownLoading}
+              />
             </FormControl>
 
             {/* District Filter - dependent on selected state */}
-            <FormControl sx={{ minWidth: 200 }} disabled={!selectedState || dropdownLoading}>
-              <InputLabel>District</InputLabel>
-              <Select
+            <FormControl sx={{ minWidth: 200 }}>
+              <Autocomplete
+                options={filteredDistricts}
                 value={selectedDistrict}
-                onChange={(e) => {
-                  setSelectedDistrict(e.target.value);
+                onChange={(_, newValue) => {
+                  setSelectedDistrict(newValue);
                   setSelectedCity('');
                 }}
-                label="District"
-                MenuProps={{
-                  PaperProps: {
-                    style: {
-                      maxHeight: 300,
-                    },
-                  },
+                inputValue={searchTerms.district}
+                onInputChange={(_, newInputValue) => {
+                  handleSearchChange('district', newInputValue);
                 }}
-              >
-                <MenuItem value="">All Districts</MenuItem>
-                <Box px={2} pb={1}>
-                  <TextField
-                    fullWidth
-                    size="small"
+                renderInput={(params) => (
+                  <TextField 
+                    {...params} 
+                    label="District" 
                     variant="outlined"
-                    placeholder="Search districts..."
-                    value={searchTerms.district}
-                    onChange={(e) => handleSearchChange('district', e.target.value)}
+                    disabled={!selectedState || dropdownLoading}
                     InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {dropdownLoading && selectedDistrict && (
+                            <CircularProgress color="inherit" size={20} />
+                          )}
+                          {params.InputProps.endAdornment}
+                        </>
+                      )
                     }}
                   />
-                </Box>
-                {filteredDistricts.map((district, index) => (
-                  <MenuItem key={`district-${index}`} value={district}>
-                    {district}
-                  </MenuItem>
-                ))}
-              </Select>
+                )}
+                loading={dropdownLoading}
+                disabled={!selectedState || dropdownLoading}
+              />
             </FormControl>
 
             {/* City Filter - dependent on selected district */}
-            <FormControl sx={{ minWidth: 200 }} disabled={!selectedDistrict || dropdownLoading}>
-              <InputLabel>City</InputLabel>
-              <Select
+            <FormControl sx={{ minWidth: 200 }}>
+              <Autocomplete
+                options={filteredCities}
                 value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                label="City"
-                MenuProps={{
-                  PaperProps: {
-                    style: {
-                      maxHeight: 300,
-                    },
-                  },
+                onChange={(_, newValue) => {
+                  setSelectedCity(newValue);
                 }}
-              >
-                <MenuItem value="">All Cities</MenuItem>
-                <Box px={2} pb={1}>
-                  <TextField
-                    fullWidth
-                    size="small"
+                inputValue={searchTerms.city}
+                onInputChange={(_, newInputValue) => {
+                  handleSearchChange('city', newInputValue);
+                }}
+                renderInput={(params) => (
+                  <TextField 
+                    {...params} 
+                    label="City" 
                     variant="outlined"
-                    placeholder="Search cities..."
-                    value={searchTerms.city}
-                    onChange={(e) => handleSearchChange('city', e.target.value)}
+                    disabled={!selectedDistrict || dropdownLoading}
                     InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {dropdownLoading && selectedCity && (
+                            <CircularProgress color="inherit" size={20} />
+                          )}
+                          {params.InputProps.endAdornment}
+                        </>
+                      )
                     }}
                   />
-                </Box>
-                {filteredCities.map((city, index) => (
-                  <MenuItem key={`city-${index}`} value={city}>
-                    {city}
-                  </MenuItem>
-                ))}
-              </Select>
+                )}
+                loading={dropdownLoading}
+                disabled={!selectedDistrict || dropdownLoading}
+              />
             </FormControl>
           </Box>
         )}
@@ -816,44 +871,37 @@ const NavbarSearch = ({ open, handleClose }) => {
         {tab === 2 && (
           <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center" mb={3}>
             <FormControl sx={{ minWidth: 200 }}>
-              <InputLabel>Investment Range</InputLabel>
-              <Select
+              <Autocomplete
+                options={filteredInvestmentRanges}
                 value={selectedInvestmentRange}
-                onChange={(e) => setSelectedInvestmentRange(e.target.value)}
-                label="Investment Range"
-                disabled={dropdownLoading}
-                MenuProps={{
-                  PaperProps: {
-                    style: {
-                      maxHeight: 300,
-                    },
-                  },
+                onChange={(_, newValue) => {
+                  setSelectedInvestmentRange(newValue);
                 }}
-              >
-                <MenuItem value="">Select Investment Range</MenuItem>
-                <Box px={2} pb={1}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    variant="outlined"
-                    placeholder="Search investment ranges..."
-                    value={searchTerms.investment}
-                    onChange={(e) => handleSearchChange('investment', e.target.value)}
+                inputValue={searchTerms.investment}
+                onInputChange={(_, newInputValue) => {
+                  handleSearchChange('investment', newInputValue);
+                }}
+                renderInput={(params) => (
+                  <TextField 
+                    {...params} 
+                    label="Investment Range" 
+                    variant="outlined" 
                     InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {dropdownLoading && selectedInvestmentRange && (
+                            <CircularProgress color="inherit" size={20} />
+                          )}
+                          {params.InputProps.endAdornment}
+                        </>
+                      )
                     }}
                   />
-                </Box>
-                {filteredInvestmentRanges.map((range, index) => (
-                  <MenuItem key={`range-${index}`} value={range}>
-                    {range}
-                  </MenuItem>
-                ))}
-              </Select>
+                )}
+                loading={dropdownLoading}
+                disabled={dropdownLoading}
+              />
             </FormControl>
           </Box>
         )}

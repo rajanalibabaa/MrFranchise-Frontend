@@ -54,7 +54,28 @@ function App() {
   const AccessToken = localStorage.getItem("accessToken");
   // console.log("Access Token:", AccessToken);
 
-  
+  // hide the right click disable 
+//   useEffect(() => {
+//   const disableRightClick = (e) => e.preventDefault();
+//   document.addEventListener("contextmenu", disableRightClick);
+//   return () => document.removeEventListener("contextmenu", disableRightClick);
+// }, []);
+
+
+useEffect(() => {
+  const disableShortcuts = (e) => {
+    if (
+      (e.ctrlKey && (e.key === 'c' || e.key === 's' || e.key === 'u' || e.key === 'p')) ||
+      (e.metaKey && (e.key === 'c' || e.key === 's' || e.key === 'u' || e.key === 'p'))
+    ) {
+      e.preventDefault();
+    }
+  };
+
+  document.addEventListener('keydown', disableShortcuts);
+  return () => document.removeEventListener('keydown', disableShortcuts);
+}, []);
+
 
   useEffect(() => {
     const logoutTimestamp = localStorage.getItem("logoutTimestamp");

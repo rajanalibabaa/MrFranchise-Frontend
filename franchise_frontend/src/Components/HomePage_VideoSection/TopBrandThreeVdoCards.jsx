@@ -33,6 +33,7 @@ import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 import { likeApiFunction } from "../../Api/likeApi";
 import { toggleHomeCardLike } from "../../Redux/Slices/TopCardFetchingSlice";
 import { token } from "../../Utils/autherId";
+import { RiBookmark3Fill, RiBookMarkedFill } from "react-icons/ri";
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -166,15 +167,15 @@ function TopBrandVdoCards() {
     }
   };
 
- const handleLikeClick = async(brandId) => {
-  if (!token) {
-    setShowLogin(true);
-    return;
-  }
-  dispatch(toggleBrandLike(brandId));
-  dispatch(toggleHomeCardLike(brandId));
-  await likeApiFunction(brandId)
-};
+  const handleLikeClick = async (brandId) => {
+    if (!token) {
+      setShowLogin(true);
+      return;
+    }
+    dispatch(toggleBrandLike(brandId));
+    dispatch(toggleHomeCardLike(brandId));
+    await likeApiFunction(brandId);
+  };
 
   const handleApply = (brand) => {
     postView(brand.uuid);
@@ -346,7 +347,6 @@ function TopBrandVdoCards() {
                     cursor: "pointer",
                     backgroundColor: "#000",
                     overflow: "hidden",
-                  
                   }}
                   onClick={() => togglePlayPause(0)}
                 >
@@ -524,22 +524,47 @@ function TopBrandVdoCards() {
                       alignItems="center"
                       sx={{ minWidth: 0, flex: 1, paddingBottom: "10px" }}
                     >
-                      <Avatar
-                        onClick={() => handleApply(mainBrand)}
-                        src={mainBrand.logo}
-                        alt={mainBrand.brandname}
-                        sx={{
-                          width: 50,
-                          height: 50,
-                          border: `2px solid ${
-                            theme.palette.mode === "dark"
-                              ? "#ffb74d"
-                              : "#f57c00"
-                          }`,
-                          boxShadow: theme.shadows[2],
-                          cursor: "pointer",
-                        }}
-                      />
+                      {isMobile && (
+                        <Avatar
+                          onClick={() => handleApply(mainBrand)}
+                          src={mainBrand.logo}
+                          alt={mainBrand.brandname}
+                          sx={{
+                            width: 50,
+                            height: 50,
+                            border: `2px solid ${
+                              theme.palette.mode === "dark"
+                                ? "#ffb74d"
+                                : "#f57c00"
+                            }`,
+                            boxShadow: theme.shadows[2],
+                            cursor: "pointer",
+                          }}
+                        />
+                      )}
+                      {!isMobile && (
+                        <Box
+                          component="img"
+                          onClick={() => handleApply(mainBrand)}
+                          src={mainBrand.logo}
+                          alt={mainBrand.brandname}
+                          sx={{
+                            width: 100,
+                            height: 50,
+                            border: `2px solid ${
+                              theme.palette.mode === "dark"
+                                ? "#ffb74d"
+                                : "#f57c00"
+                            }`,
+                            boxShadow: theme.shadows[2],
+                            cursor: "pointer",
+                            borderRadius: 0, // ✅ Ensures no rounding (true square)
+                            objectFit: "contain", // ✅ Keeps image aspect ratio inside square
+                            display: "block", // ✅ Prevents inline issues
+                          }}
+                        />
+                      )}
+
                       <Box sx={{ minWidth: 0, flex: 1 }}>
                         <Box display="flex" alignItems="center">
                           <Typography
@@ -577,10 +602,10 @@ function TopBrandVdoCards() {
                                     isLoading || likeProcessing[mainBrand.uuid]
                                   }
                                   sx={{
-                                    color: mainBrand.isLiked ? 'red' : 'gray',
-                                    '&:hover': {
+                                    color: mainBrand.isLiked ? "red" : "gray",
+                                    "&:hover": {
                                       // color: mainBrand.isLiked ? 'darkred' : 'darkgray',
-                                    }
+                                    },
                                   }}
                                 >
                                   {mainBrand.isLiked ? (
@@ -589,6 +614,16 @@ function TopBrandVdoCards() {
                                     <FavoriteBorder />
                                   )}
                                 </IconButton>
+                                 <IconButton
+                                          // onClick={() => handleToggleShortList(brand)}
+                                          // sx={{
+                                          //   color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                                          // }}
+                                        >
+                                          {/* <Tooltip title={"ShortList"}> */}
+                                            <RiBookmark3Fill size={21} />
+                                          {/* </Tooltip> */}
+                                        </IconButton>
                               </Tooltip>
                             )}
                           </Box>
@@ -678,6 +713,7 @@ function TopBrandVdoCards() {
                         )}
 
                         {!isMobile && (
+                          
                           <Tooltip
                             title={
                               mainBrand.isLiked
@@ -702,7 +738,18 @@ function TopBrandVdoCards() {
                                 <FavoriteBorder />
                               )}
                             </IconButton>
+                             <IconButton
+                                          // onClick={() => handleToggleShortList(brand)}
+                                          // sx={{
+                                          //   color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                                          // }}
+                                        >
+                                          <Tooltip title={"ShortList"}>
+                                            <RiBookmark3Fill size={21} />
+                                          </Tooltip>
+                                        </IconButton>
                           </Tooltip>
+                          
                         )}
                       </Stack>
                     </Stack>
@@ -886,31 +933,61 @@ function TopBrandVdoCards() {
                         gap: 0.5,
                       }}
                     >
-                      <Tooltip title={brand.brandname}>
-                        <Typography
-                          variant={isMobile ? "caption" : "body1"}
-                          color="black"
-                          noWrap={false}
+                      {!isMobile && (
+                        <Box
+                          component="img"
+                          onClick={() => handleApply(mainBrand)}
+                          src={mainBrand.logo}
+                          alt={mainBrand.brandname}
                           sx={{
-                            flex: 1,
-                            minWidth: 0,
-                            whiteSpace: "normal",
-                            wordBreak: "break-word",
-                            overflowWrap: "break-word",
+                            width: 100,
+                            height: 50,
+                            border: `2px solid ${
+                              theme.palette.mode === "dark"
+                                ? "#ffb74d"
+                                : "#f57c00"
+                            }`,
+                            boxShadow: theme.shadows[2],
+                            cursor: "pointer",
+                            borderRadius: 0, // ✅ Ensures no rounding (true square)
+                            objectFit: "contain", // ✅ Keeps image aspect ratio inside square
+                            display: "block", // ✅ Prevents inline issues
                           }}
-                        >
-                          {brand.brandname}
-                        </Typography>
-                      </Tooltip>
-                      <IconButton
+                        />
+                      )}
+                      {isMobile && (
+                        <Box
+                          component="img"
+                          onClick={() => handleApply(mainBrand)}
+                          src={mainBrand.logo}
+                          alt={mainBrand.brandname}
+                          sx={{
+                            width: 80,
+                            height: 50,
+                            border: `2px solid ${
+                              theme.palette.mode === "dark"
+                                ? "#ffb74d"
+                                : "#f57c00"
+                            }`,
+                            boxShadow: theme.shadows[2],
+                            cursor: "pointer",
+                            borderRadius: 0, // ✅ Ensures no rounding (true square)
+                            objectFit: "contain", // ✅ Keeps image aspect ratio inside square
+                            display: "block", // ✅ Prevents inline issues
+                          }}
+                        />
+                      )}
+
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                        <IconButton
                         size="small"
                         onClick={() =>
                           handleLikeClick(brand.uuid, brand.isLiked)
                         }
                         disabled={isLoading || likeProcessing[brand.uuid]}
                         sx={{
-                          color: brand.isLiked ? 'red' : 'gray',
-                          '&:hover': {
+                          color: brand.isLiked ? "red" : "gray",
+                          "&:hover": {
                             // color: brand.isLiked ? 'darkred' : 'darkgray',
                             // backgroundColor: 'rgba(0, 0, 0, 0.04)',
                           },
@@ -922,74 +999,91 @@ function TopBrandVdoCards() {
                           <FavoriteBorder fontSize="small" />
                         )}
                       </IconButton>
-                    </Box>
 
-                    <Typography
-                      variant="caption"
-                      color="Black"
-                      sx={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        mt: 1,
-                        fontSize: "0.7rem",
-                        lineHeight: 1.1,
-                      }}
-                    >
-                      Categories: {brand.brandCategories?.child}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="Black"
-                      sx={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        mt: 1.2,
-                        fontSize: "0.7rem",
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      Investment: {brand.fico?.investmentRange}
-                    </Typography>
-                    {!isMobile && (
+                       <IconButton
+                                          // onClick={() => handleToggleShortList(brand)}
+                                          // sx={{
+                                          //   color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                                          // }}
+                                        >
+                                          <Tooltip title={"ShortList"}>
+                                            <RiBookmark3Fill size={21} />
+                                          </Tooltip>
+                                        </IconButton>
+                      </Box>
+                    </Box>
+                   
+                 
+                    <Box
+  sx={{
+    maxHeight: 80, // Adjust height as needed
+    overflowY: "auto",
+    // mt: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: 0.8,
+    scrollbarWidth: "thin", // For Firefox
+    "&::-webkit-scrollbar": {
+      width: "4px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: "#ccc",
+      borderRadius: "2px",
+    },
+  }}
+>
+   <Tooltip title={brand.brandname}>
                       <Typography
-                        variant="caption"
-                        color="Black"
+                        variant={isMobile ? "caption" : "body1"}
+                        color="black"
+                        mt={1}
+                        noWrap={false}
                         sx={{
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          mt: 1.2,
-                          fontSize: "0.7rem",
-                          lineHeight: 1.4,
+                          flex: 1,
+                          minWidth: 0,
+                          whiteSpace: "normal",
+                          wordBreak: "break-word",
+                          overflowWrap: "break-word",
                         }}
                       >
-                        Area: {brand.fico?.areaRequired}
+                        {brand.brandname}
                       </Typography>
-                    )}
-                    <Typography
-                      variant="caption"
-                      color="Black"
-                      sx={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        mt: 1.2,
-                        fontSize: "0.7rem",
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      Model: {brand.fico?.franchiseModel}
-                    </Typography>
+                    </Tooltip>
+  <Typography
+    variant="caption"
+    color="Black"
+    sx={{ fontSize: "0.7rem", lineHeight: 1.1 }}
+  >
+    Categories: {brand.brandCategories?.child}
+  </Typography>
+
+  <Typography
+    variant="caption"
+    color="Black"
+    sx={{ fontSize: "0.7rem", lineHeight: 1.4 }}
+  >
+    Investment: {brand.fico?.investmentRange}
+  </Typography>
+
+  {/* {!isMobile && ( */}
+    <Typography
+      variant="caption"
+      color="Black"
+      sx={{ fontSize: "0.7rem", lineHeight: 1.4 }}
+    >
+      Area: {brand.fico?.areaRequired}
+    </Typography>
+  {/* )} */}
+
+  <Typography
+    variant="caption"
+    color="Black"
+    sx={{ fontSize: "0.7rem", lineHeight: 1.5 }}
+  >
+    Model: {brand.fico?.franchiseModel}
+  </Typography>
+</Box>
+
                   </Box>
 
                   <Button
