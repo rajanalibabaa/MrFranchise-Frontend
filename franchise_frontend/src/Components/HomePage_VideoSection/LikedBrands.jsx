@@ -31,6 +31,10 @@ const LikedBrands = () => {
  
   const userId = useSelector((state) => state.auth?.investorUUID) || localStorage.getItem("id");
   const accessToken = useSelector((state) => state.auth?.AccessToken);
+  const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID")
+  if (!id) {
+    return null;
+  }
  
   // Fetch liked brands data
   const fetchLikedBrands = useCallback(async () => {
@@ -168,7 +172,10 @@ const LikedBrands = () => {
   }
  
   return (
-    <Box
+
+    <>
+    
+      <Box
       ref={containerRef}
       sx={{
         py: isMobile ? 1 : 2,
@@ -314,7 +321,7 @@ const LikedBrands = () => {
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          {brands?.brands?.length > 0 && brands.brands.map((brand) => (
+          {brands?.brands?.length > 4 && brands.brands.map((brand) => (
             <motion.div key={brand.uuid || brand.id}>
               <HomePageBrandCard
                 brand={brand}
@@ -335,6 +342,8 @@ const LikedBrands = () => {
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}
     </Box>
+   
+    </>
   );
 };
  

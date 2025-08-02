@@ -26,6 +26,7 @@ import HomePageBrandCard from "./HomePageBrandCard.jsx";
 import { token } from "../../Utils/autherId.jsx";
 import { toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
 import { likeApiFunction } from "../../Api/likeApi.jsx";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 
 // Breakpoints
 const CARD_DIMENSIONS = {

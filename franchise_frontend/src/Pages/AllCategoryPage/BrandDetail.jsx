@@ -90,7 +90,7 @@ const BrandDetails = ({ brandData }) => {
   const investmentRanges = useMemo(
     () => [
       ...new Set(
-        selectedBrand?.franchiseDetails?.fico?.map((m) => m.investmentRange) ||
+        selectedBrand[0]?.brandfranchisedetails?.franchiseDetails?.fico?.map((m) => m.investmentRange) ||
           []
       ),
     ],
@@ -107,11 +107,12 @@ const BrandDetails = ({ brandData }) => {
     []
   );
 
-  const allVideos = useMemo(
-    () => selectedBrand[0].uploads?.franchiseVideos || [],
-    [selectedBrand]
-  );
-
+ const allVideos = useMemo(() => {
+  if (!selectedBrand || selectedBrand.length === 0) return [];
+  return selectedBrand[0]?.uploads?.franchiseVideos || [];
+}, [selectedBrand]);
+ console.log("allVideos:", allVideos);
+ 
   const allImages = useMemo(
     () => [
       ...(selectedBrand[0]?.uploads?.logo
@@ -320,6 +321,7 @@ const BrandDetails = ({ brandData }) => {
     fetchBrand();
     return () => controller.abort();
   }, [uuid]);
+
   useEffect(() => {
     if (investorUUID && AccessToken) {
       const controller = new AbortController();
@@ -327,76 +329,67 @@ const BrandDetails = ({ brandData }) => {
       return () => controller.abort();
     }
   }, [fetchInvestorDetails, investorUUID, AccessToken]);
-  useEffect(() => {
-    if (
-      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
-        ?.locations
-    ) {
-      const locations =
-        selectedBrand.expansionLocationData.expansionLocations.domestic
-          .locations;
-      const states = [
-        ...new Set(locations.map((loc) => loc.state).filter(Boolean)),
-      ];
-      setLocationData((prev) => ({
-        ...prev,
-        states,
-        districts: [],
-        cities: [],
-      }));
-    }
-  }, [selectedBrand]);
-  useEffect(() => {
-    if (
-      formData.state &&
-      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
-        ?.locations
-    ) {
-      const locations =
-        selectedBrand.expansionLocationData.expansionLocations.domestic
-          .locations;
-      const stateObj = locations.find((loc) => loc.state === formData.state);
-      const districts = [
-        ...new Set(stateObj?.districts?.map((d) => d.district) || []),
-      ];
-      setLocationData((prev) => ({
-        ...prev,
-        districts,
-        cities: [],
-      }));
-      setFormData((prev) => ({
-        ...prev,
-        district: "",
-        city: "",
-      }));
-    }
-  }, [formData.state, selectedBrand]);
 
-  useEffect(() => {
-    if (
-      formData.state &&
-      formData.district &&
-      selectedBrand?.expansionLocationData?.expansionLocations?.domestic
-        ?.locations
-    ) {
-      const locations =
-        selectedBrand.expansionLocationData.expansionLocations.domestic
-          .locations;
-      const stateObj = locations.find((loc) => loc.state === formData.state);
-      const districtObj = stateObj?.districts?.find(
-        (d) => d.district === formData.district
-      );
-      const cities = [...new Set(districtObj?.cities || [])];
-      setLocationData((prev) => ({
-        ...prev,
-        cities,
-      }));
-      setFormData((prev) => ({
-        ...prev,
-        city: "",
-      }));
-    }
-  }, [formData.district, formData.state, selectedBrand]);
+useEffect(() => {
+  const locations =
+    selectedBrand[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
+console.log("locations",locations)
+  if (locations.length > 0) {
+    const states = [
+      ...new Set(locations.map((loc) => loc.state).filter(Boolean)),
+    ];
+    setLocationData((prev) => ({
+      ...prev,
+      states,
+      districts: [],
+      cities: [],
+    }));
+  }
+}, [selectedBrand]);
+
+useEffect(() => {
+  const locations =
+    selectedBrand[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
+
+  if (formData.state && locations.length > 0) {
+    const stateObj = locations.find((loc) => loc.state === formData.state);
+    const districts = [
+      ...new Set(stateObj?.districts?.map((d) => d.district) || []),
+    ];
+    setLocationData((prev) => ({
+      ...prev,
+      districts,
+      cities: [],
+    }));
+    setFormData((prev) => ({
+      ...prev,
+      district: "",
+      city: "",
+    }));
+  }
+}, [formData.state, selectedBrand]);
+
+useEffect(() => {
+  const locations =
+    selectedBrand[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
+
+  if (formData.state && formData.district && locations.length > 0) {
+    const stateObj = locations.find((loc) => loc.state === formData.state);
+    const districtObj = stateObj?.districts?.find(
+      (d) => d.district === formData.district
+    );
+    const cities = [...new Set(districtObj?.cities || [])];
+    setLocationData((prev) => ({
+      ...prev,
+      cities,
+    }));
+    setFormData((prev) => ({
+      ...prev,
+      city: "",
+    }));
+  }
+}, [formData.district, formData.state, selectedBrand]);
+
 
   useEffect(() => {
     const handleScroll = () => {

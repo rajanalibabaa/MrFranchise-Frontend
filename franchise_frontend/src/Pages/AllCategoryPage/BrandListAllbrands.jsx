@@ -226,25 +226,25 @@ function BrandList() {
         mainCategories: unique(brands.map(b => b.brandCategories?.main)),
         subCategories: unique(brands.map(b => b.brandCategories?.sub)),
         childCategories: unique(brands.map(b => b.brandCategories?.child)),
-        investmentRanges: unique(brands.flatMap(b => 
-          b.fico?.map(f => f.investmentRange)
-        )),
-        franchiseModels: unique(brands.flatMap(b => 
-          b.fico?.map(f => f.franchiseModel)
-        )),
-        states: unique(brands.flatMap(b => 
-          b.expansionLocationData?.expansionLocations.domestic?.locations?.map(l => l.state)
-        )),
-        districts: unique(brands.flatMap(b => 
-          b.expansionLocationData?.expansionLocations.domestic?.locations?.flatMap(l => 
-            l.districts?.map(d => d.district)
-          )
-        )),
-        cities: unique(brands.flatMap(b => 
-          b.expansionLocationData?.expansionLocations.domestic?.locations?.flatMap(l => 
-            l.districts?.flatMap(d => d.cities)
-          )
-        ))
+        // investmentRanges: unique(brands.flatMap(b => 
+        //   b.fico?[0].map(f => f.investmentRange)
+        // )),
+        // franchiseModels: unique(brands.flatMap(b => 
+        //   b.fico?.map(f => f.franchiseModel)
+        // )),
+        // states: unique(brands.flatMap(b => 
+        //   b.expansionLocationData?.expansionLocations.domestic?.locations?.map(l => l.state)
+        // )),
+        // districts: unique(brands.flatMap(b => 
+        //   b.expansionLocationData?.expansionLocations.domestic?.locations?.flatMap(l => 
+        //     l.districts?.map(d => d.district)
+        //   )
+        // )),
+        // cities: unique(brands.flatMap(b => 
+        //   b.expansionLocationData?.expansionLocations.domestic?.locations?.flatMap(l => 
+        //     l.districts?.flatMap(d => d.cities)
+        //   )
+        // ))
       };
     }
 

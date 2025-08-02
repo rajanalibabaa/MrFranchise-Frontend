@@ -40,13 +40,15 @@ const HomePageBrandCard = React.memo(
     dimensions,
     theme,
   }) => {
+
+    console.log("card coming brand",brand)
     const videoRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
     const observerRef = useRef();
     const [showLogin, setShowLogin] = useState(false);
     
     const brandId = brand?.uuid || "";
-    const franchiseModel = brand?.fico?.[0] || {}; // Changed to match the array structure
+    const franchiseModel = brand?.fico || {}; // Changed to match the array structure
     const category = brand?.brandCategories || {}; // Changed to match the new structure
     const videoUrl = brand?.franchiseVideos ||brand?.logo ; // Direct URL now
     const brandLogo = brand?.logo || "";
@@ -185,6 +187,8 @@ const HomePageBrandCard = React.memo(
                   src={brandLogo}
                   alt={brandName}
                   loading="lazy"
+                   onClick={() => handleApply(brand)}
+cursor="pointer"
                   sx={{
                     width: 100,
                     height: 50,
@@ -229,6 +233,8 @@ const HomePageBrandCard = React.memo(
               <Typography
                 variant="body1"
                 fontWeight={800}
+                                onClick={() => handleApply(brand)}
+cursor="pointer"
                 sx={{
                   whiteSpace: "nowrap",
                   overflow: "hidden",

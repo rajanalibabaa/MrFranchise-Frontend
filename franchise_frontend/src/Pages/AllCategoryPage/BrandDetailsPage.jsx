@@ -1,17 +1,25 @@
 import { useEffect, useState, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import BrandDetails from "./BrandDetail.jsx";
 import { CircularProgress, Box } from "@mui/material";
 import axios from "axios";
- 
+
 function BrandDetailsPage() {
-  const { brandId: routeBrandId } = useParams(); // fallback if needed
+  const { brandId: routeBrandId } = useParams();
+  const location = useLocation();
   const [brandData, setBrandData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
- 
-  // Get brandId from localStorage instead of URL
+
+  // Get the most relevant brand ID (priority: URL param > location state > localStorage)
   const brandId = useMemo(() => {
+    // First check if brandId is passed in route params
+    if (routeBrandId) return routeBrandId;
+    
+    // Then check if brandId is passed in location state (from dialog/navigation)
+    if (location.state?.brandId) return location.state.brandId;
+    
+    // Finally fall back to localStorage
     const keys = Object.keys(localStorage);
     for (const key of keys) {
       if (key.startsWith("brand-")) {
@@ -19,37 +27,59 @@ function BrandDetailsPage() {
         if (item?.uuid) return item.uuid;
       }
     }
-    return routeBrandId; // fallback if needed
-  }, [routeBrandId]);
- 
-  const brandKey = useMemo(() => `viewing-brand-id-${brandId}`, [brandId]);
- 
+    
+    return null;
+  }, [routeBrandId, location.state]);
+
+  // Generate a unique key for this brand view
+  const brandKey = useMemo(() => `brand-view-${brandId || 'none'}`, [brandId]);
+
   useEffect(() => {
     const fetchBrand = async () => {
+      if (!brandId) {
+        setError("Brand ID not found.");
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
+        setError(null);
+        
+        // Check sessionStorage first for cached data
+        const cachedData = sessionStorage.getItem(`brand-data-${brandId}`);
+        if (cachedData) {
+          setBrandData(JSON.parse(cachedData));
+          console.log("Using cached brand data");
+          setLoading(false);
+          return;
+        }
+
+        // Fetch fresh data from API
         const res = await axios.get(
           `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${brandId}`
         );
-        setBrandData(res.data?.data); // depends on your API response structure
-        console.log("Brand data fetched:", res.data?.data);
-        sessionStorage.setItem(brandKey, brandId);
+        
+        const brandData = res.data?.data;
+        if (brandData) {
+          setBrandData(brandData);
+          // Cache the data in sessionStorage
+          sessionStorage.setItem(`brand-data-${brandId}`, JSON.stringify(brandData));
+          console.log("Brand data fetched:", brandData);
+        } else {
+          throw new Error("No data returned from API");
+        }
       } catch (err) {
         console.error("Error fetching brand data:", err);
-        setError("Failed to load brand details.");
+        setError(err.response?.data?.message || "Failed to load brand details.");
       } finally {
         setLoading(false);
       }
     };
- 
-    if (brandId) {
-      fetchBrand();
-    } else {
-      setError("Brand ID not found in localStorage.");
-      setLoading(false);
-    }
-  }, [brandId, brandKey]);
- 
+
+    fetchBrand();
+  }, [brandId]);
+
   if (loading) {
     return (
       <Box
@@ -70,11 +100,11 @@ function BrandDetailsPage() {
       </Box>
     );
   }
- 
-  if (error) return <div>{error}</div>;
- 
-  if (!brandData) return <div>No brand data found.</div>;
- 
+
+  if (error) return <div>Error: {error}</div>;
+
+  if (!brandData) return <div>No brand data found for ID: {brandId}</div>;
+
   return (
     <BrandDetails
       brandData={brandData}
@@ -83,5 +113,5 @@ function BrandDetailsPage() {
     />
   );
 }
- 
+
 export default BrandDetailsPage;

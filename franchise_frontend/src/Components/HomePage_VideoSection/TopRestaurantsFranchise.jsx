@@ -23,6 +23,7 @@ import { token } from "../../Utils/autherId.jsx";
 import { toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
 import { likeApiFunction } from "../../Api/likeApi.jsx";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 
 import { motion } from "framer-motion";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
@@ -47,6 +48,7 @@ const TopRestaurantsFranchise = () => {
     error,
     pagination
   } = fetchToprestarunt || {};
+
  
    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
    const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
