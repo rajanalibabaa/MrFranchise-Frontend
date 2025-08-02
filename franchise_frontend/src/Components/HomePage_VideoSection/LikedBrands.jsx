@@ -42,31 +42,8 @@ const LikedBrands = () => {
       });
       console.log("=== :",response.data)
  
-      // Check the actual response structure and adjust accordingly
-      // const responseData = response.data;
- 
-      // First try: check if data is directly in response.data
-      // let brandsData = Array.isArray(responseData)? responseData :[];
- 
-      // Second try: check if data is in response.data.data
-      // if(!Array.isArray(brandsData)) {
-      //   brandsData = Array.isArray(responseData.data) ? responseData.data : [];
-      // }
-   
-      // Filter to only show liked brands
-      // const likedBrands = brandsData.filter(brand => brand.isLiked);
-      // setBrands(likedBrands);
- 
- 
        let brandsData =  response.data.data;
- 
-    // if (Array.isArray(response.data)) {
-    //   brandsData = response.data;
-    // } else if (Array.isArray(response.data)) {
-    //   brandsData = response.data;
-    // } else if (Array.isArray(response.data.likedBrands)) {
-    //   brandsData = response.data.likedBrands;
-    // }
+
       setBrands(brandsData);
  
       console.log("xxxxx : ",brandsData.brands.length)
@@ -189,22 +166,6 @@ const LikedBrands = () => {
       </Box>
     );
   }
- 
-  // if (!brands.length) {
-  //   return (
-  //     <Box sx={{
-  //       display: 'flex',
-  //       justifyContent: 'center',
-  //       py: 10,
-  //       textAlign: 'center'
-  //     }}>
-  //       <Typography variant="body1">
-  //         No liked brands found. Like some brands to see them here.
-  //       </Typography>
-  //     </Box>
-  //   );
-  // }
- 
  
   return (
     <Box

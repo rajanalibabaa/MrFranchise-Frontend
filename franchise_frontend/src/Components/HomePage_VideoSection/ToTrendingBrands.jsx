@@ -49,7 +49,7 @@ const TopInvestVdocardround = () => {
 
   // Initial load and pagination
   useEffect(() => {
-    if (!fetchedPages.includes(page)) {
+    if (!(fetchedPages || [] ).includes(page)) {
       console.log("DISPATCHING BRANDS PAGE:", page);
       dispatch(fetchBrands({ page }));
     }
