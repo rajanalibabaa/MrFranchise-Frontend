@@ -11,6 +11,7 @@ import openBrandViewPage  from "../Slices/OpenBrandNewPageSlice.jsx";
 import topFoodsfranchise from "../Slices/TopCardFetchingSlice.jsx";
 import filterDropdown from "../../Redux/Slices/filterDropdownData.jsx"
 import filterBrandReducer from "../../Redux/Slices/FilterBrandSlice.jsx"
+import brandCategoryReducer from "../../Redux/Slices/SideMenuHoverBrandSlices.jsx"
  const store = configureStore({
   reducer: {
     navbar:navReducer,
@@ -22,7 +23,8 @@ import filterBrandReducer from "../../Redux/Slices/FilterBrandSlice.jsx"
     loading :loadingReducer,
     brands:getAllBrands,
     foodfranchise:topFoodsfranchise,
-    openBrandDialog: openBrandViewPage
+    openBrandDialog: openBrandViewPage,
+    brandCategory: brandCategoryReducer
   },
 });
 export default store;

@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
-
+ 
 const API_BASE_URL = 'http://localhost:5000/api/v1/';
-
+ 
 // Async thunk for fetching all filter options
 export const fetchFilterOptions = createAsyncThunk(
   'filterDropdown/fetchFilterOptions',
@@ -10,20 +10,20 @@ export const fetchFilterOptions = createAsyncThunk(
     try {
       const { sub, state, district } = params;
       const queryParams = new URLSearchParams();
-      
+     
       if (sub) queryParams.append('sub', sub);
       if (state) queryParams.append('state', state);
       if (district) queryParams.append('district', district);
-
+ 
       const response = await axios.post(`${API_BASE_URL}filter/getAllBrandFiltersdata?${queryParams}`);
       console.log( response.data.data)
-      return response.data.data; 
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
-
+ 
 const initialState = {
   // Main filter options
   mainCategories: [],
@@ -34,20 +34,20 @@ const initialState = {
   states: [],
   districts: [],
   cities: [],
-  
+ 
   // Loading states
   loading: false,
   loadingChildCategories: false,
   loadingDistricts: false,
   loadingCities: false,
-  
+ 
   // Error states
   error: null,
   childCategoriesError: null,
   districtsError: null,
   citiesError: null,
 };
-
+ 
 const filterDropdownSlice = createSlice({
   name: 'filterDropdown',
   initialState,
@@ -79,12 +79,12 @@ const filterDropdownSlice = createSlice({
       })
       .addCase(fetchFilterOptions.fulfilled, (state, action) => {
         const params = action.meta.arg || {};
-        
+       
         if (params.sub) {
           // Child categories response
           state.childCategories = action.payload;
           state.loadingChildCategories = false;
-        } 
+        }
         else if (params.state) {
           // Districts response
           state.districts = action.payload;
@@ -107,11 +107,11 @@ const filterDropdownSlice = createSlice({
       })
       .addCase(fetchFilterOptions.rejected, (state, action) => {
         const params = action.meta.arg || {};
-        
+       
         if (params.sub) {
           state.childCategoriesError = action.payload;
           state.loadingChildCategories = false;
-        } 
+        }
         else if (params.state) {
           state.districtsError = action.payload;
           state.loadingDistricts = false;
@@ -127,12 +127,13 @@ const filterDropdownSlice = createSlice({
       });
   }
 });
-
-export const { 
-  resetChildCategories, 
-  resetDistricts, 
+ 
+export const {
+  resetChildCategories,
+  resetDistricts,
   resetCities,
-  clearErrors 
+  clearErrors
 } = filterDropdownSlice.actions;
-
+ 
 export default filterDropdownSlice.reducer;
+ 

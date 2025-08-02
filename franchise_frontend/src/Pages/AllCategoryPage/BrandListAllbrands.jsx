@@ -1,3 +1,4 @@
+
 import React, {
   useState,
   useEffect,
@@ -107,7 +108,11 @@ function BrandList() {
     states = [],
     districts = [],
     cities = [],
-    loading: dropdownLoading
+    loading: dropdownLoading,
+    loadingSubCategories,
+    loadingChildCategories,
+    loadingDistricts,
+    loadingCities
   } = filterDropdownState;
 
   // Fetch initial data
@@ -115,6 +120,11 @@ function BrandList() {
     dispatch(fetchFilteredBrands(filters));
     dispatch(fetchFilterOptions());
   }, [dispatch]);
+
+  // Fetch brands when filters change
+  useEffect(() => {
+    dispatch(fetchFilteredBrands(filters));
+  }, [dispatch, filters]);
 
   // Handle scroll position
   useEffect(() => {
@@ -131,7 +141,6 @@ function BrandList() {
   // Handle filter changes
   const handleFilterChange = useCallback((name, value) => {
     dispatch(setFilter({ filterName: name, value }));
-    dispatch(fetchFilteredBrands({ ...filters, [name]: value }));
     
     // Fetch dependent data when parent filter changes
     if (name === 'maincat') {
@@ -143,17 +152,16 @@ function BrandList() {
     } else if (name === 'district') {
       dispatch(fetchFilterOptions({ district: value }));
     }
-  }, [dispatch, filters]);
+  }, [dispatch]);
 
   const handleClearFilters = useCallback(() => {
     dispatch(resetFilters());
-    dispatch(fetchFilteredBrands(initialFilters));
   }, [dispatch]);
 
   const handlePageChange = useCallback((event, page) => {
     dispatch(setPage(page));
-    dispatch(fetchFilteredBrands({ ...filters, page }));
-  }, [dispatch, filters]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [dispatch]);
 
   const handleLikeClick = useCallback(
     async (brandId, isLiked) => {
@@ -205,55 +213,10 @@ function BrandList() {
     ).length;
   }, [filters]);
 
-  // Extract available filter options from brands data
-  const availableFilterOptions = useMemo(() => {
-    const options = {
-      mainCategories,
-      subCategories,
-      childCategories,
-      investmentRanges,
-      franchiseModels,
-      states,
-      districts,
-      cities
-    };
-
-    // If dropdown data is still loading, extract from current brands
-    if (dropdownLoading && brands.length > 0) {
-      const unique = (items) => [...new Set(items.filter(Boolean))];
-      
-      return {
-        mainCategories: unique(brands.map(b => b.brandCategories?.main)),
-        subCategories: unique(brands.map(b => b.brandCategories?.sub)),
-        childCategories: unique(brands.map(b => b.brandCategories?.child)),
-        // investmentRanges: unique(brands.flatMap(b => 
-        //   b.fico?[0].map(f => f.investmentRange)
-        // )),
-        // franchiseModels: unique(brands.flatMap(b => 
-        //   b.fico?.map(f => f.franchiseModel)
-        // )),
-        // states: unique(brands.flatMap(b => 
-        //   b.expansionLocationData?.expansionLocations.domestic?.locations?.map(l => l.state)
-        // )),
-        // districts: unique(brands.flatMap(b => 
-        //   b.expansionLocationData?.expansionLocations.domestic?.locations?.flatMap(l => 
-        //     l.districts?.map(d => d.district)
-        //   )
-        // )),
-        // cities: unique(brands.flatMap(b => 
-        //   b.expansionLocationData?.expansionLocations.domestic?.locations?.flatMap(l => 
-        //     l.districts?.flatMap(d => d.cities)
-        //   )
-        // ))
-      };
-    }
-
-    return options;
-  }, [brands, dropdownLoading, mainCategories, subCategories, childCategories, 
-      investmentRanges, franchiseModels, states, districts, cities]);
-
   return (
     <Container maxWidth="xl" sx={{ mt: 0, mb: 6 }}>
+
+
       {/* Comparison Button */}
       {selectedForComparison.length > 0 && (
         <Box sx={{ position: "fixed", top: 290, right: 25, zIndex: 1000 }}>
@@ -321,16 +284,18 @@ function BrandList() {
                 onFilterChange={handleFilterChange}
                 onClearFilters={handleClearFilters}
                 activeFilterCount={activeFilterCount}
-                categories={availableFilterOptions.mainCategories}
-                subCategories={availableFilterOptions.subCategories}
-                childCategories={availableFilterOptions.childCategories}
-                modelTypes={availableFilterOptions.franchiseModels}
-                investmentRanges={availableFilterOptions.investmentRanges}
-                locationData={{
-                  states: availableFilterOptions.states,
-                  districts: availableFilterOptions.districts,
-                  cities: availableFilterOptions.cities,
-                }}
+                mainCategories={mainCategories}
+                subCategories={subCategories}
+                childCategories={childCategories}
+                franchiseModels={franchiseModels}
+                investmentRanges={investmentRanges}
+                states={states}
+                districts={districts}
+                cities={cities}
+                loadingSubCategories={loadingSubCategories}
+                loadingChildCategories={loadingChildCategories}
+                loadingDistricts={loadingDistricts}
+                loadingCities={loadingCities}
                 resultStats={{
                   showing: brands.length,
                   total: pagination.total,
@@ -418,26 +383,32 @@ function BrandList() {
               </Grid>
 
               {/* Pagination */}
-              {pagination.totalPages > 1 && (
-                <Box display="flex" justifyContent="center" mt={4}>
-                  <Pagination
-                    count={pagination.totalPages}
-                    page={pagination.currentPage}
-                    onChange={handlePageChange}
-                    color="primary"
-                    sx={{
-                      '& .MuiPaginationItem-root': {
-                        color: '#ff9800',
-                        borderColor: '#ff9800',
-                      },
-                      '& .MuiPaginationItem-root.Mui-selected': {
-                        backgroundColor: '#ff9800',
-                        color: 'white',
-                      },
-                    }}
-                  />
-                </Box>
-              )}
+             {pagination.totalPages > 1 && (
+    <Box display="flex" justifyContent="center" mt={4}>
+      <Pagination
+        count={pagination.totalPages}
+        page={pagination.currentPage}
+        onChange={handlePageChange}
+        color="primary"
+        sx={{
+          '& .MuiPaginationItem-root': {
+            color: '#ff9800',
+            borderColor: '#ff9800',
+          },
+          '& .MuiPaginationItem-root.Mui-selected': {
+            backgroundColor: '#ff9800',
+            color: 'white',
+            '&:hover': {
+              backgroundColor: '#fb8c00',
+            },
+          },
+          '& .MuiPaginationItem-root:hover': {
+            backgroundColor: 'rgba(255, 152, 0, 0.1)',
+          },
+        }}
+      />
+    </Box>
+  )}
             </>
           )}
         </Box>
@@ -465,16 +436,18 @@ function BrandList() {
                 onFilterChange={handleFilterChange}
                 onClearFilters={handleClearFilters}
                 activeFilterCount={activeFilterCount}
-                categories={availableFilterOptions.mainCategories}
-                subCategories={availableFilterOptions.subCategories}
-                childCategories={availableFilterOptions.childCategories}
-                modelTypes={availableFilterOptions.franchiseModels}
-                investmentRanges={availableFilterOptions.investmentRanges}
-                locationData={{
-                  states: availableFilterOptions.states,
-                  districts: availableFilterOptions.districts,
-                  cities: availableFilterOptions.cities,
-                }}
+                mainCategories={mainCategories}
+                subCategories={subCategories}
+                childCategories={childCategories}
+                franchiseModels={franchiseModels}
+                investmentRanges={investmentRanges}
+                states={states}
+                districts={districts}
+                cities={cities}
+                loadingSubCategories={loadingSubCategories}
+                loadingChildCategories={loadingChildCategories}
+                loadingDistricts={loadingDistricts}
+                loadingCities={loadingCities}
                 resultStats={{
                   showing: brands.length,
                   total: pagination.total,
@@ -510,17 +483,3 @@ function BrandList() {
 }
 
 export default React.memo(BrandList);
-
-const initialFilters = {
-  id: null,
-  maincat: null,
-  subcat: null,
-  childcat: null,
-  serchterm: '',
-  country: null,
-  state: null,
-  district: null,
-  city: null,
-  investmentRange: null,
-  modelType: null,
-};

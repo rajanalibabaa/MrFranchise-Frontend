@@ -206,7 +206,7 @@ const bannerTexts = [
     subtitle: {
           text: "Discover A Universe Of F&B Franchise Opportunities From Quick Service Restaurants To Gourmet Cafes All Under On Powerful Portal",
       highlight: {
-        text: "F&B franchise opportunities",
+        text: " F&B franchise opportunities",
         color: "#ff9800",
         fontWeight: "bold"
       }
@@ -221,7 +221,7 @@ const bannerTexts = [
     subtitle: {
       text: "Explore Curated Restaurant And Cafe Franchises With Proven Models Designed For ROI Stability And Low Opertational Hassle",
       highlight: {
-        text: "proven models",
+        text: " proven models",
         color: "#ff9800",
         fontWeight: "bold"
       }
@@ -235,9 +235,9 @@ const bannerTexts = [
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
     subtitle: {
-      text: "From Startup Food kiosks To International Food Chains We Have Everything You Need To Start Your Food Franchise Journey",
+      text: "From Startup Food kiosks To International Food Chains We Have Everything You Need To Start Your ",
       highlight: {
-        // text: "food franchise journey",
+        text: "food franchise journey",
         color: "#ff9800",
         lineHeight: "1.5",
         fontWeight: "bold"
@@ -308,7 +308,7 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "F&B Franchise Made Easy \n with MrFranchise.in",
+      text: "F&B Franchise Made Easy \n with www.MrFranchise.in",
       gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },
@@ -339,7 +339,7 @@ const bannerTexts = [
   },
   {
     title: {
-      text: "Your Food Franchise Future\n Starts At foodandbeverage MrFranchise.in",
+      text: "Your Food Franchise Future\n Starts At food and beverage www.MrFranchise.in",
       gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" }
     },

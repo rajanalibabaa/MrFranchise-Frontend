@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+
+
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -8,6 +10,8 @@ import {
   MenuItem,
   Button,
   CircularProgress,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
@@ -18,9 +22,11 @@ import {
   resetDistricts,
   resetCities,
   clearErrors,
-} from "../../Redux/Slices/filterDropdownData.jsx"
+} from "../../Redux/Slices/filterDropdownData";
 
-const FilterDropdowns = () => {
+const FilterDropdowns = ({ onFilterChange }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [filters, setFilters] = useState({
@@ -71,8 +77,19 @@ const FilterDropdowns = () => {
       } else if (name === "selectedState" && value) {
         dispatch(fetchFilterOptions({ state: value }));
       }
+
+      // Call the parent component's filter change handler if provided
+      if (onFilterChange) {
+        if (name === "selectedSubCategory") {
+          onFilterChange("subcat", value);
+        } else if (name === "selectedState") {
+          onFilterChange("state", value);
+        } else if (name === "selectedInvestmentRange") {
+          onFilterChange("investmentRange", value);
+        }
+      }
     },
-    [dispatch]
+    [dispatch, onFilterChange]
   );
 
   // Format investment ranges for display
@@ -118,21 +135,23 @@ const FilterDropdowns = () => {
   }, [investmentRanges]);
 
   // Handle search button click
-  const handleFindBrands = useCallback(() => {
-    const queryParams = new URLSearchParams();
-    
-    if (filters.selectedSubCategory) {
-      queryParams.append("category", filters.selectedSubCategory);
-    }
-    if (filters.selectedInvestmentRange) {
-      queryParams.append("investment", filters.selectedInvestmentRange);
-    }
-    if (filters.selectedState) {
-      queryParams.append("location", filters.selectedState);
-    }
+// In your FilterDropdowns component
+const handleFindBrands = useCallback(() => {
+  const queryParams = new URLSearchParams();
+  
+  if (filters.selectedSubCategory) {
+    queryParams.append("subcat", filters.selectedSubCategory);
+  }
+  if (filters.selectedInvestmentRange) {
+    queryParams.append("investmentRange", filters.selectedInvestmentRange);
+  }
+  if (filters.selectedState) {
+    queryParams.append("state", filters.selectedState);
+  }
 
-    navigate(`/brandviewpage?${queryParams.toString()}`);
-  }, [filters, navigate]);
+  navigate(`/brands?${queryParams.toString()}`);
+}, [filters, navigate]);
+
 
   if (loading && !subCategories.length && !states.length) {
     return (
@@ -151,94 +170,107 @@ const FilterDropdowns = () => {
   }
 
   return (
-    <Box>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          gap: 2,
-          mb: 4,
-          p: 2,
-          borderRadius: 2,
-          alignItems: "center",
-          backgroundColor: "#fff",
-        }}
-      >
-        {/* Category Filter */}
-        <FormControl fullWidth sx={{ minWidth: 180 }}>
-          <InputLabel>Category</InputLabel>
-          <Select
-            value={filters.selectedSubCategory}
-            onChange={(e) =>
-              handleFilterChange("selectedSubCategory", e.target.value)
-            }
-            label="Category"
-            MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
-          >
-            <MenuItem value="">All Categories</MenuItem>
-            {subCategories.map((category) => (
-              <MenuItem key={category} value={category}>
-                {category}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Investment Range Filter */}
-        <FormControl fullWidth sx={{ minWidth: 180 }}>
-          <InputLabel>Investment Range</InputLabel>
-          <Select
-            value={filters.selectedInvestmentRange}
-            onChange={(e) =>
-              handleFilterChange("selectedInvestmentRange", e.target.value)
-            }
-            label="Investment Range"
-            MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
-          >
-            {formattedInvestmentRanges.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* State Filter */}
-        <FormControl fullWidth sx={{ minWidth: 180 }}>
-          <InputLabel>Location</InputLabel>
-          <Select
-            value={filters.selectedState}
-            onChange={(e) => handleFilterChange("selectedState", e.target.value)}
-            label="Location"
-            MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
-          >
-            <MenuItem value="">All Locations</MenuItem>
-            {states.map((state) => (
-              <MenuItem key={state} value={state}>
-                {state}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <Button
-          variant="contained"
-          onClick={handleFindBrands}
-          startIcon={<SearchIcon />}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+        gap: 2,
+        mb: 4,
+        p: 3,
+        borderRadius: 2,
+        alignItems: "center",
+        backgroundColor: "#f5f5f5",
+        boxShadow: 1,
+      }}
+    >
+      {/* Category Filter */}
+      <FormControl fullWidth sx={{ minWidth: 180 }}>
+        <InputLabel>Category</InputLabel>
+        <Select
+          value={filters.selectedSubCategory}
+          onChange={(e) =>
+            handleFilterChange("selectedSubCategory", e.target.value)
+          }
+          label="Category"
+          MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
           sx={{
-            height: "56px",
-            minWidth: "180px",
-            backgroundColor: "#6fff00fa",
-            color: "black",
-            "&:hover": {
-              backgroundColor: "#7ad03a",
-            },
+            backgroundColor: "white",
+            borderRadius: 1,
           }}
-          disabled={loading}
         >
-          {loading ? <CircularProgress size={24} /> : "Find Brands"}
-        </Button>
-      </Box>
+          <MenuItem value="">All Categories</MenuItem>
+          {subCategories.map((category) => (
+            <MenuItem key={category} value={category}>
+              {category}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* Investment Range Filter */}
+      <FormControl fullWidth sx={{ minWidth: 180 }}>
+        <InputLabel>Investment Range</InputLabel>
+        <Select
+          value={filters.selectedInvestmentRange}
+          onChange={(e) =>
+            handleFilterChange("selectedInvestmentRange", e.target.value)
+          }
+          label="Investment Range"
+          MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
+          sx={{
+            backgroundColor: "white",
+            borderRadius: 1,
+          }}
+        >
+          {formattedInvestmentRanges.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* State Filter */}
+      <FormControl fullWidth sx={{ minWidth: 180 }}>
+        <InputLabel>Location</InputLabel>
+        <Select
+          value={filters.selectedState}
+          onChange={(e) => handleFilterChange("selectedState", e.target.value)}
+          label="Location"
+          MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
+          sx={{
+            backgroundColor: "white",
+            borderRadius: 1,
+          }}
+        >
+          <MenuItem value="">All Locations</MenuItem>
+          {states.map((state) => (
+            <MenuItem key={state} value={state}>
+              {state}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <Button
+        variant="contained"
+        onClick={handleFindBrands}
+        startIcon={<SearchIcon />}
+        sx={{
+          height: "56px",
+          minWidth: isMobile ? "100%" : "180px",
+          backgroundColor: "#ff9800",
+          color: "white",
+          "&:hover": {
+            backgroundColor: "#fb8c00",
+          },
+          borderRadius: 1,
+          boxShadow: "none",
+        }}
+        disabled={loading}
+      >
+        {loading ? <CircularProgress size={24} color="inherit" /> : "Find Brands"}
+      </Button>
     </Box>
   );
 };

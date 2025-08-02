@@ -21,7 +21,6 @@ import PlayCircle from "@mui/icons-material/PlayCircle";
 import PauseCircle from "@mui/icons-material/PauseCircle";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { postView } from "../../Utils/function/view";
 import { useDispatch, useSelector } from "react-redux";

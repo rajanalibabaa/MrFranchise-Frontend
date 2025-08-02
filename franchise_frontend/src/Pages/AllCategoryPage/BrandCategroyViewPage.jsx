@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense, useEffect, useCallback } from "react";
 
 import Navbar from "../../Components/Navbar/NavBar";
@@ -6,10 +7,29 @@ import { useMediaQuery } from "@mui/system";
 
 // Lazy load the BrandList component
 const BrandListNew = lazy(() => import("./BrandListAllbrands.jsx"));
-
+import { useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setFilter } from '../../Redux/Slices/FilterBrandSlice';
 function BrandCategoryViewPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+const location = useLocation();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const filters = {};
+    
+    if (params.has('subcat')) filters.subcat = params.get('subcat');
+    if (params.has('state')) filters.state = params.get('state');
+    if (params.has('investmentRange')) {
+      filters.investmentRange = params.get('investmentRange');
+    }
+
+    if (Object.keys(filters).length > 0) {
+      dispatch(setFilter(filters));
+    }
+  }, [location.search, dispatch]);
 
 
   return (

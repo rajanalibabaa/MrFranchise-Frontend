@@ -1,5 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Dialog,
   DialogContent,
@@ -20,11 +22,13 @@ import {
   ListItem,
   ListItemText,
   Divider,
-  Chip
+  Chip,
+  CircularProgress
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import { useBrandsForFiltering, useBrandsForListing } from '../..//Hooks/Fetchbrands';
+import { fetchFilterOptions } from '../../Redux/Slices/filterDropdownData';
+import { setFilter, resetFilters } from '../../Redux/Slices/FilterBrandSlice';
 
 const highlightMatch = (text, searchTerm) => {
   if (!searchTerm || !text) return text;
@@ -41,251 +45,204 @@ const highlightMatch = (text, searchTerm) => {
 
 const NavbarSearch = ({ open, handleClose }) => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const dispatch = useDispatch();
 
   const [tab, setTab] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [openSuggestions, setOpenSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  // Get all filter options using React Query
-  const { data: brands = [] } = useBrandsForFiltering();
-  const { data: listingBrands = [] } = useBrandsForListing();
+  // Filter options from Redux
+  const filterOptions = useSelector(state => state.filterDropdown);
+  const {
+    mainCategories = [],
+    subCategories = [],
+    childCategories = [],
+    investmentRanges = [],
+    states = [],
+    districts = [],
+    cities = [],
+    loading: dropdownLoading
+  } = filterOptions;
 
-  // Initialize state from location state if available (when coming from brand view page)
+  // Selected filters
+  const [selectedMainCategory, setSelectedMainCategory] = useState('');
+  const [selectedSubCategory, setSelectedSubCategory] = useState('');
+  const [selectedChildCategory, setSelectedChildCategory] = useState('');
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedInvestmentRange, setSelectedInvestmentRange] = useState('');
+
+  // Search terms for filter dropdowns
+  const [searchTerms, setSearchTerms] = useState({
+    state: '',
+    district: '',
+    city: '',
+    investment: ''
+  });
+
+  // Fetch initial filter options when component mounts
   useEffect(() => {
-    if (location.state?.filters) {
-      const { filters } = location.state;
-      setSearchTerm(filters.searchTerm || '');
-      setSelectedMainCategory(filters.selectedMainCategory || '');
-      setSelectedSubCategory(filters.selectedSubCategory || '');
-      setSelectedChildCategory(filters.selectedChildCategory || '');
-      setSelectedState(filters.selectedState || '');
-      setSelectedDistrict(filters.selectedDistrict || '');
-      setSelectedCity(filters.selectedCity || '');
-      setSelectedInvestmentRange(filters.selectedInvestmentRange || '');
-    }
-  }, [location.state]);
+    dispatch(fetchFilterOptions());
+  }, [dispatch]);
 
-  // Generate search suggestions including categories and locations
+  // Fetch sub-categories when main category is selected
+  useEffect(() => {
+    if (selectedMainCategory) {
+      dispatch(fetchFilterOptions({ main: selectedMainCategory }));
+    }
+  }, [selectedMainCategory, dispatch]);
+
+  // Fetch child-categories when sub-category is selected
+  useEffect(() => {
+    if (selectedSubCategory) {
+      dispatch(fetchFilterOptions({ sub: selectedSubCategory }));
+    }
+  }, [selectedSubCategory, dispatch]);
+
+  // Fetch districts when state is selected
+  useEffect(() => {
+    if (selectedState) {
+      dispatch(fetchFilterOptions({ state: selectedState }));
+    }
+  }, [selectedState, dispatch]);
+
+  // Fetch cities when district is selected
+  useEffect(() => {
+    if (selectedDistrict) {
+      dispatch(fetchFilterOptions({ district: selectedDistrict }));
+    }
+  }, [selectedDistrict, dispatch]);
+
+  // Generate search suggestions
   const searchSuggestions = useMemo(() => {
     if (!searchTerm || searchTerm.length < 2) return [];
 
     const term = searchTerm.toLowerCase();
     const suggestions = [];
 
-    // Add brand suggestions that match the search term
-    listingBrands.forEach(brand => {
-      // Check brand name
-      if (brand.brandName?.toLowerCase().includes(term)) {
-        suggestions.push({
-          type: 'Brand',
-          value: brand.brandName,
-          brandId: brand.uuid,
-          icon: '🏢',
-          searchTerm: term
-        });
-      }
-
-      // Check categories (main, sub, child)
-      if (brand.categories) {
-        if (brand.categories.main?.toLowerCase().includes(term)) {
-          suggestions.push({
-            type: 'Brand',
-            value: brand.brandName,
-            brandId: brand.uuid,
-            icon: '🏢',
-            matchText: `Category: ${brand.categories.main}`,
-            searchTerm: term
-          });
-        }
-        if (brand.categories.sub?.toLowerCase().includes(term)) {
-          suggestions.push({
-            type: 'Brand',
-            value: brand.brandName,
-            brandId: brand.uuid,
-            icon: '🏢',
-            matchText: `Category: ${brand.categories.main} > ${brand.categories.sub}`,
-            searchTerm: term
-          });
-        }
-        if (brand.categories.child?.toLowerCase().includes(term)) {
-          suggestions.push({
-            type: 'Brand',
-            value: brand.brandName,
-            brandId: brand.uuid,
-            icon: '🏢',
-            matchText: `Category: ${brand.categories.main} > ${brand.categories.sub} > ${brand.categories.child}`,
-            searchTerm: term
-          });
-        }
-      }
-
-      // Check locations
-      brand.locations?.forEach(location => {
-        if (location.state?.toLowerCase().includes(term)) {
-          suggestions.push({
-            type: 'Brand',
-            value: brand.brandName,
-            brandId: brand.uuid,
-            icon: '🏢',
-            matchText: `Location: ${location.state}`,
-            searchTerm: term
-          });
-        }
-
-        location.districts?.forEach(district => {
-          if (district.district?.toLowerCase().includes(term)) {
-            suggestions.push({
-              type: 'Brand',
-              value: brand.brandName,
-              brandId: brand.uuid,
-              icon: '🏢',
-              matchText: `Location: ${location.state} > ${district.district}`,
-              searchTerm: term
-            });
-          }
-
-          district.cities?.forEach(city => {
-            if (city.toLowerCase().includes(term)) {
-              suggestions.push({
-                type: 'Brand',
-                value: brand.brandName,
-                brandId: brand.uuid,
-                icon: '🏢',
-                matchText: `Location: ${location.state} > ${district.district} > ${city}`,
-                searchTerm: term
-              });
-            }
-          });
-        });
-      });
-    });
-
-    // Add standalone category suggestions (not tied to specific brands)
-    const allCategories = new Set();
-    const allLocations = new Set();
-
-    brands.forEach(brand => {
-      if (brand.categories) {
-        if (brand.categories.main) {
-          allCategories.add(`${brand.categories.main}`);
-        }
-        if (brand.categories.main && brand.categories.sub) {
-          allCategories.add(`${brand.categories.main} > ${brand.categories.sub}`);
-        }
-        if (brand.categories.main && brand.categories.sub && brand.categories.child) {
-          allCategories.add(`${brand.categories.main} > ${brand.categories.sub} > ${brand.categories.child}`);
-        }
-      }
-
-      brand.locations?.forEach(location => {
-        if (location.state) {
-          allLocations.add(`${location.state}`);
-          location.districts?.forEach(district => {
-            if (district.district) {
-              allLocations.add(`${location.state} > ${district.district}`);
-              district.cities?.forEach(city => {
-                allLocations.add(`${location.state} > ${district.district} > ${city}`);
-              });
-            }
-          });
-        }
-      });
-    });
-
-    // Add standalone category matches
-    Array.from(allCategories).forEach(category => {
+    // Add category suggestions
+    mainCategories.forEach(category => {
       if (category.toLowerCase().includes(term)) {
-        const parts = category.split(' > ');
-        // Find brands that have this category
-        const matchingBrands = listingBrands.filter(brand => {
-          if (parts.length === 1) return brand.categories?.main === parts[0];
-          if (parts.length === 2) return brand.categories?.main === parts[0] && brand.categories?.sub === parts[1];
-          if (parts.length === 3) return brand.categories?.main === parts[0] && brand.categories?.sub === parts[1] && brand.categories?.child === parts[2];
-          return false;
-        });
-
-        matchingBrands.forEach(brand => {
-          suggestions.push({
-            type: 'Brand',
-            value: brand.brandName,
-            brandId: brand.uuid,
-            icon: '🏢',
-            matchText: `Category: ${category}`,
-            searchTerm: term
-          });
+        suggestions.push({
+          type: 'Category',
+          value: category,
+          icon: '🏭',
+          searchTerm: term,
+          filterType: 'maincat',
+          filterValue: category
         });
       }
     });
 
-    // Add standalone location matches
-    Array.from(allLocations).forEach(location => {
-      if (location.toLowerCase().includes(term)) {
-        const parts = location.split(' > ');
-        // Find brands that have this location
-        const matchingBrands = listingBrands.filter(brand => {
-          return brand.locations?.some(loc => {
-            if (parts.length === 1) return loc.state === parts[0];
-            if (parts.length === 2) {
-              return loc.state === parts[0] && 
-                loc.districts?.some(dist => dist.district === parts[1]);
-            }
-            if (parts.length === 3) {
-              return loc.state === parts[0] && 
-                loc.districts?.some(dist => 
-                  dist.district === parts[1] && 
-                  dist.cities?.includes(parts[2])
-                )
-            }
-            return false;
-          });
-        });
-
-        matchingBrands.forEach(brand => {
-          suggestions.push({
-            type: 'Brand',
-            value: brand.brandName,
-            brandId: brand.uuid,
-            icon: '🏢',
-            matchText: `Location: ${location}`,
-            searchTerm: term
-          });
+    subCategories.forEach(sub => {
+      if (sub.toLowerCase().includes(term)) {
+        suggestions.push({
+          type: 'Sub-Category',
+          value: sub,
+          icon: '🏷️',
+          searchTerm: term,
+          filterType: 'subcat',
+          filterValue: sub
         });
       }
     });
 
-    // Remove duplicates (same brand with same match text)
-    const uniqueSuggestions = suggestions.filter(
-      (suggestion, index, self) =>
-        index === self.findIndex(s => 
-          s.brandId === suggestion.brandId && 
-          s.matchText === suggestion.matchText
-        )
-    );
+    childCategories.forEach(child => {
+      if (child.toLowerCase().includes(term)) {
+        suggestions.push({
+          type: 'Child-Category',
+          value: child,
+          icon: '🏷️',
+          searchTerm: term,
+          filterType: 'childcat',
+          filterValue: child
+        });
+      }
+    });
 
-    return uniqueSuggestions.slice(0, 10); // Limit to 10 suggestions
-  }, [searchTerm, listingBrands, brands]);
+    // Add location suggestions
+    states.forEach(state => {
+      if (state.toLowerCase().includes(term)) {
+        suggestions.push({
+          type: 'Location',
+          value: state,
+          icon: '📍',
+          searchTerm: term,
+          filterType: 'state',
+          filterValue: state
+        });
+      }
+    });
+
+    districts.forEach(district => {
+      if (district.toLowerCase().includes(term)) {
+        suggestions.push({
+          type: 'Location',
+          value: district,
+          icon: '📍',
+          searchTerm: term,
+          filterType: 'district',
+          filterValue: district
+        });
+      }
+    });
+
+    cities.forEach(city => {
+      if (city.toLowerCase().includes(term)) {
+        suggestions.push({
+          type: 'Location',
+          value: city,
+          icon: '📍',
+          searchTerm: term,
+          filterType: 'city',
+          filterValue: city
+        });
+      }
+    });
+
+    // Add investment range suggestions
+    investmentRanges.forEach(range => {
+      if (range.toLowerCase().includes(term)) {
+        suggestions.push({
+          type: 'Investment',
+          value: range,
+          icon: '💰',
+          searchTerm: term,
+          filterType: 'investmentRange',
+          filterValue: range
+        });
+      }
+    });
+
+    return suggestions.slice(0, 10); // Limit to 10 suggestions
+  }, [
+    searchTerm,
+    mainCategories,
+    subCategories,
+    childCategories,
+    states,
+    districts,
+    cities,
+    investmentRanges
+  ]);
 
   // Handle keyboard navigation for suggestions
   useEffect(() => {
     if (!openSuggestions || searchSuggestions.length === 0) return;
 
     const handleKeyDown = (e) => {
-      // Arrow down
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         setActiveSuggestion(prev => 
           prev < searchSuggestions.length - 1 ? prev + 1 : prev
         );
-      }
-      // Arrow up
-      else if (e.key === 'ArrowUp') {
+      } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setActiveSuggestion(prev => (prev > 0 ? prev - 1 : 0));
-      }
-      // Enter
-      else if (e.key === 'Enter') {
+      } else if (e.key === 'Enter') {
         e.preventDefault();
         if (searchSuggestions[activeSuggestion]) {
           handleSuggestionSelect(searchSuggestions[activeSuggestion]);
@@ -297,111 +254,6 @@ const NavbarSearch = ({ open, handleClose }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [openSuggestions, searchSuggestions, activeSuggestion]);
 
-  // Extract filter options from brands data
-  const filterOptions = useMemo(() => {
-    const mainCategories = new Set();
-    const subCategories = new Map();
-    const childCategories = new Map();
-    const states = new Set();
-    const districts = new Map(); // { state: [districts] }
-    const cities = new Map(); // { district: [cities] }
-    const investmentRanges = new Set();
-
-    brands.forEach(brand => {
-      // Categories
-      const mainCat = brand.categories?.main;
-      const subCat = brand.categories?.sub;
-      const childCat = brand.categories?.child;
-     
-      if (mainCat){
-         mainCategories.add(mainCat);
-
-        // Initialize subcategories map for this main category if it doesn't exist
-        if (!subCategories.has(mainCat)){
-          subCategories.set(mainCat, new Set());
-        }
-
-        if (subCat){
-          subCategories.get(mainCat).add(subCat);
-
-          // Initialize child categories map for this subcategory if it doesn't exist
-          if (!childCategories.has(subCat)) {
-              childCategories.set(subCat, new Set());
-            }
-
-          if (childCat) {
-              childCategories.get(subCat).add(childCat);
-            }
-        }
-      }
-
-      // Locations
-      brand.locations?.forEach(location => {
-        if (location.state) {
-          states.add(location.state);
-          
-          location.districts?.forEach(district => {
-            if (district.district) {
-              const stateDistricts = districts.get(location.state) || new Set();
-              stateDistricts.add(district.district);
-              districts.set(location.state, stateDistricts);
-              
-              district.cities?.forEach(city => {
-                const districtCities = cities.get(district.district) || new Set();
-                districtCities.add(city);
-                cities.set(district.district, districtCities);
-              });
-            }
-          });
-        }
-      });
-
-      // Investment ranges
-      brand.investmentRanges?.forEach(range => {
-        if (range) investmentRanges.add(range);
-      });
-    });
-
-    return {
-      mainCategories: Array.from(mainCategories),
-      subCategories: Object.fromEntries(
-        Array.from(subCategories.entries()).map(([mainCat, subs]) => 
-          [mainCat, Array.from(subs)]
-        )
-      ),
-      childCategories: Object.fromEntries(
-        Array.from(childCategories.entries()).map(([subCat, children]) => 
-          [subCat, Array.from(children)]
-        )
-      ),
-      states: Array.from(states),
-      districts: Object.fromEntries(
-        Array.from(districts.entries()).map(([state, distSet]) => [state, Array.from(distSet)])
-      ),
-      cities: Object.fromEntries(
-        Array.from(cities.entries()).map(([district, citySet]) => [district, Array.from(citySet)])
-      ),
-      investmentRanges: Array.from(investmentRanges)
-    };
-  }, [brands]);
-
-  const [searchTerms, setSearchTerms] = useState({
-    state: '',
-    district: '',
-    city: '',
-    investment: ''
-  });
-
-  const [selectedMainCategory, setSelectedMainCategory] = useState('');
-  const [selectedSubCategory, setSelectedSubCategory] = useState('');
-  const [selectedChildCategory, setSelectedChildCategory] = useState('');
-
-  const [selectedState, setSelectedState] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
-
-  const [selectedInvestmentRange, setSelectedInvestmentRange] = useState('');
-
   const handleTabChange = (_, newValue) => setTab(newValue);
 
   const handleSearchChange = (key, value) => {
@@ -409,180 +261,93 @@ const NavbarSearch = ({ open, handleClose }) => {
   };
 
   const handleSuggestionSelect = (suggestion) => {
-    // Set the brand name in the search bar
     setSearchTerm(suggestion.value);
     setOpenSuggestions(false);
     
-    // Navigate directly to the brand in a new tab
-if (suggestion.brandId) {
-  const url = `/brands/${suggestion.brandId}`;
-  window.open(url, "_blank"); // Opens in a new tab
-  handleClose();
-}
-
-    
-    // Parse the category or location from the match text to set filters
-    if (suggestion.matchText) {
-      if (suggestion.matchText.startsWith('Category:')) {
-        const categoryPath = suggestion.matchText.replace('Category: ', '');
-        const parts = categoryPath.split(' > ');
-        if (parts.length === 1) {
-          setSelectedMainCategory(parts[0]);
-          setSelectedSubCategory('');
-          setSelectedChildCategory('');
-          setTab(0);
-        } else if (parts.length === 2) {
-          setSelectedMainCategory(parts[0]);
-          setSelectedSubCategory(parts[1]);
-          setSelectedChildCategory('');
-          setTab(0);
-        } else if (parts.length === 3) {
-          setSelectedMainCategory(parts[0]);
-          setSelectedSubCategory(parts[1]);
-          setSelectedChildCategory(parts[2]);
-          setTab(0);
-        }
-      } else if (suggestion.matchText.startsWith('Location:')) {
-        const locationPath = suggestion.matchText.replace('Location: ', '');
-        const parts = locationPath.split(' > ');
-        if (parts.length === 1) {
-          setSelectedState(parts[0]);
-          setSelectedDistrict('');
-          setSelectedCity('');
-          setTab(1);
-        } else if (parts.length === 2) {
-          setSelectedState(parts[0]);
-          setSelectedDistrict(parts[1]);
-          setSelectedCity('');
-          setTab(1);
-        } else if (parts.length === 3) {
-          setSelectedState(parts[0]);
-          setSelectedDistrict(parts[1]);
-          setSelectedCity(parts[2]);
-          setTab(1);
-        }
-      }
+    // Set the appropriate filter based on suggestion type
+    switch (suggestion.filterType) {
+      case 'maincat':
+        setSelectedMainCategory(suggestion.filterValue);
+        setSelectedSubCategory('');
+        setSelectedChildCategory('');
+        setTab(0);
+        break;
+      case 'subcat':
+        setSelectedSubCategory(suggestion.filterValue);
+        setSelectedChildCategory('');
+        setTab(0);
+        break;
+      case 'childcat':
+        setSelectedChildCategory(suggestion.filterValue);
+        setTab(0);
+        break;
+      case 'state':
+        setSelectedState(suggestion.filterValue);
+        setSelectedDistrict('');
+        setSelectedCity('');
+        setTab(1);
+        break;
+      case 'district':
+        setSelectedDistrict(suggestion.filterValue);
+        setSelectedCity('');
+        setTab(1);
+        break;
+      case 'city':
+        setSelectedCity(suggestion.filterValue);
+        setTab(1);
+        break;
+      case 'investmentRange':
+        setSelectedInvestmentRange(suggestion.filterValue);
+        setTab(2);
+        break;
+      default:
+        break;
     }
   };
 
-  // Filter brands based on selected filters
-  const filteredBrands = useMemo(() => {
-    return brands.filter(brand => {
-      // Filter by search term if it exists (only brand name)
-      if (searchTerm && 
-          !brand.brandName?.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          !(brand.categories?.main?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-          !(brand.categories?.sub?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-          !(brand.categories?.child?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-          !brand.locations?.some(location => 
-            location.state?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            location.districts?.some(district => 
-              district.district?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              district.cities?.some(city => 
-                city.toLowerCase().includes(searchTerm.toLowerCase())
-              )
-            )
-          )
-      ) {
-        return false;
-      }
-
-      // Filter by category if any category is selected
-      if (tab === 0) {
-        if (selectedMainCategory && brand.categories?.main !== selectedMainCategory) {
-          return false;
-        }
-        if (selectedSubCategory && brand.categories?.sub !== selectedSubCategory) {
-          return false;
-        }
-        if (selectedChildCategory && brand.categories?.child !== selectedChildCategory) {
-          return false;
-        }
-      }
-
-      // Filter by location if any location is selected
-      if (tab === 1) {
-        if (selectedState) {
-          const hasState = brand.locations?.some(location => 
-            location.state === selectedState && 
-            (!selectedDistrict || location.districts?.some(district => 
-              district.district === selectedDistrict && 
-              (!selectedCity || district.cities?.includes(selectedCity))
-            ))
-          );
-          if (!hasState) return false;
-        }
-      }
-
-      // Filter by investment range if selected
-      if (tab === 2 && selectedInvestmentRange) {
-        if (!brand.investmentRanges?.includes(selectedInvestmentRange)) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [
-    brands,
-    searchTerm,
-    tab,
-    selectedMainCategory,
-    selectedSubCategory,
-    selectedChildCategory,
-    selectedState,
-    selectedDistrict,
-    selectedCity,
-    selectedInvestmentRange
-  ]);
-
-  const handleExplore = () => {
-    const filters = {
-      searchTerm,
-      ...(tab === 0 && {
-        selectedMainCategory,
-        selectedSubCategory,
-        selectedChildCategory
-      }),
-      ...(tab === 1 && {
-        selectedState,
-        selectedDistrict,
-        selectedCity
-      }),
-      ...(tab === 2 && {
-        selectedInvestmentRange
-      })
-    };
-
-    // Store filters in localStorage to persist them across page refreshes
-    localStorage.setItem('brandFilters', JSON.stringify(filters));
-    localStorage.setItem('filteredBrands', JSON.stringify(filteredBrands));
-
-    // Check if we're already on the brand view page
-    if (location.pathname === '/brandViewPage') {
-      // If already on brand view page, update the state directl
-      navigate('/brandViewPage', {
-        state: {
-          filteredBrands,
-          filters,
-          fromSearch: true
-        },
-        replace: true
-      });
-      window.location.reload();
-    } else {
-      // Otherwise navigate normally
-
-      navigate('/brandViewPage', {
-        state: {
-          filteredBrands,
-          filters,
-          fromSearch: true
-        }
-      });
+  const handleExplore = async () => {
+    setLoading(true);
+    
+    // Reset all filters first
+    dispatch(resetFilters());
+    
+    // Apply selected filters
+    if (searchTerm) {
+      dispatch(setFilter({ filterName: 'serchterm', value: searchTerm }));
     }
     
+    if (selectedMainCategory) {
+      dispatch(setFilter({ filterName: 'maincat', value: selectedMainCategory }));
+    }
+    
+    if (selectedSubCategory) {
+      dispatch(setFilter({ filterName: 'subcat', value: selectedSubCategory }));
+    }
+    
+    if (selectedChildCategory) {
+      dispatch(setFilter({ filterName: 'childcat', value: selectedChildCategory }));
+    }
+    
+    if (selectedState) {
+      dispatch(setFilter({ filterName: 'state', value: selectedState }));
+    }
+    
+    if (selectedDistrict) {
+      dispatch(setFilter({ filterName: 'district', value: selectedDistrict }));
+    }
+    
+    if (selectedCity) {
+      dispatch(setFilter({ filterName: 'city', value: selectedCity }));
+    }
+    
+    if (selectedInvestmentRange) {
+      dispatch(setFilter({ filterName: 'investmentRange', value: selectedInvestmentRange }));
+    }
+    
+    // Navigate to brand view page
+    navigate('/brandViewPage');
     handleClose();
+    setLoading(false);
   };
 
   const handleClearAll = () => {
@@ -602,60 +367,51 @@ if (suggestion.brandId) {
     });
   };
 
-  // Filtered states
+  // Filtered states for dropdown
   const filteredStates = useMemo(() => {
     const term = searchTerms.state.toLowerCase();
-    return filterOptions.states.filter(state => 
+    return states.filter(state => 
       state.toLowerCase().includes(term)
     );
-  }, [filterOptions.states, searchTerms.state]);
+  }, [states, searchTerms.state]);
 
-  // Filtered districts
+  // Filtered districts for dropdown - filtered by selected state
   const filteredDistricts = useMemo(() => {
-    if (!selectedState) return [];
     const term = searchTerms.district.toLowerCase();
-    const stateDistricts = filterOptions.districts[selectedState] || [];
-    return stateDistricts.filter(district => 
+    return districts.filter(district => 
       district.toLowerCase().includes(term)
     );
-  }, [selectedState, filterOptions.districts, searchTerms.district]);
+  }, [districts, searchTerms.district]);
 
-  // Filtered cities
+  // Filtered cities for dropdown - filtered by selected district
   const filteredCities = useMemo(() => {
-    if (!selectedDistrict) return [];
     const term = searchTerms.city.toLowerCase();
-    const districtCities = filterOptions.cities[selectedDistrict] || [];
-    return districtCities.filter(city => 
+    return cities.filter(city => 
       city.toLowerCase().includes(term)
     );
-  }, [selectedDistrict, filterOptions.cities, searchTerms.city]);
+  }, [cities, searchTerms.city]);
 
-  // Filtered investment ranges
+  // Filtered investment ranges for dropdown
   const filteredInvestmentRanges = useMemo(() => {
     const term = searchTerms.investment.toLowerCase();
-    return filterOptions.investmentRanges.filter(range => 
+    return investmentRanges.filter(range => 
       range.toLowerCase().includes(term)
     );
-  }, [filterOptions.investmentRanges, searchTerms.investment]);
+  }, [investmentRanges, searchTerms.investment]);
 
-  // Get MAIN categories (level 1)
-  const mainCategories = useMemo(() => {
-    return filterOptions.mainCategories;
-  }, [filterOptions.mainCategories]);
-
-  // Get SUB categories based on selected main category (level 2)
-  const subCategories = useMemo(() => {
+  // Get sub categories for selected main category
+  const currentSubCategories = useMemo(() => {
     if (!selectedMainCategory) return [];
-    return filterOptions.subCategories[selectedMainCategory] || [];
-  }, [selectedMainCategory, filterOptions.subCategories]);
+    return subCategories.filter(sub => sub.maincat === selectedMainCategory);
+  }, [selectedMainCategory, subCategories]);
 
-  // Get CHILD categories based on selected sub category (level 3)
-  const childCategories = useMemo(() => {
+  // Get child categories for selected sub category
+  const currentChildCategories = useMemo(() => {
     if (!selectedSubCategory) return [];
-    return filterOptions.childCategories[selectedSubCategory] || [];
-  }, [selectedSubCategory, filterOptions.childCategories]);
+    return childCategories.filter(child => child.subcat === selectedSubCategory);
+  }, [selectedSubCategory, childCategories]);
 
-  // Get active filters count for display
+  // Count active filters
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (searchTerm) count++;
@@ -679,12 +435,12 @@ if (suggestion.brandId) {
   ]);
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md" sx={{ top: { xs: "-20%", sm: "-50%", lg: "-300px" } }}>
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogContent sx={{ position: 'relative', p: 3 }}>
         {/* Close Button */}
         <IconButton
           onClick={handleClose}
-          sx={{ position: 'absolute', top: { xs: -5, sm: 2 }, right: { xs: -7, sm: 4 } }}
+          sx={{ position: 'absolute', top: 8, right: 8 }}
         >
           <CloseIcon />
         </IconButton>
@@ -721,8 +477,9 @@ if (suggestion.brandId) {
                   <IconButton 
                     sx={{ bgcolor: 'rgb(104, 159, 56)', color: 'white', "&:hover": { backgroundColor: "#7ad03a" } }}
                     onClick={handleExplore}
+                    disabled={loading}
                   >
-                    <SearchIcon />
+                    {loading ? <CircularProgress size={24} color="inherit" /> : <SearchIcon />}
                   </IconButton>
                 </InputAdornment>
               )
@@ -763,11 +520,7 @@ if (suggestion.brandId) {
                       <ListItemText
                         primary={highlightMatch(suggestion.value, suggestion.searchTerm)}
                         secondary={
-                          suggestion.matchText ? (
-                            <span>{highlightMatch(suggestion.matchText, suggestion.searchTerm)}</span>
-                          ) : (
-                            <span>Brand</span>
-                          )
+                          <span>{suggestion.type}</span>
                         }
                         secondaryTypographyProps={{ color: 'text.secondary' }}
                       />
@@ -857,7 +610,7 @@ if (suggestion.brandId) {
           centered
           textColor="error"
           indicatorColor="error"
-          sx={{ mb: { xs: 0.5, sm: 2 }, p: { xs: "12px 0px" } }}
+          sx={{ mb: 2 }}
         >
           <Tab label="Categories" />
           <Tab label="Location" />
@@ -877,6 +630,7 @@ if (suggestion.brandId) {
                   setSelectedChildCategory('');
                 }}
                 label="Industry"
+                disabled={dropdownLoading}
               >
                 <MenuItem value="">Select Industry</MenuItem>
                 {mainCategories.map((category, index) => (
@@ -887,7 +641,7 @@ if (suggestion.brandId) {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ minWidth: 200 }} disabled={!selectedMainCategory}>
+            <FormControl sx={{ minWidth: 200 }} disabled={!selectedMainCategory || dropdownLoading}>
               <InputLabel>Main Category</InputLabel>
               <Select
                 value={selectedSubCategory}
@@ -898,15 +652,15 @@ if (suggestion.brandId) {
                 label="Main Category"
               >
                 <MenuItem value="">Select Main Category</MenuItem>
-                {subCategories.map((sub, index) => (
-                  <MenuItem key={`sub-cat-${index}`} value={sub}>
-                    {sub}
+                {currentSubCategories.map((sub, index) => (
+                  <MenuItem key={`sub-cat-${index}`} value={sub.subcat}>
+                    {sub.subcat}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            <FormControl sx={{ minWidth: 200 }} disabled={!selectedSubCategory}>
+            <FormControl sx={{ minWidth: 200 }} disabled={!selectedSubCategory || dropdownLoading}>
               <InputLabel>Sub Category</InputLabel>
               <Select
                 value={selectedChildCategory}
@@ -914,9 +668,9 @@ if (suggestion.brandId) {
                 label="Sub Category"
               >
                 <MenuItem value="">Select Sub Category</MenuItem>
-                {childCategories.map((child, index) => (
-                  <MenuItem key={`child-cat-${index}`} value={child}>
-                    {child}
+                {currentChildCategories.map((child, index) => (
+                  <MenuItem key={`child-cat-${index}`} value={child.childcat}>
+                    {child.childcat}
                   </MenuItem>
                 ))}
               </Select>
@@ -937,6 +691,7 @@ if (suggestion.brandId) {
                   setSelectedCity('');
                 }}
                 label="State"
+                disabled={dropdownLoading}
                 MenuProps={{
                   PaperProps: {
                     style: {
@@ -971,8 +726,8 @@ if (suggestion.brandId) {
               </Select>
             </FormControl>
 
-            {/* District Filter */}
-            <FormControl sx={{ minWidth: 200 }} disabled={!selectedState}>
+            {/* District Filter - dependent on selected state */}
+            <FormControl sx={{ minWidth: 200 }} disabled={!selectedState || dropdownLoading}>
               <InputLabel>District</InputLabel>
               <Select
                 value={selectedDistrict}
@@ -1015,8 +770,8 @@ if (suggestion.brandId) {
               </Select>
             </FormControl>
 
-            {/* City Filter */}
-            <FormControl sx={{ minWidth: 200 }} disabled={!selectedDistrict}>
+            {/* City Filter - dependent on selected district */}
+            <FormControl sx={{ minWidth: 200 }} disabled={!selectedDistrict || dropdownLoading}>
               <InputLabel>City</InputLabel>
               <Select
                 value={selectedCity}
@@ -1066,6 +821,7 @@ if (suggestion.brandId) {
                 value={selectedInvestmentRange}
                 onChange={(e) => setSelectedInvestmentRange(e.target.value)}
                 label="Investment Range"
+                disabled={dropdownLoading}
                 MenuProps={{
                   PaperProps: {
                     style: {
@@ -1107,17 +863,19 @@ if (suggestion.brandId) {
           <Button
             variant="contained"
             onClick={handleExplore}
+            disabled={loading}
             sx={{
               backgroundColor: 'rgb(104, 159, 56)',
               '&:hover': { backgroundColor: "#7ad03a" },
               textTransform: 'none'
             }}
           >
-            Explore
+            {loading ? <CircularProgress size={24} color="inherit" /> : 'Explore'}
           </Button>
           <Button
             variant="text"
             onClick={handleClearAll}
+            disabled={loading}
             sx={{ textTransform: 'none', color: "black" }}
           >
             Clear All

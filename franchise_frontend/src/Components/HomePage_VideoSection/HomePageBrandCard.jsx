@@ -41,7 +41,6 @@ const HomePageBrandCard = React.memo(
     theme,
   }) => {
 
-    console.log("card coming brand",brand)
     const videoRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
     const observerRef = useRef();

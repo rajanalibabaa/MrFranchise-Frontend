@@ -1,9 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
-
+ 
 const API_BASE_URL = 'http://localhost:5000/api/v1/';
-
-// Async thunk for fetching filtered brands
+ 
 export const fetchFilteredBrands = createAsyncThunk(
   'filterBrands/fetchFilteredBrands',
   async (filters, { rejectWithValue }) => {
@@ -23,7 +22,7 @@ export const fetchFilteredBrands = createAsyncThunk(
         investmentRange,
         modelType,
       } = filters;
-
+ 
       const params = new URLSearchParams();
       params.append('page', page);
       params.append('limit', limit);
@@ -38,15 +37,26 @@ export const fetchFilteredBrands = createAsyncThunk(
       if (city) params.append('city', city);
       if (investmentRange) params.append('investmentRange', investmentRange);
       if (modelType) params.append('modelType', modelType);
-
+ 
       const response = await axios.post(`${API_BASE_URL}filter/getAllBrandsAndFilter?${params.toString()}`);
-      
-         return response.data.data || response.data; // Assuming your API returns data in response.data.data
+     
+      return {
+        brands: response.data.data?.brands || [],
+        pagination: response.data.data?.pagination || {
+          currentPage: 1,
+          totalPages: 1,
+          limit: parseInt(limit),
+          total: 0,
+          hasNext: false,
+          hasPrevious: false,
+        }
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
+ 
 const initialState = {
   brands: [],
   loading: false,
@@ -71,9 +81,11 @@ const initialState = {
     city: null,
     investmentRange: null,
     modelType: null,
+    page: 1,
+    limit: 20,
   }
 };
-
+ 
 const filterBrandSlice = createSlice({
   name: 'filterBrands',
   initialState,
@@ -81,7 +93,7 @@ const filterBrandSlice = createSlice({
     setFilter: (state, action) => {
       const { filterName, value } = action.payload;
       state.filters[filterName] = value;
-      
+     
       // Reset dependent filters when parent changes
       if (filterName === 'maincat') {
         state.filters.subcat = null;
@@ -94,8 +106,9 @@ const filterBrandSlice = createSlice({
       } else if (filterName === 'district') {
         state.filters.city = null;
       }
-      
+     
       // Reset to first page when filters change
+      state.filters.page = 1;
       state.pagination.currentPage = 1;
     },
     resetFilters: (state) => {
@@ -103,6 +116,7 @@ const filterBrandSlice = createSlice({
       state.pagination.currentPage = 1;
     },
     setPage: (state, action) => {
+      state.filters.page = action.payload;
       state.pagination.currentPage = action.payload;
     },
     clearError: (state) => {
@@ -117,17 +131,13 @@ const filterBrandSlice = createSlice({
       })
       .addCase(fetchFilteredBrands.fulfilled, (state, action) => {
         state.loading = false;
-        state.brands = action.payload.brands || [];
-        
+        state.brands = action.payload.brands;
+       
         // Update pagination info
         if (action.payload.pagination) {
           state.pagination = {
-            currentPage: action.payload.pagination.currentPage,
-            totalPages: action.payload.pagination.totalPages,
-            limit: action.payload.pagination.limit,
-            total: action.payload.pagination.total,
-            hasNext: action.payload.pagination.hasNext,
-            hasPrevious: action.payload.pagination.hasPrevious,
+            ...action.payload.pagination,
+            currentPage: action.payload.pagination.currentPage || state.pagination.currentPage,
           };
         }
       })
@@ -137,7 +147,8 @@ const filterBrandSlice = createSlice({
       });
   }
 });
-
+ 
 export const { setFilter, resetFilters, setPage, clearError } = filterBrandSlice.actions;
-
+ 
 export default filterBrandSlice.reducer;
+ 

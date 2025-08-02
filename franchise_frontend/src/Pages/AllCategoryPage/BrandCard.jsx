@@ -22,10 +22,12 @@ import {
   PlaylistAddCheckCircleOutlined,
 } from "@mui/icons-material";
 import LoginPage from "../LoginPage/LoginPage";
-import { openBrandDialog, useToggleLike } from "../../Hooks/Fetchbrands";
+// import { openBrandDialog, useToggleLike } from "../../Hooks/Fetchbrands";
 import { postView } from "../../Utils/function/view";
 import { handleShortList } from "../../Api/shortListApi";
-
+ import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+ import { useDispatch, useSelector } from "react-redux";
+ 
 const cardStyles = {
   width: { xs: "40vh", sm: "calc(50% - 10px)", md: 260 },
   height: { xs: "55vh", sm: "calc(50% - 10px)", md: 400 },
@@ -42,7 +44,7 @@ const cardStyles = {
     boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
   },
 };
-
+ 
 const titleStyles = {
   fontWeight: 600,
   color: "text.primary",
@@ -56,7 +58,7 @@ const titleStyles = {
   maxHeight: "2.8em",
   wordBreak: "break-word",
 };
-
+ 
 const viewButtonStyles = {
   py: 0.5,
   bgcolor: "#4caf50",
@@ -68,7 +70,7 @@ const viewButtonStyles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
   },
 };
-
+ 
 const BrandCard = memo(
   ({
     brand,
@@ -85,38 +87,38 @@ const BrandCard = memo(
       isLiked,
       isShortListed,
     } = brand;
-
-
-    console.log(".....",brand)
-
-
+ 
+ 
+    console.log("..... brand data ",brand)
+ 
+ 
     const [brandLike, setBrandLike] = useState(isLiked);
     const [shortListed, setShortListed] = useState(isShortListed);
     const videoRef = useRef(null);
-
-
+ 
+ const dispatch = useDispatch();
     const handleOpenBrand = useCallback(() => {
       if ("requestIdleCallback" in window) {
         requestIdleCallback(() => postView(uuid));
       } else {
         setTimeout(() => postView(uuid), 0);
       }
-      openBrandDialog(brand);
+      dispatch(openBrandDialog(brand));
     }, [uuid, brand]);
-
+ 
     const handleLike = useCallback(() => {
       if (likeProcessing[uuid]) return;
       const token = localStorage.getItem("accessToken");
-
+ 
       if (!token) {
         onShowLogin(true);
         return;
       }
-
+ 
       handleLikeClick(uuid, brandLike);
       setBrandLike(!brandLike);
     }, [uuid, brandLike, handleLikeClick, likeProcessing, onShowLogin]);
-
+ 
     const handlePlay = useCallback(() => {
       const allVideos = document.querySelectorAll("video");
       allVideos.forEach((vid) => {
@@ -125,7 +127,7 @@ const BrandCard = memo(
         }
       });
     }, []);
-
+ 
     const handleToggleShortList = useCallback(
       async () => {
         try {
@@ -139,7 +141,7 @@ const BrandCard = memo(
       },
       [brand, shortListed]
     );
-
+ 
     return (
       <Card sx={cardStyles}>
         <Tooltip
@@ -185,7 +187,7 @@ const BrandCard = memo(
             </IconButton>
           </span>
         </Tooltip>
-
+ 
         <Box sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Box
             sx={{
@@ -217,9 +219,9 @@ const BrandCard = memo(
               onPlay={handlePlay}
             />
           </Box>
-
+ 
           <Divider sx={{ my: 1 }} />
-
+ 
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Typography variant="body2" component="div" sx={titleStyles}>
               {brand.brandname}
@@ -253,7 +255,7 @@ const BrandCard = memo(
               </IconButton>
             </Box>
           </Box>
-
+ 
           <Box
             sx={{
               mb: 1,
@@ -279,25 +281,25 @@ const BrandCard = memo(
               </Typography>
             )}
           </Box>
-
+ 
           <Box sx={{ mb: 2, flexGrow: 1, "& > *:not(:last-child)": { mb: 1 } }}>
             <DetailItem
               icon={<AttachMoney />}
               label="Investment"
-              value={brand.fico?.[0]?.investmentRange }
+              value={brand.fico?.investmentRange }
             />
             <DetailItem
               icon={<AreaChart />}
               label="Area"
-              value={brand.fico?.[0]?.areaRequired }
+              value={brand.fico?.areaRequired }
             />
             <DetailItem
               icon={<Business />}
               label="Franchise Model"
-              value={brand.fico?.[0]?.franchiseModel}
+              value={brand.fico?.franchiseModel}
             />
           </Box>
-
+ 
           <Button
             fullWidth
             variant="contained"
@@ -308,7 +310,7 @@ const BrandCard = memo(
             View Details
           </Button>
         </Box>
-
+ 
         {showLogin && (
           <LoginPage open={showLogin} onClose={() => onShowLogin(false)} />
         )}
@@ -324,7 +326,7 @@ const BrandCard = memo(
     prevProps.maxComparisonReached === nextProps.maxComparisonReached &&
     prevProps.likeProcessing === nextProps.likeProcessing
 );
-
+ 
 const DetailItem = memo(({ icon, label, value }) => {
   const clonedIcon = useMemo(
     () =>
@@ -338,7 +340,7 @@ const DetailItem = memo(({ icon, label, value }) => {
       }),
     [icon]
   );
-
+ 
   return (
     <Box display="flex" alignItems="center">
       {clonedIcon}
@@ -348,5 +350,6 @@ const DetailItem = memo(({ icon, label, value }) => {
     </Box>
   );
 });
-
+ 
 export default BrandCard;
+ 

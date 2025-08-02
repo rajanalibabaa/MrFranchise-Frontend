@@ -4,7 +4,6 @@ import {
   Box,
   Typography,
   Avatar,
- 
   IconButton,
   useMediaQuery,
   useTheme,
@@ -17,155 +16,259 @@ import {
   Paper,
   Fade,
   Grow,
-  Slide
+  Slide,
+  Button,
+  Skeleton
 } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useBrands,openBrandDialog } from "../../Hooks/Fetchbrands";
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchBrandsByChildCategory, clearBrands, prefetchBrands } from '../../Redux/Slices/SideMenuHoverBrandSlices.jsx';
+import { debounce } from 'lodash';
 
+// Memoized brand card component with optimized props
+const BrandCard = React.memo(({ brand, onClick, isMobile }) => {
+  console.log("calling brand:", brand);
+  const brandName = brand.brandname || 'Unknown';
+  const brandLogo = brand.logo || "";
+  const initial = brandName[0] || "B";
 
-
-
-// Memoized brand card component to prevent unnecessary re-renders
-
-const BrandCard = React.memo(({ brand, handleBrandClick, isMobile }) => (
-  <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-    <Paper
-      onClick={() => handleBrandClick(brand)}
-      elevation={2}
-      sx={{
-        width: isMobile ? 100 : 100,
-        height: isMobile ? 130 : 120,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: 1,
-        borderRadius: 2,
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        border: '1px solid #eee',
-        backgroundColor: '#fff',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 6px 20px rgba(0,0,0,0.08)',
-          borderColor: '#ff9800',
-        },
-      }}
-    >
-      <Box
+  return (
+    <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+      <Paper
+        onClick={onClick}
+        elevation={2}
         sx={{
-          width: isMobile ? 48 : 60,
-          height: isMobile ? 48 : 60,
-          borderRadius: '50%',
-          overflow: 'hidden',
+          width: isMobile ? 100 : 100,
+          height: isMobile ? 130 : 120,
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          mb: 1,
+          p: 1,
+          borderRadius: 2,
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          border: '1px solid #eee',
+          backgroundColor: '#fff',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 6px 20px rgba(0,0,0,0.08)',
+            borderColor: '#ff9800',
+          },
         }}
       >
-        <Avatar
-          src={brand.uploads?.brandLogo || ""}
-          alt={brand.brandDetails?.brandName || "B"}
+        <Box
           sx={{
-            width: '100%',
-            height: '100%',
-            fontSize: isMobile ? 22 : 26,
-            bgcolor: '#ffe0b2',
-            color: '#ff6d00'
+            width: isMobile ? 48 : 60,
+            height: isMobile ? 48 : 60,
+            borderRadius: '50%',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mb: 1,
           }}
         >
-          {brand.brandDetails?.brandName?.[0] || "B"}
-        </Avatar>
-      </Box>
-      <Typography
-        fontWeight={600}
-        textAlign="center"
-        noWrap
-        sx={{
-          fontSize: isMobile ? '0.75rem' : '0.875rem',
-          maxWidth: '100%',
-          px: 1,
-          color: 'text.primary',
-          whiteSpace: 'normal',
-          wordBreak: 'break-word',
-          lineHeight: 1.3,
-        }}
-      >
-        {brand.brandDetails?.brandName || 'Unknown'}
-      </Typography>
-    </Paper>
-  </motion.div>
-));
+          <Avatar
+            src={brandLogo}
+            alt={brandName}
+            sx={{
+              width: '100%',
+              height: '100%',
+              fontSize: isMobile ? 22 : 26,
+              bgcolor: '#ffe0b2',
+              color: '#ff6d00'
+            }}
+          >
+            {initial}
+          </Avatar>
+        </Box>
+        <Typography
+          fontWeight={600}
+          textAlign="center"
+          noWrap
+          sx={{
+            fontSize: isMobile ? '0.75rem' : '0.875rem',
+            maxWidth: '100%',
+            px: 1,
+            color: 'text.primary',
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            lineHeight: 1.3,
+          }}
+        >
+          {brandName}
+        </Typography>
+      </Paper>
+    </motion.div>
+  );
+}, (prevProps, nextProps) => {
+  // Only re-render if brand ID changes or mobile status changes
+  return prevProps.brand._id === nextProps.brand._id && 
+         prevProps.isMobile === nextProps.isMobile;
+});
 
+// Skeleton loader for brands
+const BrandCardSkeleton = ({ isMobile }) => (
+  <Skeleton 
+    variant="rectangular" 
+    width={isMobile ? 100 : 100} 
+    height={isMobile ? 130 : 120}
+    sx={{ borderRadius: 2 }}
+  />
+);
 
 const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
+  const dispatch = useDispatch();
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
-  const [filteredBrands, setFilteredBrands] = useState([]);
   const [mobileTabValue, setMobileTabValue] = useState(0);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  const navigate = useNavigate();
+  const [hoveredChild, setHoveredChild] = useState(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  // Memoized selector for Redux state
+  const { brands, loading, error, pagination, currentCategory } = useSelector(
+    (state) => ({
+      brands: state.brandCategory.brands,
+      loading: state.brandCategory.loading,
+      error: state.brandCategory.error,
+      pagination: state.brandCategory.pagination,
+      currentCategory: state.brandCategory.currentCategory
+    }),
+    (prev, next) => (
+      prev.brands.length === next.brands.length &&
+      prev.loading === next.loading &&
+      prev.error === next.error &&
+      prev.pagination.currentPage === next.pagination.currentPage &&
+      prev.currentCategory === next.currentCategory
+    )
+  );
+
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
-
-
-const { data, isLoading, error, refetch } = useBrands();
-const brandsData = data || [];
-
-  
- // Build child-to-brands map when data loads
-  const childToBrandsMap = useMemo(() => {
-    const map = {};
-    if (!brandsData || brandsData.length === 0) return map;
-
-    brandsData.forEach((brand) => {
-      const brandCats = brand.franchiseDetails?.brandCategories;
-      if (!brandCats) return;
-
-      // Handle both array and single category cases
-      const catArray = Array.isArray(brandCats) ? brandCats : [brandCats];
-      
-      catArray.forEach((cat) => {
-        if (cat.child) {
-          if (!map[cat.child]) map[cat.child] = [];
-          map[cat.child].push(brand);
-        }
-      });
-    });
-
-    return map;
-  }, [brandsData]);
-
-  // Optimized brand filtering  
- const handleSubChildHover = useCallback((children) => {
-    try {
+ // Faster debounced hover handler with 100ms delay
+  const debouncedHandleSubChildHover = useMemo(
+    () => debounce((children, subCategory) => {
       const childName = typeof children === "string" ? children : children.name;
-      if (childToBrandsMap[childName]) {
-        setFilteredBrands(childToBrandsMap[childName]);
-      } else {
-        setFilteredBrands([]);
+      if (subCategory && childName) {
+        setHoveredChild(childName);
+        setIsTransitioning(true);
+        dispatch(fetchBrandsByChildCategory({
+          subCategory,
+          childCategory: childName,
+          page: 1,
+          limit: 30
+        })).finally(() => {
+          setIsTransitioning(false);
+        });
       }
-    } catch (err) {
-      console.error("Error filtering brands:", err);
-      setFilteredBrands([]);
+    }, 100), // Reduced from 150ms to 100ms
+    [dispatch]
+  );
+
+ // Immediate category change handler
+  const handleCategoryHover = useCallback((index) => {
+    if (activeCategory !== index) {
+      setIsTransitioning(true);
+      dispatch(clearBrands());
+      setActiveCategory(index);
+      setActiveSubCategory(null);
+      setHoveredChild(null);
+      // Don't wait for state updates to complete
+      setIsTransitioning(false);
     }
-  }, [childToBrandsMap]);
+  }, [activeCategory, dispatch]);
+
+ // Immediate subcategory change handler
+  const handleSubCategoryHover = useCallback((subCategory) => {
+    if (activeSubCategory?.name !== subCategory.name) {
+      setIsTransitioning(true);
+      dispatch(clearBrands());
+      setActiveSubCategory(subCategory);
+      setHoveredChild(null);
+      // Don't wait for state updates to complete
+      setIsTransitioning(false);
+    }
+  }, [activeSubCategory, dispatch]);
+
+
+  // Prefetch adjacent categories when a subcategory is selected
+  useEffect(() => {
+    if (activeSubCategory?.children) {
+      const subCategoryName = activeSubCategory.name;
+      // Prefetch first 3 child categories
+      activeSubCategory.children.slice(0, 3).forEach(child => {
+        const childName = typeof child === "string" ? child : child.name;
+        dispatch(prefetchBrands({
+          subCategory: subCategoryName,
+          childCategory: childName
+        }));
+      });
+    }
+  }, [activeSubCategory, dispatch]);
+
+  // Clean up debounce on unmount
+  useEffect(() => {
+    return () => {
+      debouncedHandleSubChildHover.cancel();
+    };
+  }, [debouncedHandleSubChildHover]);
 
   const handleBrandClick = useCallback((brand) => {
-    // dispatch(openBrandDialog(brand));
     openBrandDialog(brand);
   }, []);
 
   const handleMobileTabChange = useCallback((event, newValue) => {
     setMobileTabValue(newValue);
   }, []);
+
+   // Immediate child category hover handler
+  const handleSubChildHover = useCallback((children) => {
+    const subCategory = activeSubCategory?.name;
+    const childName = typeof children === "string" ? children : children.name;
+    
+    // Immediate visual feedback
+    setHoveredChild(childName);
+    setIsTransitioning(true);
+    dispatch(clearBrands());
+    
+    // Debounced API call
+    debouncedHandleSubChildHover(children, subCategory);
+  }, [activeSubCategory, debouncedHandleSubChildHover, dispatch]);
+
+  const handleLoadMore = useCallback(() => {
+    if (pagination.hasNext) {
+      const subCategory = activeSubCategory?.name;
+      const childCategory = currentCategory;
+      
+      if (subCategory && childCategory) {
+        dispatch(fetchBrandsByChildCategory({
+          subCategory,
+          childCategory,
+          page: pagination.currentPage + 1,
+          limit: pagination.limit
+        }));
+      }
+    }
+  }, [activeSubCategory, currentCategory, pagination, dispatch]);
+
+  // Clear brands when drawer closes
+  useEffect(() => {
+    if (!hoverCategory) {
+      dispatch(clearBrands());
+      setActiveCategory(null);
+      setActiveSubCategory(null);
+      setMobileTabValue(0);
+      setHoveredChild(null);
+    }
+  }, [hoverCategory, dispatch]);
 
   // Memoized mobile tab content
   const getMobileTabContent = useMemo(() => {
@@ -298,11 +401,14 @@ const brandsData = data || [];
           {activeSubCategory?.children?.map((children, idx) => {
             const name = typeof children === "string" ? children : children.name;
             const Icon = typeof children === "object" ? children.icon : null;
+            const isHovered = hoveredChild === name;
+            
             return (
               <Slide in={true} direction="up" timeout={(idx + 1) * 100} key={idx}>
                 <motion.div whileHover={{ scale: 1.02 }}>
                   <Box
                     onClick={() => handleSubChildHover(children)}
+                    onMouseEnter={() => handleSubChildHover(children)}
                     sx={{
                       cursor: "pointer",
                       display: "flex",
@@ -312,11 +418,12 @@ const brandsData = data || [];
                       borderRadius: 2,
                       gap: 1.5,
                       mb: 1,
-                      bgcolor: "background.paper",
+                      bgcolor: isHovered ? "orange" : "background.paper",
+                      color: isHovered ? "primary.contrastText" : "text.primary",
                       boxShadow: theme.shadows[1],
                       transition: "all 0.3s ease",
                       "&:hover": {
-                        bgcolor: "action.hover",
+                        bgcolor: "orange",
                         boxShadow: theme.shadows[2],
                       },
                     }}
@@ -324,7 +431,10 @@ const brandsData = data || [];
                     {Icon && (
                       <Box
                         component={Icon}
-                        sx={{ fontSize: 20, color: "primary.main" }}
+                        sx={{ 
+                          fontSize: 20, 
+                          color: isHovered ? "primary.contrastText" : "primary.main" 
+                        }}
                       />
                     )}
                     <Typography fontWeight="medium">{name}</Typography>
@@ -338,26 +448,25 @@ const brandsData = data || [];
     ];
     
     return () => tabContents[mobileTabValue] || null;
-  }, [mobileTabValue, activeCategory, activeSubCategory, handleSubChildHover]);
+  }, [mobileTabValue, activeCategory, activeSubCategory, handleSubChildHover, hoveredChild]);
 
-  // Optimized brands grid rendering
+  // Optimized brands grid rendering with skeleton loading
   const renderBrandsGrid = useMemo(() => {
-    if (isLoading) {
+    // Show loading state during transitions or initial load
+    if (isTransitioning || (loading && brands.length === 0)) {
       return (
-           <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "60vh",
-          width: "100%",
-        }}
-      >
-        <CircularProgress color="primary" size={48} thickness={4} />
-      </Box>
+        <Box sx={{ p: 2 }}>
+          <Skeleton variant="text" width="40%" height={40} sx={{ mb: 2 }} />
+          <Grid container spacing={isMobile ? 1 : 2}>
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <BrandCardSkeleton isMobile={isMobile} />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
       );
     }
-
     if (error) {
       return (
         <Box
@@ -375,13 +484,24 @@ const brandsData = data || [];
           <Typography variant="h6" gutterBottom>
             Oops! Something went wrong
           </Typography>
-         <Typography variant="body2" sx={{ mb: 2 }}>
-  {error?.message || String(error) || 'Failed to load brands. Please try again later.'}
-</Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            {error || 'Failed to load brands. Please try again later.'}
+          </Typography>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Chip
               label="Retry"
-              onClick={refetch}
+              onClick={() => {
+                const subCategory = activeSubCategory?.name;
+                const childCategory = currentCategory;
+                if (subCategory && childCategory) {
+                  dispatch(fetchBrandsByChildCategory({
+                    subCategory,
+                    childCategory,
+                    page: 1,
+                    limit: 30
+                  }));
+                }
+              }}
               color="primary"
               sx={{ 
                 px: 3,
@@ -395,7 +515,7 @@ const brandsData = data || [];
       );
     }
 
-    if (filteredBrands.length > 0) {
+    if (brands.length > 0) {
       return (
         <>
           <Box
@@ -416,27 +536,57 @@ const brandsData = data || [];
                 WebkitTextFillColor: "transparent",
               }}
             >
-              Popular Brands
+              {currentCategory || 'Popular Brands'}
             </Typography>
             <Chip
-              label={`${filteredBrands.length} -  brands`}
+              label={`${brands.length} brands`}
               size="small"
               color="warning"
               variant="outlined"
               sx={{ fontWeight: 'bold' }}
             />
           </Box>
+          
           <Grid container spacing={isMobile ? 1 : 2}>
-            {filteredBrands.slice(0, isMobile ? 8 : 12).map((brand, index) => (
-              <Grid item xs={12} sm={6} md={3} key={brand._id || index}>
+            {brands.map((brand) => (
+              <Grid item xs={12} sm={6} md={3} key={brand._id}>
                 <BrandCard 
                   brand={brand} 
-                  handleBrandClick={handleBrandClick} 
+                  onClick={() => handleBrandClick(brand)}
                   isMobile={isMobile} 
                 />
               </Grid>
             ))}
+            
+            {loading && (
+              <>
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Grid item xs={12} sm={6} md={3} key={`skeleton-${index}`}>
+                    <BrandCardSkeleton isMobile={isMobile} />
+                  </Grid>
+                ))}
+              </>
+            )}
           </Grid>
+          
+          {pagination.hasNext && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleLoadMore}
+                disabled={loading}
+                sx={{
+                  px: 4,
+                  py: 1,
+                  borderRadius: 2,
+                  fontWeight: 'bold'
+                }}
+              >
+                {loading ? 'Loading...' : 'Load More'}
+              </Button>
+            </Box>
+          )}
         </>
       );
     }
@@ -455,15 +605,6 @@ const brandsData = data || [];
             p: 3,
           }}
         >
-          {/* <img 
-            src="/images/no-brands.svg" 
-            alt="No brands found" 
-            style={{ 
-              width: isMobile ? 150 : 200,
-              opacity: 0.7,
-              marginBottom: 16
-            }}
-          /> */}
           <Typography variant="h6" gutterBottom>
             Find Your Dream Franchise Brands
           </Typography>
@@ -473,8 +614,7 @@ const brandsData = data || [];
         </Box>
       </Fade>
     );
-  },  [isLoading, error, filteredBrands, isMobile, handleBrandClick, refetch]);
-
+}, [brands, loading, error, isMobile, pagination, currentCategory, handleLoadMore, handleBrandClick, isTransitioning]);
   return (
     <Drawer
       anchor="top"
@@ -558,6 +698,7 @@ const brandsData = data || [];
           <>
             {/* Categories Column */}
             <Box
+            onMouseEnter={() => handleCategoryHover(index)}
               sx={{
                 width: 240,
                 borderRight: `1px solid ${theme.palette.divider}`,
@@ -605,6 +746,7 @@ const brandsData = data || [];
             {/* Subcategories Column */}
             {activeCategory !== null && (
               <Box
+               onMouseEnter={() => handleSubCategoryHover(subCategory)}
                 sx={{
                   width: 260,
                   borderRight: `1px solid ${theme.palette.divider}`,
@@ -678,13 +820,16 @@ const brandsData = data || [];
                   {activeSubCategory.name}
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
-                {activeSubCategory.children?.map((children, idx) => {
-                  const name = typeof children === "string" ? children : children.name;
-                  const Icon = typeof children === "object" ? children.icon : null;
+                {activeSubCategory?.children?.map((children, idx) => {
+    const name = typeof children === "string" ? children : children.name;
+    const Icon = typeof children === "object" ? children.icon : null;
+    const isHovered = hoveredChild === name;
+                  
                   return (
                     <Slide in={true} direction="up" timeout={(idx + 1) * 100} key={idx}>
                       <motion.div whileHover={{ scale: 1.02 }}>
                         <Box
+                          onClick={() => handleSubChildHover(children)}
                           onMouseEnter={() => handleSubChildHover(children)}
                           sx={{
                             cursor: "pointer",
@@ -695,9 +840,10 @@ const brandsData = data || [];
                             borderRadius: 2,
                             gap: 1.5,
                             mb: 1.5,
-                            bgcolor: "background.paper",
+                            bgcolor: isHovered ? "orange" : "background.paper",
+                            color: isHovered ? "primary.contrastText" : "text.primary",
                             boxShadow: theme.shadows[1],
-                            transition: "all 0.3s ease",
+                            transition: "all 0.2s ease",
                             "&:hover": {
                               bgcolor: "orange",
                               boxShadow: theme.shadows[2],
@@ -707,7 +853,10 @@ const brandsData = data || [];
                           {Icon && (
                             <Box
                               component={Icon}
-                              sx={{ fontSize: 20, color: "primary.main" }}
+                              sx={{ 
+                                fontSize: 20, 
+                                color: isHovered ? "primary.contrastText" : "primary.main" 
+                              }}
                             />
                           )}
                           <Typography fontWeight="medium">{name}</Typography>
