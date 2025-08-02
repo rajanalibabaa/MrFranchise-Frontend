@@ -11,8 +11,9 @@ import {
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowBack, ArrowForward, Close } from "@mui/icons-material";
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useSelector,useDispatch } from 'react-redux';
 import HomePageBrandCard from './HomePageBrandCard';
+ import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
  
 const LikedBrands = () => {
   const theme = useTheme();
@@ -28,9 +29,13 @@ const LikedBrands = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [removeMsg, setRemoveMsg] = useState("");
- 
+ const dispatch = useDispatch();
   const userId = useSelector((state) => state.auth?.investorUUID) || localStorage.getItem("id");
   const accessToken = useSelector((state) => state.auth?.AccessToken);
+  const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID")
+  if (!id) {
+    return null;
+  }
  
   // Fetch liked brands data
   const fetchLikedBrands = useCallback(async () => {
@@ -42,31 +47,8 @@ const LikedBrands = () => {
       });
       console.log("=== :",response.data)
  
-      // Check the actual response structure and adjust accordingly
-      // const responseData = response.data;
- 
-      // First try: check if data is directly in response.data
-      // let brandsData = Array.isArray(responseData)? responseData :[];
- 
-      // Second try: check if data is in response.data.data
-      // if(!Array.isArray(brandsData)) {
-      //   brandsData = Array.isArray(responseData.data) ? responseData.data : [];
-      // }
-   
-      // Filter to only show liked brands
-      // const likedBrands = brandsData.filter(brand => brand.isLiked);
-      // setBrands(likedBrands);
- 
- 
        let brandsData =  response.data.data;
- 
-    // if (Array.isArray(response.data)) {
-    //   brandsData = response.data;
-    // } else if (Array.isArray(response.data)) {
-    //   brandsData = response.data;
-    // } else if (Array.isArray(response.data.likedBrands)) {
-    //   brandsData = response.data.likedBrands;
-    // }
+
       setBrands(brandsData);
  
       console.log("xxxxx : ",brandsData.brands.length)
@@ -117,7 +99,8 @@ const LikedBrands = () => {
  
   const handleApply = useCallback((brand) => {
     // Your apply logic here
-    console.log("Apply for brand:", brand.brandDetails.brandName);
+    console.log("Apply for brand:", brand);
+    dispatch(openBrandDialog(brand));
   }, []);
  
   const handlePrevClick = useCallback(() => {
@@ -190,24 +173,11 @@ const LikedBrands = () => {
     );
   }
  
-  // if (!brands.length) {
-  //   return (
-  //     <Box sx={{
-  //       display: 'flex',
-  //       justifyContent: 'center',
-  //       py: 10,
-  //       textAlign: 'center'
-  //     }}>
-  //       <Typography variant="body1">
-  //         No liked brands found. Like some brands to see them here.
-  //       </Typography>
-  //     </Box>
-  //   );
-  // }
- 
- 
   return (
-    <Box
+
+    <>
+    
+      <Box
       ref={containerRef}
       sx={{
         py: isMobile ? 1 : 2,
@@ -353,7 +323,7 @@ const LikedBrands = () => {
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          {brands?.brands?.length > 0 && brands.brands.map((brand) => (
+          {brands?.brands?.length > 4 && brands.brands.map((brand) => (
             <motion.div key={brand.uuid || brand.id}>
               <HomePageBrandCard
                 brand={brand}
@@ -374,6 +344,8 @@ const LikedBrands = () => {
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}
     </Box>
+   
+    </>
   );
 };
  

@@ -21,7 +21,7 @@ export const fetchTopFoodFranchises = createAsyncThunk(
         brands: response.data.data.brands,
         pagination: response.data.data.pagination || {
           currentPage: page,
-          totalPages: 1,
+          totalPages: 1, 
           totalItems: 0,
           hasNextPage: false,
           hasPreviousPage: false
