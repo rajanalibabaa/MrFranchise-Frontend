@@ -9,6 +9,17 @@
     "preview": "vite preview",
     "lint": "eslint ."
   },
+  "reactSnap": {
+    "inlineCss": true,
+    "puppeteerArgs": [
+      "--no-sandbox",
+      "--disable-setuid-sandbox"
+    ],
+    "minifyHtml": {
+      "collapseWhitespace": true,
+      "removeComments": true
+    }
+  },
   "dependencies": {
     "@date-io/date-fns": "^3.2.1",
     "@emotion/react": "^11.14.0",
@@ -37,6 +48,7 @@
     "react-confetti": "^6.4.0",
     "react-dom": "^19.0.0",
     "react-google-recaptcha": "^3.1.0",
+    "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.56.3",
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.5.0",
@@ -44,6 +56,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.5.3",
     "react-share": "^5.2.2",
+    "react-snap": "^1.23.0",
     "react-use": "^17.6.0",
     "react-virtualized-auto-sizer": "^1.0.26",
     "react-window": "^1.8.11",

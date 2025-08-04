@@ -38,6 +38,7 @@ export const VideoPlayer = ({
   const [pipMode, setPipMode] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [hasError, setHasError] = useState(false);
   
   const {
     currentPlayingId,
@@ -53,10 +54,7 @@ export const VideoPlayer = ({
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
+        setIsVisible(entry.isIntersecting);
       },
       { threshold: 0.1 }
     );
@@ -68,57 +66,64 @@ export const VideoPlayer = ({
     return () => observer.disconnect();
   }, []);
 
-  // Memoized event handlers
+  // Load video when visible
+  useEffect(() => {
+    if (isVisible && videoRef.current) {
+      videoRef.current.load();
+    }
+  }, [isVisible]);
+
+  // Event handlers
   const handleLoadedMetadata = useCallback(() => {
     if (videoRef.current) {
       setDuration(videoRef.current.duration);
       setIsLoaded(true);
-      
-      // Start loading the video immediately after metadata is loaded
-      if (isVisible) {
-        videoRef.current.load();
-      }
+      setIsBuffering(false);
+      setHasError(false);
     }
-  }, [isVisible]);
+  }, []);
 
   const handleTimeUpdate = useCallback(() => {
-    if (videoRef.current) {
+    if (videoRef.current && duration > 0) {
       setProgress((videoRef.current.currentTime / duration) * 100);
     }
   }, [duration]);
 
-  // Register/unregister video with cleanup
-  useEffect(() => {
-    if (!isVisible) return;
+  const handleError = useCallback(() => {
+    console.error('Video error');
+    setHasError(true);
+    setIsBuffering(false);
+    setIsLoaded(true); // Show controls even if error
+  }, []);
 
+  // Register/unregister video
+  useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     registerVideo(id, video);
     
-    // More aggressive preloading strategy
-    video.preload = 'auto';
-    video.load();
-    
     return () => {
       unregisterVideo(id);
-      // Clean up video element
-      video.pause();
-      video.removeAttribute('src');
-      video.load();
     };
-  }, [id, isVisible, registerVideo, unregisterVideo]);
+  }, [id, registerVideo, unregisterVideo]);
 
-  // Play/pause handler with immediate feedback
-  const togglePlayPause = useCallback(() => {
+  // Play/pause handler
+  const togglePlayPause = useCallback(async () => {
     if (isPlaying) {
       pauseVideo(id);
     } else {
-      // Optimistic UI update
       setIsBuffering(true);
-      playVideo(id).finally(() => setIsBuffering(false));
+      try {
+        await playVideo(id);
+      } catch (error) {
+        console.error('Playback failed:', error);
+        handleError();
+      } finally {
+        setIsBuffering(false);
+      }
     }
-  }, [isPlaying, id, pauseVideo, playVideo]);
+  }, [isPlaying, id, pauseVideo, playVideo, handleError]);
 
   // Mute/unmute handler
   const toggleMute = useCallback(() => {
@@ -137,71 +142,54 @@ export const VideoPlayer = ({
     }
   }, [isFullscreen]);
 
-  // PIP handler
+  // PIP handler with proper error handling
   const togglePipMode = useCallback(async () => {
-    if (!pipMode && document.pictureInPictureEnabled) {
-      try {
-        await videoRef.current?.requestPictureInPicture?.();
+    try {
+      if (!pipMode && document.pictureInPictureEnabled && videoRef.current) {
+        await videoRef.current.requestPictureInPicture();
         setPipMode(true);
-      } catch (err) {
-        console.error("PIP failed:", err);
+      } else if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+        setPipMode(false);
       }
-    } else {
-      await document.exitPictureInPicture?.();
+    } catch (err) {
+      console.error("PIP error:", err);
       setPipMode(false);
     }
   }, [pipMode]);
 
-  // Event listeners with optimized setup
+  // Event listeners setup
   useEffect(() => {
-    if (!isVisible) return;
-
     const video = videoRef.current;
     if (!video) return;
 
+    const events = {
+      loadedmetadata: handleLoadedMetadata,
+      timeupdate: handleTimeUpdate,
+      waiting: () => setIsBuffering(true),
+      playing: () => setIsBuffering(false),
+      canplay: () => setIsBuffering(false),
+      ended: () => pauseVideo(id),
+      error: handleError
+    };
+
+    Object.entries(events).forEach(([event, handler]) => {
+      video.addEventListener(event, handler);
+    });
+
+    // Fullscreen change listener
     const handleFullscreenChange = () => {
       setIsFullscreen(document.fullscreenElement === containerRef.current);
     };
-
-    const handlePipChange = () => {
-      setPipMode(document.pictureInPictureElement === video);
-    };
-
-    const handleWaiting = () => setIsBuffering(true);
-    const handlePlaying = () => setIsBuffering(false);
-    const handleEnded = () => pauseVideo(id);
-    const handleCanPlay = () => setIsBuffering(false);
-
-    // Video events
-    const videoEvents = [
-      { type: 'loadedmetadata', handler: handleLoadedMetadata },
-      { type: 'timeupdate', handler: handleTimeUpdate },
-      { type: 'waiting', handler: handleWaiting },
-      { type: 'playing', handler: handlePlaying },
-      { type: 'ended', handler: handleEnded },
-      { type: 'canplay', handler: handleCanPlay },
-      { type: 'enterpictureinpicture', handler: handlePipChange },
-      { type: 'leavepictureinpicture', handler: handlePipChange }
-    ];
-
-    // Add all video event listeners
-    videoEvents.forEach(({ type, handler }) => {
-      video.addEventListener(type, handler);
-    });
-
-    // Document events
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
-      // Remove all video event listeners
-      videoEvents.forEach(({ type, handler }) => {
-        video.removeEventListener(type, handler);
+      Object.entries(events).forEach(([event, handler]) => {
+        video.removeEventListener(event, handler);
       });
-      
-      // Remove document events
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, [id, isVisible, handleLoadedMetadata, handleTimeUpdate, pauseVideo]);
+  }, [handleLoadedMetadata, handleTimeUpdate, id, pauseVideo, handleError]);
 
   return (
     <>
@@ -216,77 +204,84 @@ export const VideoPlayer = ({
           '&:hover .video-controls': { opacity: 1 },
         }}
       >
-        {/* Optimized loading indicator with custom color */}
-        {(!isLoaded || isBuffering) && (
-          <LinearProgress 
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 1,
-              backgroundColor: 'rgba(255, 152, 0, 0.2)',
-              '& .MuiLinearProgress-bar': {
-                backgroundColor: '#ff9800'
-              }
-            }}
-          />
-        )}
-
-        {/* Video element with optimized attributes */}
-        {isVisible && (
-          <video
-            ref={videoRef}
-            poster={poster}
-            src={videoUrl}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit,
-              cursor: 'pointer',
-              display: isLoaded ? 'block' : 'none',
-              visibility: isLoaded ? 'visible' : 'hidden'
-            }}
-            muted={isMuted}
-            loop
-            playsInline
-            preload="auto"
-            onClick={togglePlayPause}
-            onError={() => {
-              console.error('Video loading failed');
-              setIsLoaded(true); // Show controls even if error
-            }}
-          />
-        )}
-
-        {/* Fallback for browsers that don't support video */}
-        {(!isLoaded || !isVisible) && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#f5f5f5'
-            }}
-          >
-            <Box
-              component="img"
-              src={poster}
-              alt="Video thumbnail"
+        {/* Loading/error indicator */}
+        {(!isLoaded || isBuffering || hasError) && (
+          <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1 }}>
+            <LinearProgress 
+              variant={isBuffering ? 'indeterminate' : 'determinate'}
+              value={progress}
               sx={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                objectFit: 'contain'
+                height: 4,
+                '& .MuiLinearProgress-bar': {
+                  backgroundColor: hasError ? '#f44336' : '#ff9800'
+                }
               }}
             />
           </Box>
         )}
 
+        {/* Video element */}
+        <video
+          ref={videoRef}
+          poster={poster}
+          src={videoUrl}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit,
+            cursor: 'pointer',
+            display: isLoaded && !hasError ? 'block' : 'none',
+            backgroundColor: '#f5f5f5'
+          }}
+          muted={isMuted}
+          loop
+          playsInline
+          preload="auto"
+          onClick={togglePlayPause}
+        />
+
+        {/* Fallback poster or error message */}
+        {(!isLoaded || hasError) && poster && (
+          <Box
+            component="img"
+            src={poster}
+            alt="Video preview"
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              cursor: 'pointer',
+              zIndex: 0,
+              filter: hasError ? 'grayscale(80%)' : 'none',
+              opacity: 0.8
+            }}
+            onClick={togglePlayPause}
+          />
+        )}
+
+        {hasError && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              color: 'white',
+              backgroundColor: 'rgba(0,0,0,0.7)',
+              padding: 1,
+              borderRadius: 1,
+              zIndex: 2,
+              textAlign: 'center'
+            }}
+          >
+            Video Loading ...
+          </Box>
+        )}
+
+        {/* Controls */}
         {showControls && (
           <Box
             className="video-controls"
@@ -300,61 +295,137 @@ export const VideoPlayer = ({
               opacity: isPlaying ? 0.7 : 1,
               transition: 'opacity 0.3s',
               '&:hover': { opacity: 1 },
+              zIndex: 2
             }}
           >
-            {/* Progress bar with better UX */}
-            <Slider
-              value={progress}
-              onChange={(e, newValue) => {
-                if (videoRef.current) {
-                  videoRef.current.currentTime = (newValue / 100) * duration;
-                }
-              }}
-              sx={{
-                position: 'absolute',
-                top: -10,
-                left: 0,
-                right: 0,
-                color: 'primary.main',
-                height: 4,
-                '& .MuiSlider-thumb': {
-                  width: 8,
-                  height: 8,
-                  transition: '0.3s cubic-bezier(.47,1.64,.41,.8)',
-                  '&:hover': { width: 12, height: 12 },
-                },
-              }}
-            />
+            {/* Progress bar */}
+            <Box sx={{ position: 'relative', width: '100%', height: 4, mb: 1 }}>
+              <Slider
+                value={progress}
+                onChange={(e, newValue) => {
+                  if (videoRef.current) {
+                    videoRef.current.currentTime = (newValue / 100) * duration;
+                  }
+                }}
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  color: 'primary.main',
+                  height: 4,
+                  '& .MuiSlider-thumb': {
+                    width: 12,
+                    height: 12,
+                    transition: '0.2s cubic-bezier(.47,1.64,.41,.8)',
+                    '&:hover': { width: 16, height: 16 },
+                  },
+                  '& .MuiSlider-rail': {
+                    display: 'none'
+                  },
+                  '& .MuiSlider-track': {
+                    backgroundColor: '#ff9800'
+                  }
+                }}
+              />
+            </Box>
 
-            {/* Control buttons with better spacing */}
+            {/* Control buttons */}
             <Box display="flex" alignItems="center" gap={1} px={1}>
               <Tooltip title={isPlaying ? 'Pause' : 'Play'}>
-                <IconButton onClick={togglePlayPause} size="small" sx={{ color: 'white' }}>
+                <IconButton 
+                  onClick={togglePlayPause} 
+                  size="small" 
+                  disabled={hasError}
+                  sx={{ 
+                    color: 'white',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.7)'
+                    },
+                    '&:disabled': {
+                      opacity: 0.5
+                    }
+                  }}
+                >
                   {isPlaying ? <Pause fontSize="small" /> : <PlayArrow fontSize="small" />}
                 </IconButton>
               </Tooltip>
 
               <Tooltip title={isMuted ? 'Unmute' : 'Mute'}>
-                <IconButton onClick={toggleMute} size="small" sx={{ color: 'white' }}>
+                <IconButton 
+                  onClick={toggleMute} 
+                  size="small" 
+                  disabled={hasError}
+                  sx={{ 
+                    color: 'white',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.7)'
+                    },
+                    '&:disabled': {
+                      opacity: 0.5
+                    }
+                  }}
+                >
                   {isMuted ? <VolumeOff fontSize="small" /> : <VolumeUp fontSize="small" />}
                 </IconButton>
               </Tooltip>
 
-              <Box flexGrow={1} minWidth={8} />
+              <Box 
+                sx={{ 
+                  color: 'white', 
+                  fontSize: '0.75rem',
+                  ml: 1,
+                  minWidth: '60px',
+                  textAlign: 'center'
+                }}
+              >
+                {duration > 0 && !hasError && (
+                  <>
+                    {formatTime((progress / 100) * duration)} / {formatTime(duration)}
+                  </>
+                )}
+              </Box>
+
+              <Box flexGrow={1} />
 
               <Tooltip title="Picture-in-Picture">
                 <IconButton 
                   onClick={togglePipMode} 
                   size="small" 
-                  sx={{ color: 'white' }}
-                  disabled={!document.pictureInPictureEnabled}
+                  disabled={!document.pictureInPictureEnabled || hasError}
+                  sx={{ 
+                    color: 'white',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.7)'
+                    },
+                    '&:disabled': {
+                      opacity: 0.5
+                    }
+                  }}
                 >
                   <PictureInPicture fontSize="small" />
                 </IconButton>
               </Tooltip>
 
               <Tooltip title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}>
-                <IconButton onClick={toggleFullscreen} size="small" sx={{ color: 'white' }}>
+                <IconButton 
+                  onClick={toggleFullscreen} 
+                  size="small" 
+                  disabled={hasError}
+                  sx={{ 
+                    color: 'white',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.7)'
+                    },
+                    '&:disabled': {
+                      opacity: 0.5
+                    }
+                  }}
+                >
                   {isFullscreen ? <FullscreenExit fontSize="small" /> : <Fullscreen fontSize="small" />}
                 </IconButton>
               </Tooltip>
@@ -363,7 +434,7 @@ export const VideoPlayer = ({
         )}
       </Box>
 
-      {/* Enhanced PIP Fallback Dialog */}
+      {/* PIP fallback dialog */}
       {pipMode && !document.pictureInPictureEnabled && (
         <Dialog
           open={pipMode}
@@ -420,3 +491,10 @@ export const VideoPlayer = ({
     </>
   );
 };
+
+// Helper function to format time (mm:ss)
+function formatTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+}
