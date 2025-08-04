@@ -23,7 +23,8 @@ import { likeApiFunction } from "../../Api/likeApi";
 import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
 import { token } from "../../Utils/autherId";
 import { handleShortList } from "../../Api/shortListApi";
- 
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+
 const TopInvestVdocardround = () => {
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
@@ -81,6 +82,10 @@ const TopInvestVdocardround = () => {
   }, [hasMore, isLoading]);
  
   const handleToggleShortList = async (brandId) => {
+    if (!token) {
+      setShowLogin(true);
+      return;
+    }
   try {
     dispatch(toggleBrandShortList(brandId));
     await handleShortList(brandId);
@@ -108,10 +113,10 @@ const TopInvestVdocardround = () => {
     }
   };
  
-  const handleApply = useCallback((brand) => {
-    postView(brand.uuid);
-    openBrandDialog(brand);
-  }, []);
+   const handleApply = (brand) => {
+        postView(brand.uuid);
+        dispatch(openBrandDialog(brand));
+      };
  
   if (isLoading && page === 1) {
     return (

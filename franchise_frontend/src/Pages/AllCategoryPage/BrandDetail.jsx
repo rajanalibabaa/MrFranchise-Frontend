@@ -142,10 +142,10 @@ const [showLogin, setShowLogin] = useState(false);
     console.log("ppppppp :",brandData[0].uuid)
 
     const brandId = brandData[0].uuid
-      // if (!token) {
-      //   setShowLogin(true);
-      //   return;
-      // }
+      if (!token) {
+        setShowLogin(true);
+        return;
+      }
       dispatch(toggleBrandLike(brandId));
       dispatch(toggleHomeCardLike(brandId));
       await likeApiFunction(brandId);
