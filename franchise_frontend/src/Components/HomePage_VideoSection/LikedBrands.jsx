@@ -45,13 +45,13 @@ const LikedBrands = () => {
         {
           headers: { Authorization: `Bearer ${accessToken}` }  
       });
-      console.log("=== :",response.data)
+      // console.log("=== :",response.data)
  
        let brandsData =  response.data.data;
 
       setBrands(brandsData);
  
-      console.log("xxxxx : ",brandsData.brands.length)
+      // console.log("xxxxx : ",brandsData.brands.length)
       setError(null);
     } catch (err) {
       console.error('Error fetching brands:', err);
@@ -99,7 +99,7 @@ const LikedBrands = () => {
  
   const handleApply = useCallback((brand) => {
     // Your apply logic here
-    console.log("Apply for brand:", brand);
+    // console.log("Apply for brand:", brand);
     dispatch(openBrandDialog(brand));
   }, []);
  

@@ -162,7 +162,7 @@ const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, 
   const brandName = item.brandDetails?.brandName || "Unnamed Brand";
   const brandLogo = item.uploads?.brandLogo?.[0] || img;
 
-  console.log('===',isLiked);
+  // console.log('===',isLiked);
   
   return (
     <Box sx={{ display: "flex", justifyContent: "center", alignContent: "center" }}>

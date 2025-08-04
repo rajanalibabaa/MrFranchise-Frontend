@@ -26,6 +26,8 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { RiBookmark3Fill } from "react-icons/ri";
 import { toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
 import {token} from "../../Utils/autherId.jsx"
+import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
+
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -121,7 +123,7 @@ const HomePageBrandCard = React.memo(
             border: "1px solid #eee",
           }}
         >
-          <Box
+          {/* <Box
             ref={videoRef}
             sx={{
               height: mediaHeight,
@@ -169,8 +171,14 @@ const HomePageBrandCard = React.memo(
                 </Typography>
               </Box>
             )}
-          </Box>
-
+          </Box> */}
+ <VideoPlayer
+        id={brand.uuid}
+        videoUrl={brand.franchiseVideos || brand.logo}
+        poster={brand.logo}
+        width="100%"
+        height={dimensions.height * 0.4}
+      />
           <Box sx={{ display: "flex", flexDirection: "column" }}>
             <CardContent sx={{ pb: 1 }}>
               <Box

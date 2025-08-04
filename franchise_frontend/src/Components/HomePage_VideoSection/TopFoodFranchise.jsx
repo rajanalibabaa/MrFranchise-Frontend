@@ -191,7 +191,7 @@ const {
 
   const handleApply = (brand) => {
     // Your apply logic here
-    console.log("Apply for brand:", brand);
+    // console.log("Apply for brand:", brand);
     dispatch(openBrandDialog(brand));
   };
 

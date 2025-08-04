@@ -327,7 +327,7 @@ const BrandListingController = () => {
   try {
     const apiData = unflattenFormData(formData);
 
-    console.log(apiData)
+    // console.log(apiData)
     const formDataSend = new FormData();
 
     // Append brandDetails
@@ -371,7 +371,7 @@ const BrandListingController = () => {
       }
     });
 
-    console.log("formDataSend:", formDataSend);
+    // console.log("formDataSend:", formDataSend);
 
     const response = await axios.patch(
       `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,

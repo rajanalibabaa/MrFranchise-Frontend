@@ -28,6 +28,7 @@ import { motion } from "framer-motion";
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchBrandsByChildCategory, clearBrands, prefetchBrands } from '../../Redux/Slices/SideMenuHoverBrandSlices.jsx';
 import { debounce } from 'lodash';
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 
 // Memoized brand card component with optimized props
 const BrandCard = React.memo(({ brand, onClick, isMobile }) => {
@@ -222,7 +223,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
   }, [debouncedHandleSubChildHover]);
 
   const handleBrandClick = useCallback((brand) => {
-    openBrandDialog(brand);
+    dispatch(openBrandDialog(brand) );
   }, []);
 
   const handleMobileTabChange = useCallback((event, newValue) => {
