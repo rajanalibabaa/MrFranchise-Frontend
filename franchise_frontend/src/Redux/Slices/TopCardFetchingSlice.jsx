@@ -452,6 +452,8 @@ const topFoodFranchiseSlice = createSlice({
         state.trucksAndKiosks.isLoading = false;
         state.trucksAndKiosks.error = action.payload?.message || action.error.message;
       });
+
+      
   }
 });
 
@@ -472,7 +474,7 @@ export const {
   resetDesertAndBakeryViewedCount,
   resetTrucksAndKiosksViewedCount,
   toggleHomeCardLike,
-  toggleHomeCardShortlist
+  
 } = topFoodFranchiseSlice.actions;
 
 export default topFoodFranchiseSlice.reducer;
