@@ -204,7 +204,8 @@ const TopInvestVdocardround = () => {
                 overflow: "hidden",
               }}
             >
-              <Stack
+             {!isMobile && (
+                <Stack
                 direction="column"
                 spacing={0.5}
                 sx={{ position: "absolute", top: 4, right: 4, zIndex: 2 }}
@@ -239,7 +240,43 @@ const TopInvestVdocardround = () => {
                   </Tooltip>
                 </IconButton>
               </Stack>
+             )}
+ {isMobile && (
+                 <Stack
+                direction="row"
+                spacing={0.5}
+              >
+                <IconButton
+                  sx={{
+                    color: brand?.isLiked ? "#ff5252" : "rgba(0,0,0,0.2)",
+                    "&:hover": { color: "#ff5252" },
+                  }}
+                  onClick={() => handleLikeClick(brand.uuid)}
+                  disabled={likeProcessing[brand.uuid]}
+                >
+                  {likeProcessing[brand.uuid] ? (
+                    <CircularProgress size={24} />
+                  ) : brand?.isLiked ? (
+                    <FavoriteIcon fontSize="small" />
+                  ) : (
+                    <FavoriteBorderIcon fontSize="small" />
+                  )}
+                </IconButton>
  
+                <IconButton
+                  onClick={() => handleToggleShortList(brand)}
+                  sx={{
+                    color: brand?.isShortListed
+                      ? "#7ef400ff"
+                      : "rgba(0, 0, 0, 0.23)",
+                  }}
+                >
+                  <Tooltip title="ShortList">
+                    <RiBookmark3Fill size={21} />
+                  </Tooltip>
+                </IconButton>
+              </Stack>
+              )}
               <Box
                 component="img"
                 src={brand.logo}
@@ -253,6 +290,7 @@ const TopInvestVdocardround = () => {
                   objectFit: "contain",
                 }}
               />
+             
               <Typography
                 variant="caption"
                 fontWeight={600}
@@ -265,6 +303,7 @@ const TopInvestVdocardround = () => {
                   px: 0.5,
                 }}
               >
+                
                 {brand.brandname}
               </Typography>
               <Typography
@@ -293,6 +332,7 @@ const TopInvestVdocardround = () => {
                   Type : {brand.fico?.franchiseModel || "N/A"}
                 </Typography>
               </Stack>
+               
               <Button
                 variant="outlined"
                 size="small"

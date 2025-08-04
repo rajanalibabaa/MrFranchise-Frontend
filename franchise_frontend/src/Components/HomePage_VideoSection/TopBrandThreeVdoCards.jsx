@@ -664,6 +664,7 @@ function TopBrandVdoCards() {
                             variant="contained"
                             onClick={() => handleApply(mainBrand)}
                             sx={{
+                              width : "35vh",
                               fontWeight: 800,
                               textTransform: "none",
                               color: "#fff",
