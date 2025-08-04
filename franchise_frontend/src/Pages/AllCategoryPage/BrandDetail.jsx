@@ -35,6 +35,12 @@ import { useBrand } from "../../Hooks/Fetchbrands.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
 import OverviewTab from "./OverviewTab.jsx";
+import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
+import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice.jsx";
+import { likeApiFunction } from "../../Api/likeApi.jsx";
+import { useDispatch } from "react-redux";
+import { token } from "../../Utils/autherId.jsx";
+import LoginPage from "../LoginPage/LoginPage.jsx";
 
 const BrandDetails = ({ brandData }) => {
   const theme = useTheme();
@@ -63,9 +69,9 @@ const BrandDetails = ({ brandData }) => {
     districts: [],
     cities: [],
   });
-  const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
+  const [localIsLiked, setLocalIsLiked] = useState(brandData[0].isLiked);
   const [isProcessingLike, setIsProcessingLike] = useState(false);
-  const [shortListed, setShortListed] = useState(brandData);
+  const [shortListed, setShortListed] = useState(brandData[0].isShortListed);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -78,6 +84,9 @@ const BrandDetails = ({ brandData }) => {
     planToInvest: "",
     readyToInvest: "",
   });
+
+const [showLogin, setShowLogin] = useState(false);
+  const dispatch = useDispatch()
 
   // Memoized data
   const selectedBrand = brandData || {};
@@ -129,45 +138,34 @@ const BrandDetails = ({ brandData }) => {
     setAnchorEl(event.currentTarget);
   }, []);
 
-  const handleLikeClick = useCallback(() => {
-    if (isProcessingLike) return;
+   const handleLikeClick = async () => {
+    console.log("ppppppp :",brandData[0].uuid)
 
-    setIsProcessingLike(true);
-    const newLikeStatus = !localIsLiked;
-
-    // Optimistic update
-    setLocalIsLiked(newLikeStatus);
-
-    toggleLike(
-      { brandId: brandData.uuid, isLiked: brandData.isLiked },
-      {
-        onError: () => {
-          // Revert on error
-          setLocalIsLiked(!newLikeStatus);
-        },
-        onSettled: () => {
-          setIsProcessingLike(false);
-        },
+    const brandId = brandData[0].uuid
+      if (!token) {
+        setShowLogin(true);
+        return;
       }
-    );
-  }, [
-    brandData.uuid,
-    brandData.isLiked,
-    isProcessingLike,
-    localIsLiked,
-    toggleLike,
-  ]);
+      dispatch(toggleBrandLike(brandId));
+      dispatch(toggleHomeCardLike(brandId));
+      await likeApiFunction(brandId);
+      setLocalIsLiked(!localIsLiked)
+    };
 
-  const handleToggleShortList = useCallback(async (brandData) => {
-    try {
-      const response = await handleShortList(brandData);
-      if (response.success) {
-        setShortListed((prev) => !prev);
-      }
-    } catch (error) {
-      console.error("Error toggling shortlist:", error);
-    }
-  }, []);
+ const handleToggleShortList = async () => {
+  const brandId = brandData[0].uuid
+     if (!token) {
+
+       setShowLogin(true);
+       return;
+     }
+     
+       dispatch(toggleBrandShortList(brandId));
+       dispatch(toggleHomeCardShortlist(brandId))
+       await handleShortList(brandId);
+     setShortListed(!shortListed)
+   };
+ 
 
   const toggleDrawer = useCallback(
     (open) => (event) => {
@@ -558,6 +556,11 @@ useEffect(() => {
 
       <BackToTopButton show={showBackToTop} isMobile={isMobile} />
       <Footer />
+
+       {/* Login Dialog */}
+      {showLogin && (
+        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+      )}
     </>
   );
 };

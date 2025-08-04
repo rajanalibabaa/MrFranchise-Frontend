@@ -81,44 +81,25 @@ const brandSlice = createSlice({
     resetViewedCount: (state) => {
       state.viewedBrandsCount = 0;
     },
-    toggleBrandLike: (state, action) => {
-      const brandId = action.payload;
-      state.brands = state.brands.map((brand) => ({
-        ...brand,
-        isLiked: brand.uuid === brandId ? !brand.isLiked : brand.isLiked
-      }));
-    },
-    // Comparison-related reducers
-    addToComparison: (state, action) => {
-      const brandId = action.payload;
-      const brandToAdd = state.brands.find(brand => brand.uuid === brandId);
-      
-      if (brandToAdd && !state.comparisonBrands.some(b => b.uuid === brandId)) {
-        state.comparisonBrands.push(brandToAdd);
-        // Mark as compared in main brands array
-        state.brands = state.brands.map(brand => 
-          brand.uuid === brandId ? { ...brand, isCompared: true } : brand
-        );
-      }
-    },
-    removeFromComparison: (state, action) => {
-      const brandId = action.payload;
-      state.comparisonBrands = state.comparisonBrands.filter(
-        brand => brand.uuid !== brandId
-      );
-      // Remove compared mark from main brands array
-      state.brands = state.brands.map(brand => 
-        brand.uuid === brandId ? { ...brand, isCompared: false } : brand
-      );
-    },
-    clearComparison: (state) => {
-      // Clear all comparison flags
-      const comparedIds = state.comparisonBrands.map(b => b.uuid);
-      state.brands = state.brands.map(brand => 
-        comparedIds.includes(brand.uuid) ? { ...brand, isCompared: false } : brand
-      );
-      state.comparisonBrands = [];
-    }
+ toggleBrandLike: (state, action) => {
+  const brandId = action.payload;
+  state.brands = state.brands.map(brand => 
+    brand.uuid === brandId 
+      ? { ...brand, isLiked: !brand.isLiked }
+      : brand
+  );
+},
+   toggleBrandShortList: (state, action) => {
+  const brandId = action.payload;
+  state.brands = state.brands.map(brand => 
+    brand.uuid === brandId 
+      ? { ...brand, isShortListed: !brand.isShortListed }
+      : brand
+  );
+}
+
+ 
+ 
   },
   extraReducers: (builder) => {
     builder
@@ -150,24 +131,8 @@ const brandSlice = createSlice({
       });
   },
 });
-
-// Action creators
-export const { 
-  resetBrands, 
-  incrementViewedCount, 
-  resetViewedCount, 
-  toggleBrandLike,
-  addToComparison,
-  removeFromComparison,
-  clearComparison
-} = brandSlice.actions;
-
-// Selectors
-export const selectAllBrands = (state) => state.brands.brands;
-export const selectComparisonBrands = (state) => state.brands.comparisonBrands;
-export const selectBrandById = (id) => (state) => 
-  state.brands.brands.find(brand => brand.uuid === id);
-export const selectIsBrandCompared = (id) => (state) =>
-  state.brands.comparisonBrands.some(brand => brand.uuid === id);
-
+ 
+export const { resetBrands, incrementViewedCount, resetViewedCount, toggleBrandLike, toggleBrandShortList } = brandSlice.actions;
 export default brandSlice.reducer;
+ 
+ 

@@ -23,7 +23,7 @@ import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import img from "../../assets/images/brandLogo.jpg";
 import { api } from "../../Api/api";
-import { openBrandDialog } from "../../Hooks/Fetchbrands";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice";
 
 // Memoized StatCard component to prevent unnecessary re-renders
 const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {

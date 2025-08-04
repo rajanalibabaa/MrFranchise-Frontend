@@ -8,8 +8,7 @@ export const likeApiFunction = async(id) => {
         branduuid : id
     }
     try {
-        const res = await postApi(api.likeApi.post,data)
-        // console.log("likeApiFunction res :",res.data)
+        await postApi(api.likeApi.post,data)
     } catch (error) {
         console.error(error)
     }

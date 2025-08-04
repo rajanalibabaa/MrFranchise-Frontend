@@ -18,11 +18,13 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { postView } from "../../Utils/function/view";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBrands, toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
+import { fetchBrands, toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
 import { likeApiFunction } from "../../Api/likeApi";
-import { toggleHomeCardLike } from "../../Redux/Slices/TopCardFetchingSlice";
+import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
 import { token } from "../../Utils/autherId";
- 
+import { handleShortList } from "../../Api/shortListApi";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+
 const TopInvestVdocardround = () => {
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
@@ -34,7 +36,7 @@ const TopInvestVdocardround = () => {
   const dispatch = useDispatch();
  
   const {
-    brands: reduxBrands = [],
+    brands,
     isLoading,
     error,
     pagination = { totalPages: 1 },
@@ -50,14 +52,14 @@ const TopInvestVdocardround = () => {
   }, [page, fetchedPages, dispatch]);
  
   useEffect(() => {
-    if (Array.isArray(reduxBrands)) {
+    if (Array.isArray(brands)) {
       setAllBrands((prev) => {
         const existingUUIDs = new Set(prev.map((b) => b.uuid));
-        const uniqueNewBrands = reduxBrands.filter((b) => !existingUUIDs.has(b.uuid));
+        const uniqueNewBrands = brands.filter((b) => !existingUUIDs.has(b.uuid));
         return [...prev, ...uniqueNewBrands];
       });
     }
-  }, [reduxBrands]);
+  }, [brands]);
  
   // Scroll-based infinite loading
   useEffect(() => {
@@ -79,20 +81,19 @@ const TopInvestVdocardround = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, isLoading]);
  
-  const handleToggleShortList = async (brand) => {
-    try {
-      const response = await handleShortList(brand);
-      if (response.success) {
-        setAllBrands((prev) =>
-          prev.map((b) =>
-            b.uuid === brand.uuid ? { ...b, isShortListed: !b.isShortListed } : b
-          )
-        );
-      }
-    } catch (error) {
-      console.error("Error toggling shortlist:", error);
+  const handleToggleShortList = async (brandId) => {
+    if (!token) {
+      setShowLogin(true);
+      return;
     }
-  };
+  try {
+    dispatch(toggleBrandShortList(brandId));
+    await handleShortList(brandId);
+     dispatch(toggleHomeCardShortlist(brandId))
+  } catch (error) {
+    console.error("Error toggling shortlist:", error);
+  }
+};
  
   const handleLikeClick = async (brandId) => {
     if (!token) {
@@ -102,9 +103,9 @@ const TopInvestVdocardround = () => {
  
     setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
     try {
-      await dispatch(toggleBrandLike(brandId));
-      await dispatch(toggleHomeCardLike(brandId));
-      await likeApiFunction(brandId);
+       dispatch(toggleBrandLike(brandId));
+       dispatch(toggleHomeCardLike(brandId));
+       likeApiFunction(brandId);
     } catch (error) {
       console.error("Error toggling like:", error);
     } finally {
@@ -112,10 +113,10 @@ const TopInvestVdocardround = () => {
     }
   };
  
-  const handleApply = useCallback((brand) => {
-    postView(brand.uuid);
-    openBrandDialog(brand);
-  }, []);
+   const handleApply = (brand) => {
+        postView(brand.uuid);
+        dispatch(openBrandDialog(brand));
+      };
  
   if (isLoading && page === 1) {
     return (
@@ -180,7 +181,7 @@ const TopInvestVdocardround = () => {
           },
         }}
       >
-        {allBrands.map((brand) => (
+        {brands.map((brand) => (
           <motion.div
             key={brand.uuid}
             whileHover={{ y: -5 }}
@@ -228,7 +229,7 @@ const TopInvestVdocardround = () => {
                 </IconButton>
  
                 <IconButton
-                  onClick={() => handleToggleShortList(brand)}
+                  onClick={() => handleToggleShortList(brand.uuid)}
                   sx={{
                     color: brand?.isShortListed
                       ? "#7ef400ff"

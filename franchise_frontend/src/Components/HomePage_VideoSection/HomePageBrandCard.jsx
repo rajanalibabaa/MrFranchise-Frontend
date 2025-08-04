@@ -28,6 +28,9 @@ import { toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice
 import {token} from "../../Utils/autherId.jsx"
 import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
 
+import { postView } from "../../Utils/function/view.jsx";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+import { useDispatch } from "react-redux";
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -36,7 +39,7 @@ const cardVariants = {
 const HomePageBrandCard = React.memo(
   ({
     brand,
-    handleApply,
+    
     handleLikeClick,
     likeProcessing,
     dimensions,
@@ -85,6 +88,7 @@ const HomePageBrandCard = React.memo(
     }, []);
 
     const [shortListed, setShortListed] = useState(brand.isShortListed);
+    const dispatch = useDispatch()
     const handleToggleShortList = async (brand) => {
       try {
         // const response = await handleShortList(brand);
@@ -102,6 +106,11 @@ const HomePageBrandCard = React.memo(
         console.error("Error toggling shortlist:", error);
       }
     };
+
+    const handleApply = (brand) => {
+        postView(brand.uuid);
+        dispatch(openBrandDialog(brand));
+      };
 
     return (
       <motion.div
