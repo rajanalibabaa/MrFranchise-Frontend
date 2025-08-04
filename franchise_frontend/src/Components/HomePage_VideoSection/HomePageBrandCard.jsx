@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   CardContent,
-  CardMedia,
   CircularProgress,
   IconButton,
   Chip,
@@ -132,55 +131,6 @@ const HomePageBrandCard = React.memo(
             border: "1px solid #eee",
           }}
         >
-          {/* <Box
-            ref={videoRef}
-            sx={{
-              height: mediaHeight,
-              width: "100%",
-              overflow: "hidden",
-              position: "relative",
-              backgroundColor: theme.palette.grey[200],
-            }}
-          >
-            {isVisible && videoUrl ? (
-              <CardMedia
-                component="video"
-                loading="lazy"
-                poster={brandLogo}
-                src={videoUrl}
-                alt={brandName}
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                }}
-                controls
-                muted
-                loop
-                preload="none"
-              />
-            ) : (
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography variant="body2" color="text.secondary">
-                  No video available
-                </Typography>
-              </Box>
-            )}
-          </Box> */}
  <VideoPlayer
         id={brand.uuid}
         videoUrl={brand.franchiseVideos || brand.logo}
