@@ -14,6 +14,7 @@ import { useDispatch } from "react-redux";
 import Footer from "../../Components/Footers/Footer.jsx";
 import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
+import ShortlistBrands from "../../Components/HomePage_VideoSection/ShortlistBrands.jsx";
 
 // Higher-order component for Suspense
 const withSuspense = (Component) => (props) => (
@@ -39,6 +40,9 @@ const dynamicComponents = {
   )),
   LikedBrands: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/LikedBrands.jsx")
+  )),
+  ShortlistBrands: withSuspense(React.lazy(() => 
+    import("../../Components/HomePage_VideoSection/ShortlistBrands.jsx")
   )),
 //   ViewBrands: withSuspense(React.lazy(() =>
 //     import("../../Components/HomePage_VideoSection/ViewBrands.jsx")
@@ -112,6 +116,11 @@ const pageConfig = {
     //   background: "rgba(255, 250, 247, 1)",
     //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
     // },
+    {
+      component: "ShortlistBrands",
+      background: "#white",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    },
     {
       component: "TopCafeFranchises",
       background: "#fffaf7",

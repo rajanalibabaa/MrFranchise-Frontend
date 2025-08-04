@@ -189,7 +189,7 @@ useEffect(() => {
   const handleNextClick = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    const distance = getScrollDistance() * visibleCardCount;
+    const distance = getScrollDistance();
     const maxScroll = container.scrollWidth - container.clientWidth;
     const newScroll = Math.min(container.scrollLeft + distance, maxScroll);
     smoothScrollTo(newScroll);
@@ -198,7 +198,7 @@ useEffect(() => {
   const handlePrevClick = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    const distance = getScrollDistance() * visibleCardCount;
+    const distance = getScrollDistance();
     const newScroll = Math.max(container.scrollLeft - distance, 0);
     smoothScrollTo(newScroll);
   };
