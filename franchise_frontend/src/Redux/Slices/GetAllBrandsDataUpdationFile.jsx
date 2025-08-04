@@ -62,25 +62,23 @@ const brandSlice = createSlice({
     resetViewedCount: (state) => {
       state.viewedBrandsCount = 0;
     },
-    toggleBrandLike: (state, action) => {
+ toggleBrandLike: (state, action) => {
   const brandId = action.payload;
- 
-  console.log("Toggling like for brandId:", brandId);
-  console.log("Current brands state:", state.brands);
- 
-  state.brands = state.brands.map((brand) => {
-    if (brand.uuid === brandId) {
-      console.log(`Toggling isLiked for brand: ${brand.uuid}`);
-      return {
-        ...brand,
-        isLiked: !brand.isLiked,
-      };
-    }
-    return brand; // Don't forget to return the unchanged brand
-  });
- 
-  console.log("Updated brands list:", state.brands);
+  state.brands = state.brands.map(brand => 
+    brand.uuid === brandId 
+      ? { ...brand, isLiked: !brand.isLiked }
+      : brand
+  );
+},
+   toggleBrandShortList: (state, action) => {
+  const brandId = action.payload;
+  state.brands = state.brands.map(brand => 
+    brand.uuid === brandId 
+      ? { ...brand, isShortListed: !brand.isShortListed }
+      : brand
+  );
 }
+
  
  
   },
@@ -122,7 +120,7 @@ const brandSlice = createSlice({
   },
 });
  
-export const { resetBrands, incrementViewedCount, resetViewedCount, toggleBrandLike } = brandSlice.actions;
+export const { resetBrands, incrementViewedCount, resetViewedCount, toggleBrandLike, toggleBrandShortList } = brandSlice.actions;
 export default brandSlice.reducer;
  
  

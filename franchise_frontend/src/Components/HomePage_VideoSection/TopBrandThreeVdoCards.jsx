@@ -28,12 +28,14 @@ import {
   fetchBrands,
   resetBrands,
   toggleBrandLike,
+  toggleBrandShortList,
 } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 import { likeApiFunction } from "../../Api/likeApi";
-import { toggleHomeCardLike } from "../../Redux/Slices/TopCardFetchingSlice";
+import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
 import { token } from "../../Utils/autherId";
 import { RiBookmark3Fill, RiBookMarkedFill } from "react-icons/ri";
+import { handleShortList } from "../../Api/shortListApi.jsx";
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -177,9 +179,20 @@ function TopBrandVdoCards() {
     await likeApiFunction(brandId);
   };
 
+  const handleToggleShortList = async (brandId) => {
+    if (!token) {
+      setShowLogin(true);
+      return;
+    }
+    
+      dispatch(toggleBrandShortList(brandId));
+      dispatch(toggleHomeCardShortlist(brandId))
+      await handleShortList(brandId);
+    
+  };
+
   const handleApply = (brand) => {
     postView(brand.uuid);
-    // Implement your brand dialog functionality here
     dispatch(openBrandDialog(brand));
   };
 
@@ -558,9 +571,9 @@ function TopBrandVdoCards() {
                             }`,
                             boxShadow: theme.shadows[2],
                             cursor: "pointer",
-                            borderRadius: 0, // ✅ Ensures no rounding (true square)
-                            objectFit: "contain", // ✅ Keeps image aspect ratio inside square
-                            display: "block", // ✅ Prevents inline issues
+                            borderRadius: 0,
+                            objectFit: "contain",
+                            display: "block",
                           }}
                         />
                       )}
@@ -603,9 +616,6 @@ function TopBrandVdoCards() {
                                   }
                                   sx={{
                                     color: mainBrand.isLiked ? "red" : "gray",
-                                    "&:hover": {
-                                      // color: mainBrand.isLiked ? 'darkred' : 'darkgray',
-                                    },
                                   }}
                                 >
                                   {mainBrand.isLiked ? (
@@ -614,16 +624,6 @@ function TopBrandVdoCards() {
                                     <FavoriteBorder />
                                   )}
                                 </IconButton>
-                                 <IconButton
-                                          // onClick={() => handleToggleShortList(brand)}
-                                          // sx={{
-                                          //   color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
-                                          // }}
-                                        >
-                                          {/* <Tooltip title={"ShortList"}> */}
-                                            <RiBookmark3Fill size={21} />
-                                          {/* </Tooltip> */}
-                                        </IconButton>
                               </Tooltip>
                             )}
                           </Box>
@@ -713,43 +713,49 @@ function TopBrandVdoCards() {
                         )}
 
                         {!isMobile && (
-                          
-                          <Tooltip
-                            title={
-                              mainBrand.isLiked
-                                ? "Remove from favorites"
-                                : "Add to favorites"
-                            }
-                          >
-                            <IconButton
-                              onClick={() =>
-                                handleLikeClick(
-                                  mainBrand.uuid,
-                                  mainBrand.isLiked
-                                )
-                              }
-                              disabled={
-                                isLoading || likeProcessing[mainBrand.uuid]
+                          <>
+                            <Tooltip
+                              title={
+                                mainBrand.isLiked
+                                  ? "Remove from favorites"
+                                  : "Add to favorites"
                               }
                             >
-                              {mainBrand.isLiked ? (
-                                <Favorite color="error" />
-                              ) : (
-                                <FavoriteBorder />
-                              )}
-                            </IconButton>
-                             <IconButton
-                                          // onClick={() => handleToggleShortList(brand)}
-                                          // sx={{
-                                          //   color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
-                                          // }}
-                                        >
-                                          <Tooltip title={"ShortList"}>
-                                            <RiBookmark3Fill size={21} />
-                                          </Tooltip>
-                                        </IconButton>
-                          </Tooltip>
-                          
+                              <IconButton
+                                onClick={() =>
+                                  handleLikeClick(
+                                    mainBrand.uuid,
+                                    mainBrand.isLiked
+                                  )
+                                }
+                                disabled={
+                                  isLoading || likeProcessing[mainBrand.uuid]
+                                }
+                              >
+                                {mainBrand.isLiked ? (
+                                  <Favorite color="error" />
+                                ) : (
+                                  <FavoriteBorder />
+                                )}
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip
+                              title={
+                                mainBrand.isShortListed
+                                  ? "Remove from shortlist"
+                                  : "Add to shortlist"
+                              }
+                            >
+                              <IconButton
+                                onClick={() => handleToggleShortList(mainBrand.uuid)}
+                                sx={{
+                                  color: mainBrand.isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                                }}
+                              >
+                                <RiBookmark3Fill size={21} />
+                              </IconButton>
+                            </Tooltip>
+                          </>
                         )}
                       </Stack>
                     </Stack>
@@ -936,9 +942,9 @@ function TopBrandVdoCards() {
                       {!isMobile && (
                         <Box
                           component="img"
-                          onClick={() => handleApply(mainBrand)}
-                          src={mainBrand.logo}
-                          alt={mainBrand.brandname}
+                          onClick={() => handleApply(brand)}
+                          src={brand.logo}
+                          alt={brand.brandname}
                           sx={{
                             width: 100,
                             height: 50,
@@ -949,18 +955,18 @@ function TopBrandVdoCards() {
                             }`,
                             boxShadow: theme.shadows[2],
                             cursor: "pointer",
-                            borderRadius: 0, // ✅ Ensures no rounding (true square)
-                            objectFit: "contain", // ✅ Keeps image aspect ratio inside square
-                            display: "block", // ✅ Prevents inline issues
+                            borderRadius: 0,
+                            objectFit: "contain",
+                            display: "block",
                           }}
                         />
                       )}
                       {isMobile && (
                         <Box
                           component="img"
-                          onClick={() => handleApply(mainBrand)}
-                          src={mainBrand.logo}
-                          alt={mainBrand.brandname}
+                          onClick={() => handleApply(brand)}
+                          src={brand.logo}
+                          alt={brand.brandname}
                           sx={{
                             width: 80,
                             height: 50,
@@ -971,119 +977,125 @@ function TopBrandVdoCards() {
                             }`,
                             boxShadow: theme.shadows[2],
                             cursor: "pointer",
-                            borderRadius: 0, // ✅ Ensures no rounding (true square)
-                            objectFit: "contain", // ✅ Keeps image aspect ratio inside square
-                            display: "block", // ✅ Prevents inline issues
+                            borderRadius: 0,
+                            objectFit: "contain",
+                            display: "block",
                           }}
                         />
                       )}
 
                       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                        <IconButton
-                        size="small"
-                        onClick={() =>
-                          handleLikeClick(brand.uuid, brand.isLiked)
-                        }
-                        disabled={isLoading || likeProcessing[brand.uuid]}
-                        sx={{
-                          color: brand.isLiked ? "red" : "gray",
-                          "&:hover": {
-                            // color: brand.isLiked ? 'darkred' : 'darkgray',
-                            // backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                          },
-                        }}
-                      >
-                        {brand.isLiked ? (
-                          <Favorite fontSize="small" />
-                        ) : (
-                          <FavoriteBorder fontSize="small" />
-                        )}
-                      </IconButton>
+                        <Tooltip
+                          title={
+                            brand.isLiked
+                              ? "Remove from favorites"
+                              : "Add to favorites"
+                          }
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              handleLikeClick(brand.uuid, brand.isLiked)
+                            }
+                            disabled={isLoading || likeProcessing[brand.uuid]}
+                            sx={{
+                              color: brand.isLiked ? "red" : "gray",
+                            }}
+                          >
+                            {brand.isLiked ? (
+                              <Favorite fontSize="small" />
+                            ) : (
+                              <FavoriteBorder fontSize="small" />
+                            )}
+                          </IconButton>
+                        </Tooltip>
 
-                       <IconButton
-                                          // onClick={() => handleToggleShortList(brand)}
-                                          // sx={{
-                                          //   color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
-                                          // }}
-                                        >
-                                          <Tooltip title={"ShortList"}>
-                                            <RiBookmark3Fill size={21} />
-                                          </Tooltip>
-                                        </IconButton>
+                        <Tooltip
+                          title={
+                            brand.isShortListed
+                              ? "Remove from shortlist"
+                              : "Add to shortlist"
+                          }
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() => handleToggleShortList(brand.uuid)}
+                            sx={{
+                              color: brand.isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                            }}
+                          >
+                            <RiBookmark3Fill size={18} />
+                          </IconButton>
+                        </Tooltip>
                       </Box>
                     </Box>
                    
-                 
                     <Box
-  sx={{
-    maxHeight: 80, // Adjust height as needed
-    overflowY: "auto",
-    // mt: 1,
-    display: "flex",
-    flexDirection: "column",
-    gap: 0.8,
-    scrollbarWidth: "thin", // For Firefox
-    "&::-webkit-scrollbar": {
-      width: "4px",
-    },
-    "&::-webkit-scrollbar-thumb": {
-      backgroundColor: "#ccc",
-      borderRadius: "2px",
-    },
-  }}
->
-   <Tooltip title={brand.brandname}>
+                      sx={{
+                        maxHeight: 80,
+                        overflowY: "auto",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.8,
+                        scrollbarWidth: "thin",
+                        "&::-webkit-scrollbar": {
+                          width: "4px",
+                        },
+                        "&::-webkit-scrollbar-thumb": {
+                          backgroundColor: "#ccc",
+                          borderRadius: "2px",
+                        },
+                      }}
+                    >
+                      <Tooltip title={brand.brandname}>
+                        <Typography
+                          variant={isMobile ? "caption" : "body1"}
+                          color="black"
+                          mt={1}
+                          noWrap={false}
+                          sx={{
+                            flex: 1,
+                            minWidth: 0,
+                            whiteSpace: "normal",
+                            wordBreak: "break-word",
+                            overflowWrap: "break-word",
+                          }}
+                        >
+                          {brand.brandname}
+                        </Typography>
+                      </Tooltip>
                       <Typography
-                        variant={isMobile ? "caption" : "body1"}
-                        color="black"
-                        mt={1}
-                        noWrap={false}
-                        sx={{
-                          flex: 1,
-                          minWidth: 0,
-                          whiteSpace: "normal",
-                          wordBreak: "break-word",
-                          overflowWrap: "break-word",
-                        }}
+                        variant="caption"
+                        color="Black"
+                        sx={{ fontSize: "0.7rem", lineHeight: 1.1 }}
                       >
-                        {brand.brandname}
+                        Categories: {brand.brandCategories?.child}
                       </Typography>
-                    </Tooltip>
-  <Typography
-    variant="caption"
-    color="Black"
-    sx={{ fontSize: "0.7rem", lineHeight: 1.1 }}
-  >
-    Categories: {brand.brandCategories?.child}
-  </Typography>
 
-  <Typography
-    variant="caption"
-    color="Black"
-    sx={{ fontSize: "0.7rem", lineHeight: 1.4 }}
-  >
-    Investment: {brand.fico?.investmentRange}
-  </Typography>
+                      <Typography
+                        variant="caption"
+                        color="Black"
+                        sx={{ fontSize: "0.7rem", lineHeight: 1.4 }}
+                      >
+                        Investment: {brand.fico?.investmentRange}
+                      </Typography>
 
-  {/* {!isMobile && ( */}
-    <Typography
-      variant="caption"
-      color="Black"
-      sx={{ fontSize: "0.7rem", lineHeight: 1.4 }}
-    >
-      Area: {brand.fico?.areaRequired}
-    </Typography>
-  {/* )} */}
+                      <Typography
+                        variant="caption"
+                        color="Black"
+                        sx={{ fontSize: "0.7rem", lineHeight: 1.4 }}
+                      >
+                        Area: {brand.fico?.areaRequired}
+                      </Typography>
 
-  <Typography
-    variant="caption"
-    color="Black"
-    sx={{ fontSize: "0.7rem", lineHeight: 1.5 }}
-  >
-    Model: {brand.fico?.franchiseModel}
-  </Typography>
-</Box>
-
+                      <Typography
+                        variant="caption"
+                        color="Black"
+                        sx={{ fontSize: "0.7rem", lineHeight: 1.5 }}
+                      >
+                        Model: {brand.fico?.franchiseModel}
+                      </Typography>
+                    </Box>
                   </Box>
 
                   <Button

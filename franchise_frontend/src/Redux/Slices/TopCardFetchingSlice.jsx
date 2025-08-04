@@ -536,8 +536,6 @@ const topFoodFranchiseSlice = createSlice({
         state.restaurant.isLoading = false;
         state.restaurant.error = action.payload?.message || action.error.message;
       });
-
-      
   }
 });
 
@@ -564,7 +562,7 @@ export const {
   resetRestaruntViewedCount,
 
   toggleHomeCardLike,
-  
+  toggleHomeCardShortlist
 } = topFoodFranchiseSlice.actions;
 
 export default topFoodFranchiseSlice.reducer;
