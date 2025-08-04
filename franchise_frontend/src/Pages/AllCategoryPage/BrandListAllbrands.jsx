@@ -1,3 +1,4 @@
+
 import React, {
   useState,
   useEffect,
@@ -21,6 +22,7 @@ import {
   useMediaQuery,
   useTheme,
   Tooltip,
+  Pagination,
 } from "@mui/material";
 import {
   Close,
@@ -28,10 +30,17 @@ import {
   Clear as ClearIcon,
   Compare,
 } from "@mui/icons-material";
-
-
 import { useLocation } from "react-router-dom";
 import LoginPage from "../LoginPage/LoginPage.jsx";
+import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
+import { useDispatch, useSelector } from "react-redux";
+import { 
+  setFilter, 
+  resetFilters, 
+  fetchFilteredBrands,
+  setPage 
+} from "../../Redux/Slices/FilterBrandSlice.jsx";
+import { fetchFilterOptions } from "../../Redux/Slices/filterDropdownData.jsx";
 
 // Memoized components
 const BrandCardSkeleton = React.memo(() => (
@@ -61,45 +70,104 @@ const FilterPanelSkeleton = React.memo(() => (
 // Lazy load heavy components
 const BrandComparison = lazy(() => import("./BrandComparison.jsx"));
 const FilterPanel = lazy(() => import("./FillterPannel.jsx"));
-// const BrandDetail = lazy(() => import("./BrandDetail.jsx"));
 const BrandCard = lazy(() => import("./BrandCard.jsx"));
-
-// Memoized BrandCard with proper props comparison
-const MemoizedBrandCard = React.memo(BrandCard, (prevProps, nextProps) => {
-  return (
-    prevProps.brand.uuid === nextProps.brand.uuid &&
-    prevProps.isSelectedForComparison === nextProps.isSelectedForComparison
-  );
-});
 
 function BrandList() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const location = useLocation();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const initialFilters = location.state?.filters || {};
-
-  // React Query hooks
-  const { data: brands = [], isLoading, error } = useBrands();
-
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
-
   const toggleLike = useToggleLike();
-
-  // State for filters and UI
-  const [filters, setFilters] = useState(initialFilters);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [comparisonOpen, setComparisonOpen] = useState(false);
   const [selectedForComparison, setSelectedForComparison] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
+  const dispatch = useDispatch();
+
+  // Redux state selectors
+  const filterBrandsState = useSelector((state) => state.filterBrands);
+  const filterDropdownState = useSelector((state) => state.filterDropdown);
+  const authState = useSelector((state) => state.auth);
+  
+  const { 
+    brands = [], 
+    loading, 
+    error,
+    filters,
+    pagination 
+  } = filterBrandsState;
+
+  const {
+    mainCategories = [],
+    subCategories = [],
+    childCategories = [],
+    investmentRanges = [],
+    franchiseModels = [],
+    states = [],
+    districts = [],
+    cities = [],
+    loading: dropdownLoading,
+    loadingSubCategories,
+    loadingChildCategories,
+    loadingDistricts,
+    loadingCities
+  } = filterDropdownState;
+
+  // Fetch initial data
+  useEffect(() => {
+    dispatch(fetchFilteredBrands(filters));
+    dispatch(fetchFilterOptions());
+  }, [dispatch]);
+
+  // Fetch brands when filters change
+  useEffect(() => {
+    dispatch(fetchFilteredBrands(filters));
+  }, [dispatch, filters]);
+
+  // Handle scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollPosition(window.scrollY);
+      setIsScrolling(true);
+      const timer = setTimeout(() => setIsScrolling(false), 100);
+      return () => clearTimeout(timer);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Handle filter changes
+  const handleFilterChange = useCallback((name, value) => {
+    dispatch(setFilter({ filterName: name, value }));
+    
+    // Fetch dependent data when parent filter changes
+    if (name === 'maincat') {
+      dispatch(fetchFilterOptions({ main: value }));
+    } else if (name === 'subcat') {
+      dispatch(fetchFilterOptions({ sub: value }));
+    } else if (name === 'state') {
+      dispatch(fetchFilterOptions({ state: value }));
+    } else if (name === 'district') {
+      dispatch(fetchFilterOptions({ district: value }));
+    }
+  }, [dispatch]);
+
+  const handleClearFilters = useCallback(() => {
+    dispatch(resetFilters());
+  }, [dispatch]);
+
+  const handlePageChange = useCallback((event, page) => {
+    dispatch(setPage(page));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [dispatch]);
 
   const handleLikeClick = useCallback(
     async (brandId, isLiked) => {
       if (likeProcessing[brandId]) return;
-      const token = localStorage.getItem("accessToken");
-
-      if (!token) {
+      
+      if (!authState.isAuthenticated) {
         setShowLogin(true);
         return;
       }
@@ -108,198 +176,33 @@ function BrandList() {
 
       try {
         await toggleLike.mutateAsync({ brandId, isLiked });
+        // Refresh brands after like to update the like status
+        dispatch(fetchFilteredBrands(filters));
       } catch (error) {
         console.error("Like operation failed:", error);
-        // Show error to user if needed
-        if (error.response?.data?.message) {
-          // You could show this in a snackbar/toast
-          console.error("Error details:", error.response.data.message);
-        }
       } finally {
         setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
       }
     },
-    [likeProcessing, toggleLike]
+    [likeProcessing, toggleLike, authState, dispatch, filters]
   );
 
-  // Throttled scroll handler
-  const handleScroll = useCallback(() => {
-    if (isScrolling) return;
-
-    setIsScrolling(true);
-    setScrollPosition(window.pageYOffset);
-
-    const timer = setTimeout(() => {
-      setIsScrolling(false);
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [isScrolling]);
-
-  // Memoize filtered brands
-  const filteredBrands = useMemo(() => {
-    return filterBrands(brands, filters);
-  }, [brands, filters]);
-
-  // Optimized filter options extraction
-  const filterOptions = useMemo(() => {
-    if (!brands.length)
-      return {
-        availableCategories: [],
-        availableSubCategories: [],
-        availableChildCategories: [],
-        availableModelTypes: [],
-        availableInvestmentRanges: [],
-        availableStates: [],
-        availableDistricts: [],
-        availableCities: [],
-      };
-
-    const categories = new Set();
-    const subCategories = new Set();
-    const childCategories = new Set();
-    const modelTypes = new Set();
-    const investmentRanges = new Set();
-    const states = new Set();
-    const districts = new Map();
-    const cities = new Map();
-
-    brands.forEach((brand) => {
-      // Categories
-      const mainCat = brand.franchiseDetails?.brandCategories?.main;
-      if (mainCat) categories.add(mainCat);
-
-      const subCat = brand.franchiseDetails?.brandCategories?.sub;
-      if (subCat) subCategories.add(subCat);
-
-      const childCat = brand.franchiseDetails?.brandCategories?.child;
-      if (childCat) childCategories.add(childCat);
-
-      // FICO details
-      brand.franchiseDetails?.fico?.forEach((item) => {
-        if (item.franchiseType) modelTypes.add(item.franchiseType);
-        if (item.investmentRange) investmentRanges.add(item.investmentRange);
-      });
-
-      // Location data
-      brand.expansionLocationData?.expansionLocations.domestic?.locations?.forEach(
-        (loc) => {
-          if (loc.state) {
-            states.add(loc.state);
-
-            loc.districts?.forEach((district) => {
-              if (district.district) {
-                const key = `${loc.state}-${district.district}`;
-                if (!districts.has(key)) {
-                  districts.set(key, {
-                    state: loc.state,
-                    district: district.district,
-                  });
-                }
-
-                district.cities?.forEach((city) => {
-                  const cityKey = `${loc.state}-${district.district}-${city}`;
-                  if (!cities.has(cityKey)) {
-                    cities.set(cityKey, {
-                      state: loc.state,
-                      district: district.district,
-                      city,
-                    });
-                  }
-                });
-              }
-            });
-          }
-        }
-      );
-    });
-
-    return {
-      availableCategories: Array.from(categories),
-      availableSubCategories: Array.from(subCategories),
-      availableChildCategories: Array.from(childCategories),
-      availableModelTypes: Array.from(modelTypes),
-      availableInvestmentRanges: Array.from(investmentRanges),
-      availableStates: Array.from(states),
-      availableDistricts: Array.from(districts.values()),
-      availableCities: Array.from(cities.values()),
-    };
-  }, [brands]);
-
-  // Stable callback handlers
-  const scrollToTop = useCallback(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }, []);
-
   const toggleBrandComparison = useCallback((brand) => {
-    setSelectedForComparison((prev) => {
-      const exists = prev.some((b) => b.uuid === brand.uuid);
-      return exists
-        ? prev.filter((b) => b.uuid !== brand.uuid)
-        : prev.length < 3
-        ? [...prev, brand]
-        : prev;
-    });
-  }, []);
-
-  const removeFromComparison = useCallback((brandId) => {
-    setSelectedForComparison((prev) => prev.filter((b) => b.uuid !== brandId));
-  }, []);
-
-  const handleOpenBrand = useCallback(async (brand) => {
-    try {
-      openBrandDialog(brand);
-    } catch (error) {
-      console.error("Failed to record view:", error);
-    }
-  }, []);
-
-  const handleFilterChange = useCallback((name, value) => {
-    setFilters((prev) => {
-      // Reset dependent filters when parent changes
-      if (name === "selectedState") {
-        return {
-          ...prev,
-          [name]: value,
-          selectedDistrict: "",
-          selectedCity: "",
-        };
+    setSelectedForComparison(prev => {
+      const isSelected = prev.some(b => b.uuid === brand.uuid);
+      if (isSelected) {
+        return prev.filter(b => b.uuid !== brand.uuid);
+      } else {
+        return prev.length < 3 ? [...prev, brand] : prev;
       }
-      if (name === "selectedDistrict") {
-        return {
-          ...prev,
-          [name]: value,
-          selectedCity: "",
-        };
-      }
-      return { ...prev, [name]: value };
     });
   }, []);
 
-  const handleClearFilters = useCallback(() => {
-    setFilters({
-      searchTerm: "",
-      selectedCategory: "",
-      selectedSubCategory: "",
-      selectedChildCategory: [],
-      selectedModelType: "",
-      selectedState: "",
-      selectedDistrict: "",
-      selectedCity: "",
-      selectedInvestmentRange: "",
-    });
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [handleScroll]);
-
+  // Calculate active filter count
   const activeFilterCount = useMemo(() => {
     return Object.values(filters).filter(
       (value) =>
@@ -310,89 +213,43 @@ function BrandList() {
     ).length;
   }, [filters]);
 
-  if (isLoading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-        sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(255, 255, 255, 0.8)",
-          zIndex: 9999,
-        }}
-      >
-        <CircularProgress size={60} thickness={4} sx={{ color: "#ff9800" }} />
-      </Box>
-    );
-  }
-
   return (
     <Container maxWidth="xl" sx={{ mt: 0, mb: 6 }}>
-      {/* Comparison Button */}
 
+
+      {/* Comparison Button */}
       {selectedForComparison.length > 0 && (
-        <Box
-          sx={{
-            position: "fixed",
-            top: 290,
-            right: 25,
-            zIndex: 1000,
-          }}
-        >
+        <Box sx={{ position: "fixed", top: 290, right: 25, zIndex: 1000 }}>
           <Badge badgeContent={selectedForComparison.length} color="primary">
-            <Tooltip
-              title="Click to compare selected brands"
-              placement="left"
-              arrow
-            >
-              <span>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<Compare />}
-                  onClick={() => setComparisonOpen(true)}
-                  sx={{
-                    borderRadius: 4,
-                    boxShadow: 3,
-                    bgcolor: "#ff9800",
-                    "&:hover": {
-                      bgcolor: "#fb8c00",
-                      boxShadow: 6,
-                    },
-                  }}
-                >
-                  Compare
-                </Button>
-              </span>
+            <Tooltip title="Click to compare selected brands" placement="left" arrow>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<Compare />}
+                onClick={() => setComparisonOpen(true)}
+                sx={{
+                  borderRadius: 4,
+                  boxShadow: 3,
+                  bgcolor: "#ff9800",
+                  "&:hover": { bgcolor: "#fb8c00", boxShadow: 6 },
+                }}
+              >
+                Compare
+              </Button>
             </Tooltip>
           </Badge>
         </Box>
       )}
 
       {/* Scroll to Top Button */}
-      {scrollPosition > 300 && (
-        <Box
-          sx={{
-            position: "fixed",
-            bottom: 24,
-            right: 24,
-            zIndex: 1000,
-          }}
-        >
+      {scrollPosition > 300 && !isScrolling && (
+        <Box sx={{ position: "fixed", bottom: 24, right: 24, zIndex: 1000 }}>
           <IconButton
             onClick={scrollToTop}
             sx={{
               bgcolor: "#ff9800",
               color: "white",
-              "&:hover": {
-                bgcolor: "#fb8c00",
-              },
+              "&:hover": { bgcolor: "#fb8c00" },
               boxShadow: 3,
               width: 48,
               height: 48,
@@ -407,44 +264,43 @@ function BrandList() {
       <Box display="flex" flexDirection={{ xs: "column", md: "row" }}>
         {/* Desktop Filters */}
         {!isMobile && (
-          <Box
-            sx={{
-              width: 280,
-              flexShrink: 0,
-              position: "sticky",
-              top: 16,
-              alignSelf: "flex-start",
-              maxHeight: "calc(100vh - 32px)",
-              overflowY: "auto",
-              "&::-webkit-scrollbar": {
-                width: "6px",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                backgroundColor: "#ff9800",
-                borderRadius: "3px",
-              },
-            }}
-          >
+          <Box sx={{
+            width: 280,
+            flexShrink: 0,
+            position: "sticky",
+            top: 16,
+            alignSelf: "flex-start",
+            maxHeight: "calc(100vh - 32px)",
+            overflowY: "auto",
+            "&::-webkit-scrollbar": { width: "6px" },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#ff9800",
+              borderRadius: "3px",
+            },
+          }}>
             <Suspense fallback={<FilterPanelSkeleton />}>
               <FilterPanel
                 filters={filters}
                 onFilterChange={handleFilterChange}
                 onClearFilters={handleClearFilters}
                 activeFilterCount={activeFilterCount}
-                categories={filterOptions.availableCategories}
-                subCategories={filterOptions.availableSubCategories}
-                childCategories={filterOptions.availableChildCategories}
-                modelTypes={filterOptions.availableModelTypes}
-                investmentRanges={filterOptions.availableInvestmentRanges}
-                locationData={{
-                  states: filterOptions.availableStates,
-                  districts: filterOptions.availableDistricts,
-                  cities: filterOptions.availableCities,
-                }}
+                mainCategories={mainCategories}
+                subCategories={subCategories}
+                childCategories={childCategories}
+                franchiseModels={franchiseModels}
+                investmentRanges={investmentRanges}
+                states={states}
+                districts={districts}
+                cities={cities}
+                loadingSubCategories={loadingSubCategories}
+                loadingChildCategories={loadingChildCategories}
+                loadingDistricts={loadingDistricts}
+                loadingCities={loadingCities}
                 resultStats={{
-                  showing: filteredBrands.length,
-                  total: brands.length,
+                  showing: brands.length,
+                  total: pagination.total,
                 }}
+                isLoading={loading || dropdownLoading}
               />
             </Suspense>
           </Box>
@@ -456,18 +312,14 @@ function BrandList() {
             <Button
               variant="outlined"
               startIcon={<FilterAlt sx={{ color: "#ff9800" }} />}
-              endIcon={
-                <Badge badgeContent={activeFilterCount} color="primary" />
-              }
+              endIcon={<Badge badgeContent={activeFilterCount} color="primary" />}
               onClick={() => setMobileFiltersOpen(true)}
               fullWidth
               sx={{
                 py: 1.5,
                 borderColor: "#ff9800",
                 color: "#ff9800",
-                "&:hover": {
-                  borderColor: "#fb8c00",
-                },
+                "&:hover": { borderColor: "#fb8c00" },
               }}
             >
               Filters
@@ -476,19 +328,18 @@ function BrandList() {
         )}
 
         {/* Main Content */}
-        <Box flexGrow={1}>
-          {error ? (
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              minHeight="60vh"
-            >
+        <Box flexGrow={1} ml={{ md: 3 }}>
+          {loading ? (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+              <CircularProgress size={60} thickness={4} sx={{ color: "#ff9800" }} />
+            </Box>
+          ) : error ? (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
               <Typography color="error" variant="h6">
-                {error.message}
+                {error}
               </Typography>
             </Box>
-          ) : filteredBrands.length === 0 ? (
+          ) : brands.length === 0 ? (
             <Box textAlign="center" py={6}>
               <Typography variant="h5" color="primary">
                 No brands match your filters
@@ -498,62 +349,66 @@ function BrandList() {
                 onClick={handleClearFilters}
                 startIcon={<ClearIcon />}
                 size="large"
-                sx={{
-                  mt: 2,
-                  borderColor: "#ff9800",
-                  color: "#ff9800",
-                }}
+                sx={{ mt: 2, borderColor: "#ff9800", color: "#ff9800" }}
               >
                 Clear All Filters
               </Button>
             </Box>
           ) : (
             <>
-              {!isMobile && (
-                <Typography
-                  sx={{ ml: 2 }}
-                  variant="h4"
-                  gutterBottom
-                  color="#ff9800"
-                >
-                  Food & Beverage Brands
-                </Typography>
-              )}
-              {isMobile && (
-                <Typography
-                  sx={{ ml: 2 }}
-                  variant="h5"
-                  gutterBottom
-                  color="#ff9800"
-                >
-                  Food & Beverage Brands
-                </Typography>
-              )}
+              <Typography sx={{ ml: 2 }} variant={isMobile ? "h5" : "h4"} gutterBottom color="#ff9800">
+                Food & Beverage Brands
+              </Typography>
               <Typography sx={{ ml: 2, mb: 2 }} variant="body2" gutterBottom>
-                Showing {filteredBrands.length} of {brands.length} brands
+                Showing {brands.length} of {pagination.total} brands
               </Typography>
 
               <Grid container spacing={3}>
-                {filteredBrands.map((brand) => (
+                {brands.map((brand) => (
                   <Grid item xs={12} sm={6} md={4} lg={3} key={brand.uuid}>
                     <Suspense fallback={<BrandCardSkeleton />}>
-                      <MemoizedBrandCard
+                      <BrandCard
                         brand={brand}
-                        onOpenBrand={handleOpenBrand}
                         handleLikeClick={handleLikeClick}
                         likeProcessing={likeProcessing}
-                        onToggleLike={toggleLike}
                         showLogin={showLogin}
                         onShowLogin={setShowLogin}
-                        isSelectedForComparison={selectedForComparison.some(
-                          (b) => b.uuid === brand.uuid
-                        )}
+                        isSelectedForComparison={selectedForComparison.some(b => b.uuid === brand.uuid)}
                         onToggleBrandComparison={toggleBrandComparison}
+                        maxComparisonReached={selectedForComparison.length >= 3}
                       />
                     </Suspense>
                   </Grid>
                 ))}
               </Grid>
+
+              {/* Pagination */}
+             {pagination.totalPages > 1 && (
+    <Box display="flex" justifyContent="center" mt={4}>
+      <Pagination
+        count={pagination.totalPages}
+        page={pagination.currentPage}
+        onChange={handlePageChange}
+        color="primary"
+        sx={{
+          '& .MuiPaginationItem-root': {
+            color: '#ff9800',
+            borderColor: '#ff9800',
+          },
+          '& .MuiPaginationItem-root.Mui-selected': {
+            backgroundColor: '#ff9800',
+            color: 'white',
+            '&:hover': {
+              backgroundColor: '#fb8c00',
+            },
+          },
+          '& .MuiPaginationItem-root:hover': {
+            backgroundColor: 'rgba(255, 152, 0, 0.1)',
+          },
+        }}
+      />
+    </Box>
+  )}
             </>
           )}
         </Box>
@@ -564,26 +419,10 @@ function BrandList() {
         anchor="left"
         open={mobileFiltersOpen}
         onClose={() => setMobileFiltersOpen(false)}
-        sx={{
-          "& .MuiDrawer-paper": {
-            width: 280,
-          },
-        }}
+        sx={{ "& .MuiDrawer-paper": { width: 280 } }}
       >
-        <Box
-          sx={{
-            p: 2,
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={2}
-          >
+        <Box sx={{ p: 2, height: "100%", display: "flex", flexDirection: "column" }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Typography variant="h6">Filters</Typography>
             <IconButton onClick={() => setMobileFiltersOpen(false)}>
               <Close />
@@ -597,21 +436,23 @@ function BrandList() {
                 onFilterChange={handleFilterChange}
                 onClearFilters={handleClearFilters}
                 activeFilterCount={activeFilterCount}
-                categories={filterOptions.availableCategories}
-                subCategories={filterOptions.availableSubCategories}
-                // resultStats={{ showing: filteredBrands.length, total: brands.length }}
-                childCategories={filterOptions.availableChildCategories}
-                modelTypes={filterOptions.availableModelTypes}
-                investmentRanges={filterOptions.availableInvestmentRanges}
-                locationData={{
-                  states: filterOptions.availableStates,
-                  districts: filterOptions.availableDistricts,
-                  cities: filterOptions.availableCities,
-                }}
+                mainCategories={mainCategories}
+                subCategories={subCategories}
+                childCategories={childCategories}
+                franchiseModels={franchiseModels}
+                investmentRanges={investmentRanges}
+                states={states}
+                districts={districts}
+                cities={cities}
+                loadingSubCategories={loadingSubCategories}
+                loadingChildCategories={loadingChildCategories}
+                loadingDistricts={loadingDistricts}
+                loadingCities={loadingCities}
                 resultStats={{
-                  showing: filteredBrands.length,
-                  total: brands.length,
+                  showing: brands.length,
+                  total: pagination.total,
                 }}
+                isLoading={loading || dropdownLoading}
               />
             </Suspense>
           </Box>
@@ -626,13 +467,11 @@ function BrandList() {
         </Box>
       </Drawer>
 
-      {/* Brand Comparison Dialog */}
       <Suspense fallback={null}>
         <BrandComparison
           open={comparisonOpen}
           onClose={() => setComparisonOpen(false)}
           selectedBrands={selectedForComparison}
-          onRemoveFromComparison={removeFromComparison}
         />
       </Suspense>
 

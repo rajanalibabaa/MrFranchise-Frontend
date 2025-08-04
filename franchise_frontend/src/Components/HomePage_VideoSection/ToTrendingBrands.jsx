@@ -6,7 +6,11 @@ import {
   IconButton,
   Stack,
   CircularProgress,
+  Tooltip,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
+import { RiBookmark3Fill } from "react-icons/ri";
 import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -15,65 +19,104 @@ import { postView } from "../../Utils/function/view";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBrands, toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
-// import { toast } from "react-toastify";
 import { likeApiFunction } from "../../Api/likeApi";
 import { toggleHomeCardLike } from "../../Redux/Slices/TopCardFetchingSlice";
 import { token } from "../../Utils/autherId";
-
-
+ 
 const TopInvestVdocardround = () => {
-  // const toggleLike = useToggleLike();
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
   const [page, setPage] = useState(1);
   const [allBrands, setAllBrands] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
+  const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const dispatch = useDispatch();
-  const { brands, isLoading, pagination, error } = useSelector(
-    (state) => state.brands
-  );
-
-  // Initial load and pagination
+ 
+  const {
+    brands: reduxBrands = [],
+    isLoading,
+    error,
+    pagination = { totalPages: 1 },
+    fetchedPages = [],
+  } = useSelector((state) => state.brands);
+ 
+  const hasMore = pagination.totalPages > page;
+ 
   useEffect(() => {
-    dispatch(fetchBrands({ page, })); // Adjust limit as needed
-  }, [dispatch, page]);
-
-  // Accumulate brands when new data loads
-  useEffect(() => {
-    if (brands && brands.length > 0) {
-      if (page === 1) {
-        setAllBrands(brands);
-      } else {
-        setAllBrands(prev => [...prev, ...brands]);
-      }
-      setHasMore(pagination?.totalPages > page);
+    if (!fetchedPages.includes(page)) {
+      dispatch(fetchBrands({ page }));
     }
-  }, [brands, page, pagination]);
-
-
-const handleLikeClick = async(brandId) => {
-
-  console.log(brandId)
-  if (!token) {
-    setShowLogin(true);
-    return;
-  }
-  dispatch(toggleBrandLike(brandId));
-  dispatch(toggleHomeCardLike(brandId));
-  await likeApiFunction(brandId)
-};
+  }, [page, fetchedPages, dispatch]);
+ 
+  useEffect(() => {
+    if (Array.isArray(reduxBrands)) {
+      setAllBrands((prev) => {
+        const existingUUIDs = new Set(prev.map((b) => b.uuid));
+        const uniqueNewBrands = reduxBrands.filter((b) => !existingUUIDs.has(b.uuid));
+        return [...prev, ...uniqueNewBrands];
+      });
+    }
+  }, [reduxBrands]);
+ 
+  // Scroll-based infinite loading
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
+ 
+      if (
+        scrollTop + windowHeight >= fullHeight - 300 &&
+        hasMore &&
+        !isLoading
+      ) {
+        setPage((prev) => prev + 1);
+      }
+    };
+ 
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasMore, isLoading]);
+ 
+  const handleToggleShortList = async (brand) => {
+    try {
+      const response = await handleShortList(brand);
+      if (response.success) {
+        setAllBrands((prev) =>
+          prev.map((b) =>
+            b.uuid === brand.uuid ? { ...b, isShortListed: !b.isShortListed } : b
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling shortlist:", error);
+    }
+  };
+ 
+  const handleLikeClick = async (brandId) => {
+    if (!token) {
+      setShowLogin(true);
+      return;
+    }
+ 
+    setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
+    try {
+      await dispatch(toggleBrandLike(brandId));
+      await dispatch(toggleHomeCardLike(brandId));
+      await likeApiFunction(brandId);
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    } finally {
+      setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
+    }
+  };
+ 
   const handleApply = useCallback((brand) => {
     postView(brand.uuid);
     openBrandDialog(brand);
   }, []);
-
-  const loadMoreBrands = () => {
-    if (hasMore) {
-      setPage(prev => prev + 1);
-    }
-  };
-
+ 
   if (isLoading && page === 1) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
@@ -81,7 +124,7 @@ const handleLikeClick = async(brandId) => {
       </Box>
     );
   }
-
+ 
   if (error) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
@@ -91,24 +134,32 @@ const handleLikeClick = async(brandId) => {
       </Box>
     );
   }
-
+ 
   return (
     <Box component="section" sx={{ maxWidth: 1300, mx: "auto" }}>
       <Typography
-        variant="h5"
-        sx={{
-          mb: 2,
-          fontWeight: 800,
-          textAlign: "center",
-          background: "linear-gradient(45deg, #f29724 30%, #ffcc80 90%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}
+        variant={isMobile ? "body1" : "h5"}
+             fontWeight="bold"
+             sx={{
+               color: "black",
+               mb: 1,
+               textAlign: "left",
+               position: "relative",
+               "&:after": {
+                 content: '""',
+                 display: "block",
+                 width: "80px",
+                 height: "4px",
+                 background:
+                   theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                 mt: 1,
+                 borderRadius: 2,
+               },
+             }}
       >
         Franchise Opportunities
       </Typography>
-
-      {/* Compact Cards Grid */}
+ 
       <Box
         sx={{
           display: "grid",
@@ -153,31 +204,42 @@ const handleLikeClick = async(brandId) => {
                 overflow: "hidden",
               }}
             >
-              {/* Like Button */}
-              <IconButton
-                sx={{
-                  position: "absolute",
-                  top: 4,
-                  right: 4,
-                  zIndex: 2,
-                  color: brand?.isLiked ? "#ff5252" : "rgba(0,0,0,0.2)",
-                  "&:hover": {
-                    color: "#ff5252",
-                  },
-                }}
-                onClick={() => handleLikeClick(brand.uuid, brand?.isLiked)}
-                disabled={likeProcessing[brand.uuid]}
+              <Stack
+                direction="column"
+                spacing={0.5}
+                sx={{ position: "absolute", top: 4, right: 4, zIndex: 2 }}
               >
-                {likeProcessing[brand.uuid] ? (
-                  <CircularProgress size={24} />
-                ) : brand?.isLiked ? (
-                  <FavoriteIcon fontSize="small" />
-                ) : (
-                  <FavoriteBorderIcon fontSize="small" />
-                )}
-              </IconButton>
-
-              {/* Brand Logo */}
+                <IconButton
+                  sx={{
+                    color: brand?.isLiked ? "#ff5252" : "rgba(0,0,0,0.2)",
+                    "&:hover": { color: "#ff5252" },
+                  }}
+                  onClick={() => handleLikeClick(brand.uuid)}
+                  disabled={likeProcessing[brand.uuid]}
+                >
+                  {likeProcessing[brand.uuid] ? (
+                    <CircularProgress size={24} />
+                  ) : brand?.isLiked ? (
+                    <FavoriteIcon fontSize="small" />
+                  ) : (
+                    <FavoriteBorderIcon fontSize="small" />
+                  )}
+                </IconButton>
+ 
+                <IconButton
+                  onClick={() => handleToggleShortList(brand)}
+                  sx={{
+                    color: brand?.isShortListed
+                      ? "#7ef400ff"
+                      : "rgba(0, 0, 0, 0.23)",
+                  }}
+                >
+                  <Tooltip title="ShortList">
+                    <RiBookmark3Fill size={21} />
+                  </Tooltip>
+                </IconButton>
+              </Stack>
+ 
               <Box
                 component="img"
                 src={brand.logo}
@@ -191,25 +253,20 @@ const handleLikeClick = async(brandId) => {
                   objectFit: "contain",
                 }}
               />
-
-              {/* Brand Name */}
               <Typography
                 variant="caption"
                 fontWeight={600}
                 textAlign="center"
                 sx={{
                   mb: 0.5,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
+                  whiteSpace: "normal",
+                  overflowWrap: "break-word",
                   width: "100%",
                   px: 0.5,
                 }}
               >
                 {brand.brandname}
               </Typography>
-
-              {/* Category Chips */}
               <Typography
                 variant="caption"
                 sx={{
@@ -225,52 +282,17 @@ const handleLikeClick = async(brandId) => {
               >
                 {brand.brandCategories?.child}
               </Typography>
-
-              {/* Investment Details */}
-              <Stack
-                direction="column"
-                spacing={0.5}
-                sx={{ mb: 0.5, width: "100%" }}
-              >
-                <Typography
-                  variant="caption"
-                  fontWeight={500}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  Investment :{" "}
-                  {brand.fico?.investmentRange || "N/A"}
+              <Stack direction="column" spacing={0.5} sx={{ mb: 0.5, width: "100%" }}>
+                <Typography variant="caption" fontWeight={500}>
+                  Investment : {brand.fico?.investmentRange || "N/A"}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  fontWeight={500}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  Area :{" "}
-                  {brand.fico?.areaRequired || "N/A"}
+                <Typography variant="caption" fontWeight={500}>
+                  Area : {brand.fico?.areaRequired || "N/A"}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  fontWeight={500}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  Type :{" "}
-                  {brand.fico?.franchiseModel || "N/A"}
+                <Typography variant="caption" fontWeight={500}>
+                  Type : {brand.fico?.franchiseModel || "N/A"}
                 </Typography>
               </Stack>
-
-              {/* View Button */}
               <Button
                 variant="outlined"
                 size="small"
@@ -294,42 +316,19 @@ const handleLikeClick = async(brandId) => {
           </motion.div>
         ))}
       </Box>
-
-      {/* Load More Button */}
-      {hasMore && (
-        <Box sx={{ textAlign: "center", mt: 2, mb: 4 }}>
-          <Button
-            variant="contained"
-            sx={{
-              borderRadius: 2,
-              px: 4,
-              py: 1,
-              background: "linear-gradient(45deg, #f29724 30%, #ffcc80 90%)",
-              fontWeight: 600,
-              fontSize: "0.875rem",
-              "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: "0 4px 8px rgba(242, 151, 36, 0.3)",
-              },
-              transition: "all 0.3s ease",
-            }}
-            onClick={loadMoreBrands}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <CircularProgress size={24} sx={{ color: "white" }} />
-            ) : (
-              "Load More Brands"
-            )}
-          </Button>
+ 
+      {/* Spinner at bottom for infinite loading */}
+      {isLoading && page > 1 && (
+        <Box sx={{ textAlign: "center", py: 4 }}>
+          <CircularProgress size={30} sx={{ color: "#f29724" }} />
         </Box>
       )}
-
-      {showLogin && (
-        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
-      )}
+ 
+      {showLogin && <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />}
     </Box>
   );
 };
-
+ 
 export default React.memo(TopInvestVdocardround);
+ 
+ 

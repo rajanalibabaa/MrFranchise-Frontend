@@ -22,11 +22,12 @@ import {
   PlaylistAddCheckCircleOutlined,
 } from "@mui/icons-material";
 import LoginPage from "../LoginPage/LoginPage";
-import { openBrandDialog, useToggleLike } from "../../Hooks/Fetchbrands";
+// import { openBrandDialog, useToggleLike } from "../../Hooks/Fetchbrands";
 import { postView } from "../../Utils/function/view";
-import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 import { handleShortList } from "../../Api/shortListApi";
-
+ import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+ import { useDispatch, useSelector } from "react-redux";
+ 
 const cardStyles = {
   width: { xs: "40vh", sm: "calc(50% - 10px)", md: 260 },
   height: { xs: "55vh", sm: "calc(50% - 10px)", md: 400 },
@@ -43,7 +44,7 @@ const cardStyles = {
     boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
   },
 };
-
+ 
 const titleStyles = {
   fontWeight: 600,
   color: "text.primary",
@@ -57,7 +58,7 @@ const titleStyles = {
   maxHeight: "2.8em",
   wordBreak: "break-word",
 };
-
+ 
 const viewButtonStyles = {
   py: 0.5,
   bgcolor: "#4caf50",
@@ -69,74 +70,55 @@ const viewButtonStyles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
   },
 };
-
+ 
 const BrandCard = memo(
   ({
     brand,
+    handleLikeClick,
+    likeProcessing,
     showLogin,
     onShowLogin,
     isSelectedForComparison,
     onToggleBrandComparison,
     maxComparisonReached,
   }) => {
-    const [isProcessingLike, setIsProcessingLike] = useState(false);
-    const { mutate: toggleLike } = useToggleLike();
-
     const {
       uuid,
-      uploads = {},
-      brandDetails = {},
-      franchiseDetails = {},
       isLiked,
+      isShortListed,
     } = brand;
-
-    const investmentRange = useMemo(
-      () => franchiseDetails.fico?.[0]?.investmentRange || "Not specified",
-      [franchiseDetails.fico]
-    );
-
-    const areaRequired = useMemo(
-      () => franchiseDetails.fico?.[0]?.areaRequired || "Not specified",
-      [franchiseDetails.fico]
-    );
-    const franchiseModel = useMemo(
-      () => franchiseDetails.fico?.[0]?.franchiseModel || "Not specified",
-      [franchiseDetails.fico]
-    );
-
+ 
+ 
+    console.log("..... brand data ",brand)
+ 
+ 
     const [brandLike, setBrandLike] = useState(isLiked);
-    const [shortListed, setShortListed] = useState(brand.isShortListed);
-
+    const [shortListed, setShortListed] = useState(isShortListed);
+    const videoRef = useRef(null);
+ 
+ const dispatch = useDispatch();
     const handleOpenBrand = useCallback(() => {
       if ("requestIdleCallback" in window) {
         requestIdleCallback(() => postView(uuid));
       } else {
         setTimeout(() => postView(uuid), 0);
       }
-      openBrandDialog(brand);
+      dispatch(openBrandDialog(brand));
     }, [uuid, brand]);
-
-    const handleLikeClick = useCallback(() => {
-      if (isProcessingLike) return;
-      setIsProcessingLike(true);
-      toggleLike(
-        { brandId: uuid, isLiked: brandLike },
-        { onSettled: () => setIsProcessingLike(false) }
-      );
+ 
+    const handleLike = useCallback(() => {
+      if (likeProcessing[uuid]) return;
+      const token = localStorage.getItem("accessToken");
+ 
+      if (!token) {
+        onShowLogin(true);
+        return;
+      }
+ 
+      handleLikeClick(uuid, brandLike);
       setBrandLike(!brandLike);
-    }, [uuid, brandLike, toggleLike, isProcessingLike]);
-
-    const handleComparisonToggle = useCallback(() => {
-      if (maxComparisonReached && !isSelectedForComparison) return;
-      onToggleBrandComparison(brand);
-    }, [
-      brand,
-      onToggleBrandComparison,
-      isSelectedForComparison,
-      maxComparisonReached,
-    ]);
-
-    const videoRef = useRef(null);
+    }, [uuid, brandLike, handleLikeClick, likeProcessing, onShowLogin]);
+ 
     const handlePlay = useCallback(() => {
       const allVideos = document.querySelectorAll("video");
       allVideos.forEach((vid) => {
@@ -145,9 +127,9 @@ const BrandCard = memo(
         }
       });
     }, []);
-
+ 
     const handleToggleShortList = useCallback(
-      async (brand) => {
+      async () => {
         try {
           const response = await handleShortList(brand);
           if (response.success) {
@@ -157,9 +139,9 @@ const BrandCard = memo(
           console.error("Error toggling shortlist:", error);
         }
       },
-      [shortListed]
+      [brand, shortListed]
     );
-
+ 
     return (
       <Card sx={cardStyles}>
         <Tooltip
@@ -172,8 +154,6 @@ const BrandCard = memo(
           arrow
         >
           <span>
-            {" "}
-            {/* Tooltip needs a wrapper for disabled buttons */}
             <IconButton
               sx={{
                 position: "absolute",
@@ -196,7 +176,7 @@ const BrandCard = memo(
                 width: 32,
                 height: 32,
               }}
-              onClick={handleComparisonToggle}
+              onClick={() => onToggleBrandComparison(brand)}
               disabled={maxComparisonReached && !isSelectedForComparison}
             >
               {isSelectedForComparison ? (
@@ -207,58 +187,52 @@ const BrandCard = memo(
             </IconButton>
           </span>
         </Tooltip>
-
-        <Box
-          sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}
-        >
+ 
+        <Box sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Box
             sx={{
               position: "relative",
               width: "100%",
-              maxWidth: "600px", // Set a fixed max width (you can adjust)
+              maxWidth: "600px",
               height: "auto",
-              aspectRatio: "16 / 9", // Always keep 16:9 ratio
+              aspectRatio: "16 / 9",
               margin: "0 auto",
               backgroundColor: "#000",
-              overflow: "hidden", // Prevent unwanted stretching
-              flexShrink: 0, // Prevent shrinking when parent resizes
+              overflow: "hidden",
+              flexShrink: 0,
             }}
           >
             <CardMedia
               component="video"
               ref={videoRef}
-              poster={uploads.brandLogo}
-              src={uploads.franchisePromotionVideo}
-              alt={brandDetails.brandName}
+              poster={brand.logo}
+              src={brand.franchiseVideos}
+              alt={brand.brandname}
               controls
               preload="none"
               sx={{
                 width: "100%",
                 height: "100%",
-                objectFit: "cover", // Keeps aspect ratio without black bars
+                objectFit: "cover",
                 display: "block",
               }}
               onPlay={handlePlay}
             />
           </Box>
-
+ 
           <Divider sx={{ my: 1 }} />
-
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
+ 
+          <Box display="flex" justifyContent="space-between" alignItems="center">
             <Typography variant="body2" component="div" sx={titleStyles}>
-              {brandDetails.brandName}
+              {brand.brandname}
             </Typography>
             <Box>
               <IconButton
-                onClick={handleLikeClick}
-                disabled={isProcessingLike}
+                onClick={handleLike}
+                disabled={likeProcessing[uuid]}
                 size="small"
               >
-                {isProcessingLike ? (
+                {likeProcessing[uuid] ? (
                   <CircularProgress size={24} />
                 ) : (
                   <Favorite
@@ -269,7 +243,7 @@ const BrandCard = memo(
                 )}
               </IconButton>
               <IconButton
-                onClick={() => handleToggleShortList(brand)}
+                onClick={handleToggleShortList}
                 size="small"
                 sx={{
                   color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
@@ -281,7 +255,7 @@ const BrandCard = memo(
               </IconButton>
             </Box>
           </Box>
-
+ 
           <Box
             sx={{
               mb: 1,
@@ -291,9 +265,9 @@ const BrandCard = memo(
               alignItems: "center",
             }}
           >
-            {franchiseDetails.brandCategories?.child ? (
+            {brand.brandCategories?.child ? (
               <Chip
-                label={franchiseDetails.brandCategories.child}
+                label={brand.brandCategories.child}
                 size="small"
                 sx={{
                   bgcolor: "rgba(255, 152, 0, 0.1)",
@@ -307,25 +281,25 @@ const BrandCard = memo(
               </Typography>
             )}
           </Box>
-
+ 
           <Box sx={{ mb: 2, flexGrow: 1, "& > *:not(:last-child)": { mb: 1 } }}>
             <DetailItem
               icon={<AttachMoney />}
               label="Investment"
-              value={investmentRange}
+              value={brand.fico?.investmentRange }
             />
             <DetailItem
               icon={<AreaChart />}
               label="Area"
-              value={areaRequired}
+              value={brand.fico?.areaRequired }
             />
             <DetailItem
               icon={<Business />}
               label="Franchise Model"
-              value={franchiseModel}
+              value={brand.fico?.franchiseModel}
             />
           </Box>
-
+ 
           <Button
             fullWidth
             variant="contained"
@@ -336,7 +310,7 @@ const BrandCard = memo(
             View Details
           </Button>
         </Box>
-
+ 
         {showLogin && (
           <LoginPage open={showLogin} onClose={() => onShowLogin(false)} />
         )}
@@ -346,11 +320,13 @@ const BrandCard = memo(
   (prevProps, nextProps) =>
     prevProps.brand.uuid === nextProps.brand.uuid &&
     prevProps.brand.isLiked === nextProps.brand.isLiked &&
+    prevProps.brand.isShortListed === nextProps.brand.isShortListed &&
     prevProps.isSelectedForComparison === nextProps.isSelectedForComparison &&
     prevProps.showLogin === nextProps.showLogin &&
-    prevProps.maxComparisonReached === nextProps.maxComparisonReached
+    prevProps.maxComparisonReached === nextProps.maxComparisonReached &&
+    prevProps.likeProcessing === nextProps.likeProcessing
 );
-
+ 
 const DetailItem = memo(({ icon, label, value }) => {
   const clonedIcon = useMemo(
     () =>
@@ -364,7 +340,7 @@ const DetailItem = memo(({ icon, label, value }) => {
       }),
     [icon]
   );
-
+ 
   return (
     <Box display="flex" alignItems="center">
       {clonedIcon}
@@ -374,5 +350,6 @@ const DetailItem = memo(({ icon, label, value }) => {
     </Box>
   );
 });
-
+ 
 export default BrandCard;
+ 

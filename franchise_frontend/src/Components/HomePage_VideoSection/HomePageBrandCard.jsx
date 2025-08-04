@@ -20,10 +20,12 @@ import Business from "@mui/icons-material/Business";
 import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { handleShortList } from "../../Api/shortListApi";
+import LoginPage from "../../Pages/LoginPage/LoginPage";
+
 // import { BsFillBookmarkStarFill } from "react-icons/bs";
 import { RiBookmark3Fill } from "react-icons/ri";
 import { toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
-
+import {token} from "../../Utils/autherId.jsx"
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -38,12 +40,14 @@ const HomePageBrandCard = React.memo(
     dimensions,
     theme,
   }) => {
+
     const videoRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
     const observerRef = useRef();
+    const [showLogin, setShowLogin] = useState(false);
     
     const brandId = brand?.uuid || "";
-    const franchiseModel = brand?.fico?.[0] || {}; // Changed to match the array structure
+    const franchiseModel = brand?.fico || {}; // Changed to match the array structure
     const category = brand?.brandCategories || {}; // Changed to match the new structure
     const videoUrl = brand?.franchiseVideos ||brand?.logo ; // Direct URL now
     const brandLogo = brand?.logo || "";
@@ -85,6 +89,10 @@ const HomePageBrandCard = React.memo(
         // if (response.success) {
         //   setShortListed(!shortListed);
         // }
+        if (!token) {
+                                setShowLogin(true);
+                                return;
+                              }
         toggleHomeCardShortlist(brand.uuid)
         await handleShortList(brand.uuid)
         setShortListed(!shortListed)
@@ -178,6 +186,8 @@ const HomePageBrandCard = React.memo(
                   src={brandLogo}
                   alt={brandName}
                   loading="lazy"
+                   onClick={() => handleApply(brand)}
+cursor="pointer"
                   sx={{
                     width: 100,
                     height: 50,
@@ -222,6 +232,8 @@ const HomePageBrandCard = React.memo(
               <Typography
                 variant="body1"
                 fontWeight={800}
+                                onClick={() => handleApply(brand)}
+cursor="pointer"
                 sx={{
                   whiteSpace: "nowrap",
                   overflow: "hidden",
@@ -323,6 +335,9 @@ const HomePageBrandCard = React.memo(
             </Box>
           </Box>
         </Card>
+        {showLogin && (
+                  <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+                )}
       </motion.div>
     );
   }

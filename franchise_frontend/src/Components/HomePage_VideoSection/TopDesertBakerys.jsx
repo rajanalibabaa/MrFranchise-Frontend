@@ -19,6 +19,7 @@ import ArrowForward from "@mui/icons-material/ArrowForward";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchDesertAndBakery, toggleHomeCardLike  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { motion } from "framer-motion";

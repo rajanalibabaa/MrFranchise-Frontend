@@ -1,5 +1,12 @@
+
+* {
+  user-select: none; 
+}
+
+img, video {
+  pointer-events: none; 
+}
 body{
     margin: 0;
     padding: 0;
-  
 }

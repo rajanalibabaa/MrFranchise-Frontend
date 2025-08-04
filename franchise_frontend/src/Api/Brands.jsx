@@ -29,7 +29,7 @@ export const fetchBrands = async () => {
   const url = id 
     ? `${api.allBrandsApi.get.likeAndUnlikeBrands}/${id}`
     : api.allBrandsApi.get.defaultBrands;
-  
+
   try {
     const response = await apiClient.get(url);
     // console.log("Fetched Brands:", response.data.data);
@@ -39,6 +39,7 @@ export const fetchBrands = async () => {
     throw error;
   }
 };
+
 
 export const fetchBrandById = async (brandId) => {
   try {

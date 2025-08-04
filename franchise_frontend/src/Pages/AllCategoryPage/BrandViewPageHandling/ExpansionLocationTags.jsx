@@ -8,11 +8,13 @@ const ExpansionLocationTags = ({
   isSmallDesktop,
   isLargeDesktop,
 }) => {
+
+  console.log('exp',brand)
   // Process location data more safely with null checks
   const locations = useMemo(() => {
     try {
       return (
-        brand?.expansionLocationData?.expansionLocations?.domestic?.locations
+        brand?.[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations
           ?.flatMap((loc) =>
             loc?.districts?.flatMap((dist) =>
               dist?.cities?.map((city) => ({
@@ -30,7 +32,7 @@ const ExpansionLocationTags = ({
   }, [brand]);
 
   const category = useMemo(
-    () => brand?.franchiseDetails?.brandCategories || {},
+    () => brand?.[0]?.brandfranchisedetails?.franchiseDetails?.brandCategories || {},
     [brand]
   );
 
