@@ -528,8 +528,8 @@ useEffect(() => {
         />
       </Box>
 
-      <LikedBrands />
-      <SimilarBrands brandData={selectedBrand} />
+      {/* <LikedBrands /> */}
+      <SimilarBrands />
 
       <Box
         sx={{

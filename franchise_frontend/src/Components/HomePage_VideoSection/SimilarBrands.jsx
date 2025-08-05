@@ -30,14 +30,15 @@ import Business from "@mui/icons-material/Business";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { useNavigate } from "react-router-dom";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-
+import { useDispatch, useSelector } from "react-redux";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 import { postView } from "../../Utils/function/view";
 import {
   useBrands,
   useToggleLike,
   openBrandDialog,
 } from "../../Hooks/Fetchbrands";
-import { useDispatch } from "react-redux";
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 500 },
@@ -51,6 +52,39 @@ const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
+
+const API_BASE_URL = "your_api_base_url"; // Replace with your actual API base URL
+
+// Cache for prefetched data
+const prefetchCache = {};
+
+// Thunk for fetching brands by child category with caching
+export const fetchBrandsByChildCategory = createAsyncThunk(
+  'brandCategory/fetchBrandsByChildCategory',
+  async ({ subCategory, childCategory, page = 1, limit = 30, isPrefetch = false }, { rejectWithValue, getState }) => {
+    try {
+      // Check cache first for prefetched data
+      const cacheKey = `${subCategory}_${childCategory}_${page}`;
+      
+      if (isPrefetch && prefetchCache[cacheKey]) {
+        return { data: prefetchCache[cacheKey], page, isPrefetch };
+      }
+
+      const response = await axios.get(`${API_BASE_URL}/brandlisting/getBrandsByChildCategory`, {
+        params: { subCategory, childCategory, page, limit }
+      });
+
+      // Store in cache if this is a prefetch
+      if (isPrefetch) {
+        prefetchCache[cacheKey] = response.data.data;
+      }
+
+      return { data: response.data.data, page, isPrefetch };
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { message: 'Something went wrong' });
+    }
+  }
+);
 
 const BrandCard = React.memo(
   ({
@@ -77,20 +111,13 @@ const BrandCard = React.memo(
     const brandDetails = brand.brandDetails || {};
     const {
       brandName = "N/A",
-      // tagLine = "",
-      // companyName = "N/A",
     } = brandDetails;
 
     // Extract franchise details with fallbacks
     const {
       investmentRange = "Not specified",
       areaRequired = "Not specified",
-      franchiseType = "N/A",
       franchiseModel: modelType = "N/A",
-      // franchiseFee = "N/A",
-      // royaltyFee = "N/A",
-      // roi = "N/A",
-      // payBackPeriod = "N/A"
     } = franchiseModel;
 
     useEffect(() => {
@@ -119,7 +146,6 @@ const BrandCard = React.memo(
       <motion.div
         key={brandId}
         variants={cardVariants}
-        // whileHover={{ scale: 1.03 }}
         style={{
           width: dimensions.width,
           flexShrink: 0,
@@ -132,12 +158,7 @@ const BrandCard = React.memo(
             borderRadius: 3,
             overflow: "hidden",
             width: "100%",
-            // border: "1px solid #eee",
-            // boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
             transition: "all 0.3s ease",
-            // "&:hover": {
-            //   boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
-            // },
           }}
         >
           {/* Video/Image Section */}
@@ -376,35 +397,54 @@ const SimilarBrands = ({ brandData }) => {
   const [showLogin, setShowLogin] = useState(false);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(false);
+  const [similarBrands, setSimilarBrands] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // REACT-QUERY HOOKS
-  const { data: brands = [], isLoading: brandsLoading, error } = useBrands();
+  const { data: brands = [], isLoading: brandsLoading } = useBrands();
   const toggleLike = useToggleLike();
 
-  // Filter similar brands by child category, excluding the current brand
-  const similarBrands = useMemo(() => {
-    if (!brandData || !brands.length) return [];
+  // Fetch similar brands when brandData changes
+  useEffect(() => {
+    const fetchSimilarBrands = async () => {
+      if (!brandData) return;
 
-    const currentChildCategory =
-      brandData.franchiseDetails?.brandCategories?.child;
-    if (!currentChildCategory) return [];
+      const childCategory = brandData?.franchiseDetails?.brandCategories?.child;
+      const subCategory = brandData?.franchiseDetails?.brandCategories?.main;
 
-    const filtered = brands.filter((brand) => {
-      // Exclude the current brand
-      if (brand.uuid === brandData.uuid) return false;
+      if (!childCategory || !subCategory) {
+        setLoading(false);
+        return;
+      }
 
-      // Include brands with the same child category
-      return (
-        brand.franchiseDetails?.brandCategories?.child === currentChildCategory
-      );
-    });
+      try {
+        setLoading(true);
+        const result = await dispatch(
+          fetchBrandsByChildCategory({ subCategory, childCategory })
+        ).unwrap();
 
-    // Add the first few brands at the end to create infinite loop effect
-    return [...filtered, ...filtered.slice(0, 4)];
-  }, [brandData, brands]);
+        // Filter out the current brand and ensure we have valid data
+        const filteredBrands = result.data.filter(
+          brand => brand.uuid !== brandData.uuid
+        );
+
+        // Add the first few brands at the end to create infinite loop effect
+        const brandsWithDuplicates = [...filteredBrands, ...filteredBrands.slice(0, 4)];
+        setSimilarBrands(brandsWithDuplicates);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch similar brands:", err);
+        setError(err.message || "Failed to load similar brands");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSimilarBrands();
+  }, [brandData, dispatch]);
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
@@ -421,7 +461,6 @@ const SimilarBrands = ({ brandData }) => {
         const containerWidth = containerRef.current.offsetWidth;
         const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
         const count = Math.floor(containerWidth / cardWidthWithGap);
-        // setVisibleCardCount(Math.max(1, Math.min(count, 6)));
       }
     };
 
@@ -471,13 +510,11 @@ const SimilarBrands = ({ brandData }) => {
     }
   }, []);
 
-  // Calculate the scroll distance for 4 cards (including gap)
   const getScrollDistance = useCallback(() => {
     const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
     return cardWidthWithGap * 4;
   }, [dimensions.width, isMobile]);
 
-  // Smooth scroll function
   const smoothScrollTo = useCallback((target) => {
     if (!scrollContainerRef.current) return;
 
@@ -489,7 +526,7 @@ const SimilarBrands = ({ brandData }) => {
     const start = container.scrollLeft;
     const change = target - start;
     const startTime = performance.now();
-    const duration = 500; // 0.5 second scroll duration
+    const duration = 500;
 
     const animateScroll = (currentTime) => {
       const elapsed = currentTime - startTime;
@@ -500,15 +537,14 @@ const SimilarBrands = ({ brandData }) => {
       if (progress < 1) {
         scrollRequestRef.current = requestAnimationFrame(animateScroll);
       } else {
-        handleScroll(); // Update shadow states after scroll completes
-        checkForLoop(); // Check if we need to loop back to start
+        handleScroll();
+        checkForLoop();
       }
     };
 
     scrollRequestRef.current = requestAnimationFrame(animateScroll);
   }, []);
 
-  // Check if we've scrolled to the duplicated items and need to loop back
   const checkForLoop = useCallback(() => {
     if (!scrollContainerRef.current) return;
 
@@ -517,30 +553,24 @@ const SimilarBrands = ({ brandData }) => {
     const clientWidth = container.clientWidth;
     const maxScrollLeft = scrollWidth - clientWidth;
 
-    // If we're within 100px of the end, jump back to the equivalent position at the start
     if (container.scrollLeft >= maxScrollLeft - 100) {
-      const originalBrandsCount = similarBrands.length - 4; // Subtract the duplicated items
+      const originalBrandsCount = similarBrands.length - 4;
       const originalScrollWidth =
         originalBrandsCount * (dimensions.width + (isMobile ? 16 : 24));
-
-      // Calculate equivalent position at the start
       const newScrollLeft = container.scrollLeft - originalScrollWidth;
       container.scrollLeft = newScrollLeft;
     }
   }, [similarBrands.length, dimensions.width, isMobile]);
 
-  // Handle next button click - scroll forward 4 cards
   const handleNextClick = useCallback(() => {
     if (!scrollContainerRef.current) return;
 
     const container = scrollContainerRef.current;
     const scrollDistance = getScrollDistance();
     const newScrollLeft = container.scrollLeft + scrollDistance;
-
     smoothScrollTo(newScrollLeft);
   }, [getScrollDistance, smoothScrollTo]);
 
-  // Handle previous button click - scroll backward 4 cards
   const handlePrevClick = useCallback(() => {
     if (!scrollContainerRef.current) return;
 
@@ -548,9 +578,8 @@ const SimilarBrands = ({ brandData }) => {
     const scrollDistance = getScrollDistance();
     const newScrollLeft = container.scrollLeft - scrollDistance;
 
-    // If we're at the start, jump to near the end (before the duplicated items)
     if (newScrollLeft <= 0) {
-      const originalBrandsCount = similarBrands.length - 4; // Subtract the duplicated items
+      const originalBrandsCount = similarBrands.length - 4;
       const originalScrollWidth =
         originalBrandsCount * (dimensions.width + (isMobile ? 16 : 24));
       const clientWidth = container.clientWidth;
@@ -566,12 +595,10 @@ const SimilarBrands = ({ brandData }) => {
     smoothScrollTo,
   ]);
 
-  // Easing function for smooth scrolling
   const easeInOutQuad = (t) => {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   };
 
-  // Track scroll position for shadow effects
   const handleScroll = useCallback(() => {
     if (!scrollContainerRef.current) return;
 
@@ -580,7 +607,6 @@ const SimilarBrands = ({ brandData }) => {
     setShowEndShadow(scrollLeft < scrollWidth - clientWidth - 10);
   }, []);
 
-  // Initialize and clean up
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (container) {
@@ -601,7 +627,7 @@ const SimilarBrands = ({ brandData }) => {
     };
   }, [similarBrands.length, handleScroll]);
 
-  if (brandsLoading) {
+  if (loading) {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <CircularProgress />
@@ -613,7 +639,7 @@ const SimilarBrands = ({ brandData }) => {
     return (
       <Box sx={{ textAlign: "center", p: 4 }}>
         <Typography color="error">
-          {error.message || "Failed to load brands."}
+          {error || "Failed to load similar brands."}
         </Typography>
       </Box>
     );
@@ -729,7 +755,6 @@ const SimilarBrands = ({ brandData }) => {
               p: 2,
               overflowX: "auto",
               perspective: "1000px",
-              // Custom attractive scrollbar design
               "&::-webkit-scrollbar": {
                 height: isMobile ? "10px" : "8px",
                 backgroundColor: "transparent",
@@ -751,10 +776,8 @@ const SimilarBrands = ({ brandData }) => {
                   backgroundPosition: "right center",
                 },
               },
-              // Firefox scrollbar
               scrollbarColor: ` transparent`,
               scrollbarWidth: "thin",
-              // Extra bottom padding for mobile
               paddingBottom: isMobile ? "24px" : "16px",
             }}
             onMouseEnter={handleMouseEnter}
@@ -762,11 +785,10 @@ const SimilarBrands = ({ brandData }) => {
           >
             {similarBrands.map((brand, index) => (
               <motion.div
-                key={`${brand?.uuid}-${index}`} // Add index to key to handle duplicates
+                key={`${brand?.uuid}-${index}`}
                 whileHover={{
                   scale: 1.03,
                   zIndex: 10,
-                  // boxShadow: theme.shadows[6],
                   transition: { duration: 0.3 },
                 }}
                 whileTap={{ scale: 0.98 }}
