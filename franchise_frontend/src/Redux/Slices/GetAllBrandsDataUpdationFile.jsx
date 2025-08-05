@@ -98,7 +98,7 @@ const brandSlice = createSlice({
   );
 }
 
- 
+
  
   },
   extraReducers: (builder) => {
