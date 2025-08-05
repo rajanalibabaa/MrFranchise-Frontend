@@ -1,3 +1,5 @@
+
+
 import React, {
   useState,
   useCallback,
@@ -376,3 +378,4 @@ const DetailItem = memo(({ icon, label, value }) => {
 });
 
 export default BrandCard;
+

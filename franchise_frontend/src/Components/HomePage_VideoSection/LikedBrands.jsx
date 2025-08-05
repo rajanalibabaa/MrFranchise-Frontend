@@ -198,25 +198,27 @@ const LikedBrands = () => {
     );
   }
  
-  if (error) {
-    return (
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        py: 10,
-        textAlign: 'center'
-      }}>
-        <Typography variant="h6" color="error" sx={{ mb: 2 }}>
-          Error loading brands
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {error}
-        </Typography>
-      </Box>
-    );
+  // if (error) {
+  //   return (
+  //     <Box sx={{
+  //       display: 'flex',
+  //       flexDirection: 'column',
+  //       alignItems: 'center',
+  //       py: 10,
+  //       textAlign: 'center'
+  //     }}>
+  //       <Typography variant="h6" color="error" sx={{ mb: 2 }}>
+  //         Error loading brands
+  //       </Typography>
+  //       <Typography variant="body2" color="text.secondary">
+  //         {error}
+  //       </Typography>
+  //     </Box>
+  //   );
+  // }
+ if(error) {
+    return <ErrorComponent message={error} />;
   }
- 
   return (
 
     <>

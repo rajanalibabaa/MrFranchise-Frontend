@@ -30,6 +30,10 @@ const ShortlistBrands = () => {
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const scrollRequestRef = useRef(null);
+  const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID") 
+  if(!id) {
+    return null
+  }
 
   const dimensions = {
     mobile: { width: 280, height: 520 },
@@ -193,7 +197,7 @@ const ShortlistBrands = () => {
               },
             }}
           >
-            Your Shortlist Brands
+            Your Sortlist Brands
           </Typography>
 
           <Button

@@ -25,66 +25,65 @@ import SEO from "../../Components/SEO/Seo.jsx";
 import HomeBanner from "../../assets/Images/HomeBanner.avif";
 
 // ErrorBoundary component remains the same
-const ErrorBoundary = ({ children, fallback }) => {
-  const [hasError, setHasError] = useState(false);
-  useEffect(() => {
-    const errorHandler = (error) => {
-      console.error("Error caught by boundary:", error);
-      setHasError(true);
-    };
-    window.addEventListener("error", errorHandler);
-    return () => window.removeEventListener("error", errorHandler);
-  }, []);
-  return hasError ? fallback : children;
-};
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Error caught by boundary:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
 // Optimized withSuspense HOC
-const withSuspense =
-  (Component, { fallback } = {}) =>
-  (props) =>
-    (
-      <Suspense
+// Update your withSuspense HOC
+const withSuspense = (Component, { fallback } = {}) => (props) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    return fallback || (
+      <Box sx={{ /* your error fallback styles */ }}>
+        <Typography color="error">Failed to load this section</Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Suspense
+      fallback={
+        fallback || (
+          <Box sx={{ /* your loading styles */ }}>
+            <CircularProgress color="secondary" />
+            <Typography variant="body2" sx={{ mt: 2 }}>
+              Loading content...
+            </Typography>
+          </Box>
+        )
+      }
+    >
+      <ErrorBoundary
         fallback={
-          fallback || (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "300px",
-                backgroundColor: "#fffaf7",
-                flexDirection: "column",
-              }}
-            >
-              <CircularProgress color="secondary" />
-              <Typography variant="body2" sx={{ mt: 2 }}>
-                Loading content...
-              </Typography>
-            </Box>
-          )
+          <Box sx={{ /* your error fallback styles */ }}>
+            <Typography color="error">Failed to load this section</Typography>
+          </Box>
         }
       >
-        <ErrorBoundary
-          fallback={
-            <Box
-              sx={{
-                p: 3,
-                textAlign: "center",
-                backgroundColor: "#ffeeee",
-                height: "300px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Typography color="error">Failed to load this section</Typography>
-            </Box>
-          }
-        >
-          <Component {...props} />
-        </ErrorBoundary>
-      </Suspense>
-    );
+        <Component {...props} />
+      </ErrorBoundary>
+    </Suspense>
+  );
+};
 
 const bannerTexts = [
   {
@@ -272,6 +271,9 @@ const HomeBannerSec = () => {
       LikedBrands: withSuspense(
         React.lazy(() =>
           import("../../Components/HomePage_VideoSection/LikedBrands.jsx")
+        .catch(() => ({ 
+          default: () => <div>Failed to load component</div> 
+        }))
         )
       ),
       ShortlistBrands: withSuspense(
@@ -318,6 +320,11 @@ const HomeBannerSec = () => {
           import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
         )
       ),
+       FindFranchiseLocations: withSuspense(
+        React.lazy(() =>
+          import("../../Components/HomePage_VideoSection/FindFranchiseLocations.jsx")
+        )
+      ),
     }),
     []
   );
@@ -352,6 +359,7 @@ const HomeBannerSec = () => {
         { component: "TopDesertBakeryFranchise", background: "#fffaf7" },
         { component: "TopTruckAndKiosks", background: "#fffaf7" },
         { component: "TopRestaurantsFranchise", background: "white" },
+        { component: "FindFranchiseLocations", background: "white" },
         { component: "ToTrendingBrands", title: "Trending Brands" },
       ],
       animations: {
@@ -459,45 +467,43 @@ const HomeBannerSec = () => {
   );
 
   // Memoize section rendering
-  const renderSection = useCallback(
-    (sectionConfig, index) => {
-      const DynamicComponent = dynamicComponents[sectionConfig.component];
+ const renderSection = useCallback(
+  (sectionConfig, index) => {
+    const DynamicComponent = dynamicComponents[sectionConfig.component];
 
-      return (
-        <Box
-          key={`section-${index}`}
-          sx={{
-            py: 1,
-            px: 2,
-            position: "relative",
-            overflow: "hidden",
-            backgroundColor: sectionConfig.background || "#fffaf7",
-            ...(sectionConfig.backgroundImage && {
-              backgroundImage: `linear-gradient(${sectionConfig.background}), url(${sectionConfig.backgroundImage})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }),
-          }}
-        >
-          <Container maxWidth="xl" sx={{ position: "relative", zIndex: 1 }}>
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.8,
-                delay: index * 0.1,
-              }}
-              viewport={{ once: true, margin: "100px", amount: 0.1 }}
+    return (
+      <Box key={`section-${index}`} sx={{ /* your styles */ }}>
+        <Container maxWidth="xl">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: index * 0.1 }}
+            viewport={{ once: true }}
+          >
+            <ErrorBoundary
+              fallback={
+                <Box sx={{ /* error styles */ }}>
+                  Failed to load {sectionConfig.component}
+                </Box>
+              }
             >
-              {isPreloaded && <DynamicComponent />}
-            </motion.div>
-          </Container>
-        </Box>
-      );
-    },
-    [isPreloaded]
-  );
+              <Suspense
+                fallback={
+                  <Box sx={{ /* loading styles */ }}>
+                    <CircularProgress />
+                  </Box>
+                }
+              >
+                {isPreloaded && <DynamicComponent />}
+              </Suspense>
+            </ErrorBoundary>
+          </motion.div>
+        </Container>
+      </Box>
+    );
+  },
+  [isPreloaded, dynamicComponents]
+);
 
   // Combine with your existing popup state
   useEffect(() => {

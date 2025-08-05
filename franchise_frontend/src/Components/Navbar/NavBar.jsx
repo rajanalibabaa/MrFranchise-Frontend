@@ -109,7 +109,7 @@ function Navbar() {
     try {
       const response = await axios.post(
       
-        `http://localhost:5000/logout/${ID}`,
+        `http://localhost:5000/api/v1/logout/${ID}`,
         {},
         {
           headers: {

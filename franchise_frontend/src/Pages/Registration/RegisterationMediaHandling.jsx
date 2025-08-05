@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Grid } from '@mui/material';
 import media1 from '../../assets/videos/mediaVideo1.mp4';
 // import media2 from '../../assets/videos/mediaVideo2.mp4';
-
+// import { } from "../../../Redux/Slices/GetAllBrandsDataUpdationFile"
 const mediaList = [
   { src: media1, title: 'Brand One' },
   { src: media1, title: 'Brand Two' },
