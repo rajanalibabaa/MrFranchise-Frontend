@@ -1,4 +1,11 @@
-import React, { useState, useCallback, memo, useMemo, useRef } from "react";
+import React, {
+  useState,
+  useCallback,
+  memo,
+  useMemo,
+  useRef,
+  useEffect,
+} from "react";
 import {
   Box,
   Button,
@@ -25,9 +32,10 @@ import LoginPage from "../LoginPage/LoginPage";
 // import { openBrandDialog, useToggleLike } from "../../Hooks/Fetchbrands";
 import { postView } from "../../Utils/function/view";
 import { handleShortList } from "../../Api/shortListApi";
- import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
- import { useDispatch, useSelector } from "react-redux";
- 
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+import { useDispatch, useSelector } from "react-redux";
+import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
+
 const cardStyles = {
   width: { xs: "40vh", sm: "calc(50% - 10px)", md: 260 },
   height: { xs: "55vh", sm: "calc(50% - 10px)", md: 400 },
@@ -44,7 +52,7 @@ const cardStyles = {
     boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
   },
 };
- 
+
 const titleStyles = {
   fontWeight: 600,
   color: "text.primary",
@@ -58,7 +66,7 @@ const titleStyles = {
   maxHeight: "2.8em",
   wordBreak: "break-word",
 };
- 
+
 const viewButtonStyles = {
   py: 0.5,
   bgcolor: "#4caf50",
@@ -70,7 +78,7 @@ const viewButtonStyles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
   },
 };
- 
+
 const BrandCard = memo(
   ({
     brand,
@@ -82,21 +90,14 @@ const BrandCard = memo(
     onToggleBrandComparison,
     maxComparisonReached,
   }) => {
-    const {
-      uuid,
-      isLiked,
-      isShortListed,
-    } = brand;
- 
- 
-    console.log("..... brand data ",brand)
- 
- 
+    const { uuid, isLiked, isShortListed } = brand;
+
     const [brandLike, setBrandLike] = useState(isLiked);
     const [shortListed, setShortListed] = useState(isShortListed);
     const videoRef = useRef(null);
- 
- const dispatch = useDispatch();
+    const [currentlyPlayingId, setCurrentlyPlayingId] = useState(null);
+
+    const dispatch = useDispatch();
     const handleOpenBrand = useCallback(() => {
       if ("requestIdleCallback" in window) {
         requestIdleCallback(() => postView(uuid));
@@ -105,43 +106,63 @@ const BrandCard = memo(
       }
       dispatch(openBrandDialog(brand));
     }, [uuid, brand]);
- 
+
     const handleLike = useCallback(() => {
       if (likeProcessing[uuid]) return;
       const token = localStorage.getItem("accessToken");
- 
+
       if (!token) {
         onShowLogin(true);
         return;
       }
- 
+
       handleLikeClick(uuid, brandLike);
       setBrandLike(!brandLike);
     }, [uuid, brandLike, handleLikeClick, likeProcessing, onShowLogin]);
- 
+
     const handlePlay = useCallback(() => {
-      const allVideos = document.querySelectorAll("video");
-      allVideos.forEach((vid) => {
-        if (vid !== videoRef.current) {
-          vid.pause();
+      // Pause all other videos
+      allVideosRef.current.forEach((video) => {
+        if (video !== videoRef.current && !video.paused) {
+          video.pause();
         }
       });
+      setIsPlaying(true);
     }, []);
- 
-    const handleToggleShortList = useCallback(
-      async () => {
-        try {
-          const response = await handleShortList(brand);
-          if (response.success) {
-            setShortListed(!shortListed);
-          }
-        } catch (error) {
-          console.error("Error toggling shortlist:", error);
+
+    const handlePause = useCallback(() => {
+      setIsPlaying(false);
+    }, []);
+
+    // useEffect(() => {
+    //   const allVideos = document.querySelectorAll('video');
+    //   allVideos.forEach(video => {
+    //     if (video !== videoRef.current && currentlyPlayingId === brand.uuid) {
+    //       video.pause();
+    //     }
+    //   });
+    // }, [currentlyPlayingId, brand.uuid]);
+
+    const handleToggleShortList = useCallback(async () => {
+      try {
+        const response = await handleShortList(brand);
+        if (response.success) {
+          setShortListed(!shortListed);
         }
-      },
-      [brand, shortListed]
-    );
- 
+      } catch (error) {
+        console.error("Error toggling shortlist:", error);
+      }
+    }, [brand, shortListed]);
+
+    useEffect(() => {
+      if (videoRef.current) {
+        allVideosRef.current.add(videoRef.current);
+        return () => {
+          allVideosRef.current.delete(videoRef.current);
+        };
+      }
+    }, []);
+
     return (
       <Card sx={cardStyles}>
         <Tooltip
@@ -187,8 +208,10 @@ const BrandCard = memo(
             </IconButton>
           </span>
         </Tooltip>
- 
-        <Box sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
+
+        <Box
+          sx={{ p: 1, flexGrow: 1, display: "flex", flexDirection: "column" }}
+        >
           <Box
             sx={{
               position: "relative",
@@ -202,27 +225,28 @@ const BrandCard = memo(
               flexShrink: 0,
             }}
           >
-            <CardMedia
-              component="video"
+            <VideoPlayer
               ref={videoRef}
+              id={brand.uuid} // or any unique identifier
+              videoUrl={brand.franchiseVideos}
               poster={brand.logo}
-              src={brand.franchiseVideos}
-              alt={brand.brandname}
-              controls
-              preload="none"
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-              }}
-              onPlay={handlePlay}
+              width="100%"
+              height="100%"
+              objectFit="cover"
+              showControls={true} // equivalent to 'controls' in CardMedia
+              autoPlay={false} // set to true if you want autoplay
+              loop={false} // set to true if you want looping
+              muted={true} // videos are often muted by default for autoplay
             />
           </Box>
- 
+
           <Divider sx={{ my: 1 }} />
- 
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Typography variant="body2" component="div" sx={titleStyles}>
               {brand.brandname}
             </Typography>
@@ -255,7 +279,7 @@ const BrandCard = memo(
               </IconButton>
             </Box>
           </Box>
- 
+
           <Box
             sx={{
               mb: 1,
@@ -281,17 +305,17 @@ const BrandCard = memo(
               </Typography>
             )}
           </Box>
- 
+
           <Box sx={{ mb: 2, flexGrow: 1, "& > *:not(:last-child)": { mb: 1 } }}>
             <DetailItem
               icon={<AttachMoney />}
               label="Investment"
-              value={brand.fico?.investmentRange }
+              value={brand.fico?.investmentRange}
             />
             <DetailItem
               icon={<AreaChart />}
               label="Area"
-              value={brand.fico?.areaRequired }
+              value={brand.fico?.areaRequired}
             />
             <DetailItem
               icon={<Business />}
@@ -299,7 +323,7 @@ const BrandCard = memo(
               value={brand.fico?.franchiseModel}
             />
           </Box>
- 
+
           <Button
             fullWidth
             variant="contained"
@@ -310,7 +334,7 @@ const BrandCard = memo(
             View Details
           </Button>
         </Box>
- 
+
         {showLogin && (
           <LoginPage open={showLogin} onClose={() => onShowLogin(false)} />
         )}
@@ -326,7 +350,7 @@ const BrandCard = memo(
     prevProps.maxComparisonReached === nextProps.maxComparisonReached &&
     prevProps.likeProcessing === nextProps.likeProcessing
 );
- 
+
 const DetailItem = memo(({ icon, label, value }) => {
   const clonedIcon = useMemo(
     () =>
@@ -340,7 +364,7 @@ const DetailItem = memo(({ icon, label, value }) => {
       }),
     [icon]
   );
- 
+
   return (
     <Box display="flex" alignItems="center">
       {clonedIcon}
@@ -350,6 +374,5 @@ const DetailItem = memo(({ icon, label, value }) => {
     </Box>
   );
 });
- 
+
 export default BrandCard;
- 

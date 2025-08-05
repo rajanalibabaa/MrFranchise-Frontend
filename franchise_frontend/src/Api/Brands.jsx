@@ -82,8 +82,8 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
 
   try {
     if (!isLiked) {
-       console.log("api brandId false:",brandId)
-  console.log("api brandId isLiked  false:",isLiked)
+      //  console.log("api brandId false:",brandId)
+  // console.log("api brandId isLiked  false:",isLiked)
       // For like creation
       // const response = await apiClient.post(
       //   '/api/v1/like/post-favbrands',
@@ -105,8 +105,8 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
 
       return response.data;
     } else {
-           console.log("api brandId true:",brandId)
-  console.log("api brandId isLiked  true:",isLiked)
+          //  console.log("api brandId true:",brandId)
+  // console.log("api brandId isLiked  true:",isLiked)
       // For like removal
       // const response = await apiClient.delete(
       //   '/api/v1/like/delete-favbrand',
@@ -131,7 +131,7 @@ export const toggleBrandLike = async ({ brandId, isLiked }) => {
         
       );
 
-      console.log("res delete:",response.data)
+      // console.log("res delete:",response.data)
       return response.data;
     }
   } catch (error) {

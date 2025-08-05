@@ -3,6 +3,7 @@ import { useParams, useLocation } from "react-router-dom";
 import BrandDetails from "./BrandDetail.jsx";
 import { CircularProgress, Box } from "@mui/material";
 import axios from "axios";
+import { userId } from "../../Utils/autherId.jsx";
 
 function BrandDetailsPage() {
   const { brandId: routeBrandId } = useParams();
@@ -57,7 +58,12 @@ function BrandDetailsPage() {
 
         // Fetch fresh data from API
         const res = await axios.get(
-          `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${brandId}`
+          `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${brandId}`,{
+            params: {
+                     
+                      userId, 
+                    }
+          }
         );
         
         const brandData = res.data?.data;

@@ -48,7 +48,7 @@ const {
   pagination
 } = beveragesFranchiseState || {};
 
-console.log("beveragesFranchiseState",beveragesFranchiseState);
+// console.log("beveragesFranchiseState",beveragesFranchiseState);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
@@ -190,7 +190,7 @@ console.log("beveragesFranchiseState",beveragesFranchiseState);
   const handleNextClick = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    const distance = getScrollDistance() * visibleCardCount;
+    const distance = getScrollDistance();
     const maxScroll = container.scrollWidth - container.clientWidth;
     const newScroll = Math.min(container.scrollLeft + distance, maxScroll);
     smoothScrollTo(newScroll);
@@ -199,7 +199,7 @@ console.log("beveragesFranchiseState",beveragesFranchiseState);
   const handlePrevClick = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    const distance = getScrollDistance() * visibleCardCount;
+    const distance = getScrollDistance();
     const newScroll = Math.max(container.scrollLeft - distance, 0);
     smoothScrollTo(newScroll);
   };

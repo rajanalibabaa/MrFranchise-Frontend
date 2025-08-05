@@ -7,6 +7,8 @@ import {
   Stack,
   CircularProgress,
   Tooltip,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { RiBookmark3Fill } from "react-icons/ri";
 import { motion } from "framer-motion";
@@ -16,21 +18,25 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { postView } from "../../Utils/function/view";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBrands, toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
+import { fetchBrands, toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
 import { likeApiFunction } from "../../Api/likeApi";
-import { toggleHomeCardLike } from "../../Redux/Slices/TopCardFetchingSlice";
+import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
 import { token } from "../../Utils/autherId";
- 
+import { handleShortList } from "../../Api/shortListApi";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+
 const TopInvestVdocardround = () => {
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
   const [page, setPage] = useState(1);
   const [allBrands, setAllBrands] = useState([]);
- 
+  const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const dispatch = useDispatch();
  
   const {
-    brands: reduxBrands = [],
+    brands,
     isLoading,
     error,
     pagination = { totalPages: 1 },
@@ -46,14 +52,14 @@ const TopInvestVdocardround = () => {
   }, [page, fetchedPages, dispatch]);
  
   useEffect(() => {
-    if (Array.isArray(reduxBrands)) {
+    if (Array.isArray(brands)) {
       setAllBrands((prev) => {
         const existingUUIDs = new Set(prev.map((b) => b.uuid));
-        const uniqueNewBrands = reduxBrands.filter((b) => !existingUUIDs.has(b.uuid));
+        const uniqueNewBrands = brands.filter((b) => !existingUUIDs.has(b.uuid));
         return [...prev, ...uniqueNewBrands];
       });
     }
-  }, [reduxBrands]);
+  }, [brands]);
  
   // Scroll-based infinite loading
   useEffect(() => {
@@ -75,20 +81,19 @@ const TopInvestVdocardround = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, isLoading]);
  
-  const handleToggleShortList = async (brand) => {
-    try {
-      const response = await handleShortList(brand);
-      if (response.success) {
-        setAllBrands((prev) =>
-          prev.map((b) =>
-            b.uuid === brand.uuid ? { ...b, isShortListed: !b.isShortListed } : b
-          )
-        );
-      }
-    } catch (error) {
-      console.error("Error toggling shortlist:", error);
+  const handleToggleShortList = async (brandId) => {
+    if (!token) {
+      setShowLogin(true);
+      return;
     }
-  };
+  try {
+    dispatch(toggleBrandShortList(brandId));
+    await handleShortList(brandId);
+     dispatch(toggleHomeCardShortlist(brandId))
+  } catch (error) {
+    console.error("Error toggling shortlist:", error);
+  }
+};
  
   const handleLikeClick = async (brandId) => {
     if (!token) {
@@ -98,9 +103,9 @@ const TopInvestVdocardround = () => {
  
     setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
     try {
-      await dispatch(toggleBrandLike(brandId));
-      await dispatch(toggleHomeCardLike(brandId));
-      await likeApiFunction(brandId);
+       dispatch(toggleBrandLike(brandId));
+       dispatch(toggleHomeCardLike(brandId));
+       likeApiFunction(brandId);
     } catch (error) {
       console.error("Error toggling like:", error);
     } finally {
@@ -108,10 +113,10 @@ const TopInvestVdocardround = () => {
     }
   };
  
-  const handleApply = useCallback((brand) => {
-    postView(brand.uuid);
-    openBrandDialog(brand);
-  }, []);
+   const handleApply = (brand) => {
+        postView(brand.uuid);
+        dispatch(openBrandDialog(brand));
+      };
  
   if (isLoading && page === 1) {
     return (
@@ -134,15 +139,24 @@ const TopInvestVdocardround = () => {
   return (
     <Box component="section" sx={{ maxWidth: 1300, mx: "auto" }}>
       <Typography
-        variant="h5"
-        sx={{
-          mb: 2,
-          fontWeight: 800,
-          textAlign: "center",
-          background: "linear-gradient(45deg, #f29724 30%, #ffcc80 90%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}
+        variant={isMobile ? "body1" : "h5"}
+             fontWeight="bold"
+             sx={{
+               color: "black",
+               mb: 1,
+               textAlign: "left",
+               position: "relative",
+               "&:after": {
+                 content: '""',
+                 display: "block",
+                 width: "80px",
+                 height: "4px",
+                 background:
+                   theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                 mt: 1,
+                 borderRadius: 2,
+               },
+             }}
       >
         Franchise Opportunities
       </Typography>
@@ -167,7 +181,7 @@ const TopInvestVdocardround = () => {
           },
         }}
       >
-        {allBrands.map((brand) => (
+        {brands.map((brand) => (
           <motion.div
             key={brand.uuid}
             whileHover={{ y: -5 }}
@@ -191,10 +205,47 @@ const TopInvestVdocardround = () => {
                 overflow: "hidden",
               }}
             >
-              <Stack
+             {!isMobile && (
+                <Stack
                 direction="column"
                 spacing={0.5}
                 sx={{ position: "absolute", top: 4, right: 4, zIndex: 2 }}
+              >
+                <IconButton
+                  sx={{
+                    color: brand?.isLiked ? "#ff5252" : "rgba(0,0,0,0.2)",
+                    "&:hover": { color: "#ff5252" },
+                  }}
+                  onClick={() => handleLikeClick(brand.uuid)}
+                  disabled={likeProcessing[brand.uuid]}
+                >
+                  {likeProcessing[brand.uuid] ? (
+                    <CircularProgress size={24} />
+                  ) : brand?.isLiked ? (
+                    <FavoriteIcon fontSize="small" />
+                  ) : (
+                    <FavoriteBorderIcon fontSize="small" />
+                  )}
+                </IconButton>
+ 
+                <IconButton
+                  onClick={() => handleToggleShortList(brand.uuid)}
+                  sx={{
+                    color: brand?.isShortListed
+                      ? "#7ef400ff"
+                      : "rgba(0, 0, 0, 0.23)",
+                  }}
+                >
+                  <Tooltip title="ShortList">
+                    <RiBookmark3Fill size={21} />
+                  </Tooltip>
+                </IconButton>
+              </Stack>
+             )}
+ {isMobile && (
+                 <Stack
+                direction="row"
+                spacing={0.5}
               >
                 <IconButton
                   sx={{
@@ -226,7 +277,7 @@ const TopInvestVdocardround = () => {
                   </Tooltip>
                 </IconButton>
               </Stack>
- 
+              )}
               <Box
                 component="img"
                 src={brand.logo}
@@ -240,6 +291,7 @@ const TopInvestVdocardround = () => {
                   objectFit: "contain",
                 }}
               />
+             
               <Typography
                 variant="caption"
                 fontWeight={600}
@@ -252,6 +304,7 @@ const TopInvestVdocardround = () => {
                   px: 0.5,
                 }}
               >
+                
                 {brand.brandname}
               </Typography>
               <Typography
@@ -280,6 +333,7 @@ const TopInvestVdocardround = () => {
                   Type : {brand.fico?.franchiseModel || "N/A"}
                 </Typography>
               </Stack>
+               
               <Button
                 variant="outlined"
                 size="small"

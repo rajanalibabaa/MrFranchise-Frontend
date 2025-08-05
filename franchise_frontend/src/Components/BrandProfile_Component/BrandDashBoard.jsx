@@ -92,7 +92,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
   const filteredLikedData = filterByDate(likedData);
   const filteredLeadsData = filterByDate(applyData);
 
-  console.log("leads : ",Leads)
+  // console.log("leads : ",Leads)
 
   const handleTabChange = (_, newValue) => {
     setTabValue(newValue);

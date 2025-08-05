@@ -28,11 +28,15 @@ import {
   fetchBrands,
   resetBrands,
   toggleBrandLike,
+  toggleBrandShortList,
 } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 import { likeApiFunction } from "../../Api/likeApi";
-import { toggleHomeCardLike } from "../../Redux/Slices/TopCardFetchingSlice";
+import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
 import { token } from "../../Utils/autherId";
+import { RiBookmark3Fill, RiBookMarkedFill } from "react-icons/ri";
+import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
+import { handleShortList } from "../../Api/shortListApi.jsx";
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -166,19 +170,30 @@ function TopBrandVdoCards() {
     }
   };
 
- const handleLikeClick = async(brandId) => {
-  if (!token) {
-    setShowLogin(true);
-    return;
-  }
-  dispatch(toggleBrandLike(brandId));
-  dispatch(toggleHomeCardLike(brandId));
-  await likeApiFunction(brandId)
-};
+  const handleLikeClick = async (brandId) => {
+    if (!token) {
+      setShowLogin(true);
+      return;
+    }
+    dispatch(toggleBrandLike(brandId));
+    dispatch(toggleHomeCardLike(brandId));
+    await likeApiFunction(brandId);
+  };
+
+  const handleToggleShortList = async (brandId) => {
+    if (!token) {
+      setShowLogin(true);
+      return;
+    }
+    
+      dispatch(toggleBrandShortList(brandId));
+      dispatch(toggleHomeCardShortlist(brandId))
+      await handleShortList(brandId);
+    
+  };
 
   const handleApply = (brand) => {
     postView(brand.uuid);
-    // Implement your brand dialog functionality here
     dispatch(openBrandDialog(brand));
   };
 
@@ -346,7 +361,6 @@ function TopBrandVdoCards() {
                     cursor: "pointer",
                     backgroundColor: "#000",
                     overflow: "hidden",
-                  
                   }}
                   onClick={() => togglePlayPause(0)}
                 >
@@ -369,7 +383,7 @@ function TopBrandVdoCards() {
                         sx={{
                           textTransform: "none",
                           color:
-                            theme.palette.mode === "dark" ? "#fff" : "#fff",
+                            theme.palette.mode === "dark" ? "black" : "black",
                           borderColor:
                             theme.palette.mode === "dark"
                               ? "#43ea5e"
@@ -418,7 +432,7 @@ function TopBrandVdoCards() {
                           sx={{
                             textTransform: "none",
                             color:
-                              theme.palette.mode === "dark" ? "#fff" : "#fff",
+                              theme.palette.mode === "dark" ? "black" : "black",
                             borderColor:
                               theme.palette.mode === "dark"
                                 ? "#ffb74d"
@@ -458,7 +472,7 @@ function TopBrandVdoCards() {
                           sx={{
                             textTransform: "none",
                             color:
-                              theme.palette.mode === "dark" ? "#fff" : "#fff",
+                              theme.palette.mode === "dark" ? "black" : "black",
                             borderColor:
                               theme.palette.mode === "dark"
                                 ? "#ffb74d"
@@ -480,7 +494,7 @@ function TopBrandVdoCards() {
                       )}
                     </Box>
                   )}
-                  <video
+                  {/* <video
                     ref={(el) => (videoRefs.current[0] = el)}
                     loading="lazy"
                     src={mainBrand?.franchiseVideos}
@@ -497,6 +511,19 @@ function TopBrandVdoCards() {
                     playsInline
                     onPlay={() => handleVideoPlay(0)}
                     onPause={() => handleVideoPause(0)}
+                  /> */}
+                  <VideoPlayer
+                    id={mainBrand.uuid}
+                    videoUrl={mainBrand.franchiseVideos}
+                    poster={mainBrand.logo}
+                    width="100%"
+                    height="100%"
+                    objectFit="contain"
+                    onPlay={() => handleVideoPlay(0)}
+                    onPause={() => handleVideoPause(0)}
+                    autoPlay={true}
+                    loop={true}
+                    muted={true}
                   />
                 </Box>
 
@@ -524,22 +551,47 @@ function TopBrandVdoCards() {
                       alignItems="center"
                       sx={{ minWidth: 0, flex: 1, paddingBottom: "10px" }}
                     >
-                      <Avatar
-                        onClick={() => handleApply(mainBrand)}
-                        src={mainBrand.logo}
-                        alt={mainBrand.brandname}
-                        sx={{
-                          width: 50,
-                          height: 50,
-                          border: `2px solid ${
-                            theme.palette.mode === "dark"
-                              ? "#ffb74d"
-                              : "#f57c00"
-                          }`,
-                          boxShadow: theme.shadows[2],
-                          cursor: "pointer",
-                        }}
-                      />
+                      {isMobile && (
+                        <Avatar
+                          onClick={() => handleApply(mainBrand)}
+                          src={mainBrand.logo}
+                          alt={mainBrand.brandname}
+                          sx={{
+                            width: 50,
+                            height: 50,
+                            border: `2px solid ${
+                              theme.palette.mode === "dark"
+                                ? "#ffb74d"
+                                : "#f57c00"
+                            }`,
+                            boxShadow: theme.shadows[2],
+                            cursor: "pointer",
+                          }}
+                        />
+                      )}
+                      {!isMobile && (
+                        <Box
+                          component="img"
+                          onClick={() => handleApply(mainBrand)}
+                          src={mainBrand.logo}
+                          alt={mainBrand.brandname}
+                          sx={{
+                            width: 100,
+                            height: 50,
+                            border: `2px solid ${
+                              theme.palette.mode === "dark"
+                                ? "#ffb74d"
+                                : "#f57c00"
+                            }`,
+                            boxShadow: theme.shadows[2],
+                            cursor: "pointer",
+                            borderRadius: 0,
+                            objectFit: "contain",
+                            display: "block",
+                          }}
+                        />
+                      )}
+
                       <Box sx={{ minWidth: 0, flex: 1 }}>
                         <Box display="flex" alignItems="center">
                           <Typography
@@ -577,10 +629,7 @@ function TopBrandVdoCards() {
                                     isLoading || likeProcessing[mainBrand.uuid]
                                   }
                                   sx={{
-                                    color: mainBrand.isLiked ? 'red' : 'gray',
-                                    '&:hover': {
-                                      // color: mainBrand.isLiked ? 'darkred' : 'darkgray',
-                                    }
+                                    color: mainBrand.isLiked ? "red" : "gray",
                                   }}
                                 >
                                   {mainBrand.isLiked ? (
@@ -629,6 +678,7 @@ function TopBrandVdoCards() {
                             variant="contained"
                             onClick={() => handleApply(mainBrand)}
                             sx={{
+                              width: "35vh",
                               fontWeight: 800,
                               textTransform: "none",
                               color: "#fff",
@@ -678,31 +728,49 @@ function TopBrandVdoCards() {
                         )}
 
                         {!isMobile && (
-                          <Tooltip
-                            title={
-                              mainBrand.isLiked
-                                ? "Remove from favorites"
-                                : "Add to favorites"
-                            }
-                          >
-                            <IconButton
-                              onClick={() =>
-                                handleLikeClick(
-                                  mainBrand.uuid,
-                                  mainBrand.isLiked
-                                )
-                              }
-                              disabled={
-                                isLoading || likeProcessing[mainBrand.uuid]
+                          <>
+                            <Tooltip
+                              title={
+                                mainBrand.isLiked
+                                  ? "Remove from favorites"
+                                  : "Add to favorites"
                               }
                             >
-                              {mainBrand.isLiked ? (
-                                <Favorite color="error" />
-                              ) : (
-                                <FavoriteBorder />
-                              )}
-                            </IconButton>
-                          </Tooltip>
+                              <IconButton
+                                onClick={() =>
+                                  handleLikeClick(
+                                    mainBrand.uuid,
+                                    mainBrand.isLiked
+                                  )
+                                }
+                                disabled={
+                                  isLoading || likeProcessing[mainBrand.uuid]
+                                }
+                              >
+                                {mainBrand.isLiked ? (
+                                  <Favorite color="error" />
+                                ) : (
+                                  <FavoriteBorder />
+                                )}
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip
+                              title={
+                                mainBrand.isShortListed
+                                  ? "Remove from shortlist"
+                                  : "Add to shortlist"
+                              }
+                            >
+                              <IconButton
+                                onClick={() => handleToggleShortList(mainBrand.uuid)}
+                                sx={{
+                                  color: mainBrand.isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                                }}
+                              >
+                                <RiBookmark3Fill size={21} />
+                              </IconButton>
+                            </Tooltip>
+                          </>
                         )}
                       </Stack>
                     </Stack>
@@ -814,7 +882,7 @@ function TopBrandVdoCards() {
                   }}
                   onClick={() => togglePlayPause(i + 1)}
                 >
-                  <video
+                  {/* <video
                     ref={(el) => (videoRefs.current[i + 1] = el)}
                     loading="lazy"
                     src={brand.franchiseVideos}
@@ -830,6 +898,19 @@ function TopBrandVdoCards() {
                     playsInline
                     onPlay={() => handleVideoPlay(i + 1)}
                     onPause={() => handleVideoPause(i + 1)}
+                  /> */}
+                  <VideoPlayer
+                    id={mainBrand.uuid}
+                    videoUrl={brand.franchiseVideos}
+                    poster={brand.logo}
+                    width="100%"
+                    height="100%"
+                    objectFit="contain"
+                    onPlay={() => handleVideoPlay(i + 1)}
+                    onPause={() => handleVideoPause(i + 1)}
+                    autoPlay={true}
+                    loop={true}
+                    muted={true}
                   />
                   <Chip
                     label={i === 0 ? "Trending" : "Popular"}
@@ -847,26 +928,7 @@ function TopBrandVdoCards() {
                       fontSize: "0.65rem",
                     }}
                   />
-                  <IconButton
-                    size="small"
-                    sx={{
-                      position: "absolute",
-                      top: "50%",
-                      left: "50%",
-                      transform: "translate(-50%, -50%)",
-                      color: "#fff",
-                      backgroundColor: "rgba(0,0,0,0.5)",
-                      "&:hover": {
-                        backgroundColor: "rgba(0,0,0,0.7)",
-                      },
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      togglePlayPause(i + 1);
-                    }}
-                  >
-                    {activeVideo === i + 1 ? <PauseCircle /> : <PlayCircle />}
-                  </IconButton>
+                 
                 </Box>
                 <CardContent
                   sx={{
@@ -886,10 +948,119 @@ function TopBrandVdoCards() {
                         gap: 0.5,
                       }}
                     >
+                      {!isMobile && (
+                        <Box
+                          component="img"
+                          onClick={() => handleApply(brand)}
+                          src={brand.logo}
+                          alt={brand.brandname}
+                          sx={{
+                            width: 100,
+                            height: 50,
+                            border: `2px solid ${
+                              theme.palette.mode === "dark"
+                                ? "#ffb74d"
+                                : "#f57c00"
+                            }`,
+                            boxShadow: theme.shadows[2],
+                            cursor: "pointer",
+                            borderRadius: 0,
+                            objectFit: "contain",
+                            display: "block",
+                          }}
+                        />
+                      )}
+                      {isMobile && (
+                        <Box
+                          component="img"
+                          onClick={() => handleApply(brand)}
+                          src={brand.logo}
+                          alt={brand.brandname}
+                          sx={{
+                            width: 80,
+                            height: 50,
+                            border: `2px solid ${
+                              theme.palette.mode === "dark"
+                                ? "#ffb74d"
+                                : "#f57c00"
+                            }`,
+                            boxShadow: theme.shadows[2],
+                            cursor: "pointer",
+                            borderRadius: 0,
+                            objectFit: "contain",
+                            display: "block",
+                          }}
+                        />
+                      )}
+
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                        <Tooltip
+                          title={
+                            brand.isLiked
+                              ? "Remove from favorites"
+                              : "Add to favorites"
+                          }
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              handleLikeClick(brand.uuid, brand.isLiked)
+                            }
+                            disabled={isLoading || likeProcessing[brand.uuid]}
+                            sx={{
+                              color: brand.isLiked ? "red" : "gray",
+                            }}
+                          >
+                            {brand.isLiked ? (
+                              <Favorite fontSize="small" />
+                            ) : (
+                              <FavoriteBorder fontSize="small" />
+                            )}
+                          </IconButton>
+                        </Tooltip>
+
+                        <Tooltip
+                          title={
+                            brand.isShortListed
+                              ? "Remove from shortlist"
+                              : "Add to shortlist"
+                          }
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() => handleToggleShortList(brand.uuid)}
+                            sx={{
+                              color: brand.isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                            }}
+                          >
+                            <RiBookmark3Fill size={18} />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </Box>
+                   
+                    <Box
+                      sx={{
+                        maxHeight: 80,
+                        overflowY: "auto",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.8,
+                        scrollbarWidth: "thin",
+                        "&::-webkit-scrollbar": {
+                          width: "4px",
+                        },
+                        "&::-webkit-scrollbar-thumb": {
+                          backgroundColor: "#ccc",
+                          borderRadius: "2px",
+                        },
+                      }}
+                    >
                       <Tooltip title={brand.brandname}>
                         <Typography
                           variant={isMobile ? "caption" : "body1"}
                           color="black"
+                          mt={1}
                           noWrap={false}
                           sx={{
                             flex: 1,
@@ -902,94 +1073,38 @@ function TopBrandVdoCards() {
                           {brand.brandname}
                         </Typography>
                       </Tooltip>
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          handleLikeClick(brand.uuid, brand.isLiked)
-                        }
-                        disabled={isLoading || likeProcessing[brand.uuid]}
-                        sx={{
-                          color: brand.isLiked ? 'red' : 'gray',
-                          '&:hover': {
-                            // color: brand.isLiked ? 'darkred' : 'darkgray',
-                            // backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                          },
-                        }}
-                      >
-                        {brand.isLiked ? (
-                          <Favorite fontSize="small" />
-                        ) : (
-                          <FavoriteBorder fontSize="small" />
-                        )}
-                      </IconButton>
-                    </Box>
-
-                    <Typography
-                      variant="caption"
-                      color="Black"
-                      sx={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        mt: 1,
-                        fontSize: "0.7rem",
-                        lineHeight: 1.1,
-                      }}
-                    >
-                      Categories: {brand.brandCategories?.child}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="Black"
-                      sx={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        mt: 1.2,
-                        fontSize: "0.7rem",
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      Investment: {brand.fico?.investmentRange}
-                    </Typography>
-                    {!isMobile && (
                       <Typography
                         variant="caption"
                         color="Black"
-                        sx={{
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          mt: 1.2,
-                          fontSize: "0.7rem",
-                          lineHeight: 1.4,
-                        }}
+                        sx={{ fontSize: "0.7rem", lineHeight: 1.1 }}
+                      >
+                        Categories: {brand.brandCategories?.child}
+                      </Typography>
+
+                      <Typography
+                        variant="caption"
+                        color="Black"
+                        sx={{ fontSize: "0.7rem", lineHeight: 1.4 }}
+                      >
+                        Investment: {brand.fico?.investmentRange}
+                      </Typography>
+
+                      <Typography
+                        variant="caption"
+                        color="Black"
+                        sx={{ fontSize: "0.7rem", lineHeight: 1.4 }}
                       >
                         Area: {brand.fico?.areaRequired}
                       </Typography>
-                    )}
-                    <Typography
-                      variant="caption"
-                      color="Black"
-                      sx={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        mt: 1.2,
-                        fontSize: "0.7rem",
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      Model: {brand.fico?.franchiseModel}
-                    </Typography>
+
+                      <Typography
+                        variant="caption"
+                        color="Black"
+                        sx={{ fontSize: "0.7rem", lineHeight: 1.5 }}
+                      >
+                        Model: {brand.fico?.franchiseModel}
+                      </Typography>
+                    </Box>
                   </Box>
 
                   <Button

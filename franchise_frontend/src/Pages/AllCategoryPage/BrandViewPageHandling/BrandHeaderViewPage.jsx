@@ -23,10 +23,12 @@ import {
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import ShareDialogActions from "../ShareDialogActions";
+import { RiBookmark3Fill } from "react-icons/ri";
  
 const BrandHeader = ({
   brand,
   isMobile,
+  localIsLiked,
   isProcessingLike,
   shortListed,
   handleLikeClick,
@@ -37,7 +39,6 @@ const BrandHeader = ({
   toggleDrawer,
   getOutletRange,
 }) => {
-  console.log("Brand Header Data:", brand);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -157,7 +158,7 @@ const BrandHeader = ({
                     ) : (
                       <Favorite
                         sx={{
-                          color: brand?.isLiked
+                          color: localIsLiked
                             ? "#f44336"
                             : "rgba(0, 0, 0, 0.23)",
                         }}
@@ -165,12 +166,12 @@ const BrandHeader = ({
                     )}
                   </IconButton>
                   <IconButton
-                    onClick={() => handleToggleShortList(shortListed)}
+                    onClick={() => handleToggleShortList(brand.uuid)}
                     sx={{
                       color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
                     }}
                   >
-                    <PlaylistAddCheckCircleOutlined />
+                    <RiBookmark3Fill />
                   </IconButton>
                   <IconButton
                     onClick={handleOpenShareClick}

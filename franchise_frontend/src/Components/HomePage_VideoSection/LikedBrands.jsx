@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -13,14 +13,21 @@ import { ArrowRight, ArrowBack, ArrowForward, Close } from "@mui/icons-material"
 import axios from 'axios';
 import { useSelector,useDispatch } from 'react-redux';
 import HomePageBrandCard from './HomePageBrandCard';
- import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
- 
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+
+const CARD_DIMENSIONS = {
+  mobile: { width: 280, height: 520 },
+  tablet: { width: 320, height: 560 },
+  desktop: { width: 327, height: 500 },
+};
+
 const LikedBrands = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
+   const scrollRequestRef = useRef(null);
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
@@ -30,12 +37,92 @@ const LikedBrands = () => {
   const [error, setError] = useState(null);
   const [removeMsg, setRemoveMsg] = useState("");
  const dispatch = useDispatch();
+ 
   const userId = useSelector((state) => state.auth?.investorUUID) || localStorage.getItem("id");
   const accessToken = useSelector((state) => state.auth?.AccessToken);
   const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID")
   if (!id) {
     return null;
   }
+
+   const dimensions = useMemo(() => {
+    if (isMobile) return CARD_DIMENSIONS.mobile;
+    if (isTablet) return CARD_DIMENSIONS.tablet;
+    return CARD_DIMENSIONS.desktop;
+  }, [isMobile, isTablet]);
+
+    const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+
+    const smoothScrollTo = useCallback((target, immediate = false) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    if (scrollRequestRef.current) cancelAnimationFrame(scrollRequestRef.current);
+
+    const start = container.scrollLeft;
+    const change = target - start;
+    const duration = immediate ? 0 : 500;
+    const startTime = performance.now();
+
+    const animateScroll = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = easeInOutQuad(progress);
+      container.scrollLeft = start + change * ease;
+
+      if (progress < 1) {
+        scrollRequestRef.current = requestAnimationFrame(animateScroll);
+      } else {
+        handleScroll();  // update shadows
+      }
+    };
+
+    scrollRequestRef.current = requestAnimationFrame(animateScroll);
+  }, []);
+
+  // ✏️ Added: calculate scroll distance based on card width
+  const getScrollDistance = useCallback(() => {
+    return dimensions.width + (isMobile ? 16 : 24);
+  }, [dimensions.width, isMobile]);
+
+  // ✏️ Changed: handlePrevClick to use smoothScrollTo
+  const handlePrevClick = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const distance = getScrollDistance();
+    const newScroll = Math.max(container.scrollLeft - distance, 0);
+    smoothScrollTo(newScroll);
+  }, [getScrollDistance, smoothScrollTo]);
+
+  // ✏️ Changed: handleNextClick to use smoothScrollTo
+  const handleNextClick = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const distance = getScrollDistance();
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    const newScroll = Math.min(container.scrollLeft + distance, maxScroll);
+    smoothScrollTo(newScroll);
+  }, [getScrollDistance, smoothScrollTo]);
+
+  // ✏️ Changed: handleScroll to update shadows
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    setShowStartShadow(container.scrollLeft > 10);
+    setShowEndShadow(container.scrollLeft < container.scrollWidth - container.clientWidth - 10);
+  }, []);
+
+  // ✏️ Changed: useEffect to attach/detach scroll listener
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      handleScroll();
+    }
+    return () => {
+      container?.removeEventListener("scroll", handleScroll);
+      if (scrollRequestRef.current) cancelAnimationFrame(scrollRequestRef.current);
+    };
+  }, [handleScroll]);
  
   // Fetch liked brands data
   const fetchLikedBrands = useCallback(async () => {
@@ -45,13 +132,13 @@ const LikedBrands = () => {
         {
           headers: { Authorization: `Bearer ${accessToken}` }  
       });
-      console.log("=== :",response.data)
+      // console.log("=== :",response.data)
  
        let brandsData =  response.data.data;
 
       setBrands(brandsData);
  
-      console.log("xxxxx : ",brandsData.brands.length)
+      // console.log("xxxxx : ",brandsData.brands.length)
       setError(null);
     } catch (err) {
       console.error('Error fetching brands:', err);
@@ -99,52 +186,9 @@ const LikedBrands = () => {
  
   const handleApply = useCallback((brand) => {
     // Your apply logic here
-    console.log("Apply for brand:", brand);
+    // console.log("Apply for brand:", brand);
     dispatch(openBrandDialog(brand));
-  }, []);
- 
-  const handlePrevClick = useCallback(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: -300,
-        behavior: 'smooth'
-      });
-    }
-  }, []);
- 
-  const handleNextClick = useCallback(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: 300,
-        behavior: 'smooth'
-      });
-    }
-  }, []);
- 
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
- 
-    const handleScroll = () => {
-      setShowStartShadow(container.scrollLeft > 0);
-      setShowEndShadow(
-        container.scrollLeft + container.clientWidth < container.scrollWidth - 1
-      );
-    };
- 
-    container.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
- 
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-    };
-  }, [brands]); // Re-run when brands change
- 
-  const dimensions = {
-    mobile: { width: 280, height: 520 },
-    tablet: { width: 320, height: 560 },
-    desktop: { width: 327, height: 500 },
-  }[isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'];
+  }, [dispatch]);
  
   if (loading) {
     return (

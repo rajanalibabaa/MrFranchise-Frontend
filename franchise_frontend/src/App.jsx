@@ -47,6 +47,7 @@ import BrandDetailsControl from './Components/BrandProfile_Component/BrandDashbo
 import FranchiseDetailsControl from './Components/BrandProfile_Component/BrandDashboardController/FranchiseDetailsControl.jsx';
 import ExpansionLocationControl from './Components/BrandProfile_Component/BrandDashboardController/ExpansionLocationControl.jsx';
 import UploadsControl from './Components/BrandProfile_Component/BrandDashboardController/UploadsControl.jsx';
+import { VideoControllerProvider } from './services/VideoControllerMedia/VideHandlingFunctions.jsx';
 // import AllBrandsApi from './Api/AllBrandsApi.jsx';
 
 function App() {
@@ -54,7 +55,28 @@ function App() {
   const AccessToken = localStorage.getItem("accessToken");
   // console.log("Access Token:", AccessToken);
 
-  
+  // hide the right click disable 
+//   useEffect(() => {
+//   const disableRightClick = (e) => e.preventDefault();
+//   document.addEventListener("contextmenu", disableRightClick);
+//   return () => document.removeEventListener("contextmenu", disableRightClick);
+// }, []);
+
+
+useEffect(() => {
+  const disableShortcuts = (e) => {
+    if (
+      (e.ctrlKey && (e.key === 'c' || e.key === 's' || e.key === 'u' || e.key === 'p')) ||
+      (e.metaKey && (e.key === 'c' || e.key === 's' || e.key === 'u' || e.key === 'p'))
+    ) {
+      e.preventDefault();
+    }
+  };
+
+  document.addEventListener('keydown', disableShortcuts);
+  return () => document.removeEventListener('keydown', disableShortcuts);
+}, []);
+
 
   useEffect(() => {
     const logoutTimestamp = localStorage.getItem("logoutTimestamp");
@@ -93,6 +115,7 @@ function App() {
   return (
     <>
     {/* <AllBrandsApi /> */}
+    <VideoControllerProvider>
    <GlobalLoader/>
         <Box sx={{ position: "fixed", top: 0, width: "100%", zIndex: 1100 }}>
         {/* <Navbar /> */}
@@ -156,6 +179,7 @@ function App() {
           
         </Routes>
       
+   </VideoControllerProvider>
     </>
   );
 }

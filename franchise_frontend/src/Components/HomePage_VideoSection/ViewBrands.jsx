@@ -27,7 +27,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { api } from "../../Api/api";
-import { openBrandDialog } from "../../Hooks/Fetchbrands";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice";
 import { Visibility } from "@mui/icons-material";
 import { handleShortList } from "../../Api/shortListApi";
  

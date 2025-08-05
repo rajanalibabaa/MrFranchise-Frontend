@@ -363,24 +363,38 @@ function BrandList() {
                 Showing {brands.length} of {pagination.total} brands
               </Typography>
 
-              <Grid container spacing={3}>
-                {brands.map((brand) => (
-                  <Grid item xs={12} sm={6} md={4} lg={3} key={brand.uuid}>
-                    <Suspense fallback={<BrandCardSkeleton />}>
-                      <BrandCard
-                        brand={brand}
-                        handleLikeClick={handleLikeClick}
-                        likeProcessing={likeProcessing}
-                        showLogin={showLogin}
-                        onShowLogin={setShowLogin}
-                        isSelectedForComparison={selectedForComparison.some(b => b.uuid === brand.uuid)}
-                        onToggleBrandComparison={toggleBrandComparison}
-                        maxComparisonReached={selectedForComparison.length >= 3}
-                      />
-                    </Suspense>
-                  </Grid>
-                ))}
-              </Grid>
+<Box
+  sx={{
+    display: "grid",
+    gridTemplateColumns: {
+      xs: "repeat(1, 1fr)", // Mobile: 1 column
+      sm: "repeat(1, 1fr)", // Small devices: 2 columns
+      md: "repeat(3, 1fr)", // Tablets: 3 columns
+      lg: "repeat(3, 1fr)", // Desktop: 4 columns
+      xl: "repeat(4, 1fr)"  // Extra large screens: 5 columns
+    },
+    gap: 1, // theme spacing (8px * 2 = 16px)
+  }}
+>
+  {brands.map((brand) => (
+    <Box key={brand.uuid}>
+      <Suspense fallback={<BrandCardSkeleton />}>
+        <BrandCard
+          brand={brand}
+          handleLikeClick={handleLikeClick}
+          likeProcessing={likeProcessing}
+          showLogin={showLogin}
+          onShowLogin={setShowLogin}
+          isSelectedForComparison={selectedForComparison.some(b => b.uuid === brand.uuid)}
+          onToggleBrandComparison={toggleBrandComparison}
+          maxComparisonReached={selectedForComparison.length >= 3}
+        />
+      </Suspense>
+    </Box>
+  ))}
+</Box>
+
+
 
               {/* Pagination */}
              {pagination.totalPages > 1 && (

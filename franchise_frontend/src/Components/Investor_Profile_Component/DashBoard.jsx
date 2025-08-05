@@ -23,7 +23,7 @@ import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import img from "../../assets/images/brandLogo.jpg";
 import { api } from "../../Api/api";
-import { openBrandDialog } from "../../Hooks/Fetchbrands";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice";
 
 // Memoized StatCard component to prevent unnecessary re-renders
 const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
@@ -162,7 +162,7 @@ const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, 
   const brandName = item.brandDetails?.brandName || "Unnamed Brand";
   const brandLogo = item.uploads?.brandLogo?.[0] || img;
 
-  console.log('===',isLiked);
+  // console.log('===',isLiked);
   
   return (
     <Box sx={{ display: "flex", justifyContent: "center", alignContent: "center" }}>

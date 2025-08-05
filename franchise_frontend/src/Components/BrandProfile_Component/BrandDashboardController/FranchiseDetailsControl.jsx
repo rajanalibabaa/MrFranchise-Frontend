@@ -160,7 +160,7 @@ const FranchiseDetailsControl = ({
   const handleSave = () => {
     if (validateForm()) {
       // Here you would typically send the data to your API
-      console.log('Saving data:', data);
+      // console.log('Saving data:', data);
       setIsEditing(false);
     }
   };

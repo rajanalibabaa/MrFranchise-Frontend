@@ -388,4 +388,3 @@ export const openBrandDialog = (brand) => {
     }, 1000); // check every 1s
   }
 };
-
