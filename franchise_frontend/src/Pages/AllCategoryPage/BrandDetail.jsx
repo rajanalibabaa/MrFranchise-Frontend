@@ -28,19 +28,13 @@ import ApplyDrawer from "./BrandViewPageHandling/ApplyDrawerFormViewPage.jsx";
 import BackToTopButton from "./BrandViewPageHandling/BackToTopButtonViewPage.jsx";
 import FloatingApplyButton from "./BrandViewPageHandling/FloatingApplyButtonViewPage.jsx";
 import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx";
-import SimilarBrands from "../../Components/HomePage_VideoSection/SimilarBrands.jsx";
+import SimilarBrands from "../../Components/HomePage_VideoSection/SimilarBrands.jsx"
 
 // Hooks
 import { useBrand } from "../../Hooks/Fetchbrands.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
 import OverviewTab from "./OverviewTab.jsx";
-import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
-import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice.jsx";
-import { likeApiFunction } from "../../Api/likeApi.jsx";
-import { useDispatch } from "react-redux";
-import { token } from "../../Utils/autherId.jsx";
-import LoginPage from "../LoginPage/LoginPage.jsx";
 
 const BrandDetails = ({ brandData }) => {
   const theme = useTheme();
@@ -69,9 +63,9 @@ const BrandDetails = ({ brandData }) => {
     districts: [],
     cities: [],
   });
-  const [localIsLiked, setLocalIsLiked] = useState(brandData[0].isLiked);
+  const [localIsLiked, setLocalIsLiked] = useState(brandData.isLiked);
   const [isProcessingLike, setIsProcessingLike] = useState(false);
-  const [shortListed, setShortListed] = useState(brandData[0].isShortListed);
+  const [shortListed, setShortListed] = useState(brandData);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -84,9 +78,6 @@ const BrandDetails = ({ brandData }) => {
     planToInvest: "",
     readyToInvest: "",
   });
-
-const [showLogin, setShowLogin] = useState(false);
-  const dispatch = useDispatch()
 
   // Memoized data
   const selectedBrand = brandData || {};
@@ -120,7 +111,7 @@ const [showLogin, setShowLogin] = useState(false);
   if (!selectedBrand || selectedBrand.length === 0) return [];
   return selectedBrand[0]?.uploads?.franchiseVideos || [];
 }, [selectedBrand]);
- console.log("allVideos:", allVideos);
+//  console.log("allVideos:", allVideos);
  
   const allImages = useMemo(
     () => [
@@ -138,34 +129,45 @@ const [showLogin, setShowLogin] = useState(false);
     setAnchorEl(event.currentTarget);
   }, []);
 
-   const handleLikeClick = async () => {
-    console.log("ppppppp :",brandData[0].uuid)
+  const handleLikeClick = useCallback(() => {
+    if (isProcessingLike) return;
 
-    const brandId = brandData[0].uuid
-      if (!token) {
-        setShowLogin(true);
-        return;
+    setIsProcessingLike(true);
+    const newLikeStatus = !localIsLiked;
+
+    // Optimistic update
+    setLocalIsLiked(newLikeStatus);
+
+    toggleLike(
+      { brandId: brandData.uuid, isLiked: brandData.isLiked },
+      {
+        onError: () => {
+          // Revert on error
+          setLocalIsLiked(!newLikeStatus);
+        },
+        onSettled: () => {
+          setIsProcessingLike(false);
+        },
       }
-      dispatch(toggleBrandLike(brandId));
-      dispatch(toggleHomeCardLike(brandId));
-      await likeApiFunction(brandId);
-      setLocalIsLiked(!localIsLiked)
-    };
+    );
+  }, [
+    brandData.uuid,
+    brandData.isLiked,
+    isProcessingLike,
+    localIsLiked,
+    toggleLike,
+  ]);
 
- const handleToggleShortList = async () => {
-  const brandId = brandData[0].uuid
-     if (!token) {
-
-       setShowLogin(true);
-       return;
-     }
-     
-       dispatch(toggleBrandShortList(brandId));
-       dispatch(toggleHomeCardShortlist(brandId))
-       await handleShortList(brandId);
-     setShortListed(!shortListed)
-   };
- 
+  const handleToggleShortList = useCallback(async (brandData) => {
+    try {
+      const response = await handleShortList(brandData);
+      if (response.success) {
+        setShortListed((prev) => !prev);
+      }
+    } catch (error) {
+      console.error("Error toggling shortlist:", error);
+    }
+  }, []);
 
   const toggleDrawer = useCallback(
     (open) => (event) => {
@@ -331,7 +333,7 @@ const [showLogin, setShowLogin] = useState(false);
 useEffect(() => {
   const locations =
     selectedBrand[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
-console.log("locations",locations)
+// console.log("locations",locations)
   if (locations.length > 0) {
     const states = [
       ...new Set(locations.map((loc) => loc.state).filter(Boolean)),
@@ -526,8 +528,8 @@ useEffect(() => {
         />
       </Box>
 
-      <LikedBrands />
-      <SimilarBrands brandData={selectedBrand} />
+      {/* <LikedBrands /> */}
+      <SimilarBrands brandData={brandData}/>
 
       <Box
         sx={{
@@ -556,11 +558,6 @@ useEffect(() => {
 
       <BackToTopButton show={showBackToTop} isMobile={isMobile} />
       <Footer />
-
-       {/* Login Dialog */}
-      {showLogin && (
-        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
-      )}
     </>
   );
 };
