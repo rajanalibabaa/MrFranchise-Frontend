@@ -39,7 +39,7 @@ export const fetchFilteredBrands = createAsyncThunk(
       if (modelType) params.append('modelType', modelType);
  
       const response = await axios.post(`${API_BASE_URL}filter/getAllBrandsAndFilter?${params.toString()}`);
-     
+     console.log(' filte response', response.data.data)
       return {
         brands: response.data.data?.brands || [],
         pagination: response.data.data?.pagination || {

@@ -63,7 +63,11 @@ export const VideoPlayer = ({
       observer.observe(containerRef.current);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+    };
   }, []);
 
   // Load video when visible
@@ -93,7 +97,7 @@ export const VideoPlayer = ({
     console.error('Video error');
     setHasError(true);
     setIsBuffering(false);
-    setIsLoaded(true); // Show controls even if error
+    setIsLoaded(true);
   }, []);
 
   // Register/unregister video
@@ -110,6 +114,8 @@ export const VideoPlayer = ({
 
   // Play/pause handler
   const togglePlayPause = useCallback(async () => {
+    if (!videoRef.current) return;
+    
     if (isPlaying) {
       pauseVideo(id);
     } else {
@@ -135,17 +141,21 @@ export const VideoPlayer = ({
 
   // Fullscreen handler
   const toggleFullscreen = useCallback(() => {
+    if (!containerRef.current) return;
+    
     if (!isFullscreen) {
-      containerRef.current?.requestFullscreen?.().catch(console.error);
+      containerRef.current.requestFullscreen?.().catch(console.error);
     } else {
-      document.exitFullscreen?.();
+      document.exitFullscreen?.().catch(console.error);
     }
   }, [isFullscreen]);
 
   // PIP handler with proper error handling
   const togglePipMode = useCallback(async () => {
+    if (!videoRef.current) return;
+    
     try {
-      if (!pipMode && document.pictureInPictureEnabled && videoRef.current) {
+      if (!pipMode && document.pictureInPictureEnabled) {
         await videoRef.current.requestPictureInPicture();
         setPipMode(true);
       } else if (document.pictureInPictureElement) {
@@ -179,7 +189,7 @@ export const VideoPlayer = ({
 
     // Fullscreen change listener
     const handleFullscreenChange = () => {
-      setIsFullscreen(document.fullscreenElement === containerRef.current);
+      setIsFullscreen(!!document.fullscreenElement);
     };
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
@@ -190,6 +200,13 @@ export const VideoPlayer = ({
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, [handleLoadedMetadata, handleTimeUpdate, id, pauseVideo, handleError]);
+
+  // Helper function to format time (mm:ss)
+  const formatTime = useCallback((seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  }, []);
 
   return (
     <>
@@ -303,7 +320,7 @@ export const VideoPlayer = ({
               <Slider
                 value={progress}
                 onChange={(e, newValue) => {
-                  if (videoRef.current) {
+                  if (videoRef.current && duration > 0) {
                     videoRef.current.currentTime = (newValue / 100) * duration;
                   }
                 }}
@@ -390,25 +407,27 @@ export const VideoPlayer = ({
 
               <Box flexGrow={1} />
 
-              <Tooltip title="Picture-in-Picture">
-                <IconButton 
-                  onClick={togglePipMode} 
-                  size="small" 
-                  disabled={!document.pictureInPictureEnabled || hasError}
-                  sx={{ 
-                    color: 'white',
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.7)'
-                    },
-                    '&:disabled': {
-                      opacity: 0.5
-                    }
-                  }}
-                >
-                  <PictureInPicture fontSize="small" />
-                </IconButton>
-              </Tooltip>
+              {document.pictureInPictureEnabled && (
+                <Tooltip title="Picture-in-Picture">
+                  <IconButton 
+                    onClick={togglePipMode} 
+                    size="small" 
+                    disabled={hasError}
+                    sx={{ 
+                      color: 'white',
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)'
+                      },
+                      '&:disabled': {
+                        opacity: 0.5
+                      }
+                    }}
+                  >
+                    <PictureInPicture fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
 
               <Tooltip title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}>
                 <IconButton 
@@ -491,10 +510,3 @@ export const VideoPlayer = ({
     </>
   );
 };
-
-// Helper function to format time (mm:ss)
-function formatTime(seconds) {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-}

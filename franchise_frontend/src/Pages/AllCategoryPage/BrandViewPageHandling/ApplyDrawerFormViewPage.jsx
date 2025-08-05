@@ -144,7 +144,7 @@ const ApplyDrawer = ({
                             name="district"
                             value={formData.district}
                             onChange={handleChange}
-                            required
+                            // required
                             variant="outlined"
                             size="small"
                             disabled={!formData.state}
@@ -166,7 +166,7 @@ const ApplyDrawer = ({
                             name="city"
                             value={formData.city}
                             onChange={handleChange}
-                            required
+                            // required
                             variant="outlined"
                             size="small"
                             disabled={!formData.district}
