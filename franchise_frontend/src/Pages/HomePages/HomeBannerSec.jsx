@@ -69,9 +69,9 @@ const dynamicComponents = {
   TopRestaurantsFranchise: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/TopRestaurantsFranchise.jsx")
   )),
-//   FindFranchiseLocations: withSuspense(React.lazy(() =>
-//     import("../../Components/HomePage_VideoSection/FindFranchiseLocations.jsx")
-//   )),
+  FindFranchiseLocations: withSuspense(React.lazy(() =>
+    import("../../Components/HomePage_VideoSection/FindFranchiseLocations.jsx")
+  )),
   ToTrendingBrands: withSuspense(React.lazy(() =>
     import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
   )),
@@ -156,11 +156,11 @@ const pageConfig = {
       background: "white",
       dividerColor: "linear-gradient(45deg, #FF9800, #FF5722)",
     },
-    // {
-    //   component: "FindFranchiseLocations",
-    //   background: "#fffaf7",
-    //   dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
-    // },
+    {
+      component: "FindFranchiseLocations",
+      background: "#fffaf7",
+      dividerColor: "linear-gradient(45deg, #FF5722, #FF9800)",
+    },
     {
       component: "ToTrendingBrands",
       title: "Trending Brands",
