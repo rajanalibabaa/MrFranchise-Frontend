@@ -1,8 +1,11 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
- 
+import { userId } from '../../Utils/autherId';
+
 const API_BASE_URL = 'http://localhost:5000/api/v1/';
- 
+
+const id = userId
+
 export const fetchFilteredBrands = createAsyncThunk(
   'filterBrands/fetchFilteredBrands',
   async (filters, { rejectWithValue }) => {
@@ -10,7 +13,7 @@ export const fetchFilteredBrands = createAsyncThunk(
       const {
         page = 1,
         limit = 20,
-        id,
+     
         maincat,
         subcat,
         childcat,
@@ -22,7 +25,7 @@ export const fetchFilteredBrands = createAsyncThunk(
         investmentRange,
         modelType,
       } = filters;
- 
+
       const params = new URLSearchParams();
       params.append('page', page);
       params.append('limit', limit);
@@ -37,11 +40,35 @@ export const fetchFilteredBrands = createAsyncThunk(
       if (city) params.append('city', city);
       if (investmentRange) params.append('investmentRange', investmentRange);
       if (modelType) params.append('modelType', modelType);
- 
-      const response = await axios.post(`${API_BASE_URL}filter/getAllBrandsAndFilter?${params.toString()}`);
+
+      const response = await axios.get(`${API_BASE_URL}filter/getAllBrandsAndFilter?${params.toString()}`);
      
+      // Normalize the brand data to ensure consistent structure
+      const normalizedBrands = response.data.data?.brands?.map(brand => ({
+        ...brand,
+        brandDetails: {
+          brandName: '',
+          companyName: '',
+          ...brand.brandDetails
+        },
+        brandfranchisedetails: {
+          franchiseDetails: {
+            fico: [],
+            trainingSupport: [],
+            ...brand.brandfranchisedetails?.franchiseDetails
+          },
+          ...brand.brandfranchisedetails
+        },
+        uploads: {
+          logo: '',
+          ...brand.uploads
+        },
+        isLiked: brand.isLiked || false,
+        isShortListed: brand.isShortListed || false
+      })) || [];
+
       return {
-        brands: response.data.data?.brands || [],
+        brands: normalizedBrands,
         pagination: response.data.data?.pagination || {
           currentPage: 1,
           totalPages: 1,
@@ -56,7 +83,7 @@ export const fetchFilteredBrands = createAsyncThunk(
     }
   }
 );
- 
+
 const initialState = {
   brands: [],
   loading: false,
@@ -85,7 +112,7 @@ const initialState = {
     limit: 20,
   }
 };
- 
+
 const filterBrandSlice = createSlice({
   name: 'filterBrands',
   initialState,
@@ -121,6 +148,23 @@ const filterBrandSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    // Add the toggle actions similar to brandSlice
+    toggleBrandLikefilter: (state, action) => {
+      const brandId = action.payload;
+      state.brands = state.brands.map(brand => 
+        brand.uuid === brandId 
+          ? { ...brand, isLiked: !brand.isLiked }
+          : brand
+      );
+    },
+    toggleBrandShortListfilter: (state, action) => {
+      const brandId = action.payload;
+      state.brands = state.brands.map(brand => 
+        brand.uuid === brandId 
+          ? { ...brand, isShortListed: !brand.isShortListed }
+          : brand
+      );
     }
   },
   extraReducers: (builder) => {
@@ -147,8 +191,14 @@ const filterBrandSlice = createSlice({
       });
   }
 });
- 
-export const { setFilter, resetFilters, setPage, clearError } = filterBrandSlice.actions;
- 
+
+export const { 
+  setFilter, 
+  resetFilters, 
+  setPage, 
+  clearError,
+  toggleBrandLikefilter,
+  toggleBrandShortListfilter
+} = filterBrandSlice.actions;
+
 export default filterBrandSlice.reducer;
- 
