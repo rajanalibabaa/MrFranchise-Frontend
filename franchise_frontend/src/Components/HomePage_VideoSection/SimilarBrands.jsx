@@ -1,532 +1,95 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
-} from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import {
   Box,
   Typography,
   Button,
-  Card,
-  CardContent,
-  CardMedia,
   CircularProgress,
-  IconButton,
   useMediaQuery,
   useTheme,
-  Chip,
-  Divider,
-  Avatar,
-  Stack,
-  Tooltip,
+  IconButton
 } from "@mui/material";
 import { motion } from "framer-motion";
-import Favorite from "@mui/icons-material/Favorite";
-import PlaylistAddCheckCircleOutlined from "@mui/icons-material/PlaylistAddCheckCircleOutlined";
-import MonetizationOn from "@mui/icons-material/MonetizationOn";
-import Business from "@mui/icons-material/Business";
-import AreaChart from "@mui/icons-material/AreaChart";
-import { useNavigate } from "react-router-dom";
-import LoginPage from "../../Pages/LoginPage/LoginPage";
-import { useDispatch, useSelector } from "react-redux";
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { postView } from "../../Utils/function/view";
-import {
-  useBrands,
-  useToggleLike,
-  openBrandDialog,
-} from "../../Hooks/Fetchbrands";
-
+import { ArrowRight, ArrowBack, ArrowForward, Close } from "@mui/icons-material";
+import { useSelector, useDispatch } from 'react-redux';
+import HomePageBrandCard from './HomePageBrandCard';
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+import { fetchBrandsByChildCategory } from "../../Redux/Slices/SideMenuHoverBrandSlices.jsx";
+import LoginPage from '../../Pages/LoginPage/LoginPage.jsx';  
 const CARD_DIMENSIONS = {
-  mobile: { width: 280, height: 500 },
+  mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
-  smallDesktop: { width: 280, height: 500 },
-  desktop: { width: 267, height: 480 },
-  largeDesktop: { width: 327, height: 500 },
+  desktop: { width: 327, height: 500 },
 };
-
-const cardVariants = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-};
-
-const API_BASE_URL = "your_api_base_url"; // Replace with your actual API base URL
-
-// Cache for prefetched data
-const prefetchCache = {};
-
-// Thunk for fetching brands by child category with caching
-export const fetchBrandsByChildCategory = createAsyncThunk(
-  'brandCategory/fetchBrandsByChildCategory',
-  async ({ subCategory, childCategory, page = 1, limit = 30, isPrefetch = false }, { rejectWithValue, getState }) => {
-    try {
-      // Check cache first for prefetched data
-      const cacheKey = `${subCategory}_${childCategory}_${page}`;
-      
-      if (isPrefetch && prefetchCache[cacheKey]) {
-        return { data: prefetchCache[cacheKey], page, isPrefetch };
-      }
-
-      const response = await axios.get(`${API_BASE_URL}/brandlisting/getBrandsByChildCategory`, {
-        params: { subCategory, childCategory, page, limit }
-      });
-
-      // Store in cache if this is a prefetch
-      if (isPrefetch) {
-        prefetchCache[cacheKey] = response.data.data;
-      }
-
-      return { data: response.data.data, page, isPrefetch };
-    } catch (error) {
-      return rejectWithValue(error.response?.data || { message: 'Something went wrong' });
-    }
-  }
-);
-
-const BrandCard = React.memo(
-  ({
-    brand,
-    handleApply,
-    handleLikeClick,
-    likeProcessing,
-    dimensions,
-    theme,
-    isMobile,
-    isTablet,
-  }) => {
-    const videoRef = useRef(null);
-    const [isVisible, setIsVisible] = useState(false);
-    const observerRef = useRef();
-
-    const brandId = brand.uuid;
-    const franchiseModel = brand.franchiseDetails?.fico?.[0] || {};
-    const category = brand.franchiseDetails?.brandCategories || {};
-    const videoUrl = brand?.uploads?.franchisePromotionVideo?.[0];
-    const mediaHeight = isMobile ? 180 : isTablet ? 200 : 220;
-
-    // Extract brand details with fallbacks
-    const brandDetails = brand.brandDetails || {};
-    const {
-      brandName = "N/A",
-    } = brandDetails;
-
-    // Extract franchise details with fallbacks
-    const {
-      investmentRange = "Not specified",
-      areaRequired = "Not specified",
-      franchiseModel: modelType = "N/A",
-    } = franchiseModel;
-
-    useEffect(() => {
-      observerRef.current = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-            observerRef.current.disconnect();
-          }
-        },
-        { threshold: 0.1 }
-      );
-
-      if (videoRef.current) {
-        observerRef.current.observe(videoRef.current);
-      }
-
-      return () => {
-        if (observerRef.current) {
-          observerRef.current.disconnect();
-        }
-      };
-    }, []);
-
-    return (
-      <motion.div
-        key={brandId}
-        variants={cardVariants}
-        style={{
-          width: dimensions.width,
-          flexShrink: 0,
-        }}
-      >
-        <Card
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            borderRadius: 3,
-            overflow: "hidden",
-            width: "100%",
-            transition: "all 0.3s ease",
-          }}
-        >
-          {/* Video/Image Section */}
-          <Box
-            ref={videoRef}
-            sx={{
-              height: mediaHeight,
-              width: "100%",
-              overflow: "hidden",
-              position: "relative",
-              backgroundColor: theme.palette.grey[200],
-            }}
-          >
-            {isVisible && videoUrl ? (
-              <CardMedia
-                component="video"
-                loading="lazy"
-                poster={brand?.uploads?.brandLogo?.[0] || ""}
-                src={videoUrl}
-                alt={brandName}
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-                controls
-                muted
-                loop
-                preload="none"
-              />
-            ) : (
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: theme.palette.grey[300],
-                }}
-              >
-                <Typography variant="body2" color="text.secondary">
-                  No media available
-                </Typography>
-              </Box>
-            )}
-          </Box>
-
-          {/* Content Section */}
-          <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-            <CardContent sx={{ pb: 1 }}>
-              {/* Brand Header */}
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  mb: 1.5,
-                  justifyContent: "space-between",
-                }}
-              >
-                <Box
-                  onClick={() => handleApply(brand)}
-                  component="img"
-                  src={brand?.uploads?.brandLogo?.[0]}
-                  alt={brand.uploads?.brandName}
-                  loading="lazy"
-                  sx={{
-                    width: 100,
-                    height: 50,
-                    border: "1px solid #f29724",
-                    cursor: "pointer",
-                    objectFit: "contain",
-                  }}
-                />
-                <IconButton>
-                  <Tooltip title={"ShortList"}>
-                    <PlaylistAddCheckCircleOutlined />
-                  </Tooltip>
-                </IconButton>
-                <IconButton
-                  onClick={() => handleLikeClick(brand.uuid, brand.isLiked)}
-                  disabled={likeProcessing[brand.uuid]}
-                  sx={{ ml: 1 }}
-                >
-                  {likeProcessing[brand.uuid] ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    <Favorite
-                      sx={{
-                        color: brand.isLiked
-                          ? "#f44336"
-                          : "rgba(0, 0, 0, 0.23)",
-                      }}
-                    />
-                  )}
-                </IconButton>
-              </Box>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Tooltip title={brandName} placement="top">
-                  <Typography
-                    variant="h6"
-                    fontWeight={700}
-                    sx={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {brandName}
-                  </Typography>
-                </Tooltip>
-              </Box>
-              {/* Categories */}
-              {(category.main || category.child) && (
-                <Box sx={{ mb: 2 }}>
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    justifyContent="space-between"
-                    alignItems="center"
-                    sx={{ flexWrap: "wrap" }}
-                  >
-                    {category.child && (
-                      <Chip
-                        label={category.child}
-                        size="small"
-                        sx={{
-                          bgcolor: "rgba(255, 152, 0, 0.1)",
-                          color: "orange.dark",
-                          fontWeight: 500,
-                          mb: 1,
-                        }}
-                      />
-                    )}
-                  </Stack>
-                </Box>
-              )}
-
-              {/* Franchise Details */}
-              <Stack spacing={1} sx={{ mb: 2 }}>
-                <Box display="flex" alignItems="center">
-                  <Business
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    <strong>Investment:</strong> {investmentRange}
-                  </Typography>
-                </Box>
-
-                <Box display="flex" alignItems="center">
-                  <MonetizationOn
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    <strong>Area:</strong> {areaRequired}
-                  </Typography>
-                </Box>
-
-                <Box display="flex" alignItems="center">
-                  <AreaChart
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2">
-                    <strong>Type:</strong> {modelType}
-                  </Typography>
-                </Box>
-              </Stack>
-
-              <Divider sx={{ my: 1 }} />
-            </CardContent>
-
-            {/* Action Button */}
-            <Box sx={{ px: 2, pb: 2, mt: "auto" }}>
-              <Button
-                variant="contained"
-                fullWidth
-                onClick={() => handleApply(brand)}
-                sx={{
-                  backgroundColor: "#f29724",
-                  "&:hover": {
-                    backgroundColor: "#e68a1e",
-                    boxShadow: 2,
-                  },
-                  py: 1,
-                  borderRadius: 1,
-                  textTransform: "none",
-                  fontWeight: 500,
-                }}
-              >
-                View Full Details
-              </Button>
-            </Box>
-          </Box>
-        </Card>
-      </motion.div>
-    );
-  }
-);
 
 const SimilarBrands = ({ brandData }) => {
+
+  console.log("similar coming   brandData", brandData);
+  
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
-  const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
-  const isDesktop = useMediaQuery(theme.breakpoints.between("lg", "xl"));
-  const isLargeDesktop = useMediaQuery(theme.breakpoints.up("xl"));
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
-  const isPaused = useRef(false);
-  const scrollIntervalRef = useRef(null);
   const scrollRequestRef = useRef(null);
-
-  const [likeProcessing, setLikeProcessing] = useState({});
-  const [showLogin, setShowLogin] = useState(false);
   const [showStartShadow, setShowStartShadow] = useState(false);
-  const [showEndShadow, setShowEndShadow] = useState(false);
-  const [similarBrands, setSimilarBrands] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const navigate = useNavigate();
+  const [showEndShadow, setShowEndShadow] = useState(true);
+  const [showLogin, setShowLogin] = useState(false);
+  const [likeProcessing, setLikeProcessing] = useState({});
+  const [removeMsg, setRemoveMsg] = useState("");
   const dispatch = useDispatch();
 
-  const { data: brands = [], isLoading: brandsLoading } = useBrands();
-  const toggleLike = useToggleLike();
+  const userId = useSelector((state) => state.auth?.investorUUID) || localStorage.getItem("id");
+  const accessToken = useSelector((state) => state.auth?.AccessToken);
 
-  // Fetch similar brands when brandData changes
+  // Get brands from Redux
+  const { brands, loading, error } = useSelector((state) => state.brandCategory);
+
+  // Get current brand's subCategory and childCategory
+  const currentSubCategory = brandData[0]?.brandfranchisedetails?.franchiseDetails?.brandCategories?.main;
+  const currentChildCategory = brandData[0]?.brandfranchisedetails?.franchiseDetails?.brandCategories?.child;
+  const currentBrandUUID = brandData[0]?.uuid;
+  console.log("category selections", currentSubCategory, currentChildCategory, currentBrandUUID);
+
+  // Fetch brands from Redux when brandData changes
   useEffect(() => {
-    const fetchSimilarBrands = async () => {
-      if (!brandData) return;
+    if (currentSubCategory && currentChildCategory) {
+      dispatch(fetchBrandsByChildCategory({
+        subCategory: currentSubCategory,
+        childCategory: currentChildCategory,
+        page: 1,
+        limit: 30,
+        isPrefetch: false
+      }));
+    }
+  }, [dispatch, currentSubCategory, currentChildCategory]);
 
-      const childCategory = brandData?.franchiseDetails?.brandCategories?.child;
-      const subCategory = brandData?.franchiseDetails?.brandCategories?.main;
-
-      if (!childCategory || !subCategory) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const result = await dispatch(
-          fetchBrandsByChildCategory({ subCategory, childCategory })
-        ).unwrap();
-
-        // Filter out the current brand and ensure we have valid data
-        const filteredBrands = result.data.filter(
-          brand => brand.uuid !== brandData.uuid
-        );
-
-        // Add the first few brands at the end to create infinite loop effect
-        const brandsWithDuplicates = [...filteredBrands, ...filteredBrands.slice(0, 4)];
-        setSimilarBrands(brandsWithDuplicates);
-        setError(null);
-      } catch (err) {
-        console.error("Failed to fetch similar brands:", err);
-        setError(err.message || "Failed to load similar brands");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSimilarBrands();
-  }, [brandData, dispatch]);
+  // Filter brands: same subCategory, not current brand
+  const filteredBrands = useMemo(() => {
+    if (!brands || !currentSubCategory) return [];
+    return brands.filter(
+      (brand) =>
+        brand.brandCategories?.main === currentSubCategory &&
+        brand.uuid !== currentBrandUUID
+    );
+  }, [brands, currentSubCategory, currentBrandUUID]);
 
   const dimensions = useMemo(() => {
     if (isMobile) return CARD_DIMENSIONS.mobile;
     if (isTablet) return CARD_DIMENSIONS.tablet;
-    if (isSmallDesktop) return CARD_DIMENSIONS.smallDesktop;
-    if (isDesktop) return CARD_DIMENSIONS.desktop;
-    return CARD_DIMENSIONS.largeDesktop;
-  }, [isMobile, isTablet, isSmallDesktop, isDesktop, isLargeDesktop]);
+    return CARD_DIMENSIONS.desktop;
+  }, [isMobile, isTablet]);
 
-  // Calculate visible cards based on container width
-  useEffect(() => {
-    const updateVisibleCards = () => {
-      if (containerRef.current) {
-        const containerWidth = containerRef.current.offsetWidth;
-        const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
-        const count = Math.floor(containerWidth / cardWidthWithGap);
-      }
-    };
+  const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
-    updateVisibleCards();
-    window.addEventListener("resize", updateVisibleCards);
-    return () => window.removeEventListener("resize", updateVisibleCards);
-  }, [dimensions.width, isMobile]);
-
-  const handleLikeClick = useCallback(
-    (brandId, isLiked) => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        setShowLogin(true);
-        return;
-      }
-
-      setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-      toggleLike.mutate(
-        { brandId, isLiked },
-        {
-          onSettled: () => {
-            setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
-          },
-        }
-      );
-    },
-    [toggleLike]
-  );
-
-  const handleApply = useCallback((brand) => {
-    postView(brand.uuid);
-    openBrandDialog(brand);
-  }, []);
-
-  const handleMouseEnter = useCallback(() => {
-    isPaused.current = true;
-    if (scrollIntervalRef.current) {
-      clearInterval(scrollIntervalRef.current);
-      scrollIntervalRef.current = null;
-    }
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    isPaused.current = false;
-    if (!scrollIntervalRef.current) {
-      // startAutoScroll();
-    }
-  }, []);
-
-  const getScrollDistance = useCallback(() => {
-    const cardWidthWithGap = dimensions.width + (isMobile ? 16 : 24);
-    return cardWidthWithGap * 4;
-  }, [dimensions.width, isMobile]);
-
-  const smoothScrollTo = useCallback((target) => {
-    if (!scrollContainerRef.current) return;
-
+  const smoothScrollTo = useCallback((target, immediate = false) => {
     const container = scrollContainerRef.current;
-    if (scrollRequestRef.current) {
-      cancelAnimationFrame(scrollRequestRef.current);
-    }
+    if (!container) return;
+    if (scrollRequestRef.current) cancelAnimationFrame(scrollRequestRef.current);
 
     const start = container.scrollLeft;
     const change = target - start;
+    const duration = immediate ? 0 : 500;
     const startTime = performance.now();
-    const duration = 500;
 
     const animateScroll = (currentTime) => {
       const elapsed = currentTime - startTime;
@@ -538,73 +101,38 @@ const SimilarBrands = ({ brandData }) => {
         scrollRequestRef.current = requestAnimationFrame(animateScroll);
       } else {
         handleScroll();
-        checkForLoop();
       }
     };
 
     scrollRequestRef.current = requestAnimationFrame(animateScroll);
   }, []);
 
-  const checkForLoop = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-
-    const container = scrollContainerRef.current;
-    const scrollWidth = container.scrollWidth;
-    const clientWidth = container.clientWidth;
-    const maxScrollLeft = scrollWidth - clientWidth;
-
-    if (container.scrollLeft >= maxScrollLeft - 100) {
-      const originalBrandsCount = similarBrands.length - 4;
-      const originalScrollWidth =
-        originalBrandsCount * (dimensions.width + (isMobile ? 16 : 24));
-      const newScrollLeft = container.scrollLeft - originalScrollWidth;
-      container.scrollLeft = newScrollLeft;
-    }
-  }, [similarBrands.length, dimensions.width, isMobile]);
-
-  const handleNextClick = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-
-    const container = scrollContainerRef.current;
-    const scrollDistance = getScrollDistance();
-    const newScrollLeft = container.scrollLeft + scrollDistance;
-    smoothScrollTo(newScrollLeft);
-  }, [getScrollDistance, smoothScrollTo]);
+  const getScrollDistance = useCallback(() => {
+    return dimensions.width + (isMobile ? 16 : 24);
+  }, [dimensions.width, isMobile]);
 
   const handlePrevClick = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-
     const container = scrollContainerRef.current;
-    const scrollDistance = getScrollDistance();
-    const newScrollLeft = container.scrollLeft - scrollDistance;
+    if (!container) return;
+    const distance = getScrollDistance();
+    const newScroll = Math.max(container.scrollLeft - distance, 0);
+    smoothScrollTo(newScroll);
+  }, [getScrollDistance, smoothScrollTo]);
 
-    if (newScrollLeft <= 0) {
-      const originalBrandsCount = similarBrands.length - 4;
-      const originalScrollWidth =
-        originalBrandsCount * (dimensions.width + (isMobile ? 16 : 24));
-      const clientWidth = container.clientWidth;
-      smoothScrollTo(originalScrollWidth - clientWidth);
-    } else {
-      smoothScrollTo(newScrollLeft);
-    }
-  }, [
-    similarBrands.length,
-    dimensions.width,
-    getScrollDistance,
-    isMobile,
-    smoothScrollTo,
-  ]);
-
-  const easeInOutQuad = (t) => {
-    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-  };
+  const handleNextClick = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const distance = getScrollDistance();
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    const newScroll = Math.min(container.scrollLeft + distance, maxScroll);
+    smoothScrollTo(newScroll);
+  }, [getScrollDistance, smoothScrollTo]);
 
   const handleScroll = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-
-    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-    setShowStartShadow(scrollLeft > 10);
-    setShowEndShadow(scrollLeft < scrollWidth - clientWidth - 10);
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    setShowStartShadow(container.scrollLeft > 10);
+    setShowEndShadow(container.scrollLeft < container.scrollWidth - container.clientWidth - 10);
   }, []);
 
   useEffect(() => {
@@ -613,23 +141,42 @@ const SimilarBrands = ({ brandData }) => {
       container.addEventListener("scroll", handleScroll);
       handleScroll();
     }
-
     return () => {
-      if (container) {
-        container.removeEventListener("scroll", handleScroll);
-      }
-      if (scrollIntervalRef.current) {
-        clearInterval(scrollIntervalRef.current);
-      }
-      if (scrollRequestRef.current) {
-        cancelAnimationFrame(scrollRequestRef.current);
-      }
+      container?.removeEventListener("scroll", handleScroll);
+      if (scrollRequestRef.current) cancelAnimationFrame(scrollRequestRef.current);
     };
-  }, [similarBrands.length, handleScroll]);
+  }, [handleScroll]);
+
+  const handleLikeClick = useCallback(async (brandId) => {
+    if (!userId || !accessToken) {
+      setShowLogin(true); // Show login popup if not logged in
+      return;
+    }
+    if (likeProcessing[brandId]) return;
+
+    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
+
+    try {
+      // Your API call for removing like
+      // ...existing code...
+      setRemoveMsg("Brand removed successfully");
+      setTimeout(() => setRemoveMsg(""), 3000);
+    } catch (error) {
+      setRemoveMsg("Failed to remove brand");
+    } finally {
+      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
+    }
+  }, [likeProcessing, userId, accessToken]);
+
+  const handleApply = useCallback((brand) => {
+    dispatch(openBrandDialog(brand));
+  }, [dispatch]);
+
+  if (!brandData) return null;
 
   if (loading) {
     return (
-      <Box sx={{ textAlign: "center", p: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
         <CircularProgress />
       </Box>
     );
@@ -637,166 +184,178 @@ const SimilarBrands = ({ brandData }) => {
 
   if (error) {
     return (
-      <Box sx={{ textAlign: "center", p: 4 }}>
-        <Typography color="error">
-          {error || "Failed to load similar brands."}
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        py: 10,
+        textAlign: 'center'
+      }}>
+        <Typography variant="h6" color="error" sx={{ mb: 2 }}>
+          Error loading similar brands
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {error}
         </Typography>
       </Box>
     );
   }
 
-  // Only show if we have at least one brand (excluding duplicates)
-  const shouldShow = similarBrands.length > 4;
-
-  if (!shouldShow) return null;
+  if (filteredBrands.length === 0) return null;
 
   return (
     <>
       <Box
+        ref={containerRef}
         sx={{
           py: isMobile ? 1 : 3,
-          px: isMobile ? 2 : 4,
-          maxWidth: 1400,
+          px: isMobile ? 0 : 2,
+          maxWidth: isMobile ? "100%" : 1400,
           mx: "auto",
-          mt: 4,
-          borderTop: `1px solid ${theme.palette.divider}`,
           position: "relative",
+          borderTop: `1px solid ${theme.palette.divider}`,
+          mt: 4
         }}
-        ref={containerRef}
       >
-        <Typography
-          variant={isMobile ? "h6" : "h5"}
-          fontWeight="bold"
-          sx={{
-            color: "black",
+        {removeMsg && (
+          <Box sx={{
             mb: 3,
-            textAlign: "left",
-            position: "relative",
-            "&:after": {
-              content: '""',
-              display: "block",
-              width: "80px",
-              height: "4px",
-              background: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-              mt: 1,
-              borderRadius: 2,
-            },
+            p: 2,
+            borderRadius: 2,
+            backgroundColor: '#4caf50',
+            color: 'white',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <Typography>{removeMsg}</Typography>
+            <IconButton size="small" onClick={() => setRemoveMsg("")}>
+              <Close sx={{ color: 'white' }} />
+            </IconButton>
+          </Box>
+        )}
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 1,
+            px: isMobile ? 2 : 0,
           }}
         >
-          Similar Category Brands
-        </Typography>
+          <Typography
+            variant={isMobile ? "body1" : "h5"}
+            fontWeight="bold"
+            sx={{
+              color: "black",
+              mb: 1,
+              textAlign: "left",
+              position: "relative",
+              "&:after": {
+                content: '""',
+                display: "block",
+                width: "80px",
+                height: "4px",
+                background:
+                  theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                mt: 1,
+                borderRadius: 2,
+              },
+            }}
+          >
+            Similar Category Brands
+          </Typography>
 
-        <Box sx={{ position: "relative", px: isMobile ? 0 : 0 }}>
-          {/* Previous button */}
-          {showStartShadow && (
-            <Button
-              variant="contained"
-              onClick={handlePrevClick}
-              sx={{
-                position: "absolute",
-                left: isMobile ? 4 : -12,
-                top: `calc(50% + ${isMobile ? 20 : 40}px)`,
-                transform: "translateY(-50%)",
-                zIndex: 2,
-                minWidth: "36px",
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                padding: 0,
-                backgroundColor: "rgba(111, 255, 0, 0.98)",
-                color: "white",
-                boxShadow: theme.shadows[4],
-                "&:hover": {
-                  backgroundColor: "#7ad03a",
-                },
-              }}
-            >
-              &lt;
-            </Button>
-          )}
+          <Button
+            variant="text"
+            size="small"
+            endIcon={<ArrowRight />}
+            sx={{
+              textTransform: "none",
+              fontSize: isMobile ? 14 : 16,
+              color: theme.palette.text.secondary,
+              "&:hover": {
+                color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+                backgroundColor: "transparent",
+              },
+            }}
+            onClick={() => {
+              window.open(`/brandviewpage?category=${currentSubCategory}&subCategory=${currentChildCategory}`, "_blank");
+            }}
+          >
+            View More
+          </Button>
+        </Box>
 
-          {/* Next button */}
-          {showEndShadow && (
-            <Button
-              variant="contained"
-              onClick={handleNextClick}
-              sx={{
-                position: "absolute",
-                right: isMobile ? 4 : -12,
-                top: `calc(50% + ${isMobile ? 20 : 40}px)`,
-                transform: "translateY(-50%)",
-                zIndex: 2,
-                minWidth: "36px",
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                padding: 0,
-                backgroundColor: "rgba(111, 255, 0, 0.98)",
-                color: "white",
-                boxShadow: theme.shadows[4],
-                "&:hover": {
-                  backgroundColor: "#7ad03a",
-                },
-              }}
-            >
-              &gt;
-            </Button>
-          )}
+        <Box sx={{ position: "relative" }}>
+          <Button
+            onClick={handlePrevClick}
+            disabled={!showStartShadow}
+            sx={{
+              position: "absolute",
+              left: isMobile ? 2 : 8,
+              top: "55%",
+              transform: "translateY(-50%)",
+              zIndex: 1,
+              minWidth: 40,
+              height: 40,
+              borderRadius: "50%",
+              backgroundColor: "background.paper",
+              boxShadow: 2,
+              "&:hover": {
+                backgroundColor: "action.hover",
+              },
+              "&:disabled": {
+                opacity: 0,
+                pointerEvents: "none",
+              },
+            }}
+          >
+            <ArrowBack fontSize="small" />
+          </Button>
+
+          <Button
+            onClick={handleNextClick}
+            disabled={!showEndShadow}
+            sx={{
+              position: "absolute",
+              right: isMobile ? 4 : 8,
+              top: "55%",
+              transform: "translateY(-50%)",
+              zIndex: 1,
+              minWidth: 40,
+              height: 40,
+              borderRadius: "50%",
+              backgroundColor: "background.paper",
+              boxShadow: 2,
+              "&:hover": {
+                backgroundColor: "action.hover",
+              },
+              "&:disabled": {
+                opacity: 0,
+                pointerEvents: "none",
+              },
+            }}
+          >
+            <ArrowForward fontSize="small" />
+          </Button>
 
           <Box
-            component={motion.div}
-            initial="initial"
-            animate="animate"
             ref={scrollContainerRef}
             sx={{
               display: "flex",
-              gap: isMobile ? 2 : 3,
-              borderRadius: 3,
-              p: 2,
               overflowX: "auto",
-              perspective: "1000px",
-              "&::-webkit-scrollbar": {
-                height: isMobile ? "10px" : "8px",
-                backgroundColor: "transparent",
-              },
-              "&::-webkit-scrollbar-track": {
-                background:
-                  "linear-gradient(90deg, transparent, rgba(242, 151, 36, 0.1), transparent)",
-                borderRadius: "10px",
-                marginX: isMobile ? 0 : "10%",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                background: "linear-gradient(90deg, #f29724, #98dd2e)",
-                borderRadius: "10px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                border: "2px solid white",
-                backgroundSize: "200%",
-                transition: "background-position 0.3s ease",
-                "&:hover": {
-                  backgroundPosition: "right center",
-                },
-              },
-              scrollbarColor: ` transparent`,
-              scrollbarWidth: "thin",
-              paddingBottom: isMobile ? "24px" : "16px",
+              gap: isMobile ? 2 : 3,
+              p: 2,
+              scrollBehavior: "smooth",
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
             }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
           >
-            {similarBrands.map((brand, index) => (
-              <motion.div
-                key={`${brand?.uuid}-${index}`}
-                whileHover={{
-                  scale: 1.03,
-                  zIndex: 10,
-                  transition: { duration: 0.3 },
-                }}
-                whileTap={{ scale: 0.98 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <BrandCard
+            {filteredBrands.map((brand) => (
+              <motion.div key={brand.uuid || brand.id}>
+                <HomePageBrandCard
                   brand={brand}
                   handleApply={handleApply}
                   handleLikeClick={handleLikeClick}
@@ -819,4 +378,4 @@ const SimilarBrands = ({ brandData }) => {
   );
 };
 
-export default React.memo(SimilarBrands);
+export default SimilarBrands;
