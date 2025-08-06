@@ -24,6 +24,7 @@ import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/
 import { token } from "../../Utils/autherId";
 import { handleShortList } from "../../Api/shortListApi";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+import { addSortlist, removeSortList } from "../../Redux/Slices/shortlistslice.jsx";
 
 const TopInvestVdocardround = () => {
   const [likeProcessing, setLikeProcessing] = useState({});
@@ -81,15 +82,21 @@ const TopInvestVdocardround = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, isLoading]);
  
-  const handleToggleShortList = async (brandId) => {
+  const handleToggleShortList = async (brand) => {
     if (!token) {
       setShowLogin(true);
       return;
     }
   try {
-    dispatch(toggleBrandShortList(brandId));
-    await handleShortList(brandId);
-     dispatch(toggleHomeCardShortlist(brandId))
+
+    if (!brand.isShortListed) {
+            dispatch(addSortlist(brand))
+          }else{
+            dispatch(removeSortList(brand.uuid))
+          }
+    dispatch(toggleBrandShortList(brand.uuid));
+    await handleShortList(brand.uuid);
+     dispatch(toggleHomeCardShortlist(brand.uuid))
   } catch (error) {
     console.error("Error toggling shortlist:", error);
   }
@@ -229,7 +236,7 @@ const TopInvestVdocardround = () => {
                 </IconButton>
  
                 <IconButton
-                  onClick={() => handleToggleShortList(brand.uuid)}
+                  onClick={() => handleToggleShortList(brand)}
                   sx={{
                     color: brand?.isShortListed
                       ? "#7ef400ff"

@@ -30,6 +30,7 @@ import { likeApiFunction } from "../../Api/likeApi";
 import { handleShortList } from "../../Api/shortListApi";
 import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
 import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice.jsx";
+import { addSortlist, removeSortList } from "../../Redux/Slices/shortlistslice.jsx";
 
 const cardStyles = {
   width: { xs: "40vh", sm: "calc(50% - 10px)", md: 260 },
@@ -149,6 +150,11 @@ const BrandCard = memo(
 
       setShortlistProcessing(true);
       try {
+        if (!brand.isShortListed) {
+                        dispatch(addSortlist(brand))
+                      }else(
+                        dispatch(removeSortList(brand.uuid))
+                      )
         // Dispatch the Redux action to update UI immediately
         dispatch(toggleBrandShortListfilter(uuid));
         dispatch(toggleBrandShortList(uuid));
@@ -165,7 +171,7 @@ const BrandCard = memo(
       } finally {
         setShortlistProcessing(false);
       }
-    }, [uuid, shortlistProcessing, onShowLogin, dispatch]);
+    }, [brand,uuid, shortlistProcessing, onShowLogin, dispatch]);
 
     const handlePlay = useCallback(() => {
       const allVideos = document.querySelectorAll("video");

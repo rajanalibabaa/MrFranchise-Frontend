@@ -30,6 +30,8 @@ import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomp
 import { postView } from "../../Utils/function/view.jsx";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 import { useDispatch } from "react-redux";
+import { addSortlist, removeSortList } from "../../Redux/Slices/shortlistslice.jsx";
+import { toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -98,7 +100,15 @@ const HomePageBrandCard = React.memo(
                                 setShowLogin(true);
                                 return;
                               }
-        toggleHomeCardShortlist(brand.uuid)
+
+        if (!brand.isShortListed) {
+                dispatch(addSortlist(brand))
+              }else(
+                dispatch(removeSortList(brand.uuid))
+              )
+        // dispatch(removeSortList(brand.uuid))
+        dispatch(toggleBrandShortList(brand.uuid))
+        dispatch(toggleHomeCardShortlist(brand.uuid))
         await handleShortList(brand.uuid)
         setShortListed(!shortListed)
       } catch (error) {
@@ -169,7 +179,7 @@ cursor="pointer"
                   <IconButton
                     onClick={() => handleToggleShortList(brand)}
                     sx={{
-                      color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                      color: brand.isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
                     }}
                   >
                     <Tooltip title={"ShortList"}>

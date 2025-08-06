@@ -37,6 +37,7 @@ import { token } from "../../Utils/autherId";
 import { RiBookmark3Fill, RiBookMarkedFill } from "react-icons/ri";
 import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
+import { addSortlist, removeSortList } from "../../Redux/Slices/shortlistslice.jsx";
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -185,15 +186,21 @@ function TopBrandVdoCards() {
     await likeApiFunction(brandId);
   };
 
-  const handleToggleShortList = async (brandId) => {
+  const handleToggleShortList = async (mainBrand) => {
     if (!token) {
       setShowLogin(true);
       return;
     }
     
-      dispatch(toggleBrandShortList(brandId));
-      dispatch(toggleHomeCardShortlist(brandId))
-      await handleShortList(brandId);
+      dispatch(toggleBrandShortList(mainBrand.uuid));
+      dispatch(toggleHomeCardShortlist(mainBrand.uuid))
+      if (!mainBrand.isShortListed) {
+        dispatch(addSortlist(mainBrand))
+      }else{
+        dispatch(removeSortList(mainBrand.uuid))
+      }
+      await handleShortList(mainBrand.uuid);
+      
     
   };
 
@@ -763,7 +770,7 @@ function TopBrandVdoCards() {
                               }
                             >
                               <IconButton
-                                onClick={() => handleToggleShortList(mainBrand.uuid)}
+                                onClick={() => handleToggleShortList(mainBrand)}
                                 sx={{
                                   color: mainBrand.isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
                                 }}
@@ -1029,7 +1036,7 @@ function TopBrandVdoCards() {
                         >
                           <IconButton
                             size="small"
-                            onClick={() => handleToggleShortList(brand.uuid)}
+                            onClick={() => handleToggleShortList(brand)}
                             sx={{
                               color: brand.isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
                             }}
