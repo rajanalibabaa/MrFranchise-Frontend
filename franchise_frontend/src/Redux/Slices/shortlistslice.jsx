@@ -63,7 +63,15 @@ const shortListSlice = createSlice({
 
          console.log("addSortlist :",brand)
          state.data.brands.unshift(brand)
-    }
+    },
+     toggleSortlistBrandLike: (state, action) => {
+        const brandId = action.payload;
+        state.data.brands = state.data.brands.map(brand => 
+            brand.uuid === brandId 
+            ? { ...brand, isLiked: !brand.isLiked }
+            : brand
+        );
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -95,5 +103,5 @@ const shortListSlice = createSlice({
   },
 });
 
-export const { clearShortList,removeSortList, addSortlist } = shortListSlice.actions;
+export const { clearShortList,removeSortList, addSortlist,toggleSortlistBrandLike } = shortListSlice.actions;
 export default shortListSlice.reducer;

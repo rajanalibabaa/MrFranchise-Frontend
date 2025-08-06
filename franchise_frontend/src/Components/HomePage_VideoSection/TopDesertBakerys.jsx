@@ -18,15 +18,11 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchDesertAndBakery, toggleHomeCardLike  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
-import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+import { fetchDesertAndBakery  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
 
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { motion } from "framer-motion";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
-import { token } from "../../Utils/autherId.jsx";
-import { toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
-import { likeApiFunction } from "../../Api/likeApi.jsx";
 
 // Breakpoints
 const CARD_DIMENSIONS = {
@@ -101,34 +97,7 @@ useEffect(() => {
     return () => window.removeEventListener("resize", updateVisibleCards);
   }, [dimensions.width, isMobile]);
 
-  const handleLikeClick = useCallback(
-    async(brandId) => {
-      if (!token) {
-                    setShowLogin(true);
-                    return;
-                  }
-                  dispatch(toggleBrandLike(brandId))
-                  dispatch(toggleHomeCardLike(brandId))
-                  await likeApiFunction(brandId)
-                },
-    [dispatch]
-  );
-
-  const handleApply = useCallback(
-    (brand) => {
-      const token = localStorage.getItem("accessToken");
-      const id =
-        localStorage.getItem("investorUUID") ||
-        localStorage.getItem("brandUUID");
-
-      if (token && id) {
-        // dispatch(viewApi(brand.uuid));
-      }
-
-      dispatch(openBrandDialog(brand));
-    },
-    [dispatch]
-  );
+  
 
   const getScrollDistance = useCallback(() => {
     return dimensions.width + (isMobile ? 16 : 24);
@@ -358,8 +327,6 @@ useEffect(() => {
               <motion.div key={brand.uuid}>
                 <HomePageBrandCard
                   brand={brand}
-                  handleApply={handleApply}
-                  handleLikeClick={handleLikeClick}
                   likeProcessing={likeProcessing}
                   dimensions={dimensions}
                   theme={theme}

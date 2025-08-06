@@ -21,11 +21,7 @@ import { useSelector, useDispatch } from "react-redux";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 import { motion } from "framer-motion";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
-import { fetchTopFoodFranchises, toggleHomeCardLike  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
-import { token } from "../../Utils/autherId.jsx";
-import { likeApiFunction } from "../../Api/likeApi.jsx";
-import { toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
-import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+import { fetchTopFoodFranchises,   } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
 
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
@@ -189,22 +185,6 @@ const {
     smoothScrollTo(newScroll);
   };
 
-  const handleApply = (brand) => {
-    // Your apply logic here
-    // console.log("Apply for brand:", brand);
-    dispatch(openBrandDialog(brand));
-  };
-
-  const handleLikeClick = async(brandId) => {
-    if (!token) {
-            setShowLogin(true);
-            return;
-          }
-    
-          dispatch(toggleHomeCardLike(brandId))
-          dispatch(toggleBrandLike(brandId))
-          await likeApiFunction(brandId)
-  };
 
   if (isLoading && brands.length === 0) {
     return (
@@ -357,8 +337,6 @@ const {
             <motion.div key={brand.uuid || brand.id}>
               <HomePageBrandCard
                 brand={brand}
-                handleApply={handleApply}
-                handleLikeClick={handleLikeClick}
                 likeProcessing={likeProcessing}
                 dimensions={dimensions}
                 theme={theme}

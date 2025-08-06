@@ -18,12 +18,7 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import ArrowRight from "@mui/icons-material/ArrowRight";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchTopRestarunt, toggleHomeCardLike  } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
-import { token } from "../../Utils/autherId.jsx";
-import { toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
-import { likeApiFunction } from "../../Api/likeApi.jsx";
-import LoginPage from "../../Pages/LoginPage/LoginPage";
-import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+import { fetchTopRestarunt} from '../../Redux/Slices/TopCardFetchingSlice.jsx';
 
 import { motion } from "framer-motion";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
@@ -102,34 +97,6 @@ const TopRestaurantsFranchise = () => {
      return () => window.removeEventListener("resize", updateVisibleCards);
    }, [dimensions.width, isMobile]);
  
-   const handleLikeClick = useCallback(
-      async(brandId) => {
-           if (!token) {
-                         setShowLogin(true);
-                         return;
-                       }
-                       dispatch(toggleBrandLike(brandId))
-                       dispatch(toggleHomeCardLike(brandId))
-                       await likeApiFunction(brandId)
-                     },
-     [dispatch]
-   );
- 
-   const handleApply = useCallback(
-     (brand) => {
-       const token = localStorage.getItem("accessToken");
-       const id =
-         localStorage.getItem("investorUUID") ||
-         localStorage.getItem("brandUUID");
- 
-       if (token && id) {
-         dispatch(viewApi(brand.uuid));
-       }
- 
-       dispatch(openBrandDialog(brand));
-     },
-     [dispatch]
-   );
  
    const getScrollDistance = useCallback(() => {
      return dimensions.width + (isMobile ? 16 : 24);
@@ -359,8 +326,6 @@ const TopRestaurantsFranchise = () => {
                <motion.div key={brand.uuid}>
                  <HomePageBrandCard
                    brand={brand}
-                   handleApply={handleApply}
-                   handleLikeClick={handleLikeClick}
                    likeProcessing={likeProcessing}
                    dimensions={dimensions}
                    theme={theme}

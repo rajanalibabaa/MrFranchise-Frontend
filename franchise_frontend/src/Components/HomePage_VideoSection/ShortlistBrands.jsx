@@ -13,8 +13,10 @@ import {
 import { ArrowBack, ArrowForward, ArrowRight, Close } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchShortListedById, removeFromShortlist } from '../../Redux/Slices/shortlistslice.jsx';
+import { fetchShortListedById,   } from '../../Redux/Slices/shortlistslice.jsx';
 import HomePageBrandCard from './HomePageBrandCard';
+
+import LoginPage from '../../Pages/LoginPage/LoginPage.jsx';
 
 const ShortlistBrands = () => {
   const theme = useTheme();
@@ -38,7 +40,7 @@ const ShortlistBrands = () => {
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(true);
-
+  const [showLogin, setShowLogin] = useState(false);
   // Refs
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
@@ -139,34 +141,15 @@ const ShortlistBrands = () => {
   }, [dispatch, id]);
 
   // Brand actions
-  const handleLikeClick = useCallback(async (brandId) => {
-    try {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
-      await dispatch(removeFromShortlist(brandId)).unwrap();
-      setNotification({
-        open: true,
-        message: 'Removed from shortlist successfully',
-        severity: 'success'
-      });
-    } catch (error) {
-      setNotification({
-        open: true,
-        message: error.message || 'Failed to remove from shortlist',
-        severity: 'error'
-      });
-    } finally {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-    }
-  }, [dispatch]);
-
-  const handleApply = useCallback((brand) => {
-    console.log('Apply clicked:', brand);
-    // Implement your apply logic here
-  }, []);
+ 
 
   const handleCloseNotification = () => {
     setNotification(prev => ({ ...prev, open: false }));
   };
+
+  if (brands.length < 4) {
+    return
+  }
 
   return (
     <Box
@@ -307,8 +290,6 @@ const ShortlistBrands = () => {
               >
                 <HomePageBrandCard
                   brand={brand}
-                  handleApply={handleApply}
-                  handleLikeClick={handleLikeClick}
                   likeProcessing={likeProcessing[brand.uuid] || false}
                   dimensions={dimensions}
                   theme={theme}
@@ -324,6 +305,9 @@ const ShortlistBrands = () => {
           )}
         </Box>
       </Box>
+      {showLogin && (
+          <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+        )}
     </Box>
   );
 };

@@ -8,11 +8,7 @@ import './App.css';
 
 // Context Providers
 import { VideoControllerProvider } from './services/VideoControllerMedia/VideHandlingFunctions';
-// import AppDataProvider from './context/AppDataProvider';
 
-// Core Components (not lazy-loaded as they're used immediately)
-import Navbar from './Components/Navbar/NavBar';
-import Footer from './Components/Footers/Footer';
 
 // Lazy-loaded components with prefetching
 const HomeBannerSec = lazy(() => import(/* webpackPrefetch: true */ './Pages/HomePages/HomeBannerSec'));
@@ -138,6 +134,15 @@ const App = () => {
     };
   }, []);
 
+
+    // hide the right click disable 
+  useEffect(() => {
+   const disableRightClick = (e) => e.preventDefault();
+   document.addEventListener("contextmenu", disableRightClick);
+   return () => document.removeEventListener("contextmenu", disableRightClick);
+ }, []);
+
+ 
   return (
       <VideoControllerProvider>
         {/* Main Content */}
