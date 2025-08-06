@@ -11,8 +11,24 @@ export const postApi = async (url, bodydata) => {
       Authorization: `Bearer ${token}`
     }
     });
-    // console.log("resres :",res.data)
+    console.log("resres :",res.data)
     // return res;
+  } catch (error) {
+    console.error("POST API Error:", error);
+    throw error;
+  }
+};
+export const getApi = async (url) => {
+
+    // console.log("postApi :",url)
+  try {
+    const res = await axios.get(url, {
+      headers:  {
+      Authorization: `Bearer ${token}`
+    }
+    });
+    // console.log("resres :",res.data)
+    return res;
   } catch (error) {
     console.error("POST API Error:", error);
     throw error;

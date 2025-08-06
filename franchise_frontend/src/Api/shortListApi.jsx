@@ -1,5 +1,5 @@
 import { api } from "./api"
-import { postApi } from "./DefaultApi"
+import { getApi, postApi } from "./DefaultApi"
 import { userId } from "../Utils/autherId"
 
 export const handleShortList = async(brandId) => {
@@ -16,3 +16,4 @@ export const handleShortList = async(brandId) => {
     
 
 }
+

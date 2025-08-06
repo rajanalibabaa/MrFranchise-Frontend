@@ -20,7 +20,6 @@ import { useDispatch } from "react-redux";
 import Footer from "../../Components/Footers/Footer.jsx";
 import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
-import ShortlistBrands from "../../Components/HomePage_VideoSection/ShortlistBrands.jsx";
 import SEO from "../../Components/SEO/Seo.jsx";
 import HomeBanner from "../../assets/Images/HomeBanner.avif";
 

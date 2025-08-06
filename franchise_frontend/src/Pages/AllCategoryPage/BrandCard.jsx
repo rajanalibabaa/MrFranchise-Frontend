@@ -25,11 +25,26 @@ import LoginPage from "../LoginPage/LoginPage";
 import { postView } from "../../Utils/function/view";
 import { useDispatch, useSelector } from "react-redux";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
-import { toggleBrandLikefilter, toggleBrandShortListfilter } from "../../Redux/Slices/FilterBrandSlice.jsx";
+import {
+  toggleBrandLikefilter,
+  toggleBrandShortListfilter,
+} from "../../Redux/Slices/FilterBrandSlice.jsx";
 import { likeApiFunction } from "../../Api/likeApi";
 import { handleShortList } from "../../Api/shortListApi";
-import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
-import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice.jsx";
+import {
+  toggleBrandLike,
+  toggleBrandShortList,
+} from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
+import {
+  toggleHomeCardLike,
+  toggleHomeCardShortlist,
+} from "../../Redux/Slices/TopCardFetchingSlice.jsx";
+import {
+  addSortlist,
+  removeSortList,
+} from "../../Redux/Slices/shortlistslice.jsx";
+import { RiBookmark3Fill } from "react-icons/ri";
+import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
 
 const cardStyles = {
   width: { xs: "40vh", sm: "calc(50% - 10px)", md: 260 },
@@ -123,7 +138,7 @@ const BrandCard = memo(
         dispatch(toggleBrandLikefilter(uuid));
         dispatch(toggleBrandLike(uuid));
         dispatch(toggleHomeCardLike(uuid));
-        
+
         // Call the API to update the server
         await likeApiFunction(uuid);
       } catch (error) {
@@ -148,11 +163,14 @@ const BrandCard = memo(
 
       setShortlistProcessing(true);
       try {
+        if (!brand.isShortListed) {
+          dispatch(addSortlist(brand));
+        } else dispatch(removeSortList(brand.uuid));
         // Dispatch the Redux action to update UI immediately
         dispatch(toggleBrandShortListfilter(uuid));
         dispatch(toggleBrandShortList(uuid));
         dispatch(toggleHomeCardShortlist(uuid));
-        
+
         // Call the API to update the server
         await handleShortList(uuid);
       } catch (error) {
@@ -164,7 +182,7 @@ const BrandCard = memo(
       } finally {
         setShortlistProcessing(false);
       }
-    }, [uuid, shortlistProcessing, onShowLogin, dispatch]);
+    }, [brand, uuid, shortlistProcessing, onShowLogin, dispatch]);
 
     const handlePlay = useCallback(() => {
       const allVideos = document.querySelectorAll("video");
@@ -221,7 +239,9 @@ const BrandCard = memo(
           </span>
         </Tooltip>
 
-        <Box sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
+        <Box
+          sx={{ p: 0.5, flexGrow: 1, display: "flex", flexDirection: "column" }}
+        >
           <Box
             sx={{
               position: "relative",
@@ -235,27 +255,23 @@ const BrandCard = memo(
               flexShrink: 0,
             }}
           >
-            <CardMedia
-              component="video"
+            <VideoPlayer
+              id={brand.uuid}
+              videoUrl={brand.franchiseVideos || brand.logo}
+              poster={brand.logo}
+              width="100%"
+              height="100%"
               ref={videoRef}
-              poster={logo}
-              src={franchiseVideos}
-              alt={brandname}
-              controls
-              preload="none"
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-              }}
-              onPlay={handlePlay}
             />
           </Box>
 
           <Divider sx={{ my: 1 }} />
 
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Typography variant="body2" component="div" sx={titleStyles}>
               {brandname}
             </Typography>
@@ -286,9 +302,7 @@ const BrandCard = memo(
                 {shortlistProcessing ? (
                   <CircularProgress size={24} />
                 ) : (
-                  <Tooltip title="ShortList">
-                    <PlaylistAddCheckCircleOutlined />
-                  </Tooltip>
+                  <RiBookmark3Fill size={21} />
                 )}
               </IconButton>
             </Box>

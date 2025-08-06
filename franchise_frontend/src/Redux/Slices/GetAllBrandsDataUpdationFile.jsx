@@ -15,28 +15,30 @@ export const fetchBrands = createAsyncThunk(
       });
 
       // Normalize the brand data to ensure consistent structure
-      const normalizedBrands = response.data.data.brands.map(brand => ({
-        ...brand,
-        brandDetails: {
-          brandName: '',
-          companyName: '',
-          ...brand.brandDetails
-        },
-        brandfranchisedetails: {
-          franchiseDetails: {
-            fico: [],
-            trainingSupport: [],
-            ...brand.brandfranchisedetails?.franchiseDetails
-          },
-          ...brand.brandfranchisedetails
-        },
-        uploads: {
-          logo: '',
-          ...brand.uploads
-        },
-        isLiked: brand.isLiked || false,
-        isCompared: brand.isCompared || false
-      }));
+      // const normalizedBrands = response.data.data.brands.map(brand => ({
+      //   ...brand,
+      //   brandDetails: {
+      //     brandName: '',
+      //     companyName: '',
+      //     ...brand.brandDetails
+      //   },
+      //   brandfranchisedetails: {
+      //     franchiseDetails: {
+      //       fico: [],
+      //       trainingSupport: [],
+      //       ...brand.brandfranchisedetails?.franchiseDetails
+      //     },
+      //     ...brand.brandfranchisedetails
+      //   },
+      //   uploads: {
+      //     logo: '',
+      //     ...brand.uploads
+      //   },
+      //   isLiked: brand.isLiked || false,
+      //   isCompared: brand.isCompared || false
+      // }));
+
+       const normalizedBrands = response.data.data.brands
 
       return {
         brands: normalizedBrands,
