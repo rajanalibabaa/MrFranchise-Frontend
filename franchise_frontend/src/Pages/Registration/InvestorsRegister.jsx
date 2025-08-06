@@ -524,8 +524,10 @@ alert('Add Multiple preferences to get more offers from us!','info')
 
   // Remove preference handler
   const handleRemovePreference = (idx) => {
+  if (window.confirm("Are you sure you want to remove this preference?")) {
     setPreferences(preferences.filter((_, i) => i !== idx));
-  };
+  }
+};
 
   const handleEditPreference = (idx) => {
     const pref = preferences[idx];
@@ -751,6 +753,7 @@ useEffect(() => {
       const response = await axios.post(
                 `http://localhost:5000/investor/createInvestor`,
         formattedData,
+        console.log('investor',formattedData),
         { headers: { "Content-Type": "application/json" } }
       );
       if (response.status === 201) {
@@ -1669,17 +1672,15 @@ flexDirection: isMobile ? "column" : "row",
                     <MenuItem value="">
                       Select preferred Investment Amount
                     </MenuItem>
-                    <MenuItem value="Below - 50,000">Below - Rs.50 K</MenuItem>
-                    <MenuItem value="Rs. 50,000 - 2 L">Rs.50 K - 2 L</MenuItem>
-                    <MenuItem value="Rs. 2 L - 5 L">Rs.2 L - 5 L</MenuItem>
-                    <MenuItem value="Rs. 5 L - 10 L">Rs.5 L - 10 L</MenuItem>
-                    <MenuItem value="Rs. 10L - 20 L">Rs.10 L - 20 L</MenuItem>
-                    <MenuItem value="Rs. 20 L - 30 L">Rs.20 L - 30 L</MenuItem>
-                    <MenuItem value="Rs. 30 L - 50 L">Rs.30 L - 50 L</MenuItem>
-                    <MenuItem value="Rs. 50 L - 1 Cr">Rs.50 L - 1 Cr</MenuItem>
-                    <MenuItem value="Rs. 1 Cr - 2 Crs">Rs.1 Cr - 2 Cr</MenuItem>
-                    <MenuItem value="Rs. 2 Crs - 5 Crs">Rs.2 Cr - 5 Cr</MenuItem>
-                    <MenuItem value="Rs. 5Crs - above">Rs.5 Cr - Above</MenuItem>
+                  <MenuItem value="Below 50K">Below Rs.50K</MenuItem>
+<MenuItem value="50K - 2L">Rs.50K - 2L</MenuItem>
+<MenuItem value="2L - 5L">Rs.2L - 5L</MenuItem>
+<MenuItem value="5L - 10L">Rs.5L - 10L</MenuItem>
+<MenuItem value="10L - 20L">Rs.10L - 20L</MenuItem>
+<MenuItem value="20L - 50L">Rs.20L - 50L</MenuItem>
+<MenuItem value="50L - 1Cr">Rs.50L - 1Cr</MenuItem>
+<MenuItem value="1Cr - 5Cr">Rs.1Cr - 5Cr</MenuItem>
+<MenuItem value="Above 5Cr">Above Rs.5Cr</MenuItem>
                   </TextField>
                 )}
               />
@@ -2327,14 +2328,14 @@ flexDirection: isMobile ? "column" : "row",
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <IconButton
                       color="primary"
-                      onClick={() => onEdit(idx)}
+                      onClick={() =>handleEditPreference(idx)}
                       aria-label="edit preference"
                     >
                       <EditIcon fontSize="small" />
                     </IconButton>
                     <IconButton
                       color="error"
-                      onClick={() => onRemove(idx)}
+onClick={() => handleRemovePreference(idx)}
                       aria-label="remove preference"
                     >
                       <DeleteIcon fontSize="small" />

@@ -340,7 +340,7 @@ const MembershipSelection = ({ onNext }) => {
               fontSize: '1rem',
               fontWeight: 700,
               borderRadius: 2,
-              background: selectedPlan.gradient,
+              background: '#ffad33',
               boxShadow: `0 4px 15px ${selectedPlan.color}40`,
               '&:hover': {
                 transform: 'translateY(-2px)',

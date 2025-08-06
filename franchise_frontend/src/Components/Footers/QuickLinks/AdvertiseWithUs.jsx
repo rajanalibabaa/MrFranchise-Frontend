@@ -12,11 +12,12 @@ import {
   Stack,
   IconButton
 } from '@mui/material';
-import { ArrowBack, ArrowForward, Close } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, Close ,Home} from '@mui/icons-material';
 import MembershipSelection from './PaymentPAge/MembershipPayment';
 import BannerAdsSelection from './PaymentPAge/HomePageAdsLeads';
 import PaymentPage from './PaymentPAge/PaymentPage';
-
+import Navbar from '../../Navbar/NavBar';
+import Footer from '../../Footers/Footer';
 const steps = ['Select Membership', 'Banner Ads', 'Payment'];
 
 const AdvertisingPage = () => {
@@ -47,7 +48,9 @@ const AdvertisingPage = () => {
   const handleBack = () => {
     setActiveStep((prevStep) => prevStep - 1);
   };
-
+ const handleGoToHome = () => {
+    navigate('/');
+  };
   const handleSkip = () => {
     if (activeStep === 1) {
       setBanners([]); // Skip banner selection
@@ -81,8 +84,9 @@ const AdvertisingPage = () => {
     }
   };
 
-  return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+  return (<Box>
+    <Box><Navbar/></Box>
+    <Container  sx={{ py: 4 }}>
       <Box>
         
 
@@ -94,7 +98,7 @@ const AdvertisingPage = () => {
             fontWeight: 800,
             textAlign: 'center',
             mb: 4,
-            background: 'linear-gradient(90deg, #4f46e5, #ec4899)',
+            background: 'linear-gradient(90deg, #ffad33, #6fff00fa)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             letterSpacing: '-0.5px'
@@ -148,62 +152,99 @@ const AdvertisingPage = () => {
         </Box>
 
         {/* Navigation buttons */}
-        {activeStep !== 0 && (
-          <Stack 
-            direction="row" 
-            justifyContent="space-between" 
-            sx={{ mt: 4 }}
-          >
-            <Button
-              startIcon={<ArrowBack />}
-              onClick={handleBack}
-              variant="outlined"
-              sx={{
-                borderRadius: 2,
-                px: 3,
-                textTransform: 'none'
-              }}
-            >
-              Back
-            </Button>
+       {activeStep !== 0 && (
+  <Stack direction="row" justifyContent="space-between" sx={{ mt: 4 }}>
+    {/* Back Button (always shown except on first step) */}
+    <Button
+      startIcon={<ArrowBack />}
+      onClick={handleBack}
+      variant="outlined"
+      sx={{
+        borderRadius: 2,
+        px: 3,
+        textTransform: 'none'
+      }}
+    >
+      Back
+    </Button>
             
-            {activeStep < steps.length - 1 && (
-              <Stack direction="row" spacing={2}>
-                <Button
-                  variant="text"
-                  onClick={handleSkip}
-                  sx={{
-                    borderRadius: 2,
-                    px: 3,
-                    textTransform: 'none',
-                    color: theme.palette.text.secondary
-                  }}
-                >
-                  Skip this step
-                </Button>
-                <Button
-                  endIcon={<ArrowForward />}
-                  onClick={activeStep === 0 ? () => {} : handleNext}
-                  variant="contained"
-                  disabled={activeStep === 0 && !membership}
-                  sx={{
-                    borderRadius: 2,
-                    px: 3,
-                    textTransform: 'none',
-                    background: 'linear-gradient(90deg, #4f46e5, #ec4899)',
-                    '&:hover': {
-                      background: 'linear-gradient(90deg, #4338ca, #db2777)'
-                    }
-                  }}
-                >
-                  {activeStep === steps.length - 1 ? 'Complete Payment' : 'Continue'}
-                </Button>
-              </Stack>
-            )}
-          </Stack>
-        )}
+            {activeStep === steps.length - 1 ? (
+      // Final step - Show Complete Payment button
+      <Button
+        endIcon={<ArrowForward />}
+        onClick={handlePaymentSubmit}
+        variant="contained"
+        sx={{
+          borderRadius: 2,
+          px: 3,
+          textTransform: 'none',
+          background: 'linear-gradient(90deg, #10b981, #3b82f6)',
+          '&:hover': {
+            background: 'linear-gradient(90deg, #0d9e6e, #2563eb)'
+          }
+        }}
+      >
+        Complete Payment
+      </Button>
+    ) : activeStep === 1 && (membership?.tier === "Free" || membership?.price === 0) ? (
+      // Step 1 with Free Membership - Show Go Back to Home
+      <Button
+        startIcon={<Home />}
+        onClick={handleGoToHome}
+        variant="contained"
+        sx={{
+          borderRadius: 2,
+          px: 4,
+          py: 1.5,
+          textTransform: 'none',
+          background: 'linear-gradient(90deg, #10b981, #3b82f6)',
+          boxShadow: '0 4px 6px rgba(16, 185, 129, 0.2)',
+          '&:hover': {
+            background: 'linear-gradient(90deg, #059669, #2563eb)',
+            boxShadow: '0 6px 8px rgba(16, 185, 129, 0.3)'
+          }
+        }}
+      >
+        Go Back to Home
+      </Button>
+    ) : (
+      // Default case - Show Skip + Continue buttons
+      <Stack direction="row" spacing={2}>
+        <Button
+          variant="text"
+          onClick={handleSkip}
+          sx={{
+            borderRadius: 2,
+            px: 3,
+            textTransform: 'none',
+            color: theme.palette.text.secondary
+          }}
+        >
+          Skip this step
+        </Button>
+        <Button
+          endIcon={<ArrowForward />}
+          onClick={handleNext}
+          variant="contained"
+          disabled={activeStep === 0 && !membership}
+          sx={{
+            borderRadius: 2,
+            px: 3,
+            textTransform: 'none',
+            background: 'linear-gradient(90deg, #4f46e5, #ec4899)',
+            '&:hover': {
+              background: 'linear-gradient(90deg, #4338ca, #db2777)'
+            }
+          }}
+        >
+          Continue
+        </Button>
+      </Stack>
+    )}
+  </Stack>
+)}
       </Box>
-    </Container>
+    </Container><Box><Footer/></Box></Box>
   );
 };
 
