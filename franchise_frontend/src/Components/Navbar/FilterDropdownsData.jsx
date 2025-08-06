@@ -92,47 +92,42 @@ const FilterDropdowns = ({ onFilterChange }) => {
     [dispatch, onFilterChange]
   );
 
+  
   // Format investment ranges for display
-  const formattedInvestmentRanges = useMemo(() => {
-    if (!investmentRanges || investmentRanges.length === 0) {
-      return [{ label: "All Ranges", value: "" }];
-    }
+const formattedInvestmentRanges = useMemo(() => {
+  if (!investmentRanges || investmentRanges.length === 0) {
+    return [{ label: "All Ranges", value: "" }];
+  }
 
-    const convertToRupees = (val) => {
-      if (!val) return 0;
-      val = val.trim().replace(/Rs\.?\s*/i, "");
-      if (val.includes(",")) val = val.replace(/,/g, "");
+  // Helper function to convert range to numerical value (in rupees)
+  const getRangeValue = (range) => {
+    // Handle special cases first
+    if (range.includes("Below")) return 0;
+    if (range === "Rs. 50,000 - 2 L") return 50000;
+    
+    // Extract the minimum value from the range
+    const match = range.match(/Rs\.?\s*([\d,\.]+)\s*(L|Cr|Crs)?/i);
+    if (!match) return Number.MAX_SAFE_INTEGER;
+    
+    const num = parseFloat(match[1].replace(/,/g, ''));
+    const unit = match[2] ? match[2].toLowerCase() : '';
+    
+    // Convert to rupees
+    if (unit === 'cr') return num * 10000000;
+    if (unit === 'l') return num * 100000;
+    return num;
+  };
 
-      if (val.toLowerCase().includes("cr")) {
-        return parseFloat(val) * 1_00_00_000;
-      } else if (val.toLowerCase().includes("l")) {
-        return parseFloat(val) * 1_00_000;
-      } else {
-        return parseFloat(val);
-      }
-    };
+  // Sort ranges based on their numerical value
+  const sortedRanges = [...investmentRanges].sort((a, b) => {
+    return getRangeValue(a) - getRangeValue(b);
+  });
 
-    const getMinValue = (range) => {
-      const matches = range.match(/Rs\.?\s*([\d,\.]+\s*(L|Cr|Crs)?)/gi);
-      if (!matches) return Number.MAX_SAFE_INTEGER;
-
-      const values = matches.map((m) => convertToRupees(m));
-      return Math.min(...values);
-    };
-
-    const sortedRanges = [...investmentRanges]
-      .map((range) => ({
-        label: range,
-        value: range,
-        sortValue: getMinValue(range),
-      }))
-      .sort((a, b) => a.sortValue - b.sortValue);
-
-    return [
-      { label: "All Ranges", value: "" },
-      ...sortedRanges.map(({ label, value }) => ({ label, value })),
-    ];
-  }, [investmentRanges]);
+  return [
+    { label: "All Ranges", value: "" },
+    ...sortedRanges.map((range) => ({ label: range, value: range })),
+  ];
+}, [investmentRanges]);
 
   // Handle search button click
 // In your FilterDropdowns component

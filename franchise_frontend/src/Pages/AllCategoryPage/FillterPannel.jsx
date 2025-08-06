@@ -669,79 +669,115 @@ const FilterPanel = React.memo(
         </Accordion>
 
         {/* Investment Range Filter */}
-        <Accordion
-          expanded={expandedSections.investment}
-          onChange={() => toggleSection("investment")}
-          disableGutters
-          elevation={0}
-          sx={{ mb: 2, "&:before": { display: "none" } }}
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon sx={{ color: "#4caf50" }} />}
-            sx={{
-              px: 1,
-              // "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
-              "&.Mui-expanded": { minHeight: "48px" },
-            }}
-          >
-            <Typography sx={{ color: "#4caf50", fontWeight: "bold", fontSize: "0.875rem" }}>
-              Investment Range
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails sx={{ p: 0 }}>
-            <Box sx={{ px: 3, pt: 1 }}>
-              <TextField
-                fullWidth
-                size="small"
-                placeholder="Search investment ranges..."
-                value={searchTerms.investmentRange}
-                onChange={handleSearchTermChange("investmentRange")}
-                sx={{ mb: 1 }}
-                InputProps={{
-                  startAdornment: <SearchIcon fontSize="small" sx={{ mr: 1, color: "#ff9800" }} />,
-                }}
-              />
-              <RadioGroup
-                value={filters.investmentRange || ""}
-                onChange={(e) => onFilterChange("investmentRange", e.target.value)}
-              >
-                <FormControlLabel
-                  value=""
-                  control={
-                    <Radio
-                      size="small"
-                      sx={{
-                        color: "#ff9800",
-                        "&.Mui-checked": { color: "#4caf50" },
-                        padding: "6px",
-                      }}
-                    />
-                  }
-                  label={<Typography fontSize="0.8125rem">All Ranges</Typography>}
-                  sx={{ mb: 0, mr: 0 }}
+      {/* Investment Range Filter */}
+<Accordion
+  expanded={expandedSections.investment}
+  onChange={() => toggleSection("investment")}
+  disableGutters
+  elevation={0}
+  sx={{ mb: 2, "&:before": { display: "none" } }}
+>
+  <AccordionSummary
+    expandIcon={<ExpandMoreIcon sx={{ color: "#4caf50" }} />}
+    sx={{
+      px: 1,
+      "&.Mui-expanded": { minHeight: "48px" },
+    }}
+  >
+    <Typography sx={{ color: "#4caf50", fontWeight: "bold", fontSize: "0.875rem" }}>
+      Investment Range
+    </Typography>
+  </AccordionSummary>
+  <AccordionDetails sx={{ p: 0 }}>
+    <Box sx={{ px: 3, pt: 1 }}>
+      <TextField
+        fullWidth
+        size="small"
+        placeholder="Search investment ranges..."
+        value={searchTerms.investmentRange}
+        onChange={handleSearchTermChange("investmentRange")}
+        sx={{ mb: 1 }}
+        InputProps={{
+          startAdornment: <SearchIcon fontSize="small" sx={{ mr: 1, color: "#ff9800" }} />,
+        }}
+      />
+      <RadioGroup
+        value={filters.investmentRange || ""}
+        onChange={(e) => onFilterChange("investmentRange", e.target.value)}
+      >
+        <FormControlLabel
+          value=""
+          control={
+            <Radio
+              size="small"
+              sx={{
+                color: "#ff9800",
+                "&.Mui-checked": { color: "#4caf50" },
+                padding: "6px",
+              }}
+            />
+          }
+          label={<Typography fontSize="0.8125rem">All Ranges</Typography>}
+          sx={{ mb: 0, mr: 0 }}
+        />
+        {filteredInvestmentRanges
+          .slice() // Create a copy to avoid mutating the original array
+          .sort((a, b) => {
+            // Create a priority map for special cases
+            const priorityMap = {
+              "Below - 50,000": 0,
+              "Rs. 50,000 - 2 L": 1,
+              "Rs. 2 L - 5 L": 2,
+              "Rs. 5 L - 10 L": 3,
+              "Rs. 10 L - 20 L": 4,
+              "Rs. 20 L - 30 L": 5,
+              "Rs. 30 L - 50 L": 6,
+              "Rs. 50 L - 1 Cr": 7,
+              "Rs. 1 Cr - 2 Crs": 8,
+              "Rs. 2 Crs - 5 Crs": 9
+            };
+
+            // If both ranges are in our priority map, use that order
+            if (priorityMap[a] !== undefined && priorityMap[b] !== undefined) {
+              return priorityMap[a] - priorityMap[b];
+            }
+
+            // Fallback to numerical comparison for unknown ranges
+            const getValue = (range) => {
+              if (range.includes("Below")) return 0;
+              const match = range.match(/(\d[\d,.]*)/);
+              if (!match) return 0;
+              const num = parseFloat(match[0].replace(/,/g, ''));
+              if (range.includes("Cr")) return num * 10000000;
+              if (range.includes("L")) return num * 100000;
+              return num;
+            };
+
+            return getValue(a) - getValue(b);
+          })
+          .map((range) => (
+            <FormControlLabel
+              key={`range-${range}`}
+              value={range}
+              control={
+                <Radio
+                  size="small"
+                  sx={{
+                    color: "#ff9800",
+                    "&.Mui-checked": { color: "#4caf50" },
+                    padding: "6px",
+                  }}
                 />
-                {filteredInvestmentRanges.map((range) => (
-                  <FormControlLabel
-                    key={`range-${range}`}
-                    value={range}
-                    control={
-                      <Radio
-                        size="small"
-                        sx={{
-                          color: "#ff9800",
-                          "&.Mui-checked": { color: "#4caf50" },
-                          padding: "6px",
-                        }}
-                      />
-                    }
-                    label={<Typography fontSize="0.8125rem">{range}</Typography>}
-                    sx={{ mb: 0, mr: 0 }}
-                  />
-                ))}
-              </RadioGroup>
-            </Box>
-          </AccordionDetails>
-        </Accordion>
+              }
+              label={<Typography fontSize="0.8125rem">{range}</Typography>}
+              sx={{ mb: 0, mr: 0 }}
+            />
+          ))}
+      </RadioGroup>
+    </Box>
+  </AccordionDetails>
+</Accordion>
+
 
         <Divider sx={{ my: 2 }} />
         <Typography variant="body2" sx={{ color: "#4caf50", textAlign: "center" }}>

@@ -546,8 +546,10 @@ const InvestorRegister = () => {
 
   // Remove preference handler
   const handleRemovePreference = (idx) => {
+  if (window.confirm("Are you sure you want to remove this preference?")) {
     setPreferences(preferences.filter((_, i) => i !== idx));
-  };
+  }
+};
 
   const handleEditPreference = (idx) => {
     const pref = preferences[idx];
@@ -779,6 +781,7 @@ const InvestorRegister = () => {
       const response = await axios.post(
         `http://localhost:5000/api/v1/investor/createInvestor`,
         formattedData,
+        console.log('investor',formattedData),
         { headers: { "Content-Type": "application/json" } }
       );
       if (response.status === 201) {
