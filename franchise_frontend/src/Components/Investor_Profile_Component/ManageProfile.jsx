@@ -209,7 +209,7 @@ const ManageProfile = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `http://localhost:5000/investor/getInvestorByUUID/${investorUUID}`,
+          `http://localhost:5000/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -217,7 +217,8 @@ const ManageProfile = () => {
             },
           }
         );
-
+ console.log("API Response:", response.data);
+ con
         if (response.data?.data) {
           const data = response.data.data;
           const formattedData = {
