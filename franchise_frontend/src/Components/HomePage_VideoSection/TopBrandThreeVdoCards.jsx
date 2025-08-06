@@ -37,7 +37,7 @@ import { token } from "../../Utils/autherId";
 import { RiBookmark3Fill, RiBookMarkedFill } from "react-icons/ri";
 import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
-import { addSortlist, removeSortList } from "../../Redux/Slices/shortlistslice.jsx";
+import { addSortlist, removeSortList, toggleSortlistBrandLike } from "../../Redux/Slices/shortlistslice.jsx";
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -182,6 +182,7 @@ function TopBrandVdoCards() {
       return;
     }
     dispatch(toggleBrandLike(brandId));
+    dispatch(toggleSortlistBrandLike(brandId));
     dispatch(toggleHomeCardLike(brandId));
     await likeApiFunction(brandId);
   };

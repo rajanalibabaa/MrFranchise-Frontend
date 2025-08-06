@@ -20,9 +20,6 @@ import ArrowRight from "@mui/icons-material/ArrowRight";
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchBrands,
-  toggleLikeBrand,
-  viewApi,
-  openBrandDialog,
 } from "../../Redux/Slices/brandSlice";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
 
@@ -105,39 +102,6 @@ const TopLeadingFranchise = () => {
     return () => window.removeEventListener("resize", updateVisibleCards);
   }, [dimensions.width, isMobile]);
 
-  const handleLikeClick = useCallback(
-    (brandId, isLiked) => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        setShowLogin(true);
-        return;
-      }
-
-      setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-      dispatch(toggleLikeBrand({ brandId, isLiked }))
-        .unwrap()
-        .finally(() => {
-          setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
-        });
-    },
-    [dispatch]
-  );
-
-  const handleApply = useCallback(
-    (brand) => {
-      const token = localStorage.getItem("accessToken");
-      const id =
-        localStorage.getItem("investorUUID") ||
-        localStorage.getItem("brandUUID");
-
-      if (token && id) {
-        dispatch(viewApi(brand.uuid));
-      }
-
-      dispatch(openBrandDialog(brand));
-    },
-    [dispatch]
-  );
 
   const getScrollDistance = useCallback(() => {
     return dimensions.width + (isMobile ? 16 : 24);
@@ -364,8 +328,6 @@ const TopLeadingFranchise = () => {
               <motion.div key={brand.uuid}>
                 <HomePageBrandCard
                   brand={brand}
-                  handleApply={handleApply}
-                  handleLikeClick={handleLikeClick}
                   likeProcessing={likeProcessing}
                   dimensions={dimensions}
                   theme={theme}

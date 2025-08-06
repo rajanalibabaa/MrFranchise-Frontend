@@ -30,7 +30,7 @@ import { likeApiFunction } from "../../Api/likeApi";
 import { handleShortList } from "../../Api/shortListApi";
 import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
 import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice.jsx";
-import { addSortlist, removeSortList } from "../../Redux/Slices/shortlistslice.jsx";
+import { addSortlist, removeSortList, toggleSortlistBrandLike } from "../../Redux/Slices/shortlistslice.jsx";
 
 const cardStyles = {
   width: { xs: "40vh", sm: "calc(50% - 10px)", md: 260 },
@@ -119,6 +119,7 @@ const BrandCard = memo(
       }
 
       setLikeProcessing(true);
+      dispatch(toggleSortlistBrandLike(uuid));
       try {
         // Dispatch the Redux action to update UI immediately
         dispatch(toggleBrandLikefilter(uuid));

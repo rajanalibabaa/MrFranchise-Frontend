@@ -24,7 +24,7 @@ import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/
 import { token } from "../../Utils/autherId";
 import { handleShortList } from "../../Api/shortListApi";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
-import { addSortlist, removeSortList } from "../../Redux/Slices/shortlistslice.jsx";
+import { addSortlist, removeSortList, toggleSortlistBrandLike } from "../../Redux/Slices/shortlistslice.jsx";
 
 const TopInvestVdocardround = () => {
   const [likeProcessing, setLikeProcessing] = useState({});
@@ -110,6 +110,7 @@ const TopInvestVdocardround = () => {
  
     setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
     try {
+      dispatch(toggleSortlistBrandLike(brandId));
        dispatch(toggleBrandLike(brandId));
        dispatch(toggleHomeCardLike(brandId));
        likeApiFunction(brandId);

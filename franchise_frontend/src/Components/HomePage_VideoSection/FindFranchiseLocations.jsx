@@ -134,25 +134,7 @@ const FindFranchiseLocations = () => {
     }
   };
 
-  // Handle like click
-  const handleLikeClick = useCallback((brandId, isLiked) => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      setShowLogin(true);
-      return;
-    }
 
-    setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
-    setTimeout(() => {
-      setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
-      setRemoveMsg(isLiked ? "Brand removed from liked list" : "Brand added to liked list");
-    }, 1000);
-  }, []);
-
-  // Handle apply click
-  const handleApply = useCallback((brand) => {
-    console.log("Applying to brand:", brand.name);
-  }, []);
 
   // Scroll handlers
   const handleScroll = useCallback(() => {
@@ -424,11 +406,9 @@ const FindFranchiseLocations = () => {
         >
           {brands?.length > 0 ? (
             brands.map((brand) => (
-              <motion.div key={brand.uuid || brand.id}>
+              <motion.div key={brand.uuid}>
                 <HomePageBrandCard
                   brand={brand}
-                  handleApply={handleApply}
-                  handleLikeClick={handleLikeClick}
                   likeProcessing={likeProcessing}
                   dimensions={dimensions}
                   theme={theme}

@@ -23,15 +23,16 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 // import { BsFillBookmarkStarFill } from "react-icons/bs";
 import { RiBookmark3Fill } from "react-icons/ri";
-import { toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
+import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
 import {token} from "../../Utils/autherId.jsx"
 import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
 
 import { postView } from "../../Utils/function/view.jsx";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 import { useDispatch } from "react-redux";
-import { addSortlist, removeSortList } from "../../Redux/Slices/shortlistslice.jsx";
-import { toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
+import { addSortlist, removeSortList, toggleSortlistBrandLike } from "../../Redux/Slices/shortlistslice.jsx";
+import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
+import { likeApiFunction } from "../../Api/likeApi.jsx";
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -41,7 +42,7 @@ const HomePageBrandCard = React.memo(
   ({
     brand,
     
-    handleLikeClick,
+    // handleLikeClick,
     likeProcessing,
     dimensions,
     theme,
@@ -115,6 +116,18 @@ const HomePageBrandCard = React.memo(
         console.error("Error toggling shortlist:", error);
       }
     };
+
+    const handleLikeClick =  async(brandId) => {
+           if (!token) {
+             setShowLogin(true);
+             return;
+           }
+           dispatch(toggleSortlistBrandLike(brandId))
+           dispatch(toggleBrandLike(brandId))
+           dispatch(toggleHomeCardLike(brandId))
+           await likeApiFunction(brandId)
+         }
+    
 
     const handleApply = (brand) => {
         postView(brand.uuid);
