@@ -18,6 +18,7 @@ import BannerAdsSelection from './PaymentPAge/HomePageAdsLeads';
 import PaymentPage from './PaymentPAge/PaymentPage';
 import Navbar from '../../Navbar/NavBar';
 import Footer from '../../Footers/Footer';
+import { useNavigate } from 'react-router-dom';
 const steps = ['Select Membership', 'Banner Ads', 'Payment'];
 
 const AdvertisingPage = () => {
@@ -25,7 +26,7 @@ const AdvertisingPage = () => {
   const [membership, setMembership] = useState(null);
   const [banners, setBanners] = useState([]);
   const theme = useTheme();
-
+  const navigate = useNavigate();
   const handleMembershipSelect = (selectedMembership) => {
     setMembership(selectedMembership);
     handleNext();
@@ -53,7 +54,7 @@ const AdvertisingPage = () => {
   };
   const handleSkip = () => {
     if (activeStep === 1) {
-      setBanners([]); // Skip banner selection
+      setBanners([]); 
     }
     handleNext();
   };
