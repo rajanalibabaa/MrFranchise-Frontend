@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useMemo,
   useRef,
+  lazy,
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -18,23 +19,25 @@ import { motion } from "framer-motion";
 import axios from "axios";
 
 // Components
-import Navbar from "../../Components/Navbar/NavBar.jsx";
-import Footer from "../../Components/Footers/Footer.jsx";
-import BrandHeader from "./BrandViewPageHandling/BrandHeaderViewPage.jsx";
-import MediaSection from "./BrandViewPageHandling/MediaSectionViewPage.jsx";
-import ExpansionLocationTags from "./BrandViewPageHandling/ExpansionLocationTags.jsx";
-import ImageDialog from "./BrandViewPageHandling/ImageDialogBoxViewPage.jsx";
-import ApplyDrawer from "./BrandViewPageHandling/ApplyDrawerFormViewPage.jsx";
-import BackToTopButton from "./BrandViewPageHandling/BackToTopButtonViewPage.jsx";
-import FloatingApplyButton from "./BrandViewPageHandling/FloatingApplyButtonViewPage.jsx";
-import LikedBrands from "../../Components/HomePage_VideoSection/LikedBrands.jsx";
-import SimilarBrands from "../../Components/HomePage_VideoSection/SimilarBrands.jsx"
+const Navbar = lazy(() => import("../../Components/Navbar/NavBar.jsx"));
+const Footer = lazy(() => import("../../Components/Footers/Footer.jsx"));
+const BrandHeader = lazy(() =>import ("./BrandViewPageHandling/BrandHeaderViewPage.jsx"));
+const MediaSection = lazy(() =>import ("./BrandViewPageHandling/MediaSectionViewPage.jsx"));
+const ExpansionLocationTags = lazy(() =>import ("./BrandViewPageHandling/ExpansionLocationTags.jsx"));
+const ImageDialog = lazy(() =>import ("./BrandViewPageHandling/ImageDialogBoxViewPage.jsx"));
+const ApplyDrawer = lazy(() =>import ("./BrandViewPageHandling/ApplyDrawerFormViewPage.jsx"));
+const BackToTopButton = lazy(() =>import ("./BrandViewPageHandling/BackToTopButtonViewPage.jsx"));
+const FloatingApplyButton = lazy(() =>import ("./BrandViewPageHandling/FloatingApplyButtonViewPage.jsx"));
+const SimilarBrands = lazy(() =>import ("../../Components/HomePage_VideoSection/SimilarBrands.jsx"));
+const OverviewTab = lazy(() =>import ("./OverviewTab.jsx"));
+
+
+
 
 // Hooks
 import { useBrand } from "../../Hooks/Fetchbrands.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
-import OverviewTab from "./OverviewTab.jsx";
 
 const BrandDetails = ({ brandData }) => {
   const theme = useTheme();
@@ -229,7 +232,7 @@ const BrandDetails = ({ brandData }) => {
           return;
         }
         const response = await axios.post(
-          "http://localhost:5000/api/v1/instantapply/postApplication",
+          "https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication",
           payload,
           {
             headers: { "Content-Type": "application/json" },
@@ -283,7 +286,7 @@ const BrandDetails = ({ brandData }) => {
     if (!investorUUID || !AccessToken) return;
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",

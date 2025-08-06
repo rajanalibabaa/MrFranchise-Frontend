@@ -91,7 +91,7 @@
 // <<<<<<< HEAD
 //           `http://localhost:5000/investor/getInvestorByUUID/${investorUUID}`,
 // =======
-//           `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+//           `http://localhost:5000/api/v1investor/getInvestorByUUID/${investorUUID}`,
 // >>>>>>> d37056e415ba37cc491d4faf137ee52e6e87e872
 // =======
 //           `http://localhost:5000/investor/getInvestorByUUID/${investorUUID}`,
@@ -221,7 +221,7 @@
 // <<<<<<< HEAD
 //         `http://localhost:5000/instantapply/postApplication/${id}`,
 // =======
-//         `https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication/${id}`,
+//         `http://localhost:5000/api/v1instantapply/postApplication/${id}`,
 // >>>>>>> d37056e415ba37cc491d4faf137ee52e6e87e872
 // =======
 //         `http://localhost:5000/instantapply/postApplication/${id}`,

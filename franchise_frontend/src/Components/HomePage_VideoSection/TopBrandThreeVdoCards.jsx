@@ -32,7 +32,10 @@ import {
 } from "../../Redux/Slices/GetAllBrandsDataUpdationFile";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 import { likeApiFunction } from "../../Api/likeApi";
-import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
+import {
+  toggleHomeCardLike,
+  toggleHomeCardShortlist,
+} from "../../Redux/Slices/TopCardFetchingSlice";
 import { token } from "../../Utils/autherId";
 import { RiBookmark3Fill, RiBookMarkedFill } from "react-icons/ri";
 import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
@@ -44,7 +47,7 @@ function TopBrandVdoCards() {
   const [activeVideo, setActiveVideo] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   const [likeProcessing, setLikeProcessing] = useState({});
- const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -76,7 +79,7 @@ function TopBrandVdoCards() {
     (state) => state.brands
   );
 
-// Initial load - runs only once
+  // Initial load - runs only once
   useEffect(() => {
     if (!initialLoadComplete) {
       dispatch(resetBrands());
@@ -119,7 +122,7 @@ function TopBrandVdoCards() {
     }
   }, [brands.length, viewedBrandsCount, hasMore, isLoading, page, dispatch]);
 
-  const handlePrev =  useCallback(() => {
+  const handlePrev = useCallback(() => {
     if (brands.length > 0) {
       setCurrentIndex((prev) => (prev - 1 + brands.length) % brands.length);
     }
@@ -132,15 +135,29 @@ function TopBrandVdoCards() {
     }
   };
   // Video controls
+  // Update your useEffect for video initialization
   useEffect(() => {
-    videoRefs.current.forEach((video) => {
+    videoRefs.current.forEach((video, index) => {
       if (video) {
-        video.autoplay = true;
+        video.autoplay = false; // Disable default autoplay
         video.loop = true;
         video.muted = true;
         video.playsInline = true;
+
+        // Add event listeners
+        video.addEventListener("play", () => handleVideoPlay(index));
+        video.addEventListener("pause", () => handleVideoPause(index));
       }
     });
+
+    return () => {
+      videoRefs.current.forEach((video, index) => {
+        if (video) {
+          video.removeEventListener("play", () => handleVideoPlay(index));
+          video.removeEventListener("pause", () => handleVideoPause(index));
+        }
+      });
+    };
   }, [brands]);
 
   useEffect(() => {
@@ -149,12 +166,13 @@ function TopBrandVdoCards() {
   }, [currentIndex, startAutoSlide]);
 
   const handleVideoPlay = (index) => {
-    setActiveVideo(index);
+    // Pause all other videos
     videoRefs.current.forEach((video, i) => {
       if (video && i !== index) {
         video.pause();
       }
     });
+    setActiveVideo(index);
   };
 
   const handleVideoPause = (index) => {
@@ -190,11 +208,10 @@ function TopBrandVdoCards() {
       setShowLogin(true);
       return;
     }
-    
-      dispatch(toggleBrandShortList(brandId));
-      dispatch(toggleHomeCardShortlist(brandId))
-      await handleShortList(brandId);
-    
+
+    dispatch(toggleBrandShortList(brandId));
+    dispatch(toggleHomeCardShortlist(brandId));
+    await handleShortList(brandId);
   };
 
   const handleApply = (brand) => {
@@ -212,10 +229,15 @@ function TopBrandVdoCards() {
     }
   };
 
- // Loading and error states
+  // Loading and error states
   if (!initialLoadComplete || (isLoading && brands.length === 0)) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight={200}
+      >
         <CircularProgress />
       </Box>
     );
@@ -261,7 +283,7 @@ function TopBrandVdoCards() {
     brands[(currentIndex + 2) % brands.length],
   ].filter(Boolean);
 
-  const Fact =  ({ label, value }) => (
+  const Fact = ({ label, value }) => (
     <Typography variant="body2" color="text.secondary" noWrap>
       <strong>{label}:</strong>&nbsp;{value || "Not Specified"}
     </Typography>
@@ -376,6 +398,7 @@ function TopBrandVdoCards() {
                     >
                       <Button
                         variant="outlined"
+                        aria-label="previous brand"
                         onClick={(e) => {
                           e.stopPropagation();
                           handlePrev();
@@ -419,6 +442,7 @@ function TopBrandVdoCards() {
                       {viewedBrandsCount >= brands.length - 1 && hasMore ? (
                         <Button
                           variant="outlined"
+                          aria-label="next brand"
                           onClick={() => {
                             const nextPage = page + 1;
                             setPage(nextPage);
@@ -465,6 +489,7 @@ function TopBrandVdoCards() {
                       ) : (
                         <Button
                           variant="outlined"
+                          aria-label="next brand"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleNext();
@@ -522,9 +547,10 @@ function TopBrandVdoCards() {
                     objectFit="contain"
                     onPlay={() => handleVideoPlay(0)}
                     onPause={() => handleVideoPause(0)}
-                    autoPlay={true}
+                    autoPlay={false}
                     loop={true}
                     muted={true}
+                    ref={(el) => (videoRefs.current[0] = el?.videoRef || null)}
                   />
                 </Box>
 
@@ -677,6 +703,7 @@ function TopBrandVdoCards() {
                         {isMobile && (
                           <Button
                             variant="contained"
+                            aria-label="view details"
                             onClick={() => handleApply(mainBrand)}
                             sx={{
                               width: "35vh",
@@ -705,6 +732,7 @@ function TopBrandVdoCards() {
                         {!isMobile && (
                           <Button
                             variant="contained"
+                            aria-label="view details"
                             onClick={() => handleApply(mainBrand)}
                             sx={{
                               px: 3,
@@ -763,9 +791,13 @@ function TopBrandVdoCards() {
                               }
                             >
                               <IconButton
-                                onClick={() => handleToggleShortList(mainBrand.uuid)}
+                                onClick={() =>
+                                  handleToggleShortList(mainBrand.uuid)
+                                }
                                 sx={{
-                                  color: mainBrand.isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                                  color: mainBrand.isShortListed
+                                    ? "#7ef400ff"
+                                    : "rgba(0, 0, 0, 0.23)",
                                 }}
                               >
                                 <RiBookmark3Fill size={21} />
@@ -901,7 +933,8 @@ function TopBrandVdoCards() {
                     onPause={() => handleVideoPause(i + 1)}
                   /> */}
                   <VideoPlayer
-                    id={mainBrand.uuid}
+                    key={brand.uuid}
+                    id={brand.uuid}
                     videoUrl={brand.franchiseVideos}
                     poster={brand.logo}
                     width="100%"
@@ -909,9 +942,12 @@ function TopBrandVdoCards() {
                     objectFit="contain"
                     onPlay={() => handleVideoPlay(i + 1)}
                     onPause={() => handleVideoPause(i + 1)}
-                    autoPlay={true}
+                    autoPlay={false} // Controlled manually
                     loop={true}
                     muted={true}
+                    ref={(el) =>
+                      (videoRefs.current[i + 1] = el?.videoRef || null)
+                    }
                   />
                   <Chip
                     label={i === 0 ? "Trending" : "Popular"}
@@ -929,7 +965,6 @@ function TopBrandVdoCards() {
                       fontSize: "0.65rem",
                     }}
                   />
-                 
                 </Box>
                 <CardContent
                   sx={{
@@ -994,7 +1029,13 @@ function TopBrandVdoCards() {
                         />
                       )}
 
-                      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 0.5,
+                        }}
+                      >
                         <Tooltip
                           title={
                             brand.isLiked
@@ -1031,7 +1072,9 @@ function TopBrandVdoCards() {
                             size="small"
                             onClick={() => handleToggleShortList(brand.uuid)}
                             sx={{
-                              color: brand.isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                              color: brand.isShortListed
+                                ? "#7ef400ff"
+                                : "rgba(0, 0, 0, 0.23)",
                             }}
                           >
                             <RiBookmark3Fill size={18} />
@@ -1039,7 +1082,7 @@ function TopBrandVdoCards() {
                         </Tooltip>
                       </Box>
                     </Box>
-                   
+
                     <Box
                       sx={{
                         maxHeight: 80,

@@ -1545,6 +1545,7 @@ const FranchiseDetailsControl = ({
         <Grid item xs={12} mt={1} sx={{ display: "flex", justifyContent: "space-evenly" }}>
           <Button
             variant="contained"
+            aria-label="add-fico-model"
             onClick={handleAddFicoModel}
             size="large"
             sx={{
@@ -2011,6 +2012,7 @@ const FranchiseDetailsControl = ({
               />
               <Button
                 variant="contained"
+                aria-label="add-usp"
                 onClick={handleAddUSP}
                 disabled={!currentUSP.trim()}
                 sx={{

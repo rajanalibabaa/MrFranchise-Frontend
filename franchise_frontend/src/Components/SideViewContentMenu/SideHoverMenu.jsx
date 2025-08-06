@@ -647,6 +647,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
               <Button
                 variant="outlined"
                 color="primary"
+                aria-label="load more brands"
                 onClick={handleLoadMore}
                 disabled={loading}
                 sx={{

@@ -284,7 +284,7 @@ const UploadsControl = ({
                         onChange={handleFileChange("brandLogo", { maxFiles: 1, allowedTypes: ["image/jpeg", "image/png"], maxSize: 2 })}
                       />
                     </UploadButton>
-                    <Button variant="outlined" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
+                    <Button variant="outlined" aria-label="cancel" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
                       Cancel
                     </Button>
                   </>
@@ -367,7 +367,7 @@ const UploadsControl = ({
                         onChange={handleFileChange("franchisePromotionVideo", { maxFiles: 1, allowedTypes: ["video/mp4", "video/quicktime"], maxSize: 25 })}
                       />
                     </UploadButton>
-                    <Button variant="outlined" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
+                    <Button variant="outlined" aria-label="cancel" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
                       Cancel
                     </Button>
                   </>
@@ -468,7 +468,7 @@ const UploadsControl = ({
                     onChange={handleFileChange("pancard", { maxFiles: 1, allowedTypes: ["application/pdf", "image/jpeg", "image/png"], maxSize: 1 })}
                   />
                 </UploadButton>
-                <Button variant="outlined" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
+                <Button variant="outlined" aria-label="cancel" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
                   Cancel
                 </Button>
               </>
@@ -563,7 +563,7 @@ const UploadsControl = ({
                     onChange={handleFileChange("gstCertificate", { maxFiles: 1, allowedTypes: ["application/pdf", "image/jpeg", "image/png"], maxSize: 1 })}
                   />
                 </UploadButton>
-                <Button variant="outlined" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
+                <Button variant="outlined" aria-label="cancel" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
                   Cancel
                 </Button>
               </>
@@ -679,7 +679,7 @@ const UploadsControl = ({
                                   onChange={handleFileChange("exteriorOutlet", { maxFiles: 1, allowedTypes: ["image/jpeg", "image/png"], maxSize: 5 })}
                                 />
                               </UploadButton>
-                              <Button variant="outlined" color="secondary" size="small" onClick={cancelEditFile}>
+                              <Button variant="outlined" aria-label="cancel" color="secondary" size="small" onClick={cancelEditFile}>
                                 Cancel
                               </Button>
                             </Box>
@@ -760,7 +760,7 @@ const UploadsControl = ({
                                   onChange={handleFileChange("interiorOutlet", { maxFiles: 1, allowedTypes: ["image/jpeg", "image/png"], maxSize: 5 })}
                                 />
                               </UploadButton>
-                              <Button variant="outlined" color="secondary" size="small" onClick={cancelEditFile}>
+                              <Button variant="outlined" aria-label="cancel" color="secondary" size="small" onClick={cancelEditFile}>
                                 Cancel
                               </Button>
                             </Box>
@@ -871,6 +871,7 @@ const UploadsControl = ({
             <Grid item xs={12} md={2}>
               <Button
                 variant="contained"
+                aria-label="add"
                 fullWidth
                 sx={{ py: 2, backgroundColor: "#7ad03a", "&:hover": { backgroundColor: "#5db024" }, "&:disabled": { backgroundColor: "#e0e0e0" } }}
                 onClick={() => {
@@ -882,7 +883,7 @@ const UploadsControl = ({
                 {editAwardIndex !== null ? "Update Award" : "Add Award"}
               </Button>
               {editAwardIndex !== null && (
-                <Button variant="outlined" fullWidth sx={{ mt: 1 }} onClick={handleCancelEdit}>
+                <Button variant="outlined" aria-label="cancel" fullWidth sx={{ mt: 1 }} onClick={handleCancelEdit}>
                   Cancel
                 </Button>
               )}
@@ -967,7 +968,7 @@ const UploadsControl = ({
                   })}
                 />
               </UploadButton>
-              <Button variant="outlined" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
+              <Button variant="outlined" aria-label="cancel" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
                 Cancel
               </Button>
             </>
@@ -1020,8 +1021,8 @@ const UploadsControl = ({
           <Typography>Are you sure you want to delete this award? This action cannot be undone.</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmDeleteIndex(null)}>Cancel</Button>
-          <Button onClick={() => handleDeleteAward(confirmDeleteIndex)} color="error" variant="contained">
+          <Button onClick={() => setConfirmDeleteIndex(null)} aria-label="cancel">Cancel</Button>
+          <Button onClick={() => handleDeleteAward(confirmDeleteIndex)} color="error" aria-label="delete" variant="contained">
             Delete
           </Button>
         </DialogActions>

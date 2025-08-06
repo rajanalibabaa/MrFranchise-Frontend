@@ -528,8 +528,7 @@ const NavbarSearch = ({ open, handleClose }) => {
               <List>
                 {searchSuggestions.map((suggestion, index) => (
                   <React.Fragment key={`${suggestion.type}-${suggestion.value}-${index}`}>
-                    <ListItem 
-                      button
+                    <ListItemButton
                       selected={index === activeSuggestion}
                       onMouseEnter={() => setActiveSuggestion(index)}
                       onClick={() => handleSuggestionSelect(suggestion)}
@@ -546,7 +545,7 @@ const NavbarSearch = ({ open, handleClose }) => {
                         }
                         secondaryTypographyProps={{ color: 'text.secondary' }}
                       />
-                    </ListItem>
+                    </ListItemButton>
                     {index < searchSuggestions.length - 1 && <Divider />}
                   </React.Fragment>
                 ))}

@@ -121,7 +121,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
         <TableCell sx={{ color: colors.textPrimary }}>{email || 'N/A'}</TableCell>
         <TableCell sx={{ color: colors.textPrimary }}>{phone || 'N/A'}</TableCell>
         <TableCell>
-          <Button size="small" variant="outlined" onClick={() => handleViewDetails(item)}
+          <Button size="small" variant="outlined" aria-label="details" onClick={() => handleViewDetails(item)}
             sx={{ color: colors.accent, borderColor: colors.accent, '&:hover': { backgroundColor: `${colors.accent}15` }}}>
             Details
           </Button>
@@ -138,7 +138,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
     if (error) return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px', flexDirection: 'column' }}>
       <Typography color="error" variant="h6" gutterBottom>Error Loading Data</Typography>
       <Typography color={colors.textSecondary}>{error}</Typography>
-      <Button variant="contained" sx={{ mt: 2, backgroundColor: colors.accent, '&:hover': { backgroundColor: colors.secondary }}} 
+      <Button variant="contained" aria-label="retry" sx={{ mt: 2, backgroundColor: colors.accent, '&:hover': { backgroundColor: colors.secondary }}} 
         onClick={fetchData}>Retry</Button>
     </Box>;
 
@@ -265,6 +265,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                   setFilterDialogOpen(false); 
                 }} 
                 sx={{ color: colors.textSecondary }}
+                aria-label="reset"
               >
                 Reset
               </Button>
@@ -275,6 +276,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                   backgroundColor: colors.accent, 
                   '&:hover': { backgroundColor: colors.secondary } 
                 }}
+                aria-label="apply"
               >
                 Apply
               </Button>
@@ -444,6 +446,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                         borderColor: colors.accent, 
                         '&:hover': { backgroundColor: `${colors.accent}15` } 
                       }}
+                      aria-label="details"
                     >
                       Details
                     </Button>
@@ -479,12 +482,12 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
       case 1: return <Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button variant={viewType === 'investors' ? 'contained' : 'outlined'} onClick={() => setViewType('investors')}
+            <Button variant={viewType === 'investors' ? 'contained' : 'outlined'} aria-label="investor view" onClick={() => setViewType('investors')}
               sx={viewType === 'investors' ? { backgroundColor: colors.accent, '&:hover': { backgroundColor: colors.secondary } } : 
               { color: colors.accent, borderColor: colors.accent, '&:hover': { backgroundColor: `${colors.accent}15` } }}>
               Investor View ({investorViewsCount})
             </Button>
-            <Button variant={viewType === 'brands' ? 'contained' : 'outlined'} onClick={() => setViewType('brands')}
+            <Button variant={viewType === 'brands' ? 'contained' : 'outlined'} aria-label="brand view" onClick={() => setViewType('brands')}
               sx={viewType === 'brands' ? { backgroundColor: colors.accent, '&:hover': { backgroundColor: colors.secondary } } : 
               { color: colors.accent, borderColor: colors.accent, '&:hover': { backgroundColor: `${colors.accent}15` } }}>
               Brand View ({brandViewsCount})
@@ -553,7 +556,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                   <TableCell sx={{ color: colors.textPrimary }}>{like?.brandDetails?.fullName || like?.firstName || 'Unknown'}</TableCell>
                   <TableCell sx={{ color: colors.textPrimary }}>{like?.brandDetails ? 'Brand' : 'Investor'}</TableCell>
                   <TableCell>
-                    <Button variant="outlined" size="small" onClick={() => handleViewDetails(like)}
+                    <Button variant="outlined" size="small" aria-label="details" onClick={() => handleViewDetails(like)}
                       sx={{ color: colors.accent, borderColor: colors.accent, '&:hover': { backgroundColor: `${colors.accent}15` } }}>
                       Details
                     </Button>
@@ -711,6 +714,7 @@ case 3: return (
                   setFilterDialogOpen(false); 
                 }} 
                 sx={{ color: colors.textSecondary }}
+                aria-label="reset"
               >
                 Reset
               </Button>
@@ -721,6 +725,7 @@ case 3: return (
                   backgroundColor: colors.accent, 
                   '&:hover': { backgroundColor: colors.secondary } 
                 }}
+                aria-label="apply"
               >
                 Apply
               </Button>
@@ -917,6 +922,7 @@ case 3: return (
                         borderColor: colors.accent, 
                         '&:hover': { backgroundColor: `${colors.accent}15` } 
                       }}
+                      aria-label="details"
                     >
                       Details
                     </Button>
@@ -1013,8 +1019,8 @@ default: return null;
         </Box>}
       </DialogContent>
       <DialogActions sx={{ backgroundColor: colors.cardBackground, borderTop: `1px solid ${colors.divider}` }}>
-        <Button onClick={() => setDetailDialogOpen(false)} sx={{ color: colors.textSecondary }}>Close</Button>
-        
+        <Button onClick={() => setDetailDialogOpen(false)} sx={{ color: colors.textSecondary }} aria-label="close">Close</Button>
+
       </DialogActions>
     </Dialog>
   );

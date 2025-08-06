@@ -283,6 +283,7 @@ cursor="pointer"
             <Box sx={{ px: 2, pb: 2 }}>
               <Button
                 variant="contained"
+                aria-label="view details"
                 fullWidth
                 onClick={() => handleApply(brand)}
                 sx={{

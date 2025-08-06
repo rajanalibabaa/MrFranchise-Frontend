@@ -4,7 +4,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { userId } from '../../Utils/autherId';
 
-const API_BASE_URL = 'http://localhost:5000/api/v1/';
+const API_BASE_URL = 'https://mrfranchisebackend.mrfranchise.in/api/v1/';
 
 const id = userId
 
@@ -44,7 +44,7 @@ export const fetchFilteredBrands = createAsyncThunk(
       if (modelType) params.append('modelType', modelType);
 
       const response = await axios.get(`${API_BASE_URL}filter/getAllBrandsAndFilter?${params.toString()}`);
-     
+
       // Normalize the brand data to ensure consistent structure
       const normalizedBrands = response.data.data?.brands?.map(brand => ({
         ...brand,

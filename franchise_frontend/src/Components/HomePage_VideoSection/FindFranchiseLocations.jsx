@@ -338,6 +338,7 @@ const FindFranchiseLocations = () => {
           <Button
             variant="text"
             size="small"
+            aria-label="view more brands"
             endIcon={<ArrowRight />}
             sx={{
               textTransform: "none",
@@ -360,6 +361,7 @@ const FindFranchiseLocations = () => {
       <Box sx={{ position: "relative" }}>
         <Button
           onClick={handlePrevClick}
+          aria-label="previous"
           disabled={!showStartShadow}
           sx={{
             position: "absolute",
@@ -387,6 +389,7 @@ const FindFranchiseLocations = () => {
         <Button
           onClick={handleNextClick}
           disabled={!showEndShadow}
+          aria-label="next"
           sx={{
             position: "absolute",
             right: isMobile ? 4 : 8,

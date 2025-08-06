@@ -53,7 +53,7 @@ const BrandFeedBack = () => {
 
         try {
             const response = await axios.post(
-                "http://localhost:5000/api/feedback/createFeedback",
+                "https://mrfranchisebackend.mrfranchise.in/api/v1/feedback/createFeedback",
                 formattedData,
                 {
                     headers: {
@@ -149,6 +149,7 @@ const BrandFeedBack = () => {
                         type="submit"
                         variant="contained"
                         color="primary"
+                        aria-label="submit feedback"
                         sx={{ alignSelf: "flex-end", borderRadius: 2, px: 4, backgroundColor: "#558b2f" }}
                     >
                         Submit Your Feedback

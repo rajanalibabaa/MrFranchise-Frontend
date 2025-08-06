@@ -316,6 +316,7 @@ const BrandCard = React.memo(({
               variant="contained"
               fullWidth
               onClick={() => handleViewDetails(brand)}
+              aria-label="view details"
               sx={{
                 backgroundColor: "#f29724",
                 "&:hover": {
@@ -608,6 +609,7 @@ const BrandCard = React.memo(({
             <Typography
               variant={isMobile ? "body1" : "h5"}
               fontWeight="bold"
+            
               sx={{
                 color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
                 mb: 1,
@@ -628,6 +630,7 @@ const BrandCard = React.memo(({
             </Typography>
             <Button
               variant="text"
+              aria-label="view more"
               size="small"
               endIcon={<ArrowRight />}
               sx={{
@@ -652,6 +655,7 @@ window.open('/brandviewpage', '_blank')              }
               {showStartShadow && (
                 <Button
                   variant="contained"
+                  aria-label="previous"
                   onClick={handlePrevClick}
                   sx={{
                     position: 'absolute',
@@ -680,6 +684,7 @@ window.open('/brandviewpage', '_blank')              }
               {showEndShadow && (
                 <Button
                   variant="contained"
+                  aria-label="next"
                   onClick={handleNextClick}
                   sx={{
                     position: 'absolute',

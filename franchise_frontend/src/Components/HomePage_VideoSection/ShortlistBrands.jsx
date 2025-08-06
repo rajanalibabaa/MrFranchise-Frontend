@@ -10,17 +10,24 @@ import {
 } from '@mui/material';
 import { ArrowBack, ArrowForward, ArrowRight, Close } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import axios from 'axios';
-import HomePageBrandCard from './HomePageBrandCard'; // adjust import as needed
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchShortlist } from '../../Redux/Slices/shortlistslice.jsx'; // Import your Redux action
+import HomePageBrandCard from './HomePageBrandCard';
 
 const ShortlistBrands = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const dispatch = useDispatch();
 
-  const [brands, setBrands] = useState([]);
-  const [loading, setLoading] = useState(true);       // ✅ start as true
-  const [error, setError] = useState(null);
+  // Get data from Redux store
+  const { 
+    items: brands, 
+    loading, 
+    error, 
+    status 
+  } = useSelector(state => state.shortlist);
+
   const [removeMsg, setRemoveMsg] = useState('');
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showLogin, setShowLogin] = useState(false);
@@ -30,9 +37,10 @@ const ShortlistBrands = () => {
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const scrollRequestRef = useRef(null);
-  const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID") 
-  if(!id) {
-    return null
+  const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
+
+  if (!id) {
+    return null;
   }
 
   const dimensions = {
@@ -41,10 +49,8 @@ const ShortlistBrands = () => {
     desktop: { width: 327, height: 500 },
   }[isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'];
 
-  const easeInOutQuad = (t) =>
-    t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+  const easeInOutQuad = (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
-  // ✏️ Added: smoothScrollTo
   const smoothScrollTo = useCallback((target, immediate = false) => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -65,19 +71,17 @@ const ShortlistBrands = () => {
       if (progress < 1) {
         scrollRequestRef.current = requestAnimationFrame(animateScroll);
       } else {
-        handleScroll(); // update shadows after scroll
+        handleScroll();
       }
     };
 
     scrollRequestRef.current = requestAnimationFrame(animateScroll);
   }, []);
 
-  // ✏️ Added: calculate scroll distance based on card width + gap
   const getScrollDistance = useCallback(() => {
     return dimensions.width + (isMobile ? 16 : 24);
   }, [dimensions.width, isMobile]);
 
-  // ✏️ Changed: handlePrevClick
   const handlePrevClick = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -86,7 +90,6 @@ const ShortlistBrands = () => {
     smoothScrollTo(newScroll);
   }, [getScrollDistance, smoothScrollTo]);
 
-  // ✏️ Changed: handleNextClick
   const handleNextClick = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -96,7 +99,6 @@ const ShortlistBrands = () => {
     smoothScrollTo(newScroll);
   }, [getScrollDistance, smoothScrollTo]);
 
-  // ✏️ Changed: scroll shadow logic
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -104,40 +106,23 @@ const ShortlistBrands = () => {
     setShowEndShadow(container.scrollLeft < container.scrollWidth - container.clientWidth - 10);
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
     container.addEventListener('scroll', handleScroll);
-    handleScroll(); // initial shadows
+    handleScroll();
     return () => {
       container.removeEventListener('scroll', handleScroll);
       if (scrollRequestRef.current) cancelAnimationFrame(scrollRequestRef.current);
     };
   }, [handleScroll]);
 
-  // ✅ Fetch brands once
-  const fetchBrands = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get('http://localhost:5000/api/v1/brandlisting/getAllBrandListing');
-      console.log('Fetched raw data:', res.data);
-
-      const fetched = res.data?.brands || res.data?.data || res.data;
-      console.log('Extracted brands:', fetched);
-
-      setBrands(Array.isArray(fetched) ? fetched : fetched?.brands || []);
-      setError(null);
-    } catch (err) {
-      console.error('Failed to load brands:', err);
-      setError(err.message || 'Failed to load brands');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
+  // Fetch brands using Redux when component mounts
   useEffect(() => {
-    fetchBrands();
-  }, [fetchBrands]);
+    if (id) {
+      dispatch(fetchShortlist());
+    }
+  }, [dispatch, id]);
 
   const handleLikeClick = useCallback((id) => {
     console.log('Like clicked:', id);
@@ -197,12 +182,13 @@ const ShortlistBrands = () => {
               },
             }}
           >
-            Your Sortlist Brands
+            Your Shortlist Brands
           </Typography>
 
           <Button
             variant="text"
             size="small"
+            aria-label="view more brands"
             endIcon={<ArrowRight />}
             sx={{
               textTransform: 'none',
@@ -223,6 +209,7 @@ const ShortlistBrands = () => {
           <Button
             onClick={handlePrevClick}
             disabled={!showStartShadow}
+            aria-label="previous"
             sx={{
               position: 'absolute',
               left: isMobile ? 2 : 8,
@@ -244,6 +231,7 @@ const ShortlistBrands = () => {
           <Button
             onClick={handleNextClick}
             disabled={!showEndShadow}
+            aria-label="next"
             sx={{
               position: 'absolute',
               right: isMobile ? 4 : 8,
@@ -278,7 +266,7 @@ const ShortlistBrands = () => {
               <CircularProgress />
             ) : error ? (
               <Typography color="error">{error}</Typography>
-            ) : brands.length ? (
+            ) : brands?.length ? (
               brands.map((brand) => (
                 <motion.div key={brand.uuid || brand.id}>
                   <HomePageBrandCard
@@ -294,12 +282,11 @@ const ShortlistBrands = () => {
                 </motion.div>
               ))
             ) : (
-              <Typography>No brands found</Typography>
+              <Typography>No brands found in your shortlist</Typography>
             )}
           </Box>
         </Box>
 
-        {/* Optional: Login modal */}
         {showLogin && (
           <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
         )}

@@ -265,6 +265,7 @@ useEffect(() => {
 
           <Button
             variant="text"
+            aria-label="view more brands"
             size="small"
             endIcon={<ArrowRight />}
             sx={{
@@ -288,6 +289,7 @@ useEffect(() => {
           <Button
             onClick={handlePrevClick}
             disabled={!showStartShadow}
+            aria-label="previous"
             sx={{
               position: "absolute",
               left: isMobile ? 2 : 8,
@@ -314,6 +316,7 @@ useEffect(() => {
           <Button
             onClick={handleNextClick}
             disabled={!showEndShadow}
+            aria-label="next"
             sx={{
               position: "absolute",
               right: isMobile ? 4 : 8,

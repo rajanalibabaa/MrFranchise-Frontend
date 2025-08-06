@@ -244,11 +244,6 @@ const bannerTexts = [
   },
 ];
 
-// Configuration object for the entire page
-// Memoized page configuration
-
-// Array of banner texts (3 contents)
-// Memoized banner texts
 
 const HomeBannerSec = () => {
   const theme = useTheme();

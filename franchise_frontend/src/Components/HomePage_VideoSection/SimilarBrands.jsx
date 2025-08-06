@@ -270,6 +270,7 @@ const SimilarBrands = ({ brandData }) => {
           <Button
             variant="text"
             size="small"
+            aria-label="view more brands"
             endIcon={<ArrowRight />}
             sx={{
               textTransform: "none",
@@ -292,6 +293,7 @@ const SimilarBrands = ({ brandData }) => {
           <Button
             onClick={handlePrevClick}
             disabled={!showStartShadow}
+            aria-label="previous"
             sx={{
               position: "absolute",
               left: isMobile ? 2 : 8,
@@ -318,6 +320,7 @@ const SimilarBrands = ({ brandData }) => {
           <Button
             onClick={handleNextClick}
             disabled={!showEndShadow}
+            aria-label="next"
             sx={{
               position: "absolute",
               right: isMobile ? 4 : 8,
