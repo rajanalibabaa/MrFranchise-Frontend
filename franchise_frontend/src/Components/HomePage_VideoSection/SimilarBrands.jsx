@@ -23,7 +23,6 @@ const CARD_DIMENSIONS = {
 
 const SimilarBrands = ({ brandData }) => {
 
-  console.log("similar coming   brandData", brandData);
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -48,7 +47,6 @@ const SimilarBrands = ({ brandData }) => {
   const currentSubCategory = brandData[0]?.brandfranchisedetails?.franchiseDetails?.brandCategories?.main;
   const currentChildCategory = brandData[0]?.brandfranchisedetails?.franchiseDetails?.brandCategories?.child;
   const currentBrandUUID = brandData[0]?.uuid;
-  console.log("category selections", currentSubCategory, currentChildCategory, currentBrandUUID);
 
   // Fetch brands from Redux when brandData changes
   useEffect(() => {

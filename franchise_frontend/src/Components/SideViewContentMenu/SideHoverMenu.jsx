@@ -37,7 +37,6 @@ import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 // Memoized brand card component with optimized props
 const BrandCard = React.memo(
   ({ brand, onClick, isMobile }) => {
-    console.log("calling brand:", brand);
     const brandName = brand.brandname || "Unknown";
     const brandLogo = brand.logo || "";
     const initial = brandName[0] || "B";

@@ -21,6 +21,7 @@ import {
   LocationOn,
 } from "@mui/icons-material";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Footer() {
   const scrollToTop = () => {
@@ -30,7 +31,7 @@ function Footer() {
   const [email, setEmail] = React.useState("");
   const [successMsg, setSuccessMsg] = React.useState("");
   const [response, setresponse] = React.useState("");
-
+  const navigate = useNavigate();
   const handleSubscribe = async () => {
     try {
       const res = await axios.post(
@@ -100,7 +101,6 @@ function Footer() {
                   cursor: "pointer",
                   alignSelf: { xs: "center", md: "flex-start" },
                 }}
-                onClick={scrollToTop}
               />
               <Typography
                 variant="body1"
@@ -343,13 +343,17 @@ function Footer() {
               </Typography>
               <Box sx={{ display: "flex", gap: 1.5 }}>
                 {[
-                  { icon: <Facebook />, color: "#4267B2" },
-                  { icon: <Twitter />, color: "#1DA1F2" },
-                  { icon: <LinkedIn />, color: "#0077B5" },
-                  { icon: <Instagram />, color: "#E1306C" },
+                  { icon: <Facebook  />, color: "#4267B2",url:'https://www.facebook.com/profile.php?id=61575143466373' },
+                  { icon: <Twitter />, color: "#1DA1F2",url:'https://twitter.com/' },
+                  { icon: <LinkedIn />, color: "#0077B5",url:'https://www.linkedin.com/company/mr-franchise-www-mrfranchise-in/posts/?feedView=all&viewAsMember=true' },
+                  { icon: <Instagram />, color: "#E1306C",url:'https://www.instagram.com/mrfranchise.in/' },
                 ].map((social, index) => (
                   <IconButton
                     key={index}
+                    component="a"
+                    href={social.url}
+                    target="_blank"
+        rel="noopener noreferrer"
                     sx={{
                       backgroundColor: `${social.color}20`,
                       color: social.color,

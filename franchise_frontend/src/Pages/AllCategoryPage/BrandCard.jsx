@@ -123,7 +123,6 @@ const BrandCard = memo(
         dispatch(toggleBrandLikefilter(uuid));
         dispatch(toggleBrandLike(uuid));
         dispatch(toggleHomeCardLike(uuid));
-        console.log(uuid)
         
         // Call the API to update the server
         await likeApiFunction(uuid);

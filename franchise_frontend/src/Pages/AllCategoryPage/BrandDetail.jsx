@@ -30,7 +30,7 @@ const BackToTopButton = lazy(() =>import ("./BrandViewPageHandling/BackToTopButt
 const FloatingApplyButton = lazy(() =>import ("./BrandViewPageHandling/FloatingApplyButtonViewPage.jsx"));
 const SimilarBrands = lazy(() =>import ("../../Components/HomePage_VideoSection/SimilarBrands.jsx"));
 const OverviewTab = lazy(() =>import ("./OverviewTab.jsx"));
-
+const LikedBrands = lazy(() =>import ("../../Components/HomePage_VideoSection/LikedBrands.jsx"));
 
 
 
@@ -530,7 +530,7 @@ useEffect(() => {
           handleNextImage={handleNextImage}
         />
       </Box>
-
+<LikedBrands  brandData={brandData}/>
       {/* <LikedBrands /> */}
       <SimilarBrands brandData={brandData}/>
 

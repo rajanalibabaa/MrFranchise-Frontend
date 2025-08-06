@@ -6,6 +6,7 @@ import { useMediaQuery } from "@mui/system";
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setFilter } from '../../Redux/Slices/FilterBrandSlice';
+import Footer from "../../Components/Footers/Footer.jsx";
 
 // Lazy load the BrandList component
 const BrandListNew = lazy(() => import("./BrandListAllbrands.jsx"));
@@ -145,6 +146,7 @@ function BrandCategoryViewPage() {
           <BrandListNew />
         </Suspense>
       </Box>
+      <Footer />
     </>
   );
 }

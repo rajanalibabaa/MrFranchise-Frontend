@@ -26,7 +26,7 @@ const AdvertisingPage = () => {
   const [membership, setMembership] = useState(null);
   const [banners, setBanners] = useState([]);
   const theme = useTheme();
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const handleMembershipSelect = (selectedMembership) => {
     setMembership(selectedMembership);
     handleNext();
@@ -54,7 +54,7 @@ const navigate = useNavigate();
   };
   const handleSkip = () => {
     if (activeStep === 1) {
-      setBanners([]); // Skip banner selection
+      setBanners([]); 
     }
     handleNext();
   };

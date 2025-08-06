@@ -26,7 +26,6 @@ export const fetchShortlist = createAsyncThunk(
       );
       return response.data;
 
-      console.log("Shortlist fetched successfully:", response.data);
     } catch (error) {
       if (error.response) {
         return rejectWithValue(error.response.data.message || 'Failed to fetch shortlist');

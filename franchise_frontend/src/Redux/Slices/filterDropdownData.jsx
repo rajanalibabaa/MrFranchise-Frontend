@@ -16,7 +16,6 @@ export const fetchFilterOptions = createAsyncThunk(
       if (district) queryParams.append('district', district);
  
       const response = await axios.post(`${API_BASE_URL}filter/getAllBrandFiltersdata?${queryParams}`);
-      console.log( response.data.data)
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

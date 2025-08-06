@@ -73,7 +73,6 @@ const BrandComparison = ({
           return Array.isArray(data) ? data[0] : data;
         });
 
-        console.log("✅ Flattened brand details:", details);
         setBrandDetails(details); // Now this will be an array of objects, not arrays
 
         // Initialize current model indexes
@@ -116,7 +115,6 @@ const BrandComparison = ({
       setShowLogin(true);
       return;
     }
-    console.log("handleToggleShortListhandleToggleShortList:",brand)
     try {
       const brandId = brand.uuid;
       dispatch(toggleBrandShortList(brandId));

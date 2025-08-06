@@ -242,7 +242,7 @@ function BrandList() {
       )}
 
       {/* Scroll to Top Button */}
-      {scrollPosition > 300 && !isScrolling && (
+      {/* {scrollPosition > 300 && !isScrolling && (
         <Box sx={{ position: "fixed", bottom: 24, right: 24, zIndex: 1000 }}>
           <IconButton
             onClick={scrollToTop}
@@ -259,7 +259,7 @@ function BrandList() {
             <KeyboardArrowUp fontSize="medium" />
           </IconButton>
         </Box>
-      )}
+      )} */}
 
       <Box display="flex" flexDirection={{ xs: "column", md: "row" }}>
         {/* Desktop Filters */}

@@ -113,7 +113,6 @@ const FindFranchiseLocations = () => {
 
   // Fetch brands based on filters - this is the key fix
   useEffect(() => {
-    console.log("Current filters:", filters);
     if (filters.state || selectedState) {
       const currentFilters = {
         ...filters,
@@ -125,7 +124,6 @@ const FindFranchiseLocations = () => {
 
   // Handle state filter change
   const handleStateChange = (state) => {
-    console.log("State changed to:", state);
     setSelectedState(state);
     dispatch(setFilter({ filterName: "state", value: state }));
     // Reset scroll position when state changes

@@ -664,13 +664,13 @@ const HomeBannerSec = () => {
               sx={{
                 textAlign: "center",
                 color: "rgba(255,255,255,0.9)",
-                fontWeight: 300,
+                fontWeight: 500,
                 mt: 2,
                 mb: 5,
                 maxWidth: "800px",
                 mx: "auto",
                 lineHeight: 1.5,
-                fontSize: isMobile ? "0.6rem" : ".8rem",
+                fontSize: isMobile ? "0.6rem" : ".9rem",
                 textShadow: "0 2px 4px rgba(0,0,0,0.5)",
                 position: "relative",
               }}
