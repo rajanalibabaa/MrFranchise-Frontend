@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Box } from '@mui/material';
 import Lottie from 'lottie-react';
@@ -7,17 +7,18 @@ import loadingAnimation from '../assets/videos/Animation - 1750051841214.json';
 const GlobalLoader = () => {
   const isLoading = useSelector((state) => state.loading.isLoading);
 
-  // Optimized Lottie configuration
-  const lottieConfig = {
+  // Memoize the Lottie configuration to prevent recreation on every render
+  const lottieConfig = useMemo(() => ({
     animationData: loadingAnimation,
     loop: true,
     autoplay: true,
     rendererSettings: {
       preserveAspectRatio: 'xMidYMid slice',
-      progressiveLoad: true // Better for large animations
+      progressiveLoad: true,
     }
-  };
+  }), []);
 
+  // Early return if not loading (before any DOM calculations)
   if (!isLoading) return null;
 
   return (
@@ -34,18 +35,31 @@ const GlobalLoader = () => {
         alignItems: 'center',
         zIndex: 1300,
         backdropFilter: 'blur(2px)',
-        pointerEvents: 'none', // Allows clicks to pass through when loading
+        pointerEvents: 'none',
+        // Hardware acceleration for smoother animations
+        transform: 'translateZ(0)',
+        willChange: 'opacity',
       }}
     >
       <Box sx={{
-        width: { xs: 500, sm: 300, md: 400 },
-        height: { xs: 500, sm: 300, md: 400 },
+        width: { xs: 150, sm: 200, md: 250 }, // Reduced sizes for better performance
+        height: { xs: 150, sm: 200, md: 250 },
+        // Contain the animation to prevent layout shifts
+        contain: 'strict',
       }}>
         <Lottie 
           {...lottieConfig}
           style={{
-            willChange: 'transform', // Optimizes for animations
-            filter: 'drop-shadow(0 0 8px rgba(0, 0, 0, 0.1))'
+            width: '100%',
+            height: '100%',
+            // Optimizations for smoother animation
+            willChange: 'transform',
+            transform: 'translateZ(0)',
+            // Reduce animation quality slightly for performance
+            rendererSettings: {
+              ...lottieConfig.rendererSettings,
+              quality: 'medium',
+            }
           }}
         />
       </Box>
@@ -53,4 +67,4 @@ const GlobalLoader = () => {
   );
 };
 
-export default React.memo(GlobalLoader); // Memoize to prevent unnecessary re-renders
+export default React.memo(GlobalLoader);

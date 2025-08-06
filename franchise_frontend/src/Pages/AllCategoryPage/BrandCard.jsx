@@ -1,11 +1,4 @@
-import React, {
-  useState,
-  useCallback,
-  memo,
-  useMemo,
-  useRef,
-  useEffect,
-} from "react";
+import React, { useState, useCallback, memo, useMemo, useRef } from "react";
 import {
   Box,
   Button,
@@ -29,12 +22,14 @@ import {
   PlaylistAddCheckCircleOutlined,
 } from "@mui/icons-material";
 import LoginPage from "../LoginPage/LoginPage";
-// import { openBrandDialog, useToggleLike } from "../../Hooks/Fetchbrands";
 import { postView } from "../../Utils/function/view";
-import { handleShortList } from "../../Api/shortListApi";
-import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 import { useDispatch, useSelector } from "react-redux";
-import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+import { toggleBrandLikefilter, toggleBrandShortListfilter } from "../../Redux/Slices/FilterBrandSlice.jsx";
+import { likeApiFunction } from "../../Api/likeApi";
+import { handleShortList } from "../../Api/shortListApi";
+import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
+import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice.jsx";
 
 const cardStyles = {
   width: { xs: "40vh", sm: "calc(50% - 10px)", md: 260 },
@@ -82,22 +77,28 @@ const viewButtonStyles = {
 const BrandCard = memo(
   ({
     brand,
-    handleLikeClick,
-    likeProcessing,
     showLogin,
     onShowLogin,
     isSelectedForComparison,
     onToggleBrandComparison,
     maxComparisonReached,
   }) => {
-    const { uuid, isLiked, isShortListed } = brand;
-
-    const [brandLike, setBrandLike] = useState(isLiked);
-    const [shortListed, setShortListed] = useState(isShortListed);
-    const videoRef = useRef(null);
-    const [currentlyPlayingId, setCurrentlyPlayingId] = useState(null);
+    const {
+      uuid,
+      isLiked,
+      isShortListed,
+      brandname,
+      logo,
+      franchiseVideos,
+      brandCategories,
+      fico,
+    } = brand;
 
     const dispatch = useDispatch();
+    const [likeProcessing, setLikeProcessing] = useState(false);
+    const [shortlistProcessing, setShortlistProcessing] = useState(false);
+    const videoRef = useRef(null);
+
     const handleOpenBrand = useCallback(() => {
       if ("requestIdleCallback" in window) {
         requestIdleCallback(() => postView(uuid));
@@ -105,10 +106,10 @@ const BrandCard = memo(
         setTimeout(() => postView(uuid), 0);
       }
       dispatch(openBrandDialog(brand));
-    }, [uuid, brand]);
+    }, [uuid, brand, dispatch]);
 
-    const handleLike = useCallback(() => {
-      if (likeProcessing[uuid]) return;
+    const handleLike = useCallback(async () => {
+      if (likeProcessing) return;
       const token = localStorage.getItem("accessToken");
 
       if (!token) {
@@ -116,51 +117,63 @@ const BrandCard = memo(
         return;
       }
 
-      handleLikeClick(uuid, brandLike);
-      setBrandLike(!brandLike);
-    }, [uuid, brandLike, handleLikeClick, likeProcessing, onShowLogin]);
-
-    const handlePlay = useCallback(() => {
-      // Pause all other videos
-      allVideosRef.current.forEach((video) => {
-        if (video !== videoRef.current && !video.paused) {
-          video.pause();
-        }
-      });
-      setIsPlaying(true);
-    }, []);
-
-    const handlePause = useCallback(() => {
-      setIsPlaying(false);
-    }, []);
-
-    // useEffect(() => {
-    //   const allVideos = document.querySelectorAll('video');
-    //   allVideos.forEach(video => {
-    //     if (video !== videoRef.current && currentlyPlayingId === brand.uuid) {
-    //       video.pause();
-    //     }
-    //   });
-    // }, [currentlyPlayingId, brand.uuid]);
+      setLikeProcessing(true);
+      try {
+        // Dispatch the Redux action to update UI immediately
+        dispatch(toggleBrandLikefilter(uuid));
+        dispatch(toggleBrandLike(uuid));
+        dispatch(toggleHomeCardLike(uuid));
+        console.log(uuid)
+        
+        // Call the API to update the server
+        await likeApiFunction(uuid);
+      } catch (error) {
+        console.error("Error toggling like:", error);
+        // Revert the change if API call fails
+        dispatch(toggleBrandLikefilter(uuid));
+        dispatch(toggleBrandLike(uuid));
+        dispatch(toggleHomeCardLike(uuid));
+      } finally {
+        setLikeProcessing(false);
+      }
+    }, [uuid, likeProcessing, onShowLogin, dispatch]);
 
     const handleToggleShortList = useCallback(async () => {
+      if (shortlistProcessing) return;
+      const token = localStorage.getItem("accessToken");
+
+      if (!token) {
+        onShowLogin(true);
+        return;
+      }
+
+      setShortlistProcessing(true);
       try {
-        const response = await handleShortList(brand);
-        if (response.success) {
-          setShortListed(!shortListed);
-        }
+        // Dispatch the Redux action to update UI immediately
+        dispatch(toggleBrandShortListfilter(uuid));
+        dispatch(toggleBrandShortList(uuid));
+        dispatch(toggleHomeCardShortlist(uuid));
+        
+        // Call the API to update the server
+        await handleShortList(uuid);
       } catch (error) {
         console.error("Error toggling shortlist:", error);
+        // Revert the change if API call fails
+        dispatch(toggleBrandShortListfilter(uuid));
+        dispatch(toggleBrandShortList(uuid));
+        dispatch(toggleHomeCardShortlist(uuid));
+      } finally {
+        setShortlistProcessing(false);
       }
-    }, [brand, shortListed]);
+    }, [uuid, shortlistProcessing, onShowLogin, dispatch]);
 
-    useEffect(() => {
-      if (videoRef.current) {
-        allVideosRef.current.add(videoRef.current);
-        return () => {
-          allVideosRef.current.delete(videoRef.current);
-        };
-      }
+    const handlePlay = useCallback(() => {
+      const allVideos = document.querySelectorAll("video");
+      allVideos.forEach((vid) => {
+        if (vid !== videoRef.current) {
+          vid.pause();
+        }
+      });
     }, []);
 
     return (
@@ -209,9 +222,7 @@ const BrandCard = memo(
           </span>
         </Tooltip>
 
-        <Box
-          sx={{ p: 1, flexGrow: 1, display: "flex", flexDirection: "column" }}
-        >
+        <Box sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
           <Box
             sx={{
               position: "relative",
@@ -225,43 +236,42 @@ const BrandCard = memo(
               flexShrink: 0,
             }}
           >
-            <VideoPlayer
+            <CardMedia
+              component="video"
               ref={videoRef}
-              id={brand.uuid} // or any unique identifier
-              videoUrl={brand.franchiseVideos}
-              poster={brand.logo}
-              width="100%"
-              height="100%"
-              objectFit="cover"
-              showControls={true} // equivalent to 'controls' in CardMedia
-              autoPlay={false} // set to true if you want autoplay
-              loop={false} // set to true if you want looping
-              muted={true} // videos are often muted by default for autoplay
+              poster={logo}
+              src={franchiseVideos}
+              alt={brandname}
+              controls
+              preload="none"
+              sx={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+              onPlay={handlePlay}
             />
           </Box>
 
           <Divider sx={{ my: 1 }} />
 
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
+          <Box display="flex" justifyContent="space-between" alignItems="center">
             <Typography variant="body2" component="div" sx={titleStyles}>
-              {brand.brandname}
+              {brandname}
             </Typography>
             <Box>
               <IconButton
                 onClick={handleLike}
-                disabled={likeProcessing[uuid]}
+                disabled={likeProcessing}
                 size="small"
               >
-                {likeProcessing[uuid] ? (
+                {likeProcessing ? (
                   <CircularProgress size={24} />
                 ) : (
                   <Favorite
                     sx={{
-                      color: brandLike ? "#f44336" : "rgba(0, 0, 0, 0.23)",
+                      color: isLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
                     }}
                   />
                 )}
@@ -269,13 +279,18 @@ const BrandCard = memo(
               <IconButton
                 onClick={handleToggleShortList}
                 size="small"
+                disabled={shortlistProcessing}
                 sx={{
-                  color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                  color: isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
                 }}
               >
-                <Tooltip title="ShortList">
-                  <PlaylistAddCheckCircleOutlined />
-                </Tooltip>
+                {shortlistProcessing ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  <Tooltip title="ShortList">
+                    <PlaylistAddCheckCircleOutlined />
+                  </Tooltip>
+                )}
               </IconButton>
             </Box>
           </Box>
@@ -289,9 +304,9 @@ const BrandCard = memo(
               alignItems: "center",
             }}
           >
-            {brand.brandCategories?.child ? (
+            {brandCategories?.child ? (
               <Chip
-                label={brand.brandCategories.child}
+                label={brandCategories.child}
                 size="small"
                 sx={{
                   bgcolor: "rgba(255, 152, 0, 0.1)",
@@ -310,17 +325,17 @@ const BrandCard = memo(
             <DetailItem
               icon={<AttachMoney />}
               label="Investment"
-              value={brand.fico?.investmentRange}
+              value={fico?.investmentRange}
             />
             <DetailItem
               icon={<AreaChart />}
               label="Area"
-              value={brand.fico?.areaRequired}
+              value={fico?.areaRequired}
             />
             <DetailItem
               icon={<Business />}
               label="Franchise Model"
-              value={brand.fico?.franchiseModel}
+              value={fico?.franchiseModel}
             />
           </Box>
 
@@ -347,8 +362,7 @@ const BrandCard = memo(
     prevProps.brand.isShortListed === nextProps.brand.isShortListed &&
     prevProps.isSelectedForComparison === nextProps.isSelectedForComparison &&
     prevProps.showLogin === nextProps.showLogin &&
-    prevProps.maxComparisonReached === nextProps.maxComparisonReached &&
-    prevProps.likeProcessing === nextProps.likeProcessing
+    prevProps.maxComparisonReached === nextProps.maxComparisonReached
 );
 
 const DetailItem = memo(({ icon, label, value }) => {
@@ -369,7 +383,7 @@ const DetailItem = memo(({ icon, label, value }) => {
     <Box display="flex" alignItems="center">
       {clonedIcon}
       <Typography variant="caption" noWrap>
-        <span style={{ fontWeight: 400 }}>{label}:</span> {value}
+        <span style={{ fontWeight: 400 }}>{label}:</span> {value || "N/A"}
       </Typography>
     </Box>
   );

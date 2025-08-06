@@ -44,6 +44,7 @@ function TopBrandVdoCards() {
   const [activeVideo, setActiveVideo] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   const [likeProcessing, setLikeProcessing] = useState({});
+ const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -75,11 +76,15 @@ function TopBrandVdoCards() {
     (state) => state.brands
   );
 
-  // Initial load
+// Initial load - runs only once
   useEffect(() => {
-    dispatch(resetBrands());
-    dispatch(fetchBrands({ page: 1 }));
-  }, [dispatch]);
+    if (!initialLoadComplete) {
+      dispatch(resetBrands());
+      dispatch(fetchBrands({ page: 1 })).then(() => {
+        setInitialLoadComplete(true);
+      });
+    }
+  }, [dispatch, initialLoadComplete]);
 
   // Update hasMore when pagination changes
   useEffect(() => {
@@ -114,16 +119,16 @@ function TopBrandVdoCards() {
     }
   }, [brands.length, viewedBrandsCount, hasMore, isLoading, page, dispatch]);
 
-  const handlePrev = () => {
+  const handlePrev =  useCallback(() => {
     if (brands.length > 0) {
       setCurrentIndex((prev) => (prev - 1 + brands.length) % brands.length);
     }
-  };
+  }, [brands.length]);
 
   const startAutoSlide = () => {
     clearTimeout(timeoutRef.current);
     if (!isHovered && brands.length > 0) {
-      timeoutRef.current = setTimeout(() => handleNext(), 5000);
+      timeoutRef.current = setTimeout(() => handleNext(), 15000);
     }
   };
   // Video controls
@@ -207,14 +212,10 @@ function TopBrandVdoCards() {
     }
   };
 
-  if (isLoading && brands.length === 0) {
+ // Loading and error states
+  if (!initialLoadComplete || (isLoading && brands.length === 0)) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight={200}
-      >
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
         <CircularProgress />
       </Box>
     );
@@ -260,7 +261,7 @@ function TopBrandVdoCards() {
     brands[(currentIndex + 2) % brands.length],
   ].filter(Boolean);
 
-  const Fact = ({ label, value }) => (
+  const Fact =  ({ label, value }) => (
     <Typography variant="body2" color="text.secondary" noWrap>
       <strong>{label}:</strong>&nbsp;{value || "Not Specified"}
     </Typography>

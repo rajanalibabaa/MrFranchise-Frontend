@@ -1,20 +1,25 @@
-
 import React, { lazy, Suspense, useEffect, useCallback } from "react";
-
+import SEO from "../../Components/SEO/Seo";
 import Navbar from "../../Components/Navbar/NavBar";
 import { Box, CircularProgress, useTheme } from "@mui/material";
 import { useMediaQuery } from "@mui/system";
-
-// Lazy load the BrandList component
-const BrandListNew = lazy(() => import("./BrandListAllbrands.jsx"));
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setFilter } from '../../Redux/Slices/FilterBrandSlice';
+
+// Lazy load the BrandList component
+const BrandListNew = lazy(() => import("./BrandListAllbrands.jsx"));
+
 function BrandCategoryViewPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-const location = useLocation();
+  const location = useLocation();
   const dispatch = useDispatch();
+
+  // Get category from URL
+  const category = new URLSearchParams(location.search).get('subcat') || 'Food & Beverage';
+  const state = new URLSearchParams(location.search).get('state') || 'India';
+  const investmentRange = new URLSearchParams(location.search).get('investmentRange') || '';
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -31,9 +36,72 @@ const location = useLocation();
     }
   }, [location.search, dispatch]);
 
+  // Generate dynamic title and description
+  const seoTitle = investmentRange 
+    ? `${category} Franchises Under ₹${investmentRange} in ${state} | MrFranchise`
+    : `Top ${category} Franchise Opportunities in ${state} | MrFranchise`;
+    
+  const seoDescription = investmentRange
+    ? `Explore ${category} franchise opportunities under ₹${investmentRange} in ${state}. Find low investment, high ROI food business franchises.`
+    : `Browse 1000+ ${category.toLowerCase()} franchise opportunities in ${state}. Compare brands, investment & ROI to find your perfect business.`;
+
+  // Schema markup
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://mrfranchise.in"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": `${category} Franchises`,
+        "item": `https://mrfranchise.in/franchises/${category.toLowerCase().replace(/ /g, '-')}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": state !== 'India' ? `${category} Franchises in ${state}` : `${category} Franchises`,
+        "item": window.location.href
+      }
+    ]
+  };
+
+  const categorySchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": `${category} Franchise Opportunities`,
+    "description": `List of ${category} franchise brands available in ${state}`,
+    "url": window.location.href,
+    "numberOfItems": 1000 // Update with actual count
+  };
 
   return (
     <>
+      <SEO
+        title={seoTitle}
+        description={seoDescription}
+        keywords={`${category} franchise, ${category.toLowerCase()} business opportunities, franchise in ${state}, low investment franchise`}
+        canonical={window.location.href}
+        url={window.location.href}
+        image="https://mrfranchise.in/images/franchise-category.jpg"
+        schema={[breadcrumbSchema, categorySchema]}
+        og={{
+          type: "website",
+          title: seoTitle,
+          description: seoDescription
+        }}
+        twitter={{
+          card: "summary_large_image",
+          title: seoTitle,
+          description: seoDescription
+        }}
+      />
+
       {isMobile && (
         <Box
           style={{
@@ -74,7 +142,7 @@ const location = useLocation();
             </Box>
           }
         >
-          <BrandListNew  />
+          <BrandListNew />
         </Suspense>
       </Box>
     </>

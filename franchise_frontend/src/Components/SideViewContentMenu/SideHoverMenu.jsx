@@ -543,10 +543,10 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
           <Typography variant="h6" gutterBottom>
             Oops! Brands Under Updating Process
           </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+          {/* <Typography variant="body2" sx={{ mb: 2 }}>
             {error || "Failed to load brands. Please try again later."}
-          </Typography>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          </Typography> */}
+          {/* <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Chip
               label="Retry"
               onClick={() => {
@@ -571,7 +571,7 @@ const SideViewContent = ({ hoverCategory, onHoverLeave }) => {
                 fontWeight: "bold",
               }}
             />
-          </motion.div>
+          </motion.div> */}
         </Box>
       );
     }

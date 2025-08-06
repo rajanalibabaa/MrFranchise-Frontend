@@ -109,7 +109,7 @@ function Navbar() {
     try {
       const response = await axios.post(
       
-        `http://localhost:5000/logout/${ID}`,
+        `http://localhost:5000/api/v1/logout/${ID}`,
         {},
         {
           headers: {
@@ -527,41 +527,7 @@ function Navbar() {
           position: 'relative',
           zIndex: 1
         }}>
-          {/* <motion.div whileHover={{ scale: 1.1 }}>
-            <IconButton size="small" sx={{ color: 'rgba(253, 182, 16, 0.9)' }}>
-              <Badge badgeContent={3} color="error">
-                <MessageSquare size={18} />
-              </Badge>
-            </IconButton>
-          </motion.div> */}
           
-          {/* <FormControl variant="standard" size="small" sx={{ minWidth: isMobile ? 80 : 10 }}>
-            <Select
-              value="en"
-              disableUnderline
-              sx={{
-                color: '#ff9800',
-                '& .MuiSelect-icon': {
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  right: 8,
-                  top: 'calc(50% - 8px)'
-                },
-                '&:before': {
-                  borderBottom: 'none'
-                },
-                '&:hover:not(.Mui-disabled):before': {
-                  borderBottom: 'none'
-                }
-              }}
-            > 
-              {/* <MenuItem value="en" sx={{ color: '#ff9800'}}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Globe size={18} color="rgba(5, 5, 5, 0.9)" /> 
-                  <span>EN</span>
-                </Box>
-              </MenuItem> 
-            </Select>
-          </FormControl> */}
         </Box>
         </Toolbar>
 

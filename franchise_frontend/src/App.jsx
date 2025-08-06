@@ -158,7 +158,7 @@ useEffect(() => {
             />  
           </Route>
 
-          <Route path="/brandsearchview" element={<BrandCategroyViewPage />} />
+          {/* <Route path="/brandsearchview" element={<BrandCategroyViewPage />} /> */}
 
           {/* {Footer paths} */}
           <Route path='/aboutus' element ={<AboutUs/>}/>
