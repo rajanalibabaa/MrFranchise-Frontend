@@ -16,7 +16,7 @@
 
 //                 if (!token) {
 //                     response = await axios.get(
-//                         "http://localhost:5000/api/v1/brandlisting/getAllBrandListing",
+//                         "http://localhost:5000/api/v1brandlisting/getAllBrandListing",
 //                         {
 //                             headers: {
 //                                 "Content-Type": "application/json",
@@ -25,7 +25,7 @@
 //                     );
 //                 } else {
 //                     response = await axios.get(
-//                         `http://localhost:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
+//                         `http://localhost:5000/api/v1like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
 //                         {
 //                             headers: {
 //                                 "Content-Type": "application/json",

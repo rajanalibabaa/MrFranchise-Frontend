@@ -139,8 +139,10 @@ const ShortlistBrands = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    fetchBrands();
-  }, [fetchBrands]);
+    if (id) {
+      dispatch(fetchShortlist());
+    }
+  }, [dispatch, id]);
 
   // Brand actions
  

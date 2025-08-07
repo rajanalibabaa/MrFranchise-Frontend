@@ -279,7 +279,6 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
   };
 
   const [otpToken, setOtpToken] = useState(null); // Add this state for token storage
-  console.log("Token:", otpToken);
 
   // OTP Verification Functions - Fixed Version
   const handleSendOtp = async (field) => {
@@ -294,7 +293,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/otpverify/send-otp-email",
+        "https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-email",
         {
           [field === "email" ? "email" : "phone"]: data[field],
           type: field,
@@ -309,7 +308,6 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
       // Modified success check to match backend response
       if (response.data.token) {
         setOtpToken(response.data.token);
-        console.log("OTP Token stored:", response.data.token);
 
         setVerificationState((prev) => ({
           ...prev,
@@ -376,10 +374,9 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
     }));
 
     try {
-      console.log("Verifying with token:", otpToken); // Debug log
 
       const response = await axios.post(
-        "http://localhost:5000/api/v1/otpverify/verify-otp",
+        "https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/verify-otp",
         {
           identifier: data[field],
           otp: otpInput,
@@ -503,36 +500,7 @@ const BrandDetails = ({ data = {}, errors = {}, onChange }) => {
               />
             </InputAdornment>
           ),
-          // endAdornment: (
-          //   <InputAdornment position="end">
-          //     {verificationState.mobileNumber.verified ? (
-          //       <Box display="flex" alignItems="center" color="success.main">
-          //         <CheckCircleIcon fontSize="medium" />
-          //         <Typography variant="caption" sx={{ ml: 0.5 }}>
-          //           Verified
-          //         </Typography>
-          //       </Box>
-          //     ) : (
-          //       <Button
-          //         variant="outlined"
-          //         size="medium"
-          //         onClick={() => handleVerificationDialog("mobileNumber", true)}
-          //         disabled={
-          //           !data.mobileNumber || verificationState.mobileNumber.loading
-          //         }
-          //         startIcon={
-          //           verificationState.mobileNumber.loading ? (
-          //             <CircularProgress size={14} />
-          //           ) : (
-          //             <SendIcon fontSize="medium" />
-          //           )
-          //         }
-          //       >
-          //         Verify
-          //       </Button>
-          //     )}
-          //   </InputAdornment>
-          // ),
+         
         }}
         required
       />

@@ -160,6 +160,7 @@ const HomePageBrandCard = React.memo(
         poster={brand.logo}
         width="100%"
         height={dimensions.height * 0.4}
+        ref={videoRef}
       />
           <Box sx={{ display: "flex", flexDirection: "column" }}>
             <CardContent sx={{ pb: 1 }}>
@@ -306,6 +307,7 @@ cursor="pointer"
             <Box sx={{ px: 2, pb: 2 }}>
               <Button
                 variant="contained"
+                aria-label="view details"
                 fullWidth
                 onClick={() => handleApply(brand)}
                 sx={{

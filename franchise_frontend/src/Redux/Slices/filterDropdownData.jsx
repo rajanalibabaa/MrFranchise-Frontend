@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
  
-const API_BASE_URL = 'http://localhost:5000/api/v1/';
+const API_BASE_URL = 'https://mrfranchisebackend.mrfranchise.in/api/v1/';
  
 // Async thunk for fetching all filter options
 export const fetchFilterOptions = createAsyncThunk(
@@ -16,7 +16,6 @@ export const fetchFilterOptions = createAsyncThunk(
       if (district) queryParams.append('district', district);
  
       const response = await axios.post(`${API_BASE_URL}filter/getAllBrandFiltersdata?${queryParams}`);
-      console.log( response.data.data)
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);

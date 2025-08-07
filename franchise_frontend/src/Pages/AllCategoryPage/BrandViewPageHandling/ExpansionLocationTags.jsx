@@ -9,7 +9,6 @@ const ExpansionLocationTags = ({
   isLargeDesktop,
 }) => {
 
-  console.log('exp',brand)
   // Process location data more safely with null checks
   const locations = useMemo(() => {
     try {

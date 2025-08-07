@@ -55,7 +55,7 @@ const BrandComparison = ({
       setLoading(true);
       try {
         const promises = selectedBrands.map((brand) =>
-  axios.get(`http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${brand.uuid}`, {
+  axios.get(`https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandListingByUUID/${brand.uuid}`, {
     params: {
       userId: userId
     }
@@ -73,7 +73,6 @@ const BrandComparison = ({
           return Array.isArray(data) ? data[0] : data;
         });
 
-        console.log("✅ Flattened brand details:", details);
         setBrandDetails(details); // Now this will be an array of objects, not arrays
 
         // Initialize current model indexes
@@ -116,7 +115,6 @@ const BrandComparison = ({
       setShowLogin(true);
       return;
     }
-    console.log("handleToggleShortListhandleToggleShortList:",brand)
     try {
       const brandId = brand.uuid;
       dispatch(toggleBrandShortList(brandId));

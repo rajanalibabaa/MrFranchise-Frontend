@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Typography,
@@ -12,14 +11,12 @@ import {
   TableCell,
   TableRow,
   Paper,
-  Divider,
   CircularProgress,
 } from "@mui/material";
 import {
   Phone,
   Favorite,
   ShareOutlined,
-  PlaylistAddCheckCircleOutlined,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import ShareDialogActions from "../ShareDialogActions";

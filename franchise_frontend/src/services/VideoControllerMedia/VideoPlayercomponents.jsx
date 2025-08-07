@@ -257,6 +257,37 @@ export const VideoPlayer = ({
           onClick={togglePlayPause}
         />
 
+        {/* Centered play/pause button */}
+        {showControls && (
+          <Tooltip title={isPlaying ? 'Pause' : 'Play'}>
+            <IconButton 
+              onClick={togglePlayPause} 
+              size="large"
+              disabled={hasError}
+              sx={{ 
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                color: 'white',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                  transform: 'translate(-50%, -50%) scale(1.1)'
+                },
+                '&:disabled': {
+                  opacity: 0.5
+                },
+                width: 64,
+                height: 64,
+                zIndex: 2
+              }}
+            >
+              {isPlaying ? <Pause fontSize="large" /> : <PlayArrow fontSize="large" />}
+            </IconButton>
+          </Tooltip>
+        )}
+
         {/* Fallback poster or error message */}
         {(!isLoaded || hasError) && poster && (
           <Box
@@ -269,7 +300,7 @@ export const VideoPlayer = ({
               left: 0,
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
+              objectFit: 'contain',
               cursor: 'pointer',
               zIndex: 0,
               filter: hasError ? 'grayscale(80%)' : 'none',
@@ -349,26 +380,6 @@ export const VideoPlayer = ({
 
             {/* Control buttons */}
             <Box display="flex" alignItems="center" gap={1} px={1}>
-              <Tooltip title={isPlaying ? 'Pause' : 'Play'}>
-                <IconButton 
-                  onClick={togglePlayPause} 
-                  size="small" 
-                  disabled={hasError}
-                  sx={{ 
-                    color: 'white',
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.7)'
-                    },
-                    '&:disabled': {
-                      opacity: 0.5
-                    }
-                  }}
-                >
-                  {isPlaying ? <Pause fontSize="small" /> : <PlayArrow fontSize="small" />}
-                </IconButton>
-              </Tooltip>
-
               <Tooltip title={isMuted ? 'Unmute' : 'Mute'}>
                 <IconButton 
                   onClick={toggleMute} 

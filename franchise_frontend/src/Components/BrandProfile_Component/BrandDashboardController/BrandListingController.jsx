@@ -166,7 +166,7 @@ const BrandListingController = () => {
       }
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${uuid}`
+          `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandListingByUUID/${uuid}`
         );
         const brand = response.data.brandListing || response.data.data;
         if (response.data.success && brand) {
@@ -256,7 +256,7 @@ const BrandListingController = () => {
   const sendOtp = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/v1/otpverify/send-otp-email`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-email`,
         {
           email: formData.email,
         },
@@ -290,7 +290,7 @@ const BrandListingController = () => {
 
     try {
       const response = await axios.post(
-       `http://localhost:5000/api/v1/otpverify/verify-otp`,
+       `https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/verify-otp`,
       //  `http://localhost:5000/otpverify/verify-otp`,
         {
           identifier: formData.email,
@@ -374,7 +374,7 @@ const BrandListingController = () => {
     // console.log("formDataSend:", formDataSend);
 
     const response = await axios.patch(
-      `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
+      `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
       formDataSend,
       {
         headers: {
@@ -457,6 +457,7 @@ const BrandListingController = () => {
 
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button 
+          aria-label="cancel"
             onClick={handleCloseOtpDialog} 
             disabled={otpVerifying}
             variant="outlined"
@@ -479,6 +480,7 @@ const BrandListingController = () => {
             }}
             disabled={otpSending || otpVerifying}
             variant="outlined"
+            aria-label="resend-otp"
             sx={{ ml: 'auto' }}
           >
             {otpSending ? <CircularProgress size={20} /> : 'Resend OTP'}
@@ -487,6 +489,7 @@ const BrandListingController = () => {
             onClick={verifyOtp}
             color="primary"
             variant="contained"
+            aria-label="verify-otp"
             disabled={!otp || otp.length !== 6 || otpSending || otpVerifying}
           >
             {otpVerifying ? <CircularProgress size={20} /> : 'Verify'}
@@ -497,7 +500,7 @@ const BrandListingController = () => {
       {/* Edit / Save Buttons */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
         {!isEditing ? (
-          <Button variant="outlined" onClick={handleEditClick}>
+          <Button variant="outlined" aria-label="edit" onClick={handleEditClick}>
             Edit
           </Button>
         ) : (
@@ -505,6 +508,7 @@ const BrandListingController = () => {
             <Button
               variant="contained"
               color="primary"
+              aria-label="save"
               onClick={handleSave}
               disabled={saveStatus.loading}
               startIcon={saveStatus.loading ? <CircularProgress size={20} /> : null}
@@ -515,6 +519,7 @@ const BrandListingController = () => {
             <Button
               variant="outlined"
               color="secondary"
+              aria-label="cancel"
               onClick={handleCancel}
               disabled={saveStatus.loading}
             >

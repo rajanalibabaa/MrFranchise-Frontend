@@ -1093,6 +1093,7 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
             variant="outlined"
             fullWidth
             color="warning"
+            aria-label="expand-domestic-states"
             onClick={() => toggle(true)}
             endIcon={<ChevronDown />}
             sx={{ justifyContent: "space-between" }}
@@ -1123,7 +1124,7 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
               <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800" }}>
                 Select States
               </Typography>
-              <Button variant="outlined" color="warning" onClick={() => toggle(false)}>
+              <Button variant="outlined" color="warning" aria-label="done" onClick={() => toggle(false)}>
                 Done
               </Button>
             </Box>
@@ -1254,6 +1255,7 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           <Button
             variant="outlined"
             color="warning"
+            aria-label="expand-domestic-districts"
             fullWidth
             onClick={() => toggle(true)}
             endIcon={<ChevronDown />}
@@ -1284,7 +1286,7 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
               <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800" }}>
                 Select Districts
               </Typography>
-              <Button variant="outlined" color="warning" onClick={() => toggle(false)}>
+              <Button variant="outlined" color="warning" aria-label="done" onClick={() => toggle(false)}>
                 Done
               </Button>
             </Box>
@@ -1475,6 +1477,7 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           <Button
             variant="outlined"
             color="warning"
+            aria-label="select-cities"
             fullWidth
             onClick={() => toggle(true)}
             endIcon={<ChevronDown />}
@@ -1505,7 +1508,7 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
               <Typography variant="h6" sx={{ color: "#ff9800", fontWeight: 700 }}>
                 Select Cities
               </Typography>
-              <Button variant="outlined" color="warning" onClick={() => toggle(false)}>
+              <Button variant="outlined" color="warning" aria-label="done" onClick={() => toggle(false)}>
                 Done
               </Button>
             </Box>
@@ -1692,6 +1695,7 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
             variant="outlined"
             color="success"
             fullWidth
+            aria-label="select-international-countries"
             onClick={() => toggle(true)}
             endIcon={<ChevronDown />}
             sx={{ justifyContent: "space-between" }}
@@ -1722,7 +1726,7 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 Select Countries
               </Typography>
-              <Button variant="outlined" color="warning" onClick={() => toggle(false)}>
+              <Button variant="outlined" aria-label="done" color="warning" onClick={() => toggle(false)}>
                 Done
               </Button>
             </Box>
@@ -1859,6 +1863,7 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           <Button
             variant="outlined"
             color="warning"
+            aria-label="select-international-states"
             fullWidth
             onClick={() => toggle(true)}
             endIcon={<ChevronDown />}
@@ -1889,7 +1894,7 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
               <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800" }}>
                 Select States
               </Typography>
-              <Button variant="outlined" color="warning" onClick={() => toggle(false)}>
+              <Button variant="outlined" color="warning" aria-label="done" onClick={() => toggle(false)}>
                 Done
               </Button>
             </Box>
@@ -2084,6 +2089,7 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
           <Button
             variant="outlined"
             color="warning"
+            aria-label="select-cities"
             fullWidth
             onClick={() => toggle(true)}
             endIcon={<ChevronDown />}
@@ -2115,7 +2121,7 @@ const BrandExpansionLocationDetails = ({ data, onChange, errors }) => {
               <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800" }}>
                 Select Cities
               </Typography>
-              <Button variant="outlined" color="warning" onClick={() => toggle(false)}>
+              <Button variant="outlined" aria-label="done" color="warning" onClick={() => toggle(false)}>
                 Done
               </Button>
             </Box>

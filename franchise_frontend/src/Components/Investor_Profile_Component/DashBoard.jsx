@@ -162,7 +162,7 @@ const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, 
   const brandName = item.brandDetails?.brandName || "Unnamed Brand";
   const brandLogo = item.uploads?.brandLogo?.[0] || img;
 
-  // console.log('===',isLiked);
+
   
   return (
     <Box sx={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
@@ -337,8 +337,7 @@ const Dashboard = () => {
   
   const investorUUID = useSelector((state) => state.auth?.investorUUID);
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
-  console.log('likedBrands',likedBrands);
-  console.log('likedStates',likedStates);
+
   
   // Memoized stats calculation
   const stats = useMemo(() => ({
@@ -384,10 +383,7 @@ const Dashboard = () => {
       ]);
 
 
-      console.log('likedRes',likedRes);
-      console.log('viewedRes',viewedRes);
-      console.log('appliedRes',appliedRes);
-      console.log('userRes',userRes);
+     
       
       setLikedBrands(likedRes);
       setViewedBrands(viewedRes);

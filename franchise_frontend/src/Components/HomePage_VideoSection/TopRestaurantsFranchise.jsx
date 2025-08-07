@@ -235,6 +235,7 @@ const TopRestaurantsFranchise = () => {
  
            <Button
              variant="text"
+             aria-label="View More"
              size="small"
              endIcon={<ArrowRight />}
              sx={{
@@ -257,6 +258,7 @@ const TopRestaurantsFranchise = () => {
          <Box sx={{ position: "relative" }}>
            <Button
              onClick={handlePrevClick}
+              aria-label="previous"
              disabled={!showStartShadow}
              sx={{
                position: "absolute",
@@ -283,6 +285,7 @@ const TopRestaurantsFranchise = () => {
  
            <Button
              onClick={handleNextClick}
+             aria-label="next"
              disabled={!showEndShadow}
              sx={{
                position: "absolute",

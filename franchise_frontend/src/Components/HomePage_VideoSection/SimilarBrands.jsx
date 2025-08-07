@@ -23,7 +23,6 @@ const CARD_DIMENSIONS = {
 
 const SimilarBrands = ({ brandData }) => {
 
-  console.log("similar coming   brandData", brandData);
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -48,7 +47,6 @@ const SimilarBrands = ({ brandData }) => {
   const currentSubCategory = brandData[0]?.brandfranchisedetails?.franchiseDetails?.brandCategories?.main;
   const currentChildCategory = brandData[0]?.brandfranchisedetails?.franchiseDetails?.brandCategories?.child;
   const currentBrandUUID = brandData[0]?.uuid;
-  console.log("category selections", currentSubCategory, currentChildCategory, currentBrandUUID);
 
   // Fetch brands from Redux when brandData changes
   useEffect(() => {
@@ -270,6 +268,7 @@ const SimilarBrands = ({ brandData }) => {
           <Button
             variant="text"
             size="small"
+            aria-label="view more brands"
             endIcon={<ArrowRight />}
             sx={{
               textTransform: "none",
@@ -292,6 +291,7 @@ const SimilarBrands = ({ brandData }) => {
           <Button
             onClick={handlePrevClick}
             disabled={!showStartShadow}
+            aria-label="previous"
             sx={{
               position: "absolute",
               left: isMobile ? 2 : 8,
@@ -318,6 +318,7 @@ const SimilarBrands = ({ brandData }) => {
           <Button
             onClick={handleNextClick}
             disabled={!showEndShadow}
+            aria-label="next"
             sx={{
               position: "absolute",
               right: isMobile ? 4 : 8,

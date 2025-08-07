@@ -113,7 +113,6 @@ const FindFranchiseLocations = () => {
 
   // Fetch brands based on filters - this is the key fix
   useEffect(() => {
-    console.log("Current filters:", filters);
     if (filters.state || selectedState) {
       const currentFilters = {
         ...filters,
@@ -125,7 +124,6 @@ const FindFranchiseLocations = () => {
 
   // Handle state filter change
   const handleStateChange = (state) => {
-    console.log("State changed to:", state);
     setSelectedState(state);
     dispatch(setFilter({ filterName: "state", value: state }));
     // Reset scroll position when state changes
@@ -320,6 +318,7 @@ const FindFranchiseLocations = () => {
           <Button
             variant="text"
             size="small"
+            aria-label="view more brands"
             endIcon={<ArrowRight />}
             sx={{
               textTransform: "none",
@@ -342,6 +341,7 @@ const FindFranchiseLocations = () => {
       <Box sx={{ position: "relative" }}>
         <Button
           onClick={handlePrevClick}
+          aria-label="previous"
           disabled={!showStartShadow}
           sx={{
             position: "absolute",
@@ -369,6 +369,7 @@ const FindFranchiseLocations = () => {
         <Button
           onClick={handleNextClick}
           disabled={!showEndShadow}
+          aria-label="next"
           sx={{
             position: "absolute",
             right: isMobile ? 4 : 8,

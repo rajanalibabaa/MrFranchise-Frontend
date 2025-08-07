@@ -16,7 +16,6 @@ const brandSlice = createSlice({
         toggleBrandLike(state, action) {
             const singleData = action.payload;
             state.toggleLikedata = singleData
-            console.log("action.payload toggleBrandLike:",action.payload)
             state.data = state.data.map(brand => {
                 if (brand.uuid === singleData.brandId) {
                     return {
@@ -30,7 +29,6 @@ const brandSlice = createSlice({
         toggleShortlist(state, action) {
             const singleData = action.payload;
             state.toggleLikedata = singleData
-            console.log("action.payload toggleShortlist:",action.payload)
             state.data = state.data.map(brand => {
                 if (brand.uuid === singleData.brandId) {
                     return {

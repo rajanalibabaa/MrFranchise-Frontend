@@ -779,9 +779,8 @@ const InvestorRegister = () => {
     try {
       dispatch(showLoading());
       const response = await axios.post(
-        `http://localhost:5000/api/v1/investor/createInvestor`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/createInvestor`,
         formattedData,
-        console.log('investor',formattedData),
         { headers: { "Content-Type": "application/json" } }
       );
       if (response.status === 201) {

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import  { useState, useRef, useEffect } from "react";
 import { 
   Box, 
   Typography, 
@@ -83,7 +83,6 @@ const MediaSection = ({
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       videoContainerRef.current.requestFullscreen().catch(err => {
-        console.log(`Error attempting to enable fullscreen: ${err.message}`);
       });
       setIsFullscreen(true);
     } else {
@@ -107,7 +106,6 @@ const MediaSection = ({
     // Start with muted autoplay to comply with browser policies
     videoRef.current.muted = true;
     videoRef.current.play().catch(error => {
-      console.log("Autoplay prevented:", error);
     });
   };
 
