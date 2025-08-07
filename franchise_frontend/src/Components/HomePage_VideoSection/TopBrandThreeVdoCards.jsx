@@ -1483,37 +1483,40 @@ function TopBrandVdoCards() {
     }
   }, []);
 
-  const handleLikeClick = useCallback(async (brandId) => {
+  const handleLikeClick = async (brand) => {
     if (!token) {
       setShowLogin(true);
       return;
     }
-    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
-    dispatch(toggleBrandLike(brandId));
-    dispatch(toggleSortlistBrandLike(brandId));
-    dispatch(toggleHomeCardLike(brandId));
-    try {
-      await likeApiFunction(brandId);
-    } finally {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-    }
-  }, [dispatch]);
+    
+    if (!brand.isLiked) {
+                dispatch(addLikedBrand(brand))
+               } else {
+                dispatch(removeLikedBrand(brand.uuid))
+               }
+    dispatch(toggleBrandLike(brand.uuid));
+    dispatch(toggleSortlistBrandLike(brand.uuid));
+    dispatch(toggleHomeCardLike(brand.uuid));
+    await likeApiFunction(brand.uuid);
+  };
 
   const handleToggleShortList = useCallback(async (brand) => {
     if (!token) {
       setShowLogin(true);
       return;
     }
+        dispatch(toggleLikedSliceShortList(mainBrand.uuid))
+      dispatch(toggleBrandShortList(mainBrand.uuid));
+      dispatch(toggleHomeCardShortlist(mainBrand.uuid))
+      if (!mainBrand.isShortListed) {
+        dispatch(addSortlist(mainBrand))
+      }else{
+        dispatch(removeSortList(mainBrand.uuid))
+      }
+      await handleShortList(mainBrand.uuid);
+      
     
-    dispatch(toggleBrandShortList(brand.uuid));
-    dispatch(toggleHomeCardShortlist(brand.uuid));
-    if (!brand.isShortListed) {
-      dispatch(addSortlist(brand));
-    } else {
-      dispatch(removeSortList(brand.uuid));
-    }
-    await handleShortList(brand.uuid);
-  }, [dispatch]);
+  };
 
   const handleApply = useCallback((brand) => {
     postView(brand.uuid);

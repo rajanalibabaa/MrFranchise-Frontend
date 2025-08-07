@@ -46,6 +46,7 @@ import filterDropdown from "../../Redux/Slices/filterDropdownData";
 import filterBrandReducer from "../../Redux/Slices/FilterBrandSlice";
 import brandCategoryReducer from "../../Redux/Slices/SideMenuHoverBrandSlices";
 import ShortListBrands from "../../Redux/Slices/shortlistslice";
+import LikedBrands from "../../Redux/Slices/likeSlice"
 
 // Combine reducers first
 const rootReducer = combineReducers({
@@ -58,7 +59,8 @@ const rootReducer = combineReducers({
   foodfranchise: topFoodsfranchise,
   openBrandDialog: openBrandViewPage,
   brandCategory: brandCategoryReducer,
-  shortList: ShortListBrands
+  shortList: ShortListBrands,
+  likedBrands: LikedBrands
 });
 
 // Persist config

@@ -27,13 +27,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchShortListedById } from "../../Redux/Slices/shortlistslice.jsx";
 import HomePageBrandCard from "./HomePageBrandCard";
 import LoginPage from "../../Pages/LoginPage/LoginPage.jsx";
-
 const ShortlistBrands = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const dispatch = useDispatch();
-
+ 
   // Redux state
   const {
     brands = [],
@@ -49,7 +48,6 @@ const ShortlistBrands = () => {
   useEffect(() => {
     dispatch(fetchShortListedById({ page: 1 }));
   }, [dispatch]);
-
   // Local state
   const [notification, setNotification] = useState({
     open: false,
@@ -60,12 +58,11 @@ const ShortlistBrands = () => {
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
-
   // Refs
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const scrollRequestRef = useRef(null);
-
+ 
   // Dimensions
   const dimensions = useMemo(
     () =>
@@ -76,13 +73,11 @@ const ShortlistBrands = () => {
       }[isMobile ? "mobile" : isTablet ? "tablet" : "desktop"]),
     [isMobile, isTablet]
   );
-
   // Scroll handlers
   const easeInOutQuad = useCallback(
     (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t),
     []
   );
-
   const smoothScrollTo = useCallback(
     (target, immediate = false) => {
       const container = scrollContainerRef.current;
@@ -96,29 +91,25 @@ const ShortlistBrands = () => {
       const change = target - start;
       const duration = immediate ? 0 : 500;
       const startTime = performance.now();
-
       const animateScroll = (currentTime) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
         const ease = easeInOutQuad(progress);
         container.scrollLeft = start + change * ease;
-
         if (progress < 1) {
           scrollRequestRef.current = requestAnimationFrame(animateScroll);
         } else {
           handleScroll();
         }
       };
-
       scrollRequestRef.current = requestAnimationFrame(animateScroll);
     },
     [easeInOutQuad]
   );
-
   const getScrollDistance = useCallback(() => {
     return dimensions.width + (isMobile ? 16 : 24);
   }, [dimensions.width, isMobile]);
-
+ 
   const handlePrevClick = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -126,7 +117,7 @@ const ShortlistBrands = () => {
     const newScroll = Math.max(container.scrollLeft - distance, 0);
     smoothScrollTo(newScroll);
   }, [getScrollDistance, smoothScrollTo]);
-
+ 
   const handleNextClick = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -135,7 +126,7 @@ const ShortlistBrands = () => {
     const newScroll = Math.min(container.scrollLeft + distance, maxScroll);
     smoothScrollTo(newScroll);
   }, [getScrollDistance, smoothScrollTo]);
-
+ 
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -144,7 +135,7 @@ const ShortlistBrands = () => {
       container.scrollLeft < container.scrollWidth - container.clientWidth - 10
     );
   }, []);
-
+ 
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -167,7 +158,7 @@ const ShortlistBrands = () => {
   if (brands.length === 0) {
     return null;
   }
-
+ 
   return (
     <Box
       ref={containerRef}
@@ -193,7 +184,6 @@ const ShortlistBrands = () => {
           {notification.message}
         </Alert>
       </Snackbar>
-
       <Box
         sx={{
           display: "flex",
@@ -223,7 +213,7 @@ const ShortlistBrands = () => {
         >
           Your Shortlisted Brands
         </Typography>
-
+ 
         <Button
           variant="text"
           size="small"
@@ -242,7 +232,6 @@ const ShortlistBrands = () => {
           View More
         </Button>
       </Box>
-
       <Box sx={{ position: "relative" }}>
         <Button
           onClick={handlePrevClick}
@@ -264,7 +253,7 @@ const ShortlistBrands = () => {
         >
           <ArrowBack fontSize="small" />
         </Button>
-
+ 
         <Button
           onClick={handleNextClick}
           disabled={!showEndShadow}
@@ -285,7 +274,7 @@ const ShortlistBrands = () => {
         >
           <ArrowForward fontSize="small" />
         </Button>
-
+ 
         <Box
           ref={scrollContainerRef}
           sx={{
