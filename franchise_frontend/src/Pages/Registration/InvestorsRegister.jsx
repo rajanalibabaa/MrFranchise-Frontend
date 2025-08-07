@@ -31,12 +31,6 @@ import {
   DialogContent,
   DialogActions,
   Toolbar,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
   IconButton,
   Tooltip,
   useMediaQuery,
@@ -54,6 +48,7 @@ import {
   Work,
   HomeWork,
   MeetingRoom,
+  CheckCircle,
 } from "@mui/icons-material";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
@@ -67,6 +62,7 @@ import FlagIcon from "@mui/icons-material/Flag";
 import Navbar from "../../Components/Navbar/NavBar";
 import Footer from "../../Components/Footers/Footer";
 import { API_BASE_URL } from "../../Api/api";
+import InvestorRegisterPreferences from "./InvestorRegisterPreferences";
 
 const InvestorRegister = () => {
   const {
@@ -102,16 +98,14 @@ const InvestorRegister = () => {
   const [showWhatsappSnackbar, setShowWhatsappSnackbar] = useState(false);
   const [isCategoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  // --- Property Location State ---
   const [propertyCountries, setPropertyCountries] = useState(["India"]);
   const [propertyStates, setPropertyStates] = useState([]);
   const [propertyCities, setPropertyCities] = useState([]);
-  // const [propertyDistricts, setPropertyDistricts] = useState([]);
   const propertyCountry = watch("propertyCountry");
   const propertyState = watch("propertyState");
-  // const propertyDistrict = watch("propertyDistrict");
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
-  //Domestic country
+  // Domestic country
   const [indiaData, setIndiaData] = useState([]);
   const [preferredStates, setPreferredStates] = useState([]);
   const [preferredCities, setPreferredCities] = useState([]);
@@ -132,6 +126,14 @@ const InvestorRegister = () => {
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [selectedChild, setSelectedChild] = useState("");
   const propertyTypeValue = useWatch({ control, name: "propertyType" });
+
+  const [otpModal, setOtpModal] = useState({
+    open: false,
+    type: null,
+    otp: "",
+    loading: false,
+    verified: false,
+  });
 
   const FORM_DATA_KEY = "investor_form_data";
 
@@ -160,14 +162,6 @@ const InvestorRegister = () => {
     preferredCity: "",
     terms: false,
   };
-  const openLoginPopup = () => {
-    document.activeElement.blur();
-    setLoginOpen(true);
-  };
-
-  const closeLoginPopup = () => {
-    setLoginOpen(false);
-  };
 
   useEffect(() => {
     fetch("https://countriesnow.space/api/v0.1/countries/positions")
@@ -182,14 +176,11 @@ const InvestorRegister = () => {
     setPropertyCities([]);
   }, [setValue]);
 
-  // --- Fetch Property States ---
   useEffect(() => {
     if (!propertyCountry) {
       setPropertyStates([]);
       setValue("propertyState", "");
-      // setValue("propertyDistrict", "");
       setValue("propertyCity", "");
-      // setPropertyDistricts([]);
       setPropertyCities([]);
       return;
     }
@@ -205,9 +196,7 @@ const InvestorRegister = () => {
         else setPropertyStates([]);
       });
     setValue("propertyState", "");
-    // setValue("propertyDistrict", "");
     setValue("propertyCity", "");
-    // setPropertyDistricts([]);
     setPropertyCities([]);
   }, [propertyCountry, setValue]);
 
@@ -230,7 +219,6 @@ const InvestorRegister = () => {
       }
       setValue("propertyCity", "");
     } else {
-      // International: use API
       fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -254,19 +242,15 @@ const InvestorRegister = () => {
     }
   }, [propertyCountry, propertyState, setValue, indiaData]);
 
-  // --- RESTORE FORM DATA AND PREFERENCES ON MOUNT ---
   useEffect(() => {
     const savedData = localStorage.getItem(FORM_DATA_KEY);
     if (savedData) {
       const parsed = JSON.parse(savedData);
-      // Restore preferences
       if (parsed.preferences) setPreferences(parsed.preferences);
-      // Restore form fields
       reset({ ...initialFormData, ...parsed });
     }
-  }, []);
+  }, [reset]);
 
-  // --- SAVE FORM DATA AND PREFERENCES TO LOCALSTORAGE ON CHANGE ---
   useEffect(() => {
     const subscription = watch((value) => {
       localStorage.setItem(
@@ -277,7 +261,6 @@ const InvestorRegister = () => {
     return () => subscription.unsubscribe();
   }, [watch, preferences]);
 
-  // --- SAVE PREFERENCES TO LOCALSTORAGE WHEN THEY CHANGE ---
   useEffect(() => {
     const currentData = JSON.parse(localStorage.getItem(FORM_DATA_KEY) || "{}");
     localStorage.setItem(
@@ -286,7 +269,6 @@ const InvestorRegister = () => {
     );
   }, [preferences]);
 
-  //  country codes
   useEffect(() => {
     fetch("https://countriesnow.space/api/v0.1/countries/codes")
       .then((res) => res.json())
@@ -323,7 +305,6 @@ const InvestorRegister = () => {
     fetchStates();
   }, []);
 
-  // Domestic
   useEffect(() => {
     if (
       preferredLocationType === "domestic" &&
@@ -372,7 +353,6 @@ const InvestorRegister = () => {
     preferredLocationType,
   ]);
 
-  // International
   useEffect(() => {
     if (preferredLocationType === "international") {
       fetch("https://countriesnow.space/api/v0.1/countries/positions")
@@ -388,7 +368,6 @@ const InvestorRegister = () => {
     }
   }, [preferredLocationType, setValue]);
 
-  // International: fetch states
   useEffect(() => {
     if (preferredLocationType === "international" && preferredStateValue) {
       fetch("https://countriesnow.space/api/v0.1/countries/states", {
@@ -407,7 +386,6 @@ const InvestorRegister = () => {
     }
   }, [preferredStateValue, preferredLocationType, setValue]);
 
-  // International: fetch cities
   useEffect(() => {
     if (
       preferredLocationType === "international" &&
@@ -435,7 +413,6 @@ const InvestorRegister = () => {
     setValue,
   ]);
 
-  // Add this useEffect hook to handle outside clicks
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -447,147 +424,14 @@ const InvestorRegister = () => {
       }
     };
 
-    // Add event listener when dropdown is open
     if (isCategoryDropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
-    // Clean up event listener
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isCategoryDropdownOpen]);
-  const showSnackbar = (message, severity = "info") => {
-    setSnackbar({ open: true, message, severity });
-  };
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
-  };
-
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "info",
-  });
-  const handleAddPreference = () => {
-    const propertyType = watch("propertyType");
-    const isOwnProperty = propertyType === "Own Property";
-
-    const pref = {
-      category: selectedCategories,
-      investmentRange: watch("investmentRange"),
-      investmentAmount: watch("investmentAmount"),
-      preferredState: watch("preferredState"),
-      preferredDistrict: watch("preferredDistrict"),
-      preferredCity: watch("preferredCity"),
-      propertyType,
-      locationType: watch("preferredLocationType"),
-      ...(isOwnProperty && {
-        propertySize: watch("propertySize"),
-        propertyCountry: watch("propertyCountry"),
-        propertyState: watch("propertyState"),
-        propertyCity: watch("propertyCity"),
-      }),
-    };
-    if (
-      !pref.category.length ||
-      !pref.investmentRange ||
-      !pref.investmentAmount ||
-      !pref.preferredState ||
-      !pref.preferredDistrict ||
-      !pref.preferredCity ||
-      !pref.propertyType ||
-      !pref.propertyType ||
-      (isOwnProperty &&
-        (!pref.propertySize ||
-          !pref.propertyCountry ||
-          !pref.propertyState ||
-          !pref.propertyCity))
-    ) {
-      showSnackbar("Please fill all preference fields before adding.", "error");
-      return;
-    }
-    setPreferences([...preferences, pref]);
-    setValue("investmentRange", "");
-    setValue("investmentAmount", "");
-    setValue("preferredState", "");
-    setValue("preferredDistrict", "");
-    setValue("preferredCity", "");
-    setValue("preferredLocationType", "");
-    setValue("propertyType", "");
-    setValue("propertySize", "");
-    setValue("propertyCountry", "");
-    setValue("propertyState", "");
-    setValue("propertyCity", "");
-    setSelectedCategories([]);
-    setValue("category", []);
-    setSelectedCategories([]);
-    setSelectedMainCategory("");
-    setSelectedSubCategory("");
-    setSelectedChild("");
-    clearErrors([
-      "preferredState",
-      "preferredDistrict",
-      "preferredCity",
-      "propertyType",
-      "propertySize",
-      "investmentRange",
-      "investmentAmount",
-      "category",
-      "propertyCountry",
-      "propertyState",
-      "propertyCity",
-    ]);
-    showSnackbar("Preference added!", "success");
-    setTimeout(() => {
-      alert("Add Multiple preferences to get more offers from us!", "info");
-    }, 2000);
-  };
-
-  // Remove preference handler
-  const handleRemovePreference = (idx) => {
-  if (window.confirm("Are you sure you want to remove this preference?")) {
-    setPreferences(preferences.filter((_, i) => i !== idx));
-  }
-};
-
-  const handleEditPreference = (idx) => {
-    const pref = preferences[idx];
-    if (pref.category && pref.category.length > 0) {
-      const selectedCat = pref.category[0];
-
-      // Assuming you're using state for these dropdowns
-      setSelectedMainCategory(selectedCat.main || "");
-      setSelectedSubCategory(selectedCat.sub || "");
-      setSelectedChild(selectedCat.child || "");
-
-      // And setting form value for category array
-      setSelectedCategories(pref.category);
-      setValue("category", pref.category);
-    }
-
-    setValue("investmentRange", pref.investmentRange || "");
-    setValue("investmentAmount", pref.investmentAmount || "");
-    setValue("preferredState", pref.preferredState || "");
-    setValue("preferredDistrict", pref.preferredDistrict || "");
-    setValue("preferredCity", pref.preferredCity || "");
-    setValue("propertyType", pref.propertyType || "");
-    setValue("propertySize", pref.propertySize || "");
-    setValue("propertyCountry", pref.propertyCountry || "");
-    setValue("propertyState", pref.propertyState || "");
-    setValue("propertyCity", pref.propertyCity || "");
-
-    setPreferences(preferences.filter((_, i) => i !== idx));
-  };
-
-  // OTP related states
-  const [otpModal, setOtpModal] = useState({
-    open: false,
-    type: null,
-    otp: "",
-    loading: false,
-    verified: false,
-  });
 
   const occupationValue = useWatch({
     control,
@@ -615,6 +459,30 @@ const InvestorRegister = () => {
       token: "",
     },
   });
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
+
+  const showSnackbar = (message, severity = "info") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
+  const openLoginPopup = () => {
+    document.activeElement.blur();
+    setLoginOpen(true);
+  };
+
+  const closeLoginPopup = () => {
+    setRegistrationSuccess(false); // NEW: close login dialog
+    setLoginOpen(false);
+  };
 
   const closeOtpModal = () => {
     setOtpModal({
@@ -783,10 +651,11 @@ const InvestorRegister = () => {
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
+      
       if (response.status === 201) {
         localStorage.removeItem(FORM_DATA_KEY);
         setFormData(initialFormData);
-
+        console.log("Submitting formattedData:", formattedData);
         if (formattedData.firstName) {
           localStorage.setItem("investorName", formattedData.firstName);
         }
@@ -796,7 +665,9 @@ const InvestorRegister = () => {
         if (data.mobileNumber) {
           localStorage.setItem("investorMobile", data.mobileNumber);
         }
-
+         setPreferences([]); // NEW: clear preferences
+        reset(initialFormData); // NEW: reset form
+        setRegistrationSuccess(true); // NEW: show login dialog    
         showSnackbar(
           "Registration successful! Redirecting to login...",
           "success"
@@ -836,7 +707,7 @@ const InvestorRegister = () => {
       }
     }
   };
-  // Make sure to also save preferences to localStorage
+
   useEffect(() => {
     const savedData = localStorage.getItem(FORM_DATA_KEY);
     if (savedData) {
@@ -847,7 +718,6 @@ const InvestorRegister = () => {
     }
   }, []);
 
-  // Update localStorage when preferences change
   useEffect(() => {
     const currentData = JSON.parse(localStorage.getItem(FORM_DATA_KEY) || "{}");
     localStorage.setItem(
@@ -891,7 +761,6 @@ const InvestorRegister = () => {
       const fetchLocation = async () => {
         try {
           if (countryCode === "IN") {
-            // India Post API
             const res = await fetch(
               `https://api.postalpincode.in/pincode/${pincode}`
             );
@@ -907,7 +776,6 @@ const InvestorRegister = () => {
               setPincodeError("Invalid Indian pincode");
             }
           } else {
-            // Zippopotam.us for international
             const code = countryCode.toLowerCase();
             const res = await fetch(
               `https://api.zippopotam.us/${code}/${pincode}`
@@ -935,7 +803,6 @@ const InvestorRegister = () => {
         setPincodeError("Enter 6-digit pincode");
       }
     }
-    // eslint-disable-next-line
   }, [watch("pincode"), watch("country")]);
 
   return (
@@ -988,11 +855,8 @@ const InvestorRegister = () => {
             borderColor: "divider",
           }}
         >
-          {/* <Box sx={{ textAlign: "center", mb: 4 }}>
-    </Box> */}
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Personal Details Section */}
-
             <Typography
               variant="h5"
               sx={{
@@ -1143,7 +1007,6 @@ const InvestorRegister = () => {
                         label="WhatsApp Number"
                         fullWidth
                         variant="outlined"
-                        // disabled={!whatsappEnabled}
                         error={!!errors.whatsappNumber}
                         helperText={errors.whatsappNumber?.message || " "}
                         inputProps={{
@@ -1181,7 +1044,6 @@ const InvestorRegister = () => {
                 spacing={2}
                 sx={{
                   display: "flex",
-                  // gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
                   gap: 2,
                   alignItems: "flex-start",
                 }}
@@ -1240,9 +1102,6 @@ const InvestorRegister = () => {
                         label="Address"
                         fullWidth
                         variant="outlined"
-                        // multiline
-                        // minRows={2}
-                        // maxRows={3}
                         error={!!errors.address}
                         helperText={errors.address?.message || " "}
                         InputProps={{
@@ -1257,8 +1116,6 @@ const InvestorRegister = () => {
                             borderRadius: "8px",
                             mt: 1,
                           },
-
-                          // resize: 'vertical',
                         }}
                       />
                     )}
@@ -1280,7 +1137,6 @@ const InvestorRegister = () => {
                     name="pincode"
                     control={control}
                     render={({ field }) => {
-                      // Get country code from dropdown value
                       const selectedCountryObj = countries.find(
                         (c) => c.name === watch("country")
                       );
@@ -1471,1009 +1327,38 @@ const InvestorRegister = () => {
               )}
             </Grid>
 
-            {/* Preferences Section */}
-
-            <Typography
-              variant="h5"
-              sx={{
-                mb: 3,
-                fontWeight: "bold",
-                color: "text.primary",
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              <FavoriteBorderOutlined color="primary" /> Preferences
-              <Tooltip
-                title={
-                  <span style={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
-                    You can add multiple preferences to get more offers from us!
-                  </span>
-                }
-                placement="right-start"
-                arrow
-                enterTouchDelay={0} // makes it responsive on mobile too
-              >
-                <IconButton
-                  size="small"
-                  sx={{
-                    // p: 0.8,
-                    color: "warning.main",
-                    // backgroundColor: 'info.light',
-                    "&:hover": {
-                      backgroundColor: "info.main",
-                      color: "white",
-                    },
-                    marginLeft: "5px",
-                    // borderRadius: '50%',
-                  }}
-                >
-                  <InfoOutlined fontSize="medium" />
-                </IconButton>
-              </Tooltip>{" "}
-            </Typography>
-
-            {/* Category Selection */}
-            <Box sx={{ mb: 4 }}>
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                sx={{ fontWeight: 500, mb: 1 }}
-              >
-                Investment Categories
-              </Typography>
-
-              <Grid
-                container
-                spacing={2}
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-                  gap: 2,
-                }}
-              >
-                {/* Main Category Dropdown */}
-                <FormControl fullWidth sx={{ minWidth: 120 }}>
-                  <InputLabel>Industry</InputLabel>
-                  <Select
-                    value={selectedMainCategory || ""}
-                    onChange={(e) => {
-                      setSelectedMainCategory(e.target.value);
-                      setSelectedSubCategory("");
-                      setSelectedChild("");
-                    }}
-                    label="Industry"
-                    sx={{ borderRadius: "8px" }}
-                  >
-                    <MenuItem value="">Select Industry</MenuItem>
-                    {categories.map((category, index) => (
-                      <MenuItem key={index} value={category.name}>
-                        {category.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                {/* Subcategory Dropdown */}
-                <FormControl
-                  fullWidth
-                  sx={{ minWidth: 120 }}
-                  disabled={!selectedMainCategory}
-                >
-                  <InputLabel>Main category</InputLabel>
-                  <Select
-                    value={selectedSubCategory || ""}
-                    onChange={(e) => {
-                      setSelectedSubCategory(e.target.value);
-                      setSelectedChild("");
-                    }}
-                    label="Main category"
-                    sx={{ borderRadius: "8px" }}
-                  >
-                    <MenuItem value="">Select Main category</MenuItem>
-                    {selectedMainCategory &&
-                      categories
-                        .find((c) => c.name === selectedMainCategory)
-                        ?.children?.map((sub, index) => (
-                          <MenuItem key={index} value={sub.name}>
-                            {sub.name}
-                          </MenuItem>
-                        ))}
-                  </Select>
-                </FormControl>
-
-                {/* Child Item Dropdown */}
-                <FormControl
-                  fullWidth
-                  sx={{ minWidth: 120 }}
-                  disabled={!selectedSubCategory}
-                >
-                  <InputLabel>Sub Category</InputLabel>
-                  <Select
-                    value={selectedChild || ""}
-                    onChange={(e) => {
-                      const selected = e.target.value;
-                      setSelectedChild(selected);
-
-                      if (
-                        selectedMainCategory &&
-                        selectedSubCategory &&
-                        selected
-                      ) {
-                        const newCategory = {
-                          main: selectedMainCategory,
-                          sub: selectedSubCategory,
-                          child: selected,
-                        };
-
-                        setSelectedCategories((prev) => {
-                          const exists = prev.some(
-                            (c) =>
-                              c.main === newCategory.main &&
-                              c.sub === newCategory.sub &&
-                              c.child === newCategory.child
-                          );
-                          return exists ? prev : [...prev, newCategory];
-                        });
-
-              
-                      }
-                    }}
-                    label="Sub Category"
-                    sx={{ borderRadius: "8px" }}
-                  >
-                    <MenuItem value="">Select Sub Category</MenuItem>
-                    {selectedMainCategory &&
-                      selectedSubCategory &&
-                      categories
-                        .find((c) => c.name === selectedMainCategory)
-                        ?.children?.find((s) => s.name === selectedSubCategory)
-                        ?.children?.map((child, index) => (
-                          <MenuItem key={index} value={child}>
-                            {child}
-                          </MenuItem>
-                        ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Box>
-
-            <Grid spacing={3}>
-              {/* Investment Amount - Only shown if range is selected */}
-              {/* {selectedRange && ( */}
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                sx={{ fontWeight: 500, mb: 1 }}
-              >
-                Investment Range
-              </Typography>
-              <Grid item xs={12} md={6}>
-                <Controller
-                  name="investmentAmount"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      select
-                      fullWidth
-                      label="Preferred Investment Amount"
-                      variant="outlined"
-                      value={field.value || ""}
-                      error={!!errors.investmentAmount}
-                      helperText={errors.investmentAmount?.message || " "}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                        },
-                      }}
-                    >
-                      <MenuItem value="">
-                        Select preferred Investment Amount
-                      </MenuItem>
-                      <MenuItem value="Below - 50,000">
-                        Below - Rs.50 K
-                      </MenuItem>
-                      <MenuItem value="Rs. 50,000 - 2 L">
-                        Rs.50 K - 2 L
-                      </MenuItem>
-                      <MenuItem value="Rs. 2 L - 5 L">Rs.2 L - 5 L</MenuItem>
-                      <MenuItem value="Rs. 5 L - 10 L">Rs.5 L - 10 L</MenuItem>
-                      <MenuItem value="Rs. 10 L - 20 L">
-                        Rs.10 L - 20 L
-                      </MenuItem>
-                      <MenuItem value="Rs. 20 L - 30 L">
-                        Rs.20 L - 30 L
-                      </MenuItem>
-                      <MenuItem value="Rs. 30 L - 50 L">
-                        Rs.30 L - 50 L
-                      </MenuItem>
-                      <MenuItem value="Rs. 50 L - 1 Cr">
-                        Rs.50 L - 1 Cr
-                      </MenuItem>
-                      <MenuItem value="Rs. 1 Cr - 2 Crs">
-                        Rs.1 Cr - 2 Cr
-                      </MenuItem>
-                      <MenuItem value="Rs. 2 Crs - 5 Crs">
-                        Rs.2 Cr - 5 Cr
-                      </MenuItem>
-                      <MenuItem value="Rs. 5Crs - above">
-                        Rs.5 Cr - Above
-                      </MenuItem>
-                    </TextField>
-                  )}
-                />
-              </Grid>
-              {/* )} */}
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                sx={{ fontWeight: 500, mb: 1 }}
-              >
-                Preferred Location
-              </Typography>
-              <Grid item xs={12}>
-                <Controller
-                  name="preferredLocationType"
-                  control={control}
-                  defaultValue=""
-                  render={({ field }) => (
-                    <FormControl
-                      component="fieldset"
-                      error={!!errors.preferredLocationType}
-                    >
-                      {/* <FormLabel component="legend">Location Type</FormLabel> */}
-                      <RadioGroup row {...field}>
-                        <FormControlLabel
-                          value="domestic"
-                          control={<Radio />}
-                          label="India"
-                        />
-                        <FormControlLabel
-                          value="international"
-                          control={<Radio />}
-                          label="International"
-                        />
-                      </RadioGroup>
-                      <FormHelperText>
-                        {errors.preferredLocationType?.message || " "}
-                      </FormHelperText>
-                    </FormControl>
-                  )}
-                />
-              </Grid>
-              <Grid
-                container
-                spacing={2}
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-                  gap: 2,
-                }}
-              >
-                {/* Preferred Location */}
-                <Grid item xs={12} md={4}>
-                  <Controller
-                    name="preferredState"
-                    control={control}
-                    defaultValue=""
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        select
-                        fullWidth
-                        label={
-                          preferredLocationType === "international"
-                            ? "Country"
-                            : "Preferred State"
-                        }
-                        variant="outlined"
-                        disabled={preferredLocationType === ""}
-                        error={!!errors.preferredState}
-                        helperText={errors.preferredState?.message || " "}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          setValue("preferredDistrict", "");
-                          setValue("preferredCity", "");
-                        }}
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                          },
-                        }}
-                      >
-                        <MenuItem value="">
-                          Select{" "}
-                          {preferredLocationType === "international"
-                            ? "Country"
-                            : "State"}
-                        </MenuItem>
-                        {(preferredLocationType === "international"
-                          ? intlCountries
-                          : preferredStates
-                        ).map((item) => (
-                          <MenuItem key={item} value={item}>
-                            {item}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    )}
-                  />
-                </Grid>
-
-                {/* Preferred District/State */}
-                <Grid item xs={12} md={4}>
-                  <Controller
-                    name="preferredDistrict"
-                    control={control}
-                    defaultValue=""
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        select
-                        fullWidth
-                        label={
-                          preferredLocationType === "international"
-                            ? "State"
-                            : "Preferred District"
-                        }
-                        variant="outlined"
-                        disabled={
-                          preferredLocationType === "" ||
-                          !watch("preferredState")
-                        }
-                        error={!!errors.preferredDistrict}
-                        helperText={errors.preferredDistrict?.message || " "}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          setValue("preferredCity", "");
-                        }}
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                          },
-                        }}
-                      >
-                        <MenuItem value="">
-                          Select{" "}
-                          {preferredLocationType === "international"
-                            ? "State"
-                            : "District"}
-                        </MenuItem>
-                        {(preferredLocationType === "international"
-                          ? intlStates
-                          : preferredDistricts
-                        ).map((item) => (
-                          <MenuItem key={item} value={item}>
-                            {item}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    )}
-                  />
-                </Grid>
-
-                {/* Preferred City */}
-                <Grid item xs={12} md={4}>
-                  <Controller
-                    name="preferredCity"
-                    control={control}
-                    defaultValue=""
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        select
-                        fullWidth
-                        label="Preferred City"
-                        variant="outlined"
-                        disabled={
-                          preferredLocationType === "" ||
-                          !watch("preferredDistrict")
-                        }
-                        error={!!errors.preferredCity}
-                        helperText={errors.preferredCity?.message || " "}
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                          },
-                        }}
-                      >
-                        <MenuItem value="">Select City</MenuItem>
-                        {(preferredLocationType === "international"
-                          ? intlCities
-                          : preferredCities
-                        ).map((item) => (
-                          <MenuItem key={item} value={item}>
-                            {item}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    )}
-                  />
-                </Grid>
-              </Grid>
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                sx={{ fontWeight: 500, mb: 1 }}
-              >
-                Preferred Readiness
-              </Typography>
-              <Grid item xs={12} md={6}>
-                <Controller
-                  name="investmentRange"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      select
-                      fullWidth
-                      label="Preferred Investment Readiness"
-                      variant="outlined"
-                      value={field.value || ""}
-                      error={!!errors.investmentRange}
-                      helperText={errors.investmentRange?.message || " "}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                        },
-                      }}
-                    >
-                      <MenuItem value="">Select Preferred Readiness</MenuItem>
-                      <MenuItem value="having amount">
-                        Having Investment Amount Ready
-                      </MenuItem>
-                      <MenuItem value="take loan">
-                        Planning to take a Loan
-                      </MenuItem>
-                      <MenuItem value="need loan">
-                        Need Loan Assistance
-                      </MenuItem>
-                    </TextField>
-                  )}
-                />
-              </Grid>
-              {/* Property Type */}
-              <Grid
-                container
-                spacing={2}
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { md: "repeat(2, 1fr)", xs: "1fr" },
-                  gap: 2,
-                }}
-              >
-                <Grid item xs={12}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ mb: 1, fontWeight: 500 }}
-                  >
-                    Property Type
-                  </Typography>
-                  <Controller
-                    name="propertyType"
-                    control={control}
-                    render={({ field }) => (
-                      <RadioGroup
-                        row
-                        {...field}
-                        value={field.value || ""}
-                        onChange={(e) => {
-                          field.onChange(e.target.value);
-                          if (e.target.value !== "Own Property") {
-                            setValue("propertySize", "");
-                            setValue("propertyCountry", "");
-                            setValue("propertyState", "");
-                            setValue("propertyCity", "");
-                          }
-                        }}
-                        sx={{ gap: 3 }}
-                      >
-                        <FormControlLabel
-                          value="Own Property"
-                          control={<Radio color="primary" />}
-                          label={
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
-                              }}
-                            >
-                              <HomeWork color="primary" />
-                              <Typography>Own Property</Typography>
-                            </Box>
-                          }
-                        />
-                        <FormControlLabel
-                          value="Rental Property"
-                          control={<Radio color="primary" />}
-                          label={
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
-                              }}
-                            >
-                              <MeetingRoom color="primary" />
-                              <Typography>Rental Property</Typography>
-                            </Box>
-                          }
-                        />
-                      </RadioGroup>
-                    )}
-                  />
-                </Grid>
-
-                {/* Property Size - Only show for Own Property */}
-                {watch("propertyType") === "Own Property" && (
-                  <Grid item xs={12} md={6}>
-                    <Controller
-                      name="propertySize"
-                      control={control}
-                      rules={{
-                        required:
-                          watch("propertyType") === "Own Property"
-                            ? "Property size is required"
-                            : false,
-                      }}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          select
-                          fullWidth
-                          label="Property Size"
-                          variant="outlined"
-                          error={!!errors.propertySize}
-                          helperText={errors.propertySize?.message || " "}
-                          sx={{
-                            "& .MuiOutlinedInput-root": {
-                              borderRadius: "8px",
-                            },
-                          }}
-                        >
-                          <MenuItem value="">Select Total Area</MenuItem>
-                          <MenuItem value="Below - 100 sq ft">
-                            Below - 100 sq ft
-                          </MenuItem>
-                          <MenuItem value="100 sq ft - 200 sq ft">
-                            100 sq ft - 200 sq ft
-                          </MenuItem>
-                          <MenuItem value="200 sq ft - 500 sq ft">
-                            200 sq ft - 500 sq ft
-                          </MenuItem>
-                          <MenuItem value="500 sq ft - 1000 sq ft">
-                            500 sq ft - 1000 sq ft
-                          </MenuItem>
-                          <MenuItem value="1000 sq ft - 1500 sq ft">
-                            1000 sq ft - 1500 sq ft
-                          </MenuItem>
-                          <MenuItem value="1500 sq ft - 2000 sq ft">
-                            1500 sq ft - 2000 sq ft
-                          </MenuItem>
-                          <MenuItem value="2000 sq ft - 3000 sq ft">
-                            2000 sq ft - 3000 sq ft
-                          </MenuItem>
-                          <MenuItem value="3000 sq ft - 5000 sq ft">
-                            3000 sq ft - 5000 sq ft
-                          </MenuItem>
-                          <MenuItem value="5000 sq ft - 7000 sq ft">
-                            5000 sq ft - 7000 sq ft
-                          </MenuItem>
-                          <MenuItem value="7000 sq ft - 10000 sq ft">
-                            7000 sq ft - 10000 sq ft
-                          </MenuItem>
-                          <MenuItem value="Above 10000 sq ft">
-                            Above 10000 sq ft
-                          </MenuItem>
-                        </TextField>
-                      )}
-                    />
-                  </Grid>
-                )}
-              </Grid>
-
-              {watch("propertyType") === "Own Property" && (
-                <Grid
-                  container
-                  spacing={2}
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-                    gap: 2,
-                    mt: 2,
-                  }}
-                >
-                  <Grid item xs={12} md={4}>
-                    <Controller
-                      name="propertyCountry"
-                      control={control}
-                      rules={{ required: "Country is required" }}
-                      render={({ field }) => (
-                        <Autocomplete
-                          freeSolo
-                          options={propertyCountries}
-                          value={field.value || ""}
-                          onChange={(_, newValue) => {
-                            field.onChange(newValue || "");
-                            setValue("propertyState", "");
-                            setValue("propertyCity", "");
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label="Property Country"
-                              error={!!errors.propertyCountry}
-                              helperText={errors.propertyCountry?.message}
-                              fullWidth
-                              variant="outlined"
-                              sx={{
-                                "& .MuiOutlinedInput-root": {
-                                  borderRadius: "8px",
-                                },
-                              }}
-                            />
-                          )}
-                        />
-                      )}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12} md={4}>
-                    <Controller
-                      name="propertyState"
-                      control={control}
-                      rules={{ required: "State is required" }}
-                      render={({ field }) => (
-                        <Autocomplete
-                          freeSolo
-                          options={propertyStates}
-                          value={field.value || ""}
-                          onChange={(_, newValue) => {
-                            field.onChange(newValue || "");
-                            setValue("propertyCity", "");
-                          }}
-                          disabled={!watch("propertyCountry")}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label="Property State"
-                              error={!!errors.propertyState}
-                              helperText={errors.propertyState?.message}
-                              fullWidth
-                              variant="outlined"
-                              sx={{
-                                "& .MuiOutlinedInput-root": {
-                                  borderRadius: "8px",
-                                },
-                              }}
-                            />
-                          )}
-                        />
-                      )}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12} md={4}>
-                    <Controller
-                      name="propertyCity"
-                      control={control}
-                      rules={{ required: "City is required" }}
-                      render={({ field }) => (
-                        <Autocomplete
-                          freeSolo
-                          options={propertyCities}
-                          value={field.value || ""}
-                          onChange={(_, newValue) =>
-                            field.onChange(newValue || "")
-                          }
-                          disabled={!watch("propertyState")}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label="Property City"
-                              error={!!errors.propertyCity}
-                              helperText={errors.propertyCity?.message}
-                              fullWidth
-                              variant="outlined"
-                              sx={{
-                                "& .MuiOutlinedInput-root": {
-                                  borderRadius: "8px",
-                                },
-                              }}
-                            />
-                          )}
-                        />
-                      )}
-                    />
-                  </Grid>
-                </Grid>
-              )}
-            </Grid>
-
-            {/* Add Preference Button */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                mt: 3,
-                mr: { xs: "40px", sm: "55px" },
-              }}
-            >
-              <Button
-                onClick={handleAddPreference}
-                sx={{
-                  borderRadius: "8px",
-                  backgroundColor: "#7ad03a",
-                  color: "#fff",
-
-                  px: 4,
-                  py: 1.5,
-                  fontWeight: "bold",
-                }}
-              >
-                Add Preference
-              </Button>
-            </Box>
-
-            {/* Preferences Table */}
-            {preferences.length > 0 && (
-              <Box sx={{ mt: 4 }}>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                  Your Investment Preferences
-                </Typography>
-                <TableContainer
-                  component={Paper}
-                  sx={{
-                    borderRadius: "12px",
-                    overflowX: "auto",
-                    width: "100%",
-                    WebkitOverflowScrolling: "touch",
-                    "&::-webkit-scrollbar": {
-                      height: "8px",
-                    },
-                    "&::-webkit-scrollbar-track": {
-                      backgroundColor: "transparent",
-                    },
-                    "&::-webkit-scrollbar-thumb": {
-                      backgroundColor: "#555",
-                      borderRadius: "8px",
-                    },
-                    "&::-webkit-scrollbar-thumb:hover": {
-                      backgroundColor: "#333",
-                    },
-                  }}
-                >
-                  <Table size="small" aria-label="added preferences table">
-                    <TableHead>
-                      <TableRow
-                        sx={{ bgcolor: "#7ad03a", alignContent: "center" }}
-                      >
-                        <TableCell
-                          sx={{
-                            fontWeight: "bold",
-                            color: "primary.contrastText",
-                          }}
-                        >
-                          #
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Industry
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Main Category
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Sub Category
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Investment Range
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Preferred State
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Preferred District
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Preferred City
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Property Country
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Property State
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Property City
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Investment Amount
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Property Type
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Property Size
-                        </TableCell>
-                        <TableCell sx={{ color: "primary.contrastText" }}>
-                          Actions
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {preferences.map((pref, idx) => (
-                        <TableRow key={idx} hover>
-                          <TableCell>{idx + 1}</TableCell>
-                          <TableCell
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              minWidth: 150, // Adjust based on your layout
-                            }}
-                          >
-                            {pref.category?.map((cat, i) => (
-                              <Typography key={i}>{cat.main}</Typography>
-                            ))}
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              minWidth: 150, // Adjust based on your layout
-                            }}
-                          >
-                            {pref.category?.map((cat, i) => (
-                              <Typography key={i}>{cat.sub}</Typography>
-                            ))}
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              minWidth: 150, // Adjust based on your layout
-                            }}
-                          >
-                            {pref.category?.map((cat, i) => (
-                              <Typography key={i}>{cat.child}</Typography>
-                            ))}
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              minWidth: 150, // Adjust based on your layout
-                            }}
-                          >
-                            <Typography>{pref.investmentAmount}</Typography>
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              minWidth: 150, // Adjust based on your layout
-                            }}
-                          >
-                            <Typography>{pref.preferredState}</Typography>
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              minWidth: 150, // Adjust based on your layout
-                            }}
-                          >
-                            <Typography>{pref.preferredDistrict}</Typography>
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              minWidth: 150, // Adjust based on your layout
-                            }}
-                          >
-                            <Typography>{pref.preferredCity}</Typography>
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              minWidth: 150, // Adjust based on your layout
-                            }}
-                          >
-                            <Typography>{pref.propertyCountry}</Typography>
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              minWidth: 150, // Adjust based on your layout
-                            }}
-                          >
-                            <Typography>{pref.propertyState}</Typography>
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              minWidth: 150, // Adjust based on your layout
-                            }}
-                          >
-                            <Typography>{pref.propertyCity}</Typography>
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              minWidth: 150, // Adjust based on your layout
-                            }}
-                          >
-                            <Typography>{pref.investmentRange}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography
-                              sx={{
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                minWidth: 150, // Adjust based on your layout
-                              }}
-                            >
-                              {pref.propertyType}
-                            </Typography>
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              minWidth: 150, // Adjust based on your layout
-                            }}
-                          >
-                            <Typography>
-                              {pref.propertyType === "Own Property"
-                                ? pref.propertySize
-                                : "N/A"}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: "flex", gap: 1 }}>
-                              <IconButton
-                                color="primary"
-                                onClick={() => handleEditPreference(idx)}
-                                aria-label="edit preference"
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                              <IconButton
-                                color="error"
-                                onClick={() => handleRemovePreference(idx)}
-                                aria-label="remove preference"
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
-            )}
+            {/* Preferences Section - Now in separate component */}
+            <InvestorRegisterPreferences
+              control={control}
+              watch={watch}
+              setValue={setValue}
+              errors={errors}
+              clearErrors={clearErrors}
+              preferences={preferences}
+              setPreferences={setPreferences}
+              selectedMainCategory={selectedMainCategory}
+              setSelectedMainCategory={setSelectedMainCategory}
+              selectedSubCategory={selectedSubCategory}
+              setSelectedSubCategory={setSelectedSubCategory}
+              selectedChild={selectedChild}
+              setSelectedChild={setSelectedChild}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+              categories={categories}
+              showSnackbar={showSnackbar}
+              indiaData={indiaData}
+              preferredStates={preferredStates}
+              preferredCities={preferredCities}
+              preferredDistricts={preferredDistricts}
+              intlCountries={intlCountries}
+              intlStates={intlStates}
+              intlCities={intlCities}
+              propertyCountries={propertyCountries}
+              propertyStates={propertyStates}
+              propertyCities={propertyCities}
+              propertyCountry={propertyCountry}
+              propertyState={propertyState}
+            />
 
             {/* Terms and Submit Section */}
             <Box
@@ -2522,7 +1407,6 @@ const InvestorRegister = () => {
                   You must accept the terms
                 </Typography>
               )}
-              {/* <CaptchaForm /> */}
               <Button
                 type="submit"
                 variant="contained"
@@ -2563,7 +1447,7 @@ const InvestorRegister = () => {
 
           {/* Login Popup Dialog */}
           <Dialog
-            open={loginOpen}
+            open={registrationSuccess || loginOpen} // CHANGED
             onClose={closeLoginPopup}
             maxWidth="sm"
             fullWidth
@@ -2573,7 +1457,7 @@ const InvestorRegister = () => {
               },
             }}
           >
-            <LoginPage open={loginOpen} onClose={closeLoginPopup} />
+            <LoginPage open={registrationSuccess || loginOpen} onClose={closeLoginPopup} />
           </Dialog>
 
           {/* OTP Verification Modal */}
@@ -2612,7 +1496,7 @@ const InvestorRegister = () => {
                 InputProps={{
                   endAdornment: otpModal.verified && (
                     <InputAdornment position="end">
-                      <CheckCircleIcon color="success" />
+                      <CheckCircle color="success" />
                     </InputAdornment>
                   ),
                 }}

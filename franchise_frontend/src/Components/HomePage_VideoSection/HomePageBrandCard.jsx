@@ -23,8 +23,11 @@ import LoginPage from "../../Pages/LoginPage/LoginPage";
 
 // import { BsFillBookmarkStarFill } from "react-icons/bs";
 import { RiBookmark3Fill } from "react-icons/ri";
-import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
-import {token} from "../../Utils/autherId.jsx"
+import {
+  toggleHomeCardLike,
+  toggleHomeCardShortlist,
+} from "../../Redux/Slices/TopCardFetchingSlice";
+import { token } from "../../Utils/autherId.jsx";
 import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
 
 import { postView } from "../../Utils/function/view.jsx";
@@ -42,22 +45,21 @@ const cardVariants = {
 const HomePageBrandCard = React.memo(
   ({
     brand,
-    
+
     // handleLikeClick,
     likeProcessing,
     dimensions,
     theme,
   }) => {
-
     const videoRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
     const observerRef = useRef();
     const [showLogin, setShowLogin] = useState(false);
-    
+
     const brandId = brand?.uuid || "";
     const franchiseModel = brand?.fico || {}; // Changed to match the array structure
     const category = brand?.brandCategories || {}; // Changed to match the new structure
-    const videoUrl = brand?.franchiseVideos ||brand?.logo ; // Direct URL now
+    const videoUrl = brand?.franchiseVideos || brand?.logo; // Direct URL now
     const brandLogo = brand?.logo || "";
     const brandName = brand?.brandname || brand?.brandName;
     const mediaHeight = dimensions.height * 0.4;
@@ -91,7 +93,7 @@ const HomePageBrandCard = React.memo(
     }, []);
 
     const [shortListed, setShortListed] = useState(brand.isShortListed);
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
     const handleToggleShortList = async (brand) => {
       try {
         // const response = await handleShortList(brand);
@@ -99,9 +101,9 @@ const HomePageBrandCard = React.memo(
         //   setShortListed(!shortListed);
         // }
         if (!token) {
-                                setShowLogin(true);
-                                return;
-                              }
+          setShowLogin(true);
+          return;
+        }
 
         if (!brand.isShortListed) {
                 dispatch(addSortlist(brand))
@@ -137,9 +139,9 @@ const HomePageBrandCard = React.memo(
     
 
     const handleApply = (brand) => {
-        postView(brand.uuid);
-        dispatch(openBrandDialog(brand));
-      };
+      postView(brand.uuid);
+      dispatch(openBrandDialog(brand));
+    };
 
     return (
       <motion.div
@@ -161,14 +163,14 @@ const HomePageBrandCard = React.memo(
             border: "1px solid #03f507ff",
           }}
         >
- <VideoPlayer
-        id={brand.uuid}
-        videoUrl={brand.franchiseVideos || brand.logo}
-        poster={brand.logo}
-        width="100%"
-        height={dimensions.height * 0.4}
-        ref={videoRef}
-      />
+          <VideoPlayer
+            id={brand.uuid}
+            videoUrl={brand.franchiseVideos || brand.logo}
+            poster={brand.logo}
+            width="100%"
+            height={dimensions.height * 0.4}
+            ref={videoRef}
+          />
           <Box sx={{ display: "flex", flexDirection: "column" }}>
             <CardContent sx={{ pb: 1 }}>
               <Box
@@ -184,8 +186,8 @@ const HomePageBrandCard = React.memo(
                   src={brandLogo}
                   alt={brandName}
                   loading="lazy"
-                   onClick={() => handleApply(brand)}
-cursor="pointer"
+                  onClick={() => handleApply(brand)}
+                  cursor="pointer"
                   sx={{
                     width: 100,
                     height: 50,
@@ -200,7 +202,9 @@ cursor="pointer"
                   <IconButton
                     onClick={() => handleToggleShortList(brand)}
                     sx={{
-                      color: brand.isShortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
+                      color: brand.isShortListed
+                        ? "#7ef400ff"
+                        : "rgba(0, 0, 0, 0.23)",
                     }}
                   >
                     <Tooltip title={"ShortList"}>
@@ -212,17 +216,13 @@ cursor="pointer"
                     onClick={() => handleLikeClick(brand)}
                     disabled={likeProcessing[brandId]}
                     sx={{
-                          color: brand?.isLiked
-                            ? "#f44336"
-                            : "rgba(0, 0, 0, 0.23)",
-                        }}
+                      color: brand?.isLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
+                    }}
                   >
                     {likeProcessing[brandId] ? (
                       <CircularProgress size={24} />
                     ) : (
-                      <Favorite
-                        
-                      />
+                      <Favorite />
                     )}
                   </IconButton>
                 </Box>
@@ -230,8 +230,8 @@ cursor="pointer"
               <Typography
                 variant="body1"
                 fontWeight={800}
-                                onClick={() => handleApply(brand)}
-cursor="pointer"
+                onClick={() => handleApply(brand)}
+                cursor="pointer"
                 sx={{
                   whiteSpace: "nowrap",
                   overflow: "hidden",
@@ -335,8 +335,8 @@ cursor="pointer"
           </Box>
         </Card>
         {showLogin && (
-                  <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
-                )}
+          <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+        )}
       </motion.div>
     );
   }

@@ -34,9 +34,6 @@ const CARD_DIMENSIONS = {
 const TopFoodFranchises = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
-
- 
-
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
@@ -185,6 +182,25 @@ const {
     smoothScrollTo(newScroll);
   };
 
+<<<<<<< HEAD
+=======
+  const handleApply = (brand) => {
+    // Your apply logic here
+    // console.log("Apply for brand:", brand);
+    dispatch(openBrandDialog(brand));
+  };
+
+  const handleLikeClick = async(brandId) => {
+    if (!token) {
+            setShowLogin(true);
+            return;
+          }
+
+          dispatch(toggleHomeCardLike(brandId))
+          dispatch(toggleBrandLike(brandId))
+          await likeApiFunction(brandId)
+  };
+>>>>>>> 34e53a911184553f3acea56c20a5ea80cc7dcbfb
 
   if (isLoading && brands.length === 0) {
     return (
