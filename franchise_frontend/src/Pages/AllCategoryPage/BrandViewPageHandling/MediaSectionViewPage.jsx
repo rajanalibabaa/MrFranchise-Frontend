@@ -18,6 +18,7 @@ import {
    
 } from "@mui/icons-material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { VideoPlayer } from "../../../services/VideoControllerMedia/VideoPlayercomponents";
 const MediaSection = ({
   allVideos = [],
   allImages = [],
@@ -205,7 +206,7 @@ const MediaSection = ({
                   </Box>
                 )}
                 
-                <video
+                {/* <video
                   ref={videoRef}
                   preload="auto"
                   poster={allImages?.[0] || ""}
@@ -221,10 +222,19 @@ const MediaSection = ({
                 >
                   <source src={videoSrc} type="video/mp4" />
                   Your browser does not support HTML5 video.
-                </video>
-                
+                </video> */}
+                <VideoPlayer
+                  ref={videoRef}
+                  src={videoSrc}
+                  poster={allImages?.[0] || ""}
+                  width="100%"
+                  height="100%"
+                  isMuted={isMuted}
+                  onPlay={togglePlay}
+                  onPause={() => setIsPlaying(false)}
+                  />
                 {/* Custom Video Controls */}
-                <Box 
+                {/* <Box 
                   className="video-controls"
                   sx={{
                     position: 'absolute',
@@ -245,7 +255,7 @@ const MediaSection = ({
                     setControlsTimeout(setTimeout(() => setShowControls(false), 2000));
                   }}
                 >
-                  {/* Progress bar */}
+                  {/* Progress bar *
                   <Slider
                     value={progress}
                     onChange={handleProgressChange}
@@ -270,7 +280,7 @@ const MediaSection = ({
                     }}
                   />
                   
-                  {/* Control buttons */}
+                  {/* Control buttons 
                   <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 1 }}>
                     <IconButton onClick={togglePlay} sx={{ color: 'white' }}>
                       {isPlaying ? <Pause /> : <PlayArrow />}
@@ -303,9 +313,9 @@ const MediaSection = ({
                       {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
                     </IconButton>
                   </Stack>
-                </Box>
+                </Box> */}
                 
-                {!isPlaying && !videoLoading && (
+                {/* {!isPlaying && !videoLoading && (
                   <Box sx={{
                     position: 'absolute',
                     top: 0,
@@ -325,7 +335,7 @@ const MediaSection = ({
                       <PlayArrowIcon sx={{ fontSize: 50, color: 'white' }} />
                     </IconButton>
                   </Box>
-                )}
+                )} */}
                 
                 {videoError && (
                   <Box sx={{
