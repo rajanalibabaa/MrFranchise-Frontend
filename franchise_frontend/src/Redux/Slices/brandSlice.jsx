@@ -23,13 +23,13 @@
 //       const brandID = brandId;
 //       if (!isLiked) {
 //         await axios.post(
-//           "https://mrfranchisebackend.mrfranchise.in/api/v1/like/post-favbrands",
+//           "http://localhost:5000/api/v1/like/post-favbrands",
 //           { branduuid: brandId },
 //           config
 //         );
 //       } else if (isLiked) {
 //         await axios.delete(
-//           `https://mrfranchisebackend.mrfranchise.in/api/v1/like/delete-favbrand/${id}`,
+//           `http://localhost:5000/api/v1/like/delete-favbrand/${id}`,
 //           {
 //             headers: {
 //               "Content-Type": "application/json",
@@ -55,7 +55,7 @@
 //     if (!token || !id) return null;
     
 //     const response = await axios.get(
-//       `https://mrfranchisebackend.mrfranchise.in/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
+//       `http://localhost:5000/api/v1/like/favbrands/getAllLikedAndUnlikedBrand/${id}`,
 //       {
 //         headers: {
 //           "Content-Type": "application/json",
@@ -123,7 +123,7 @@
 //   async (brandId, { rejectWithValue }) => {
 //     try {
 //       const response = await axios.get(
-//         `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandListingById/${brandId}`,
+//         `http://localhost:5000/api/v1/brandlisting/getBrandListingById/${brandId}`,
 //         {
 //           headers: {
 //             "Content-Type": "application/json",
@@ -152,7 +152,7 @@
 //       }
 
 //       const res = await axios.post(
-//         `https://mrfranchisebackend.mrfranchise.in/api/v1/view/postViewBrands/${id}`,
+//         `http://localhost:5000/api/v1/view/postViewBrands/${id}`,
 //         { brandID },
 //         {
 //           headers: {

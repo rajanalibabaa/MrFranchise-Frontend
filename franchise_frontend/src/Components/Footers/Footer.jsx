@@ -35,7 +35,7 @@ function Footer() {
   const handleSubscribe = async () => {
     try {
       const res = await axios.post(
-        "https://mrfranchisebackend.mrfranchise.in/api/v1/subcribe/getsubscribe",
+        "http://localhost:5000/api/v1/subcribe/getsubscribe",
         { email },
         {
           headers: {
@@ -409,7 +409,7 @@ function Footer() {
                 />
                 <Typography variant="body2" color="#b0bec5" 
 >
-                  Chennai, India
+                  India
                 </Typography>
               </Box>
               </Box>

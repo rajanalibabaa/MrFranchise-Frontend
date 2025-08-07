@@ -58,7 +58,7 @@ const HomePageBrandCard = React.memo(
     const category = brand?.brandCategories || {}; // Changed to match the new structure
     const videoUrl = brand?.franchiseVideos ||brand?.logo ; // Direct URL now
     const brandLogo = brand?.logo || "";
-    const brandName = brand?.brandname || "Brand";
+    const brandName = brand?.brandname || brand?.brandName;
     const mediaHeight = dimensions.height * 0.4;
 
     const {
@@ -151,7 +151,7 @@ const HomePageBrandCard = React.memo(
             overflow: "hidden",
             width: "100%",
             height: dimensions.height,
-            border: "1px solid #eee",
+            border: "1px solid #03f507ff",
           }}
         >
  <VideoPlayer

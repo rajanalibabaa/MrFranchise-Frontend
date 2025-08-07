@@ -128,7 +128,7 @@ const LikedBrands = () => {
   const fetchLikedBrands = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getAllBrandListing',
+      const response = await axios.get('http://localhost:5000/api/v1/brandlisting/getAllBrandListing',
         {
           headers: { Authorization: `Bearer ${accessToken}` }  
       });
@@ -161,7 +161,7 @@ const LikedBrands = () => {
  
     try {
       await axios.delete(
-        `https://mrfranchisebackend.mrfranchise.in/api/v1/likes/delete/${userId}`,
+        `http://localhost:5000/api/v1/likes/delete/${userId}`,
         {
           headers: {
             "Content-Type": "application/json",

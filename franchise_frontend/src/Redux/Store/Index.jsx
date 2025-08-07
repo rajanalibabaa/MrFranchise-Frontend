@@ -58,7 +58,7 @@ const rootReducer = combineReducers({
   foodfranchise: topFoodsfranchise,
   openBrandDialog: openBrandViewPage,
   brandCategory: brandCategoryReducer,
-  shortlist: ShortListBrands
+  shortList: ShortListBrands
 });
 
 // Persist config

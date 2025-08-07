@@ -1,107 +1,160 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { token, userId } from '../../Utils/autherId';
-import { api } from '../../Api/api';
-import { getApi } from '../../Api/DefaultApi';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+import { token, userId } from "../../Utils/autherId";
+import { api } from "../../Api/api";
+import { getApi } from "../../Api/DefaultApi";
 
-export const fetchShortListedById = createAsyncThunk(
-  'shortList/fetchById',
-  async ({ page = 1 } = {}, { rejectWithValue }) => {
-    try {
-      const query = {
-        page
-      };
-      const url = `${api.shortListApi.get}/${userId}`;
-      const response = await getApi(url, query);
-      return response.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to fetch short list');
-    }
-  }
-);
+// Utility for handling API errors
+const handleApiError = (error) => {
+  console.error("API Error:", error.response?.data || error.message);
+  return (
+    error.response?.data?.message ||
+    error.message ||
+    "An unknown error occurred"
+  );
+};
 
+// ✅ REMOVE from shortlist thunk
 export const removeFromShortlist = createAsyncThunk(
-  'shortList/remove',
+  "shortList/remove",
   async (brandId, { rejectWithValue }) => {
     try {
-      const url = `${api.shortListApi.remove}/${userId}/${brandId}`;
+      if (!userId || !brandId) throw new Error("Missing user ID or brand ID");
+
+      const baseUrl = "http://localhost:5000/api/v1/shortList";
+      const url = `${baseUrl}/removeFromShortlist/${userId}/${brandId}`;
+
       await axios.delete(url, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` },
       });
+
       return brandId;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to remove from shortlist');
+      return rejectWithValue(handleApiError(err));
     }
   }
 );
 
-const shortListSlice = createSlice({
-  name: 'shortList',
-  initialState: {
-    data: null,
-    isLoading: false,
-    error: null,
+// ✅ FETCH shortlist by ID thunk
+export const fetchShortListedById = createAsyncThunk(
+  "shortList/fetchById",
+  async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
+    try {
+      if (!userId) throw new Error("User ID is required");
+
+      const query = { page, limit };
+      const baseUrl = "http://localhost:5000/api/v1/shortList";
+      const url = `${baseUrl}/getShortListedById/${userId}`;
+
+      const response = await getApi(url, query, token); // ✅ Correct usage
+
+      const responseData = response.data?.data;
+      if (!responseData) throw new Error("No data received");
+
+      return {
+        brands: responseData.brands || [],
+        pagination: responseData.pagination || {
+          currentPage: page,
+          totalPages: 1,
+          totalItems: 0,
+          limit,
+          hasNext: false,
+        },
+      };
+    } catch (err) {
+      return rejectWithValue(handleApiError(err));
+    }
+  }
+);
+
+// ✅ Initial state
+const initialState = {
+  brands: [],
+  pagination: {
+    totalItems: 0,
     currentPage: 1,
     totalPages: 1,
+    limit: 10,
+    hasNext: false,
   },
+  isLoading: false,
+  error: null,
+  lastFetched: null,
+};
+
+// ✅ Redux slice
+const shortListSlice = createSlice({
+  name: "shortList",
+  initialState,
   reducers: {
-    clearShortList: (state) => {
-      state.data = null;
-      state.error = null;
-      state.isLoading = false;
-    },
-    removeSortList : (state,action) => {
-        const brandId = action.payload
+    clearShortList: () => initialState,
 
-        console.log("brandId sclice :",brandId)
-        state.data.brands = state.data.brands.filter(brand => brand.uuid !== brandId)
+    removeSortList: (state, action) => {
+      state.brands = state.brands.filter(
+        (brand) => brand.uuid !== action.payload
+      );
+      state.pagination.totalItems = state.brands.length;
     },
-    addSortlist : (state,action) => {
-        const brand = { ...action.payload, isShortListed: true };
 
-         console.log("addSortlist :",brand)
-         state.data.brands.unshift(brand)
+    addSortlist: (state, action) => {
+      const brand = { ...action.payload, isShortListed: true };
+      state.brands.unshift(brand);
+      state.pagination.totalItems = state.brands.length;
     },
-     toggleSortlistBrandLike: (state, action) => {
-        const brandId = action.payload;
-        state.data.brands = state.data.brands.map(brand => 
-            brand.uuid === brandId 
-            ? { ...brand, isLiked: !brand.isLiked }
-            : brand
-        );
+
+    toggleSortlistBrandLike: (state, action) => {
+      state.brands = state.brands.map((brand) =>
+        brand.uuid === action.payload
+          ? { ...brand, isLiked: !brand.isLiked }
+          : brand
+      );
     },
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchShortListedById.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
+
       .addCase(fetchShortListedById.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.data = action.payload.data || action.payload;
-        state.currentPage = action.payload.currentPage || 1;
-        state.totalPages = action.payload.totalPages || 1;
+        state.lastFetched = new Date().toISOString();
+
+        state.brands = action.payload.brands;
+        state.pagination = {
+          ...state.pagination,
+          ...action.payload.pagination,
+          totalItems: action.payload.brands.length,
+        };
       })
+
       .addCase(fetchShortListedById.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
+
       .addCase(removeFromShortlist.fulfilled, (state, action) => {
-        if (state.data && state.data.brands) {
-          state.data.brands = state.data.brands.filter(
-            brand => brand.uuid !== action.payload
-          );
-        } else if (Array.isArray(state.data)) {
-          state.data = state.data.filter(
-            brand => brand.uuid !== action.payload
-          );
-        } 
+        state.brands = state.brands.filter(
+          (brand) => brand.uuid !== action.payload
+        );
+        state.pagination.totalItems = state.brands.length;
+      })
+
+      .addCase(removeFromShortlist.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });
 
-export const { clearShortList,removeSortList, addSortlist,toggleSortlistBrandLike } = shortListSlice.actions;
+// ✅ Export Actions
+export const {
+  clearShortList,
+  removeSortList,
+  addSortlist,
+  toggleSortlistBrandLike,
+} = shortListSlice.actions;
+
+// ✅ Export Reducer
 export default shortListSlice.reducer;

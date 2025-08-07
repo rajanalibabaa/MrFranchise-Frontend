@@ -2,7 +2,7 @@
 import React, { useEffect, lazy, Suspense, useCallback,useMemo } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, CircularProgress,Typography } from '@mui/material';
 import { logout } from './Redux/Slices/AuthSlice/authSlice';
 import './App.css';
 
@@ -136,11 +136,11 @@ const App = () => {
 
 
     // hide the right click disable 
-  useEffect(() => {
-   const disableRightClick = (e) => e.preventDefault();
-   document.addEventListener("contextmenu", disableRightClick);
-   return () => document.removeEventListener("contextmenu", disableRightClick);
- }, []);
+//   useEffect(() => {
+//    const disableRightClick = (e) => e.preventDefault();
+//    document.addEventListener("contextmenu", disableRightClick);
+//    return () => document.removeEventListener("contextmenu", disableRightClick);
+//  }, []);
 
  
   return (
@@ -163,7 +163,7 @@ const App = () => {
               <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
 
               {/* Investor Dashboard Routes */}
-              {isAuthenticated && (
+              {/* {isAuthenticated && ( */}
                 <Route path="/investordashboard" element={<ProfilePage />}>
                   <Route index element={<DashBoard />} />
                   <Route path="iIconbreadcrumbs" element={<IconBreadcrumbs />} />
@@ -173,10 +173,10 @@ const App = () => {
                   <Route path="manageProfile" element={<ManageProfile />} />
                   <Route path="respondemanager" element={<ResponseManager />} />
                 </Route>
-              )}
+              {/* )} */}
 
               {/* Brand Dashboard Routes */}
-              {isAuthenticated && (
+              {/* {isAuthenticated && ( */}
                 <Route path="/brandDashboard" element={<Sidebar />}>
                   <Route index element={<BrandDashBoard />} />
                   <Route path="brandDashboard" element={<BrandDashBoard />} />
@@ -189,7 +189,7 @@ const App = () => {
                   <Route path="brandsearchus" element={<BrandSearchus />} />
                   <Route path="brandlistingcontrol" element={<BrandListingController />} />
                 </Route>
-              )}
+              {/* )} */}
 
               {/* Footer Routes */}
               <Route path="/aboutus" element={<AboutUs />} />
@@ -211,7 +211,7 @@ const App = () => {
       
 
         {/* Global Loader */}
-        {isLoading && <GlobalLoader />}
+        {/* {isLoading && <GlobalLoader />} */}
 
        
       </VideoControllerProvider>
@@ -227,7 +227,7 @@ const GlobalLoadingFallback = () => (
     height: '100vh',
     width: '100vw'
   }}>
-    <CircularProgress size={60} />
+    <CircularProgress size={60} color="success" />
   </Box>
 );
 
