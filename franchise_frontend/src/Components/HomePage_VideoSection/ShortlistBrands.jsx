@@ -17,6 +17,7 @@ import { fetchShortListedById,   } from '../../Redux/Slices/shortlistslice.jsx';
 import HomePageBrandCard from './HomePageBrandCard';
 
 import LoginPage from '../../Pages/LoginPage/LoginPage.jsx';
+import { token } from '../../Utils/autherId.jsx';
 
 const ShortlistBrands = () => {
   const theme = useTheme();
@@ -131,6 +132,9 @@ const ShortlistBrands = () => {
 
   // Data fetching
   const fetchBrands = useCallback(() => {
+    if (!token) {
+      return
+    }
     dispatch(fetchShortListedById({ page: 1 }));
   }, [dispatch]);
 
