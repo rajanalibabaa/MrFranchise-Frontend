@@ -11,8 +11,8 @@ export const postApi = async (url, bodydata) => {
       Authorization: `Bearer ${token}`
     }
     });
-    console.log("resres :",res.data)
-    // return res;
+    // console.log("resres :",res.data)
+    return res;
   } catch (error) {
     console.error("POST API Error:", error);
     throw error;
@@ -27,7 +27,7 @@ export const getApi = async (url) => {
       Authorization: `Bearer ${token}`
     }
     });
-    // console.log("resres :",res.data)
+    console.log("resreshort :",res.data)
     return res;
   } catch (error) {
     console.error("POST API Error:", error);

@@ -13,6 +13,8 @@ export const fetchShortListedById = createAsyncThunk(
       };
       const url = `${api.shortListApi.get}/${userId}`;
       const response = await getApi(url, query);
+
+      console.log("response.data :",response.data)
       return response.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Failed to fetch short list');
