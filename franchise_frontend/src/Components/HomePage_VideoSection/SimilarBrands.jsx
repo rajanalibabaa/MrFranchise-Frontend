@@ -26,13 +26,9 @@ const CARD_DIMENSIONS = {
   desktop: { width: 327, height: 500 },
 };
 
-<<<<<<< HEAD
 const SimilarBrands = ({ brandData }) => {
 
   
-=======
- const SimilarBrands = ({ brandData }) => {
->>>>>>> 34e53a911184553f3acea56c20a5ea80cc7dcbfb
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));

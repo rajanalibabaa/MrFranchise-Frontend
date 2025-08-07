@@ -47,7 +47,7 @@ const cardStyles = {
   transition: "transform 0.3s, box-shadow 0.3s",
   position: "relative",
   overflow: "hidden",
-  borderRadius: 2,
+  borderRadius: '2px solid rgba(105, 253, 25, 1)',
   "&:hover": {
     transform: "translateY(-5px)",
     boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
