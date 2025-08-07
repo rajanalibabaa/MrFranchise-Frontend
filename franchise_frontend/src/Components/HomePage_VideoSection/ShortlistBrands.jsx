@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   Box,
   Typography,
@@ -8,87 +14,111 @@ import {
   useMediaQuery,
   CircularProgress,
   Snackbar,
-  Alert
-} from '@mui/material';
-import { ArrowBack, ArrowForward, ArrowRight, Close } from '@mui/icons-material';
-import { motion } from 'framer-motion';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchShortListedById,   } from '../../Redux/Slices/shortlistslice.jsx';
-import HomePageBrandCard from './HomePageBrandCard';
-
-import LoginPage from '../../Pages/LoginPage/LoginPage.jsx';
-
+  Alert,
+} from "@mui/material";
+import {
+  ArrowBack,
+  ArrowForward,
+  ArrowRight,
+  Close,
+} from "@mui/icons-material";
+import { motion } from "framer-motion";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchShortListedById } from "../../Redux/Slices/shortlistslice.jsx";
+import HomePageBrandCard from "./HomePageBrandCard";
+import LoginPage from "../../Pages/LoginPage/LoginPage.jsx";
+ 
 const ShortlistBrands = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const dispatch = useDispatch();
-
+ 
   // Redux state
-  const { 
-    data, 
-    isLoading, 
-    error, 
-    currentPage, 
-    totalPages 
-  } = useSelector((state) => state.shortList);
-  
-  const brands = data?.brands || data?.data || data || [];
-  
+  const {
+    brands = [],
+    pagination: { currentPage = 1, totalPages = 1 } = {},
+    isLoading = false,
+    error = null,
+  } = useSelector((state) => state.shortList || {});
+ 
+  console.log("Shortlisted Brands:", brands);
+  console.log("Pagination:", currentPage, totalPages);
+ 
+  // Data fetching
+  useEffect(() => {
+    dispatch(fetchShortListedById({ page: 1 }));
+  }, [dispatch]);
+ 
   // Local state
-  const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
+  const [notification, setNotification] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
   const [likeProcessing, setLikeProcessing] = useState({});
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
+ 
   // Refs
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const scrollRequestRef = useRef(null);
-
+ 
   // Dimensions
-  const dimensions = {
-    mobile: { width: 280, height: 520 },
-    tablet: { width: 320, height: 560 },
-    desktop: { width: 327, height: 500 },
-  }[isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop'];
-
+  const dimensions = useMemo(
+    () =>
+      ({
+        mobile: { width: 280, height: 520 },
+        tablet: { width: 320, height: 560 },
+        desktop: { width: 327, height: 500 },
+      }[isMobile ? "mobile" : isTablet ? "tablet" : "desktop"]),
+    [isMobile, isTablet]
+  );
+ 
   // Scroll handlers
-  const easeInOutQuad = (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-
-  const smoothScrollTo = useCallback((target, immediate = false) => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    if (scrollRequestRef.current) {
-      cancelAnimationFrame(scrollRequestRef.current);
-    }
-
-    const start = container.scrollLeft;
-    const change = target - start;
-    const duration = immediate ? 0 : 500;
-    const startTime = performance.now();
-
-    const animateScroll = (currentTime) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const ease = easeInOutQuad(progress);
-      container.scrollLeft = start + change * ease;
-
-      if (progress < 1) {
-        scrollRequestRef.current = requestAnimationFrame(animateScroll);
-      } else {
-        handleScroll();
+  const easeInOutQuad = useCallback(
+    (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t),
+    []
+  );
+ 
+  const smoothScrollTo = useCallback(
+    (target, immediate = false) => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+ 
+      if (scrollRequestRef.current) {
+        cancelAnimationFrame(scrollRequestRef.current);
       }
-    };
-
-    scrollRequestRef.current = requestAnimationFrame(animateScroll);
-  }, []);
-
+ 
+      const start = container.scrollLeft;
+      const change = target - start;
+      const duration = immediate ? 0 : 500;
+      const startTime = performance.now();
+ 
+      const animateScroll = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = easeInOutQuad(progress);
+        container.scrollLeft = start + change * ease;
+ 
+        if (progress < 1) {
+          scrollRequestRef.current = requestAnimationFrame(animateScroll);
+        } else {
+          handleScroll();
+        }
+      };
+ 
+      scrollRequestRef.current = requestAnimationFrame(animateScroll);
+    },
+    [easeInOutQuad]
+  );
+ 
   const getScrollDistance = useCallback(() => {
     return dimensions.width + (isMobile ? 16 : 24);
   }, [dimensions.width, isMobile]);
-
+ 
   const handlePrevClick = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -96,7 +126,7 @@ const ShortlistBrands = () => {
     const newScroll = Math.max(container.scrollLeft - distance, 0);
     smoothScrollTo(newScroll);
   }, [getScrollDistance, smoothScrollTo]);
-
+ 
   const handleNextClick = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -105,93 +135,87 @@ const ShortlistBrands = () => {
     const newScroll = Math.min(container.scrollLeft + distance, maxScroll);
     smoothScrollTo(newScroll);
   }, [getScrollDistance, smoothScrollTo]);
-
+ 
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
-    console.log("xxx :",container.scrollLeft)
     if (!container) return;
     setShowStartShadow(container.scrollLeft > 10);
-    setShowEndShadow(container.scrollLeft < container.scrollWidth - container.clientWidth - 10);
+    setShowEndShadow(
+      container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+    );
   }, []);
-
+ 
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    
-    container.addEventListener('scroll', handleScroll);
+ 
+    container.addEventListener("scroll", handleScroll);
     handleScroll();
-    
+ 
     return () => {
-      container.removeEventListener('scroll', handleScroll);
+      container.removeEventListener("scroll", handleScroll);
       if (scrollRequestRef.current) {
         cancelAnimationFrame(scrollRequestRef.current);
       }
     };
   }, [handleScroll]);
-
-  // Data fetching
-  const fetchBrands = useCallback(() => {
-    dispatch(fetchShortListedById({ page: 1 }));
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (id) {
-      dispatch(fetchShortlist());
-    }
-  }, [dispatch, id]);
-
-  // Brand actions
  
-
   const handleCloseNotification = () => {
-    setNotification(prev => ({ ...prev, open: false }));
+    setNotification((prev) => ({ ...prev, open: false }));
   };
-
-  if (brands.length < 4) {
-    return
+ 
+  if (brands.length === 0) {
+    return null;
   }
-
+ 
   return (
     <Box
       ref={containerRef}
       sx={{
         py: isMobile ? 1 : 2,
         px: isMobile ? 0 : 2,
-        maxWidth: isMobile ? '100%' : 1400,
-        mx: 'auto',
-        position: 'relative',
+        maxWidth: isMobile ? "100%" : 1400,
+        mx: "auto",
+        position: "relative",
       }}
     >
       <Snackbar
         open={notification.open}
         autoHideDuration={6000}
         onClose={handleCloseNotification}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert 
-          onClose={handleCloseNotification} 
+        <Alert
+          onClose={handleCloseNotification}
           severity={notification.severity}
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {notification.message}
         </Alert>
       </Snackbar>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+ 
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 1,
+        }}
+      >
         <Typography
-          variant={isMobile ? 'body1' : 'h5'}
+          variant={isMobile ? "body1" : "h5"}
           fontWeight="bold"
           sx={{
-            color: 'black',
+            color: "black",
             mb: 1,
-            textAlign: 'left',
-            position: 'relative',
-            '&:after': {
+            textAlign: "left",
+            position: "relative",
+            "&:after": {
               content: '""',
-              display: 'block',
-              width: '80px',
-              height: '4px',
-              background: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
+              display: "block",
+              width: "80px",
+              height: "4px",
+              background: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
               mt: 1,
               borderRadius: 2,
             },
@@ -199,90 +223,97 @@ const ShortlistBrands = () => {
         >
           Your Shortlisted Brands
         </Typography>
-
+ 
         <Button
           variant="text"
           size="small"
           endIcon={<ArrowRight />}
           sx={{
-            textTransform: 'none',
+            textTransform: "none",
             fontSize: isMobile ? 14 : 16,
             color: theme.palette.text.secondary,
-            '&:hover': {
-              color: theme.palette.mode === 'dark' ? '#ffb74d' : '#f57c00',
-              backgroundColor: 'transparent',
+            "&:hover": {
+              color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+              backgroundColor: "transparent",
             },
           }}
-          onClick={() => window.open('/brandviewpage', '_blank')}
+          onClick={() => window.open("/brandviewpage", "_blank")}
         >
           View More
         </Button>
       </Box>
-
-      <Box sx={{ position: 'relative' }}>
+ 
+      <Box sx={{ position: "relative" }}>
         <Button
           onClick={handlePrevClick}
           disabled={!showStartShadow}
           sx={{
-            position: 'absolute',
+            position: "absolute",
             left: isMobile ? 2 : 8,
-            top: '55%',
-            transform: 'translateY(-50%)',
+            top: "55%",
+            transform: "translateY(-50%)",
             zIndex: 1,
             minWidth: 40,
             height: 40,
-            borderRadius: '50%',
-            backgroundColor: 'background.paper',
+            borderRadius: "50%",
+            backgroundColor: "background.paper",
             boxShadow: 2,
-            '&:hover': { backgroundColor: 'action.hover' },
-            '&:disabled': { opacity: 0, pointerEvents: 'none' },
+            "&:hover": { backgroundColor: "action.hover" },
+            "&:disabled": { opacity: 0, pointerEvents: "none" },
           }}
         >
           <ArrowBack fontSize="small" />
         </Button>
-
+ 
         <Button
           onClick={handleNextClick}
           disabled={!showEndShadow}
           sx={{
-            position: 'absolute',
+            position: "absolute",
             right: isMobile ? 4 : 8,
-            top: '55%',
-            transform: 'translateY(-50%)',
+            top: "55%",
+            transform: "translateY(-50%)",
             zIndex: 1,
             minWidth: 40,
             height: 40,
-            borderRadius: '50%',
-            backgroundColor: 'background.paper',
+            borderRadius: "50%",
+            backgroundColor: "background.paper",
             boxShadow: 2,
-            '&:hover': { backgroundColor: 'action.hover' },
-            '&:disabled': { opacity: 0, pointerEvents: 'none' },
+            "&:hover": { backgroundColor: "action.hover" },
+            "&:disabled": { opacity: 0, pointerEvents: "none" },
           }}
         >
           <ArrowForward fontSize="small" />
         </Button>
-
+ 
         <Box
           ref={scrollContainerRef}
           sx={{
-            display: 'flex',
-            overflowX: 'auto',
+            display: "flex",
+            overflowX: "auto",
             gap: isMobile ? 2 : 3,
             p: 2,
-            scrollBehavior: 'smooth',
-            scrollbarWidth: 'none',
-            '&::-webkit-scrollbar': { display: 'none' },
+            scrollBehavior: "smooth",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
           }}
         >
           {isLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', p: 4 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                width: "100%",
+                p: 4,
+              }}
+            >
               <CircularProgress />
             </Box>
           ) : error ? (
             <Typography color="error">{error}</Typography>
           ) : brands.length ? (
             brands.map((brand) => (
-              <motion.div 
+              <motion.div
                 key={brand.uuid || brand.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -298,18 +329,14 @@ const ShortlistBrands = () => {
                 />
               </motion.div>
             ))
-          ) : (
-            <Typography variant="body1" sx={{ p: 2 }}>
-              No brands found in your shortlist
-            </Typography>
-          )}
+          ) : null}
         </Box>
       </Box>
       {showLogin && (
-          <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
-        )}
+        <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
+      )}
     </Box>
   );
 };
-
+ 
 export default ShortlistBrands;

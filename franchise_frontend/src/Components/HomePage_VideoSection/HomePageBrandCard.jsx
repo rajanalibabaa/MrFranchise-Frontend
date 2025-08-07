@@ -32,7 +32,8 @@ import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 import { useDispatch } from "react-redux";
 import { addSortlist, removeSortList, toggleSortlistBrandLike } from "../../Redux/Slices/shortlistslice.jsx";
 import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
-import { likeApiFunction } from "../../Api/likeApi.jsx";
+import  {likeApiFunction}  from "../../Api/likeApi.jsx";
+import { addLikedBrand, removeLikedBrand,toggleLikedSliceShortList } from "../../Redux/Slices/likeSlice.jsx";
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -58,7 +59,7 @@ const HomePageBrandCard = React.memo(
     const category = brand?.brandCategories || {}; // Changed to match the new structure
     const videoUrl = brand?.franchiseVideos ||brand?.logo ; // Direct URL now
     const brandLogo = brand?.logo || "";
-    const brandName = brand?.brandname || "Brand";
+    const brandName = brand?.brandname ||brand?.brandName ;
     const mediaHeight = dimensions.height * 0.4;
 
     const {
@@ -107,7 +108,8 @@ const HomePageBrandCard = React.memo(
               }else(
                 dispatch(removeSortList(brand.uuid))
               )
-        // dispatch(removeSortList(brand.uuid))
+              
+        dispatch(toggleLikedSliceShortList(brand.uuid))
         dispatch(toggleBrandShortList(brand.uuid))
         dispatch(toggleHomeCardShortlist(brand.uuid))
         await handleShortList(brand.uuid)
@@ -117,15 +119,20 @@ const HomePageBrandCard = React.memo(
       }
     };
 
-    const handleLikeClick =  async(brandId) => {
+    const handleLikeClick =  async(brand) => {
            if (!token) {
              setShowLogin(true);
              return;
            }
-           dispatch(toggleSortlistBrandLike(brandId))
-           dispatch(toggleBrandLike(brandId))
-           dispatch(toggleHomeCardLike(brandId))
-           await likeApiFunction(brandId)
+           dispatch(toggleSortlistBrandLike(brand.uuid))
+           dispatch(toggleBrandLike(brand.uuid))
+           if (!brand.isLiked) {
+            dispatch(addLikedBrand(brand))
+           } else {
+            dispatch(removeLikedBrand(brand.uuid))
+           }
+           dispatch(toggleHomeCardLike(brand.uuid))
+           await likeApiFunction(brand.uuid)
          }
     
 
@@ -202,7 +209,7 @@ cursor="pointer"
                   </IconButton>
 
                   <IconButton
-                    onClick={() => handleLikeClick(brandId, brand?.isLiked)}
+                    onClick={() => handleLikeClick(brand)}
                     disabled={likeProcessing[brandId]}
                     sx={{
                           color: brand?.isLiked

@@ -41,6 +41,7 @@ import { RiBookmark3Fill, RiBookMarkedFill } from "react-icons/ri";
 import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
 import { addSortlist, removeSortList, toggleSortlistBrandLike } from "../../Redux/Slices/shortlistslice.jsx";
+import { addLikedBrand, removeLikedBrand, toggleLikedSliceShortList } from "../../Redux/Slices/likeSlice.jsx";
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -194,15 +195,21 @@ function TopBrandVdoCards() {
     }
   };
 
-  const handleLikeClick = async (brandId) => {
+  const handleLikeClick = async (brand) => {
     if (!token) {
       setShowLogin(true);
       return;
     }
-    dispatch(toggleBrandLike(brandId));
-    dispatch(toggleSortlistBrandLike(brandId));
-    dispatch(toggleHomeCardLike(brandId));
-    await likeApiFunction(brandId);
+    
+    if (!brand.isLiked) {
+                dispatch(addLikedBrand(brand))
+               } else {
+                dispatch(removeLikedBrand(brand.uuid))
+               }
+    dispatch(toggleBrandLike(brand.uuid));
+    dispatch(toggleSortlistBrandLike(brand.uuid));
+    dispatch(toggleHomeCardLike(brand.uuid));
+    await likeApiFunction(brand.uuid);
   };
 
   const handleToggleShortList = async (mainBrand) => {
@@ -210,7 +217,7 @@ function TopBrandVdoCards() {
       setShowLogin(true);
       return;
     }
-    
+        dispatch(toggleLikedSliceShortList(mainBrand.uuid))
       dispatch(toggleBrandShortList(mainBrand.uuid));
       dispatch(toggleHomeCardShortlist(mainBrand.uuid))
       if (!mainBrand.isShortListed) {
@@ -657,8 +664,7 @@ function TopBrandVdoCards() {
                                 <IconButton
                                   onClick={() =>
                                     handleLikeClick(
-                                      mainBrand.uuid,
-                                      mainBrand.isLiked
+                                      mainBrand
                                     )
                                   }
                                   disabled={
@@ -777,8 +783,7 @@ function TopBrandVdoCards() {
                               <IconButton
                                 onClick={() =>
                                   handleLikeClick(
-                                    mainBrand.uuid,
-                                    mainBrand.isLiked
+                                    mainBrand
                                   )
                                 }
                                 disabled={
@@ -1053,7 +1058,7 @@ function TopBrandVdoCards() {
                           <IconButton
                             size="small"
                             onClick={() =>
-                              handleLikeClick(brand.uuid, brand.isLiked)
+                              handleLikeClick(brand)
                             }
                             disabled={isLoading || likeProcessing[brand.uuid]}
                             sx={{

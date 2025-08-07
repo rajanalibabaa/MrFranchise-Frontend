@@ -2,7 +2,7 @@
 import React, { useEffect, lazy, Suspense, useCallback,useMemo } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, CircularProgress ,Typography } from '@mui/material';
 import { logout } from './Redux/Slices/AuthSlice/authSlice';
 import './App.css';
 
@@ -66,11 +66,11 @@ const Blogs = lazy(() => import('./Components/Footers/QuickLinks/Blogs'));
 const App = () => {
   const dispatch = useDispatch();
   const location = useLocation();
-  const authState = useSelector(state => state.auth);
+  // const authState = useSelector(state => state.auth);
   const isLoading = useSelector(state => state.loading.isLoading);
 
   // Memoized authentication state
-  const isAuthenticated = useMemo(() => !!authState.accessToken, [authState]);
+  // const isAuthenticated = useMemo(() => !!authState.accessToken, [authState]);
 
   // Disable keyboard shortcuts
   const handleKeyDown = useCallback((e) => {
@@ -91,7 +91,7 @@ const App = () => {
   useEffect(() => {
     const checkAutoLogout = () => {
       const logoutTimestamp = localStorage.getItem('logoutTimestamp');
-      if (!logoutTimestamp || !isAuthenticated) return;
+      if (!logoutTimestamp ) return;
       
       if (Date.now() >= parseInt(logoutTimestamp, 10)) {
         dispatch(logout());
@@ -103,7 +103,7 @@ const App = () => {
     const interval = setInterval(checkAutoLogout, 60000); // Check every minute
     
     return () => clearInterval(interval);
-  }, [isAuthenticated, dispatch]);
+  }, [ dispatch]);
 
   // Scroll to top on route change
   useEffect(() => {
@@ -135,12 +135,12 @@ const App = () => {
   }, []);
 
 
-    // hide the right click disable 
-  useEffect(() => {
-   const disableRightClick = (e) => e.preventDefault();
-   document.addEventListener("contextmenu", disableRightClick);
-   return () => document.removeEventListener("contextmenu", disableRightClick);
- }, []);
+//     // hide the right click disable 
+//   useEffect(() => {
+//    const disableRightClick = (e) => e.preventDefault();
+//    document.addEventListener("contextmenu", disableRightClick);
+//    return () => document.removeEventListener("contextmenu", disableRightClick);
+//  }, []);
 
  
   return (
@@ -163,7 +163,7 @@ const App = () => {
               <Route path="/sideviewcontentmenu" element={<SideViewContent />} />
 
               {/* Investor Dashboard Routes */}
-              {isAuthenticated && (
+              {/* {isAuthenticated && ( */}
                 <Route path="/investordashboard" element={<ProfilePage />}>
                   <Route index element={<DashBoard />} />
                   <Route path="iIconbreadcrumbs" element={<IconBreadcrumbs />} />
@@ -173,10 +173,10 @@ const App = () => {
                   <Route path="manageProfile" element={<ManageProfile />} />
                   <Route path="respondemanager" element={<ResponseManager />} />
                 </Route>
-              )}
+              {/* )} */}
 
               {/* Brand Dashboard Routes */}
-              {isAuthenticated && (
+              {/* {isAuthenticated && ( */}
                 <Route path="/brandDashboard" element={<Sidebar />}>
                   <Route index element={<BrandDashBoard />} />
                   <Route path="brandDashboard" element={<BrandDashBoard />} />
@@ -189,7 +189,7 @@ const App = () => {
                   <Route path="brandsearchus" element={<BrandSearchus />} />
                   <Route path="brandlistingcontrol" element={<BrandListingController />} />
                 </Route>
-              )}
+              {/* )} */}
 
               {/* Footer Routes */}
               <Route path="/aboutus" element={<AboutUs />} />
