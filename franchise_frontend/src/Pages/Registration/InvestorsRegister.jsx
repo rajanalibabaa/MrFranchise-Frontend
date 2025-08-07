@@ -983,7 +983,7 @@ const InvestorRegister = () => {
             p: 4,
             ml: "30px",
             width: "100%",
-            maxWidth: "900px",
+            maxWidth: "1030px",
             position: "relative",
             borderColor: "divider",
           }}

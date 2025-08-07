@@ -36,6 +36,13 @@ const BrandHeader = ({
   toggleDrawer,
   getOutletRange,
 }) => {
+  const handleMoreClick = (e) => {
+  e.preventDefault();
+  const element = document.getElementById('expansion-location');
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+  }
+};
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -321,19 +328,20 @@ totalOutlets || "N/A")}
                             <>
                               {visibleStates}
                               {hasMore && (
-                                <a
-                                  href="#expansion-location"
-                                  style={{
-                                    marginLeft: 8,
-                                    fontSize: "0.7rem",
-                                    textDecoration: "none",
-                                    color: "#1976d2",
-                                    fontWeight: 500,
-                                    cursor: "pointer",
-                                  }}
-                                >
-                                  More
-                                </a>
+                              <a
+  href="#expansion-location"
+  onClick={handleMoreClick}
+  style={{
+    marginLeft: 8,
+    fontSize: "0.7rem",
+    textDecoration: "none",
+    color: "#1976d2",
+    fontWeight: 500,
+    cursor: "pointer",
+  }}
+>
+  More
+</a>
                               )}
                             </>
                           );
