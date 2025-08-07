@@ -30,7 +30,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
   <React.StrictMode>
-    <ErrorBoundary>
+    {/* <ErrorBoundary>  */}
       <Provider store={store}>
         <PersistGate loading={<LoadingFallback />} persistor={persistor}>
           <QueryClientProvider client={queryClient}>
@@ -42,6 +42,6 @@ root.render(
           </QueryClientProvider>
         </PersistGate>
       </Provider>
-    </ErrorBoundary>
+    {/* </ErrorBoundary> */}
   </React.StrictMode>
 );
