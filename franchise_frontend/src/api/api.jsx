@@ -22,7 +22,7 @@ export const api = {
   likeApi: {
     post: `${API_BASE_URL}/like/post-favbrands`,
     get: `${API_BASE_URL}/like/get-favbrands`,
-    // delete: `${API_BASE_URL}/like/delete-favbrand`,
+    delete: `${API_BASE_URL}/like/delete-favbrand`,
     // getBrandLikedByAll: `${API_BASE_URL}/like/getBrandLikedByAll`,
   },
 

@@ -158,14 +158,26 @@ const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
 // Memoized BrandCard component
 const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, onToggleViewClose }) => {
   if (!item || typeof item !== 'object') return null;
+console.log('Full brand item:', item); 
+  const brandId = item.uuid || item.brandID?.uuid || item.brandID;
+  const isLiked = brandId ? likedStates[brandId] : false;
   
-  const brandId = item.uuid;
-  const isLiked = likedStates[brandId];
-  const brandName = item.brandDetails?.brandName || "Unnamed Brand";
-  const brandLogo = item.uploads?.brandLogo?.[0] || img;
-
-
+  // Enhanced brand name extraction
+  const brandName = item.brandName || 
+                   item.brandDetails?.brandName || 
+                   item.brandID?.brandName || 
+                   item.name || 
+                   "Unnamed Brand";
   
+  // Enhanced logo extraction
+  const brandLogo = item.logo || 
+                   item.brandLogo || 
+                   item.brandDetails?.brandLogo || 
+                   item.uploads?.brandLogo?.[0] || 
+                   item.brandID?.brandLogo || 
+                   item.image || 
+                   img;
+
   return (
     <Box sx={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
       <Card sx={{
@@ -334,8 +346,8 @@ const Dashboard = () => {
   const [userData, setUserData] = useState(null);
   
   // Redux state selectors
-  const investorUUID = useSelector((state) => state.auth?.investorUUID);
-  const AccessToken = useSelector((state) => state.auth?.AccessToken);
+const investorUUID = useSelector((state) => state.auth?.investorUUID);  
+const AccessToken = useSelector((state) => state.auth?.AccessToken);
   const shortListState = useSelector(state => state.shortList);
   const likedBrandsState = useSelector(state => state.likedBrands);
 
@@ -355,14 +367,12 @@ const Dashboard = () => {
   }), [viewedBrands, likedBrands, appliedBrands, shortListState, shortlistedBrands]);
   
   // Initialize liked states
-   useEffect(() => {
-    console.log("Initializing liked states with:", likedBrands);
-    if (!likedBrands || likedBrands.length === 0) return;
-    // Create initial liked states from likedBrands
+  useEffect(() => {
     const initialLiked = {};
     likedBrands.forEach(item => {
-      if (item?.uuid) {
-        initialLiked[item.uuid] = true;
+      const brandId = item.uuid || item.brandID?.uuid || item.brandID;
+      if (brandId) {
+        initialLiked[brandId] = true;
       }
     });
     setLikedStates(initialLiked);
@@ -370,9 +380,7 @@ const Dashboard = () => {
 
   // Fetch data
   const fetchData = useCallback(async () => {
-    if (!investorUUID || !AccessToken) {
-      return;
-    }
+    if (!investorUUID || !AccessToken) return;
 
     try {
       const config = {
@@ -382,10 +390,12 @@ const Dashboard = () => {
         }
       };
 
+      // Dispatch Redux actions
       dispatch(fetchLikedBrandsById({ userId: investorUUID }));
       dispatch(fetchShortListedById({ investorUUID }));
-      // Parallel requests with Promise.all
-       const [viewedRes, appliedRes, userRes] = await Promise.all([
+
+      // Fetch additional data
+      const [viewedRes, appliedRes, userRes] = await Promise.all([
         axios.get(`${api.viewApi.get.getAllViewBrandByID}/${investorUUID}`, config)
           .then(res => res.data?.data || [])
           .catch(() => []),
@@ -401,17 +411,7 @@ const Dashboard = () => {
       setAppliedBrands(appliedRes);
       setUserData(userRes);
 
-
-      // Initialize liked states
-      // const initialLiked = {};
-      // likedRes.forEach(item => {
-      //   if (item?.uuid) {
-      //     initialLiked[item.uuid] = true;
-      //   }
-      // });
-      // setLikedStates(initialLiked);
-
-   } catch (error) {
+    } catch (error) {
       console.error("Error in fetchData:", error);
     }
   }, [investorUUID, AccessToken, dispatch]);
@@ -421,30 +421,49 @@ const Dashboard = () => {
   }, [fetchData]);
 
   // Optimized toggleLike with useCallback
- const toggleLike = useCallback(async (brandId) => {
-    if (!investorUUID || !brandId) return;
+const toggleLike = useCallback(async (brandId) => {
+  if (!brandId) {
+    console.error("Missing brand ID:", brandId);
+    return;
+  }
 
-    // Optimistic update
-    setLikedStates(prev => {
-      const newState = {...prev};
-      delete newState[brandId];
-      return newState;
-    });
+  // Find the exact brand to ensure correct ID structure
+  const brandToRemove = likedBrands.find(brand => 
+    brand.uuid === brandId || 
+    brand.brandID?.uuid === brandId || 
+    brand.brandID === brandId
+  );
 
-    try {
-      await dispatch(removeFromLikedBrands({ 
-        userId: investorUUID, 
-        brandId 
-      })).unwrap();
-      setRemoveMsg("Brand removed successfully");
-      setTimeout(() => setRemoveMsg(""), 3000);
-    } catch (error) {
-      console.error("Remove error:", error);
-      setRemoveMsg("Failed to remove brand");
-      // Revert optimistic update
-      setLikedStates(prev => ({...prev, [brandId]: true}));
-    }
-  }, [investorUUID, dispatch]);
+  if (!brandToRemove) {
+    console.error("Brand not found in liked brands:", brandId);
+    return;
+  }
+
+  // Get the correct ID for API call
+  const apiBrandId = brandToRemove.uuid || brandToRemove.brandID?.uuid || brandToRemove.brandID;
+
+  // Optimistic update
+  setLikedStates(prev => {
+    const newState = {...prev};
+    delete newState[brandId];
+    return newState;
+  });
+
+  try {
+    await dispatch(removeFromLikedBrands(apiBrandId)).unwrap();
+    
+    setRemoveMsg("Brand removed successfully");
+    setTimeout(() => setRemoveMsg(""), 3000);
+    
+    // Refresh liked brands
+    dispatch(fetchLikedBrandsById({ userId: investorUUID }));
+  } catch (error) {
+    console.error("Remove error:", error);
+    setRemoveMsg(error.message || "Failed to remove brand");
+    // Revert optimistic update
+    setLikedStates(prev => ({...prev, [brandId]: true}));
+  }
+}, [investorUUID, dispatch, likedBrands]);
 
   // Optimized toggleViewClose with useCallback
   const toggleViewClose = useCallback(async (brandId) => {
@@ -534,18 +553,21 @@ const Dashboard = () => {
 
    return brands.length > 0 ? (
       <Grid container spacing={3}>
-        {brands.map((item) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={item?.uuid || Math.random()}>
-            <BrandCard 
-              item={item} 
-              type={['viewed', 'liked', 'applied', 'shortlisted'][tabValue]}
-              likedStates={likedStates}
-              onViewDetails={handleViewDetails}
-              onToggleLike={toggleLike}
-              onToggleViewClose={toggleViewClose}
-            />
-          </Grid>
-        ))}
+       {brands.map((item) => {
+  console.log('Brand item:', item); 
+  return (
+    <Grid item xs={12} sm={6} md={4} lg={3} key={item?.uuid || Math.random()}>
+      <BrandCard 
+        item={item} 
+        type={['viewed', 'liked', 'applied', 'shortlisted'][tabValue]}
+        likedStates={likedStates}
+        onViewDetails={handleViewDetails}
+        onToggleLike={toggleLike}
+        onToggleViewClose={toggleViewClose}
+      />
+    </Grid>
+  );
+})}
       </Grid>
     ) : (
       <Box sx={{ py: 10, textAlign: 'center' }}>
@@ -598,12 +620,21 @@ const Dashboard = () => {
 
       {/* Stats Cards */}
       <Box sx={{ 
-        display: 'flex', 
-        gap: 3, 
-        justifyContent: { xs: 'center', md: 'space-between' }, 
-        mt: 3,
-        flexWrap: 'wrap'
-      }}>
+  display: 'flex', 
+  gap: 2,  // Reduced gap for tighter spacing
+  justifyContent: { xs: 'center', md: 'flex-start' },  // Changed from 'space-between' to 'flex-start'
+  mt: 3,
+  flexWrap: 'nowrap',  // Prevent wrapping to new line
+  overflowX: 'auto',  // Allow horizontal scrolling if needed
+  pb: 1,  // Add some padding for scrollbar
+  '&::-webkit-scrollbar': {
+    height: '6px',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    borderRadius: '3px',
+  }
+}}>
         <StatCard 
           icon={<Business />} 
           title="Viewed" 
