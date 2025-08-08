@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import { useInView } from "react-intersection-observer";
 import {
   Box,
   Typography,
@@ -22,67 +23,36 @@ import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 import SEO from "../../Components/SEO/Seo.jsx";
 import HomeBanner from "../../assets/Images/HomeBanner.avif";
-
-// ErrorBoundary component remains the same
+import { createLazyWithPreload } from "../../Utils/PreLoad/PreLoad.jsx";
+// Enhanced ErrorBoundary with better error handling
 class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
+  state = { hasError: false, error: null };
   static getDerivedStateFromError(error) {
-    return { hasError: true };
+    return { hasError: true, error };
   }
-
-  componentDidCatch(error, errorInfo) {
-    console.error("Error caught by boundary:", error, errorInfo);
+  componentDidCatch(error, info) {
+    console.error(error, info);
   }
-
   render() {
     if (this.state.hasError) {
-      return this.props.fallback;
+      return (
+        <Box p={3} textAlign="center" bgcolor="#fff5f5">
+          <Typography color="error">
+            Failed to load: {this.state.error?.message}
+          </Typography>
+        </Box>
+      );
     }
     return this.props.children;
   }
 }
-// Optimized withSuspense HOC
-// Update your withSuspense HOC
-const withSuspense = (Component, { fallback } = {}) => (props) => {
-  const [hasError, setHasError] = useState(false);
 
-  if (hasError) {
-    return fallback || (
-      <Box sx={{ /* your error fallback styles */ }}>
-        <Typography color="error">Failed to load this section</Typography>
-      </Box>
-    );
-  }
-
-  return (
-    <Suspense
-      fallback={
-        fallback || (
-          <Box sx={{ /* your loading styles */ }}>
-            <CircularProgress color="secondary" />
-            <Typography variant="body2" sx={{ mt: 2 }}>
-              Loading content...
-            </Typography>
-          </Box>
-        )
-      }
-    >
-      <ErrorBoundary
-        fallback={
-          <Box sx={{ /* your error fallback styles */ }}>
-            <Typography color="error">Failed to load this section</Typography>
-          </Box>
-        }
-      >
-        <Component {...props} />
-      </ErrorBoundary>
-    </Suspense>
-  );
-};
+// Component loader with built-in error boundary and suspense
+const ComponentLoader = React.memo(({ Component }) => (
+  <ErrorBoundary>
+    <Component />
+  </ErrorBoundary>
+));
 
 const bannerTexts = [
   {
@@ -243,194 +213,166 @@ const bannerTexts = [
   },
 ];
 
+const pageConfig = {
+  heroBanner: {
+    backgroundImage: HomeBanner,
+    overlayColor: "rgba(0, 0, 0, 0.3)",
+    title: {
+      text: "Welcome To Our MrFranchise Network",
+      gradient:
+        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+      fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" },
+    },
+    subtitle: {
+      text: "World's most comprehensive franchise platform with 1000+ opportunities waiting for you...",
+      highlight: {
+        text: "1000+ opportunities",
+        color: "#ff9800",
+        fontWeight: "bold",
+      },
+    },
+  },
+  sections: [
+    { component: "TopBrandThreevdocards", background: "white" },
+    { component: "TopFoodFranchise", background: "#fffaf7" },
+    { component: "LikedBrands", background: "#white" },
+    { component: "TopCafeFranchises", background: "#fffaf7" },
+    { component: "TopBeverageFranchise", background: "#fffaf7" },
+    { component: "TopDesertBakeryFranchise", background: "#fffaf7" },
+    { component: "TopTruckAndKiosks", background: "#fffaf7" },
+    { component: "ShortlistBrands", background: "#white" },
+    { component: "TopRestaurantsFranchise", background: "white" },
+    { component: "FindFranchiseLocations", background: "white" },
+    { component: "ToTrendingBrands", title: "Trending Brands" },
+  ],
+  animations: {
+    banner: {
+      hidden: { opacity: 0 },
+      visible: {
+        opacity: 1,
+        transition: { when: "beforeChildren", staggerChildren: 0.3 },
+      },
+    },
+    item: {
+      hidden: { y: 20, opacity: 0 },
+      visible: {
+        y: 0,
+        opacity: 1,
+        transition: { type: "spring", damping: 10, stiffness: 100 },
+      },
+    },
+    pulse: {
+      scale: [1, 1.02, 1],
+      transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+    },
+  },
+};
+
+const useDynamicComponents = () => {
+  return useMemo(() => {
+    const make = (name) =>
+      createLazyWithPreload(() =>
+        import(
+          /* webpackChunkName: "[request]" */
+          /* webpackPrefetch: true */
+          `../../Components/HomePage_VideoSection/${name}`
+        ).catch(() => ({
+          default: () => (
+            <Typography color="error" align="center">
+              Failed to load {name}
+            </Typography>
+          ),
+        }))
+      );
+
+    return {
+      TopBrandThreevdocards: make("TopBrandThreeVdoCards.jsx"),
+      LikedBrands: make("LikedBrands.jsx"),
+      ShortlistBrands: make("ShortlistBrands.jsx"),
+      TopCafeFranchises: make("TopCafeBrands.jsx"),
+      TopFoodFranchise: make("TopFoodFranchise.jsx"),
+      TopBeverageFranchise: make("TopBeverageFranchise.jsx"),
+      TopDesertBakeryFranchise: make("TopDesertBakerys.jsx"),
+      TopTruckAndKiosks: make("TopTruckAndKiosks.jsx"),
+      TopRestaurantsFranchise: make("TopRestaurantsFranchise.jsx"),
+      ToTrendingBrands: make("ToTrendingBrands.jsx"),
+      FindFranchiseLocations: make("FindFranchiseLocations.jsx"),
+    };
+  }, []);
+};
+
+function LazySection({ componentKey, dynamicComponents, background }) {
+  const Component = dynamicComponents[componentKey];
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    rootMargin: "200px",
+  });
+
+  useEffect(() => {
+    if (inView && Component.preload) {
+      Component.preload();
+    }
+  }, [inView, Component]);
+
+  return (
+    <Box ref={ref} py={8} bgcolor={background}>
+      <Container maxWidth="xl">
+        {inView ? (
+          <Suspense
+            fallback={
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight={200}
+              >
+                <CircularProgress />
+              </Box>
+            }
+          >
+            <ComponentLoader Component={Component} />
+          </Suspense>
+        ) : (
+          <Box minHeight={200} />
+        )}
+      </Container>
+    </Box>
+  );
+}
 
 const HomeBannerSec = () => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const dispatch = useDispatch();
+  const dynamicComponents = useDynamicComponents();
+  // State management
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
-  const [isPreloaded, setIsPreloaded] = useState(false);
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const controls = useAnimation();
-  const dispatch = useDispatch();
   const [showPopup, setShowPopup] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Memoized dynamic components
-  const dynamicComponents = useMemo(
-    () => ({
-      TopBrandThreevdocards: withSuspense(
-        React.lazy(() =>
-          import("../../Components/HomePage_VideoSection/TopBrandThreeVdoCards")
-        )
-      ),
-      LikedBrands: withSuspense(
-        React.lazy(() =>
-          import("../../Components/HomePage_VideoSection/LikedBrands.jsx")
-        .catch(() => ({ 
-          default: () => <div>Failed to load component</div> 
-        }))
-        )
-      ),
-      ShortlistBrands: withSuspense(
-        React.lazy(() =>
-          import("../../Components/HomePage_VideoSection/ShortlistBrands.jsx")
-        )
-      ),
-      TopCafeFranchises: withSuspense(
-        React.lazy(() =>
-          import("../../Components/HomePage_VideoSection/TopCafeBrands.jsx")
-        )
-      ),
-      TopFoodFranchise: withSuspense(
-        React.lazy(() =>
-          import("../../Components/HomePage_VideoSection/TopFoodFranchise.jsx")
-        )
-      ),
-      TopBeverageFranchise: withSuspense(
-        React.lazy(() =>
-          import(
-            "../../Components/HomePage_VideoSection/TopBeverageFranchise.jsx"
-          )
-        )
-      ),
-      TopDesertBakeryFranchise: withSuspense(
-        React.lazy(() =>
-          import("../../Components/HomePage_VideoSection/TopDesertBakerys.jsx")
-        )
-      ),
-      TopTruckAndKiosks: withSuspense(
-        React.lazy(() =>
-          import("../../Components/HomePage_VideoSection/TopTruckAndKiosks.jsx")
-        )
-      ),
-      TopRestaurantsFranchise: withSuspense(
-        React.lazy(() =>
-          import(
-            "../../Components/HomePage_VideoSection/TopRestaurantsFranchise.jsx"
-          )
-        )
-      ),
-      ToTrendingBrands: withSuspense(
-        React.lazy(() =>
-          import("../../Components/HomePage_VideoSection/ToTrendingBrands.jsx")
-        )
-      ),
-       FindFranchiseLocations: withSuspense(
-        React.lazy(() =>
-          import("../../Components/HomePage_VideoSection/FindFranchiseLocations.jsx")
-        )
-      ),
-    }),
-    []
-  );
-
-  const pageConfig = useMemo(
-    () => ({
-      heroBanner: {
-        backgroundImage: HomeBanner,
-        overlayColor: "rgba(0, 0, 0, 0.3)",
-        title: {
-          text: "Welcome To Our MrFranchise Network",
-          gradient:
-            "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
-          fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2.5rem" },
-        },
-        subtitle: {
-          text: "World's most comprehensive franchise platform with 1000+ opportunities waiting for you...",
-          highlight: {
-            text: "1000+ opportunities",
-            color: "#ff9800",
-            fontWeight: "bold",
-          },
-        },
-      },
-      sections: [
-        { component: "TopBrandThreevdocards", background: "white" },
-        { component: "LikedBrands", background: "#white" },
-        { component: "ShortlistBrands", background: "#white" },
-        { component: "TopCafeFranchises", background: "#fffaf7" },
-        { component: "TopFoodFranchise", background: "#fffaf7" },
-        { component: "TopBeverageFranchise", background: "#fffaf7" },
-        { component: "TopDesertBakeryFranchise", background: "#fffaf7" },
-        { component: "TopTruckAndKiosks", background: "#fffaf7" },
-        { component: "TopRestaurantsFranchise", background: "white" },
-        { component: "FindFranchiseLocations", background: "white" },
-        { component: "ToTrendingBrands", title: "Trending Brands" },
-      ],
-      animations: {
-        banner: {
-          hidden: { opacity: 0 },
-          visible: {
-            opacity: 1,
-            transition: { when: "beforeChildren", staggerChildren: 0.3 },
-          },
-        },
-        item: {
-          hidden: { y: 20, opacity: 0 },
-          visible: {
-            y: 0,
-            opacity: 1,
-            transition: { type: "spring", damping: 10, stiffness: 100 },
-          },
-        },
-        pulse: {
-          scale: [1, 1.02, 1],
-          transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-        },
-      },
-    }),
-    []
-  );
-
-  // Memoize banner texts to prevent recreation on every render
-  const memoizedBannerTexts = useMemo(() => bannerTexts, []);
-
-  // Single preload effect with cleanup
+  const controls = useAnimation();
+  
   useEffect(() => {
-    let isMounted = true;
-    const preload = async () => {
-      try {
-        await Promise.all([
-          import(
-            "../../Components/HomePage_VideoSection/TopBrandThreeVdoCards"
-          ),
-          import("../../Components/HomePage_VideoSection/LikedBrands.jsx"),
-        ]);
-        if (isMounted) setIsPreloaded(true);
-      } catch (error) {
-        console.error("Preload failed:", error);
-      }
-    };
-
-    if (!isPreloaded) {
-      preload();
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isPreloaded]);
-
-  // Popup and loading logic
-  useEffect(() => {
-    const navEntries = performance.getEntriesByType("navigation");
-    const isReload = navEntries[0]?.type === "reload";
-    const popupShown = sessionStorage.getItem("popup-shown");
+    const nav =
+      performance.getEntriesByType("navigation")[0]?.type === "reload";
+    const shown = sessionStorage.getItem("popup-shown");
 
     dispatch(showLoading());
-    const timer = setTimeout(() => {
-      if (!popupShown || isReload) {
+    const t = setTimeout(() => {
+      setIsLoading(false);
+      dispatch(hideLoading());
+      if (!shown || nav) {
         setIsPopupOpen(true);
         sessionStorage.setItem("popup-shown", "true");
       }
-      dispatch(hideLoading());
-    }, 2000);
-
-    return () => clearTimeout(timer);
+    }, 1500);
+    return () => clearTimeout(t);
   }, [dispatch]);
 
-  // Optimized banner text rotation
+  // Banner rotation effect
   useEffect(() => {
-    if (!isPreloaded) return;
+    if (isLoading) return;
 
     const interval = setInterval(() => {
       controls
@@ -440,7 +382,7 @@ const HomeBannerSec = () => {
           transition: { duration: 0.5 },
         })
         .then(() => {
-          setBannerIndex((prev) => (prev + 1) % memoizedBannerTexts.length);
+          setBannerIndex((prev) => (prev + 1) % bannerTexts.length);
           controls.start({
             opacity: 1,
             x: 0,
@@ -450,65 +392,31 @@ const HomeBannerSec = () => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [controls, isPreloaded, memoizedBannerTexts.length]);
-
-  const handlePopupClose = useCallback(() => setIsPopupOpen(false), []);
-
-  // Memoize current text to prevent recalculations
-  const currentText = useMemo(
-    () => memoizedBannerTexts[bannerIndex],
-    [bannerIndex, memoizedBannerTexts]
-  );
-
-  // Memoize section rendering
- const renderSection = useCallback(
-  (sectionConfig, index) => {
-    const DynamicComponent = dynamicComponents[sectionConfig.component];
-
-    return (
-      <Box key={`section-${index}`} sx={{ /* your styles */ }}>
-        <Container maxWidth="xl">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: index * 0.1 }}
-            viewport={{ once: true }}
-          >
-            <ErrorBoundary
-              fallback={
-                <Box sx={{ /* error styles */ }}>
-                  Failed to load {sectionConfig.component}
-                </Box>
-              }
-            >
-              <Suspense
-                fallback={
-                  <Box sx={{ /* loading styles */ }}>
-                    <CircularProgress />
-                  </Box>
-                }
-              >
-                {isPreloaded && <DynamicComponent />}
-              </Suspense>
-            </ErrorBoundary>
-          </motion.div>
-        </Container>
-      </Box>
-    );
-  },
-  [isPreloaded, dynamicComponents]
-);
+  }, [controls, isLoading]);
 
   // Combine with your existing popup state
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowPopup(!localStorage.getItem("accessToken") && isPopupOpen);
-    }, 0); // Next tick
-
-    return () => clearTimeout(timer);
+    setShowPopup(!localStorage.getItem("accessToken") && isPopupOpen);
   }, [isPopupOpen]);
 
-  // const currentText = bannerTexts[bannerIndex];
+  const handlePopupClose = useCallback(() => setIsPopupOpen(false), []);
+
+  const currentText = bannerTexts[bannerIndex];
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress color="secondary" size={60} />
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -704,12 +612,21 @@ const HomeBannerSec = () => {
         </Container>
       </Box>
 
-      {/* Render all sections from config */}
-      <Box>
-        {pageConfig.sections.map((section, index) =>
-          renderSection(section, index)
-        )}
+      {/* Sections */}
+      {/* Sections */}
+      <Box sx={{ pt: 0 }}>
+        {pageConfig.sections.map((section, index) => {
+          return (
+            <LazySection
+              key={index}
+              componentKey={section.component}
+              dynamicComponents={dynamicComponents}
+              background={section.background || "white"}
+            />
+          );
+        })}
       </Box>
+
       <Footer />
     </>
   );

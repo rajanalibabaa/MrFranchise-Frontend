@@ -1,90 +1,124 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   Box,
   Typography,
   Button,
-  CircularProgress,
-  useMediaQuery,
+  IconButton,
   useTheme,
-  IconButton
+  useMediaQuery,
+  CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
+import {
+  ArrowBack,
+  ArrowForward,
+  ArrowRight,
+  Close,
+} from "@mui/icons-material";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowBack, ArrowForward, Close } from "@mui/icons-material";
-import axios from 'axios';
-import { useSelector,useDispatch } from 'react-redux';
-import HomePageBrandCard from './HomePageBrandCard';
-import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
-
-const CARD_DIMENSIONS = {
-  mobile: { width: 280, height: 520 },
-  tablet: { width: 320, height: 560 },
-  desktop: { width: 327, height: 500 },
-};
+import { useDispatch, useSelector } from "react-redux";
+import { fetchLikedBrandsById } from "../../Redux/Slices/likeSlice.jsx";
+import HomePageBrandCard from "./HomePageBrandCard.jsx";
+import LoginPage from "../../Pages/LoginPage/LoginPage.jsx";
 
 const LikedBrands = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
-  const containerRef = useRef(null);
-  const scrollContainerRef = useRef(null);
-   const scrollRequestRef = useRef(null);
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const dispatch = useDispatch();
+
+  // Redux state
+  const {
+    brands = [],
+    pagination: { currentPage = 1, totalPages = 1 } = {},
+    isLoading = false,
+    error = null,
+  } = useSelector((state) => state.likedBrands || {});
+
+  console.log("Liked Brands:", brands);
+  console.log("Pagination:", currentPage, totalPages);
+
+  // Data fetching
+  useEffect(() => {
+    dispatch(fetchLikedBrandsById({ page: 1 }));
+  }, [dispatch]);
+
+  // Local state
+  const [notification, setNotification] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const [likeProcessing, setLikeProcessing] = useState({});
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
-  const [likeProcessing, setLikeProcessing] = useState({});
-  const [brands, setBrands] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [removeMsg, setRemoveMsg] = useState("");
- const dispatch = useDispatch();
- 
-  const userId = useSelector((state) => state.auth?.investorUUID) || localStorage.getItem("id");
-  const accessToken = useSelector((state) => state.auth?.AccessToken);
-  const id = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID")
-  if (!id) {
-    return null;
-  }
 
-   const dimensions = useMemo(() => {
-    if (isMobile) return CARD_DIMENSIONS.mobile;
-    if (isTablet) return CARD_DIMENSIONS.tablet;
-    return CARD_DIMENSIONS.desktop;
-  }, [isMobile, isTablet]);
+  // Refs
+  const containerRef = useRef(null);
+  const scrollContainerRef = useRef(null);
+  const scrollRequestRef = useRef(null);
 
-    const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+  // Dimensions
+  const dimensions = useMemo(
+    () =>
+      ({
+        mobile: { width: 280, height: 520 },
+        tablet: { width: 320, height: 560 },
+        desktop: { width: 327, height: 500 },
+      }[isMobile ? "mobile" : isTablet ? "tablet" : "desktop"]),
+    [isMobile, isTablet]
+  );
 
-    const smoothScrollTo = useCallback((target, immediate = false) => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    if (scrollRequestRef.current) cancelAnimationFrame(scrollRequestRef.current);
+  // Scroll handlers
+  const easeInOutQuad = useCallback(
+    (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t),
+    []
+  );
 
-    const start = container.scrollLeft;
-    const change = target - start;
-    const duration = immediate ? 0 : 500;
-    const startTime = performance.now();
+  const smoothScrollTo = useCallback(
+    (target, immediate = false) => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
 
-    const animateScroll = (currentTime) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const ease = easeInOutQuad(progress);
-      container.scrollLeft = start + change * ease;
-
-      if (progress < 1) {
-        scrollRequestRef.current = requestAnimationFrame(animateScroll);
-      } else {
-        handleScroll();  // update shadows
+      if (scrollRequestRef.current) {
+        cancelAnimationFrame(scrollRequestRef.current);
       }
-    };
 
-    scrollRequestRef.current = requestAnimationFrame(animateScroll);
-  }, []);
+      const start = container.scrollLeft;
+      const change = target - start;
+      const duration = immediate ? 0 : 500;
+      const startTime = performance.now();
 
-  // ✏️ Added: calculate scroll distance based on card width
+      const animateScroll = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = easeInOutQuad(progress);
+        container.scrollLeft = start + change * ease;
+
+        if (progress < 1) {
+          scrollRequestRef.current = requestAnimationFrame(animateScroll);
+        } else {
+          handleScroll();
+        }
+      };
+
+      scrollRequestRef.current = requestAnimationFrame(animateScroll);
+    },
+    [easeInOutQuad]
+  );
+
   const getScrollDistance = useCallback(() => {
     return dimensions.width + (isMobile ? 16 : 24);
   }, [dimensions.width, isMobile]);
 
-  // ✏️ Changed: handlePrevClick to use smoothScrollTo
   const handlePrevClick = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -93,7 +127,6 @@ const LikedBrands = () => {
     smoothScrollTo(newScroll);
   }, [getScrollDistance, smoothScrollTo]);
 
-  // ✏️ Changed: handleNextClick to use smoothScrollTo
   const handleNextClick = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -103,127 +136,40 @@ const LikedBrands = () => {
     smoothScrollTo(newScroll);
   }, [getScrollDistance, smoothScrollTo]);
 
-  // ✏️ Changed: handleScroll to update shadows
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
     setShowStartShadow(container.scrollLeft > 10);
-    setShowEndShadow(container.scrollLeft < container.scrollWidth - container.clientWidth - 10);
+    setShowEndShadow(
+      container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+    );
   }, []);
 
-  // ✏️ Changed: useEffect to attach/detach scroll listener
   useEffect(() => {
     const container = scrollContainerRef.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-      handleScroll();
-    }
+    if (!container) return;
+
+    container.addEventListener("scroll", handleScroll);
+    handleScroll();
+
     return () => {
-      container?.removeEventListener("scroll", handleScroll);
-      if (scrollRequestRef.current) cancelAnimationFrame(scrollRequestRef.current);
+      container.removeEventListener("scroll", handleScroll);
+      if (scrollRequestRef.current) {
+        cancelAnimationFrame(scrollRequestRef.current);
+      }
     };
   }, [handleScroll]);
- 
-  // Fetch liked brands data
-  const fetchLikedBrands = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getAllBrandListing',
-        {
-          headers: { Authorization: `Bearer ${accessToken}` }  
-      });
-      // console.log("=== :",response.data)
- 
-       let brandsData =  response.data.data;
 
-      setBrands(brandsData);
- 
-      // console.log("xxxxx : ",brandsData.brands.length)
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching brands:', err);
-      setError(err.message || 'Failed to fetch brands');
-    } finally {
-      setLoading(false);
-    }
-  }, [accessToken]);
- 
-  useEffect(() => {
-    if (accessToken) {
-      fetchLikedBrands();
-    }
-  }, [accessToken, fetchLikedBrands]);
- 
-  const handleLikeClick = useCallback(async (brandId) => {
-    if (likeProcessing[brandId] || !userId || !accessToken) return;
-   
-    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
- 
-    try {
-      await axios.delete(
-        `https://mrfranchisebackend.mrfranchise.in/api/v1/likes/delete/${userId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          data: { brandID: brandId },
-        }
-      );
-     
-      // Update local state
-      setBrands(prev => prev.filter(brand => brand.uuid !== brandId));
-      setRemoveMsg("Brand removed successfully");
-     
-      setTimeout(() => setRemoveMsg(""), 3000);
-    } catch (error) {
-      console.error("Remove error:", error);
-      setRemoveMsg("Failed to remove brand");
-    } finally {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-    }
-  }, [likeProcessing, userId, accessToken]);
- 
-  const handleApply = useCallback((brand) => {
-    // Your apply logic here
-    // console.log("Apply for brand:", brand);
-    dispatch(openBrandDialog(brand));
-  }, [dispatch]);
- 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-        <CircularProgress />
-      </Box>
-    );
+  const handleCloseNotification = () => {
+    setNotification((prev) => ({ ...prev, open: false }));
+  };
+
+  if (brands.length === 0) {
+    return null;
   }
- 
-  // if (error) {
-  //   return (
-  //     <Box sx={{
-  //       display: 'flex',
-  //       flexDirection: 'column',
-  //       alignItems: 'center',
-  //       py: 10,
-  //       textAlign: 'center'
-  //     }}>
-  //       <Typography variant="h6" color="error" sx={{ mb: 2 }}>
-  //         Error loading brands
-  //       </Typography>
-  //       <Typography variant="body2" color="text.secondary">
-  //         {error}
-  //       </Typography>
-  //     </Box>
-  //   );
-  // }
- if(error) {
-    return <ErrorComponent message={error} />;
-  }
+
   return (
-
-    <>
-    
-      <Box
+    <Box
       ref={containerRef}
       sx={{
         py: isMobile ? 1 : 2,
@@ -233,31 +179,27 @@ const LikedBrands = () => {
         position: "relative",
       }}
     >
-      {removeMsg && (
-        <Box sx={{
-          mb: 3,
-          p: 2,
-          borderRadius: 2,
-          backgroundColor: '#4caf50',
-          color: 'white',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <Typography>{removeMsg}</Typography>
-          <IconButton size="small" onClick={() => setRemoveMsg("")}>
-            <Close sx={{ color: 'white' }} />
-          </IconButton>
-        </Box>
-      )}
-     
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={6000}
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseNotification}
+          severity={notification.severity}
+          sx={{ width: "100%" }}
+        >
+          {notification.message}
+        </Alert>
+      </Snackbar>
+
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           mb: 1,
-          px: isMobile ? 2 : 0,
         }}
       >
         <Typography
@@ -273,8 +215,7 @@ const LikedBrands = () => {
               display: "block",
               width: "80px",
               height: "4px",
-              background:
-                theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+              background: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
               mt: 1,
               borderRadius: 2,
             },
@@ -282,7 +223,7 @@ const LikedBrands = () => {
         >
           Your Liked Brands
         </Typography>
- 
+
         <Button
           variant="text"
           size="small"
@@ -296,14 +237,12 @@ const LikedBrands = () => {
               backgroundColor: "transparent",
             },
           }}
-          onClick={() => {
-            window.open("/brandviewpage", "_blank");
-          }}
+          onClick={() => window.open("/brandviewpage", "_blank")}
         >
           View More
         </Button>
       </Box>
- 
+
       <Box sx={{ position: "relative" }}>
         <Button
           onClick={handlePrevClick}
@@ -319,18 +258,13 @@ const LikedBrands = () => {
             borderRadius: "50%",
             backgroundColor: "background.paper",
             boxShadow: 2,
-            "&:hover": {
-              backgroundColor: "action.hover",
-            },
-            "&:disabled": {
-              opacity: 0,
-              pointerEvents: "none",
-            },
+            "&:hover": { backgroundColor: "action.hover" },
+            "&:disabled": { opacity: 0, pointerEvents: "none" },
           }}
         >
           <ArrowBack fontSize="small" />
         </Button>
- 
+
         <Button
           onClick={handleNextClick}
           disabled={!showEndShadow}
@@ -345,18 +279,13 @@ const LikedBrands = () => {
             borderRadius: "50%",
             backgroundColor: "background.paper",
             boxShadow: 2,
-            "&:hover": {
-              backgroundColor: "action.hover",
-            },
-            "&:disabled": {
-              opacity: 0,
-              pointerEvents: "none",
-            },
+            "&:hover": { backgroundColor: "action.hover" },
+            "&:disabled": { opacity: 0, pointerEvents: "none" },
           }}
         >
           <ArrowForward fontSize="small" />
         </Button>
- 
+
         <Box
           ref={scrollContainerRef}
           sx={{
@@ -369,30 +298,45 @@ const LikedBrands = () => {
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          {brands?.brands?.length > 4 && brands.brands.map((brand) => (
-            <motion.div key={brand.uuid || brand.id}>
-              <HomePageBrandCard
-                brand={brand}
-                handleApply={handleApply}
-                handleLikeClick={handleLikeClick}
-                likeProcessing={likeProcessing}
-                dimensions={dimensions}
-                theme={theme}
-                isMobile={isMobile}
-                isTablet={isTablet}
-              />
-            </motion.div>
-          ))}
+          {isLoading ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                width: "100%",
+                p: 4,
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Typography color="error">{error}</Typography>
+          ) : brands.length ? (
+            brands.map((brand) => (
+              <motion.div
+                key={brand.uuid || brand.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <HomePageBrandCard
+                  brand={brand}
+                  likeProcessing={likeProcessing[brand.uuid] || false}
+                  dimensions={dimensions}
+                  theme={theme}
+                  isMobile={isMobile}
+                  isTablet={isTablet}
+                />
+              </motion.div>
+            ))
+          ) : null}
         </Box>
       </Box>
- 
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}
     </Box>
-   
-    </>
   );
 };
- 
+
 export default LikedBrands;

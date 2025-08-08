@@ -4,3 +4,16 @@
    document.addEventListener("contextmenu", disableRightClick);
    return () => document.removeEventListener("contextmenu", disableRightClick);
  }, []);
+
+ <Box sx={{ pt: 0 }}>
+  {pageConfig.sections.map((section, index) => {
+    return (
+      <LazySection
+        key={index}
+        componentKey={section.component}
+        dynamicComponents={dynamicComponents}
+        background={section.background || "white"}
+      />
+    );
+  })}
+</Box>

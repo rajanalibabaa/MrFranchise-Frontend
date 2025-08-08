@@ -14,7 +14,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import HomePageBrandCard from './HomePageBrandCard';
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 import { fetchBrandsByChildCategory } from "../../Redux/Slices/SideMenuHoverBrandSlices.jsx";
-import LoginPage from '../../Pages/LoginPage/LoginPage.jsx';  
+import LoginPage from '../../Pages/LoginPage/LoginPage.jsx';
+import { toggleHomeCardLike } from '../../Redux/Slices/TopCardFetchingSlice.jsx';
+import { toggleBrandLike } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
+import { likeApiFunction } from "../../Api/likeApi.jsx";
+import { token } from "../../Utils/autherId.jsx";
+
 const CARD_DIMENSIONS = {
   mobile: { width: 280, height: 520 },
   tablet: { width: 320, height: 560 },
@@ -36,9 +41,6 @@ const SimilarBrands = ({ brandData }) => {
   const [likeProcessing, setLikeProcessing] = useState({});
   const [removeMsg, setRemoveMsg] = useState("");
   const dispatch = useDispatch();
-
-  const userId = useSelector((state) => state.auth?.investorUUID) || localStorage.getItem("id");
-  const accessToken = useSelector((state) => state.auth?.AccessToken);
 
   // Get brands from Redux
   const { brands, loading, error } = useSelector((state) => state.brandCategory);
@@ -145,26 +147,16 @@ const SimilarBrands = ({ brandData }) => {
     };
   }, [handleScroll]);
 
-  const handleLikeClick = useCallback(async (brandId) => {
-    if (!userId || !accessToken) {
-      setShowLogin(true); // Show login popup if not logged in
-      return;
-    }
-    if (likeProcessing[brandId]) return;
-
-    setLikeProcessing(prev => ({ ...prev, [brandId]: true }));
-
-    try {
-      // Your API call for removing like
-      // ...existing code...
-      setRemoveMsg("Brand removed successfully");
-      setTimeout(() => setRemoveMsg(""), 3000);
-    } catch (error) {
-      setRemoveMsg("Failed to remove brand");
-    } finally {
-      setLikeProcessing(prev => ({ ...prev, [brandId]: false }));
-    }
-  }, [likeProcessing, userId, accessToken]);
+ const handleLikeClick = async(brandId) => {
+    if (!token) {
+            setShowLogin(true);
+            return;
+          }
+          
+          dispatch(toggleHomeCardLike(brandId))
+          dispatch(toggleBrandLike(brandId))
+          await likeApiFunction(brandId)
+  };
 
   const handleApply = useCallback((brand) => {
     dispatch(openBrandDialog(brand));

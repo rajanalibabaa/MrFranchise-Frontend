@@ -420,7 +420,7 @@ const BrandRegisterForm = () => {
         });
 
         const response = await axios.post(
-          "https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/createBrandListing",
+          "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {

@@ -27,7 +27,7 @@ export const getApi = async (url) => {
       Authorization: `Bearer ${token}`
     }
     });
-    console.log("resreshort :",res.data)
+    console.log("resres :",res.data)
     return res;
   } catch (error) {
     console.error("POST API Error:", error);

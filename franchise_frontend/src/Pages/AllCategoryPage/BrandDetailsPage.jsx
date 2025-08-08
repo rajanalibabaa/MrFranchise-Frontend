@@ -50,7 +50,7 @@ function BrandDetailsPage() {
         }
 
         const res = await axios.get(
-          `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandListingByUUID/${brandId}`,
+          `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${brandId}`,
           { params: { userId } }
         );
         
@@ -98,7 +98,7 @@ function BrandDetailsPage() {
 
   // Generate SEO data
   const brandUrl = `https://mrfranchise.in/brand/${brandData.slug || brandId}`;
-  const brandImage = brandData.logo || "https://mrfranchise.in/images/default-brand.jpg";
+  const brandImage = brandData[0].uploads?.logo|| "https://mrfranchise.in/images/default-brand.jpg";
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -173,7 +173,7 @@ function BrandDetailsPage() {
   return (
     <>
       <SEO
-        title={`Start ${brandData.name} Franchise in India | Cost ₹${brandData.investmentRange || ''} | ROI ${brandData.roi || ''}%`}
+        title={`Start ${brandData[0].brandDetails?.brandName} Franchise in India | Cost ₹${brandData.investmentRange || ''} | ROI ${brandData.roi || ''}%`}
         description={`${brandData.shortDescription || `Learn how to start ${brandData.name} franchise in India`}. Investment: ₹${brandData.investmentRange || '5-50 lakhs'}, ROI: ${brandData.roi || '15-25'}%. ${brandData.keyFeatures || 'Trusted brand with proven business model'}.`}
         keywords={`${brandData.name} franchise, ${brandData.name} franchise cost, ${brandData.name} ROI, ${brandData.category || 'food'} franchise opportunities`}
         canonical={brandUrl}

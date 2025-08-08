@@ -15,7 +15,7 @@ const brandSlice = createSlice({
       }
 
       const brandId = brand.uuid;
-      const brandName = encodeURIComponent(brand.brandname || "unknown"); // Encode for safe URL usage
+      const brandName = encodeURIComponent(brand.brandname || brand.brandName); // Encode for safe URL usage
 
       // 1. Store brand data in localStorage
       localStorage.setItem(`brand-${brandId}`, JSON.stringify(brand));

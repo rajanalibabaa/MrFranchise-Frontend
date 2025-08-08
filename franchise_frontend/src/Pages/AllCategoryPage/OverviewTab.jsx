@@ -106,7 +106,7 @@ const OverviewTab = ({ brand }) => {
       {/* Expansion Locations (Domestic) */}
       {hasData(expansionLocationData.expansionLocations?.domestic?.locations) && (
         <>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }} id="expansion-location">
             Expansion Locations (India)
           </Typography>
           <ExpansionLocationGrid

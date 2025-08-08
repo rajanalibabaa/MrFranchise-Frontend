@@ -8,7 +8,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { PersistGate } from 'redux-persist/integration/react';
 import App from './App.jsx';
 import  { persistor, store} from './Redux/Store/Index.jsx';
-import ErrorBoundary from '../src/services/SupportingComponents/ErrorBoundary.jsx';
+// import ErrorBoundary from '../src/services/SupportingComponents/ErrorBoundary.jsx';
 import LoadingFallback from '../src/services/SupportingComponents/LoadingFallback.jsx';
 
 // Create a single instance of QueryClient with production-appropriate settings
@@ -30,7 +30,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
   <React.StrictMode>
-    <ErrorBoundary>
+    {/* <ErrorBoundary> */}
       <Provider store={store}>
         <PersistGate loading={<LoadingFallback />} persistor={persistor}>
           <QueryClientProvider client={queryClient}>
@@ -42,6 +42,6 @@ root.render(
           </QueryClientProvider>
         </PersistGate>
       </Provider>
-    </ErrorBoundary>
+    {/* </ErrorBoundary> */}
   </React.StrictMode>
 );

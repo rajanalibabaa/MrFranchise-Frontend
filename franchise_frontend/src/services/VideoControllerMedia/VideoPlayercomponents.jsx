@@ -27,6 +27,7 @@ export const VideoPlayer = ({
   height = '100%',
   objectFit = 'contain',
   showControls = true,
+  autoPlay = false,
 }) => {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -37,7 +38,6 @@ export const VideoPlayer = ({
   const [isBuffering, setIsBuffering] = useState(false);
   const [pipMode, setPipMode] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
   const [hasError, setHasError] = useState(false);
   
   const {
@@ -50,32 +50,30 @@ export const VideoPlayer = ({
 
   const isPlaying = currentPlayingId === id;
 
-  // Intersection Observer for lazy loading
+  // Register/unregister video with proper cleanup
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
-      { threshold: 0.1 }
-    );
+    const video = videoRef.current;
+    if (!video) return;
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    const cleanup = registerVideo(id, video);
+
+    // Initial autoplay if requested
+    if (autoPlay) {
+      const timer = setTimeout(() => {
+        playVideo(id).catch(err => {
+          console.error('Autoplay failed:', err);
+          setHasError(true);
+        });
+      }, 500);
+
+      return () => {
+        clearTimeout(timer);
+        cleanup?.();
+      };
     }
 
-    return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
-      }
-    };
-  }, []);
-
-  // Load video when visible
-  useEffect(() => {
-    if (isVisible && videoRef.current) {
-      videoRef.current.load();
-    }
-  }, [isVisible]);
+    return cleanup;
+  }, [id, registerVideo, autoPlay, playVideo]);
 
   // Event handlers
   const handleLoadedMetadata = useCallback(() => {
@@ -98,36 +96,39 @@ export const VideoPlayer = ({
     setHasError(true);
     setIsBuffering(false);
     setIsLoaded(true);
+    pauseVideo(id);
+  }, [id, pauseVideo]);
+
+  const handleWaiting = useCallback(() => {
+    setIsBuffering(true);
   }, []);
 
-  // Register/unregister video
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  const handlePlaying = useCallback(() => {
+    setIsBuffering(false);
+  }, []);
 
-    registerVideo(id, video);
-    
-    return () => {
-      unregisterVideo(id);
-    };
-  }, [id, registerVideo, unregisterVideo]);
+  const handleCanPlay = useCallback(() => {
+    setIsBuffering(false);
+  }, []);
 
-  // Play/pause handler
+  const handleEnded = useCallback(() => {
+    pauseVideo(id);
+  }, [id, pauseVideo]);
+
+  // Play/pause handler with better error handling
   const togglePlayPause = useCallback(async () => {
     if (!videoRef.current) return;
     
-    if (isPlaying) {
-      pauseVideo(id);
-    } else {
-      setIsBuffering(true);
-      try {
+    try {
+      if (isPlaying) {
+        pauseVideo(id);
+      } else {
+        setIsBuffering(true);
         await playVideo(id);
-      } catch (error) {
-        console.error('Playback failed:', error);
-        handleError();
-      } finally {
-        setIsBuffering(false);
       }
+    } catch (error) {
+      console.error('Playback failed:', error);
+      handleError();
     }
   }, [isPlaying, id, pauseVideo, playVideo, handleError]);
 
@@ -168,23 +169,23 @@ export const VideoPlayer = ({
     }
   }, [pipMode]);
 
-  // Event listeners setup
+  // Event listeners setup with proper cleanup
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const events = {
-      loadedmetadata: handleLoadedMetadata,
-      timeupdate: handleTimeUpdate,
-      waiting: () => setIsBuffering(true),
-      playing: () => setIsBuffering(false),
-      canplay: () => setIsBuffering(false),
-      ended: () => pauseVideo(id),
-      error: handleError
-    };
+    const events = [
+      { type: 'loadedmetadata', handler: handleLoadedMetadata },
+      { type: 'timeupdate', handler: handleTimeUpdate },
+      { type: 'waiting', handler: handleWaiting },
+      { type: 'playing', handler: handlePlaying },
+      { type: 'canplay', handler: handleCanPlay },
+      { type: 'ended', handler: handleEnded },
+      { type: 'error', handler: handleError }
+    ];
 
-    Object.entries(events).forEach(([event, handler]) => {
-      video.addEventListener(event, handler);
+    events.forEach(({ type, handler }) => {
+      video.addEventListener(type, handler);
     });
 
     // Fullscreen change listener
@@ -194,12 +195,12 @@ export const VideoPlayer = ({
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
-      Object.entries(events).forEach(([event, handler]) => {
-        video.removeEventListener(event, handler);
+      events.forEach(({ type, handler }) => {
+        video.removeEventListener(type, handler);
       });
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, [handleLoadedMetadata, handleTimeUpdate, id, pauseVideo, handleError]);
+  }, [handleLoadedMetadata, handleTimeUpdate, handleError, handleWaiting, handlePlaying, handleCanPlay, handleEnded]);
 
   // Helper function to format time (mm:ss)
   const formatTime = useCallback((seconds) => {
