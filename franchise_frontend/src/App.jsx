@@ -10,12 +10,12 @@ import './App.css';
 // Context Providers
 import { VideoControllerProvider } from './services/VideoControllerMedia/VideHandlingFunctions';
 import LoadingFallback from '../src/services/SupportingComponents/LoadingFallback.jsx';
-
-
+import HomeBannerSec from "./Pages/HomePages/HomeBannerSec"
+import BrandDetailsPage from './Pages/AllCategoryPage/BrandDetailsPage'
+import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage'
 // Lazy-loaded components with prefetching
-const HomeBannerSec = lazy(() => import(/* webpackPrefetch: true */ './Pages/HomePages/HomeBannerSec'));
-const BrandDetailsPage = lazy(() => import(/* webpackPrefetch: true */ './Pages/AllCategoryPage/BrandDetailsPage'));
-const BrandCategroyViewPage = lazy(() => import(/* webpackPrefetch: true */ './Pages/AllCategoryPage/BrandCategroyViewPage'));
+// const  = lazy(() => import(/* webpackPrefetch: true */ ));
+// const  = lazy(() => import(/* webpackPrefetch: true */ ''));
 
 // Authentication
 const InvestorRegister = lazy(() => import('./Pages/Registration/InvestorsRegister'));
@@ -117,11 +117,11 @@ const App = () => {
 
 
     // hide the right click disable 
-//   useEffect(() => {
-//    const disableRightClick = (e) => e.preventDefault();
-//    document.addEventListener("contextmenu", disableRightClick);
-//    return () => document.removeEventListener("contextmenu", disableRightClick);
-//  }, []);
+  useEffect(() => {
+   const disableRightClick = (e) => e.preventDefault();
+   document.addEventListener("contextmenu", disableRightClick);
+   return () => document.removeEventListener("contextmenu", disableRightClick);
+ }, []);
 
  
   return (
@@ -199,18 +199,6 @@ const App = () => {
   );
 };
 
-// Simple loading fallback
-// const GlobalLoadingFallback = () => (
-//   <Box sx={{
-//     display: 'flex',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     height: '100vh',
-//     width: '100vw'
-//   }}>
-//     <CircularProgress size={60} color="success" />
-//   </Box>
-// );
 
 // Simple 404 component
 const NotFound = () => (
