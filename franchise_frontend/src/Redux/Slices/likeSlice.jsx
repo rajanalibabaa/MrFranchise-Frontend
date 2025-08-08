@@ -41,8 +41,6 @@ export const fetchLikedBrandsById = createAsyncThunk(
     try {
       if (!userId) throw new Error("User ID is required");
 
-    
-
       const query = { page, limit };
       const baseUrl =  "http://localhost:5000/api/v1/like";
       const url = `${baseUrl}/get-favbrands/${userId}`;
