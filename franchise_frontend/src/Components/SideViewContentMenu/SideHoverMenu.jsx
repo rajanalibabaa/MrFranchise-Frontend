@@ -31,7 +31,7 @@ import {
   clearBrands,
   prefetchBrands,
 } from "../../Redux/Slices/SideMenuHoverBrandSlices.jsx";
-import { debounce } from "lodash";
+import debounce  from "lodash/debounce";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 
 // Memoized brand card component with optimized props
