@@ -363,6 +363,7 @@ const pageConfig = {
 
 
 const useDynamicComponents = () => {
+<<<<<<< HEAD
   return React.useMemo(() => {
     // Gather all potential modules in this folder (adjust extension if needed)
     const modules = import.meta.glob("../../Components/HomePage_VideoSection/*.jsx", {
@@ -401,6 +402,38 @@ const useDynamicComponents = () => {
     });
 
     return map;
+=======
+  return useMemo(() => {
+    const make = (name) =>
+      createLazyWithPreload(() =>
+        import(
+          /* webpackChunkName: "[request]" */
+          /* webpackPrefetch: true */
+          `../../Components/HomePage_VideoSection/${name}`
+        ).catch(() => ({
+          default: () => (
+            <Typography color="error" align="center">
+              Failed to load {name}
+            </Typography>
+          ),
+        }))
+      );
+    return {
+      TopBrandThreevdocards: make("TopBrandThreeVdoCards.jsx"),
+      ViewBrands: make("ViewBrands.jsx"),
+      LikedBrands: make("LikedBrands.jsx"),
+      ShortlistBrands: make("ShortlistBrands.jsx"),
+      TopCafeFranchises: make("TopCafeBrands.jsx"),
+      TopFoodFranchise: make("TopFoodFranchise.jsx"),
+      // ViewBrands: make("ViewBrands.jsx"),
+      TopBeverageFranchise: make("TopBeverageFranchise.jsx"),
+      TopDesertBakeryFranchise: make("TopDesertBakerys.jsx"),
+      TopTruckAndKiosks: make("TopTruckAndKiosks.jsx"),
+      TopRestaurantsFranchise: make("TopRestaurantsFranchise.jsx"),
+      ToTrendingBrands: make("ToTrendingBrands.jsx"),
+      FindFranchiseLocations: make("FindFranchiseLocations.jsx"),
+    };
+>>>>>>> c73967643435be0ea97e5da4d2acdf10c55583da
   }, []);
 };
 
