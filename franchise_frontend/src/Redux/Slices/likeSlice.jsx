@@ -16,16 +16,26 @@ const handleApiError = (error) => {
 
 export const removeFromLikedBrands = createAsyncThunk(
   "likedBrands/remove",
-  async (brandId, { rejectWithValue }) => {
+  async (brandId, { rejectWithValue, getState }) => { // Only need brandId now
     try {
-      if (!userId || !brandId) throw new Error("Missing user ID or brand ID");
+      if (!brandId) throw new Error("Missing brand ID");
 
-      const baseUrl = api.likeApi.get || "https://localhost:5000/api/v1/like";
-      const url = `${baseUrl}/delete-favbrand/${userId}/${brandId}`;
+      // Get token from Redux state
+      const token = getState().auth?.AccessToken;
+      if (!token) throw new Error("No authentication token found");
 
-      await axios.delete(url, {
+      // Updated URL to match backend expectation
+      const url = `${api.likeApi.delete}/${brandId}`;
+
+      console.log("Delete URL:", url); // For debugging
+
+      const response = await axios.delete(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Failed to remove brand");
+      }
 
       return brandId;
     } catch (err) {

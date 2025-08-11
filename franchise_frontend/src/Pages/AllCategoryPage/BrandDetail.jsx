@@ -1,3 +1,4 @@
+
 import React, {
   useEffect,
   useState,
@@ -5,6 +6,7 @@ import React, {
   useMemo,
   useRef,
   lazy,
+  Suspense,
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -18,26 +20,10 @@ import {
 import { motion } from "framer-motion";
 import axios from "axios";
 
-// Components
-const Navbar = lazy(() => import("../../Components/Navbar/NavBar.jsx"));
-const Footer = lazy(() => import("../../Components/Footers/Footer.jsx"));
-const BrandHeader = lazy(() =>import ("./BrandViewPageHandling/BrandHeaderViewPage.jsx"));
-const MediaSection = lazy(() =>import ("./BrandViewPageHandling/MediaSectionViewPage.jsx"));
-const ExpansionLocationTags = lazy(() =>import ("./BrandViewPageHandling/ExpansionLocationTags.jsx"));
-const ImageDialog = lazy(() =>import ("./BrandViewPageHandling/ImageDialogBoxViewPage.jsx"));
-const ApplyDrawer = lazy(() =>import ("./BrandViewPageHandling/ApplyDrawerFormViewPage.jsx"));
-const BackToTopButton = lazy(() =>import ("./BrandViewPageHandling/BackToTopButtonViewPage.jsx"));
-const FloatingApplyButton = lazy(() =>import ("./BrandViewPageHandling/FloatingApplyButtonViewPage.jsx"));
-const SimilarBrands = lazy(() =>import ("../../Components/HomePage_VideoSection/SimilarBrands.jsx"));
-const LikedBrands = lazy(() =>import ("../../Components/HomePage_VideoSection/LikedBrands.jsx"));
-
-
-
-// Hooks
+// Critical (above fold) imports
 import { useBrand } from "../../Hooks/Fetchbrands.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
-import OverviewTab from "./OverviewTab.jsx";
 import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
 import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice.jsx";
 import { likeApiFunction } from "../../Api/likeApi.jsx";
@@ -45,6 +31,99 @@ import { useDispatch } from "react-redux";
 import { token } from "../../Utils/autherId.jsx";
 import LoginPage from "../LoginPage/LoginPage.jsx";
 import { addSortlist, removeSortList } from "../../Redux/Slices/shortlistslice.jsx";
+
+// Split: lazy-load OverviewTab!
+// EAGER (above fold!) imports
+import BrandHeader from "./BrandViewPageHandling/BrandHeaderViewPage.jsx";
+import MediaSection from "./BrandViewPageHandling/MediaSectionViewPage.jsx";
+
+// LAZY load (secondary) components
+const Navbar = lazy(() => import("../../Components/Navbar/NavBar.jsx"));
+const Footer = lazy(() => import("../../Components/Footers/Footer.jsx"));
+const OverviewTab = lazy(() => import("./OverviewTab.jsx"));
+const ExpansionLocationTags = lazy(() => import("./BrandViewPageHandling/ExpansionLocationTags.jsx"));
+const ImageDialog = lazy(() => import("./BrandViewPageHandling/ImageDialogBoxViewPage.jsx"));
+const ApplyDrawer = lazy(() => import("./BrandViewPageHandling/ApplyDrawerFormViewPage.jsx"));
+const BackToTopButton = lazy(() => import("./BrandViewPageHandling/BackToTopButtonViewPage.jsx"));
+const FloatingApplyButton = lazy(() => import("./BrandViewPageHandling/FloatingApplyButtonViewPage.jsx"));
+const SimilarBrands = lazy(() => import("../../Components/HomePage_VideoSection/SimilarBrands.jsx"));
+const LikedBrands = lazy(() => import("../../Components/HomePage_VideoSection/LikedBrands.jsx"));
+const ViewBrands = lazy(() => import("../../Components/HomePage_VideoSection/ViewBrands.jsx"));
+const ShortListedBrands = lazy(() => import("../../Components/HomePage_VideoSection/ShortListBrands.jsx"));
+
+// Lazy-load OverviewTab only when visible
+function LazyOverviewTab({ brand }) {
+  const ref = useRef();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new window.IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setVisible(true);
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <Box ref={ref} sx={{ minHeight: 400 }}>
+      {visible ? (
+        <Suspense fallback={<Box minHeight={200} display="flex" alignItems="center" justifyContent="center"><CircularProgress /></Box>}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+            <OverviewTab brand={brand} />
+          </motion.div>
+        </Suspense>
+      ) : (
+        <Box minHeight={260} />
+      )}
+    </Box>
+  );
+}
+
+
+const ExpansionLocationSection = ({
+  brand,
+  isMobile,
+  isTablet,
+  isSmallDesktop,
+  isLargeDesktop,
+}) => {
+  const [visible, setVisible] = useState(false);
+  const ref = useRef();
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new window.IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setVisible(true);
+      },
+      { rootMargin: "300px" }
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref}>
+      {visible ? (
+        <Suspense fallback={<div style={{ minHeight: 100 }}>Loading tags...</div>}>
+          <ExpansionLocationTags
+            brand={brand}
+            isMobile={isMobile}
+            isTablet={isTablet}
+            isSmallDesktop={isSmallDesktop}
+            isLargeDesktop={isLargeDesktop}
+          />
+        </Suspense>
+      ) : (
+        <div style={{ minHeight: 100 }} /> // Keep layout stable
+      )}
+    </div>
+  );
+};
 
 const BrandDetails = ({ brandData }) => {
   const theme = useTheme();
@@ -57,10 +136,10 @@ const BrandDetails = ({ brandData }) => {
   const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));
   const isLargeDesktop = useMediaQuery(theme.breakpoints.up("lg"));
 
-  // Refs
+  // Ref for scrolling
   const mainContainerRef = useRef(null);
 
-  // State management
+  // States
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -88,16 +167,14 @@ const BrandDetails = ({ brandData }) => {
     planToInvest: "",
     readyToInvest: "",
   });
+  const [showLogin, setShowLogin] = useState(false);
+  const dispatch = useDispatch();
 
-const [showLogin, setShowLogin] = useState(false);
-  const dispatch = useDispatch()
-
-  // Memoized data
+  // Memoized
   const selectedBrand = brandData || {};
-  console.log("selectedBrand:", selectedBrand);
-
   const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
   const AccessToken = useMemo(() => localStorage.getItem("accessToken"), []);
+
   const { mutate: toggleLike } = useToggleLike();
 
   const investmentRanges = useMemo(
@@ -120,12 +197,11 @@ const [showLogin, setShowLogin] = useState(false);
     []
   );
 
- const allVideos = useMemo(() => {
-  if (!selectedBrand || selectedBrand.length === 0) return [];
-  return selectedBrand[0]?.uploads?.franchiseVideos || [];
-}, [selectedBrand]);
- console.log("allVideos:", allVideos);
- 
+  const allVideos = useMemo(() => {
+    if (!selectedBrand || selectedBrand.length === 0) return [];
+    return selectedBrand[0]?.uploads?.franchiseVideos || [];
+  }, [selectedBrand]);
+
   const allImages = useMemo(
     () => [
       ...(selectedBrand[0]?.uploads?.logo
@@ -137,57 +213,34 @@ const [showLogin, setShowLogin] = useState(false);
     [selectedBrand]
   );
 
-  // Event handlers
+  // Events (useCallback)
   const handleOpenShareClick = useCallback((event) => {
     setAnchorEl(event.currentTarget);
   }, []);
 
-   const handleLikeClick = async () => {
-    console.log("ppppppp :",brandData[0].uuid)
+  const handleLikeClick = async () => {
+    const brandId = brandData[0].uuid;
+    if (!token) {
+      setShowLogin(true);
+      return;
+    }
+    dispatch(toggleBrandLike(brandId));
+    dispatch(toggleHomeCardLike(brandId));
+    await likeApiFunction(brandId);
+    setLocalIsLiked(!localIsLiked);
+  };
 
-    const brandId = brandData[0].uuid
-      if (!token) {
-        setShowLogin(true);
-        return;
-      }
-      dispatch(toggleBrandLike(brandId));
-      dispatch(toggleHomeCardLike(brandId));
-      await likeApiFunction(brandId);
-      setLocalIsLiked(!localIsLiked)
-    };
-
- const handleToggleShortList = async () => {
-  const brandId = brandData[0].uuid
-
-  
-  const brand = brandData[0];
-   console.log("brandData:", brand);
-
-  console.log("data :",brandData)
-
-//   const shortListObj = {
-//   uuid: brand.uuid,
-//   isLiked: brand.isLiked,
-//   isShortListed: brand.isShortListed
-// };
-     if (!token) {
-
-       setShowLogin(true);
-       return;
-     }
-    //  if (!brand.isShortListed) {
-    //   console.log("=======")
-    //          dispatch(addSortlist(shortListObj))
-    //        }else{
-    //         console.log("===brandId====")
-    //          dispatch(removeSortList(brandId))
-    //        }
-       dispatch(toggleBrandShortList(brandId));
-       dispatch(toggleHomeCardShortlist(brandId))
-       await handleShortList(brandId);
-     setShortListed(!shortListed)
-   };
- 
+  const handleToggleShortList = async () => {
+    const brandId = brandData[0].uuid;
+    if (!token) {
+      setShowLogin(true);
+      return;
+    }
+    dispatch(toggleBrandShortList(brandId));
+    dispatch(toggleHomeCardShortlist(brandId));
+    await handleShortList(brandId);
+    setShortListed(!shortListed);
+  };
 
   const toggleDrawer = useCallback(
     (open) => (event) => {
@@ -213,7 +266,6 @@ const [showLogin, setShowLogin] = useState(false);
       setIsSubmitting(true);
 
       const id = investorUUID || localStorage.getItem("brandUUID");
-
       if (!id) {
         alert("User not logged in or missing ID. Please login again.");
         navigate("/registerhandleuser");
@@ -231,8 +283,6 @@ const [showLogin, setShowLogin] = useState(false);
         };
 
         const requiredFields = [
-          "fullName",
-          "fullName",
           "fullName",
           "investorEmail",
           "mobileNumber",
@@ -284,10 +334,12 @@ const [showLogin, setShowLogin] = useState(false);
     },
     [formData, selectedBrand, investorUUID, navigate]
   );
+
   const handleImageOpen = useCallback((index) => {
     setCurrentImageIndex(index);
     setImageModalOpen(true);
   }, []);
+
   const handlePrevImage = useCallback(() => {
     setCurrentImageIndex((prev) =>
       prev === 0 ? allImages.length - 1 : prev - 1
@@ -298,7 +350,9 @@ const [showLogin, setShowLogin] = useState(false);
       prev === allImages.length - 1 ? 0 : prev + 1
     );
   }, [allImages.length]);
-  // API calls
+
+  // API: fetch investor and brand as before...
+
   const fetchInvestorDetails = useCallback(async () => {
     if (!investorUUID || !AccessToken) return;
     try {
@@ -327,7 +381,9 @@ const [showLogin, setShowLogin] = useState(false);
       }
     }
   }, [investorUUID, AccessToken]);
-  // Effects
+
+  // Effects (keep unchanged except for lazy-lazy components)
+
   useEffect(() => {
     if (!uuid) return;
     const controller = new AbortController();
@@ -350,66 +406,62 @@ const [showLogin, setShowLogin] = useState(false);
     }
   }, [fetchInvestorDetails, investorUUID, AccessToken]);
 
-useEffect(() => {
-  const locations =
-    selectedBrand[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
-console.log("locations",locations)
-  if (locations.length > 0) {
-    const states = [
-      ...new Set(locations.map((loc) => loc.state).filter(Boolean)),
-    ];
-    setLocationData((prev) => ({
-      ...prev,
-      states,
-      districts: [],
-      cities: [],
-    }));
-  }
-}, [selectedBrand]);
+  useEffect(() => {
+    const locations =
+      selectedBrand[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
+    if (locations.length > 0) {
+      const states = [
+        ...new Set(locations.map((loc) => loc.state).filter(Boolean)),
+      ];
+      setLocationData((prev) => ({
+        ...prev,
+        states,
+        districts: [],
+        cities: [],
+      }));
+    }
+  }, [selectedBrand]);
 
-useEffect(() => {
-  const locations =
-    selectedBrand[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
+  useEffect(() => {
+    const locations =
+      selectedBrand[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
+    if (formData.state && locations.length > 0) {
+      const stateObj = locations.find((loc) => loc.state === formData.state);
+      const districts = [
+        ...new Set(stateObj?.districts?.map((d) => d.district) || []),
+      ];
+      setLocationData((prev) => ({
+        ...prev,
+        districts,
+        cities: [],
+      }));
+      setFormData((prev) => ({
+        ...prev,
+        district: "",
+        city: "",
+      }));
+    }
+  }, [formData.state, selectedBrand]);
 
-  if (formData.state && locations.length > 0) {
-    const stateObj = locations.find((loc) => loc.state === formData.state);
-    const districts = [
-      ...new Set(stateObj?.districts?.map((d) => d.district) || []),
-    ];
-    setLocationData((prev) => ({
-      ...prev,
-      districts,
-      cities: [],
-    }));
-    setFormData((prev) => ({
-      ...prev,
-      district: "",
-      city: "",
-    }));
-  }
-}, [formData.state, selectedBrand]);
-
-useEffect(() => {
-  const locations =
-    selectedBrand[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
-
-  if (formData.state && formData.district && locations.length > 0) {
-    const stateObj = locations.find((loc) => loc.state === formData.state);
-    const districtObj = stateObj?.districts?.find(
-      (d) => d.district === formData.district
-    );
-    const cities = [...new Set(districtObj?.cities || [])];
-    setLocationData((prev) => ({
-      ...prev,
-      cities,
-    }));
-    setFormData((prev) => ({
-      ...prev,
-      city: "",
-    }));
-  }
-}, [formData.district, formData.state, selectedBrand]);
-
+  useEffect(() => {
+    const locations =
+      selectedBrand[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
+    if (formData.state && formData.district && locations.length > 0) {
+      const stateObj = locations.find((loc) => loc.state === formData.state);
+      const districtObj = stateObj?.districts?.find(
+        (d) => d.district === formData.district
+      );
+      const cities = [...new Set(districtObj?.cities || [])];
+      setLocationData((prev) => ({
+        ...prev,
+        cities,
+      }));
+      setFormData((prev) => ({
+        ...prev,
+        city: "",
+      }));
+    }
+  }, [formData.district, formData.state, selectedBrand]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -423,14 +475,13 @@ useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Utility functions
+  // Utility
   const getImageBoxSize = useCallback(() => {
     if (isMobile) return 120;
     if (isTablet) return 160;
     if (isSmallDesktop) return 180;
     return 204;
   }, [isMobile, isTablet, isSmallDesktop]);
-
   const getOutletRange = useCallback((value) => {
     const numericValue = Number(value);
     if (isNaN(numericValue)) return "N/A";
@@ -439,23 +490,22 @@ useEffect(() => {
     const upper = lower + 10;
     return `${lower} - ${upper}`;
   }, []);
-
-  if (!selectedBrand) {
+ if (!brandData || !brandData.length) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="80vh"
-      >
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
         <CircularProgress />
       </Box>
     );
   }
+  
 
   return (
     <>
-      <Navbar />
+      {/* LAZY NAVBAR LOAD */}
+      <Suspense fallback={<div style={{height: 60, background: "#fff"}} />}>
+        <Navbar />
+      </Suspense>
+
       <Box
         ref={mainContainerRef}
         sx={{
@@ -466,59 +516,68 @@ useEffect(() => {
           px: isMobile ? 1 : isTablet ? 3 : 4,
         }}
       >
-        <FloatingApplyButton
-          isMobile={isMobile}
-          brand={selectedBrand}
-          toggleDrawer={toggleDrawer}
-        />
-
-        <ApplyDrawer
-          open={drawerOpen}
-          onClose={toggleDrawer(false)}
-          isMobile={isMobile}
-          isTablet={isTablet}
-          formData={formData}
-          handleChange={handleChange}
-          handleSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          locationData={locationData}
-          investmentRanges={investmentRanges}
-          investmentTimings={investmentTimings}
-          readyToInvestOptions={readyToInvestOptions}
-          selectedBrand={selectedBrand}
-          userData={userData}
-        />
-
-        <BrandHeader
-          brand={selectedBrand}
-          isMobile={isMobile}
-          isTablet={isTablet}
-          localIsLiked={localIsLiked}
-          isProcessingLike={isProcessingLike}
-          shortListed={shortListed}
-          handleLikeClick={handleLikeClick}
-          handleToggleShortList={handleToggleShortList}
-          handleOpenShareClick={handleOpenShareClick}
-          anchorEl={anchorEl}
-          setAnchorEl={setAnchorEl}
-          toggleDrawer={toggleDrawer}
-          getOutletRange={getOutletRange}
-        />
-
+        {/* CRITICAL BUTTONS DRAWERS HEADER */}
+        {/* <Suspense fallback={null}> */}
+          <FloatingApplyButton
+            isMobile={isMobile}
+            brand={selectedBrand}
+            toggleDrawer={toggleDrawer}
+          />
+        {/* </Suspense> */}
+        {/* <Suspense fallback={null}> */}
+          <ApplyDrawer
+            open={drawerOpen}
+            onClose={toggleDrawer(false)}
+            isMobile={isMobile}
+            isTablet={isTablet}
+            formData={formData}
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            locationData={locationData}
+            investmentRanges={investmentRanges}
+            investmentTimings={investmentTimings}
+            readyToInvestOptions={readyToInvestOptions}
+            selectedBrand={selectedBrand}
+            userData={userData}
+          />
+        {/* </Suspense> */}
+        {/* <Suspense fallback={<Box minHeight={120}><CircularProgress /></Box>}> */}
+          <BrandHeader
+            brand={selectedBrand}
+            isMobile={isMobile}
+            isTablet={isTablet}
+            localIsLiked={localIsLiked}
+            isProcessingLike={isProcessingLike}
+            shortListed={shortListed}
+            handleLikeClick={handleLikeClick}
+            handleToggleShortList={handleToggleShortList}
+            handleOpenShareClick={handleOpenShareClick}
+            anchorEl={anchorEl}
+            setAnchorEl={setAnchorEl}
+            toggleDrawer={toggleDrawer}
+            getOutletRange={getOutletRange}
+          />
+        {/* </Suspense> */}
         <Divider sx={{ my: 3 }} />
-
-        <MediaSection
-          allVideos={allVideos}
-          allImages={allImages}
-          isMobile={isMobile}
-          isTablet={isTablet}
-          getImageBoxSize={getImageBoxSize}
-          handleImageOpen={handleImageOpen}
-        />
-
+        {/* MEDIA LAZY */}
+        {/* <Suspense fallback={<Box minHeight={200}><CircularProgress /></Box>}> */}
+          <MediaSection
+            allVideos={allVideos}
+            allImages={allImages}
+            isMobile={isMobile}
+            isTablet={isTablet}
+            getImageBoxSize={getImageBoxSize}
+            handleImageOpen={handleImageOpen}
+          />
+        {/* </Suspense> */}
         <Divider sx={{ my: 5 }} />
 
-        <Box
+        <Suspense fallback={<Box minHeight={180}><CircularProgress /></Box>}>
+          <LazyOverviewTab brand={selectedBrand} />
+        </Suspense>
+
+        {/* <Box
           sx={{
             display: "flex",
             flexDirection: isMobile ? "column" : "row",
@@ -526,31 +585,40 @@ useEffect(() => {
           }}
         >
           <Box sx={{ width: "100%" }}>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
               <OverviewTab brand={selectedBrand} />
             </motion.div>
           </Box>
-        </Box>
-
-        <ImageDialog
-          open={imageModalOpen}
-          onClose={() => setImageModalOpen(false)}
-          isMobile={isMobile}
-          allImages={allImages}
-          currentImageIndex={currentImageIndex}
-          setCurrentImageIndex={setCurrentImageIndex}
-          handlePrevImage={handlePrevImage}
-          handleNextImage={handleNextImage}
-        />
+        </Box> */}
+        <Suspense fallback={null}>
+          <ImageDialog
+            open={imageModalOpen}
+            onClose={() => setImageModalOpen(false)}
+            isMobile={isMobile}
+            allImages={allImages}
+            currentImageIndex={currentImageIndex}
+            setCurrentImageIndex={setCurrentImageIndex}
+            handlePrevImage={handlePrevImage}
+            handleNextImage={handleNextImage}
+          />
+        </Suspense>
       </Box>
 
-      <LikedBrands />
-      <SimilarBrands brandData={selectedBrand} />
+      {/* LAZY LOAD LIKED/SIMILAR BRANDS */}
+      <Suspense fallback={<Box minHeight={120}><CircularProgress /></Box>}>
+        <LikedBrands />
+      </Suspense>
+      <Suspense fallback={<Box minHeight={120}><CircularProgress /></Box>}>
+      <ViewBrands />
+        </Suspense>
+      <Suspense fallback={<Box minHeight={120}><CircularProgress /></Box>}>
+      <ShortListedBrands />
+        </Suspense>
+      <Suspense fallback={<Box minHeight={120}><CircularProgress /></Box>}>
+        <SimilarBrands brandData={selectedBrand} />
+      </Suspense>
 
+      {/* EXPANSION LOCATIONS LAZY ON SCROLL */}
       <Box
         sx={{
           width: "90%",
@@ -567,7 +635,7 @@ useEffect(() => {
         >
           Tags
         </Typography>
-        <ExpansionLocationTags
+        <ExpansionLocationSection
           brand={selectedBrand}
           isMobile={isMobile}
           isTablet={isTablet}
@@ -576,10 +644,14 @@ useEffect(() => {
         />
       </Box>
 
-      <BackToTopButton show={showBackToTop} isMobile={isMobile} />
-      <Footer />
+      <Suspense fallback={null}>
+        <BackToTopButton show={showBackToTop} isMobile={isMobile} />
+      </Suspense>
+      <Suspense fallback={<div style={{height: 300, background: "#eee"}} />}>
+        <Footer />
+      </Suspense>
 
-       {/* Login Dialog */}
+      {/* Login Dialog */}
       {showLogin && (
         <LoginPage open={showLogin} onClose={() => setShowLogin(false)} />
       )}
