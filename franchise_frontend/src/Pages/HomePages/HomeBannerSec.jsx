@@ -407,6 +407,7 @@ const HomeBannerSec = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const controls = useAnimation();
+const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
 
   useEffect(() => {
     const nav = performance.getEntriesByType("navigation")[0]?.type === "reload";
@@ -639,15 +640,23 @@ const HomeBannerSec = () => {
         </Container>
       </Box>
 
-      {pageConfig.sections.map((section, index) => (
-        <LazySection
-          key={index}
-          componentKey={section.component}
-          dynamicComponents={dynamicComponents}
-          background={section.background || "white"}
-          isMobile={isMobile}
-        />
-      ))}
+      {pageConfig.sections
+  .filter(section => {
+    // Show everything except login-required sections when logged out
+    if (!isLoggedIn && ["ViewBrands", "ShortlistBrands", "LikedBrands"].includes(section.component)) {
+      return false; // Skip these if logged out
+    }
+    return true;
+  })
+  .map((section, index) => (
+    <LazySection
+      key={index}
+      componentKey={section.component}
+      dynamicComponents={dynamicComponents}
+      background={section.background || "white"}
+      isMobile={isMobile}
+    />
+))}
 
       <Footer />
     </>
