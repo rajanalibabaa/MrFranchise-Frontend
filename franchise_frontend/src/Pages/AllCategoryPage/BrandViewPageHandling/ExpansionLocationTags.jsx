@@ -101,7 +101,7 @@ const ExpansionLocationTags = ({
           ? "repeat(2, 1fr)"
           : "repeat(3, 1fr)",
         gap: 2,
-        height: isMobile ? "auto" : "90px",
+        height: isMobile ? "auto" : "50px",
         overflowY: "auto",
       }}
     >

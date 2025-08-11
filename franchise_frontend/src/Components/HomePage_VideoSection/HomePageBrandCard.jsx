@@ -38,6 +38,7 @@ import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAll
 import  {likeApiFunction}  from "../../Api/likeApi.jsx";
 import { addLikedBrand, removeLikedBrand,toggleLikedSliceShortList } from "../../Redux/Slices/likeSlice.jsx";
 import { toggleviewSliceShortList,toggleviewSliceLiked } from "../../Redux/Slices/viewSlice.jsx";
+import { toggleBrandShortListfilter,toggleBrandLikefilter} from "../../Redux/Slices/FilterBrandSlice.jsx";
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -109,14 +110,16 @@ const HomePageBrandCard = React.memo(
         if (!brand.isShortListed) {
                 dispatch(addSortlist(brand))
               }else(
-                dispatch(removeSortList(brand.uuid))
+                dispatch(removeSortList(brand?.uuid))
               )
-              
-        dispatch(toggleLikedSliceShortList(brand.uuid))
-        dispatch(toggleviewSliceShortList(brand.uuid))
-        dispatch(toggleBrandShortList(brand.uuid))
-        dispatch(toggleHomeCardShortlist(brand.uuid))
-        await handleShortList(brand.uuid)
+
+        dispatch(toggleLikedSliceShortList(brand?.uuid))
+        dispatch(toggleviewSliceShortList(brand?.uuid))
+                   dispatch(toggleBrandShortListfilter(brand?.uuid))
+
+        dispatch(toggleBrandShortList(brand?.uuid))
+        dispatch(toggleHomeCardShortlist(brand?.uuid))
+        await handleShortList(brand?.uuid)
         setShortListed(!shortListed)
       } catch (error) {
         console.error("Error toggling shortlist:", error);
@@ -128,21 +131,22 @@ const HomePageBrandCard = React.memo(
              setShowLogin(true);
              return;
            }
-           dispatch(toggleSortlistBrandLike(brand.uuid))
-           dispatch(toggleBrandLike(brand.uuid))
-           if (!brand.isLiked) {
+           dispatch(toggleSortlistBrandLike(brand?.uuid))
+           dispatch(toggleBrandLikefilter(brand?.uuid))
+           dispatch(toggleBrandLike(brand?.uuid))
+           if (!brand?.isLiked) {
             dispatch(addLikedBrand(brand))
            } else {
-            dispatch(removeLikedBrand(brand.uuid))
+            dispatch(removeLikedBrand(brand?.uuid))
            }
-           dispatch(toggleviewSliceLiked(brand.uuid))
-           dispatch(toggleHomeCardLike(brand.uuid))
-           await likeApiFunction(brand.uuid)
+           dispatch(toggleviewSliceLiked(brand?.uuid))
+           dispatch(toggleHomeCardLike(brand?.uuid))
+           await likeApiFunction(brand?.uuid)
          }
     
 
     const handleApply = (brand) => {
-      postView(brand.uuid);
+      postView(brand?.uuid);
       dispatch(openBrandDialog(brand));
     };
 

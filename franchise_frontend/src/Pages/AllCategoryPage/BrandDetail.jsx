@@ -322,6 +322,7 @@ const BrandDetails = ({ brandData }) => {
             readyToInvest: "",
           });
         }
+        console.log("Submission successful:", response.data);
       } catch (error) {
         console.error(
           "Submission error:",
@@ -357,7 +358,7 @@ const BrandDetails = ({ brandData }) => {
     if (!investorUUID || !AccessToken) return;
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",

@@ -43,6 +43,7 @@ import { handleShortList } from "../../Api/shortListApi.jsx";
 import { addSortlist, removeSortList, toggleSortlistBrandLike } from "../../Redux/Slices/shortlistslice.jsx";
 import { addLikedBrand, removeLikedBrand, toggleLikedSliceShortList } from "../../Redux/Slices/likeSlice.jsx";
 import { toggleviewSliceShortList,toggleviewSliceLiked } from "../../Redux/Slices/viewSlice.jsx";
+import { toggleBrandShortListfilter} from "../../Redux/Slices/FilterBrandSlice.jsx";
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -210,6 +211,7 @@ function TopBrandVdoCards() {
      dispatch(toggleviewSliceLiked(brand.uuid))
     dispatch(toggleBrandLike(brand.uuid));
     dispatch(toggleSortlistBrandLike(brand.uuid));
+    dispatch(toggleBrandShortListfilter(brand.uuid));
     dispatch(toggleHomeCardLike(brand.uuid));
     await likeApiFunction(brand.uuid);
   };
