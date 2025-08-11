@@ -351,7 +351,7 @@ const useDynamicComponents = () => {
       ShortlistBrands: make("ShortlistBrands.jsx"),
       TopCafeFranchises: make("TopCafeBrands.jsx"),
       TopFoodFranchise: make("TopFoodFranchise.jsx"),
-      ViewBrands: make("ViewBrands.jsx"),
+      // ViewBrands: make("ViewBrands.jsx"),
       TopBeverageFranchise: make("TopBeverageFranchise.jsx"),
       TopDesertBakeryFranchise: make("TopDesertBakerys.jsx"),
       TopTruckAndKiosks: make("TopTruckAndKiosks.jsx"),
