@@ -94,7 +94,6 @@ const HomePageBrandCard = React.memo(
     }, []);
 
     const [shortListed, setShortListed] = useState(brand?.isShortListed);
-    const [shortListed, setShortListed] = useState(brand?.isShortListed);
     const dispatch = useDispatch();
     const handleToggleShortList = async (brand) => {
       try {
@@ -110,7 +109,6 @@ const HomePageBrandCard = React.memo(
         if (!brand?.isShortListed) {
                 dispatch(addSortlist(brand))
               }else(
-                dispatch(removeSortList(brand?.uuid))
                 dispatch(removeSortList(brand?.uuid))
               )
               
@@ -212,7 +210,7 @@ const HomePageBrandCard = React.memo(
                   <IconButton
                     onClick={() => handleToggleShortList(brand)}
                     sx={{
-                      color: brand?.isShortListed
+                      
                       color: brand?.isShortListed
                         ? "#7ef400ff"
                         : "rgba(0, 0, 0, 0.23)",
