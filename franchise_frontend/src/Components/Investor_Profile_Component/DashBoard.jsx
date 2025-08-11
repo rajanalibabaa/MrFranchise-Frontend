@@ -28,9 +28,10 @@ import img from "../../assets/images/brandLogo.jpg";
 import { api } from "../../Api/api";
 import { RiBookmark3Fill } from "react-icons/ri";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice";
-import { fetchShortListedById } from "../../Redux/Slices/shortlistslice";
+import { fetchShortListedById , removeFromShortlist } from "../../Redux/Slices/shortlistslice";
 import { fetchLikedBrandsById, removeFromLikedBrands } from "../../Redux/Slices/likeSlice";
 import { fetchViewBrandsById, removeviewBrand, clearviewBrands } from "../../Redux/Slices/viewSlice"; 
+import { handleShortList } from "../../Api/shortListApi"
 
 const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
   const theme = useTheme();
@@ -159,20 +160,20 @@ const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
   );
 });
 
-const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, onToggleViewClose }) => {
-  const theme = useTheme();
+const BrandCard = memo(({ item, type, likedStates, shortlistedStates, onViewDetails, onToggleLike, onToggleShortlist, onToggleViewClose }) => {  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   if (!item || typeof item !== 'object') return null;
 
   const brandId = item.uuid || item.brandID?.uuid || item.brandID;
   const isLiked = brandId ? likedStates[brandId] : false;
+  const isShortlisted = brandId ? shortlistedStates[brandId] : false;
   
   const wrapAfter30 = (str) => {
     if (!str) return "";
     return str.replace(/(.{30})/g, "$1\u200B");
   };
-  
+
   const brandName =
     item?.brandName ||
     item?.brandname ||
@@ -223,17 +224,27 @@ const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, 
                 <Favorite fontSize="small" />
               </IconButton>
             )}
-            {type === 'shortlisted' && (
-              <IconButton sx={{ color: "rgba(0, 0, 0, 0.23)" }}>
-                <Tooltip title="ShortList">
-                  <RiBookmark3Fill size={21} />
-                </Tooltip>
-              </IconButton>
-            )}
+     {type === 'shortlisted' && (
+  <IconButton 
+    sx={{ 
+      color: isShortlisted ? "#689f38" : "rgba(0,0,0,0.2)",
+      "&:hover": { color: "#689f38" },
+    }}
+    onClick={async (e) => {
+      e.stopPropagation();
+      await onToggleShortlist(brandId);
+    }}
+  >
+    <Tooltip title={isShortlisted ? "Remove from shortlist" : "Add to shortlist"}>
+      <RiBookmark3Fill size={21} />
+    </Tooltip>
+  </IconButton>
+)}
+
           </Stack>
         )}
 
-        {isMobile && (
+{isMobile && (
           <Stack direction="row" spacing={0.5}>
             {type === 'liked' && (
               <IconButton
@@ -246,13 +257,22 @@ const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, 
                 <Favorite fontSize="small" />
               </IconButton>
             )}
-            {type === 'shortlisted' && (
-              <IconButton sx={{ color: "rgba(0, 0, 0, 0.23)" }}>
-                <Tooltip title="ShortList">
-                  <RiBookmark3Fill size={21} />
-                </Tooltip>
-              </IconButton>
-            )}
+             {type === 'shortlisted' && (
+  <IconButton 
+    sx={{ 
+      color: "#689f38",
+      "&:hover": { color: "#689f38" },
+    }}
+    onClick={async () => {
+      await onToggleShortlist(brandId); // remove from shortlist
+    }}
+  >
+    <Tooltip title="Remove from shortlist">
+      <RiBookmark3Fill size={21} />
+    </Tooltip>
+  </IconButton>
+)}
+
           </Stack>
         )}
 
@@ -345,9 +365,9 @@ const Dashboard = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [tabValue, setTabValue] = useState(0);
-  // const [viewedBrands, setViewedBrands] = useState([]);
   const [appliedBrands, setAppliedBrands] = useState([]);
   const [likedStates, setLikedStates] = useState({});
+  const [shortlistedStates, setShortlistedStates] = useState({});
   const [removeMsg, setRemoveMsg] = useState("");
   const [userData, setUserData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -357,97 +377,93 @@ const Dashboard = () => {
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
   const shortListState = useSelector(state => state.shortList);
   const likedBrandsState = useSelector(state => state.likedBrands);
- const viewBrandsState = useSelector(state => state.viewBrands);
+  const viewBrandsState = useSelector(state => state.viewBrands);
 
-  const { brands: viewedBrands, pagination: viewPagination, isLoading: viewLoading, error: viewError } = viewBrandsState;
+  const { brands: viewedBrands, pagination: viewPagination } = viewBrandsState;
   const shortlistedBrands = Array.isArray(shortListState.brands) ? shortListState.brands : [];
   const likedBrands = Array.isArray(likedBrandsState.brands) ? likedBrandsState.brands : [];
 
   const isLoading = likedBrandsState.isLoading || shortListState.isLoading;
   const errorMessage = likedBrandsState.error || shortListState.error;
 
-const stats = useMemo(() => ({
+  const stats = useMemo(() => ({
     totalViews: viewPagination?.totalItems || viewedBrands?.length || 0,
     totalLikes: likedBrands.length,
     totalApplications: appliedBrands.length,
-    totalShortlisted: shortListState.pagination?.totalItems || shortlistedBrands.length,
-  }), [viewedBrands, viewPagination, likedBrands, appliedBrands, shortListState, shortlistedBrands]);
+    totalShortlisted: Object.values(shortlistedStates).filter(Boolean).length,
+  }), [viewedBrands, viewPagination, likedBrands, appliedBrands, shortlistedStates]);
 
   useEffect(() => {
     const initialLiked = {};
     likedBrands.forEach(item => {
       const brandId = item.uuid || item.brandID?.uuid || item.brandID;
-      if (brandId) {
-        initialLiked[brandId] = true;
-      }
+      if (brandId) initialLiked[brandId] = true;
     });
     setLikedStates(initialLiked);
-  }, [likedBrands]);
+
+    const initialShortlisted = {};
+    shortlistedBrands.forEach(item => {
+      const brandId = item.uuid || item.brandID?.uuid || item.brandID;
+      if (brandId) initialShortlisted[brandId] = true;
+    });
+    setShortlistedStates(initialShortlisted);
+  }, [likedBrands, shortlistedBrands]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [tabValue]);
 
-  const fetchData = useCallback(async () => {
-    if (!investorUUID || !AccessToken) return;
+// Modify your fetchData function to handle errors better
+const fetchData = useCallback(async () => {
+  if (!investorUUID || !AccessToken) return;
 
-    try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${AccessToken}`,
-        }
-      };
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${AccessToken}`,
+      }
+    };
 
-      dispatch(fetchLikedBrandsById({ userId: investorUUID }));
-      dispatch(fetchShortListedById({ investorUUID }));
-      dispatch(fetchViewBrandsById({ userId: investorUUID }));
+    // Dispatch all requests in parallel
+    await Promise.all([
+      dispatch(fetchLikedBrandsById({ userId: investorUUID })),
+      dispatch(fetchShortListedById({ investorUUID })),
+      dispatch(fetchViewBrandsById({ userId: investorUUID })),
+      axios.get(`${api.instantApplyApi.get.getInstaApplyById}/${investorUUID}`, config)
+        .then(res => {
+          setAppliedBrands(Array.isArray(res.data?.data) ? res.data.data : []);
+        }),
+      axios.get(`${api.user.get.investor}/${investorUUID}`, config)
+        .then(res => {
+          setUserData(res.data?.data || null);
+        })
+    ]);
 
-      const [ appliedRes, userRes] = await Promise.all([
-        // axios.get(`${api.viewApi.get.getAllViewBrandByID}/${investorUUID}`, config)
-        //   .then(res => Array.isArray(res.data?.data) ? res.data.data : [])
-        //   .catch(() => []),
-        axios.get(`${api.instantApplyApi.get.getInstaApplyById}/${investorUUID}`, config)
-          .then(res => Array.isArray(res.data?.data) ? res.data.data : [])
-          .catch(() => []),
-        axios.get(`${api.user.get.investor}/${investorUUID}`, config)
-          .then(res => res.data?.data || null)
-          .catch(() => null)
-      ]);
-
-      // setViewedBrands(viewedRes);
-      setAppliedBrands(appliedRes);
-      setUserData(userRes);
-    } catch (error) {
-      console.error("Error in fetchData:", error);
-    }
-  }, [investorUUID, AccessToken, dispatch]);
+  } catch (error) {
+    console.error("Error in fetchData:", error);
+  }
+}, [investorUUID, AccessToken, dispatch]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
   const toggleLike = useCallback(async (brandId) => {
-    if (!brandId) {
-      console.error("Missing brand ID:", brandId);
-      return;
-    }
+    if (!brandId) return;
 
-    const brandToRemove = likedBrands.find(brand => 
-      brand.uuid === brandId || 
-      brand.brandID?.uuid === brandId || 
+    const brandToRemove = likedBrands.find(brand =>
+      brand.uuid === brandId ||
+      brand.brandID?.uuid === brandId ||
       brand.brandID === brandId
     );
 
-    if (!brandToRemove) {
-      console.error("Brand not found in liked brands:", brandId);
-      return;
-    }
+    if (!brandToRemove) return;
 
     const apiBrandId = brandToRemove.uuid || brandToRemove.brandID?.uuid || brandToRemove.brandID;
 
     setLikedStates(prev => {
-      const newState = {...prev};
+      const newState = { ...prev };
       delete newState[brandId];
       return newState;
     });
@@ -460,28 +476,71 @@ const stats = useMemo(() => ({
     } catch (error) {
       console.error("Remove error:", error);
       setRemoveMsg(error.message || "Failed to remove brand");
-      setLikedStates(prev => ({...prev, [brandId]: true}));
+      setLikedStates(prev => ({ ...prev, [brandId]: true }));
     }
   }, [investorUUID, dispatch, likedBrands]);
+
+const toggleShortlist = useCallback(async (brandId) => {
+  if (!brandId) return;
+
+  try {
+    // Optimistic UI update
+    setShortlistedStates(prev => ({
+      ...prev,
+      [brandId]: !prev[brandId]
+    }));
+
+    // Call API to toggle shortlist status
+    await handleShortList(brandId);
+    
+    // Refresh data from server
+    const response = await dispatch(fetchShortListedById({ investorUUID }));
+    console.log('Server response:', response); // Now properly inside the function
+    
+    if (response?.payload?.brands) {
+      const updatedStates = {};
+      response.payload.brands.forEach(brand => {
+        const id = brand.uuid || brand.brandID?.uuid || brand.brandID;
+        if (id) updatedStates[id] = true;
+      });
+      setShortlistedStates(updatedStates);
+    }
+
+    setRemoveMsg(shortlistedStates[brandId] 
+      ? "Brand removed from shortlist" 
+      : "Brand added to shortlist");
+    
+    setTimeout(() => setRemoveMsg(""), 3000);
+  } catch (error) {
+    // Revert on error
+    setShortlistedStates(prev => ({
+      ...prev,
+      [brandId]: !prev[brandId]
+    }));
+    console.error("Shortlist toggle error:", error);
+    setRemoveMsg(error.message || "Failed to update shortlist");
+  }
+}, [investorUUID, dispatch, shortlistedStates]);
+useEffect(() => {
+  console.log('Shortlisted brands from Redux:', shortlistedBrands);
+}, [shortlistedBrands]);
 
   const toggleViewClose = useCallback(async (brandId) => {
     if (!investorUUID || !AccessToken || !brandId) return;
 
-    // setViewedBrands(prev => prev.filter(item => item?.uuid !== brandId));
-
-     try {
-      await dispatch(removeviewBrand({ 
-        userId: investorUUID, 
+    try {
+      await dispatch(removeviewBrand({
+        userId: investorUUID,
         brandId,
-        token: AccessToken 
+        token: AccessToken
       })).unwrap();
-      
+
       setRemoveMsg("Brand removed from view history");
       setTimeout(() => setRemoveMsg(""), 3000);
+      dispatch(fetchViewBrandsById({ userId: investorUUID }));
     } catch (error) {
       console.error("Error removing viewed brand:", error);
-      // Refresh the data if there was an error
-      dispatch(fetchViewBrandsById({ userId: investorUUID }));
+      setRemoveMsg(error.message || "Failed to remove brand from view history");
     }
   }, [investorUUID, AccessToken, dispatch]);
 
@@ -519,7 +578,7 @@ const stats = useMemo(() => ({
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
-
+  
   const renderTabContent = useMemo(() => {
     if (isLoading) {
       return (
@@ -587,8 +646,10 @@ const stats = useMemo(() => ({
                     item={item} 
                     type={['viewed', 'liked', 'applied', 'shortlisted'][tabValue]}
                     likedStates={likedStates}
+                    shortlistedStates={shortlistedStates}
                     onViewDetails={handleViewDetails}
                     onToggleLike={toggleLike}
+                    onToggleShortlist={toggleShortlist}
                     onToggleViewClose={toggleViewClose}
                   />
                 </Grid>
@@ -632,8 +693,10 @@ const stats = useMemo(() => ({
     totalPages, 
     currentPage, 
     likedStates, 
+    shortlistedStates,
     handleViewDetails, 
     toggleLike, 
+    toggleShortlist,
     toggleViewClose
   ]);
 
