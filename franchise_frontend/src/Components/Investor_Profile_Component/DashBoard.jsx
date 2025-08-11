@@ -4,13 +4,13 @@ import {
   Typography,
   Avatar,
   Card,
-  CardContent,
-  CardMedia,
   Grid,
   Button,
   IconButton,
   CircularProgress,
-  Tooltip ,
+  Tooltip,
+  Pagination,
+  Stack,
 } from "@mui/material";
 import {
   Favorite,
@@ -25,18 +25,17 @@ import { useMediaQuery, useTheme } from '@mui/material';
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import img from "../../assets/images/brandLogo.jpg";
-import Stack from "@mui/material/Stack";
 import { api } from "../../Api/api";
 import { RiBookmark3Fill } from "react-icons/ri";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice";
 import { fetchShortListedById } from "../../Redux/Slices/shortlistslice";
 import { fetchLikedBrandsById, removeFromLikedBrands } from "../../Redux/Slices/likeSlice";
-// Memoized StatCard component to prevent unnecessary re-renders
+import { fetchViewBrandsById, removeviewBrand, clearviewBrands } from "../../Redux/Slices/viewSlice"; 
+
 const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
   const theme = useTheme();
   const isSm = useMediaQuery(theme.breakpoints.up('sm'));
 
-  
   return (
     <Card
       onClick={onClick}
@@ -80,7 +79,6 @@ const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
       <Box
         className="stat-icon"
         sx={{
-          
           flexShrink: 0,
           p: { sm: 1 },
           borderRadius: '50%',
@@ -107,7 +105,6 @@ const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
 
       <Box
         sx={{
-          
           flex: 1,
           minWidth: 0,
           overflow: 'hidden',
@@ -162,7 +159,6 @@ const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
   );
 });
 
-// Memoized BrandCard component
 const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, onToggleViewClose }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -171,10 +167,12 @@ const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, 
 
   const brandId = item.uuid || item.brandID?.uuid || item.brandID;
   const isLiked = brandId ? likedStates[brandId] : false;
-const wrapAfter30 = (str) => {
-  if (!str) return "";
-  return str.replace(/(.{30})/g, "$1\u200B");
-};
+  
+  const wrapAfter30 = (str) => {
+    if (!str) return "";
+    return str.replace(/(.{30})/g, "$1\u200B");
+  };
+  
   const brandName =
     item?.brandName ||
     item?.brandname ||
@@ -198,7 +196,6 @@ const wrapAfter30 = (str) => {
       <Card
         sx={{
           p: 1.5,
-          
           borderRadius: 3,
           height: "100%",
           display: "flex",
@@ -213,7 +210,6 @@ const wrapAfter30 = (str) => {
           overflow: "hidden",
         }}
       >
-        {/* Like / Shortlist buttons */}
         {!isMobile && (
           <Stack direction="column" spacing={0.5} sx={{ position: "absolute", top: 4, right: 4, zIndex: 2 }}>
             {type === 'liked' && (
@@ -260,7 +256,6 @@ const wrapAfter30 = (str) => {
           </Stack>
         )}
 
-        {/* Brand logo */}
         <Box
           component="img"
           src={brandLogo}
@@ -275,7 +270,6 @@ const wrapAfter30 = (str) => {
           }}
         />
 
-        {/* Brand name */}
         <Typography
           variant="caption"
           fontWeight={600}
@@ -291,27 +285,25 @@ const wrapAfter30 = (str) => {
           {brandName}
         </Typography>
 
-        {/* Brand category */}
         <Typography
-  variant="caption"
-  sx={{
-    maxWidth: "300px",
-    display: "flex",
-    justifyContent: "center",
-    flexWrap: "wrap",
-    gap: 0.5,
-    mt: 0.5,
-    mb: 1,
-    width: "100%",
-    textAlign: "center",
-    wordBreak: "break-word",
-    whiteSpace: "normal",
-  }}
->
-  {wrapAfter30(item.brandCategories?.child)}
-</Typography>
+          variant="caption"
+          sx={{
+            maxWidth: "300px",
+            display: "flex",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            gap: 0.5,
+            mt: 0.5,
+            mb: 1,
+            width: "100%",
+            textAlign: "center",
+            wordBreak: "break-word",
+            whiteSpace: "normal",
+          }}
+        >
+          {wrapAfter30(item.brandCategories?.child)}
+        </Typography>
 
-        {/* FICO details */}
         <Stack direction="column" spacing={0.5} sx={{ mb: 0.5, width: "100%" }}>
           <Typography variant="caption" fontWeight={500}>
             Investment : {item.fico?.investmentRange || "N/A"}
@@ -324,7 +316,6 @@ const wrapAfter30 = (str) => {
           </Typography>
         </Stack>
 
-        {/* Action button */}
         <Button
           variant="outlined"
           aria-label="apply now"
@@ -351,37 +342,37 @@ const wrapAfter30 = (str) => {
 });
 
 const Dashboard = () => {
- const theme = useTheme();
+  const theme = useTheme();
   const dispatch = useDispatch();
   const [tabValue, setTabValue] = useState(0);
-  const [viewedBrands, setViewedBrands] = useState([]);
+  // const [viewedBrands, setViewedBrands] = useState([]);
   const [appliedBrands, setAppliedBrands] = useState([]);
   const [likedStates, setLikedStates] = useState({});
   const [removeMsg, setRemoveMsg] = useState("");
   const [userData, setUserData] = useState(null);
-  
-  // Redux state selectors
-const investorUUID = useSelector((state) => state.auth?.investorUUID);  
-const AccessToken = useSelector((state) => state.auth?.AccessToken);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
+
+  const investorUUID = useSelector((state) => state.auth?.investorUUID);  
+  const AccessToken = useSelector((state) => state.auth?.AccessToken);
   const shortListState = useSelector(state => state.shortList);
   const likedBrandsState = useSelector(state => state.likedBrands);
+ const viewBrandsState = useSelector(state => state.viewBrands);
 
-  const shortlistedBrands = shortListState.brands || [];
-  const likedBrands = likedBrandsState.brands || [];
+  const { brands: viewedBrands, pagination: viewPagination, isLoading: viewLoading, error: viewError } = viewBrandsState;
+  const shortlistedBrands = Array.isArray(shortListState.brands) ? shortListState.brands : [];
+  const likedBrands = Array.isArray(likedBrandsState.brands) ? likedBrandsState.brands : [];
 
-  // Combined loading and error states
   const isLoading = likedBrandsState.isLoading || shortListState.isLoading;
   const errorMessage = likedBrandsState.error || shortListState.error;
 
-  // Memoized stats calculation
-  const stats = useMemo(() => ({
-    totalViews: viewedBrands.length,
+const stats = useMemo(() => ({
+    totalViews: viewPagination?.totalItems || viewedBrands?.length || 0,
     totalLikes: likedBrands.length,
     totalApplications: appliedBrands.length,
     totalShortlisted: shortListState.pagination?.totalItems || shortlistedBrands.length,
-  }), [viewedBrands, likedBrands, appliedBrands, shortListState, shortlistedBrands]);
-  
-  // Initialize liked states
+  }), [viewedBrands, viewPagination, likedBrands, appliedBrands, shortListState, shortlistedBrands]);
+
   useEffect(() => {
     const initialLiked = {};
     likedBrands.forEach(item => {
@@ -393,7 +384,10 @@ const AccessToken = useSelector((state) => state.auth?.AccessToken);
     setLikedStates(initialLiked);
   }, [likedBrands]);
 
-  // Fetch data
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tabValue]);
+
   const fetchData = useCallback(async () => {
     if (!investorUUID || !AccessToken) return;
 
@@ -405,27 +399,25 @@ const AccessToken = useSelector((state) => state.auth?.AccessToken);
         }
       };
 
-      // Dispatch Redux actions
       dispatch(fetchLikedBrandsById({ userId: investorUUID }));
       dispatch(fetchShortListedById({ investorUUID }));
+      dispatch(fetchViewBrandsById({ userId: investorUUID }));
 
-      // Fetch additional data
-      const [viewedRes, appliedRes, userRes] = await Promise.all([
-        axios.get(`${api.viewApi.get.getAllViewBrandByID}/${investorUUID}`, config)
-          .then(res => res.data?.data || [])
-          .catch(() => []),
+      const [ appliedRes, userRes] = await Promise.all([
+        // axios.get(`${api.viewApi.get.getAllViewBrandByID}/${investorUUID}`, config)
+        //   .then(res => Array.isArray(res.data?.data) ? res.data.data : [])
+        //   .catch(() => []),
         axios.get(`${api.instantApplyApi.get.getInstaApplyById}/${investorUUID}`, config)
-          .then(res => res.data?.data || [])
+          .then(res => Array.isArray(res.data?.data) ? res.data.data : [])
           .catch(() => []),
         axios.get(`${api.user.get.investor}/${investorUUID}`, config)
           .then(res => res.data?.data || null)
           .catch(() => null)
       ]);
 
-      setViewedBrands(viewedRes);
+      // setViewedBrands(viewedRes);
       setAppliedBrands(appliedRes);
       setUserData(userRes);
-
     } catch (error) {
       console.error("Error in fetchData:", error);
     }
@@ -435,82 +427,100 @@ const AccessToken = useSelector((state) => state.auth?.AccessToken);
     fetchData();
   }, [fetchData]);
 
-  // Optimized toggleLike with useCallback
-const toggleLike = useCallback(async (brandId) => {
-  if (!brandId) {
-    console.error("Missing brand ID:", brandId);
-    return;
-  }
+  const toggleLike = useCallback(async (brandId) => {
+    if (!brandId) {
+      console.error("Missing brand ID:", brandId);
+      return;
+    }
 
-  // Find the exact brand to ensure correct ID structure
-  const brandToRemove = likedBrands.find(brand => 
-    brand.uuid === brandId || 
-    brand.brandID?.uuid === brandId || 
-    brand.brandID === brandId
-  );
+    const brandToRemove = likedBrands.find(brand => 
+      brand.uuid === brandId || 
+      brand.brandID?.uuid === brandId || 
+      brand.brandID === brandId
+    );
 
-  if (!brandToRemove) {
-    console.error("Brand not found in liked brands:", brandId);
-    return;
-  }
+    if (!brandToRemove) {
+      console.error("Brand not found in liked brands:", brandId);
+      return;
+    }
 
-  // Get the correct ID for API call
-  const apiBrandId = brandToRemove.uuid || brandToRemove.brandID?.uuid || brandToRemove.brandID;
+    const apiBrandId = brandToRemove.uuid || brandToRemove.brandID?.uuid || brandToRemove.brandID;
 
-  // Optimistic update
-  setLikedStates(prev => {
-    const newState = {...prev};
-    delete newState[brandId];
-    return newState;
-  });
+    setLikedStates(prev => {
+      const newState = {...prev};
+      delete newState[brandId];
+      return newState;
+    });
 
-  try {
-    await dispatch(removeFromLikedBrands(apiBrandId)).unwrap();
-    
-    setRemoveMsg("Brand removed successfully");
-    setTimeout(() => setRemoveMsg(""), 3000);
-    
-    // Refresh liked brands
-    dispatch(fetchLikedBrandsById({ userId: investorUUID }));
-  } catch (error) {
-    console.error("Remove error:", error);
-    setRemoveMsg(error.message || "Failed to remove brand");
-    // Revert optimistic update
-    setLikedStates(prev => ({...prev, [brandId]: true}));
-  }
-}, [investorUUID, dispatch, likedBrands]);
+    try {
+      await dispatch(removeFromLikedBrands(apiBrandId)).unwrap();
+      setRemoveMsg("Brand removed successfully");
+      setTimeout(() => setRemoveMsg(""), 3000);
+      dispatch(fetchLikedBrandsById({ userId: investorUUID }));
+    } catch (error) {
+      console.error("Remove error:", error);
+      setRemoveMsg(error.message || "Failed to remove brand");
+      setLikedStates(prev => ({...prev, [brandId]: true}));
+    }
+  }, [investorUUID, dispatch, likedBrands]);
 
-  // Optimized toggleViewClose with useCallback
   const toggleViewClose = useCallback(async (brandId) => {
     if (!investorUUID || !AccessToken || !brandId) return;
 
-    // Optimistic update
-    setViewedBrands(prev => prev.filter(item => item?.uuid !== brandId));
+    // setViewedBrands(prev => prev.filter(item => item?.uuid !== brandId));
 
-    try {
-      await axios.delete(
-        `${api.viewApi.delete}/${investorUUID}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${AccessToken}`,
-          },
-          data: { brandID: brandId },
-        }
-      );
+     try {
+      await dispatch(removeviewBrand({ 
+        userId: investorUUID, 
+        brandId,
+        token: AccessToken 
+      })).unwrap();
+      
+      setRemoveMsg("Brand removed from view history");
+      setTimeout(() => setRemoveMsg(""), 3000);
     } catch (error) {
       console.error("Error removing viewed brand:", error);
-      fetchData(); // Refetch to ensure consistency
+      // Refresh the data if there was an error
+      dispatch(fetchViewBrandsById({ userId: investorUUID }));
     }
-  }, [investorUUID, AccessToken, fetchData]);
+  }, [investorUUID, AccessToken, dispatch]);
 
-  // Memoized handleViewDetails
   const handleViewDetails = useCallback((brand) => {
     dispatch(openBrandDialog(brand));
   }, [dispatch]);
 
+  const getCurrentBrands = useCallback(() => {
+    let brands = [];
+    switch(tabValue) {
+      case 0: brands = Array.isArray(viewedBrands) ? viewedBrands : []; break;
+      case 1: brands = Array.isArray(likedBrands) ? likedBrands : []; break;
+      case 2: brands = Array.isArray(appliedBrands) ? appliedBrands : []; break;
+      case 3: brands = Array.isArray(shortlistedBrands) ? shortlistedBrands : []; break;
+      default: brands = [];
+    }
+    
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    return brands.slice(indexOfFirstItem, indexOfLastItem);
+  }, [tabValue, viewedBrands, likedBrands, appliedBrands, shortlistedBrands, currentPage, itemsPerPage]);
 
-   const renderTabContent = useMemo(() => {
+  const totalPages = useMemo(() => {
+    let brands = [];
+    switch(tabValue) {
+      case 0: brands = Array.isArray(viewedBrands) ? viewedBrands : []; break;
+      case 1: brands = Array.isArray(likedBrands) ? likedBrands : []; break;
+      case 2: brands = Array.isArray(appliedBrands) ? appliedBrands : []; break;
+      case 3: brands = Array.isArray(shortlistedBrands) ? shortlistedBrands : []; break;
+      default: brands = [];
+    }
+    return Math.max(1, Math.ceil(brands.length / itemsPerPage));
+  }, [tabValue, viewedBrands, likedBrands, appliedBrands, shortlistedBrands, itemsPerPage]);
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+
+  const renderTabContent = useMemo(() => {
     if (isLoading) {
       return (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
@@ -527,7 +537,7 @@ const toggleLike = useCallback(async (brandId) => {
       );
     }
 
- let brands = [];
+    const currentBrands = getCurrentBrands();
     let emptyState = {
       icon: <Business color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
       title: "No data available",
@@ -535,70 +545,103 @@ const toggleLike = useCallback(async (brandId) => {
     };
 
     switch(tabValue) {
-      case 0: brands = viewedBrands;
+      case 0: 
         emptyState = {
           icon: <Visibility color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
           title: "No viewed brands",
           description: "Brands you view will appear here"
         };
         break;
-      case 1: brands = likedBrands;
+      case 1: 
         emptyState = {
           icon: <Favorite color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
           title: "No liked brands yet",
           description: "Like brands to save them for later"
         };
         break;
-      case 2: brands = appliedBrands;
+      case 2: 
         emptyState = {
           icon: <AssignmentTurnedIn color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
           title: "No applications yet",
           description: "Your applications will appear here"
         };
         break;
-      case 3: brands = shortlistedBrands;
+      case 3: 
         emptyState = {
           icon: <Bookmark color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
           title: "No shortlisted brands",
           description: "Brands you shortlist will appear here"
         };
         break;
-      default: brands = [];
+      default: 
     }
 
-   return brands.length > 0 ? (
-      <Grid container spacing={3}justifyContent="center"  >
-       {brands.map((item) => {
-  console.log('Brand item:', item); 
-  return (
-    <Grid item sx={{justifyContent: 'center'}} xs={12} sm={6} md={4} lg={3} key={item?.uuid || Math.random()}>
-      <BrandCard 
-        item={item} 
-        type={['viewed', 'liked', 'applied', 'shortlisted'][tabValue]}
-        likedStates={likedStates}
-        onViewDetails={handleViewDetails}
-        onToggleLike={toggleLike}
-        onToggleViewClose={toggleViewClose}
-      />
-    </Grid>
-  );
-})}
-      </Grid>
-    ) : (
-      <Box sx={{ py: 10, textAlign: 'center' }}>
-        {emptyState.icon}
-        <Typography variant="h6">{emptyState.title}</Typography>
-        <Typography>{emptyState.description}</Typography>
-      </Box>
+    return (
+      <>
+        {currentBrands.length > 0 ? (
+          <>
+            <Grid container spacing={3} justifyContent="center">
+              {currentBrands.map((item) => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={item?.uuid || Math.random()}>
+                  <BrandCard 
+                    item={item} 
+                    type={['viewed', 'liked', 'applied', 'shortlisted'][tabValue]}
+                    likedStates={likedStates}
+                    onViewDetails={handleViewDetails}
+                    onToggleLike={toggleLike}
+                    onToggleViewClose={toggleViewClose}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+            
+            {totalPages > 1 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+                <Pagination
+                  count={totalPages}
+                  page={currentPage}
+                  onChange={handlePageChange}
+                  color="primary"
+                  size="large"
+                  sx={{
+                    '& .MuiPaginationItem-root': {
+                      fontSize: '1rem',
+                      '&.Mui-selected': {
+                        fontWeight: 'bold',
+                      },
+                    },
+                  }}
+                />
+              </Box>
+            )}
+          </>
+        ) : (
+          <Box sx={{ py: 10, textAlign: 'center' }}>
+            {emptyState.icon}
+            <Typography variant="h6">{emptyState.title}</Typography>
+            <Typography>{emptyState.description}</Typography>
+          </Box>
+        )}
+      </>
     );
-  }, [isLoading, errorMessage, tabValue, viewedBrands, likedBrands, appliedBrands, shortlistedBrands, likedStates, handleViewDetails, toggleLike, toggleViewClose]);
-  
+  }, [
+    isLoading, 
+    errorMessage, 
+    tabValue, 
+    getCurrentBrands, 
+    totalPages, 
+    currentPage, 
+    likedStates, 
+    handleViewDetails, 
+    toggleLike, 
+    toggleViewClose
+  ]);
+
   return (
     <Box sx={{ 
       minHeight: '100vh',
       p: { xs: 2, md: 4 }
     }}>
-      {/* Profile Section */}
       <Box sx={{ 
         mb: 1,
         borderRadius: 3,
@@ -633,23 +676,22 @@ const toggleLike = useCallback(async (brandId) => {
         </Box>
       </Box>
 
-      {/* Stats Cards */}
       <Box sx={{ 
-  display: 'flex', 
-  gap: 2,  // Reduced gap for tighter spacing
-  justifyContent: { xs: 'center', md: 'flex-start' },  // Changed from 'space-between' to 'flex-start'
-  mt: 3,
-  flexWrap: 'nowrap',  // Prevent wrapping to new line
-  overflowX: 'auto',  // Allow horizontal scrolling if needed
-  pb: 1,  // Add some padding for scrollbar
-  '&::-webkit-scrollbar': {
-    height: '6px',
-  },
-  '&::-webkit-scrollbar-thumb': {
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    borderRadius: '3px',
-  }
-}}>
+        display: 'flex', 
+        gap: 2,
+        justifyContent: { xs: 'center', md: 'flex-start' },
+        mt: 3,
+        flexWrap: 'nowrap',
+        overflowX: 'auto',
+        pb: 1,
+        '&::-webkit-scrollbar': {
+          height: '6px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: 'rgba(0,0,0,0.2)',
+          borderRadius: '3px',
+        }
+      }}>
         <StatCard 
           icon={<Business />} 
           title="Viewed" 
@@ -658,7 +700,7 @@ const toggleLike = useCallback(async (brandId) => {
           isSelected={tabValue === 0}
           onClick={() => setTabValue(0)}
         />
-       <StatCard 
+        <StatCard 
           icon={<Favorite />} 
           title="Liked" 
           value={stats.totalLikes} 
@@ -675,16 +717,15 @@ const toggleLike = useCallback(async (brandId) => {
           onClick={() => setTabValue(2)}
         />
         <StatCard 
-  icon={<Bookmark />}  
-  title="Shortlisted" 
-  value={stats.totalShortlisted} 
-  color="156, 39, 176"  
-  isSelected={tabValue === 3} 
-  onClick={() => setTabValue(3)}
-/>
+          icon={<Bookmark />}  
+          title="Shortlisted" 
+          value={stats.totalShortlisted} 
+          color="156, 39, 176"  
+          isSelected={tabValue === 3} 
+          onClick={() => setTabValue(3)}
+        />
       </Box>
 
-      {/* Main Content */}
       <Card sx={{ 
         borderRadius: 3,
         boxShadow: 3,
