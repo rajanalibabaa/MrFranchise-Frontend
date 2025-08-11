@@ -9,7 +9,8 @@ import {
   Grid,
   Button,
   IconButton,
-  CircularProgress
+  CircularProgress,
+  Tooltip ,
 } from "@mui/material";
 import {
   Favorite,
@@ -19,11 +20,14 @@ import {
   Business,
   Bookmark 
 } from "@mui/icons-material";
+import { motion } from "framer-motion";
 import { useMediaQuery, useTheme } from '@mui/material';
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import img from "../../assets/images/brandLogo.jpg";
+import Stack from "@mui/material/Stack";
 import { api } from "../../Api/api";
+import { RiBookmark3Fill } from "react-icons/ri";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice";
 import { fetchShortListedById } from "../../Redux/Slices/shortlistslice";
 import { fetchLikedBrandsById, removeFromLikedBrands } from "../../Redux/Slices/likeSlice";
@@ -32,6 +36,7 @@ const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
   const theme = useTheme();
   const isSm = useMediaQuery(theme.breakpoints.up('sm'));
 
+  
   return (
     <Card
       onClick={onClick}
@@ -75,6 +80,7 @@ const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
       <Box
         className="stat-icon"
         sx={{
+          
           flexShrink: 0,
           p: { sm: 1 },
           borderRadius: '50%',
@@ -101,6 +107,7 @@ const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
 
       <Box
         sx={{
+          
           flex: 1,
           minWidth: 0,
           overflow: 'hidden',
@@ -157,181 +164,189 @@ const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
 
 // Memoized BrandCard component
 const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, onToggleViewClose }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   if (!item || typeof item !== 'object') return null;
-console.log('Full brand item:', item); 
+
   const brandId = item.uuid || item.brandID?.uuid || item.brandID;
   const isLiked = brandId ? likedStates[brandId] : false;
-  
-  // Enhanced brand name extraction
-  const brandName = item.brandName || 
-                   item.brandDetails?.brandName || 
-                   item.brandID?.brandName || 
-                   item.name || 
-                   "Unnamed Brand";
-  
-  // Enhanced logo extraction
-  const brandLogo = item.logo || 
-                   item.brandLogo || 
-                   item.brandDetails?.brandLogo || 
-                   item.uploads?.brandLogo?.[0] || 
-                   item.brandID?.brandLogo || 
-                   item.image || 
-                   img;
+const wrapAfter30 = (str) => {
+  if (!str) return "";
+  return str.replace(/(.{30})/g, "$1\u200B");
+};
+  const brandName =
+    item?.brandName ||
+    item?.brandname ||
+    item?.brandDetails?.brandName ||
+    (typeof item?.brandID === "object" && item.brandID?.brandName) ||
+    item?.name ||
+    item?.brand_title ||
+    "Unnamed Brand";
+
+  const brandLogo =
+    item?.logo ||
+    item?.brandLogo ||
+    item?.brandDetails?.brandLogo ||
+    (typeof item?.brandID === "object" ? item.brandID?.brandLogo : null) ||
+    item?.uploads?.brandLogo?.[0] ||
+    item?.image ||
+    img;
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-      <Card sx={{
-        width: '200px',
-        height: '100%',
-        display: "flex",
-        flexDirection: "column",
-        borderRadius: 3,
-        overflow: 'hidden',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-        border: '1px solid rgba(0,0,0,0.05)',
-        '&:hover': {
-          transform: 'translateY(-5px)',
-          boxShadow: '0 8px 25px rgba(255,107,0,0.15)',
-          borderColor: 'rgba(255,107,0,0.2)'
-        }
-      }}>
-        <Box sx={{ 
-          position: 'relative',
-          height: 140,
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '40%',
-            zIndex: 1
-          }
-        }}>
-          <CardMedia
-            component="img"
-            loading="lazy"
-            height="140"
-            image={brandLogo}
-            alt={brandName}
-            sx={{ 
-              objectFit: 'cover',
-              width: '100%',
-              height: '100%',
-              transition: 'transform 0.3s ease',
-              '&:hover': {
-                transform: 'scale(1.05)'
-              }
-            }}
-          />
+    <motion.div whileHover={{ y: -5 }} transition={{ duration: 0.2 }} style={{ minWidth: 0 }}>
+      <Card
+        sx={{
+          p: 1.5,
           
-          <Box sx={{
-            position: 'absolute',
-            top: 12,
-            right: 12,
-            display: 'flex',
-            gap: 1,
-            zIndex: 2
-          }}>
-            {type === 'viewed' && (
-              <IconButton
-                size="small"
-                sx={{
-                  backgroundColor: 'rgba(255,255,255,0.9)',
-                  p: 0.5,
-                  '&:hover': { 
-                    backgroundColor: '#fff',
-                    transform: 'scale(1.1)',
-                    color: '#ff6d00'
-                  },
-                  transition: 'all 0.2s ease'
-                }}
-                onClick={() => onToggleViewClose(brandId)}
-              >
-                <Close fontSize="small" />
-              </IconButton>
-            )}
-            
+          borderRadius: 3,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          position: "relative",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          "&:hover": {
+            boxShadow: "0 4px 12px rgba(242, 151, 36, 0.2)",
+          },
+          maxWidth: "100%",
+          overflow: "hidden",
+        }}
+      >
+        {/* Like / Shortlist buttons */}
+        {!isMobile && (
+          <Stack direction="column" spacing={0.5} sx={{ position: "absolute", top: 4, right: 4, zIndex: 2 }}>
             {type === 'liked' && (
               <IconButton
-                size="small"
                 sx={{
-                  backgroundColor: 'rgba(255,255,255,0.9)',
-                  p: 0.5,
-                  '&:hover': { 
-                    backgroundColor: '#fff',
-                    transform: 'scale(1.1)'
-                  },
-                  transition: 'all 0.2s ease'
+                  color: isLiked ? "#ff5252" : "rgba(0,0,0,0.2)",
+                  "&:hover": { color: "#ff5252" },
                 }}
                 onClick={() => onToggleLike(brandId)}
               >
-                <Favorite 
-                  fontSize="small" 
-                  sx={{ 
-                    fontSize: '1rem',
-                    color: isLiked ? '#ff3d00' : 'rgba(0,0,0,0.3)',
-                    transition: 'all 0.3s ease'
-                  }} 
-                />
+                <Favorite fontSize="small" />
               </IconButton>
             )}
-          </Box>
-        </Box>
+            {type === 'shortlisted' && (
+              <IconButton sx={{ color: "rgba(0, 0, 0, 0.23)" }}>
+                <Tooltip title="ShortList">
+                  <RiBookmark3Fill size={21} />
+                </Tooltip>
+              </IconButton>
+            )}
+          </Stack>
+        )}
 
-        <CardContent sx={{ 
-          flex: '1 1 auto',
-          p: 2.5,
-          display: 'flex',
-          flexDirection: 'column',
-          bgcolor: 'background.paper'
-        }}>
-          <Box sx={{ 
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-            mb: 1.5
-          }}>
-            <Typography variant="caption" color="text.secondary">
-              {brandName}
-            </Typography>
-          </Box>
-        </CardContent>
+        {isMobile && (
+          <Stack direction="row" spacing={0.5}>
+            {type === 'liked' && (
+              <IconButton
+                sx={{
+                  color: isLiked ? "#ff5252" : "rgba(0,0,0,0.2)",
+                  "&:hover": { color: "#ff5252" },
+                }}
+                onClick={() => onToggleLike(brandId)}
+              >
+                <Favorite fontSize="small" />
+              </IconButton>
+            )}
+            {type === 'shortlisted' && (
+              <IconButton sx={{ color: "rgba(0, 0, 0, 0.23)" }}>
+                <Tooltip title="ShortList">
+                  <RiBookmark3Fill size={21} />
+                </Tooltip>
+              </IconButton>
+            )}
+          </Stack>
+        )}
 
-        <Box sx={{ 
-          p: 2,
-          pt: 0,
-          textAlign: 'center'
-        }}>
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={() => onViewDetails(item)}
-            sx={{
-              borderRadius: 2,
-              py: 1,
-              fontSize: '0.8rem',
-              textTransform: 'none',
-              fontWeight: 600,
-              letterSpacing: 0.5,
-              background: 'linear-gradient(135deg, #ff6d00 0%, #ff9100 100%)',
-              boxShadow: '0 2px 10px rgba(255,109,0,0.3)',
-              color: 'white',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #ff8500 0%, #ffa000 100%)',
-                boxShadow: '0 4px 14px rgba(255,109,0,0.4)',
-                transform: 'translateY(-1px)'
-              },
-              transition: 'all 0.3s ease'
-            }}
-          >
-            Explore Brand
-          </Button>
-        </Box>
+        {/* Brand logo */}
+        <Box
+          component="img"
+          src={brandLogo}
+          alt={brandName}
+          loading="lazy"
+          sx={{
+            width: 100,
+            height: 80,
+            border: "1px solid #f29724",
+            mb: 1,
+            objectFit: "contain",
+          }}
+        />
+
+        {/* Brand name */}
+        <Typography
+          variant="caption"
+          fontWeight={600}
+          textAlign="center"
+          sx={{
+            mb: 0.5,
+            whiteSpace: "normal",
+            overflowWrap: "break-word",
+            width: "100%",
+            px: 0.5,
+          }}
+        >
+          {brandName}
+        </Typography>
+
+        {/* Brand category */}
+        <Typography
+  variant="caption"
+  sx={{
+    maxWidth: "300px",
+    display: "flex",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: 0.5,
+    mt: 0.5,
+    mb: 1,
+    width: "100%",
+    textAlign: "center",
+    wordBreak: "break-word",
+    whiteSpace: "normal",
+  }}
+>
+  {wrapAfter30(item.brandCategories?.child)}
+</Typography>
+
+        {/* FICO details */}
+        <Stack direction="column" spacing={0.5} sx={{ mb: 0.5, width: "100%" }}>
+          <Typography variant="caption" fontWeight={500}>
+            Investment : {item.fico?.investmentRange || "N/A"}
+          </Typography>
+          <Typography variant="caption" fontWeight={500}>
+            Area : {item.fico?.areaRequired || "N/A"}
+          </Typography>
+          <Typography variant="caption" fontWeight={500}>
+            Type : {item.fico?.franchiseModel || "N/A"}
+          </Typography>
+        </Stack>
+
+        {/* Action button */}
+        <Button
+          variant="outlined"
+          aria-label="apply now"
+          size="small"
+          fullWidth
+          onClick={() => onViewDetails(item)}
+          sx={{
+            mt: "auto",
+            borderRadius: 2,
+            fontSize: "0.7rem",
+            py: 0.5,
+            borderColor: "#f29724",
+            color: "green",
+            "&:hover": {
+              backgroundColor: "rgba(250, 141, 8, 0.7)",
+            },
+          }}
+        >
+          View Details
+        </Button>
       </Card>
-    </Box>
+    </motion.div>
   );
 });
 
@@ -552,11 +567,11 @@ const toggleLike = useCallback(async (brandId) => {
     }
 
    return brands.length > 0 ? (
-      <Grid container spacing={3}>
+      <Grid container spacing={3}justifyContent="center"  >
        {brands.map((item) => {
   console.log('Brand item:', item); 
   return (
-    <Grid item xs={12} sm={6} md={4} lg={3} key={item?.uuid || Math.random()}>
+    <Grid item sx={{justifyContent: 'center'}} xs={12} sm={6} md={4} lg={3} key={item?.uuid || Math.random()}>
       <BrandCard 
         item={item} 
         type={['viewed', 'liked', 'applied', 'shortlisted'][tabValue]}
