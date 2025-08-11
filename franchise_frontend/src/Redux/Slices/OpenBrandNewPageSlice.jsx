@@ -1,4 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { userId } from "../../Utils/autherId";
+import { postApi } from "../../Api/DefaultApi";
+import { api } from "../../Api/api";
 
 const brandSlice = createSlice({
   name: "brand",
@@ -6,15 +9,27 @@ const brandSlice = createSlice({
     openDialog: false,
   },
   reducers: {
-    openBrandDialog: (state, action) => {
+    openBrandDialog:async(state, action) => {
       const brand = action.payload;
 
+      console.log(" 2222222 :",brand)
+      
       if (!brand?.uuid) {
         console.error("❌ No UUID in brand payload");
         return;
       }
 
+      
       const brandId = brand.uuid;
+
+       const data = {
+        viewedID : brand.uuid
+    }
+
+      if (userId) {
+         postApi(`${api.shortListApi.post}/${userId}`,data)
+      }
+
       const brandName = encodeURIComponent(brand.brandname || brand.brandName); // Encode for safe URL usage
 
       // 1. Store brand data in localStorage

@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
 import { token, userId } from "../../Utils/autherId";
 import { api } from "../../Api/api";
 import { getApi } from "../../Api/DefaultApi";
@@ -14,42 +13,21 @@ const handleApiError = (error) => {
   );
 };
 
-export const removeFromLikedBrands = createAsyncThunk(
-  "likedBrands/remove",
-  async (brandId, { rejectWithValue }) => {
-    try {
-      if (!userId || !brandId) throw new Error("Missing user ID or brand ID");
-
-      const baseUrl = api.likeApi.get || "https://localhost:5000/api/v1/like";
-      const url = `${baseUrl}/delete-favbrand/${userId}/${brandId}`;
-
-      await axios.delete(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      return brandId;
-    } catch (err) {
-      return rejectWithValue(handleApiError(err));
-    }
-  }
-);
-
-  // console.log("userId",userId)
-export const fetchLikedBrandsById = createAsyncThunk(
-  "likedBrands/fetchById",
+export const fetchViewBrandsById = createAsyncThunk(
+  "viewBrands/fetchById",
   async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
     try {
       if (!userId) throw new Error("User ID is required");
 
+      console.log("page :",page)
     
 
       const query = { page, limit };
-      const baseUrl =  "http://localhost:5000/api/v1/like";
-      const url = `${baseUrl}/get-favbrands/${userId}`;
+      const url = `${api.viewApi.get.getAllViewBrandByID}/${userId}`;
 
       const response = await getApi(url, query, token);
 
-      // console.log("...", response.data?.data)
+      console.log("fetchViewBrandsById", response.data?.data)
 
       const responseData = response.data?.data;
       if (!responseData) throw new Error("No data received");
@@ -86,33 +64,33 @@ const initialState = {
 };
 
 // ✅ Redux slice
-const likedBrandsSlice = createSlice({
-  name: "likedBrands",
+const viewBrandsSlice = createSlice({
+  name: "viewBrands",
   initialState,
   reducers: {
-    clearLikedBrands: () => initialState,
+    clearviewBrands: () => initialState,
 
-    removeLikedBrand: (state, action) => {
+    removeviewBrand: (state, action) => {
       state.brands = state.brands.filter(
         (brand) => brand.uuid !== action.payload
       );
       state.pagination.totalItems = state.brands.length;
     },
 
-    addLikedBrand: (state, action) => {
+    addviewBrand: (state, action) => {
       const brand = { ...action.payload, isLiked: true };
       state.brands.unshift(brand);
       state.pagination.totalItems = state.brands.length;
     },
 
-    toggleLikedBrand: (state, action) => {
+    toggleviewSliceLiked: (state, action) => {
       state.brands = state.brands.map((brand) =>
         brand.uuid === action.payload
           ? { ...brand, isLiked: !brand.isLiked }
           : brand
       );
     },
-     toggleLikedSliceShortList: (state, action) => {
+     toggleviewSliceShortList: (state, action) => {
       state.brands = state.brands.map((brand) =>
         brand.uuid === action.payload
           ? { ...brand, isShortListed: !brand.isShortListed }
@@ -123,12 +101,12 @@ const likedBrandsSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-      .addCase(fetchLikedBrandsById.pending, (state) => {
+      .addCase(fetchViewBrandsById.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
 
-      .addCase(fetchLikedBrandsById.fulfilled, (state, action) => {
+      .addCase(fetchViewBrandsById.fulfilled, (state, action) => {
         state.isLoading = false;
         state.lastFetched = new Date().toISOString();
 
@@ -140,32 +118,23 @@ const likedBrandsSlice = createSlice({
         };
       })
 
-      .addCase(fetchLikedBrandsById.rejected, (state, action) => {
+      .addCase(fetchViewBrandsById.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
 
-      .addCase(removeFromLikedBrands.fulfilled, (state, action) => {
-        state.brands = state.brands.filter(
-          (brand) => brand.uuid !== action.payload
-        );
-        state.pagination.totalItems = state.brands.length;
-      })
-
-      .addCase(removeFromLikedBrands.rejected, (state, action) => {
-        state.error = action.payload;
-      });
+      
   },
 });
 
 // ✅ Export Actions
 export const {
-  clearLikedBrands,
-  removeLikedBrand,
-  addLikedBrand,
-  toggleLikedBrand,
-  toggleLikedSliceShortList
-} = likedBrandsSlice.actions;
+  clearviewBrands,
+  removeviewBrand,
+  addviewBrand,
+  toggleviewSliceLiked,
+  toggleviewSliceShortList
+} = viewBrandsSlice.actions;
 
 // ✅ Export Reducer
-export default likedBrandsSlice.reducer;
+export default viewBrandsSlice.reducer;

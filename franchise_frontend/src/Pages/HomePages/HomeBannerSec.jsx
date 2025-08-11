@@ -234,6 +234,7 @@ const pageConfig = {
   },
   sections: [
     { component: "TopBrandThreevdocards", background: "white" },
+    { component: "ViewBrands", background: "white" },
     { component: "TopFoodFranchise", background: "#fffaf7" },
     { component: "LikedBrands", background: "#white" },
     { component: "TopCafeFranchises", background: "#fffaf7" },
@@ -287,6 +288,7 @@ const useDynamicComponents = () => {
 
     return {
       TopBrandThreevdocards: make("TopBrandThreeVdoCards.jsx"),
+      ViewBrands: make("ViewBrands.jsx"),
       LikedBrands: make("LikedBrands.jsx"),
       ShortlistBrands: make("ShortlistBrands.jsx"),
       TopCafeFranchises: make("TopCafeBrands.jsx"),

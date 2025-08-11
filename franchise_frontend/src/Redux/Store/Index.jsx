@@ -47,6 +47,7 @@ import filterBrandReducer from "../../Redux/Slices/FilterBrandSlice";
 import brandCategoryReducer from "../../Redux/Slices/SideMenuHoverBrandSlices";
 import ShortListBrands from "../../Redux/Slices/shortlistslice";
 import LikedBrands from "../../Redux/Slices/likeSlice"
+import viewedBrands from "../../Redux/Slices/viewSlice.jsx"
 
 // Combine reducers first
 const rootReducer = combineReducers({
@@ -60,7 +61,8 @@ const rootReducer = combineReducers({
   openBrandDialog: openBrandViewPage,
   brandCategory: brandCategoryReducer,
   shortList: ShortListBrands,
-  likedBrands: LikedBrands
+  likedBrands: LikedBrands,
+  viewBrands: viewedBrands,
 });
 
 // Persist config
