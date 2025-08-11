@@ -27,6 +27,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchLikedBrandsById } from "../../Redux/Slices/likeSlice.jsx";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
 import LoginPage from "../../Pages/LoginPage/LoginPage.jsx";
+import { userId } from "../../Utils/autherId.jsx";
 
 const LikedBrands = () => {
   const theme = useTheme();
@@ -47,6 +48,9 @@ const LikedBrands = () => {
 
   // Data fetching
   useEffect(() => {
+    if (!userId) {
+      return
+    }
     dispatch(fetchLikedBrandsById({ page: 1 }));
   }, [dispatch]);
 
@@ -314,14 +318,14 @@ const LikedBrands = () => {
           ) : brands.length ? (
             brands.map((brand) => (
               <motion.div
-                key={brand.uuid || brand.id}
+                key={brand?.uuid || brand?.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
               >
                 <HomePageBrandCard
                   brand={brand}
-                  likeProcessing={likeProcessing[brand.uuid] || false}
+                  likeProcessing={likeProcessing[brand?.uuid] || false}
                   dimensions={dimensions}
                   theme={theme}
                   isMobile={isMobile}

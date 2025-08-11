@@ -93,7 +93,7 @@ const HomePageBrandCard = React.memo(
       };
     }, []);
 
-    const [shortListed, setShortListed] = useState(brand.isShortListed);
+    const [shortListed, setShortListed] = useState(brand?.isShortListed);
     const dispatch = useDispatch();
     const handleToggleShortList = async (brand) => {
       try {
@@ -109,14 +109,14 @@ const HomePageBrandCard = React.memo(
         if (!brand.isShortListed) {
                 dispatch(addSortlist(brand))
               }else(
-                dispatch(removeSortList(brand.uuid))
+                dispatch(removeSortList(brand?.uuid))
               )
               
-        dispatch(toggleLikedSliceShortList(brand.uuid))
-        dispatch(toggleviewSliceShortList(brand.uuid))
-        dispatch(toggleBrandShortList(brand.uuid))
-        dispatch(toggleHomeCardShortlist(brand.uuid))
-        await handleShortList(brand.uuid)
+        dispatch(toggleLikedSliceShortList(brand?.uuid))
+        dispatch(toggleviewSliceShortList(brand?.uuid))
+        dispatch(toggleBrandShortList(brand?.uuid))
+        dispatch(toggleHomeCardShortlist(brand?.uuid))
+        await handleShortList(brand?.uuid)
         setShortListed(!shortListed)
       } catch (error) {
         console.error("Error toggling shortlist:", error);
@@ -128,16 +128,16 @@ const HomePageBrandCard = React.memo(
              setShowLogin(true);
              return;
            }
-           dispatch(toggleSortlistBrandLike(brand.uuid))
-           dispatch(toggleBrandLike(brand.uuid))
+           dispatch(toggleSortlistBrandLike(brand?.uuid))
+           dispatch(toggleBrandLike(brand?.uuid))
            if (!brand.isLiked) {
             dispatch(addLikedBrand(brand))
            } else {
-            dispatch(removeLikedBrand(brand.uuid))
+            dispatch(removeLikedBrand(brand?.uuid))
            }
-           dispatch(toggleviewSliceLiked(brand.uuid))
-           dispatch(toggleHomeCardLike(brand.uuid))
-           await likeApiFunction(brand.uuid)
+           dispatch(toggleviewSliceLiked(brand?.uuid))
+           dispatch(toggleHomeCardLike(brand?.uuid))
+           await likeApiFunction(brand?.uuid)
          }
     
 
@@ -167,9 +167,9 @@ const HomePageBrandCard = React.memo(
           }}
         >
           <VideoPlayer
-            id={brand.uuid}
-            videoUrl={brand.franchiseVideos || brand.logo}
-            poster={brand.logo}
+            id={brand?.uuid}
+            videoUrl={brand?.franchiseVideos || brand?.logo}
+            poster={brand?.logo}
             width="100%"
             height={dimensions.height * 0.4}
             ref={videoRef}
@@ -205,7 +205,7 @@ const HomePageBrandCard = React.memo(
                   <IconButton
                     onClick={() => handleToggleShortList(brand)}
                     sx={{
-                      color: brand.isShortListed
+                      color: brand?.isShortListed
                         ? "#7ef400ff"
                         : "rgba(0, 0, 0, 0.23)",
                     }}

@@ -187,13 +187,13 @@ const brandsSlice = createSlice({
     toggleBrandLike(state, action) {
       const id = action.payload;
       state.brands = state.brands.map(b =>
-        b.uuid === id ? { ...b, isLiked: !b.isLiked } : b
+        b?.uuid === id ? { ...b, isLiked: !b.isLiked } : b
       );
     },
     toggleBrandShortList(state, action) {
       const id = action.payload;
       state.brands = state.brands.map(b =>
-        b.uuid === id
+        b?.uuid === id
           ? { ...b, isShortListed: !b.isShortListed }
           : b
       );
