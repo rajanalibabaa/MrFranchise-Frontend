@@ -155,7 +155,7 @@ const filterBrandSlice = createSlice({
     toggleBrandLikefilter: (state, action) => {
       const brandId = action.payload;
       state.brands = state.brands.map(brand => 
-        brand.uuid === brandId 
+        brand?.uuid === brandId 
           ? { ...brand, isLiked: !brand.isLiked }
           : brand
       );
@@ -163,7 +163,7 @@ const filterBrandSlice = createSlice({
     toggleBrandShortListfilter: (state, action) => {
       const brandId = action.payload;
       state.brands = state.brands.map(brand => 
-        brand.uuid === brandId 
+        brand?.uuid === brandId 
           ? { ...brand, isShortListed: !brand.isShortListed }
           : brand
       );

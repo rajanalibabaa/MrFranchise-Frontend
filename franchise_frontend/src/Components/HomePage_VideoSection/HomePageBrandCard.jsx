@@ -38,6 +38,7 @@ import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAll
 import  {likeApiFunction}  from "../../Api/likeApi.jsx";
 import { addLikedBrand, removeLikedBrand,toggleLikedSliceShortList } from "../../Redux/Slices/likeSlice.jsx";
 import { toggleviewSliceShortList,toggleviewSliceLiked } from "../../Redux/Slices/viewSlice.jsx";
+import { toggleBrandLikefilter, toggleBrandShortListfilter } from "../../Redux/Slices/FilterBrandSlice.jsx";
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -112,6 +113,7 @@ const HomePageBrandCard = React.memo(
                 dispatch(removeSortList(brand?.uuid))
               )
               
+        dispatch(toggleBrandShortListfilter(brand?.uuid))
         dispatch(toggleLikedSliceShortList(brand?.uuid))
         dispatch(toggleviewSliceShortList(brand?.uuid))
         dispatch(toggleBrandShortList(brand?.uuid))
@@ -138,6 +140,7 @@ const HomePageBrandCard = React.memo(
            }
            dispatch(toggleviewSliceLiked(brand?.uuid))
            dispatch(toggleHomeCardLike(brand?.uuid))
+           dispatch(toggleBrandLikefilter(brand?.uuid))
            await likeApiFunction(brand?.uuid)
          }
     

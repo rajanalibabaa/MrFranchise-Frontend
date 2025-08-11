@@ -138,6 +138,8 @@ const LikedBrands = () => {
     const maxScroll = container.scrollWidth - container.clientWidth;
     const newScroll = Math.min(container.scrollLeft + distance, maxScroll);
     smoothScrollTo(newScroll);
+
+    
   }, [getScrollDistance, smoothScrollTo]);
 
   const handleScroll = useCallback(() => {
@@ -168,7 +170,7 @@ const LikedBrands = () => {
     setNotification((prev) => ({ ...prev, open: false }));
   };
 
-  if (brands.length === 0) {
+  if (brands.length < 4) {
     return null;
   }
 
