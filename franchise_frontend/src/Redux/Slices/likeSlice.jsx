@@ -44,7 +44,7 @@ export const removeFromLikedBrands = createAsyncThunk(
   }
 );
 
-  console.log("userId",userId)
+  // console.log("userId",userId)
 export const fetchLikedBrandsById = createAsyncThunk(
   "likedBrands/fetchById",
   async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
@@ -59,7 +59,7 @@ export const fetchLikedBrandsById = createAsyncThunk(
 
       const response = await getApi(url, query, token);
 
-      console.log("...", response.data?.data)
+      // console.log("...", response.data?.data)
 
       const responseData = response.data?.data;
       if (!responseData) throw new Error("No data received");

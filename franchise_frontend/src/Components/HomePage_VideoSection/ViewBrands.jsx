@@ -15,12 +15,14 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
+import adsimg1 from "../../assets/Images/HomeBanner.avif";
 import { ArrowBack, ArrowForward, ArrowRight } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchViewBrandsById } from "../../Redux/Slices/viewSlice";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
 import LoginPage from "../../Pages/LoginPage/LoginPage.jsx";
+import { userId } from "../../Utils/autherId.jsx";
  
 const ViewBrands = () => {
   const theme = useTheme();
@@ -65,6 +67,9 @@ const ViewBrands = () => {
  
   // Data fetching
   useEffect(() => {
+    if (!userId) {
+      return
+    }
     dispatch(fetchViewBrandsById({ page: 1 }));
   }, [dispatch]);
  
@@ -151,6 +156,34 @@ const ViewBrands = () => {
   const handleCloseNotification = () => {
     setNotification((prev) => ({ ...prev, open: false }));
   };
+
+if (!userId || brands.length < 4) {
+
+  return
+  // return (
+  //   <Box 
+  //     sx={{
+  //       width: "100%",
+  //       minHeight: "200px",   
+  //       maxHeight: "500px",  
+  //       height: "40vh",       
+  //       overflow: "hidden",
+  //     }}
+  //   >
+  //     <img
+  //       src={adsimg1}
+  //       alt="Advertisement"
+  //       style={{
+  //         width: "100%",
+  //         height: "100%",
+  //         objectFit: "cover",
+  //         display: "block",
+  //       }}
+  //     />
+  //   </Box>
+
+  // );
+}
  
   return (
     <Box

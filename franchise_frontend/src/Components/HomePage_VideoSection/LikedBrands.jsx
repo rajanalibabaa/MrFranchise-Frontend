@@ -316,7 +316,7 @@ const LikedBrands = () => {
           ) : error ? (
             <Typography color="error">{error}</Typography>
           ) : brands.length ? (
-            brands.map((brand) => (
+            brands?.map((brand) => (
               <motion.div
                 key={brand?.uuid || brand?.id}
                 initial={{ opacity: 0 }}
