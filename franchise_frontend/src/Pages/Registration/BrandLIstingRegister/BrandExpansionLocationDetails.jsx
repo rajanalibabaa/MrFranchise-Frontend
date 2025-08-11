@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 import { ChevronDown, Search } from "lucide-react";
 import { useSnackbar } from "notistack";
-import debounce from "lodash.debounce";
+import debounce from "lodash/debounce";
 import axios from "axios";
 
 // Cache for API responses

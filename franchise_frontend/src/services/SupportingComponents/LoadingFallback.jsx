@@ -10,8 +10,8 @@ const LoadingFallback = () => (
     height: '100vh',
     gap: 2
   }}>
-    <CircularProgress size={60} />
-    <Typography variant="body1">Loading application...</Typography>
+    <CircularProgress size={60} color="warning" />
+    {/* <Typography variant="body1">Loading application...</Typography> */}
   </Box>
 );
 
