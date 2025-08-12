@@ -16,7 +16,7 @@ import filterBrandReducer from "../../Redux/Slices/FilterBrandSlice";
 import brandCategoryReducer from "../../Redux/Slices/SideMenuHoverBrandSlices";
 import ShortListBrands from "../../Redux/Slices/shortlistslice";
 import LikedBrands from "../../Redux/Slices/likeSlice"
-import viewedBrands from "../../Redux/Slices/ViewSlice.jsx"
+import viewedBrands from "../../Redux/Slices/viewSlice.jsx"
 
 // Combine reducers first
 const rootReducer = combineReducers({

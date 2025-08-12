@@ -724,7 +724,7 @@ function TopBrandVdoCards() {
                             aria-label="view details"
                             onClick={() => handleApply(mainBrand)}
                             sx={{
-                              width: "35vh",
+                              width: "40vh",
                               fontWeight: 800,
                               textTransform: "none",
                               color: "#fff",

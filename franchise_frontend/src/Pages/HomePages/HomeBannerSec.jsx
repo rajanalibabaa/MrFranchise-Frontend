@@ -328,36 +328,79 @@ const pageConfig = {
 };
 
 // --- create lazy dynamicComponents using preloading ---
+// const useDynamicComponents = () => {
+//   return useMemo(() => {
+//     const make = (name) =>
+//       createLazyWithPreload(() =>
+//         import(
+//           /* webpackChunkName: "[request]" */
+//           /* webpackPrefetch: true */
+//           `../../Components/HomePage_VideoSection/${name}`
+//         ).catch(() => ({
+//           default: () => (
+//             <Typography color="error" align="center">
+//               Failed to load {name}
+//             </Typography>
+//           ),
+//         }))
+//       );
+//     return {
+//       TopBrandThreevdocards: make("TopBrandThreeVdoCards.jsx"),
+//       LikedBrands: make("LikedBrands.jsx"),
+//       ShortlistBrands: make("ShortlistBrands.jsx"),
+//       TopCafeFranchises: make("TopCafeBrands.jsx"),
+//       TopFoodFranchise: make("TopFoodFranchise.jsx"),
+//       ViewBrands: make("ViewBrands.jsx"),
+//       TopBeverageFranchise: make("TopBeverageFranchise.jsx"),
+//       TopDesertBakeryFranchise: make("TopDesertBakerys.jsx"),
+//       TopTruckAndKiosks: make("TopTruckAndKiosks.jsx"),
+//       TopRestaurantsFranchise: make("TopRestaurantsFranchise.jsx"),
+//       ToTrendingBrands: make("ToTrendingBrands.jsx"),
+//       FindFranchiseLocations: make("FindFranchiseLocations.jsx"),
+//     };
+//   }, []);
+// };
+
+
 const useDynamicComponents = () => {
-  return useMemo(() => {
-    const make = (name) =>
-      createLazyWithPreload(() =>
-        import(
-          /* webpackChunkName: "[request]" */
-          /* webpackPrefetch: true */
-          `../../Components/HomePage_VideoSection/${name}`
-        ).catch(() => ({
-          default: () => (
-            <Typography color="error" align="center">
-              Failed to load {name}
-            </Typography>
-          ),
-        }))
-      );
-    return {
-      TopBrandThreevdocards: make("TopBrandThreeVdoCards.jsx"),
-      LikedBrands: make("LikedBrands.jsx"),
-      ShortlistBrands: make("ShortlistBrands.jsx"),
-      TopCafeFranchises: make("TopCafeBrands.jsx"),
-      TopFoodFranchise: make("TopFoodFranchise.jsx"),
-      ViewBrands: make("ViewBrands.jsx"),
-      TopBeverageFranchise: make("TopBeverageFranchise.jsx"),
-      TopDesertBakeryFranchise: make("TopDesertBakerys.jsx"),
-      TopTruckAndKiosks: make("TopTruckAndKiosks.jsx"),
-      TopRestaurantsFranchise: make("TopRestaurantsFranchise.jsx"),
-      ToTrendingBrands: make("ToTrendingBrands.jsx"),
-      FindFranchiseLocations: make("FindFranchiseLocations.jsx"),
-    };
+  return React.useMemo(() => {
+    // Gather all potential modules in this folder (adjust extension if needed)
+    const modules = import.meta.glob("../../Components/HomePage_VideoSection/*.jsx", {
+      eager: false,
+    });
+
+    // Map of logical name -> file name (adjust to your real files)
+    const entries = [
+      { key: "TopBrandThreevdocards", file: "TopBrandThreeVdoCards.jsx" },
+      { key: "LikedBrands", file: "LikedBrands.jsx" },
+      { key: "ShortlistBrands", file: "ShortlistBrands.jsx" },
+      { key: "TopCafeFranchises", file: "TopCafeBrands.jsx" },
+      { key: "TopFoodFranchise", file: "TopFoodFranchise.jsx" },
+      { key: "ViewBrands", file: "ViewBrands.jsx" },
+      { key: "TopBeverageFranchise", file: "TopBeverageFranchise.jsx" },
+      { key: "TopDesertBakeryFranchise", file: "TopDesertBakerys.jsx" },
+      { key: "TopTruckAndKiosks", file: "TopTruckAndKiosks.jsx" },
+      { key: "TopRestaurantsFranchise", file: "TopRestaurantsFranchise.jsx" },
+      { key: "ToTrendingBrands", file: "ToTrendingBrands.jsx" },
+      { key: "FindFranchiseLocations", file: "FindFranchiseLocations.jsx" },
+    ];
+
+    const map = {};
+
+    entries.forEach(({ key, file }) => {
+      const path = `../../Components/HomePage_VideoSection/${file}`;
+
+      // Only if the module exists, create a lazy component
+      if (path in modules) {
+        // You can either wrap with your existing preload wrapper or use React.lazy directly
+        // If you want to keep your createLazyWithPreload, do:
+        // map[key] = createLazyWithPreload(() => modules[path]().then(m => m));
+        // Here, using React.lazy for simplicity:
+        map[key] = React.lazy(modules[path]);
+      }
+    });
+
+    return map;
   }, []);
 };
 
@@ -407,6 +450,7 @@ const HomeBannerSec = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const controls = useAnimation();
+const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
 
   useEffect(() => {
     const nav = performance.getEntriesByType("navigation")[0]?.type === "reload";
@@ -639,15 +683,23 @@ const HomeBannerSec = () => {
         </Container>
       </Box>
 
-      {pageConfig.sections.map((section, index) => (
-        <LazySection
-          key={index}
-          componentKey={section.component}
-          dynamicComponents={dynamicComponents}
-          background={section.background || "white"}
-          isMobile={isMobile}
-        />
-      ))}
+      {pageConfig.sections
+  .filter(section => {
+    // Show everything except login-required sections when logged out
+    if (!isLoggedIn && ["ViewBrands", "ShortlistBrands", "LikedBrands"].includes(section.component)) {
+      return false; // Skip these if logged out
+    }
+    return true;
+  })
+  .map((section, index) => (
+    <LazySection
+      key={index}
+      componentKey={section.component}
+      dynamicComponents={dynamicComponents}
+      background={section.background || "white"}
+      isMobile={isMobile}
+    />
+))}
 
       <Footer />
     </>
