@@ -1644,9 +1644,11 @@ const ManageProfile = () => {
                         <Box
                           key={catIndex}
                           display="flex"
-                          gap={1}
+                          gap={0.5}
                           alignItems="center"
                           mb={1}
+                          sx={{marginLeft:{xs:"-12px"}}}
+                          
                         >
                           {editMode ? (
                             <>
@@ -1662,7 +1664,7 @@ const ManageProfile = () => {
                                     e.target.value
                                   )
                                 }
-                                sx={{ flex: 1 }}
+                                sx={{ flex: 1, }}
                                 select
                                 required
                                 error={editMode && !cat.main}

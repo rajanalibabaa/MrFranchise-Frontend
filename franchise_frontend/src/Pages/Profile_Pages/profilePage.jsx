@@ -8,6 +8,7 @@ import {
   ListItemText, 
   useTheme,
   Paper,
+  Tooltip,
   useMediaQuery,
   Container,
   styled
@@ -22,7 +23,7 @@ import Footer from "../../Components/Footers/Footer";
 import { useDispatch } from "react-redux";
 import Navbar from "../../Components/Navbar/NavBar";
 
-// Moved colors outside component to prevent recreation on every render
+// Colors
 const COLORS = {
   pistaGreen: '#93C572',
   darkGreen: '#4A7729',
@@ -30,20 +31,21 @@ const COLORS = {
   darkText: '#2D3436'
 };
 
-// Memoized NavItem component to prevent unnecessary re-renders
+// NavItem with Tooltip
 const NavItem = React.memo(({ 
   isMobile, 
   location, 
   path, 
   icon: Icon, 
   text,
+  tooltip,
   navigate,
   onClick
 }) => {
   const isActive = location.pathname === path;
   const handleClick = onClick ? () => onClick() : undefined;
 
-  return (
+  const listItem = (
     <ListItem
       button
       component={onClick ? undefined : RouterLink}
@@ -98,6 +100,12 @@ const NavItem = React.memo(({
       )}
     </ListItem>
   );
+
+  return (
+    <Tooltip title={tooltip || ""} arrow placement={isMobile ? "right" : "top"}>
+      <Box>{listItem}</Box>
+    </Tooltip>
+  );
 });
 
 const InvestorDashboard = () => {
@@ -107,7 +115,7 @@ const InvestorDashboard = () => {
   const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  // Memoized sidebar styles
+  // Sidebar styles
   const GlassSidebar = useMemo(() => {
     return styled(Paper)(({ theme }) => ({
       width: isMobile ? '64px' : '240px',
@@ -118,7 +126,7 @@ const InvestorDashboard = () => {
       borderRight: '1px solid rgba(255, 255, 255, 0.3)',
       display: "flex",
       flexDirection: "column",
-      height: "80vh",
+      height: "100vh",
       position: "sticky",
       top: 0,
       borderRadius: 0,
@@ -133,24 +141,27 @@ const InvestorDashboard = () => {
     }));
   }, [isMobile, theme]);
 
-  // Memoized nav items to prevent unnecessary recalculations
+  // Nav items
   const navItems = useMemo(() => [
     {
       path: "/investordashboard",
       icon: DashboardIcon,
       text: "Dashboard",
+      tooltip: "View Your Dashboard",
       exact: true
     },
     {
       path: "/investordashboard/manageProfile",
       icon: ProfileIcon,
       text: "Profile",
+      tooltip: "Manage your profile details",
       onClick: () => navigate("/investordashboard/manageProfile")
     },
     {
       path: "/investordashboard/respondemanager",
       icon: ReachUsIcon,
-      text: "Reach Us"
+      text: "Reach Us",
+      tooltip: "Contact support"
     }
   ], [navigate]);
 
@@ -162,7 +173,7 @@ const InvestorDashboard = () => {
         minHeight: "calc(100vh - 64px)",
         backgroundColor: COLORS.creamWhite
       }}>
-        {/* Sidebar with fixed width */}
+        {/* Sidebar */}
         <GlassSidebar elevation={3}>
           <Box sx={{ p: isMobile ? 1 : 2, flexGrow: 1 }}>
             <List sx={{ padding: 0 }}>
@@ -174,6 +185,7 @@ const InvestorDashboard = () => {
                   path={item.path}
                   icon={item.icon}
                   text={item.text}
+                  tooltip={item.tooltip}
                   navigate={navigate}
                   onClick={item.onClick}
                 />
