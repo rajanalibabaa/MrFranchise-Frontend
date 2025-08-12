@@ -21,7 +21,7 @@
 // <<<<<<< HEAD
 //       const response = await fetch('http://localhost:5000/verify-captcha', {
 // =======
-//       const response = await fetch('https://mrfranchisebackend.mrfranchise.in/api/v1verify-captcha', {
+//       const response = await fetch('http://localhost:5000/api/v1verify-captcha', {
 // >>>>>>> d37056e415ba37cc491d4faf137ee52e6e87e872
 // =======
 //       const response = await fetch('http://localhost:5000/verify-captcha', {
