@@ -116,21 +116,41 @@ export const VideoPlayer = ({
   }, [id, pauseVideo]);
 
   // Play/pause handler with better error handling
-  const togglePlayPause = useCallback(async () => {
-    if (!videoRef.current) return;
-    
-    try {
-      if (isPlaying) {
-        pauseVideo(id);
-      } else {
-        setIsBuffering(true);
-        await playVideo(id);
-      }
-    } catch (error) {
-      console.error('Playback failed:', error);
-      handleError();
+  const togglePlayPause = useCallback(() => {
+  const video = videoRef.current;
+  if (!video) return;
+
+  if (isPlaying) {
+    // 1) Pause immediately
+    video.pause();
+    // 2) Tell your controller (pauses any other playing videos, etc.)
+    pauseVideo(id);
+  } else {
+    // 1) Show buffering/progress state if you like
+    setIsBuffering(true);
+    // 2) Attempt to play immediately
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise
+        .catch(err => {
+          console.error('Direct play() failed:', err);
+          setHasError(true);
+        })
+        .finally(() => {
+          setIsBuffering(false);
+        });
+    } else {
+      // older browsers might not return a promise
+      setIsBuffering(false);
     }
-  }, [isPlaying, id, pauseVideo, playVideo, handleError]);
+    // 3) Also notify your global controller so it can pause others
+    playVideo(id).catch(err => {
+      console.error('Controller.playVideo failed:', err);
+      setHasError(true);
+    });
+  }
+}, [isPlaying, id, pauseVideo, playVideo]);
+
 
   // Mute/unmute handler
   const toggleMute = useCallback(() => {
@@ -279,8 +299,8 @@ export const VideoPlayer = ({
                 '&:disabled': {
                   opacity: 0.5
                 },
-                width: 64,
-                height: 64,
+                width: 54,
+                height: 54,
                 zIndex: 2
               }}
             >
@@ -297,15 +317,15 @@ export const VideoPlayer = ({
             alt="Video preview"
             sx={{
               position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
+              top:0 ,
+              left:0 ,
+              width: 48,
+              height: 48,
               objectFit: 'contain',
               cursor: 'pointer',
-              zIndex: 0,
+              zIndex: 3,
               filter: hasError ? 'grayscale(80%)' : 'none',
-              opacity: 0.8
+              // opacity: 0.8
             }}
             onClick={togglePlayPause}
           />
@@ -388,9 +408,9 @@ export const VideoPlayer = ({
                   disabled={hasError}
                   sx={{ 
                     color: 'white',
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
                     '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.7)'
+                      backgroundColor: 'rgba(0, 0, 0, 0.9)'
                     },
                     '&:disabled': {
                       opacity: 0.5

@@ -33,9 +33,9 @@ import {
   Autocomplete
 } from "@mui/material";
 import categories from "../../../Pages/Registration/BrandLIstingRegister/BrandCategories";
-import { Editor } from "@tinymce/tinymce-react";
+import  Editor  from "@tinymce/tinymce-react/editor";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { InfoOutlined } from "@mui/icons-material";
+import InfoOutlined  from "@mui/icons-material/InfoOutlined";
 
 const FranchiseDetailsControl = ({ 
   data = {}, 

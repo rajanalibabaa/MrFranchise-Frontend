@@ -1,3 +1,4 @@
+
 import React, {
   useState,
   useEffect,
@@ -6,6 +7,8 @@ import React, {
   useMemo,
 } from "react";
 import { useInView } from "react-intersection-observer";
+import { FixedSizeList as List } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
 import {
   Box,
   Typography,
@@ -24,7 +27,8 @@ import Navbar from "../../Components/Navbar/NavBar.jsx";
 import SEO from "../../Components/SEO/Seo.jsx";
 import HomeBanner from "../../assets/Images/HomeBanner.avif";
 import { createLazyWithPreload } from "../../Utils/PreLoad/PreLoad.jsx";
-// Enhanced ErrorBoundary with better error handling
+
+// --- ErrorBoundary ---
 class ErrorBoundary extends React.Component {
   state = { hasError: false, error: null };
   static getDerivedStateFromError(error) {
@@ -47,19 +51,70 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Component loader with built-in error boundary and suspense
-const ComponentLoader = React.memo(({ Component }) => (
+// --- LazyCard and VirtualizedCardList for scalable, virtualized sections ---
+const LazyCard = React.memo(({ component: CardComponent, index, style }) => {
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    rootMargin: '400px',
+  });
+  return (
+    <div ref={ref} style={style}>
+      {inView ? (
+        <Suspense fallback={<Box minHeight={100} display="flex" alignItems="center" justifyContent="center"><CircularProgress size={24} color="success" /></Box>}>
+          <CardComponent key={index} />
+        </Suspense>
+      ) : (
+        <div style={{ height: '100%', backgroundColor: '#f5f5f5' }} />
+      )}
+    </div>
+  );
+});
+const VirtualizedCardList = React.memo(({ items, itemHeight = 400, componentProps }) => {
+  const CardRow = ({ index, style }) => (
+    <LazyCard
+      component={items[index]}
+      index={index}
+      style={style}
+      {...componentProps}
+    />
+  );
+  return (
+    <AutoSizer>
+      {({ height, width }) => (
+        <List
+          height={height}
+          itemCount={items.length}
+          itemSize={itemHeight}
+          width={width}
+          style={{ overflowX: 'hidden' }}
+        >
+          {CardRow}
+        </List>
+      )}
+    </AutoSizer>
+  );
+});
+
+// --- ComponentLoader to fully wrap lazy components with error and suspense ---
+const ComponentLoader = React.memo(({ Component, ...props }) => (
   <ErrorBoundary>
-    <Component />
+    <Suspense fallback={
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
+        <CircularProgress />
+      </Box>
+    }>
+      <Component {...props} />
+    </Suspense>
   </ErrorBoundary>
 ));
 
+// -- pageConfig, bannerTexts, animation objects here (same as your code) --
 const bannerTexts = [
   {
     title: {
       text: "1000+ Food Brands \n One Platform Endless Possibilities",
       gradient:
-        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+        "linear-gradient(0deg, rgba(255, 255, 255, 1) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" },
     },
     subtitle: {
@@ -74,7 +129,7 @@ const bannerTexts = [
   {
     title: {
       text: "Turn Your Investment \n Into A Tasteful Venture",
-      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
+      gradient: "linear-gradient(90deg, #ffffffff 10%, #ffffffff 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" },
     },
     subtitle: {
@@ -90,11 +145,11 @@ const bannerTexts = [
     title: {
       text: "India's #1 F&B Franchise Marketplace\n Your Food Business Starts Here",
       gradient:
-        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+        "linear-gradient(0deg, rgba(255, 255, 255, 1) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" },
     },
     subtitle: {
-      text: "From Startup Food kiosks To International Food Chains We Have Everything You Need To Start Your ",
+      text: "From Startup Food kiosks To International Food Chains We Have Everything You Need To Start Your Franchise ",
       highlight: {
         text: "food franchise journey",
         color: "#ff9800",
@@ -106,11 +161,11 @@ const bannerTexts = [
   {
     title: {
       text: "Serve Success Hot \n Choose the Right F&B Franchise Today",
-      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
+      gradient: "linear-gradient(90deg, #ffffffff 10%, #ffffffff 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" },
     },
     subtitle: {
-      text: "Invest in hot-selling food concepts with hight demand, fast scalability, and support from trusted brands.",
+      text: "Invest in hot-selling food concepts with high demand, fast scalability, and support from trusted food brands ",
       highlight: {
         text: "F&B Franchise",
         color: "#ff9800",
@@ -122,7 +177,7 @@ const bannerTexts = [
     title: {
       text: "From Local Taste to Global Plates \n Start Your Food Business Now",
       gradient:
-        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+        "linear-gradient(0deg, rgba(255, 255, 255, 1) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" },
     },
     subtitle: {
@@ -137,7 +192,7 @@ const bannerTexts = [
   {
     title: {
       text: "Low Investment.\nHigh Appetite for Growth",
-      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
+      gradient: "linear-gradient(90deg, #ffffffff 10%, #ffffffff 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" },
     },
     subtitle: {
@@ -153,7 +208,7 @@ const bannerTexts = [
     title: {
       text: "Franchise a Restaurant.\n Own a Cafe Lead a Cloud Kitchen",
       gradient:
-        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+        "linear-gradient(0deg, rgba(255, 255, 255, 1) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" },
     },
     subtitle: {
@@ -168,7 +223,7 @@ const bannerTexts = [
   {
     title: {
       text: "F&B Franchise Made Easy \n with www.MrFranchise.in",
-      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
+      gradient: "linear-gradient(90deg, #ffffffff 10%, #ffffffff 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" },
     },
     subtitle: {
@@ -184,7 +239,7 @@ const bannerTexts = [
     title: {
       text: "No Experience? No Problem!\n Proven Food Franchise Models Await You",
       gradient:
-        "linear-gradient(0deg, rgb(249, 108, 0) 10%, rgba(250, 250, 250, 1) 100%)",
+        "linear-gradient(0deg, rgba(255, 255, 255, 1) 10%, rgba(250, 250, 250, 1) 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" },
     },
     subtitle: {
@@ -199,7 +254,7 @@ const bannerTexts = [
   {
     title: {
       text: "Your Food Franchise Future\n Starts At food and beverage www.MrFranchise.in",
-      gradient: "linear-gradient(90deg, #FF9800 10%, #FF5722 100%)",
+      gradient: "linear-gradient(90deg, #ffffffff 10%, #ffffffff 100%)",
       fontSize: { mobile: "2rem", tablet: "3.5rem", desktop: "2rem" },
     },
     subtitle: {
@@ -212,6 +267,8 @@ const bannerTexts = [
     },
   },
 ];
+
+
 
 const pageConfig = {
   heroBanner: {
@@ -232,18 +289,20 @@ const pageConfig = {
       },
     },
   },
+  // ...rest unchanged
   sections: [
-    { component: "TopBrandThreevdocards", background: "white" },
-    { component: "TopFoodFranchise", background: "#fffaf7" },
-    { component: "LikedBrands", background: "#white" },
-    { component: "TopCafeFranchises", background: "#fffaf7" },
-    { component: "TopBeverageFranchise", background: "#fffaf7" },
-    { component: "TopDesertBakeryFranchise", background: "#fffaf7" },
-    { component: "TopTruckAndKiosks", background: "#fffaf7" },
-    { component: "ShortlistBrands", background: "#white" },
-    { component: "TopRestaurantsFranchise", background: "white" },
-    { component: "FindFranchiseLocations", background: "white" },
-    { component: "ToTrendingBrands", title: "Trending Brands" },
+    { component: "TopBrandThreevdocards", background: "#fff" },
+    { component: "TopFoodFranchise", background: "#fff" },
+    { component: "TopBeverageFranchise", background: "#fff" },
+    { component: "LikedBrands", background: "#fff" },
+    { component: "ViewBrands", background: "#fff" },
+    { component: "TopCafeFranchises", background: "#fff" },
+    { component: "TopDesertBakeryFranchise", background: "#fff" },
+    { component: "TopTruckAndKiosks", background: "#fff" },
+    { component: "ShortlistBrands", background: "#fff" },
+    { component: "TopRestaurantsFranchise", background: "#fff" },
+    { component: "FindFranchiseLocations", background: "#fff" },
+    { component: "ToTrendingBrands", title: "Trending Brands", background: "#fff" },
   ],
   animations: {
     banner: {
@@ -268,7 +327,7 @@ const pageConfig = {
   },
 };
 
-
+// --- create lazy dynamicComponents using preloading ---
 const useDynamicComponents = () => {
   return useMemo(() => {
     const make = (name) =>
@@ -285,13 +344,13 @@ const useDynamicComponents = () => {
           ),
         }))
       );
-
     return {
       TopBrandThreevdocards: make("TopBrandThreeVdoCards.jsx"),
       LikedBrands: make("LikedBrands.jsx"),
       ShortlistBrands: make("ShortlistBrands.jsx"),
       TopCafeFranchises: make("TopCafeBrands.jsx"),
       TopFoodFranchise: make("TopFoodFranchise.jsx"),
+      ViewBrands: make("ViewBrands.jsx"),
       TopBeverageFranchise: make("TopBeverageFranchise.jsx"),
       TopDesertBakeryFranchise: make("TopDesertBakerys.jsx"),
       TopTruckAndKiosks: make("TopTruckAndKiosks.jsx"),
@@ -302,63 +361,56 @@ const useDynamicComponents = () => {
   }, []);
 };
 
-function LazySection({ componentKey, dynamicComponents, background }) {
+// --- Section that lazy loads content on scroll-in-view, preloads just before ---
+const LazySection = ({
+  componentKey,
+  dynamicComponents,
+  background,
+  ...props
+}) => {
   const Component = dynamicComponents[componentKey];
   const [ref, inView] = useInView({
     triggerOnce: true,
     rootMargin: "200px",
   });
-
   useEffect(() => {
     if (inView && Component.preload) {
       Component.preload();
     }
   }, [inView, Component]);
-
   return (
     <Box ref={ref} py={8} bgcolor={background}>
       <Container maxWidth="xl">
         {inView ? (
-          <Suspense
-            fallback={
-              <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                minHeight={200}
-              >
-                <CircularProgress />
-              </Box>
-            }
-          >
-            <ComponentLoader Component={Component} />
-          </Suspense>
+          <ComponentLoader
+            Component={Component}
+            VirtualizedCardList={VirtualizedCardList}
+            LazyCard={LazyCard}
+            {...props}
+          />
         ) : (
           <Box minHeight={200} />
         )}
       </Container>
     </Box>
   );
-}
+};
 
+// --- Main component ---
 const HomeBannerSec = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const dispatch = useDispatch();
   const dynamicComponents = useDynamicComponents();
-  // State management
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
   const controls = useAnimation();
-  
-  useEffect(() => {
-    const nav =
-      performance.getEntriesByType("navigation")[0]?.type === "reload";
-    const shown = sessionStorage.getItem("popup-shown");
 
+  useEffect(() => {
+    const nav = performance.getEntriesByType("navigation")[0]?.type === "reload";
+    const shown = sessionStorage.getItem("popup-shown");
     dispatch(showLoading());
     const t = setTimeout(() => {
       setIsLoading(false);
@@ -371,10 +423,8 @@ const HomeBannerSec = () => {
     return () => clearTimeout(t);
   }, [dispatch]);
 
-  // Banner rotation effect
   useEffect(() => {
     if (isLoading) return;
-
     const interval = setInterval(() => {
       controls
         .start({
@@ -391,17 +441,14 @@ const HomeBannerSec = () => {
           });
         });
     }, 5000);
-
     return () => clearInterval(interval);
   }, [controls, isLoading]);
 
-  // Combine with your existing popup state
   useEffect(() => {
     setShowPopup(!localStorage.getItem("accessToken") && isPopupOpen);
   }, [isPopupOpen]);
 
   const handlePopupClose = useCallback(() => setIsPopupOpen(false), []);
-
   const currentText = bannerTexts[bannerIndex];
 
   if (isLoading) {
@@ -483,15 +530,16 @@ const HomeBannerSec = () => {
       />
 
       <Navbar />
+
       {showPopup && (
         <PopupModal
           open={isPopupOpen}
           onClose={handlePopupClose}
-          disableInitialAnimation // Add this prop to your modal if available
+          disableInitialAnimation
         />
       )}
 
-      {/* Hero Banner */}
+      {/* --- Hero Banner --- */}
       <Box
         mt={0}
         sx={{
@@ -500,7 +548,6 @@ const HomeBannerSec = () => {
           backgroundPosition: "center",
           backgroundAttachment: isMobile ? "scroll" : "fixed",
           py: 1,
-          // px: 2,
           position: "relative",
           overflow: "hidden",
           color: "white",
@@ -508,33 +555,12 @@ const HomeBannerSec = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          marginRight: 0,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "0px",
-            background: "linear-gradient(to bottom, transparent 0%, #fff 100%)",
-            zIndex: 1,
-          },
-          "&::after": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 0,
-          },
         }}
       >
         <Container
           sx={{
-            position: "",
             zIndex: 2,
-            textAlign: isMobile ? "center" : "center",
+            textAlign: "center",
             height: "100%",
             mt: 3,
           }}
@@ -567,12 +593,12 @@ const HomeBannerSec = () => {
 
           <motion.div variants={pageConfig.animations.item}>
             <Typography
-              variant={isMobile ? "body1" : "subtitle2"}
+              variant={isMobile ? "body1" : "subtitle1"}
               mt={isMobile ? 0 : 3}
               sx={{
                 textAlign: "center",
                 color: "rgba(255,255,255,0.9)",
-                fontWeight: 500,
+                fontWeight: 700,
                 mt: 2,
                 mb: 5,
                 maxWidth: "800px",
@@ -613,20 +639,15 @@ const HomeBannerSec = () => {
         </Container>
       </Box>
 
-      {/* Sections */}
-      {/* Sections */}
-      <Box sx={{ pt: 0 }}>
-        {pageConfig.sections.map((section, index) => {
-          return (
-            <LazySection
-              key={index}
-              componentKey={section.component}
-              dynamicComponents={dynamicComponents}
-              background={section.background || "white"}
-            />
-          );
-        })}
-      </Box>
+      {pageConfig.sections.map((section, index) => (
+        <LazySection
+          key={index}
+          componentKey={section.component}
+          dynamicComponents={dynamicComponents}
+          background={section.background || "white"}
+          isMobile={isMobile}
+        />
+      ))}
 
       <Footer />
     </>
