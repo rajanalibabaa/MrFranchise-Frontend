@@ -45,6 +45,7 @@ export const removeFromLikedBrands = createAsyncThunk(
 );
 
   console.log("userId",userId)
+  
 export const fetchLikedBrandsById = createAsyncThunk(
   "likedBrands/fetchById",
   async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
