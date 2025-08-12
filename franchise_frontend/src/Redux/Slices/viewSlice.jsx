@@ -17,8 +17,8 @@ export const fetchViewBrandsById = createAsyncThunk(
   "viewBrands/fetchById",
   async ({ page = 1, limit = 10 } = {}, { rejectWithValue }) => {
     try {
-      if (!userId) throw new Error("User ID is required");
- 
+      if (!userId) throw new Error("User ID is required Login to continue");
+
       console.log("page :",page)
    
  

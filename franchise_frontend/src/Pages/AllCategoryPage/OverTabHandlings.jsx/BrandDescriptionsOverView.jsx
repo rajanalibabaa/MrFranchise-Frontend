@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Typography, Divider, List, ListItem, ListItemText } from "@mui/material";
 
 const BrandDescription = ({ brandDescription, uniqueSellingPoints }) => {
+  const isMobile = window.innerWidth <= 768; // Adjust based on your breakpoint
   return (
     <Box
       sx={{
@@ -41,7 +42,7 @@ const BrandDescription = ({ brandDescription, uniqueSellingPoints }) => {
         }}
       >
         <Typography 
-          variant="body1" 
+          variant={isMobile ? "body2" : "body1"} 
           component="div" 
           sx={{ 
             color: "#212121",

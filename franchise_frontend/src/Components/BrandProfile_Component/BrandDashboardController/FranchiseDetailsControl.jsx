@@ -33,7 +33,7 @@ import {
   Autocomplete
 } from "@mui/material";
 import categories from "../../../Pages/Registration/BrandLIstingRegister/BrandCategories";
-import  Editor  from "@tinymce/tinymce-react/editor";
+// import  Editor  from "@tinymce/tinymce-react/editor";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoOutlined  from "@mui/icons-material/InfoOutlined";
 
@@ -2083,7 +2083,7 @@ const FranchiseDetailsControl = ({
               </Typography>
             )}
           </Typography>
-          <Editor
+          {/* <Editor
             apiKey="ax88nfnpet4akyi1bpe4gmsnhxabsp2ia0qoitvfd4qjki8v"
             value={data.brandDescription || ""}
             init={{
@@ -2104,7 +2104,7 @@ const FranchiseDetailsControl = ({
             }}
             onEditorChange={handleDescriptionChange}
             disabled={!isEditing}
-          />
+          /> */}
         </Box>
       </Grid>
     </Box>

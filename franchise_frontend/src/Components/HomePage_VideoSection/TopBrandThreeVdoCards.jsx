@@ -568,7 +568,7 @@ function TopBrandVdoCards() {
                     objectFit="contain"
                     onPlay={() => handleVideoPlay(0)}
                     onPause={() => handleVideoPause(0)}
-                    autoPlay={true}
+                    autoPlay={false}
                     loop={true}
                     muted={true}
                     ref={(el) => (videoRefs.current[0] = el?.videoRef || null)}
@@ -726,7 +726,7 @@ function TopBrandVdoCards() {
                             aria-label="view details"
                             onClick={() => handleApply(mainBrand)}
                             sx={{
-                              width: "40vh",
+                              width: "35vh",
                               fontWeight: 800,
                               textTransform: "none",
                               color: "#fff",
@@ -1161,7 +1161,8 @@ function TopBrandVdoCards() {
                       <Typography
                         variant="caption"
                         color="Black"
-                        sx={{ fontSize: "0.7rem", lineHeight: 1.5 }}
+
+                        sx={{ fontSize: "0.7rem", lineHeight: 1.5 ,mb:isMobile ? 1.5 : 0 }}
                       >
                         Model: {brand.fico?.franchiseModel}
                       </Typography>
