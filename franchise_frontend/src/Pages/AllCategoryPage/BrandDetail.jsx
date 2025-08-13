@@ -274,62 +274,10 @@ const handleSubmit = useCallback(
         return;
       }
 
-<<<<<<< HEAD
       // Validate selected brand exists
       if (!selectedBrand || selectedBrand.length === 0) {
         alert("No brand selected. Please try again.");
         return;
-=======
-        const requiredFields = [
-          "fullName",
-          "investorEmail",
-          "mobileNumber",
-          "state",
-          "district",
-          "city",
-          "investmentRange",
-          "planToInvest",
-          "readyToInvest",
-        ];
-        const missingFields = requiredFields.filter((field) => !payload[field]);
-        if (missingFields.length > 0) {
-          alert(`Please fill all required fields: ${missingFields.join(", ")}`);
-          return;
-        }
-        const response = await axios.post(
-          "http://localhost:5000/api/v1/instantapply/postApplication",
-          payload,
-          {
-            headers: { "Content-Type": "application/json" },
-            signal: AbortSignal.timeout(10000),
-          }
-        );
-        if (response.data) {
-          setSubmitSuccess(true);
-          alert("✅Success! Your application has been submitted.");
-          setDrawerOpen(false);
-          setFormData({
-            fullName: "",
-            investorEmail: "",
-            mobileNumber: "",
-            investmentRange: "",
-            state: "",
-            district: "",
-            city: "",
-            planToInvest: "",
-            readyToInvest: "",
-          });
-        }
-        console.log("Submission successful:", response.data);
-      } catch (error) {
-        console.error(
-          "Submission error:",
-          error?.response?.data || error.message
-        );
-        alert("❌Failed to submit application. Please try again.");
-      } finally {
-        setIsSubmitting(false);
->>>>>>> 76e4b06fe63772432a0ba39739e9f9d5f50450b1
       }
 
       // Prepare payload with correct field names

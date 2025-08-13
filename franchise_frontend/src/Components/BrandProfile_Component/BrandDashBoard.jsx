@@ -31,6 +31,7 @@ import {
   DialogContent,
   DialogActions,
   CardContent,
+  Tooltip
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -141,6 +142,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
   };
   console.log("applyData :",applyData);
   console.log("lead :",Leads);
+  console.log ("brandData",brandData)
 
   useEffect(() => {
     fetchData();
@@ -1679,7 +1681,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                   gutterBottom
                   sx={{ color: colors.textPrimary }}
                 >
-                  {brandData?.brandDetails?.fullName || "Your Brand"}
+                  {brandData?.brandDetails?.brandName || "Your Brand"}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -1715,7 +1717,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                         overflow: "visible",
                       }}
                     >
-                      <CardContent sx={{ py: 3, px: 2 }}>
+                      <CardContent sx={{ py: 0, px: 2 }}>
                         <Box
                           sx={{
                             position: "absolute",
@@ -1736,21 +1738,21 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                           <VisibilityIcon fontSize="medium" />
                         </Box>
                         <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 5 }}
+                          sx={{ display: "flex", gap: 5 }}
                         >
                           <Typography
                             variant="subtitle1"
                             fontWeight="medium"
-                            sx={{ color: "text.secondary", ml: 3 }}
+                            sx={{ color: "text.secondary", mt: 3, mb: 0, ml: 3 }}
                           >
                             Views
                           </Typography>
                           <Typography
-                            variant="h4"
+                            variant="h5"
                             component="div"
                             fontWeight="bold"
                             color="error.main"
-                            sx={{ mt: 2, mb: 1, mr: 3 }}
+                            sx={{ mt: 3, mb: 0.5, mr: 3 }}
                           >
                             {brandData.totalViewCount}
                           </Typography>
@@ -1774,6 +1776,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
 
                   {/* Likes Card */}
                   <Grid item xs={12} sm={6} md={4}>
+                    
                     <Card
                       sx={{
                         minWidth: 120,
@@ -1790,7 +1793,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                         overflow: "visible",
                       }}
                     >
-                      <CardContent sx={{ py: 3, px: 2 }}>
+                      <CardContent sx={{ py: 0, px: 2 }}>
                         <Box
                           sx={{
                             position: "absolute",
@@ -1816,16 +1819,16 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                           <Typography
                             variant="subtitle1"
                             fontWeight="medium"
-                            sx={{ color: "text.secondary", ml: 3 }}
+                            sx={{ color: "text.secondary", mt: 3, mb: 0, ml: 3 }}
                           >
                             Liked
                           </Typography>
                           <Typography
-                            variant="h4"
+                            variant="h5"
                             component="div"
                             fontWeight="bold"
                             color="error.main"
-                            sx={{ mt: 2, mb: 1, mr: 3 }}
+                            sx={{ mt: 3, mb: 0.5, mr: 3 }}
                           >
                             {brandData.totalLikedCount}
                           </Typography>
@@ -1865,7 +1868,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                         overflow: "visible",
                       }}
                     >
-                      <CardContent sx={{ py: 3, px: 2 }}>
+                      <CardContent sx={{ py: 0, px: 2 }}>
                         <Box
                           sx={{
                             position: "absolute",
@@ -1891,18 +1894,18 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                           <Typography
                             variant="subtitle1"
                             fontWeight="medium"
-                            sx={{ color: "text.secondary", ml: 3 }}
+                            sx={{ color: "text.secondary", mt: 3, mb: 0, ml: 3 }}
                           >
                             SortList
                           </Typography>
                           <Typography
-                            variant="h4"
+                            variant="h5"
                             component="div"
                             fontWeight="bold"
                             color="error.main"
-                            sx={{ mt: 2, mb: 1, mr: 3 }}
+                            sx={{ mt: 3, mb: 0.5, mr: 3 }}
                           >
-                            {brandData.totalLikedCount}
+                            {brandData.totalSortlistCount}
                           </Typography>
                         </Box>
                         <Box
