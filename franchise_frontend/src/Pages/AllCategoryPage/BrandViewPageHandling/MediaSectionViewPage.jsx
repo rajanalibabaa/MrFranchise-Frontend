@@ -228,7 +228,7 @@ useEffect(() => {
                   onClick={handlePlayPause}
                   onDoubleClick={handleFullscreen}
                 />
-                {videoLoading && (
+                {/* {videoLoading && (
                   <Box
                     sx={{
                       position: 'absolute', top: 0, left: 0, width: '100%',
@@ -238,7 +238,7 @@ useEffect(() => {
                   >
                     <CircularProgress />
                   </Box>
-                )}
+                )} */}
                 {videoError && (
                   <Box sx={{
                     position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',

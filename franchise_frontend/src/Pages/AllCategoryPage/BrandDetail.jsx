@@ -21,7 +21,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 
 // Critical (above fold) imports
-import { useBrand } from "../../Hooks/Fetchbrands.jsx";
+// import { useBrand } from "../../Hooks/Fetchbrands.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
 import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
@@ -322,6 +322,7 @@ const BrandDetails = ({ brandData }) => {
             readyToInvest: "",
           });
         }
+        console.log("Submission successful:", response.data);
       } catch (error) {
         console.error(
           "Submission error:",
@@ -384,19 +385,19 @@ const BrandDetails = ({ brandData }) => {
 
   // Effects (keep unchanged except for lazy-lazy components)
 
-  useEffect(() => {
-    if (!uuid) return;
-    const controller = new AbortController();
-    const fetchBrand = async () => {
-      try {
-        await useBrand(uuid).unwrap();
-      } catch (error) {
-        console.error("Failed to fetch brand details:", error);
-      }
-    };
-    fetchBrand();
-    return () => controller.abort();
-  }, [uuid]);
+  // useEffect(() => {
+  //   if (!uuid) return;
+  //   const controller = new AbortController();
+  //   const fetchBrand = async () => {
+  //     try {
+  //       await useBrand(uuid).unwrap();
+  //     } catch (error) {
+  //       console.error("Failed to fetch brand details:", error);
+  //     }
+  //   };
+  //   fetchBrand();
+  //   return () => controller.abort();
+  // }, [uuid]);
 
   useEffect(() => {
     if (investorUUID && AccessToken) {

@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchViewBrandsById } from "../../Redux/Slices/viewSlice";
 import HomePageBrandCard from "./HomePageBrandCard.jsx";
 import LoginPage from "../../Pages/LoginPage/LoginPage.jsx";
+import { userId } from "../../Utils/autherId.jsx"
  
 const ViewBrands = () => {
   const theme = useTheme();
@@ -65,6 +66,9 @@ const ViewBrands = () => {
  
   // Data fetching
   useEffect(() => {
+    if (!userId) {
+      return;
+    }
     dispatch(fetchViewBrandsById({ page: 1 }));
   }, [dispatch]);
  
@@ -151,6 +155,10 @@ const ViewBrands = () => {
   const handleCloseNotification = () => {
     setNotification((prev) => ({ ...prev, open: false }));
   };
+
+  if(!userId){
+    return 
+  }
  
   return (
     <Box
