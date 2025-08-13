@@ -55,24 +55,18 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
     try {
       setLoading(true);
       const endpoints = [
-        axios.get(`${API_BASE_URL}/brandlisting/getBrandListingByUUID/${brandUUID}`, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`${API_BASE_URL}/view/getAllViewBrands/${brandUUID}`, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`${API_BASE_URL}/like/getBrandLikedByAll/${brandUUID}`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API_BASE_URL}/brandlisting/getBrandById/${brandUUID}`, { headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`${API_BASE_URL}/instantapply/getAllInstaApply/${brandUUID}`, { headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`${API_BASE_URL}/instantapply/getAllLeads/${brandUUID}`, { headers: { Authorization: `Bearer ${token}` } }),
       ];
       const responses = await Promise.all(endpoints.map(p => p.catch(e => ({ error: e }))));
       const [brandRes, viewsRes, likedRes, applyRes, leadsRes] = responses;
       if (brandRes.error) throw brandRes.error;
-      setBrandData(brandRes.data?.success ? brandRes.data.data : {});
-      if (viewsRes.error) throw viewsRes.error;
-      setViewsData(viewsRes.data?.success ? viewsRes.data.data : { brands: [], investors: [] });
-      if (likedRes.error) throw likedRes.error;
-      setLikedData(likedRes.data?.success ? likedRes.data.data : []);
+      setBrandData(brandRes.data?.success ? brandRes?.data?.data : {});
       if (applyRes.error) throw applyRes.error;
-      setApplyData(applyRes.data?.success ? applyRes.data.data : []);
+      setApplyData(applyRes.data?.success ? applyRes?.data?.data : []);
       if (leadsRes.error) throw leadsRes.error;
-      setLeads(leadsRes.data?.success ? leadsRes.data.data : []);
+      setLeads(leadsRes.data?.success ? leadsRes?.data?.data : []);
 
 
     } catch (err) {
@@ -85,14 +79,8 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
   useEffect(() => {
     fetchData();
   }, [brandUUID, token]);
-
-  const brandViewsCount = filterByDate(viewsData?.brands)?.length || 0;
-  const investorViewsCount = filterByDate(viewsData?.investors)?.length || 0;
-  const totalViews = brandViewsCount + investorViewsCount;
   const filteredLikedData = filterByDate(likedData);
   const filteredLeadsData = filterByDate(applyData);
-
-  // console.log("leads : ",Leads)
 
   const handleTabChange = (_, newValue) => {
     setTabValue(newValue);
@@ -479,100 +467,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
     )}
   </Box>
 );
-      case 1: return <Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button variant={viewType === 'investors' ? 'contained' : 'outlined'} aria-label="investor view" onClick={() => setViewType('investors')}
-              sx={viewType === 'investors' ? { backgroundColor: colors.accent, '&:hover': { backgroundColor: colors.secondary } } : 
-              { color: colors.accent, borderColor: colors.accent, '&:hover': { backgroundColor: `${colors.accent}15` } }}>
-              Investor View ({investorViewsCount})
-            </Button>
-            <Button variant={viewType === 'brands' ? 'contained' : 'outlined'} aria-label="brand view" onClick={() => setViewType('brands')}
-              sx={viewType === 'brands' ? { backgroundColor: colors.accent, '&:hover': { backgroundColor: colors.secondary } } : 
-              { color: colors.accent, borderColor: colors.accent, '&:hover': { backgroundColor: `${colors.accent}15` } }}>
-              Brand View ({brandViewsCount})
-            </Button>
-          </Box>
-          
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-          <FormControl sx={{ minWidth: 200 }} size="small">
-            <InputLabel sx={{ color: colors.textSecondary }}>Time Period</InputLabel>
-            <Select label="Time Period" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}
-              sx={{ '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } }}>
-              {dateFilters.map(option => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
-            </Select>
-          </FormControl>
-        </Box>
-        <TableContainer component={Paper} sx={{ border: `1px solid ${colors.divider}`, boxShadow: 'none' }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: colors.primary }}>
-                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Avatar</TableCell>
-                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Name</TableCell>
-                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Email</TableCell>
-                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Phone</TableCell>
-                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {viewType === 'investors' && filterByDate(viewsData?.investors)?.map(view => renderTableRow(view, 'investor'))}
-              {viewType === 'brands' && filterByDate(viewsData?.brands)?.map(view => renderTableRow(view, 'brand'))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>;
-
-      case 2: return <Box mt={2}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" sx={{ color: colors.textPrimary }}>Total Likes: {filteredLikedData.length}</Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <FormControl sx={{ minWidth: 200 }} size="small">
-              <InputLabel sx={{ color: colors.textSecondary }}>Time Period</InputLabel>
-              <Select label="Time Period" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}
-                sx={{ '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.divider }, '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } }}>
-                {dateFilters.map(option => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
-              </Select>
-            </FormControl>
-            
-          </Box>
-        </Box>
-        <TableContainer component={Paper} sx={{ border: `1px solid ${colors.divider}`, boxShadow: 'none' }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: colors.primary }}>
-                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Avatar</TableCell>
-                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Name</TableCell>
-                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Type</TableCell>
-                <TableCell sx={{ color: '#fff', fontWeight: 600 }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredLikedData.length > 0 ? filteredLikedData.map(like => (
-                <TableRow key={like?.uuid} hover sx={{ '&:hover': { backgroundColor: colors.divider } }}>
-                  <TableCell><Avatar src={like?.profileImage || like?.uploads?.brandLogo?.[0] || '/default-avatar.png'} sx={{ bgcolor: colors.secondary }}
-                  as="image"
-                   /></TableCell>
-                  <TableCell sx={{ color: colors.textPrimary }}>{like?.brandDetails?.fullName || like?.firstName || 'Unknown'}</TableCell>
-                  <TableCell sx={{ color: colors.textPrimary }}>{like?.brandDetails ? 'Brand' : 'Investor'}</TableCell>
-                  <TableCell>
-                    <Button variant="outlined" size="small" aria-label="details" onClick={() => handleViewDetails(like)}
-                      sx={{ color: colors.accent, borderColor: colors.accent, '&:hover': { backgroundColor: `${colors.accent}15` } }}>
-                      Details
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              )) : <TableRow>
-                <TableCell colSpan={4} sx={{ textAlign: 'center', py: 4 }}>
-                  <Typography variant="body1" color={colors.textSecondary}>Your brand hasn't received any likes yet</Typography>
-                </TableCell>
-              </TableRow>}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>;
-
-case 3: return (
+case 1: return (
   <Box mt={4}>
     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
       <Typography variant="h6" sx={{ color: colors.textPrimary }}>
@@ -1042,13 +937,14 @@ default: return null;
               <Typography variant="caption" sx={{ color: colors.textSecondary }} gutterBottom>
                Member Id : {brandData?.brandID || 'Business type not specified'}
               </Typography>
+              
             </Box>
           </Card>
 
           <Card sx={{ mb: 3, backgroundColor: colors.cardBackground, border: `1px solid ${colors.divider}`, boxShadow: 'none' }}>
             <Tabs value={tabValue} onChange={handleTabChange} variant={isMobile ? 'scrollable' : 'fullWidth'} scrollButtons="auto"
               sx={{ '& .MuiTabs-indicator': { backgroundColor: colors.accent, height: 3 } }}>
-              {['Exclusive Enquiries', 'Views', 'Likes', 'Leads'].map((label, index) => (
+              {['Exclusive Enquiries', 'Leads'].map((label, index) => (
                 <Tab key={index} label={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.5 }}>
                     {[<Person />, <Visibility />, <ThumbUp />, <MailOutline />][index]}
@@ -1056,7 +952,7 @@ default: return null;
                       color: tabValue === index ? colors.textPrimary : colors.textSecondary }}>{label}</Typography>
                     <Box sx={{ backgroundColor: tabValue === index ? colors.accent : colors.divider, color: tabValue === index ? '#fff' : colors.textSecondary,
                       borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', ml: 0.5 }}>
-                      {[applyData.length, totalViews, likedData.length, Leads.length][index]}
+                      {[applyData.length, Leads.length][index]}
                     </Box>
                   </Box>
                 } sx={{ minWidth: 'unset', py: 1.5, '&.Mui-selected': { backgroundColor: `${colors.accent}10` } }} />
