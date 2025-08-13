@@ -65,8 +65,8 @@ export const fetchFilteredBrands = createAsyncThunk(
           logo: '',
           ...brand.uploads
         },
-        isLiked: brand.isLiked || false,
-        isShortListed: brand.isShortListed || false
+        isLiked: brand?.isLiked || false,
+        isShortListed: brand?.isShortListed || false
       })) || [];
 
       return {
@@ -155,16 +155,17 @@ const filterBrandSlice = createSlice({
     toggleBrandLikefilter: (state, action) => {
       const brandId = action.payload;
       state.brands = state.brands.map(brand => 
-        brand.uuid === brandId 
+        brand?.uuid === brandId 
           ? { ...brand, isLiked: !brand.isLiked }
           : brand
       );
     },
     toggleBrandShortListfilter: (state, action) => {
       const brandId = action.payload;
+      console.log("Toggling shortlist for brand:", brandId);
       state.brands = state.brands.map(brand => 
-        brand.uuid === brandId 
-          ? { ...brand, isShortListed: !brand.isShortListed }
+        brand?.uuid === brandId 
+          ? { ...brand, isShortListed: !brand?.isShortListed }
           : brand
       );
     }

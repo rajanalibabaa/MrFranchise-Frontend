@@ -39,7 +39,8 @@ export const VideoPlayer = ({
   const [pipMode, setPipMode] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  
+  const [isPlaying, setIsPlaying] = useState(false);
+
   const {
     currentPlayingId,
     playVideo,
@@ -48,7 +49,7 @@ export const VideoPlayer = ({
     unregisterVideo
   } = useVideoController();
 
-  const isPlaying = currentPlayingId === id;
+  // const isPlaying = currentPlayingId === id;
 
   // Register/unregister video with proper cleanup
   useEffect(() => {
@@ -116,36 +117,14 @@ export const VideoPlayer = ({
   }, [id, pauseVideo]);
 
   // Play/pause handler with better error handling
-  const togglePlayPause = useCallback(() => {
-  const video = videoRef.current;
-  if (!video) return;
+const togglePlayPause = useCallback(() => {
+  if (!videoRef.current) return;
 
   if (isPlaying) {
-    // 1) Pause immediately
-    video.pause();
-    // 2) Tell your controller (pauses any other playing videos, etc.)
-    pauseVideo(id);
+    pauseVideo(id); // let controller handle pause
   } else {
-    // 1) Show buffering/progress state if you like
-    setIsBuffering(true);
-    // 2) Attempt to play immediately
-    const playPromise = video.play();
-    if (playPromise && typeof playPromise.catch === 'function') {
-      playPromise
-        .catch(err => {
-          console.error('Direct play() failed:', err);
-          setHasError(true);
-        })
-        .finally(() => {
-          setIsBuffering(false);
-        });
-    } else {
-      // older browsers might not return a promise
-      setIsBuffering(false);
-    }
-    // 3) Also notify your global controller so it can pause others
     playVideo(id).catch(err => {
-      console.error('Controller.playVideo failed:', err);
+      console.error('Controller playVideo failed:', err);
       setHasError(true);
     });
   }
@@ -189,30 +168,53 @@ export const VideoPlayer = ({
     }
   }, [pipMode]);
 
+  useEffect(() => {
+  const video = videoRef.current;
+  if (!video) return;
+
+  const handlePlay = () => setIsPlaying(true);
+  const handlePause = () => setIsPlaying(false);
+
+  video.addEventListener('play', handlePlay);
+  video.addEventListener('pause', handlePause);
+
+  return () => {
+    video.removeEventListener('play', handlePlay);
+    video.removeEventListener('pause', handlePause);
+  };
+}, []);
+
+
   // Event listeners setup with proper cleanup
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const events = [
-      { type: 'loadedmetadata', handler: handleLoadedMetadata },
-      { type: 'timeupdate', handler: handleTimeUpdate },
-      { type: 'waiting', handler: handleWaiting },
-      { type: 'playing', handler: handlePlaying },
-      { type: 'canplay', handler: handleCanPlay },
-      { type: 'ended', handler: handleEnded },
-      { type: 'error', handler: handleError }
-    ];
+     // Add existing events + play/pause sync
+  const handlePlay = () => setIsPlaying(true);
+  const handlePause = () => setIsPlaying(false);
+
+   const events = [
+    { type: 'loadedmetadata', handler: handleLoadedMetadata },
+    { type: 'timeupdate', handler: handleTimeUpdate },
+    { type: 'waiting', handler: handleWaiting },
+    { type: 'playing', handler: handlePlaying },
+    { type: 'canplay', handler: handleCanPlay },
+    { type: 'ended', handler: handleEnded },
+    { type: 'error', handler: handleError },
+    { type: 'play', handler: handlePlay },
+    { type: 'pause', handler: handlePause },
+  ];
 
     events.forEach(({ type, handler }) => {
-      video.addEventListener(type, handler);
-    });
+    video.addEventListener(type, handler);
+  });
 
-    // Fullscreen change listener
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+  const handleFullscreenChange = () => {
+    setIsFullscreen(!!document.fullscreenElement);
+  };
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+
 
     return () => {
       events.forEach(({ type, handler }) => {
@@ -275,6 +277,7 @@ export const VideoPlayer = ({
           loop
           playsInline
           preload="auto"
+          autoPlay={autoPlay}
           onClick={togglePlayPause}
         />
 
@@ -315,17 +318,20 @@ export const VideoPlayer = ({
             component="img"
             src={poster}
             alt="Video preview"
+            loading='eager'
+            decoding='async'
             sx={{
               position: 'absolute',
               top:0 ,
               left:0 ,
-              width: 48,
-              height: 48,
+              width: '100%',
+              height: '100%',
               objectFit: 'contain',
               cursor: 'pointer',
               zIndex: 3,
               filter: hasError ? 'grayscale(80%)' : 'none',
-              // opacity: 0.8
+              // transition:'opacity 0.2s',
+
             }}
             onClick={togglePlayPause}
           />

@@ -327,7 +327,7 @@ const BrandCard = memo(
             )}
           </Box>
 
-          <Box sx={{ mb: 2, flexGrow: 1, "& > *:not(:last-child)": { mb: 1 } }}>
+          <Box sx={{ mb: 2,ml:1, flexGrow: 1, "& > *:not(:last-child)": { mb: 1 ,} }}>
             <DetailItem
               icon={<AttachMoney />}
               label="Investment"

@@ -216,9 +216,8 @@ const BrandRegisterForm = () => {
   const [formData, setFormData] = useState(() => {
     const savedData = localStorage.getItem(FORM_DATA_KEY);
     return savedData ? JSON.parse(savedData) : initialFormData;
-  });
+  }); 
 
-  // console.log("Form Data:", formData);
 
   const [validationErrors, setValidationErrors] = useState({
     brandDetails: {},
@@ -247,6 +246,7 @@ const BrandRegisterForm = () => {
     localStorage.setItem(FORM_STEP_KEY, activeStep.toString());
   }, [formData, activeStep]);
 
+  console.log("Form Data:", formData);
   const validateUploadsDetails = (data) => {
     const errors = {};
     if (data.brandLogo.length === 0)
@@ -329,7 +329,6 @@ const BrandRegisterForm = () => {
         setSubmitSuccess(false);
 
         const formDataSend = new FormData();
-
         // Append brand details
         formDataSend.append(
           "brandDetails",
@@ -418,7 +417,7 @@ const BrandRegisterForm = () => {
             });
           }
         });
-
+console.log("Form data prepared for submission:", formDataSend);
         const response = await axios.post(
           "http://localhost:5000/api/v1/brandlisting/createBrandListing",
           formDataSend,

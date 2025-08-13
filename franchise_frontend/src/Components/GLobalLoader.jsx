@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Box } from '@mui/material';
-import Lottie from 'lottie-react';
+// import Lottie from 'lottie-web/build/player/lottie_light'; 
+import Lottie from "lottie-react"
+
 import loadingAnimation from '../assets/videos/Animation - 1750051841214.json';
 
 const GlobalLoader = () => {
