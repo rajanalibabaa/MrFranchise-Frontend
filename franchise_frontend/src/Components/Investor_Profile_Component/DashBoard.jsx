@@ -97,7 +97,7 @@ const Dashboard = () => {
         dispatch(fetchLikedBrandsById({ userId: investorUUID })),
         dispatch(fetchShortListedById({ 
           investorUUID, 
-          page: 1, 
+          page: currentPage, 
           limit: itemsPerPage 
         })),     
         dispatch(fetchViewBrandsById({ userId: investorUUID })),
@@ -115,7 +115,7 @@ const Dashboard = () => {
     } finally {
       setIsPaginating(false);
     }
-  }, [investorUUID, AccessToken, dispatch, itemsPerPage]);
+  }, [investorUUID, AccessToken, dispatch, currentPage, itemsPerPage]);
 
   useEffect(() => {
     fetchData();
@@ -165,11 +165,11 @@ const Dashboard = () => {
 
       await handleShortList(brandId);
       
-      const response = await dispatch(fetchShortListedById({
-        investorUUID,
-        page: currentPage,
-        limit: itemsPerPage
-      }));
+      const response = await dispatch(fetchShortListedById({ 
+  investorUUID, 
+  page: currentPage, 
+  limit: itemsPerPage 
+}));
 
       if (response?.payload?.brands) {
         const updatedStates = {};
@@ -223,7 +223,7 @@ const Dashboard = () => {
     dispatch(openBrandDialog(brand));
   }, [dispatch]);
 
-  const getCurrentBrands = useCallback(() => {
+    const getCurrentBrands = useCallback(() => {
     switch(tabValue) {
       case 0: 
         return Array.isArray(viewedBrands) ? 
@@ -235,13 +235,13 @@ const Dashboard = () => {
         return Array.isArray(appliedBrands) ? 
           appliedBrands.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
       case 3: 
-        return shortlistedBrands;
+        return Array.isArray(shortlistedBrands) ? shortlistedBrands : [];
       default: 
         return [];
     }
   }, [tabValue, viewedBrands, likedBrands, appliedBrands, shortlistedBrands, currentPage, itemsPerPage]);
 
-  const totalPages = useMemo(() => {
+ const totalPages = useMemo(() => {
     switch(tabValue) {
       case 0: 
         return Math.max(1, Math.ceil((viewedBrands?.length || 0) / itemsPerPage));
@@ -250,30 +250,43 @@ const Dashboard = () => {
       case 2: 
         return Math.max(1, Math.ceil((appliedBrands?.length || 0) / itemsPerPage));
       case 3: 
-        return Math.max(1, Math.ceil((shortListState?.pagination?.total || 0) / itemsPerPage));
+        return Math.max(1, Math.ceil((shortListState?.pagination?.total || shortlistedBrands.length) / itemsPerPage));
       default: 
         return 1;
     }
-  }, [tabValue, viewedBrands, likedBrands, appliedBrands, shortListState?.pagination?.total, itemsPerPage]);
+  }, [tabValue, viewedBrands, likedBrands, appliedBrands, shortListState?.pagination?.total, shortlistedBrands.length, itemsPerPage]);
 
-  const handlePageChange = async (event, value) => {
-    try {
-      setIsPaginating(true);
-      setCurrentPage(value);
+const handlePageChange = async (event, value) => {
+  try {
+    setIsPaginating(true);
+    setCurrentPage(value);
+    
+    if (tabValue === 3) {
+      console.log(`Fetching shortlisted brands - Page ${value}`);
       
-      if (tabValue === 3) {
-        await dispatch(fetchShortListedById({
-          investorUUID,
-          page: value,
-          limit: itemsPerPage
-        }));
-      }
-    } catch (error) {
-      console.error("Page change error:", error);
-    } finally {
-      setIsPaginating(false);
+      const result = await dispatch(fetchShortListedById({
+        investorUUID,      
+        page: value,       
+        limit: itemsPerPage 
+      }));
+      
+      console.log('Shortlist API Response:', {
+        page: value,
+        receivedItems: result.payload?.brands?.length || 0,
+        totalItems: result.payload?.pagination?.total || 0
+      });
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  } catch (error) {
+    console.error("Page change error:", error);
+    setRemoveMsg(error.message || "Failed to load page");
+    setTimeout(() => setRemoveMsg(""), 3000);
+    setCurrentPage(prevPage => prevPage);
+  } finally {
+    setIsPaginating(false);
+  }
+};
 
   const renderTabContent = useMemo(() => {
     if (isLoading) {
@@ -338,8 +351,8 @@ const Dashboard = () => {
           <>
             <Grid container spacing={3} justifyContent="center">
               {currentBrands.map((item) => (
-                <Grid item xs={12} sm={6} md={4} lg={2.5} key={item?.uuid || Math.random()}>
-                  <BrandCard 
+<Grid item xs={12} sm={6} md={4} lg={3} key={item?.uuid || Math.random()}>
+              <BrandCard 
                     item={item} 
                     type={['viewed', 'liked', 'applied', 'shortlisted'][tabValue]}
                     likedStates={likedStates}
@@ -357,9 +370,9 @@ const Dashboard = () => {
               <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
                 <Pagination
                   count={totalPages}
-                  page={currentPage}
-                  onChange={handlePageChange}
-                  color="primary"
+  page={currentPage}
+  onChange={handlePageChange}  
+  color="primary"
                   size="large"
                   sx={{
                     '& .MuiPaginationItem-root': {
