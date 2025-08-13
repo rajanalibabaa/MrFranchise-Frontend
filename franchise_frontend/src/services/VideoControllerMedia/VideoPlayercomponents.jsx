@@ -328,7 +328,7 @@ const togglePlayPause = useCallback(() => {
               height: '100%',
               objectFit: 'contain',
               cursor: 'pointer',
-              zIndex: 3,
+              zIndex: 1,
               filter: hasError ? 'grayscale(80%)' : 'none',
               // transition:'opacity 0.2s',
 

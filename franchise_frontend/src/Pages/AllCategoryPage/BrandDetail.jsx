@@ -607,7 +607,7 @@ const BrandDetails = ({ brandData }) => {
 
       {/* LAZY LOAD LIKED/SIMILAR BRANDS */}
       <Suspense fallback={<Box minHeight={120}><CircularProgress /></Box>}>
-        <LikedBrands />
+        <LikedBrands  />
       </Suspense>
       <Suspense fallback={<Box minHeight={120}><CircularProgress /></Box>}>
       <ViewBrands />
