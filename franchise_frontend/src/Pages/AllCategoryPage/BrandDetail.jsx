@@ -264,7 +264,7 @@ const handleSubmit = useCallback(
   async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+ 
     try {
       // Get user ID (investor or brand)
       const id = investorUUID || localStorage.getItem("brandUUID");
@@ -273,65 +273,13 @@ const handleSubmit = useCallback(
         navigate("/registerhandleuser");
         return;
       }
-
-<<<<<<< HEAD
+ 
       // Validate selected brand exists
       if (!selectedBrand || selectedBrand.length === 0) {
         alert("No brand selected. Please try again.");
         return;
-=======
-        const requiredFields = [
-          "fullName",
-          "investorEmail",
-          "mobileNumber",
-          "state",
-          "district",
-          "city",
-          "investmentRange",
-          "planToInvest",
-          "readyToInvest",
-        ];
-        const missingFields = requiredFields.filter((field) => !payload[field]);
-        if (missingFields.length > 0) {
-          alert(`Please fill all required fields: ${missingFields.join(", ")}`);
-          return;
-        }
-        const response = await axios.post(
-          "http://localhost:5000/api/v1/instantapply/postApplication",
-          payload,
-          {
-            headers: { "Content-Type": "application/json" },
-            signal: AbortSignal.timeout(10000),
-          }
-        );
-        if (response.data) {
-          setSubmitSuccess(true);
-          alert("✅Success! Your application has been submitted.");
-          setDrawerOpen(false);
-          setFormData({
-            fullName: "",
-            investorEmail: "",
-            mobileNumber: "",
-            investmentRange: "",
-            state: "",
-            district: "",
-            city: "",
-            planToInvest: "",
-            readyToInvest: "",
-          });
-        }
-        console.log("Submission successful:", response.data);
-      } catch (error) {
-        console.error(
-          "Submission error:",
-          error?.response?.data || error.message
-        );
-        alert("❌Failed to submit application. Please try again.");
-      } finally {
-        setIsSubmitting(false);
->>>>>>> 76e4b06fe63772432a0ba39739e9f9d5f50450b1
       }
-
+ 
       // Prepare payload with correct field names
       const payload = {
         fullName: formData.fullName,
@@ -347,43 +295,43 @@ const handleSubmit = useCallback(
         brandName: selectedBrand[0]?.brandDetails?.brandName || "",
         applyId: id,
       };
-
+ 
       // Validate required fields
       const requiredFields = [
         "fullName",
         "email",
         "mobileNumber",
         "state",
-        "district",
-        "city",
+        // "district",
+        // "city",
         "investmentRange",
         "planToInvest",
         "readyToInvest",
       ];
-      
+     
       const missingFields = requiredFields.filter(field => !payload[field]);
       if (missingFields.length > 0) {
         alert(`Please fill all required fields: ${missingFields.join(", ")}`);
         return;
       }
-
+ 
       console.log("Submitting payload:", payload);
-
+ 
       // Make API request
       const response = await axios.post(
         "http://localhost:5000/api/v1/instantapply/postApplication",
         payload,
         {
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${AccessToken}` // Add auth token if needed
           },
           withCredentials: true,
         }
       );
-
+ 
       console.log("API Response:", response.data);
-
+ 
       if (response.data && response.data.success) {
         setSubmitSuccess(true);
         alert("✅ Success! Your application has been submitted.");
@@ -409,7 +357,7 @@ const handleSubmit = useCallback(
         response: error.response?.data,
         stack: error.stack
       });
-      
+     
       let errorMessage = "❌ Failed to submit application";
       if (error.response) {
         if (error.response.status === 401) {
@@ -420,7 +368,7 @@ const handleSubmit = useCallback(
       } else {
         errorMessage += `: ${error.message}`;
       }
-      
+     
       alert(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -428,6 +376,7 @@ const handleSubmit = useCallback(
   },
   [formData, selectedBrand, investorUUID, navigate, AccessToken]
 );
+ 
 
   const handleImageOpen = useCallback((index) => {
     setCurrentImageIndex(index);
