@@ -111,7 +111,8 @@ const OverviewTab = ({ brand }) => {
         </Grid>
       )}
 
-      {/* OUTLET GRIDS: Lazy-load (domestic, international) */}
+     <Box display={{ sm: 'none', md: 'flex', }} >
+       {/* OUTLET GRIDS: Lazy-load (domestic, international) */}
       {hasData(expansionLocationData.currentOutletLocations?.domestic?.locations) && (
         <LazyInViewSection minHeight={180}>
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}>
@@ -124,6 +125,18 @@ const OverviewTab = ({ brand }) => {
           </Suspense>
         </LazyInViewSection>
       )}
+
+       {hasData(expansionLocationData.expansionLocations?.domestic?.locations) && (
+        <LazyInViewSection minHeight={180}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }} id="expansion-location">
+            Expansion Locations (India)
+          </Typography>
+          <Suspense fallback={<SectionSkeleton lines={2} height={36} />}>
+            <ExpansionLocationGrid data={expansionLocationData.expansionLocations.domestic} />
+          </Suspense>
+        </LazyInViewSection>
+      )}
+     </Box>
 
       {hasData(expansionLocationData.currentOutletLocations?.international?.country) && (
         <LazyInViewSection minHeight={160}>
@@ -138,16 +151,7 @@ const OverviewTab = ({ brand }) => {
         </LazyInViewSection>
       )}
 
-      {hasData(expansionLocationData.expansionLocations?.domestic?.locations) && (
-        <LazyInViewSection minHeight={180}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }} id="expansion-location">
-            Expansion Locations (India)
-          </Typography>
-          <Suspense fallback={<SectionSkeleton lines={2} height={36} />}>
-            <ExpansionLocationGrid data={expansionLocationData.expansionLocations.domestic} />
-          </Suspense>
-        </LazyInViewSection>
-      )}
+     
 
       {hasData(expansionLocationData.expansionLocations?.international?.country) && (
         <LazyInViewSection minHeight={160}>

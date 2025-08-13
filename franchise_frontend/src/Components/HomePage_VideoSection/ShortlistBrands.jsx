@@ -195,6 +195,7 @@ const ShortlistBrands = () => {
         <Typography
           variant={isMobile ? "body1" : "h5"}
           fontWeight="bold"
+          ml={isMobile ? 2 : 0}
           sx={{
             color: "black",
             mb: 1,
