@@ -12,3 +12,14 @@
                     muted={true}
                     ref={(el) => (videoRefs.current[0] = el?.videoRef || null)}
                   /> */}
+
+                  import InvestDataJson from "../../Pages/Registration/BrandListingRegister/data/IndiaStateDistrictFile.json"
+useEffect(()=>{
+  try{
+    setIndiaData(InvestDataJson);
+setPreferredStates(Object.keys(InvestDataJson));
+  } catch (err){
+    setIndiaData({});
+    setPreferredStates([]);
+  }
+},[])
