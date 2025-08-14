@@ -1679,7 +1679,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                   gutterBottom
                   sx={{ color: colors.textPrimary }}
                 >
-                  {brandData?.brandDetails?.fullName || "Your Brand"}
+                  {brandData?.brandDetails?.brandName || "Your Brand"}
                 </Typography>
                 <Typography
                   variant="caption"
