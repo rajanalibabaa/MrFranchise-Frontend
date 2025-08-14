@@ -129,7 +129,7 @@ const BrandListingEdit = () => {
       }
 
       try {
-        const url = `http://localhost:5000/api/v1/brandlisting/getBrandById/${uuid}`;
+        const url = `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandById/${uuid}`;
         const response = await getApi(url);
         const brand = response?.data?.data;
 
@@ -238,7 +238,7 @@ const BrandListingEdit = () => {
   const sendOtp = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/v1/otpverify/send-otp-email`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-email`,
         {
           email: formData.email,
         },
@@ -272,7 +272,7 @@ const BrandListingEdit = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/v1/otpverify/verify-otp`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/verify-otp`,
         {
           identifier: formData.email,
           otp: otp,
@@ -389,7 +389,7 @@ const handleSave = async () => {
     }
 
     const response = await axios.patch(
-      `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
+      `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
       formDataToSend,
       {
         headers: {
