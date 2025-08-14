@@ -1,6 +1,7 @@
 import React from "react";
 import { Grid, Box, Typography, LinearProgress, CircularProgress, Pagination } from "@mui/material";
 import { AssignmentTurnedIn } from "@mui/icons-material";
+import { useEffect } from "react";
 import BrandCard from "../DashBoardFunctions/BrandCard";
 
 const AppliedTab = ({ 
@@ -17,7 +18,35 @@ const AppliedTab = ({
   toggleShortlist,
   isPaginating
 }) => {
-  
+  useEffect(() => {
+    console.log('AppliedTab - Received items:', {
+      count: items.length,
+      data: items,
+      currentPage,
+      totalPages
+    });
+    
+    if (items.length > 0) {
+      console.log('Sample item structure:', items[0]);
+    }
+  }, [items, currentPage, totalPages]);
+
+  // Transform the items to match the expected structure
+  const transformedItems = items.map(item => {
+    const application = item.application || {};
+    return {
+      ...item,
+      application: {
+        ...application,
+        // Map the API fields to the expected fields
+        investment: application.investmentRange || 'Not specified',
+        area: `${application.district || ''}${application.district && application.state ? ', ' : ''}${application.state || ''}` || 'Not specified',
+        type: application.businessType || 'Not specified'
+        
+      }
+    };
+  });
+
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
@@ -37,13 +66,13 @@ const AppliedTab = ({
   return (
     <>
       {isPaginating && <LinearProgress sx={{ width: '100%', mb: 2 }} />}
-      {items.length > 0 ? (
+      {transformedItems.length > 0 ? (
         <>
           <Grid container spacing={3} justifyContent="center">
-           {items.map((brand) => (
-              <Grid item xs={12} sm={6} md={4} lg={2.5} key={brand?.uuid || Math.random()}>
+            {transformedItems.map(({ application }) => (
+              <Grid item xs={12} sm={6} md={4} lg={2.5} key={application?.apply?.applyId || Math.random()}>
                 <BrandCard 
-                  item={brand} 
+                  item={application} 
                   type="applied"
                   likedStates={likedStates}
                   shortlistedStates={shortlistedStates}

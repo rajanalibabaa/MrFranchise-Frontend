@@ -45,21 +45,12 @@ export const fetchBrandById = async (brandId) => {
   try {
     const response = await apiClient.get(
       `/brandlisting/getBrandListingByUUID/${brandId}`
+      
     );
     return response.data.data;
+    console.log("Brand data fetched:", response.data.data);
   } catch (error) {
     console.error("Error fetching brand by ID:", error);
-    throw error;
-  }
-};
-export const fetchInstantApplyById = async (investorUUID) => {
-  try {
-    const response = await apiClient.get(
-      `api/v1/instantapply/getInstaApplyById/id${id}`
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error("Error fetching instant applications:", error);
     throw error;
   }
 };
