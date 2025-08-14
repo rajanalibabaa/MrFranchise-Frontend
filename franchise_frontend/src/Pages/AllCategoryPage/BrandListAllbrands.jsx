@@ -1,4 +1,3 @@
-
 import React, {
   useState,
   useEffect,
@@ -34,11 +33,11 @@ import { useLocation } from "react-router-dom";
 import LoginPage from "../LoginPage/LoginPage.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import { useDispatch, useSelector } from "react-redux";
-import { 
-  setFilter, 
-  resetFilters, 
+import {
+  setFilter,
+  resetFilters,
   fetchFilteredBrands,
-  setPage 
+  setPage,
 } from "../../Redux/Slices/FilterBrandSlice.jsx";
 import { fetchFilterOptions } from "../../Redux/Slices/filterDropdownData.jsx";
 
@@ -90,13 +89,13 @@ function BrandList() {
   const filterBrandsState = useSelector((state) => state.filterBrands);
   const filterDropdownState = useSelector((state) => state.filterDropdown);
   const authState = useSelector((state) => state.auth);
-  
-  const { 
-    brands = [], 
-    loading, 
+
+  const {
+    brands = [],
+    loading,
     error,
     filters,
-    pagination 
+    pagination,
   } = filterBrandsState;
 
   const {
@@ -112,7 +111,7 @@ function BrandList() {
     loadingSubCategories,
     loadingChildCategories,
     loadingDistricts,
-    loadingCities
+    loadingCities,
   } = filterDropdownState;
 
   // Fetch initial data
@@ -134,39 +133,45 @@ function BrandList() {
       const timer = setTimeout(() => setIsScrolling(false), 100);
       return () => clearTimeout(timer);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Handle filter changes
-  const handleFilterChange = useCallback((name, value) => {
-    dispatch(setFilter({ filterName: name, value }));
-    
-    // Fetch dependent data when parent filter changes
-    if (name === 'maincat') {
-      dispatch(fetchFilterOptions({ main: value }));
-    } else if (name === 'subcat') {
-      dispatch(fetchFilterOptions({ sub: value }));
-    } else if (name === 'state') {
-      dispatch(fetchFilterOptions({ state: value }));
-    } else if (name === 'district') {
-      dispatch(fetchFilterOptions({ district: value }));
-    }
-  }, [dispatch]);
+  const handleFilterChange = useCallback(
+    (name, value) => {
+      dispatch(setFilter({ filterName: name, value }));
+
+      // Fetch dependent data when parent filter changes
+      if (name === "maincat") {
+        dispatch(fetchFilterOptions({ main: value }));
+      } else if (name === "subcat") {
+        dispatch(fetchFilterOptions({ sub: value }));
+      } else if (name === "state") {
+        dispatch(fetchFilterOptions({ state: value }));
+      } else if (name === "district") {
+        dispatch(fetchFilterOptions({ district: value }));
+      }
+    },
+    [dispatch]
+  );
 
   const handleClearFilters = useCallback(() => {
     dispatch(resetFilters());
   }, [dispatch]);
 
-  const handlePageChange = useCallback((event, page) => {
-    dispatch(setPage(page));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [dispatch]);
+  const handlePageChange = useCallback(
+    (event, page) => {
+      dispatch(setPage(page));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    [dispatch]
+  );
 
   const handleLikeClick = useCallback(
     async (brandId, isLiked) => {
       if (likeProcessing[brandId]) return;
-      
+
       if (!authState.isAuthenticated) {
         setShowLogin(true);
         return;
@@ -188,10 +193,10 @@ function BrandList() {
   );
 
   const toggleBrandComparison = useCallback((brand) => {
-    setSelectedForComparison(prev => {
-      const isSelected = prev.some(b => b.uuid === brand.uuid);
+    setSelectedForComparison((prev) => {
+      const isSelected = prev.some((b) => b.uuid === brand.uuid);
       if (isSelected) {
-        return prev.filter(b => b.uuid !== brand.uuid);
+        return prev.filter((b) => b.uuid !== brand.uuid);
       } else {
         return prev.length < 3 ? [...prev, brand] : prev;
       }
@@ -215,13 +220,15 @@ function BrandList() {
 
   return (
     <Container maxWidth="xl" sx={{ mt: 0, mb: 6 }}>
-
-
       {/* Comparison Button */}
       {selectedForComparison.length > 0 && (
         <Box sx={{ position: "fixed", top: 290, right: 25, zIndex: 1000 }}>
           <Badge badgeContent={selectedForComparison.length} color="primary">
-            <Tooltip title="Click to compare selected brands" placement="left" arrow>
+            <Tooltip
+              title="Click to compare selected brands"
+              placement="left"
+              arrow
+            >
               <Button
                 variant="contained"
                 color="primary"
@@ -241,43 +248,25 @@ function BrandList() {
         </Box>
       )}
 
-      {/* Scroll to Top Button */}
-      {/* {scrollPosition > 300 && !isScrolling && (
-        <Box sx={{ position: "fixed", bottom: 24, right: 24, zIndex: 1000 }}>
-          <IconButton
-            onClick={scrollToTop}
-            sx={{
-              bgcolor: "#ff9800",
-              color: "white",
-              "&:hover": { bgcolor: "#fb8c00" },
-              boxShadow: 3,
-              width: 48,
-              height: 48,
-            }}
-            aria-label="back to top"
-          >
-            <KeyboardArrowUp fontSize="medium" />
-          </IconButton>
-        </Box>
-      )} */}
-
       <Box display="flex" flexDirection={{ xs: "column", md: "row" }}>
         {/* Desktop Filters */}
         {!isMobile && (
-          <Box sx={{
-            width: 280,
-            flexShrink: 0,
-            position: "sticky",
-            top: 16,
-            alignSelf: "flex-start",
-            maxHeight: "calc(100vh - 32px)",
-            overflowY: "auto",
-            "&::-webkit-scrollbar": { width: "6px" },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#ff9800",
-              borderRadius: "3px",
-            },
-          }}>
+          <Box
+            sx={{
+              width: 280,
+              flexShrink: 0,
+              position: "sticky",
+              top: 16,
+              alignSelf: "flex-start",
+              maxHeight: "calc(100vh - 32px)",
+              overflowY: "auto",
+              "&::-webkit-scrollbar": { width: "6px" },
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: "#ff9800",
+                borderRadius: "3px",
+              },
+            }}
+          >
             <Suspense fallback={<FilterPanelSkeleton />}>
               <FilterPanel
                 filters={filters}
@@ -312,7 +301,9 @@ function BrandList() {
             <Button
               variant="outlined"
               startIcon={<FilterAlt sx={{ color: "#ff9800" }} />}
-              endIcon={<Badge badgeContent={activeFilterCount} color="primary" />}
+              endIcon={
+                <Badge badgeContent={activeFilterCount} color="primary" />
+              }
               onClick={() => setMobileFiltersOpen(true)}
               fullWidth
               sx={{
@@ -330,11 +321,25 @@ function BrandList() {
         {/* Main Content */}
         <Box flexGrow={1} ml={{ md: 3 }}>
           {loading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-              <CircularProgress size={60} thickness={4} sx={{ color: "#ff9800" }} />
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              minHeight="60vh"
+            >
+              <CircularProgress
+                size={60}
+                thickness={4}
+                sx={{ color: "#ff9800" }}
+              />
             </Box>
           ) : error ? (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              minHeight="60vh"
+            >
               <Typography color="error" variant="h6">
                 {error}
               </Typography>
@@ -356,73 +361,78 @@ function BrandList() {
             </Box>
           ) : (
             <>
-              <Typography sx={{ ml: 2 }} variant={isMobile ? "h5" : "h4"} gutterBottom color="#ff9800">
+              <Typography
+                sx={{ ml: 2 }}
+                variant={isMobile ? "h5" : "h4"}
+                gutterBottom
+                color="#ff9800"
+              >
                 Food & Beverage Brands
               </Typography>
               <Typography sx={{ ml: 2, mb: 2 }} variant="body2" gutterBottom>
                 Showing {brands.length} of {pagination.total} brands
               </Typography>
 
-<Box
-  sx={{
-    display: "grid",
-    gridTemplateColumns: {
-      xs: "repeat(1, 1fr)", // Mobile: 1 column
-      sm: "repeat(1, 1fr)", // Small devices: 2 columns
-      md: "repeat(3, 1fr)", // Tablets: 3 columns
-      lg: "repeat(3, 1fr)", // Desktop: 4 columns
-      xl: "repeat(4, 1fr)"  // Extra large screens: 5 columns
-    },
-    gap: 1, // theme spacing (8px * 2 = 16px)
-  }}
->
-  {brands.map((brand) => (
-    <Box key={brand.uuid}>
-      <Suspense fallback={<BrandCardSkeleton />}>
-        <BrandCard
-          brand={brand}
-          handleLikeClick={handleLikeClick}
-          likeProcessing={likeProcessing}
-          showLogin={showLogin}
-          onShowLogin={setShowLogin}
-          isSelectedForComparison={selectedForComparison.some(b => b.uuid === brand.uuid)}
-          onToggleBrandComparison={toggleBrandComparison}
-          maxComparisonReached={selectedForComparison.length >= 3}
-        />
-      </Suspense>
-    </Box>
-  ))}
-</Box>
-
-
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "repeat(1, 1fr)", // Mobile: 1 column
+                    sm: "repeat(1, 1fr)", // Small devices: 2 columns
+                    md: "repeat(3, 1fr)", // Tablets: 3 columns
+                    lg: "repeat(3, 1fr)", // Desktop: 4 columns
+                    xl: "repeat(4, 1fr)", // Extra large screens: 5 columns
+                  },
+                  gap: 1, // theme spacing (8px * 2 = 16px)
+                }}
+              >
+                {brands.map((brand) => (
+                  <Box key={brand.uuid}>
+                    <Suspense fallback={<BrandCardSkeleton />}>
+                      <BrandCard
+                        brand={brand}
+                        handleLikeClick={handleLikeClick}
+                        likeProcessing={likeProcessing}
+                        showLogin={showLogin}
+                        onShowLogin={setShowLogin}
+                        isSelectedForComparison={selectedForComparison.some(
+                          (b) => b.uuid === brand.uuid
+                        )}
+                        onToggleBrandComparison={toggleBrandComparison}
+                        maxComparisonReached={selectedForComparison.length >= 3}
+                      />
+                    </Suspense>
+                  </Box>
+                ))}
+              </Box>
 
               {/* Pagination */}
-             {pagination.totalPages > 1 && (
-    <Box display="flex" justifyContent="center" mt={4}>
-      <Pagination
-        count={pagination.totalPages}
-        page={pagination.currentPage}
-        onChange={handlePageChange}
-        color="primary"
-        sx={{
-          '& .MuiPaginationItem-root': {
-            color: '#ff9800',
-            borderColor: '#ff9800',
-          },
-          '& .MuiPaginationItem-root.Mui-selected': {
-            backgroundColor: '#ff9800',
-            color: 'white',
-            '&:hover': {
-              backgroundColor: '#fb8c00',
-            },
-          },
-          '& .MuiPaginationItem-root:hover': {
-            backgroundColor: 'rgba(255, 152, 0, 0.1)',
-          },
-        }}
-      />
-    </Box>
-  )}
+              {pagination.totalPages > 1 && (
+                <Box display="flex" justifyContent="center" mt={4}>
+                  <Pagination
+                    count={pagination.totalPages}
+                    page={pagination.currentPage}
+                    onChange={handlePageChange}
+                    color="primary"
+                    sx={{
+                      "& .MuiPaginationItem-root": {
+                        color: "#ff9800",
+                        borderColor: "#ff9800",
+                      },
+                      "& .MuiPaginationItem-root.Mui-selected": {
+                        backgroundColor: "#ff9800",
+                        color: "white",
+                        "&:hover": {
+                          backgroundColor: "#fb8c00",
+                        },
+                      },
+                      "& .MuiPaginationItem-root:hover": {
+                        backgroundColor: "rgba(255, 152, 0, 0.1)",
+                      },
+                    }}
+                  />
+                </Box>
+              )}
             </>
           )}
         </Box>
@@ -435,8 +445,20 @@ function BrandList() {
         onClose={() => setMobileFiltersOpen(false)}
         sx={{ "& .MuiDrawer-paper": { width: 280 } }}
       >
-        <Box sx={{ p: 2, height: "100%", display: "flex", flexDirection: "column" }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Box
+          sx={{
+            p: 2,
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={2}
+          >
             <Typography variant="h6">Filters</Typography>
             <IconButton onClick={() => setMobileFiltersOpen(false)}>
               <Close />
