@@ -25,7 +25,7 @@ export const api = {
     delete: `${API_BASE_URL}/like/delete-favbrand`,
     // getBrandLikedByAll: `${API_BASE_URL}/like/getBrandLikedByAll`,
   },
-
+///v1/instantapply/getAllInstaApply/:id
   instantApplyApi: {
     post: `${API_BASE_URL}/instantapply/postInstaApply`,
     get: {

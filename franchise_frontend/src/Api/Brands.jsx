@@ -52,6 +52,17 @@ export const fetchBrandById = async (brandId) => {
     throw error;
   }
 };
+export const fetchInstantApplyById = async (investorUUID) => {
+  try {
+    const response = await apiClient.get(
+      `api/v1/instantapply/getInstaApplyById/id${id}`
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching instant applications:", error);
+    throw error;
+  }
+};
 
 export const toggleBrandLike = async ({ brandId, isLiked }) => {
   // const investorId = localStorage.getItem("investorUUID") || localStorage.getItem("brandUUID");
