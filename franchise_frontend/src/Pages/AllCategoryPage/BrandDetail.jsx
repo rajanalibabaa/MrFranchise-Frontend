@@ -267,7 +267,6 @@ const handleSubmit = useCallback(
         navigate("/registerhandleuser");
         return;
       }
- 
       // Validate selected brand exists
       if (!selectedBrand || selectedBrand.length === 0) {
         alert("No brand selected. Please try again.");
