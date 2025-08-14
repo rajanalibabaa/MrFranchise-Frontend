@@ -17,7 +17,7 @@ export default defineConfig({
    
     cssCodeSplit: true,
     sourcemap: false, // no sourcemaps in production
-    chunkSizeWarningLimit: 500, 
+    chunkSizeWarningLimit: 1500, 
     outDir: 'dist', // default, good for S3/EC2
     terserOptions: {
       compress: {
@@ -34,6 +34,7 @@ export default defineConfig({
           router: ['react-router-dom'],
           redux: ['redux', 'react-redux'],
           vendor: ['axios'],
+          lottie: ['lottie-react']
         },
       },
     },

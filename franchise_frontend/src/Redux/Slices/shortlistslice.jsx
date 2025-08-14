@@ -53,6 +53,9 @@ export const fetchShortListedById = createAsyncThunk(
       const responseData = response.data?.data;
       if (!responseData) throw new Error("No data received");
  
+console.log("Total Shortlisted Brands:", responseData?.pagination?.totalItems || 0);
+      console.log("All Shortlisted Data:", responseData);
+      
       return {
         brands: responseData.brands || [],
         pagination: responseData.pagination || {

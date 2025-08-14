@@ -56,6 +56,21 @@ const ExpansionLocationGrid = ({ data }) => {
     return [parentName]; // Return parent name as single item if no items exist
   };
 
+  // Function to get cities or fallback to district name
+ // Function to get cities or fallback to district name
+// Function to get cities or fallback to district name
+const getCitiesOrDistrict = (stateIndex, districtIndex) => {
+  const state = data.locations[stateIndex];
+  if (!state || !state.districts || !state.districts[districtIndex]) return [];
+  
+  const district = state.districts[districtIndex];
+  if (Array.isArray(district.cities)) {
+    return district.cities.length > 0 
+      ? district.cities 
+      : [district.district || "Unknown District"];
+  }
+  return [district.district || "Unknown District"];
+};
   return (
     <Box
       sx={{
@@ -202,7 +217,7 @@ const ExpansionLocationGrid = ({ data }) => {
                 }}
               >
                 <Map sx={{ mr: 1, color: "#fff" }} />
-                Districts
+                Cities
                 {isMobile && expandedState !== null && (
                   <IconButton
                     size="small"
@@ -292,7 +307,7 @@ const ExpansionLocationGrid = ({ data }) => {
             </Box>
 
             {/* Cities Column */}
-            <Box
+            {/* <Box
               sx={{
                 flex: 1,
                 bgcolor:
@@ -322,7 +337,7 @@ const ExpansionLocationGrid = ({ data }) => {
               >
                 <LocationCity sx={{ mr: 1, color: "#fff" }} />
                 {expandedDistrict !== null 
-                  ? `${data.locations[expandedDistrict.split("-")[0]]?.districts[expandedDistrict.split("-")[1]]?.name} Cities`
+                  ? `${data.locations[expandedDistrict.split("-")[0]]?.districts[expandedDistrict.split("-")[1]]?.name || 'Selected District'} Cities`
                   : "Cities"}
                 {isMobile && expandedDistrict !== null && (
                   <IconButton
@@ -347,9 +362,9 @@ const ExpansionLocationGrid = ({ data }) => {
                 }}
               >
                 {expandedDistrict !== null ? (
-                  renderItemsWithFallback(
-                    data.locations[expandedDistrict.split("-")[0]]?.districts[expandedDistrict.split("-")[1]]?.cities,
-                    data.locations[expandedDistrict.split("-")[0]]?.districts[expandedDistrict.split("-")[1]]?.name || "Unknown District"
+                  getCitiesOrDistrict(
+                    expandedDistrict.split("-")[0],
+                    expandedDistrict.split("-")[1]
                   ).map((item, cityIndex) => (
                     <Card
                       key={`city-${cityIndex}`}
@@ -404,11 +419,11 @@ const ExpansionLocationGrid = ({ data }) => {
                   </Box>
                 )}
               </Box>
-            </Box>
+            </Box> */}
           </Box>
         </Box>
       )}
-    </Box>
+      </Box>
   );
 };
 

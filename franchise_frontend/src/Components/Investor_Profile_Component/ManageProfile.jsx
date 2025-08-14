@@ -209,7 +209,7 @@ const ManageProfile = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+          `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -297,7 +297,7 @@ const ManageProfile = () => {
 
     try {
       const response = await axios.post(
-        "https://mrfranchisebackend.mrfranchise.in/api/v1/otp/existingEmailOTP",
+        "http://localhost:5000/api/v1/otp/existingEmailOTP",
         { email: investorData.email },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -342,7 +342,7 @@ const ManageProfile = () => {
 
     try {
       const response = await axios.post(
-        "https://mrfranchisebackend.mrfranchise.in/api/v1/otp/verifyExistingEmailOTP",
+        "http://localhost:5000/api/v1/otp/verifyExistingEmailOTP",
         {
           email: investorData.email,
           verifyOTP: otp,
@@ -708,7 +708,7 @@ const ManageProfile = () => {
 
     try {
       const response = await axios.patch(
-        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/updateInvestor/${investorUUID}`,
+        `http://localhost:5000/api/v1/investor/updateInvestor/${investorUUID}`,
         formData,
         {
           headers: {
@@ -1062,7 +1062,7 @@ const ManageProfile = () => {
       setSnackbarOpen(false);
       
       const response = await axios.patch(
-        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/deleteInvestorProfileImage/${investorUUID}`,
+        `http://localhost:5000/api/v1/investor/deleteInvestorProfileImage/${investorUUID}`,
         { removeProfileImage: true },
         {
           headers: {
@@ -1644,9 +1644,11 @@ const ManageProfile = () => {
                         <Box
                           key={catIndex}
                           display="flex"
-                          gap={1}
+                          gap={0.5}
                           alignItems="center"
                           mb={1}
+                          sx={{marginLeft:{xs:"-12px"}}}
+                          
                         >
                           {editMode ? (
                             <>
@@ -1662,7 +1664,7 @@ const ManageProfile = () => {
                                     e.target.value
                                   )
                                 }
-                                sx={{ flex: 1 }}
+                                sx={{ flex: 1, }}
                                 select
                                 required
                                 error={editMode && !cat.main}

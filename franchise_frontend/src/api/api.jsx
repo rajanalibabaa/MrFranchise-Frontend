@@ -1,6 +1,6 @@
 
-// export const API_BASE_URL =  "https://mrfranchisebackend.mrfranchise.in/api/v1";
-export const  API_BASE_URL =  "http://localhost:5000/api/v1"
+export const API_BASE_URL =  "http://localhost:5000/api/v1";
+
 // API Endpoints
 export const api = {
   allBrandsApi : {
@@ -22,7 +22,7 @@ export const api = {
   likeApi: {
     post: `${API_BASE_URL}/like/post-favbrands`,
     get: `${API_BASE_URL}/like/get-favbrands`,
-    // delete: `${API_BASE_URL}/like/delete-favbrand`,
+    delete: `${API_BASE_URL}/like/delete-favbrand`,
     // getBrandLikedByAll: `${API_BASE_URL}/like/getBrandLikedByAll`,
   },
 

@@ -4,7 +4,7 @@ import { token } from "../Utils/autherId";
 
 export const postApi = async (url, bodydata) => {
 
-    // console.log("postApi :",url,bodydata)
+    console.log("postApi :",url,bodydata)
   try {
     const res = await axios.post(url, bodydata, {
       headers:  {

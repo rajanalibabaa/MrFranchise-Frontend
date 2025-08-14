@@ -316,20 +316,66 @@ const TopInvestVdocardround = () => {
                 {brand.brandname}
               </Typography>
               <Typography
-                variant="caption"
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  flexWrap: "wrap",
-                  gap: 0.5,
-                  mt: 0.5,
-                  mb: 1,
-                  width: "100%",
-                  textAlign: "center",
-                }}
-              >
-                {brand.brandCategories?.child}
-              </Typography>
+  variant="caption"
+  sx={{
+    display: "flex",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: 0.5,
+    mt: 0.5,
+    mb: 1,
+    width: "100%",
+    textAlign: "center",
+    wordBreak: "break-word",       
+    overflowWrap: "break-word",    
+    whiteSpace: "normal",         
+  }}
+><Typography
+  variant="caption"
+  sx={{
+    display: "flex",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: 0.5,
+    mt: 0.5,
+    mb: 1,
+    width: "100%",
+    textAlign: "center",
+    wordBreak: "break-word",       // allow breaking inside long words
+    overflowWrap: "break-word",    // cross-browser support
+    whiteSpace: "normal",          // allow wrapping
+  }}
+>
+  {(() => {
+    const insertZeroWidth = (str = "", n = 30) =>
+      typeof str === "string"
+        ? str.replace(new RegExp(`(.{${n}})`, "g"), "$1\u200B")
+        : str || "";
+
+    const category = brand.brandCategories?.child;
+
+    if (Array.isArray(category)) {
+      return category.map(c => insertZeroWidth(String(c), 30)).join(", ");
+    }
+    return insertZeroWidth(String(category || ""), 30);
+  })()}
+</Typography>
+
+  {(() => {
+    const insertZeroWidth = (str = "", n = 10) =>
+      typeof str === "string"
+        ? str.replace(new RegExp(`(.{${n}})`, "g"), "$1\u200B")
+        : str || "";
+
+    const category = brand.brandCategories?.child;
+
+    if (Array.isArray(category)) {
+      return category.map(c => insertZeroWidth(String(c), 30)).join(", ");
+    }
+    return insertZeroWidth(String(category || ""), 30);
+  })()}
+</Typography>
+
               <Stack direction="column" spacing={0.5} sx={{ mb: 0.5, width: "100%" }}>
                 <Typography variant="caption" fontWeight={500}>
                   Investment : {brand.fico?.investmentRange || "N/A"}

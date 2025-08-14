@@ -17,8 +17,6 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
 import Favorite from "@mui/icons-material/Favorite";
-import PlayCircle from "@mui/icons-material/PlayCircle";
-import PauseCircle from "@mui/icons-material/PauseCircle";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@mui/material/styles";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
@@ -37,11 +35,26 @@ import {
   toggleHomeCardShortlist,
 } from "../../Redux/Slices/TopCardFetchingSlice";
 import { token } from "../../Utils/autherId";
-import { RiBookmark3Fill, RiBookMarkedFill } from "react-icons/ri";
+import { RiBookmark3Fill } from "react-icons/ri";
 import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
-import { addSortlist, removeSortList, toggleSortlistBrandLike } from "../../Redux/Slices/shortlistslice.jsx";
-import { addLikedBrand, removeLikedBrand, toggleLikedSliceShortList } from "../../Redux/Slices/likeSlice.jsx";
+import {
+  addSortlist,
+  removeSortList,
+  toggleSortlistBrandLike,
+} from "../../Redux/Slices/shortlistslice.jsx";
+import {
+  addLikedBrand,
+  removeLikedBrand,
+  toggleLikedSliceShortList,
+} from "../../Redux/Slices/likeSlice.jsx";
+import {
+  toggleviewSliceShortList,
+  toggleviewSliceLiked,
+} from "../../Redux/Slices/viewSlice.jsx";
+import { toggleBrandShortListfilter } from "../../Redux/Slices/FilterBrandSlice.jsx";
+
+
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -200,14 +213,16 @@ function TopBrandVdoCards() {
       setShowLogin(true);
       return;
     }
-    
+
     if (!brand.isLiked) {
-                dispatch(addLikedBrand(brand))
-               } else {
-                dispatch(removeLikedBrand(brand.uuid))
-               }
+      dispatch(addLikedBrand(brand));
+    } else {
+      dispatch(removeLikedBrand(brand.uuid));
+    }
+    dispatch(toggleviewSliceLiked(brand.uuid));
     dispatch(toggleBrandLike(brand.uuid));
     dispatch(toggleSortlistBrandLike(brand.uuid));
+    dispatch(toggleBrandShortListfilter(brand.uuid));
     dispatch(toggleHomeCardLike(brand.uuid));
     await likeApiFunction(brand.uuid);
   };
@@ -217,17 +232,16 @@ function TopBrandVdoCards() {
       setShowLogin(true);
       return;
     }
-        dispatch(toggleLikedSliceShortList(mainBrand.uuid))
-      dispatch(toggleBrandShortList(mainBrand.uuid));
-      dispatch(toggleHomeCardShortlist(mainBrand.uuid))
-      if (!mainBrand.isShortListed) {
-        dispatch(addSortlist(mainBrand))
-      }else{
-        dispatch(removeSortList(mainBrand.uuid))
-      }
-      await handleShortList(mainBrand.uuid);
-      
-    
+    dispatch(toggleLikedSliceShortList(mainBrand.uuid));
+    dispatch(toggleviewSliceShortList(mainBrand.uuid));
+    dispatch(toggleBrandShortList(mainBrand.uuid));
+    dispatch(toggleHomeCardShortlist(mainBrand.uuid));
+    if (!mainBrand.isShortListed) {
+      dispatch(addSortlist(mainBrand));
+    } else {
+      dispatch(removeSortList(mainBrand.uuid));
+    }
+    await handleShortList(mainBrand.uuid);
   };
 
   const handleApply = (brand) => {
@@ -244,6 +258,11 @@ function TopBrandVdoCards() {
       });
     }
   };
+  useEffect(() => {
+    if (currentIndex >= brands.length - 1 && hasMore && !isLoading) {
+      handleLoadMore();
+    }
+  }, [currentIndex, hasMore, isLoading]);
 
   // Loading and error states
   if (!initialLoadComplete || (isLoading && brands.length === 0)) {
@@ -423,7 +442,7 @@ function TopBrandVdoCards() {
                         sx={{
                           textTransform: "none",
                           color:
-                            theme.palette.mode === "dark" ? "black" : "black",
+                            theme.palette.mode === "dark" ? "white" : "white",
                           borderColor:
                             theme.palette.mode === "dark"
                               ? "#43ea5e"
@@ -473,7 +492,7 @@ function TopBrandVdoCards() {
                           sx={{
                             textTransform: "none",
                             color:
-                              theme.palette.mode === "dark" ? "black" : "black",
+                              theme.palette.mode === "dark" ? "white" : "white",
                             borderColor:
                               theme.palette.mode === "dark"
                                 ? "#ffb74d"
@@ -514,7 +533,7 @@ function TopBrandVdoCards() {
                           sx={{
                             textTransform: "none",
                             color:
-                              theme.palette.mode === "dark" ? "black" : "black",
+                              theme.palette.mode === "dark" ? "white" : "white",
                             borderColor:
                               theme.palette.mode === "dark"
                                 ? "#ffb74d"
@@ -538,7 +557,6 @@ function TopBrandVdoCards() {
                   )}
                   {/* <video
                     ref={(el) => (videoRefs.current[0] = el)}
-                    loading="lazy"
                     src={mainBrand?.franchiseVideos}
                     alt={mainBrand?.brandname}
                     style={{
@@ -546,10 +564,9 @@ function TopBrandVdoCards() {
                       height: "100%",
                       objectFit: "contain",
                     }}
-                    autoPlay
-                    muted
-                    loop
                     controls
+                    autoPlay
+                    
                     playsInline
                     onPlay={() => handleVideoPlay(0)}
                     onPause={() => handleVideoPause(0)}
@@ -557,7 +574,7 @@ function TopBrandVdoCards() {
                   <VideoPlayer
                     id={mainBrand.uuid}
                     videoUrl={mainBrand.franchiseVideos}
-                    poster={mainBrand.logo}
+                    // poster={mainBrand.logo}
                     width="100%"
                     height="100%"
                     objectFit="contain"
@@ -565,7 +582,7 @@ function TopBrandVdoCards() {
                     onPause={() => handleVideoPause(0)}
                     autoPlay={false}
                     loop={true}
-                    muted={true}
+                    muted={false}
                     ref={(el) => (videoRefs.current[0] = el?.videoRef || null)}
                   />
                 </Box>
@@ -662,11 +679,7 @@ function TopBrandVdoCards() {
                                 }
                               >
                                 <IconButton
-                                  onClick={() =>
-                                    handleLikeClick(
-                                      mainBrand
-                                    )
-                                  }
+                                  onClick={() => handleLikeClick(mainBrand)}
                                   disabled={
                                     isLoading || likeProcessing[mainBrand.uuid]
                                   }
@@ -781,11 +794,7 @@ function TopBrandVdoCards() {
                               }
                             >
                               <IconButton
-                                onClick={() =>
-                                  handleLikeClick(
-                                    mainBrand
-                                  )
-                                }
+                                onClick={() => handleLikeClick(mainBrand)}
                                 disabled={
                                   isLoading || likeProcessing[mainBrand.uuid]
                                 }
@@ -851,11 +860,12 @@ function TopBrandVdoCards() {
               </Button>
               <Button
                 variant="contained"
-                onClick={
-                  viewedBrandsCount >= brands.length - 1
-                    ? handleLoadMore
-                    : handleNext
-                }
+                // onClick={
+                //   viewedBrandsCount >= brands.length - 1
+                //     ? handleLoadMore
+                //     : handleNext
+                // }
+                onClick={handleLoadMore}
                 endIcon={
                   isLoading ? (
                     <CircularProgress size={20} sx={{ color: "inherit" }} />
@@ -1057,9 +1067,7 @@ function TopBrandVdoCards() {
                         >
                           <IconButton
                             size="small"
-                            onClick={() =>
-                              handleLikeClick(brand)
-                            }
+                            onClick={() => handleLikeClick(brand)}
                             disabled={isLoading || likeProcessing[brand.uuid]}
                             sx={{
                               color: brand.isLiked ? "red" : "gray",
@@ -1156,7 +1164,11 @@ function TopBrandVdoCards() {
                       <Typography
                         variant="caption"
                         color="Black"
-                        sx={{ fontSize: "0.7rem", lineHeight: 1.5 }}
+                        sx={{
+                          fontSize: "0.7rem",
+                          lineHeight: 1.5,
+                          mb: isMobile ? 1.5 : 0,
+                        }}
                       >
                         Model: {brand.fico?.franchiseModel}
                       </Typography>

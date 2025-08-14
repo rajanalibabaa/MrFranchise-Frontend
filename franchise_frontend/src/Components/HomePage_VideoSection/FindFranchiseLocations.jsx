@@ -295,7 +295,7 @@ const FindFranchiseLocations = () => {
  
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <FormControl sx={{ minWidth: isMobile ? 120 : 200 }} size="small">
-            <InputLabel id="state-filter-label">Filter by State</InputLabel>
+            <InputLabel id="state-filter-label">Filter by expansion Location</InputLabel>
             <Select
               labelId="state-filter-label"
               value={selectedState || ""}

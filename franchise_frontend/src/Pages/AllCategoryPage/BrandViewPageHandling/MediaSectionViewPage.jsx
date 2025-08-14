@@ -1,11 +1,14 @@
-import  { useState, useRef, useEffect } from "react";
-import { 
-  Box, 
-  Typography, 
-  CircularProgress, 
+
+import { useState, useRef, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  CircularProgress,
   IconButton,
   Slider,
-  Stack 
+  Stack,
+  Button,
+  useTheme
 } from "@mui/material";
 import { motion } from "framer-motion";
 import {
@@ -15,9 +18,10 @@ import {
   VolumeOff,
   Fullscreen,
   FullscreenExit,
-   
+  PictureInPictureAlt,
+  Close
 } from "@mui/icons-material";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+
 const MediaSection = ({
   allVideos = [],
   allImages = [],
@@ -28,150 +32,165 @@ const MediaSection = ({
 }) => {
   const videoRef = useRef(null);
   const videoContainerRef = useRef(null);
-  const [videoError, setVideoError] = useState(false);
+
   const [videoLoading, setVideoLoading] = useState(true);
+  const [videoError, setVideoError] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [inPiP, setInPiP] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isMuted, setIsMuted] = useState(true);
-  const [volume, setVolume] = useState(0.5);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  const [controlsTimeout, setControlsTimeout] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const videoSrc = Array.isArray(allVideos) ? allVideos[0] : allVideos;
+  const poster = allImages?.[0] || "";
 
-  // Handle play/pause
-  const togglePlay = () => {
+  // Start muted & autoplay for compatibility
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    const handleLoadedMetadata = () => {
+      setDuration(vid.duration || 0);
+      setVideoLoading(false);
+    };
+    const handleError = () => {
+      setVideoError(true);
+      setVideoLoading(false);
+    };
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleTimeUpdate = () => setProgress((vid.currentTime / (vid.duration || 1)) * 100);
+
+    vid.addEventListener("loadedmetadata", handleLoadedMetadata);
+    vid.addEventListener("error", handleError);
+    vid.addEventListener("play", handlePlay);
+    vid.addEventListener("pause", handlePause);
+    vid.addEventListener("timeupdate", handleTimeUpdate);
+
+    vid.volume = 0.7;
+    vid.muted = true;
+    vid.play().catch(() => setIsPlaying(false));
+
+    return () => {
+      vid.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      vid.removeEventListener("error", handleError);
+      vid.removeEventListener("play", handlePlay);
+      vid.removeEventListener("pause", handlePause);
+      vid.removeEventListener("timeupdate", handleTimeUpdate);
+    };
+  }, [videoSrc]);
+
+useEffect(() => {
+  if (!isPlaying || !showControls || inPiP) return; // Only if video is playing
+  const timeout = setTimeout(() => setShowControls(false), 2000);
+  return () => clearTimeout(timeout);
+}, [showControls, inPiP, isPlaying]);
+
+  // Hide controls after timeout unless hovered/focused
+useEffect(() => {
+  if (!showControls || inPiP || !isPlaying) return;
+  const timeout = setTimeout(() => setShowControls(false), 2000);
+  return () => clearTimeout(timeout);
+}, [showControls, inPiP, isPlaying]);
+
+  // Controls functions
+  const handlePlayPause = (e) => {
+    e?.stopPropagation();
+    const vid = videoRef.current;
+    if (!vid) return;
     if (isPlaying) {
-      videoRef.current.pause();
+      vid.pause();
     } else {
-      videoRef.current.play().catch(error => {
-        console.error("Play failed:", error);
-        setVideoError(true);
-      });
+      vid.play().catch(() => setIsPlaying(false));
     }
-    setIsPlaying(!isPlaying);
-    resetControlsTimeout();
+    setShowControls(true);
   };
 
-  // Handle volume change
-  const handleVolumeChange = (e, newValue) => {
-    const newVolume = newValue / 100;
-    videoRef.current.volume = newVolume;
-    setVolume(newValue);
-    setIsMuted(newValue === 0);
-    resetControlsTimeout();
-  };
-
-  // Toggle mute
-  const toggleMute = () => {
-    videoRef.current.muted = !isMuted;
+  const handleMute = (e) => {
+    e?.stopPropagation();
+    const vid = videoRef.current;
+    if (!vid) return;
+    vid.muted = !isMuted;
     setIsMuted(!isMuted);
-    resetControlsTimeout();
+    setShowControls(true);
   };
 
-  // Handle progress change
-  const handleProgressChange = (e, newValue) => {
-    const newTime = (newValue / 100) * duration;
-    videoRef.current.currentTime = newTime;
-    setProgress(newValue);
-    resetControlsTimeout();
+  const handleSlider = (_, val) => {
+    const vid = videoRef.current;
+    if (!vid || !duration) return;
+    const pct = Array.isArray(val) ? val[0] : val;
+    vid.currentTime = (pct / 100) * duration;
+    setProgress(pct);
   };
 
-  // Toggle fullscreen
-  const toggleFullscreen = () => {
+  const handleVolume = (_, val) => {
+    const vid = videoRef.current;
+    if (!vid) return;
+    const v = (Array.isArray(val) ? val[0] : val) / 100;
+    vid.volume = v;
+    setIsMuted(v === 0);
+    setShowControls(true);
+  };
+
+  const handleFullscreen = (e) => {
+    e?.stopPropagation();
+    const elem = videoContainerRef.current;
+    if (!elem) return;
     if (!document.fullscreenElement) {
-      videoContainerRef.current.requestFullscreen().catch(err => {
-      });
-      setIsFullscreen(true);
+      elem.requestFullscreen();
     } else {
       document.exitFullscreen();
-      setIsFullscreen(false);
     }
-    resetControlsTimeout();
-  };
-
-  // Reset controls hide timeout
-  const resetControlsTimeout = () => {
     setShowControls(true);
-    if (controlsTimeout) clearTimeout(controlsTimeout);
-    setControlsTimeout(setTimeout(() => setShowControls(false), 3000));
   };
 
-  // Event handlers
-  const handleLoadedMetadata = () => {
-    setDuration(videoRef.current.duration);
-    setVideoLoading(false);
-    // Start with muted autoplay to comply with browser policies
-    videoRef.current.muted = true;
-    videoRef.current.play().catch(error => {
-    });
-  };
-
-  const handleTimeUpdate = () => {
-    const newProgress = (videoRef.current.currentTime / duration) * 100;
-    setProgress(newProgress);
-  };
-
-  const handleVideoError = (e) => {
-    console.error("Video error:", e.target.error);
-    setVideoError(true);
-    setVideoLoading(false);
-  };
-
-  // Effects
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const handleKeyDown = (e) => {
-      if (e.code === "Space") {
-        e.preventDefault();
-        togglePlay();
+  // PiP
+  const handlePiP = async (e) => {
+    e?.stopPropagation();
+    const vid = videoRef.current;
+    if (!vid) return;
+    try {
+      if (!inPiP) {
+        await vid.requestPictureInPicture();
+        setInPiP(true);
+      } else {
+        document.exitPictureInPicture();
+        setInPiP(false);
       }
-    };
-
-    video.addEventListener('loadedmetadata', handleLoadedMetadata);
-    video.addEventListener('timeupdate', handleTimeUpdate);
-    video.addEventListener('click', togglePlay);
-    video.addEventListener('error', handleVideoError);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      video.removeEventListener('timeupdate', handleTimeUpdate);
-      video.removeEventListener('click', togglePlay);
-      video.removeEventListener('error', handleVideoError);
-      document.removeEventListener('keydown', handleKeyDown);
-      if (controlsTimeout) clearTimeout(controlsTimeout);
-    };
-  }, [duration]);
-
+    } catch (e) {}
+    setShowControls(true);
+  };
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    const vid = videoRef.current;
+    if (!vid) return;
+    function handleEnterPiP() { setInPiP(true);}
+    function handleLeavePiP() { setInPiP(false);}
+    vid.addEventListener("enterpictureinpicture", handleEnterPiP);
+    vid.addEventListener("leavepictureinpicture", handleLeavePiP);
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      vid.removeEventListener("enterpictureinpicture", handleEnterPiP);
+      vid.removeEventListener("leavepictureinpicture", handleLeavePiP);
     };
   }, []);
 
-  // Format time
-  const formatTime = (time) => {
-    if (!time) return "0:00";
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  const formatTime = (t) => {
+    if (!t || isNaN(t)) return "0:00";
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60);
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
+  const showThem = () => setShowControls(true);
+
+  // Progress bar gradient
+  const sliderGradient = `linear-gradient(90deg, orange 0%, limegreen 100%)`;
+  const theme = useTheme();
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }}>
       <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={4}>
-        {/* Main video section */}
-        <Box flex={isMobile ? "none" : 2} ref={videoContainerRef}>
+        <Box flex={isMobile ? "none" : 2} ref={videoContainerRef} position="relative">
           <Box
             sx={{
               width: "100%",
@@ -179,198 +198,203 @@ const MediaSection = ({
               borderRadius: 2,
               overflow: "hidden",
               backgroundColor: "#f5f5f5",
-              position: 'relative',
-              '&:hover .video-controls': {
-                opacity: 1
-              }
+              position: "relative",
+              cursor: "pointer",
+              userSelect: "none"
             }}
-            component={motion.div}
-            whileHover={{ scale: 1.01 }}
+            onMouseMove={showThem}
+            onTouchStart={showThem}
+            tabIndex={0}
+            onFocus={showThem}
+            onBlur={() => setShowControls(false)}
           >
             {videoSrc ? (
               <>
-                {videoLoading && (
-                  <Box sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1
-                  }}>
-                    <CircularProgress />
-                  </Box>
-                )}
-                
                 <video
                   ref={videoRef}
-                  preload="auto"
-                  poster={allImages?.[0] || ""}
+                  src={videoSrc}
+                  poster={poster}
+                  playsInline
+                  autoPlay
+                  muted={isMuted}
                   style={{
                     width: "100%",
                     height: "100%",
                     objectFit: "cover",
-                    cursor: "pointer",
-                    opacity: videoLoading ? 0.5 : 1,
+                    background: "#eee",
                   }}
-                  playsInline
-                  muted={isMuted}
-                >
-                  <source src={videoSrc} type="video/mp4" />
-                  Your browser does not support HTML5 video.
-                </video>
-                
-                {/* Custom Video Controls */}
-                <Box 
-                  className="video-controls"
-                  sx={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)',
-                    padding: 1,
-                    transition: 'opacity 0.3s',
-                    opacity: showControls ? 1 : 0,
-                    zIndex: 2
-                  }}
-                  onMouseEnter={() => {
-                    setShowControls(true);
-                    if (controlsTimeout) clearTimeout(controlsTimeout);
-                  }}
-                  onMouseLeave={() => {
-                    setControlsTimeout(setTimeout(() => setShowControls(false), 2000));
-                  }}
-                >
-                  {/* Progress bar */}
-                  <Slider
-                    value={progress}
-                    onChange={handleProgressChange}
+                  preload="auto"
+                  tabIndex={-1}
+                  onClick={handlePlayPause}
+                  onDoubleClick={handleFullscreen}
+                />
+                {/* {videoLoading && (
+                  <Box
                     sx={{
-                      color: 'white',
-                      height: 4,
-                      '& .MuiSlider-thumb': {
-                        width: 12,
-                        height: 12,
-                        transition: '0.3s cubic-bezier(.47,1.64,.41,.8)',
-                        '&:hover, &.Mui-focusVisible': {
-                          boxShadow: '0 0 0 8px rgba(255, 255, 255, 0.16)',
-                        },
-                        '&.Mui-active': {
-                          width: 16,
-                          height: 16,
-                        },
-                      },
-                      '& .MuiSlider-rail': {
-                        opacity: 0.5,
-                      },
+                      position: 'absolute', top: 0, left: 0, width: '100%',
+                      height: '100%', display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', bgcolor: "rgba(255,255,255,0.64)", zIndex: 2,
                     }}
-                  />
-                  
-                  {/* Control buttons */}
-                  <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 1 }}>
-                    <IconButton onClick={togglePlay} sx={{ color: 'white' }}>
-                      {isPlaying ? <Pause /> : <PlayArrow />}
-                    </IconButton>
-                    
-                    <IconButton onClick={toggleMute} sx={{ color: 'white' }}>
-                      {isMuted || volume === 0 ? <VolumeOff /> : <VolumeUp />}
-                    </IconButton>
-                    
-                    <Slider
-                      value={isMuted ? 0 : volume}
-                      onChange={handleVolumeChange}
-                      sx={{
-                        width: 80,
-                        color: 'white',
-                        '& .MuiSlider-thumb': {
-                          width: 10,
-                          height: 10,
-                        },
-                      }}
-                    />
-                    
-                    <Typography variant="caption" sx={{ color: 'white', ml: 1 }}>
-                      {formatTime(videoRef.current?.currentTime || 0)} / {formatTime(duration)}
-                    </Typography>
-                    
-                    <Box sx={{ flexGrow: 1 }} />
-                    
-                    <IconButton onClick={toggleFullscreen} sx={{ color: 'white' }}>
-                      {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
-                    </IconButton>
-                  </Stack>
-                </Box>
-                
-                {!isPlaying && !videoLoading && (
-                  <Box sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    zIndex: 1
-                  }} onClick={togglePlay}>
-                    <IconButton sx={{ 
-                      backgroundColor: 'rgba(255,255,255,0.2)',
-                      '&:hover': { backgroundColor: 'rgba(255,255,255,0.3)' }
-                    }}>
-                      <PlayArrowIcon sx={{ fontSize: 50, color: 'white' }} />
-                    </IconButton>
+                  >
+                    <CircularProgress />
                   </Box>
-                )}
-                
+                )} */}
                 {videoError && (
                   <Box sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: 'rgba(0,0,0,0.7)',
-                    color: 'white',
-                    flexDirection: 'column',
-                    gap: 1,
-                    zIndex: 3
+                    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexDirection: "column", bgcolor: "rgba(0,0,0,.6)", zIndex: 2
                   }}>
-                    <Typography>Video playback failed</Typography>
-                    <Typography variant="body2" sx={{ textAlign: 'center' }}>
-                      {videoRef.current?.error?.message || 'The video may be corrupted or unsupported'}
-                    </Typography>
-                    <Button 
-                      variant="contained" 
-                      onClick={() => window.location.reload()}
-                      sx={{ mt: 2 }}
-                    >
+                    <Typography color="white">Video playback failed</Typography>
+                    <Button onClick={() => window.location.reload()} sx={{ mt: 1 }}>
                       Reload Page
                     </Button>
                   </Box>
                 )}
+                {/* --- Centered Play/Pause Button Overlay --- */}
+                {(!isPlaying || showControls) && !videoLoading && !videoError && (
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 0, left: 0, width: "100%", height: "100%",
+                      zIndex: 4,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      pointerEvents: "none"
+                    }}
+                  >
+                    {!isPlaying && (
+                      <IconButton
+                        sx={{
+                          pointerEvents: "all",
+                          backgroundColor: "rgba(0,0,0,0.35)",
+                          "&:hover": { backgroundColor: "rgba(0,0,0,0.45)" }
+                        }}
+                        onClick={handlePlayPause}
+                        size="large"
+                      >
+                        <PlayArrow sx={{ color: "white", fontSize: 54 }} />
+                      </IconButton>
+                    )}
+                  </Box>
+                )}
+
+                <Box
+  sx={{
+    zIndex: 5,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    px: 1, py: 0.5,
+    bgcolor: 'linear-gradient(to top, rgba(0,0,0,0.92), transparent 88%)',
+    pointerEvents: (showControls || !isPlaying || videoLoading || videoError) ? "all" : "none",
+opacity: (showControls || !isPlaying || videoLoading || videoError) ? 1 : 0,
+
+    transition: "opacity 0.3s"
+  }}
+  onMouseMove={showThem}
+  onTouchStart={showThem}
+>
+                  <Slider
+                    value={progress}
+                    onChange={handleSlider}
+                    min={0}
+                    max={100}
+                    aria-label="Video progress"
+                    sx={{
+                      height: 6,
+                      borderRadius: 4,
+                      p: 0,
+                      background: "none",
+                      "& .MuiSlider-thumb": {
+                        width: 14,
+                        height: 14,
+                        background: "#fff",
+                        boxShadow: "0 0 8px orange",
+                      },
+                      "& .MuiSlider-rail": {
+                        opacity: 0.5,
+                        background: "#ffffff29"
+                      },
+                      "& .MuiSlider-track": {
+                        background: sliderGradient
+                      },
+                    }}
+                  />
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <IconButton
+                      size="small"
+                      onClick={handlePlayPause}
+                      sx={{ color: "white" }}
+                      aria-label={isPlaying ? "Pause" : "Play"}
+                    >
+                      {isPlaying ? <Pause /> : <PlayArrow />}
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={handleMute}
+                      sx={{ color: "white" }}
+                      aria-label={isMuted ? "Unmute" : "Mute"}
+                    >
+                      {isMuted ? <VolumeOff /> : <VolumeUp />}
+                    </IconButton>
+                    <Slider
+                      min={0}
+                      max={100}
+                      value={videoRef.current ? (videoRef.current.volume * 100) : 70}
+                      onChange={handleVolume}
+                      aria-label="Volume"
+                      sx={{
+                        width: 80,
+                        color: "white",
+                        "& .MuiSlider-track": {background: "orange"},
+                        "& .MuiSlider-thumb": {
+                          width: 11,
+                          height: 11,
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" color="white" mx={1}>
+                      {formatTime(videoRef.current?.currentTime || 0)} / {formatTime(duration)}
+                    </Typography>
+                    <Box flex={1} />
+                    <IconButton
+                      size="small"
+                      onClick={handlePiP}
+                      sx={{ color: "white" }}
+                      aria-label={inPiP ? "Exit PiP" : "PiP"}
+                    >
+                      {inPiP ? <Close /> : <PictureInPictureAlt />}
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={handleFullscreen}
+                      sx={{ color: "white" }}
+                      aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                    >
+                      {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
+                    </IconButton>
+                  </Stack>
+                </Box>
               </>
             ) : (
-              <Box sx={{ 
-                width: "100%", 
-                height: "100%", 
-                display: "flex", 
-                alignItems: "center", 
-                justifyContent: "center" 
-              }}>
+              <Box
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 <Typography>No promotional video available</Typography>
               </Box>
             )}
           </Box>
         </Box>
-
+        {/* Images panel */}
         <Box flex={1}>
           <Box
             sx={{
@@ -418,7 +442,6 @@ const MediaSection = ({
                 </Box>
               </motion.div>
             ))}
-
             {/* View More */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -455,22 +478,20 @@ const MediaSection = ({
                   View More ({Math.max(allImages.length - 3, 0)}+)
                 </Typography>
                 {allImages[3] && (
-                  <>
-                    <img
-                      src={allImages[3]}
-                      loading="lazy"
-                      alt=""
-                      style={{
-                        position: "absolute",
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        filter: "blur(10px)",
-                        opacity: 0.3,
-                        zIndex: 0,
-                      }}
-                    />
-                  </>
+                  <img
+                    src={allImages[3]}
+                    loading="lazy"
+                    alt=""
+                    style={{
+                      position: "absolute",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      filter: "blur(10px)",
+                      opacity: 0.3,
+                      zIndex: 0,
+                    }}
+                  />
                 )}
               </Box>
             </motion.div>
@@ -480,5 +501,4 @@ const MediaSection = ({
     </motion.div>
   );
 };
-
 export default MediaSection;

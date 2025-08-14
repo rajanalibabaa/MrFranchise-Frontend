@@ -1,482 +1,282 @@
-import React, { useState, useEffect, useMemo, useCallback, memo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Box,
   Typography,
   Avatar,
-  Card,
-  CardContent,
-  CardMedia,
-  Grid,
-  Button,
   IconButton,
+  LinearProgress,
+ useTheme,
+ useMediaQuery,
+ Divider ,
+  Pagination,
+  Grid,
   CircularProgress
 } from "@mui/material";
-import {
-  Favorite,
-  Visibility,
-  AssignmentTurnedIn,
-  Close,
-  Business
-} from "@mui/icons-material";
-import { useMediaQuery, useTheme } from '@mui/material';
+import { Business, Favorite, AssignmentTurnedIn, Bookmark, Visibility, Close } from "@mui/icons-material";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
-import img from "../../assets/images/brandLogo.jpg";
+import img from "../../assets/Images/logo.png";
 import { api } from "../../Api/api";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice";
+import { fetchShortListedById } from "../../Redux/Slices/shortlistslice";
+import { fetchLikedBrandsById } from "../../Redux/Slices/likeSlice";
+import { fetchViewBrandsById, removeviewBrand } from "../../Redux/Slices/viewSlice"; 
+import { handleShortList } from "../../Api/shortListApi";
+import { likeApiFunction } from "../../Api/likeApi";
 
-// Memoized StatCard component to prevent unnecessary re-renders
-const StatCard = memo(({ icon, title, value, color, isSelected, onClick }) => {
-  const theme = useTheme();
-  const isSm = useMediaQuery(theme.breakpoints.up('sm'));
-
-  return (
-    <Card
-      onClick={onClick}
-      sx={{
-        width: '100%',
-        maxWidth: { xs: '100%', sm: 240, md: 260 },
-        minHeight: { xs: 40, sm: 72 },
-        borderRadius: 2,
-        px: { xs: 1, sm: 1.5 },
-        py: 0,
-        display: 'flex',
-        alignItems: 'center',
-        gap: { xs: 1, sm: 1.5 },
-        bgcolor: isSelected ? `rgba(${color}, 0.25)` : `rgba(${color}, 0.05)`,
-        border: '1px solid',
-        borderColor: isSelected ? `rgba(${color}, 0.5)` : `rgba(${color}, 0.1)`,
-        transition: 'all 0.2s ease-out',
-        boxShadow: isSelected ? `0 4px 16px -2px rgba(${color}, 0.4)` : 'none',
-        cursor: 'pointer',
-        position: 'relative',
-        overflow: 'hidden',
-        '&:hover': {
-          transform: { xs: 'none', sm: 'translateY(-2px)' },
-          boxShadow: isSelected 
-            ? `0 4px 16px -2px rgba(${color}, 0.4)`
-            : { xs: 'none', sm: `0 4px 12px -2px rgba(${color}, 0.15)` },
-          bgcolor: isSelected 
-            ? `rgba(${color}, 0.25)`
-            : { xs: `rgba(${color}, 0.05)`, sm: `rgba(${color}, 0.08)` },
-          '& .stat-icon': {
-            transform: { xs: 'none', sm: 'scale(1.05)' }
-          }
-        },
-        '@media (hover: none)': {
-          '&:active': {
-            bgcolor: `rgba(${color}, 0.1)`
-          }
-        }
-      }}
-    >
-      <Box
-        className="stat-icon"
-        sx={{
-          flexShrink: 0,
-          p: { sm: 1 },
-          borderRadius: '50%',
-          bgcolor: isSelected ? `rgba(${color}, 0.3)` : `rgba(${color}, 0.1)`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'transform 0.2s ease-out',
-          boxShadow: `inset 0 0 0 1px rgba(${color}, ${isSelected ? '0.4' : '0.15'})`,
-          '& > svg': {
-            fontSize: { xs: '13px', sm: '15px', md: '22px' }
-          },
-          flexDirection: { xs: 'column', sm: 'row' },
-        }}
-      >
-        {React.cloneElement(icon, {
-          sx: {
-            color: isSelected ? `rgba(${color}, 1)` : `rgb(${color})`,
-            fontSize: { xs: '16px', sm: '10px', md: '22px' },
-            transition: 'color 0.2s ease-out'
-          }
-        })}
-      </Box>
-
-      <Box
-        sx={{
-          flex: 1,
-          minWidth: 0,
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: { xs: 'flex-end', sm: 'center' },
-          justifyContent: 'end',
-          gap: { xs: 0.5, sm: 1 }
-        }}
-      >
-        {isSm && (
-          <Typography
-            variant="body2"
-            noWrap
-            sx={{
-              fontWeight: isSelected ? 600 : 500,
-              fontSize: { xs: '0.7rem', sm: '0.8125rem' },
-              color: isSelected ? `rgba(${color}, 0.9)` : 'text.secondary',
-              lineHeight: 1.3,
-              transition: 'all 0.2s ease-out'
-            }}
-          >
-            {title}
-          </Typography>
-        )}
-
-        <Typography
-          variant="h6"
-          noWrap
-          sx={{
-            fontWeight: isSelected ? 700 : 600,
-            fontSize: { xs: '0.6rem', sm: '1rem', md: '1.125rem' },
-            lineHeight: 1.2,
-            background: isSelected 
-              ? `linear-gradient(75deg, rgba(${color}, 1) 0%, rgba(${color}, 0.8) 100%)`
-              : `linear-gradient(75deg, rgb(${color}) 0%, rgba(${color}, 0.9) 100%)`,
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            color: 'transparent',
-            '@media (hover: hover)': {
-              textShadow: isSelected 
-                ? `0 0 8px rgba(${color}, 0.4)`
-                : `0 0 6px rgba(${color}, 0.2)`
-            },
-            transition: 'all 0.2s ease-out'
-          }}
-        >
-          {value}
-        </Typography>
-      </Box>
-    </Card>
-  );
-});
-
-// Memoized BrandCard component
-const BrandCard = memo(({ item, type, likedStates, onViewDetails, onToggleLike, onToggleViewClose }) => {
-  if (!item || typeof item !== 'object') return null;
-  
-  const brandId = item.uuid;
-  const isLiked = likedStates[brandId];
-  const brandName = item.brandDetails?.brandName || "Unnamed Brand";
-  const brandLogo = item.uploads?.brandLogo?.[0] || img;
-
-
-  
-  return (
-    <Box sx={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-      <Card sx={{
-        width: '200px',
-        height: '100%',
-        display: "flex",
-        flexDirection: "column",
-        borderRadius: 3,
-        overflow: 'hidden',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-        border: '1px solid rgba(0,0,0,0.05)',
-        '&:hover': {
-          transform: 'translateY(-5px)',
-          boxShadow: '0 8px 25px rgba(255,107,0,0.15)',
-          borderColor: 'rgba(255,107,0,0.2)'
-        }
-      }}>
-        <Box sx={{ 
-          position: 'relative',
-          height: 140,
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '40%',
-            zIndex: 1
-          }
-        }}>
-          <CardMedia
-            component="img"
-            loading="lazy"
-            height="140"
-            image={brandLogo}
-            alt={brandName}
-            sx={{ 
-              objectFit: 'cover',
-              width: '100%',
-              height: '100%',
-              transition: 'transform 0.3s ease',
-              '&:hover': {
-                transform: 'scale(1.05)'
-              }
-            }}
-          />
-          
-          <Box sx={{
-            position: 'absolute',
-            top: 12,
-            right: 12,
-            display: 'flex',
-            gap: 1,
-            zIndex: 2
-          }}>
-            {type === 'viewed' && (
-              <IconButton
-                size="small"
-                sx={{
-                  backgroundColor: 'rgba(255,255,255,0.9)',
-                  p: 0.5,
-                  '&:hover': { 
-                    backgroundColor: '#fff',
-                    transform: 'scale(1.1)',
-                    color: '#ff6d00'
-                  },
-                  transition: 'all 0.2s ease'
-                }}
-                onClick={() => onToggleViewClose(brandId)}
-              >
-                <Close fontSize="small" />
-              </IconButton>
-            )}
-            
-            {type === 'liked' && (
-              <IconButton
-                size="small"
-                sx={{
-                  backgroundColor: 'rgba(255,255,255,0.9)',
-                  p: 0.5,
-                  '&:hover': { 
-                    backgroundColor: '#fff',
-                    transform: 'scale(1.1)'
-                  },
-                  transition: 'all 0.2s ease'
-                }}
-                onClick={() => onToggleLike(brandId)}
-              >
-                <Favorite 
-                  fontSize="small" 
-                  sx={{ 
-                    fontSize: '1rem',
-                    color: isLiked ? '#ff3d00' : 'rgba(0,0,0,0.3)',
-                    transition: 'all 0.3s ease'
-                  }} 
-                />
-              </IconButton>
-            )}
-          </Box>
-        </Box>
-
-        <CardContent sx={{ 
-          flex: '1 1 auto',
-          p: 2.5,
-          display: 'flex',
-          flexDirection: 'column',
-          bgcolor: 'background.paper'
-        }}>
-          <Box sx={{ 
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-            mb: 1.5
-          }}>
-            <Typography variant="caption" color="text.secondary">
-              {brandName}
-            </Typography>
-          </Box>
-        </CardContent>
-
-        <Box sx={{ 
-          p: 2,
-          pt: 0,
-          textAlign: 'center'
-        }}>
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={() => onViewDetails(item)}
-            sx={{
-              borderRadius: 2,
-              py: 1,
-              fontSize: '0.8rem',
-              textTransform: 'none',
-              fontWeight: 600,
-              letterSpacing: 0.5,
-              background: 'linear-gradient(135deg, #ff6d00 0%, #ff9100 100%)',
-              boxShadow: '0 2px 10px rgba(255,109,0,0.3)',
-              color: 'white',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #ff8500 0%, #ffa000 100%)',
-                boxShadow: '0 4px 14px rgba(255,109,0,0.4)',
-                transform: 'translateY(-1px)'
-              },
-              transition: 'all 0.3s ease'
-            }}
-          >
-            Explore Brand
-          </Button>
-        </Box>
-      </Card>
-    </Box>
-  );
-});
+// Import components
+import BrandCard from "./DashBoardFunctions/BrandCard";
+import StatCard from "./DashBoardFunctions/StatCard";
 
 const Dashboard = () => {
   const theme = useTheme();
-  const isSm = useMediaQuery(theme.breakpoints.up('sm'));
   const dispatch = useDispatch();
   const [tabValue, setTabValue] = useState(0);
-  const [viewedBrands, setViewedBrands] = useState([]);
-  const [likedBrands, setLikedBrands] = useState([]);
   const [appliedBrands, setAppliedBrands] = useState([]);
   const [likedStates, setLikedStates] = useState({});
+  const [shortlistedStates, setShortlistedStates] = useState({});
   const [removeMsg, setRemoveMsg] = useState("");
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
-  const investorUUID = useSelector((state) => state.auth?.investorUUID);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
+  const [isPaginating, setIsPaginating] = useState(false);
+
+  const investorUUID = useSelector((state) => state.auth?.investorUUID);  
   const AccessToken = useSelector((state) => state.auth?.AccessToken);
+  const shortListState = useSelector(state => state.shortList);
+  const likedBrandsState = useSelector(state => state.likedBrands);
+  const viewBrandsState = useSelector(state => state.viewBrands);
 
-  
-  // Memoized stats calculation
+  const { brands: viewedBrands, pagination: viewPagination } = viewBrandsState;
+  const shortlistedBrands = Array.isArray(shortListState.brands) ? shortListState.brands : [];
+  const likedBrands = Array.isArray(likedBrandsState.brands) ? likedBrandsState.brands : [];
+
+  const isLoading = likedBrandsState.isLoading || shortListState.isLoading || isPaginating;
+  const errorMessage = likedBrandsState.error || shortListState.error;
+
   const stats = useMemo(() => ({
-    totalViews: viewedBrands.length,
+    totalViews: viewPagination?.totalItems || viewedBrands?.length || 0,
     totalLikes: likedBrands.length,
-    totalApplications: appliedBrands.length
-  }), [viewedBrands, likedBrands, appliedBrands]);
+    totalApplications: appliedBrands.length,
+    totalShortlisted: shortListState?.pagination?.total || shortlistedBrands.length
+  }), [viewedBrands, viewPagination, likedBrands, appliedBrands, shortlistedBrands, shortListState]);
 
-  // Data fetching optimized with useCallback
+  useEffect(() => {
+    const initialLiked = {};
+    likedBrands.forEach(item => {
+      const brandId = item.uuid || item.brandID?.uuid || item.brandID;
+      if (brandId) initialLiked[brandId] = true;
+    });
+    setLikedStates(initialLiked);
+
+    const initialShortlisted = {};
+    shortlistedBrands.forEach(item => {
+      const brandId = item.uuid || item.brandID?.uuid || item.brandID;
+      if (brandId) initialShortlisted[brandId] = true;
+    });
+    setShortlistedStates(initialShortlisted);
+  }, [likedBrands, shortlistedBrands]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tabValue]);
+
   const fetchData = useCallback(async () => {
-    if (!investorUUID || !AccessToken) {
-      setError("Go to home page ...");
-      setLoading(false);
-      return;
-    }
+    if (!investorUUID || !AccessToken) return;
 
     try {
-      setLoading(true);
-      setError(null);
-      
+      setIsPaginating(true);
       const config = {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${AccessToken}`,
-        },
-        timeout: 10000
+        }
       };
 
-      // Parallel requests with Promise.all
-      const [likedRes, viewedRes, appliedRes, userRes] = await Promise.all([
-        axios.get(`${api.likeApi.get}/${investorUUID}`, config)
-          .then(res => res.data?.data || [])
-          .catch(() => []),
-        axios.get(`${api.viewApi.get.getAllViewBrandByID}/${investorUUID}`, config)
-          .then(res => res.data?.data || [])
-          .catch(() => []),
+      await Promise.all([
+        dispatch(fetchLikedBrandsById({ userId: investorUUID })),
+        dispatch(fetchShortListedById({ 
+          investorUUID, 
+          page: 1, 
+          limit: itemsPerPage 
+        })),     
+        dispatch(fetchViewBrandsById({ userId: investorUUID })),
         axios.get(`${api.instantApplyApi.get.getInstaApplyById}/${investorUUID}`, config)
-          .then(res => res.data?.data || [])
-          .catch(() => []),
+          .then(res => {
+            setAppliedBrands(Array.isArray(res.data?.data) ? res.data.data : []);
+          }),
         axios.get(`${api.user.get.investor}/${investorUUID}`, config)
-          .then(res => res.data?.data || null)
-          .catch(() => null)
+          .then(res => {
+            setUserData(res.data?.data || null);
+          })
       ]);
-
-
-     
-      
-      setLikedBrands(likedRes);
-      setViewedBrands(viewedRes);
-      setAppliedBrands(appliedRes);
-      setUserData(userRes);
-
-      // Initialize liked states
-      const initialLiked = {};
-      likedRes.forEach(item => {
-        if (item?.uuid) {
-          initialLiked[item.uuid] = true;
-        }
-      });
-      setLikedStates(initialLiked);
-
     } catch (error) {
       console.error("Error in fetchData:", error);
-      setError("Failed to load data");
     } finally {
-      setLoading(false);
+      setIsPaginating(false);
     }
-  }, [investorUUID, AccessToken]);
+  }, [investorUUID, AccessToken, dispatch, itemsPerPage]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // Optimized toggleLike with useCallback
   const toggleLike = useCallback(async (brandId) => {
-    if (!investorUUID || !AccessToken || !brandId) return;
+    if (!brandId) return;
 
-    // Optimistic update
+    const brandToRemove = likedBrands.find(brand =>
+      brand.uuid === brandId ||
+      brand.brandID?.uuid === brandId ||
+      brand.brandID === brandId
+    );
+
+    if (!brandToRemove) return;
+
+    const apiBrandId = brandToRemove.uuid || brandToRemove.brandID?.uuid || brandToRemove.brandID;
+
+    // Optimistic UI update
     setLikedStates(prev => {
-      const newState = {...prev};
+      const newState = { ...prev };
       delete newState[brandId];
       return newState;
     });
-    setLikedBrands(prev => prev.filter(item => item?.uuid !== brandId));
 
     try {
-      await axios.delete(
-        `${api.likeApi.delete}/${investorUUID}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${AccessToken}`,
-          },
-          data: { brandID: brandId },
-        }
-      );
-
+      await likeApiFunction(apiBrandId);
       setRemoveMsg("Brand removed successfully");
       setTimeout(() => setRemoveMsg(""), 3000);
+      dispatch(fetchLikedBrandsById({ userId: investorUUID }));
     } catch (error) {
-      console.error("Remove error:", error);
-      setRemoveMsg("Failed to remove brand");
-      // Revert optimistic update
-      setLikedStates(prev => ({...prev, [brandId]: true}));
-      fetchData(); // Refetch to ensure consistency
+      console.error("Remove like error:", error);
+      setRemoveMsg(error.message || "Failed to remove brand");
+      setLikedStates(prev => ({ ...prev, [brandId]: true }));
     }
-  }, [investorUUID, AccessToken, fetchData]);
+  }, [investorUUID, dispatch, likedBrands]);
 
-  // Optimized toggleViewClose with useCallback
+  const toggleShortlist = useCallback(async (brandId) => {
+    if (!brandId) return;
+
+    try {
+      setIsPaginating(true);
+      setShortlistedStates(prev => ({
+        ...prev,
+        [brandId]: !prev[brandId]
+      }));
+
+      await handleShortList(brandId);
+      
+      const response = await dispatch(fetchShortListedById({
+        investorUUID,
+        page: currentPage,
+        limit: itemsPerPage
+      }));
+
+      if (response?.payload?.brands) {
+        const updatedStates = {};
+        response.payload.brands.forEach(brand => {
+          const id = brand.uuid || brand.brandID?.uuid || brand.brandID;
+          if (id) updatedStates[id] = true;
+        });
+        setShortlistedStates(updatedStates);
+      }
+
+      setRemoveMsg(shortlistedStates[brandId] 
+        ? "Brand removed from shortlist" 
+        : "Brand added to shortlist");
+      
+      setTimeout(() => setRemoveMsg(""), 3000);
+    } catch (error) {
+      setShortlistedStates(prev => ({
+        ...prev,
+        [brandId]: !prev[brandId]
+      }));
+      console.error("Shortlist toggle error:", error);
+      setRemoveMsg(error.message || "Failed to update shortlist");
+    } finally {
+      setIsPaginating(false);
+    }
+  }, [investorUUID, dispatch, shortlistedStates, currentPage, itemsPerPage]);
+
   const toggleViewClose = useCallback(async (brandId) => {
     if (!investorUUID || !AccessToken || !brandId) return;
 
-    // Optimistic update
-    setViewedBrands(prev => prev.filter(item => item?.uuid !== brandId));
-
     try {
-      await axios.delete(
-        `${api.viewApi.delete}/${investorUUID}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${AccessToken}`,
-          },
-          data: { brandID: brandId },
-        }
-      );
+      setIsPaginating(true);
+      await dispatch(removeviewBrand({
+        userId: investorUUID,
+        brandId,
+        token: AccessToken
+      })).unwrap();
+
+      setRemoveMsg("Brand removed from view history");
+      setTimeout(() => setRemoveMsg(""), 3000);
+      dispatch(fetchViewBrandsById({ userId: investorUUID }));
     } catch (error) {
       console.error("Error removing viewed brand:", error);
-      fetchData(); // Refetch to ensure consistency
+      setRemoveMsg(error.message || "Failed to remove brand from view history");
+    } finally {
+      setIsPaginating(false);
     }
-  }, [investorUUID, AccessToken, fetchData]);
+  }, [investorUUID, AccessToken, dispatch]);
 
-  // Memoized handleViewDetails
   const handleViewDetails = useCallback((brand) => {
     dispatch(openBrandDialog(brand));
   }, [dispatch]);
 
+  const getCurrentBrands = useCallback(() => {
+    switch(tabValue) {
+      case 0: 
+        return Array.isArray(viewedBrands) ? 
+          viewedBrands.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
+      case 1: 
+        return Array.isArray(likedBrands) ? 
+          likedBrands.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
+      case 2: 
+        return Array.isArray(appliedBrands) ? 
+          appliedBrands.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
+      case 3: 
+        return shortlistedBrands;
+      default: 
+        return [];
+    }
+  }, [tabValue, viewedBrands, likedBrands, appliedBrands, shortlistedBrands, currentPage, itemsPerPage]);
+
+  const totalPages = useMemo(() => {
+    switch(tabValue) {
+      case 0: 
+        return Math.max(1, Math.ceil((viewedBrands?.length || 0) / itemsPerPage));
+      case 1: 
+        return Math.max(1, Math.ceil((likedBrands?.length || 0) / itemsPerPage));
+      case 2: 
+        return Math.max(1, Math.ceil((appliedBrands?.length || 0) / itemsPerPage));
+      case 3: 
+        return Math.max(1, Math.ceil((shortListState?.pagination?.total || 0) / itemsPerPage));
+      default: 
+        return 1;
+    }
+  }, [tabValue, viewedBrands, likedBrands, appliedBrands, shortListState?.pagination?.total, itemsPerPage]);
+
+  const handlePageChange = async (event, value) => {
+    try {
+      setIsPaginating(true);
+      setCurrentPage(value);
+      
+      if (tabValue === 3) {
+        await dispatch(fetchShortListedById({
+          investorUUID,
+          page: value,
+          limit: itemsPerPage
+        }));
+      }
+    } catch (error) {
+      console.error("Page change error:", error);
+    } finally {
+      setIsPaginating(false);
+    }
+  };
+
   const renderTabContent = useMemo(() => {
-    if (loading) {
+    if (isLoading) {
       return (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
           <CircularProgress />
@@ -484,89 +284,133 @@ const Dashboard = () => {
       );
     }
 
-    if (error) {
+    if (errorMessage) {
       return (
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center', 
-          py: 10,
-          textAlign: 'center'
-        }}>
-          <Typography variant="h6" color="error" sx={{ mb: 2 }}>
-            Please Login ...
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {error}
-          </Typography>
+        <Box sx={{ py: 10, textAlign: 'center' }}>
+          <Typography color="error">{errorMessage}</Typography>
         </Box>
       );
     }
 
-    const brands = tabValue === 0 ? viewedBrands : tabValue === 1 ? likedBrands : appliedBrands;
-    const emptyState = {
-      icon: tabValue === 0 ? <Visibility color="disabled" sx={{ fontSize: 60, mb: 2 }} /> : 
-            tabValue === 1 ? <Favorite color="disabled" sx={{ fontSize: 60, mb: 2 }} /> : 
-            <AssignmentTurnedIn color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
-      title: tabValue === 0 ? "No viewed brands" : 
-             tabValue === 1 ? "No liked brands yet" : 
-             "No applications yet",
-      description: tabValue === 0 ? "Brands you view will appear here" : 
-                  tabValue === 1 ? "Like brands to save them for later" : 
-                  "Your applications will appear here"
+    const currentBrands = getCurrentBrands();
+    let emptyState = {
+      icon: <Business color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
+      title: "No data available",
+      description: "There are no items to display"
     };
 
-    return brands.length > 0 ? (
-      <Grid container spacing={3}>
-        {brands.map((item) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={item?.uuid || Math.random()}>
-            <BrandCard 
-              item={item} 
-              type={tabValue === 0 ? 'viewed' : tabValue === 1 ? 'liked' : 'applied'}
-              likedStates={likedStates}
-              onViewDetails={handleViewDetails}
-              onToggleLike={toggleLike}
-              onToggleViewClose={toggleViewClose}
-            />
-          </Grid>
-        ))}
-      </Grid>
-    ) : (
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        py: 10,
-        textAlign: 'center'
-      }}>
-        {emptyState.icon}
-        <Typography variant="h6" color="text.secondary">
-          {emptyState.title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          {emptyState.description}
-        </Typography>
-      </Box>
+    switch(tabValue) {
+      case 0: 
+        emptyState = {
+          icon: <Visibility color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
+          title: "No viewed brands",
+          description: "Brands you view will appear here"
+        };
+        break;
+      case 1: 
+        emptyState = {
+          icon: <Favorite color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
+          title: "No liked brands yet",
+          description: "Like brands to save them for later"
+        };
+        break;
+      case 2: 
+        emptyState = {
+          icon: <AssignmentTurnedIn color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
+          title: "No applications yet",
+          description: "Your applications will appear here"
+        };
+        break;
+      case 3: 
+        emptyState = {
+          icon: <Bookmark color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
+          title: "No shortlisted brands",
+          description: "Brands you shortlist will appear here"
+        };
+        break;
+      default: 
+    }
+
+    return (
+      <>
+        {isPaginating && <LinearProgress sx={{ width: '100%', mb: 2 }} />}
+        {currentBrands.length > 0 ? (
+          <>
+            <Grid container spacing={3} justifyContent="center">
+              {currentBrands.map((item) => (
+                <Grid item xs={12} sm={6} md={4} lg={2.5} key={item?.uuid || Math.random()}>
+                  <BrandCard 
+                    item={item} 
+                    type={['viewed', 'liked', 'applied', 'shortlisted'][tabValue]}
+                    likedStates={likedStates}
+                    shortlistedStates={shortlistedStates}
+                    onViewDetails={handleViewDetails}
+                    onToggleLike={toggleLike}
+                    onToggleShortlist={toggleShortlist}
+                    onToggleViewClose={toggleViewClose}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+            
+            {totalPages > 1 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+                <Pagination
+                  count={totalPages}
+                  page={currentPage}
+                  onChange={handlePageChange}
+                  color="primary"
+                  size="large"
+                  sx={{
+                    '& .MuiPaginationItem-root': {
+                      fontSize: '1rem',
+                      '&.Mui-selected': {
+                        fontWeight: 'bold',
+                      },
+                    },
+                  }}
+                />
+              </Box>
+            )}
+          </>
+        ) : (
+          <Box sx={{ py: 10, textAlign: 'center' }}>
+            {emptyState.icon}
+            <Typography variant="h6">{emptyState.title}</Typography>
+            <Typography>{emptyState.description}</Typography>
+          </Box>
+        )}
+      </>
     );
-  }, [loading, error, tabValue, viewedBrands, likedBrands, appliedBrands, likedStates, handleViewDetails, toggleLike, toggleViewClose]);
+  }, [
+    isLoading, 
+    errorMessage, 
+    tabValue, 
+    getCurrentBrands, 
+    totalPages, 
+    currentPage, 
+    likedStates, 
+    shortlistedStates,
+    handleViewDetails, 
+    toggleLike, 
+    toggleShortlist,
+    toggleViewClose,
+    isPaginating
+  ]);
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh',
-      p: { xs: 2, md: 4 }
-    }}>
-      {/* Profile Section */}
-      <Box sx={{ 
-        mb: 1,
-        borderRadius: 3,
-        boxShadow: 3,
-        overflow: 'hidden',
-      }}>
+    <Box 
+    // sx={{ 
+    //   minHeight: '100vh',
+    //   p: { xs: 2, md: 4 }
+    // }}
+    >
+      <Box>
         <Box sx={{
           display: 'flex',
           alignItems: 'center',
           p: 2,
-          gap: 1
+          gap: 2
         }}>
           <Avatar
             src={userData?.profileImage || img}
@@ -590,51 +434,75 @@ const Dashboard = () => {
         </Box>
       </Box>
 
-      {/* Stats Cards */}
-      <Box sx={{ 
-        display: 'flex', 
-        gap: 3, 
-        justifyContent: { xs: 'center', md: 'space-between' }, 
-        mt: 3,
-        flexWrap: 'wrap'
-      }}>
-        <StatCard 
-          icon={<Business />} 
-          title="Viewed" 
-          value={stats.totalViews} 
-          color="76, 175, 80"
-          isSelected={tabValue === 0}
-          onClick={() => setTabValue(0)}
-        />
-        <StatCard 
-          icon={<Favorite />} 
-          title="Liked" 
-          value={stats.totalLikes} 
-          color="244, 67, 54"
-          isSelected={tabValue === 1}
-          onClick={() => setTabValue(1)}
-        />
-        <StatCard 
-          icon={<AssignmentTurnedIn />} 
-          title="Applied" 
-          value={stats.totalApplications} 
-          color="33, 150, 243"
-          isSelected={tabValue === 2}
-          onClick={() => setTabValue(2)}
-        />
-      </Box>
+   <Box 
+  sx={{ 
+    display: 'flex', 
+    gap: 2,
+    justifyContent: { xs: 'center', md: 'flex-start' },
+    mt: 3,
+    flexWrap: 'nowrap',
+    overflowX: 'auto',
+    pb: 1,
+    '&::-webkit-scrollbar': {
+      height: '6px',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: 'rgba(0,0,0,0.2)',
+      borderRadius: '3px',
+    },
+    position: 'relative', 
+    py: 2  
+  }}
+>
+  
+  <StatCard 
+    icon={<Business />} 
+    title="Viewed" 
+    value={stats.totalViews} 
+    color="76, 175, 80"
+    isSelected={tabValue === 0}
+    onClick={() => setTabValue(0)}
+  />
+  <StatCard 
+    icon={<Favorite />} 
+    title="Liked" 
+    value={stats.totalLikes} 
+    color="244, 67, 54"
+    isSelected={tabValue === 1}
+    onClick={() => setTabValue(1)}
+  />
+  <StatCard 
+    icon={<AssignmentTurnedIn />} 
+    title="Applied" 
+    value={stats.totalApplications} 
+    color="33, 150, 243"
+    isSelected={tabValue === 2}
+    onClick={() => setTabValue(2)}
+  />
+  <StatCard 
+    icon={<Bookmark />}  
+    title="Shortlisted" 
+    value={stats.totalShortlisted} 
+    color="156, 39, 176"  
+    isSelected={tabValue === 3} 
+    onClick={() => setTabValue(3)}
+  />
+  
+  <Divider 
+    sx={{ 
+      position: 'absolute', 
+      bottom: 0,  // Changed from top to bottom
+      left: 0, 
+      right: 0, 
+      borderColor: 'divider' 
+    }} 
+  />
+</Box>
 
-      {/* Main Content */}
-      <Card sx={{ 
-        borderRadius: 3,
-        boxShadow: 3,
-        overflow: 'hidden',
-        background: 'white',
-        mt: 3
-      }}>
-        <Box sx={{ p: 3 }}>
-          {removeMsg && (
-            <Box sx={{ 
+      <Box sx={{ p: 3 }}>
+        {removeMsg && (
+          <Box 
+            sx={{ 
               mb: 3,
               p: 2,
               borderRadius: 2,
@@ -643,17 +511,17 @@ const Dashboard = () => {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center'
-            }}>
-              <Typography>{removeMsg}</Typography>
-              <IconButton size="small" onClick={() => setRemoveMsg("")}>
-                <Close sx={{ color: 'white' }} />
-              </IconButton>
-            </Box>
-          )}
-          
-          {renderTabContent}
-        </Box>
-      </Card>
+            }}
+          >
+            <Typography>{removeMsg}</Typography>
+            <IconButton size="small" onClick={() => setRemoveMsg("")}>
+              <Close sx={{ color: 'white' }} />
+            </IconButton>
+          </Box>
+        )}
+        
+        {renderTabContent}
+      </Box>
     </Box>
   );
 };

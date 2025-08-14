@@ -20,10 +20,8 @@ import {
   Button,
   Skeleton,
 } from "@mui/material";
-import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
 import { categories } from "../../Pages/Registration/BrandLIstingRegister/BrandCategories";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -31,7 +29,7 @@ import {
   clearBrands,
   prefetchBrands,
 } from "../../Redux/Slices/SideMenuHoverBrandSlices.jsx";
-import { debounce } from "lodash";
+import debounce  from "lodash/debounce";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 
 // Memoized brand card component with optimized props
@@ -93,11 +91,11 @@ const BrandCard = React.memo(
             </Avatar>
           </Box>
           <Typography
-            fontWeight={600}
+            fontWeight={500}
             textAlign="center"
             noWrap
             sx={{
-              fontSize: isMobile ? "0.75rem" : "0.875rem",
+              fontSize: isMobile ? "0.75rem" : "0.65rem",
               maxWidth: "100%",
               px: 1,
               color: "text.primary",
@@ -124,7 +122,7 @@ const BrandCard = React.memo(
 // Skeleton loader for brands
 const BrandCardSkeleton = ({ isMobile }) => (
   <Skeleton
-    variant="rectangular"
+    variant="square"
     width={isMobile ? 100 : 100}
     height={isMobile ? 130 : 120}
     sx={{ borderRadius: 2 }}

@@ -1,35 +1,4 @@
-// import { configureStore } from "@reduxjs/toolkit";
 
-// import authReducer from "../Slices/AuthSlice/authSlice";
-// import navReducer from "../Slices/navbarSlice";
-// // import likedBrandsSlice from "../Slices/LikedBrandSlices/LikedBrandSlice";
-// // import brandReducer from '../Slices/brandSlice.jsx';
-// import loadingReducer  from "../Slices/loadingSlice.jsx";
-
-// import getAllBrands  from "../Slices/GetAllBrandsDataUpdationFile.jsx";
-// import openBrandViewPage  from "../Slices/OpenBrandNewPageSlice.jsx";
-// import topFoodsfranchise from "../Slices/TopCardFetchingSlice.jsx";
-// import filterDropdown from "../../Redux/Slices/filterDropdownData.jsx"
-// import filterBrandReducer from "../../Redux/Slices/FilterBrandSlice.jsx"
-// import brandCategoryReducer from "../../Redux/Slices/SideMenuHoverBrandSlices.jsx"
-// import ShortListBrands from "../../Redux/Slices/shortlistslice.jsx";
-//  const store = configureStore({
-//   reducer: {
-//     navbar:navReducer,
-//     auth: authReducer,
-//     // likedBrands : likedBrandsSlice,
-//     // brands : brandReducer,
-//     filterBrands: filterBrandReducer,
-//     filterDropdown:filterDropdown,
-//     loading :loadingReducer,
-//     brands:getAllBrands,
-//     foodfranchise:topFoodsfranchise,
-//     openBrandDialog: openBrandViewPage,
-//     brandCategory: brandCategoryReducer,
-//     shortlist: ShortListBrands
-//   },
-// });
-// export default store;
 
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from 'redux-persist';
@@ -47,6 +16,7 @@ import filterBrandReducer from "../../Redux/Slices/FilterBrandSlice";
 import brandCategoryReducer from "../../Redux/Slices/SideMenuHoverBrandSlices";
 import ShortListBrands from "../../Redux/Slices/shortlistslice";
 import LikedBrands from "../../Redux/Slices/likeSlice"
+import viewedBrands from "../../Redux/Slices/viewSlice.jsx"
 
 // Combine reducers first
 const rootReducer = combineReducers({
@@ -60,7 +30,8 @@ const rootReducer = combineReducers({
   openBrandDialog: openBrandViewPage,
   brandCategory: brandCategoryReducer,
   shortList: ShortListBrands,
-  likedBrands: LikedBrands
+  likedBrands: LikedBrands,
+  viewBrands: viewedBrands,
 });
 
 // Persist config

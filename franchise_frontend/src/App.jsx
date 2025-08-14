@@ -1,19 +1,21 @@
 
 import React, { useEffect, lazy, Suspense, useCallback,useMemo } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation , useNavigate} from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Box, CircularProgress ,Typography } from '@mui/material';
 import { logout } from './Redux/Slices/AuthSlice/authSlice';
+
 import './App.css';
 
 // Context Providers
 import { VideoControllerProvider } from './services/VideoControllerMedia/VideHandlingFunctions';
-
-
+import LoadingFallback from '../src/services/SupportingComponents/LoadingFallback.jsx';
+import HomeBannerSec from "./Pages/HomePages/HomeBannerSec"
+import BrandDetailsPage from './Pages/AllCategoryPage/BrandDetailsPage'
+import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage'
 // Lazy-loaded components with prefetching
-const HomeBannerSec = lazy(() => import(/* webpackPrefetch: true */ './Pages/HomePages/HomeBannerSec'));
-const BrandDetailsPage = lazy(() => import(/* webpackPrefetch: true */ './Pages/AllCategoryPage/BrandDetailsPage'));
-const BrandCategroyViewPage = lazy(() => import(/* webpackPrefetch: true */ './Pages/AllCategoryPage/BrandCategroyViewPage'));
+// const  = lazy(() => import(/* webpackPrefetch: true */ ));
+// const  = lazy(() => import(/* webpackPrefetch: true */ ''));
 
 // Authentication
 const InvestorRegister = lazy(() => import('./Pages/Registration/InvestorsRegister'));
@@ -48,7 +50,7 @@ const BrandSearchus = lazy(() => import('./Components/BrandProfile_Component/Bra
 const BrandDetailsEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/BrandDetailsEdit'));
 const FranchiseDetailsEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/FranchiseDetailsEdit'));
 const ExpansionLocationControl = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/ExpansionLocationControl'));
-const UploadsControl = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/UploadsControl'));
+const UploadsEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/UploadsEdit.jsx'));
 
 // Footer Pages
 const AboutUs = lazy(() => import('./Components/Footers/HelpAndSupport/AboutUs'));
@@ -66,6 +68,7 @@ const Blogs = lazy(() => import('./Components/Footers/QuickLinks/Blogs'));
 const App = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
   // const authState = useSelector(state => state.auth);
   const isLoading = useSelector(state => state.loading.isLoading);
 
@@ -110,32 +113,10 @@ const App = () => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // Resource preloading
-  useEffect(() => {
-    // Preconnect to CDNs
-    const preconnects = [
-      { rel: 'preconnect', href: 'https://your-video-cdn.com' },
-      { rel: 'preconnect', href: 'https://your-api-domain.com' }
-    ];
-
-    preconnects.forEach(link => {
-      const el = document.createElement('link');
-      Object.entries(link).forEach(([key, value]) => {
-        el[key] = value;
-      });
-      document.head.appendChild(el);
-    });
-
-    return () => {
-      preconnects.forEach(link => {
-        const el = document.querySelector(`link[href="${link.href}"]`);
-        if (el) document.head.removeChild(el);
-      });
-    };
-  }, []);
 
 
-//     // hide the right click disable 
+
+    // hide the right click disable 
 //   useEffect(() => {
 //    const disableRightClick = (e) => e.preventDefault();
 //    document.addEventListener("contextmenu", disableRightClick);
@@ -146,7 +127,7 @@ const App = () => {
   return (
       <VideoControllerProvider>
         {/* Main Content */}
-          <Suspense fallback={<GlobalLoadingFallback />}>
+          <Suspense fallback={<LoadingFallback />}>
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<HomeBannerSec />} />
@@ -183,7 +164,7 @@ const App = () => {
                   <Route path="branddetailcontrol" element={<BrandDetailsEdit />} />
                   <Route path="franchisedetailcontrol" element={<FranchiseDetailsEdit />} />
                   <Route path="expansionlocationcontrol" element={<ExpansionLocationControl />} />
-                  <Route path="uploadcontrol" element={<UploadsControl />} />
+                  <Route path="uploadcontrol" element={<UploadsEdit />} />
                   <Route path="brandfeedback" element={<BrandFeedBack />} />
                   <Route path="brandcomplaint" element={<BrandComplaint />} />
                   <Route path="brandsearchus" element={<BrandSearchus />} />
@@ -218,18 +199,6 @@ const App = () => {
   );
 };
 
-// Simple loading fallback
-const GlobalLoadingFallback = () => (
-  <Box sx={{
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    width: '100vw'
-  }}>
-    <CircularProgress size={60} />
-  </Box>
-);
 
 // Simple 404 component
 const NotFound = () => (

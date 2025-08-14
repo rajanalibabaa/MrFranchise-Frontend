@@ -1,29 +1,61 @@
 
-import React, { useState, useEffect, useRef, lazy } from "react";
+
+import React, { useRef, Suspense } from "react";
 import {
   Box,
   Typography,
   Grid,
   Divider,
   Button,
-  Card,
-  CardContent,
   Slide,
+  Skeleton,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { styled } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 
-// Import components
+// Direct (eager) import for critical info
 import FranchiseDetailsTable from "./OverTabHandlings.jsx/FranchiseDetailsOverView.jsx";
 import BrandDescription from "./OverTabHandlings.jsx/BrandDescriptionsOverView.jsx";
 import SupportProvided from "./OverTabHandlings.jsx/SupportProvidedOverView.jsx";
-import ExpansionLocationGrid from "./OverTabHandlings.jsx/BrandOverViewExpansionLocationDomestic.jsx";
-import ExpansionLocationGridInternational from "./OverTabHandlings.jsx/BrandExpansionLOcationOverviewInternational.jsx";
 
-// Lazy load icons
-const DescriptionIcon = lazy(() => import("@mui/icons-material/Description"));
-const Business = lazy(() => import("@mui/icons-material/Business"));
+// Lazy loading heavy/offscreen/large sections
+const ExpansionLocationGrid = React.lazy(() => import("./OverTabHandlings.jsx/BrandOverViewExpansionLocationDomestic.jsx"));
+const ExpansionLocationGridInternational = React.lazy(() => import("./OverTabHandlings.jsx/BrandExpansionLOcationOverviewInternational.jsx"));
+const DescriptionIcon = React.lazy(() => import("@mui/icons-material/Description"));
+
+/** Helper: Lightweight skeleton, fallback for Suspense. */
+function SectionSkeleton({ lines = 1, height = 28 }) {
+  return (
+    <Box>
+      {[...Array(lines)].map((_, idx) => (
+        <Skeleton key={idx} height={height} sx={{ my: 0.5 }} />
+      ))}
+    </Box>
+  );
+}
+
+// Lazy-load section that only mounts when scrolled to
+function LazyInViewSection({ children, fallback, minHeight = 120, ...props }) {
+  const ref = useRef();
+  const [visible, setVisible] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!ref.current) return;
+    const obs = new window.IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setVisible(true);
+      },
+      { rootMargin: "160px" }
+    );
+    obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+  return (
+    <Box ref={ref} sx={{ minHeight, width: "100%" }} {...props}>
+      {visible ? children : fallback || <SectionSkeleton height={minHeight / 3} />}
+    </Box>
+  );
+}
 
 const OverviewTab = ({ brand }) => {
   const theme = useTheme();
@@ -48,15 +80,15 @@ const OverviewTab = ({ brand }) => {
 
   return (
     <Box ref={overviewRef}>
-      {/* Franchise Details */}
+      {/* Franchise Details: Render instantly */}
       {hasData(franchiseDetails.fico) && (
-        <FranchiseDetailsTable 
-          ficoDetails={franchiseDetails.fico} 
-          formatCurrency={formatCurrency} 
+        <FranchiseDetailsTable
+          ficoDetails={franchiseDetails.fico}
+          formatCurrency={formatCurrency}
         />
       )}
 
-      {/* Brand Description */}
+      {/* Brand Description: Render instantly */}
       {franchiseDetails.brandDescription && (
         <BrandDescription
           brandDescription={franchiseDetails.brandDescription}
@@ -64,7 +96,7 @@ const OverviewTab = ({ brand }) => {
         />
       )}
 
-      {/* Support Provided */}
+      {/* Support Provided: Render instantly */}
       {(hasData(franchiseDetails.trainingSupport) ||
         franchiseDetails.aidFinancing ||
         hasData(franchiseDetails.uniqueSellingPoints)) && (
@@ -79,61 +111,68 @@ const OverviewTab = ({ brand }) => {
         </Grid>
       )}
 
-      {/* Current Outlets (Domestic) */}
+     <Box display={{ sm: 'none', md: 'flex', }} >
+       {/* OUTLET GRIDS: Lazy-load (domestic, international) */}
       {hasData(expansionLocationData.currentOutletLocations?.domestic?.locations) && (
-        <>
+        <LazyInViewSection minHeight={180}>
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}>
             Current Outlets (India)
           </Typography>
-          <ExpansionLocationGrid
-            data={expansionLocationData.currentOutletLocations.domestic}
-          />
-        </>
+          <Suspense fallback={<SectionSkeleton lines={2} height={36} />}>
+            <ExpansionLocationGrid
+              data={expansionLocationData.currentOutletLocations.domestic}
+            />
+          </Suspense>
+        </LazyInViewSection>
       )}
 
-      {/* Current Outlets (International) */}
+       {hasData(expansionLocationData.expansionLocations?.domestic?.locations) && (
+        <LazyInViewSection minHeight={180}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }} id="expansion-location">
+            Expansion Locations (India)
+          </Typography>
+          <Suspense fallback={<SectionSkeleton lines={2} height={36} />}>
+            <ExpansionLocationGrid data={expansionLocationData.expansionLocations.domestic} />
+          </Suspense>
+        </LazyInViewSection>
+      )}
+     </Box>
+
       {hasData(expansionLocationData.currentOutletLocations?.international?.country) && (
-        <>
+        <LazyInViewSection minHeight={160}>
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}>
             Current Outlets (International)
           </Typography>
-          <ExpansionLocationGridInternational
-            data={expansionLocationData.currentOutletLocations.international}
-          />
-        </>
+          <Suspense fallback={<SectionSkeleton lines={2} height={36} />}>
+            <ExpansionLocationGridInternational
+              data={expansionLocationData.currentOutletLocations.international}
+            />
+          </Suspense>
+        </LazyInViewSection>
       )}
 
-      {/* Expansion Locations (Domestic) */}
-      {hasData(expansionLocationData.expansionLocations?.domestic?.locations) && (
-        <>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}>
-            Expansion Locations (India)
-          </Typography>
-          <ExpansionLocationGrid
-            data={expansionLocationData.expansionLocations.domestic}
-          />
-        </>
-      )}
+     
 
-      {/* Expansion Locations (International) */}
       {hasData(expansionLocationData.expansionLocations?.international?.country) && (
-        <>
+        <LazyInViewSection minHeight={160}>
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}>
             Expansion Locations (International)
           </Typography>
-          <ExpansionLocationGridInternational
-            data={expansionLocationData.expansionLocations.international}
-          />
-        </>
+          <Suspense fallback={<SectionSkeleton lines={2} height={36} />}>
+            <ExpansionLocationGridInternational
+              data={expansionLocationData.expansionLocations.international}
+            />
+          </Suspense>
+        </LazyInViewSection>
       )}
 
-      {/* Awards */}
+      {/* Awards: Lazy-load only when scrolled into view. */}
       {hasData(uploads.awards) && (
-        <>
+        <LazyInViewSection minHeight={120}>
           <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mt: 4, color: "#7ad03a" }}>
             Awards
           </Typography>
-          {uploads.awards.length > 0 ? (
+          {uploads.awards.length ? (
             <Grid container spacing={2}>
               {uploads.awards.map((award, idx) => (
                 <Grid item xs={12} sm={6} md={4} key={idx}>
@@ -205,12 +244,12 @@ const OverviewTab = ({ brand }) => {
               No awards available.
             </Typography>
           )}
-        </>
+        </LazyInViewSection>
       )}
 
-      {/* Business Plan Documentation */}
+      {/* Business Plan Documentation: Lazy-loaded */}
       {hasData(uploads.businessPlan) && (
-        <>
+        <LazyInViewSection minHeight={120}>
           <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mt: 4, color: "#7ad03a" }}>
             Business Plan Documentation
           </Typography>
@@ -235,13 +274,15 @@ const OverviewTab = ({ brand }) => {
                       },
                     }}
                   >
-                    <DescriptionIcon
-                      sx={{
-                        fontSize: 60,
-                        color: "#3f51b5",
-                        mb: 1,
-                      }}
-                    />
+                    <Suspense fallback={<SectionSkeleton height={60} />}>
+                      <DescriptionIcon
+                        sx={{
+                          fontSize: 60,
+                          color: "#3f51b5",
+                          mb: 1,
+                        }}
+                      />
+                    </Suspense>
                     <Typography
                       variant="body2"
                       align="center"
@@ -272,10 +313,10 @@ const OverviewTab = ({ brand }) => {
               </Grid>
             ))}
           </Grid>
-        </>
+        </LazyInViewSection>
       )}
 
-      {/* Disclaimer */}
+      {/* Disclaimer: Instantly rendered */}
       <Box
         sx={{
           mt: 4,

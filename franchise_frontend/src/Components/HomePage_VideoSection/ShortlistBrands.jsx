@@ -27,7 +27,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchShortListedById } from "../../Redux/Slices/shortlistslice.jsx";
 import HomePageBrandCard from "./HomePageBrandCard";
 import LoginPage from "../../Pages/LoginPage/LoginPage.jsx";
- 
 const ShortlistBrands = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -41,15 +40,14 @@ const ShortlistBrands = () => {
     isLoading = false,
     error = null,
   } = useSelector((state) => state.shortList || {});
- 
+
   console.log("Shortlisted Brands:", brands);
   console.log("Pagination:", currentPage, totalPages);
- 
+
   // Data fetching
   useEffect(() => {
     dispatch(fetchShortListedById({ page: 1 }));
   }, [dispatch]);
- 
   // Local state
   const [notification, setNotification] = useState({
     open: false,
@@ -60,7 +58,6 @@ const ShortlistBrands = () => {
   const [showStartShadow, setShowStartShadow] = useState(false);
   const [showEndShadow, setShowEndShadow] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
- 
   // Refs
   const containerRef = useRef(null);
   const scrollContainerRef = useRef(null);
@@ -76,45 +73,39 @@ const ShortlistBrands = () => {
       }[isMobile ? "mobile" : isTablet ? "tablet" : "desktop"]),
     [isMobile, isTablet]
   );
- 
   // Scroll handlers
   const easeInOutQuad = useCallback(
     (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t),
     []
   );
- 
   const smoothScrollTo = useCallback(
     (target, immediate = false) => {
       const container = scrollContainerRef.current;
       if (!container) return;
- 
+
       if (scrollRequestRef.current) {
         cancelAnimationFrame(scrollRequestRef.current);
       }
- 
+
       const start = container.scrollLeft;
       const change = target - start;
       const duration = immediate ? 0 : 500;
       const startTime = performance.now();
- 
       const animateScroll = (currentTime) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
         const ease = easeInOutQuad(progress);
         container.scrollLeft = start + change * ease;
- 
         if (progress < 1) {
           scrollRequestRef.current = requestAnimationFrame(animateScroll);
         } else {
           handleScroll();
         }
       };
- 
       scrollRequestRef.current = requestAnimationFrame(animateScroll);
     },
     [easeInOutQuad]
   );
- 
   const getScrollDistance = useCallback(() => {
     return dimensions.width + (isMobile ? 16 : 24);
   }, [dimensions.width, isMobile]);
@@ -148,10 +139,10 @@ const ShortlistBrands = () => {
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
- 
+
     container.addEventListener("scroll", handleScroll);
     handleScroll();
- 
+
     return () => {
       container.removeEventListener("scroll", handleScroll);
       if (scrollRequestRef.current) {
@@ -159,11 +150,11 @@ const ShortlistBrands = () => {
       }
     };
   }, [handleScroll]);
- 
+
   const handleCloseNotification = () => {
     setNotification((prev) => ({ ...prev, open: false }));
   };
- 
+
   if (brands.length === 0) {
     return null;
   }
@@ -193,7 +184,6 @@ const ShortlistBrands = () => {
           {notification.message}
         </Alert>
       </Snackbar>
- 
       <Box
         sx={{
           display: "flex",
@@ -205,6 +195,7 @@ const ShortlistBrands = () => {
         <Typography
           variant={isMobile ? "body1" : "h5"}
           fontWeight="bold"
+          ml={isMobile ? 2 : 0}
           sx={{
             color: "black",
             mb: 1,
@@ -242,7 +233,6 @@ const ShortlistBrands = () => {
           View More
         </Button>
       </Box>
- 
       <Box sx={{ position: "relative" }}>
         <Button
           onClick={handlePrevClick}
@@ -338,5 +328,5 @@ const ShortlistBrands = () => {
     </Box>
   );
 };
- 
+
 export default ShortlistBrands;

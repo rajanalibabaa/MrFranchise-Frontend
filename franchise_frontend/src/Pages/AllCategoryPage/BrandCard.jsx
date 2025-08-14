@@ -47,7 +47,8 @@ const cardStyles = {
   transition: "transform 0.3s, box-shadow 0.3s",
   position: "relative",
   overflow: "hidden",
-  borderRadius: 2,
+  border: '1px solid rgba(105, 253, 25, 1)',
+  borderRadius: '2px',
   "&:hover": {
     transform: "translateY(-5px)",
     boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
@@ -326,7 +327,7 @@ const BrandCard = memo(
             )}
           </Box>
 
-          <Box sx={{ mb: 2, flexGrow: 1, "& > *:not(:last-child)": { mb: 1 } }}>
+          <Box sx={{ mb: 2,ml:1, flexGrow: 1, "& > *:not(:last-child)": { mb: 1 ,} }}>
             <DetailItem
               icon={<AttachMoney />}
               label="Investment"
