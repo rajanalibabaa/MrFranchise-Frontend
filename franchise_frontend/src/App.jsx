@@ -45,10 +45,10 @@ const ResponseManager = lazy(() => import('./Components/Investor_Profile_Compone
 const BrandDashBoard = lazy(() => import('./Components/BrandProfile_Component/BrandDashBoard'));
 const BrandFeedBack = lazy(() => import('./Components/BrandProfile_Component/BrandFeedback'));
 const BrandComplaint = lazy(() => import('./Components/BrandProfile_Component/BrandComplaint'));
-const BrandListingController = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/BrandListingController'));
+const BrandListingEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/BrandListingEdit'));
 const BrandSearchus = lazy(() => import('./Components/BrandProfile_Component/BrandSearches'));
-const BrandDetailsControl = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/BrandDetailsControl'));
-const FranchiseDetailsControl = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/FranchiseDetailsControl'));
+const BrandDetailsEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/BrandDetailsEdit'));
+const FranchiseDetailsEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/FranchiseDetailsEdit'));
 const ExpansionLocationControl = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/ExpansionLocationControl'));
 const UploadsControl = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/UploadsControl'));
 
@@ -161,14 +161,14 @@ const App = () => {
                 <Route path="/brandDashboard" element={<Sidebar />}>
                   <Route index element={<BrandDashBoard />} />
                   <Route path="brandDashboard" element={<BrandDashBoard />} />
-                  <Route path="branddetailcontrol" element={<BrandDetailsControl />} />
-                  <Route path="franchisedetailcontrol" element={<FranchiseDetailsControl />} />
+                  <Route path="branddetailcontrol" element={<BrandDetailsEdit />} />
+                  <Route path="franchisedetailcontrol" element={<FranchiseDetailsEdit />} />
                   <Route path="expansionlocationcontrol" element={<ExpansionLocationControl />} />
                   <Route path="uploadcontrol" element={<UploadsControl />} />
                   <Route path="brandfeedback" element={<BrandFeedBack />} />
                   <Route path="brandcomplaint" element={<BrandComplaint />} />
                   <Route path="brandsearchus" element={<BrandSearchus />} />
-                  <Route path="brandlistingcontrol" element={<BrandListingController />} />
+                  <Route path="brandlistingcontrol" element={<BrandListingEdit />} />
                 </Route>
               {/* )} */}
 
