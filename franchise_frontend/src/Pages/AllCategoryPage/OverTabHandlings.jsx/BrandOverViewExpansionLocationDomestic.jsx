@@ -217,7 +217,7 @@ const getCitiesOrDistrict = (stateIndex, districtIndex) => {
                 }}
               >
                 <Map sx={{ mr: 1, color: "#fff" }} />
-                Districts
+                Cities
                 {isMobile && expandedState !== null && (
                   <IconButton
                     size="small"
@@ -307,7 +307,7 @@ const getCitiesOrDistrict = (stateIndex, districtIndex) => {
             </Box>
 
             {/* Cities Column */}
-            <Box
+            {/* <Box
               sx={{
                 flex: 1,
                 bgcolor:
@@ -419,11 +419,11 @@ const getCitiesOrDistrict = (stateIndex, districtIndex) => {
                   </Box>
                 )}
               </Box>
-            </Box>
+            </Box> */}
           </Box>
         </Box>
       )}
-    </Box>
+      </Box>
   );
 };
 
