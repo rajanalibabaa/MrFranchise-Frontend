@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import BrandDetailsControl from './BrandDetailsControl';
-import FranchiseDetailsControl from './FranchiseDetailsControl';
+import BrandDetailsEdit from './BrandDetailsEdit';
+import FranchiseDetailsControl from './FranchiseDetailsEdit';
 import ExpansionLocationControl from './ExpansionLocationControl';
 import UploadsControl from './UploadsControl';
 import {
@@ -10,9 +10,6 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
-  Card,
-  CardContent,
-  CardHeader,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -25,10 +22,12 @@ import {
   Typography,
 } from '@mui/material';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { getApi } from '../../../Api/DefaultApi';
 
 const flattenBrandData = (brandDoc) => {
   if (!brandDoc) return {};
   return {
+    // Brand Details
     fullName: brandDoc.brandDetails?.fullName || "",
     email: brandDoc.brandDetails?.email || "",
     mobileNumber: brandDoc.brandDetails?.mobileNumber || "",
@@ -51,7 +50,11 @@ const flattenBrandData = (brandDoc) => {
     facebook: brandDoc.brandDetails?.facebook || "",
     instagram: brandDoc.brandDetails?.instagram || "",
     linkedin: brandDoc.brandDetails?.linkedin || "",
-    brandCategories: brandDoc.franchiseDetails?.brandCategories || [],
+    gstNumber: brandDoc.brandDetails?.gstNumber || "",
+    pancardNumber: brandDoc.brandDetails?.pancardNumber || "",
+    
+    // Franchise Details
+    brandCategories: brandDoc.franchiseDetails?.brandCategories || {},
     aidFinancing: brandDoc.franchiseDetails?.aidFinancing || "",
     brandDescription: brandDoc.franchiseDetails?.brandDescription || "",
     companyOwnedOutlets: brandDoc.franchiseDetails?.companyOwnedOutlets || "",
@@ -64,9 +67,19 @@ const flattenBrandData = (brandDoc) => {
     fico: brandDoc.franchiseDetails?.fico || [],
     trainingSupport: brandDoc.franchiseDetails?.trainingSupport || [],
     uniqueSellingPoints: brandDoc.franchiseDetails?.uniqueSellingPoints || [],
-    currentOutletLocations: brandDoc.expansionLocationData?.currentOutletLocations || {},
-    expansionLocations: brandDoc.expansionLocationData?.expansionLocations || {},
-    isInternationalExpansion: brandDoc.expansionLocationData?.isInternationalExpansion || "No",
+    
+    // Expansion Data
+    currentOutletLocations: brandDoc.expansionLocationData?.currentOutletLocations || {
+      domestic: { locations: [] },
+      international: { country: [] }
+    },
+    expansionLocations: brandDoc.expansionLocationData?.expansionLocations || {
+      domestic: { locations: [] },
+      international: { country: [] }
+    },
+    isInternationalExpansion: brandDoc.expansionLocationData?.isInternationalExpansion || false,
+    
+    // Uploads
     brandLogo: brandDoc.uploads?.brandLogo || [],
     exteriorOutlet: brandDoc.uploads?.exteriorOutlet || [],
     franchisePromotionVideo: brandDoc.uploads?.franchisePromotionVideo || [],
@@ -75,71 +88,10 @@ const flattenBrandData = (brandDoc) => {
     pancard: brandDoc.uploads?.pancard || [],
     businessPlan: brandDoc.uploads?.businessPlan || [],
     awards: brandDoc.uploads?.awards || [],
-    gstNumber: brandDoc.brandDetails?.gstNumber || "",
-    pancardNumber: brandDoc.brandDetails?.pancardNumber || "",
   };
 };
 
-const unflattenFormData = (formData) => ({
-  brandDetails: {
-    fullName: formData.fullName,
-    email: formData.email,
-    mobileNumber: formData.mobileNumber,
-    whatsappNumber: formData.whatsappNumber,
-    companyName: formData.companyName,
-    brandName: formData.brandName,
-    tagLine: formData.tagLine,
-    ceoName: formData.ceoName,
-    ceoEmail: formData.ceoEmail,
-    ceoMobile: formData.ceoMobile,
-    officeEmail: formData.officeEmail,
-    officeMobile: formData.officeMobile,
-    headOfficeAddress: formData.headOfficeAddress,
-    country: formData.country,
-    state: formData.state,
-    district: formData.district,
-    city: formData.city,
-    pincode: formData.pincode,
-    website: formData.website,
-    facebook: formData.facebook,
-    instagram: formData.instagram,
-    linkedin: formData.linkedin,
-    gstNumber: formData.gstNumber,
-    pancardNumber: formData.pancardNumber
-  },
-  franchiseDetails: {
-    brandCategories: formData.brandCategories,
-    aidFinancing: formData.aidFinancing,
-    brandDescription: formData.brandDescription,
-    companyOwnedOutlets: formData.companyOwnedOutlets,
-    consultationOrAssistance: formData.consultationOrAssistance,
-    establishedYear: formData.establishedYear,
-    franchiseDevelopment: formData.franchiseDevelopment,
-    franchiseOutlets: formData.franchiseOutlets,
-    franchiseSinceYear: formData.franchiseSinceYear,
-    totalOutlets: formData.totalOutlets,
-    fico: formData.fico,
-    trainingSupport: formData.trainingSupport,
-    uniqueSellingPoints: formData.uniqueSellingPoints
-  },
-  expansionLocationData: {
-    currentOutletLocations: formData.currentOutletLocations,
-    expansionLocations: formData.expansionLocations,
-    isInternationalExpansion: formData.isInternationalExpansion
-  },
-  uploads: {
-    brandLogo: formData.brandLogo,
-    exteriorOutlet: formData.exteriorOutlet,
-    franchisePromotionVideo: formData.franchisePromotionVideo,
-    gstCertificate: formData.gstCertificate,
-    interiorOutlet: formData.interiorOutlet,
-    pancard: formData.pancard,
-    businessPlan: formData.businessPlan,
-    awards: formData.awards
-  }
-});
-
-const BrandListingController = () => {
+const BrandListingEdit = () => {
   const [formData, setFormData] = useState({});
   const [originalData, setOriginalData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -155,21 +107,33 @@ const BrandListingController = () => {
   const [otpError, setOtpError] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [otpToken, setOtpToken] = useState(null);
+  const [files, setFiles] = useState({
+    brandLogo: [],
+    exteriorOutlet: [],
+    franchisePromotionVideo: [],
+    gstCertificate: [],
+    interiorOutlet: [],
+    pancard: [],
+    businessPlan: [],
+    awardDoc: []
+  });
 
   useEffect(() => {
     const fetchBrandData = async () => {
       const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
+
       if (!uuid) {
         setError("No UUID found.");
         setLoading(false);
         return;
       }
+
       try {
-        const response = await axios.get(
-          `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${uuid}`
-        );
-        const brand = response.data.brandListing || response.data.data;
-        if (response.data.success && brand) {
+        const url = `http://localhost:5000/api/v1/brandlisting/getBrandById/${uuid}`;
+        const response = await getApi(url);
+        const brand = response?.data?.data;
+
+        if (response.data.success) {
           const flatData = flattenBrandData(brand);
           setFormData(flatData);
           setOriginalData(brand);
@@ -177,7 +141,7 @@ const BrandListingController = () => {
           setError("No brand data found.");
         }
       } catch (err) {
-        setError(err.response?.data?.message || "Error loading data.");
+        setError(err.response?.message || "Error loading data.");
       } finally {
         setLoading(false);
       }
@@ -218,6 +182,24 @@ const BrandListingController = () => {
         [key]: value
       }
     }));
+  };
+
+  const handleFileChange = (field, newFiles) => {
+    setFiles(prev => ({
+      ...prev,
+      [field]: [...prev[field], ...newFiles]
+    }));
+  };
+
+  const handleRemoveFile = (field, index) => {
+    setFiles(prev => {
+      const updatedFiles = [...prev[field]];
+      updatedFiles.splice(index, 1);
+      return {
+        ...prev,
+        [field]: updatedFiles
+      };
+    });
   };
 
   const handleOtpChange = (e) => {
@@ -290,8 +272,7 @@ const BrandListingController = () => {
 
     try {
       const response = await axios.post(
-       `http://localhost:5000/api/v1/otpverify/verify-otp`,
-      //  `http://localhost:5000/otpverify/verify-otp`,
+        `http://localhost:5000/api/v1/otpverify/verify-otp`,
         {
           identifier: formData.email,
           otp: otp,
@@ -318,83 +299,130 @@ const BrandListingController = () => {
     }
   };
 
-  const handleSave = async () => {
+const handleSave = async () => {
   const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
   if (!uuid) return;
 
   setSaveStatus({ loading: true, success: false, error: '' });
 
   try {
-    const apiData = unflattenFormData(formData);
+    const formDataToSend = new FormData();
 
-    // console.log(apiData)
-    const formDataSend = new FormData();
-
-    // Append brandDetails
-    formDataSend.append("brandDetails", JSON.stringify({
-      ...apiData.brandDetails,
-      awardText: apiData.brandDetails?.awardText || [],
-    }));
-
-    // Append franchiseDetails
-    formDataSend.append("franchiseDetails", JSON.stringify({
-      ...apiData.franchiseDetails,
-    }));
-
-    // Append expansionLocationData
-    formDataSend.append("expansionLocationData", JSON.stringify({
-      ...apiData.expansionLocationData,
-    }));
-
-    // File fields
-    const fileFields = {
-      brandLogo: formData.uploads.brandLogo,
-      gstCertificate: formData.uploads.gstCertificate,
-      pancard: formData.uploads.pancard,
-      exteriorOutlet: formData.uploads.exteriorOutlet,
-      interiorOutlet: formData.uploads.interiorOutlet,
-      franchisePromotionVideo: formData.uploads.franchisePromotionVideo,
-      awardDoc: formData.uploads.awardDoc || [],
-      businessPlan: formData.uploads.businessPlan,
+    // Prepare the data structure that matches the backend expectation
+    const updateData = {
+      brandDetails: {
+        fullName: formData.fullName,
+        email: formData.email,
+        mobileNumber: formData.mobileNumber,
+        whatsappNumber: formData.whatsappNumber,
+        companyName: formData.companyName,
+        brandName: formData.brandName,
+        tagLine: formData.tagLine,
+        ceoName: formData.ceoName,
+        ceoEmail: formData.ceoEmail,
+        ceoMobile: formData.ceoMobile,
+        officeEmail: formData.officeEmail,
+        officeMobile: formData.officeMobile,
+        headOfficeAddress: formData.headOfficeAddress,
+        country: formData.country,
+        state: formData.state,
+        district: formData.district,
+        city: formData.city,
+        pincode: formData.pincode,
+        website: formData.website,
+        facebook: formData.facebook,
+        instagram: formData.instagram,
+        linkedin: formData.linkedin,
+        gstNumber: formData.gstNumber,
+        pancardNumber: formData.pancardNumber,
+      },
+      franchiseDetails: {
+        brandCategories: formData.brandCategories,
+        aidFinancing: formData.aidFinancing,
+        brandDescription: formData.brandDescription,
+        companyOwnedOutlets: formData.companyOwnedOutlets,
+        consultationOrAssistance: formData.consultationOrAssistance,
+        establishedYear: formData.establishedYear,
+        franchiseDevelopment: formData.franchiseDevelopment,
+        franchiseOutlets: formData.franchiseOutlets,
+        franchiseSinceYear: formData.franchiseSinceYear,
+        totalOutlets: formData.totalOutlets,
+        fico: formData.fico,
+        trainingSupport: formData.trainingSupport,
+        uniqueSellingPoints: formData.uniqueSellingPoints
+      },
+      expansionLocationData: {
+        currentOutletLocations: formData.currentOutletLocations,
+        expansionLocations: formData.expansionLocations,
+        isInternationalExpansion: formData.isInternationalExpansion
+      }
     };
 
-    // Append files (handling both single file and array of files)
-    Object.entries(fileFields).forEach(([fieldName, fileValue]) => {
-      if (Array.isArray(fileValue)) {
-        fileValue
-          .filter(f => f instanceof File && f.size > 0)
-          .forEach((file, index) => {
-            formDataSend.append(`${fieldName}[${index}]`, file);
-          });
-      } else if (fileValue instanceof File && fileValue.size > 0) {
-        formDataSend.append(fieldName, fileValue);
+    // Append JSON data as strings
+    formDataToSend.append('brandDetails', JSON.stringify(updateData.brandDetails));
+    formDataToSend.append('franchiseDetails', JSON.stringify(updateData.franchiseDetails));
+    formDataToSend.append('expansionLocationData', JSON.stringify(updateData.expansionLocationData));
+
+    // Append files
+    const fileFields = [
+      'brandLogo',
+      'exteriorOutlet',
+      'franchisePromotionVideo',
+      'gstCertificate',
+      'interiorOutlet',
+      'pancard',
+      'businessPlan',
+      'awardDoc'
+    ];
+
+    fileFields.forEach(field => {
+      if (files[field] && files[field].length > 0) {
+        files[field].forEach(file => {
+          formDataToSend.append(field, file);
+        });
       }
     });
 
-    // console.log("formDataSend:", formDataSend);
+    // Append award text if exists
+    if (formData.awards && formData.awards.length > 0) {
+      formDataToSend.append('awardText', JSON.stringify(formData.awards.map(award => award.awardDescription)));
+    }
 
     const response = await axios.patch(
       `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
-      formDataSend,
+      formDataToSend,
       {
         headers: {
-          "Content-Type": "multipart/form-data",
+          'Content-Type': 'multipart/form-data',
         },
       }
     );
 
     if (response.data.success) {
-      setOriginalData(response.data.brandListing || response.data.data);
+      setOriginalData(response.data.data);
       setSaveStatus({ loading: false, success: true, error: '' });
       setIsEditing(false);
+      
+      // Clear files after successful upload
+      setFiles({
+        brandLogo: [],
+        exteriorOutlet: [],
+        franchisePromotionVideo: [],
+        gstCertificate: [],
+        interiorOutlet: [],
+        pancard: [],
+        businessPlan: [],
+        awardDoc: []
+      });
     } else {
       throw new Error(response.data.message || "Failed to save.");
     }
   } catch (err) {
+    console.error("Save error:", err);
     setSaveStatus({
       loading: false,
       success: false,
-      error: err.response?.data?.message || "Save failed.",
+      error: err.response?.data?.message || err.message || "Save failed.",
     });
   }
 };
@@ -402,6 +430,18 @@ const BrandListingController = () => {
   const handleCancel = () => {
     setFormData(flattenBrandData(originalData));
     setIsEditing(false);
+    
+    // Clear any unsaved files
+    setFiles({
+      brandLogo: [],
+      exteriorOutlet: [],
+      franchisePromotionVideo: [],
+      gstCertificate: [],
+      interiorOutlet: [],
+      pancard: [],
+      businessPlan: [],
+      awardDoc: []
+    });
   };
 
   const handleAccordionChange = (panel) => (event, isExpanded) => {
@@ -457,7 +497,6 @@ const BrandListingController = () => {
 
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button 
-          aria-label="cancel"
             onClick={handleCloseOtpDialog} 
             disabled={otpVerifying}
             variant="outlined"
@@ -480,7 +519,6 @@ const BrandListingController = () => {
             }}
             disabled={otpSending || otpVerifying}
             variant="outlined"
-            aria-label="resend-otp"
             sx={{ ml: 'auto' }}
           >
             {otpSending ? <CircularProgress size={20} /> : 'Resend OTP'}
@@ -489,7 +527,6 @@ const BrandListingController = () => {
             onClick={verifyOtp}
             color="primary"
             variant="contained"
-            aria-label="verify-otp"
             disabled={!otp || otp.length !== 6 || otpSending || otpVerifying}
           >
             {otpVerifying ? <CircularProgress size={20} /> : 'Verify'}
@@ -500,7 +537,7 @@ const BrandListingController = () => {
       {/* Edit / Save Buttons */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
         {!isEditing ? (
-          <Button variant="outlined" aria-label="edit" onClick={handleEditClick}>
+          <Button variant="outlined" onClick={handleEditClick}>
             Edit
           </Button>
         ) : (
@@ -508,7 +545,6 @@ const BrandListingController = () => {
             <Button
               variant="contained"
               color="primary"
-              aria-label="save"
               onClick={handleSave}
               disabled={saveStatus.loading}
               startIcon={saveStatus.loading ? <CircularProgress size={20} /> : null}
@@ -519,7 +555,6 @@ const BrandListingController = () => {
             <Button
               variant="outlined"
               color="secondary"
-              aria-label="cancel"
               onClick={handleCancel}
               disabled={saveStatus.loading}
             >
@@ -535,14 +570,12 @@ const BrandListingController = () => {
           <Typography fontWeight="bold">Brand Details</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <CardContent>
-            <BrandDetailsControl
-              data={formData}
-              onChange={handleFormChange}
-              errors={{}}
-              isEditing={isEditing}
-            />
-          </CardContent>
+          <BrandDetailsEdit
+            data={formData}
+            onChange={handleFormChange}
+            errors={{}}
+            isEditing={isEditing}
+          />
         </AccordionDetails>
       </Accordion>
 
@@ -552,17 +585,15 @@ const BrandListingController = () => {
           <Typography fontWeight="bold">Franchise Details</Typography>
         </AccordionSummary>
         <AccordionDetails>  
-          <CardContent>
-            <FranchiseDetailsControl
-              data={formData}
-              onChange={handleFormChange}
-              onNestedChange={handleNestedFormChange}
-              onArrayChange={handleArrayChange}
-              onObjectChange={handleObjectChange}
-              errors={{}}
-              isEditing={isEditing}
-            />
-          </CardContent>
+          <FranchiseDetailsControl
+            data={formData}
+            onChange={handleFormChange}
+            onNestedChange={handleNestedFormChange}
+            onArrayChange={handleArrayChange}
+            onObjectChange={handleObjectChange}
+            errors={{}}
+            isEditing={isEditing}
+          />
         </AccordionDetails>
       </Accordion>
 
@@ -572,16 +603,14 @@ const BrandListingController = () => {
           <Typography fontWeight="bold">Expansion Location</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <CardContent>
-            <ExpansionLocationControl
-              data={formData}
-              onChange={handleFormChange}
-              onNestedChange={handleNestedFormChange}
-              onObjectChange={handleObjectChange}
-              errors={{}}
-              isEditing={isEditing}
-            />
-          </CardContent>
+          <ExpansionLocationControl
+            data={formData}
+            onChange={handleFormChange}
+            onNestedChange={handleNestedFormChange}
+            onObjectChange={handleObjectChange}
+            errors={{}}
+            isEditing={isEditing}
+          />
         </AccordionDetails>
       </Accordion>
 
@@ -591,15 +620,16 @@ const BrandListingController = () => {
           <Typography fontWeight="bold">Uploads</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <CardContent>
-            <UploadsControl
-              data={formData}
-              onChange={handleFormChange}
-              onArrayChange={handleArrayChange}
-              errors={{}}
-              isEditing={isEditing}
-            />
-          </CardContent>
+          <UploadsControl
+            data={formData}
+            files={files}
+            onChange={handleFormChange}
+            onFileChange={handleFileChange}
+            onRemoveFile={handleRemoveFile}
+            onArrayChange={handleArrayChange}
+            errors={{}}
+            isEditing={isEditing}
+          />
         </AccordionDetails>
       </Accordion>
 
@@ -617,4 +647,4 @@ const BrandListingController = () => {
   );
 };
 
-export default BrandListingController;
+export default BrandListingEdit;
