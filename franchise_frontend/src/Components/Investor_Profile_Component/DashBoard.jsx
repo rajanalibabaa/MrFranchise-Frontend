@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Box, Typography, Avatar, IconButton, Divider ,CircularProgress} from "@mui/material";
-import { Business, 
-  Favorite, 
-  AssignmentTurnedIn, 
-  Bookmark,  Close } from "@mui/icons-material";
+import { Box, Typography, Avatar, IconButton, Divider, CircularProgress } from "@mui/material";
+import { Business, Favorite, AssignmentTurnedIn, Bookmark, Close } from "@mui/icons-material";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import img from "../../assets/Images/logo.png";
@@ -13,8 +10,6 @@ import { fetchLikedBrandsById } from "../../Redux/Slices/likeSlice";
 import { fetchViewBrandsById, removeviewBrand } from "../../Redux/Slices/viewSlice"; 
 import { handleShortList } from "../../Api/shortListApi";
 import { likeApiFunction } from "../../Api/likeApi";
-
-// Import components
 import StatCard from "./DashBoardFunctions/StatCard";
 import ViewedBrands from "./DashBoardFunctions/ViewedBrands";
 import LikedTab from "./DashBoardFunctions/LikedTab";
@@ -53,6 +48,68 @@ const Dashboard = () => {
     totalShortlisted: shortListState?.pagination?.total || shortlistedBrands.length
   }), [viewedBrands, viewPagination, likedBrands, appliedBrands, shortlistedBrands, shortListState]);
 
+  const fetchBrandDetails = async (brandId, config) => {
+    try {
+      const response = await axios.get(
+        `${api.user.get.brand}/${brandId}`,
+        config
+      );
+      return {
+        ...response.data.data,
+        businessType: response.data.data.businessType || response.data.data.category || 'Not specified'
+      };
+    } catch (error) {
+      console.error(`Error fetching brand ${brandId}:`, error);
+      return null;
+    }
+  };
+
+  const fetchData = useCallback(async () => {
+    if (!investorUUID || !AccessToken) return;
+
+    try {
+      setIsPaginating(true);
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      };
+
+      const [likedRes, shortlistRes, viewRes, appliedRes, userRes] = await Promise.all([
+        dispatch(fetchLikedBrandsById({ userId: investorUUID })),
+        dispatch(fetchShortListedById({ 
+          investorUUID, 
+          page: 1, 
+          limit: itemsPerPage 
+        })),     
+        dispatch(fetchViewBrandsById({ userId: investorUUID })),
+        axios.get(`${api.instantApplyApi.get.getInstaApplyById}/${investorUUID}`, config),
+        axios.get(`${api.user.get.investor}/${investorUUID}`, config)
+      ]);
+
+      // Enhance applied brands with additional details
+      const enhancedAppliedBrands = await Promise.all(
+        appliedRes.data?.data?.map(async (item) => {
+          if (!item.application?.brandId) return item;
+          
+          const brandDetails = await fetchBrandDetails(item.application.brandId, config);
+          return {
+            ...item,
+            brandDetails: brandDetails || {}
+          };
+        }) || []
+      );
+
+      setAppliedBrands(enhancedAppliedBrands);
+      setUserData(userRes.data?.data || null);
+    } catch (error) {
+      console.error("Error in fetchData:", error);
+    } finally {
+      setIsPaginating(false);
+    }
+  }, [investorUUID, AccessToken, dispatch, itemsPerPage]);
+
   useEffect(() => {
     const initialLiked = {};
     likedBrands.forEach(item => {
@@ -73,42 +130,6 @@ const Dashboard = () => {
     setCurrentPage(1);
   }, [tabValue]);
 
-  const fetchData = useCallback(async () => {
-    if (!investorUUID || !AccessToken) return;
-
-    try {
-      setIsPaginating(true);
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${AccessToken}`,
-        }
-      };
-
-      await Promise.all([
-        dispatch(fetchLikedBrandsById({ userId: investorUUID })),
-        dispatch(fetchShortListedById({ 
-          investorUUID, 
-          page: 1, 
-          limit: itemsPerPage 
-        })),     
-        dispatch(fetchViewBrandsById({ userId: investorUUID })),
-        axios.get(`${api.instantApplyApi.get.getInstaApplyById}/${investorUUID}`, config)
-          .then(res => {
-            setAppliedBrands(Array.isArray(res.data?.data) ? res.data.data : []);
-          }),
-        axios.get(`${api.user.get.investor}/${investorUUID}`, config)
-          .then(res => {
-            setUserData(res.data?.data || null);
-          })
-      ]);
-    } catch (error) {
-      console.error("Error in fetchData:", error);
-    } finally {
-      setIsPaginating(false);
-    }
-  }, [investorUUID, AccessToken, dispatch, itemsPerPage]);
-
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -126,7 +147,6 @@ const Dashboard = () => {
 
     const apiBrandId = brandToRemove.uuid || brandToRemove.brandID?.uuid || brandToRemove.brandID;
 
-    // Optimistic UI update
     setLikedStates(prev => {
       const newState = { ...prev };
       delete newState[brandId];
