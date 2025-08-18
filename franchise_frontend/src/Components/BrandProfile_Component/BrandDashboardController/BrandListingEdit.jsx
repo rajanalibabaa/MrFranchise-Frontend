@@ -3,7 +3,7 @@ import axios from 'axios';
 import BrandDetailsEdit from './BrandDetailsEdit';
 import FranchiseDetailsControl from './FranchiseDetailsEdit';
 import ExpansionLocationControl from './ExpansionLocationControl';
-import UploadsControl from './UploadsControl';
+import UploadsEdit from './UploadsEdit';
 import {
   Box,
   Button,
@@ -363,6 +363,8 @@ const handleSave = async () => {
     formDataToSend.append('franchiseDetails', JSON.stringify(updateData.franchiseDetails));
     formDataToSend.append('expansionLocationData', JSON.stringify(updateData.expansionLocationData));
 
+
+    const formDataUploads = new FormData();
     // Append files
     const fileFields = [
       'brandLogo',
@@ -378,7 +380,7 @@ const handleSave = async () => {
     fileFields.forEach(field => {
       if (files[field] && files[field].length > 0) {
         files[field].forEach(file => {
-          formDataToSend.append(field, file);
+          formDataUploads.append(field, file);
         });
       }
     });
@@ -620,7 +622,7 @@ const handleSave = async () => {
           <Typography fontWeight="bold">Uploads</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <UploadsControl
+          <UploadsEdit
             data={formData}
             files={files}
             onChange={handleFormChange}

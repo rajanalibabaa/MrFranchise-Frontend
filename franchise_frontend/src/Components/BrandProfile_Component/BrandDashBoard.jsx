@@ -1664,7 +1664,9 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                 boxShadow: "none",
               }}
             >
-              <Avatar
+              <Box
+                component="img"
+                variant="rectangle"
                 src={brandData?.uploads?.logo || "/default-brand.png"}
                 sx={{
                   width: isMobile ? 80 : 80,

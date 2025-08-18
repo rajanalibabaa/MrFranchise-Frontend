@@ -141,6 +141,7 @@ const BrandDetails = ({ brandData }) => {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [userData, setUserData] = useState(null);
+  console.log("User Data direct:", userData);
   const [anchorEl, setAnchorEl] = useState(null);
   const [locationData, setLocationData] = useState({
     states: [],
@@ -402,8 +403,10 @@ const handleSubmit = useCallback(
           signal: AbortSignal.timeout(5000),
         }
       );
+      console.log("Investor Details Response:", response);
       if (response.data?.data) {
         setUserData(response.data.data);
+        console.log("User Data:", setUserData);
         setFormData((prev) => ({
           ...prev,
           fullName: response.data.data.firstName || "",

@@ -28,6 +28,8 @@ const ApplyDrawer = ({
   selectedBrand,
   userData,
 }) => {
+
+  console.log('userdata ', userData)
   return (
     <Drawer
       anchor={isMobile || isTablet ? "bottom" : "right"}
@@ -87,7 +89,7 @@ const ApplyDrawer = ({
                 fullWidth
                 label="Full Name"
                 name="fullName"
-                value={formData.fullName || userData?.firstName || ""}
+                value={ userData?.firstName || ""}
                 onChange={handleChange}
                 required
                 variant="outlined"
@@ -99,7 +101,7 @@ const ApplyDrawer = ({
                 fullWidth
                 label="Email"
                 name="investorEmail"
-                value={formData.investorEmail || userData?.email || ""}
+                value={ userData?.email || ""}
                 onChange={handleChange}
                 required
                 variant="outlined"
@@ -111,7 +113,7 @@ const ApplyDrawer = ({
                 fullWidth
                 label="Mobile Number"
                 name="mobileNumber"
-                value={formData.mobileNumber || userData?.mobileNumber || ""}
+                value={ userData?.mobileNumber || ""}
                 onChange={handleChange}
                 required
                 variant="outlined"
