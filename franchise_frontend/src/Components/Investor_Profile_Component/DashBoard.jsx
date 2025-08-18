@@ -15,9 +15,10 @@ import ViewedBrands from "./DashBoardFunctions/ViewedBrands";
 import LikedTab from "./DashBoardFunctions/LikedTab";
 import AppliedTab from "./DashBoardFunctions/AppliedTab";
 import ShortlistedTab from "./DashBoardFunctions/ShortlistedTab";
-
+import {useNavigate} from "react-router-dom";
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [appliedBrands, setAppliedBrands] = useState([]);
   const [likedStates, setLikedStates] = useState({});
@@ -231,9 +232,18 @@ const Dashboard = () => {
     }
   }, [investorUUID, AccessToken, dispatch]);
 
-  const handleViewDetails = useCallback((brand) => {
-    dispatch(openBrandDialog(brand));
-  }, [dispatch]);
+const handleViewDetails = useCallback((brand) => {
+  // Try to get brandId from multiple possible locations
+  const brandId = brand?.uuid || brand?.brandID?.uuid || brand?.brandID || brand?.originalItem?.brandDetails?.uuid;
+  
+  if (brandId) {
+    navigate(`/brands/${brandId}`);
+    // or window.open(`/brands/${brandId}`, '_blank') for new tab
+  } else {
+    console.error('Brand ID not found:', brand);
+    // Fallback to dialog or other action
+  }
+}, [navigate]);
 
   const handlePageChange = async (event, value) => {
     try {

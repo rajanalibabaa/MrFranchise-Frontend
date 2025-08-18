@@ -69,20 +69,29 @@ const AppliedTab = ({
       {transformedItems.length > 0 ? (
         <>
           <Grid container spacing={3} justifyContent="center">
-            {transformedItems.map(({ application }) => (
-              <Grid item xs={12} sm={6} md={4} lg={2.5} key={application?.apply?.applyId || Math.random()}>
-                <BrandCard 
-                  item={application} 
-                  type="applied"
-                  likedStates={likedStates}
-                  shortlistedStates={shortlistedStates}
-                  onViewDetails={handleViewDetails}
-                  onToggleLike={toggleLike}
-                  onToggleShortlist={toggleShortlist}
-                />
-              </Grid>
-            ))}
-          </Grid>
+  {transformedItems.map((item) => {
+    // Extract both application and brandDetails from the item
+    const { application, brandDetails } = item;
+    
+    return (
+      <Grid item xs={12} sm={6} md={4} lg={2.5} key={application?.apply?.applyId || Math.random()}>
+        <BrandCard 
+          item={{
+            ...application,       // Spread application properties
+            ...brandDetails,      // Spread brandDetails properties
+            originalItem: item    // Include the full item as reference
+          }}
+          type="applied"
+          likedStates={likedStates}
+          shortlistedStates={shortlistedStates}
+          onViewDetails={handleViewDetails}
+          onToggleLike={toggleLike}
+          onToggleShortlist={toggleShortlist}
+        />
+      </Grid>
+    );
+  })}
+</Grid>
           
           {totalPages > 1 && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
