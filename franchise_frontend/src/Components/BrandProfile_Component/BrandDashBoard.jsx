@@ -120,7 +120,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
           `${API_BASE_URL}/instantapply/getAllInstaApply/${brandUUID}`,
           { headers: { Authorization: `Bearer ${token}` } }
         ),
-        axios.get(`${API_BASE_URL}/instantapply/getAllLeads/${brandUUID}`, {
+        axios.get(`${API_BASE_URL}/instantapply/getInstantApplyLocationLeadControllerById/${brandUUID}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ];
@@ -696,7 +696,8 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                         const searchLower = searchTerm.toLowerCase();
                         const matchesSearch =
                           !searchTerm ||
-                          lead.investorName
+                          lead.invest
+                          orName
                             ?.toLowerCase()
                             .includes(searchLower) ||
                           lead.investorEmail
@@ -1154,7 +1155,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                     size={isMobile ? "small" : "medium"}
                   >
                     <InputLabel sx={{ color: colors.textSecondary }}>
-                      Location
+                      Location State
                     </InputLabel>
                     <Select
                       label="Location"
@@ -1189,6 +1190,77 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                     size={isMobile ? "small" : "medium"}
                   >
                     <InputLabel sx={{ color: colors.textSecondary }}>
+                      Location District
+                    </InputLabel>
+                    <Select
+                      label="Location"
+                      value={locationFilter}
+                      onChange={(e) => setLocationFilter(e.target.value)}
+                      sx={{
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: colors.divider,
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: colors.accent,
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">All Locations</MenuItem>
+                      {[
+                        ...new Set(
+                          Leads.map((lead) => lead.location?.district || "")
+                        ),
+                      ]
+                        .filter(Boolean)
+                        .map((state) => (
+                          <MenuItem key={state} value={state}>
+                            {state}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </FormControl>
+
+                   {/* <FormControl
+                    sx={{ minWidth: 200 }}
+                    size={isMobile ? "small" : "medium"}
+                  >
+                    <InputLabel sx={{ color: colors.textSecondary }}>
+                      Location City
+                    </InputLabel>
+                    <Select
+                      label="Location"
+                      value={locationFilter}
+                      onChange={(e) => setLocationFilter(e.target.value)}
+                      sx={{
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: colors.divider,
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: colors.accent,
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">All Locations</MenuItem>
+                      {[
+                        ...new Set(
+                          Leads.map((lead) => lead.location?.city || "")
+                        ),
+                      ]
+                        .filter(Boolean)
+                        .map((state) => (
+                          <MenuItem key={state} value={state}>
+                            {state}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </FormControl> */}
+
+
+                  {/* <FormControl
+                    sx={{ minWidth: 200 }}
+                    size={isMobile ? "small" : "medium"}
+                  >
+                    <InputLabel sx={{ color: colors.textSecondary }}>
                       Match Type
                     </InputLabel>
                     <Select
@@ -1216,7 +1288,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                         Investment & Location
                       </MenuItem>
                     </Select>
-                  </FormControl>
+                  </FormControl> */}
 
                   <FormControl
                     sx={{ minWidth: 200 }}
@@ -1470,6 +1542,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
             )}
           </Box>
         );
+      
       default:
         return null;
     }

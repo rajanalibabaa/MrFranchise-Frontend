@@ -37,7 +37,7 @@ const ApplyDrawer = ({
         sx: {
           borderTopLeftRadius: 16,
           borderTopRightRadius: 16,
-          maxHeight: isMobile ? "80vh" : isTablet ? "70vh" : "99vh",
+          maxHeight: isMobile ? "80vh" : isTablet ? "70vh" : "94vh",
           width: isMobile ? "100%" : isTablet ? "80%" : 430,
           overflow: "auto",
           mx: "auto",
@@ -161,8 +161,8 @@ const ApplyDrawer = ({
               </TextField>
             </Grid>
             {/* City Dropdown */}
-            <Grid item xs={12}>
-              {/* <TextField
+            {/*<Grid item xs={12}>
+               <TextField
                 select
                 fullWidth
                 label="City"
@@ -179,20 +179,10 @@ const ApplyDrawer = ({
                     {city}
                   </MenuItem>
                 ))}
-              </TextField> */}
+              </TextField> 
 
-              <TextField
-                fullWidth
-                label="City"
-                placeholder="Add Your City"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                variant="outlined"
-                size="small"
-                disabled={!formData.district}
-              />
-            </Grid>
+             
+            </Grid>*/}
             <Grid item xs={12}>
               <TextField
                 select

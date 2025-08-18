@@ -20,8 +20,6 @@ import {
 import { motion } from "framer-motion";
 import axios from "axios";
 
-// Critical (above fold) imports
-// import { useBrand } from "../../Hooks/Fetchbrands.jsx";
 import { useToggleLike } from "../../Hooks/Fetchbrands.jsx";
 import { handleShortList } from "../../Api/shortListApi.jsx";
 import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
@@ -30,10 +28,7 @@ import { likeApiFunction } from "../../Api/likeApi.jsx";
 import { useDispatch } from "react-redux";
 import { token } from "../../Utils/autherId.jsx";
 import LoginPage from "../LoginPage/LoginPage.jsx";
-import { addSortlist, removeSortList } from "../../Redux/Slices/shortlistslice.jsx";
 
-// Split: lazy-load OverviewTab!
-// EAGER (above fold!) imports
 import BrandHeader from "./BrandViewPageHandling/BrandHeaderViewPage.jsx";
 import MediaSection from "./BrandViewPageHandling/MediaSectionViewPage.jsx";
 
@@ -175,7 +170,6 @@ const BrandDetails = ({ brandData }) => {
   const investorUUID = useMemo(() => localStorage.getItem("investorUUID"), []);
   const AccessToken = useMemo(() => localStorage.getItem("accessToken"), []);
 
-  const { mutate: toggleLike } = useToggleLike();
 
   const investmentRanges = useMemo(
     () => [
@@ -273,7 +267,6 @@ const handleSubmit = useCallback(
         navigate("/registerhandleuser");
         return;
       }
- 
       // Validate selected brand exists
       if (!selectedBrand || selectedBrand.length === 0) {
         alert("No brand selected. Please try again.");
@@ -425,21 +418,6 @@ const handleSubmit = useCallback(
     }
   }, [investorUUID, AccessToken]);
 
-  // Effects (keep unchanged except for lazy-lazy components)
-
-  // useEffect(() => {
-  //   if (!uuid) return;
-  //   const controller = new AbortController();
-  //   const fetchBrand = async () => {
-  //     try {
-  //       await useBrand(uuid).unwrap();
-  //     } catch (error) {
-  //       console.error("Failed to fetch brand details:", error);
-  //     }
-  //   };
-  //   fetchBrand();
-  //   return () => controller.abort();
-  // }, [uuid]);
 
   useEffect(() => {
     if (investorUUID && AccessToken) {
@@ -559,15 +537,13 @@ const handleSubmit = useCallback(
           px: isMobile ? 1 : isTablet ? 3 : 4,
         }}
       >
-        {/* CRITICAL BUTTONS DRAWERS HEADER */}
-        {/* <Suspense fallback={null}> */}
+
           <FloatingApplyButton
             isMobile={isMobile}
             brand={selectedBrand}
             toggleDrawer={toggleDrawer}
           />
-        {/* </Suspense> */}
-        {/* <Suspense fallback={null}> */}
+
           <ApplyDrawer
             open={drawerOpen}
             onClose={toggleDrawer(false)}
@@ -584,8 +560,7 @@ const handleSubmit = useCallback(
             selectedBrand={selectedBrand}
             userData={userData}
           />
-        {/* </Suspense> */}
-        {/* <Suspense fallback={<Box minHeight={120}><CircularProgress /></Box>}> */}
+ 
           <BrandHeader
             brand={selectedBrand}
             isMobile={isMobile}
@@ -601,10 +576,9 @@ const handleSubmit = useCallback(
             toggleDrawer={toggleDrawer}
             getOutletRange={getOutletRange}
           />
-        {/* </Suspense> */}
+
         <Divider sx={{ my: 3 }} />
-        {/* MEDIA LAZY */}
-        {/* <Suspense fallback={<Box minHeight={200}><CircularProgress /></Box>}> */}
+
           <MediaSection
             allVideos={allVideos}
             allImages={allImages}
@@ -620,19 +594,6 @@ const handleSubmit = useCallback(
           <LazyOverviewTab brand={selectedBrand} />
         </Suspense>
 
-        {/* <Box
-          sx={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            gap: 4,
-          }}
-        >
-          <Box sx={{ width: "100%" }}>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-              <OverviewTab brand={selectedBrand} />
-            </motion.div>
-          </Box>
-        </Box> */}
         <Suspense fallback={null}>
           <ImageDialog
             open={imageModalOpen}

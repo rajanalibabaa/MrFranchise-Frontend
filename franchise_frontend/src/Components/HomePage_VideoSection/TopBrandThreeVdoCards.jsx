@@ -54,6 +54,8 @@ import {
 } from "../../Redux/Slices/viewSlice.jsx";
 import { toggleBrandShortListfilter } from "../../Redux/Slices/FilterBrandSlice.jsx";
 
+
+
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -440,7 +442,7 @@ function TopBrandVdoCards() {
                         sx={{
                           textTransform: "none",
                           color:
-                            theme.palette.mode === "dark" ? "black" : "black",
+                            theme.palette.mode === "dark" ? "white" : "white",
                           borderColor:
                             theme.palette.mode === "dark"
                               ? "#43ea5e"
@@ -490,7 +492,7 @@ function TopBrandVdoCards() {
                           sx={{
                             textTransform: "none",
                             color:
-                              theme.palette.mode === "dark" ? "black" : "black",
+                              theme.palette.mode === "dark" ? "white" : "white",
                             borderColor:
                               theme.palette.mode === "dark"
                                 ? "#ffb74d"
@@ -531,7 +533,7 @@ function TopBrandVdoCards() {
                           sx={{
                             textTransform: "none",
                             color:
-                              theme.palette.mode === "dark" ? "black" : "black",
+                              theme.palette.mode === "dark" ? "white" : "white",
                             borderColor:
                               theme.palette.mode === "dark"
                                 ? "#ffb74d"
@@ -555,7 +557,6 @@ function TopBrandVdoCards() {
                   )}
                   {/* <video
                     ref={(el) => (videoRefs.current[0] = el)}
-                    loading="lazy"
                     src={mainBrand?.franchiseVideos}
                     alt={mainBrand?.brandname}
                     style={{
@@ -563,10 +564,9 @@ function TopBrandVdoCards() {
                       height: "100%",
                       objectFit: "contain",
                     }}
-                    autoPlay
-                    muted
-                    loop
                     controls
+                    autoPlay
+                    
                     playsInline
                     onPlay={() => handleVideoPlay(0)}
                     onPause={() => handleVideoPause(0)}
@@ -574,7 +574,7 @@ function TopBrandVdoCards() {
                   <VideoPlayer
                     id={mainBrand.uuid}
                     videoUrl={mainBrand.franchiseVideos}
-                    poster={mainBrand.logo}
+                    // poster={mainBrand.logo}
                     width="100%"
                     height="100%"
                     objectFit="contain"
