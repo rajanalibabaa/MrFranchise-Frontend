@@ -35,7 +35,7 @@ function Footer() {
   const handleSubscribe = async () => {
     try {
       const res = await axios.post(
-        "https://mrfranchisebackend.mrfranchise.in/api/v1/subcribe/getsubscribe",
+        "http://localhost:5000/api/v1/subcribe/getsubscribe",
         { email },
         {
           headers: {
@@ -468,7 +468,8 @@ function Footer() {
                   color="primary.main"
                   underline="hover"
                 >
-                  support@mrfranchise.in
+                  
+support.team@mrfranchise.in
                 </Link>
               </Typography>
             </Box>

@@ -141,6 +141,7 @@ const BrandDetails = ({ brandData }) => {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [userData, setUserData] = useState(null);
+  console.log("User Data direct:", userData);
   const [anchorEl, setAnchorEl] = useState(null);
   const [locationData, setLocationData] = useState({
     states: [],
@@ -312,7 +313,7 @@ const handleSubmit = useCallback(
  
       // Make API request
       const response = await axios.post(
-        "https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication",
+        "http://localhost:5000/api/v1/instantapply/postApplication",
         payload,
         {
           headers: {
@@ -393,7 +394,7 @@ const handleSubmit = useCallback(
     if (!investorUUID || !AccessToken) return;
     try {
       const response = await axios.get(
-        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -402,8 +403,10 @@ const handleSubmit = useCallback(
           signal: AbortSignal.timeout(5000),
         }
       );
+      console.log("Investor Details Response:", response);
       if (response.data?.data) {
         setUserData(response.data.data);
+        console.log("User Data:", setUserData);
         setFormData((prev) => ({
           ...prev,
           fullName: response.data.data.firstName || "",
