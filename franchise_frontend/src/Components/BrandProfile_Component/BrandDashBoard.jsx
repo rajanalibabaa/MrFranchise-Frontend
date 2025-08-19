@@ -144,8 +144,8 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
     }
   };
   console.log("applyData :", applyData);
-  console.log("lead :", Leads);
-  console.log("brandData", brandData);
+  // console.log("lead :", Leads);
+  // console.log("brandData", brandData);
 
   useEffect(() => {
     fetchData();
@@ -247,7 +247,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
             flexDirection: "column",
           }}
         >
-          <Typography color="error" variant="h6" gutterBottom>
+          {/* <Typography color="error" variant="h6" gutterBottom>
             Error Loading Data
           </Typography>
           <Typography color={colors.textSecondary}>{error}</Typography>
@@ -262,7 +262,9 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
             onClick={fetchData}
           >
             Retry
-          </Button>
+          </Button> */}
+          <Typography color={colors.textSecondary}>We noticed that no one has applied to your brand yet.</Typography>
+
         </Box>
       );
 
