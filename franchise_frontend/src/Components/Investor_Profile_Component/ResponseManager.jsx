@@ -292,9 +292,9 @@ const ContactUs = ({ isMobile }) => (
       
       <Chip
         icon={<Email fontSize="small" />}
-        label="support@mrfranchise.com"
+        label="support.team@mrfranchise.in"
         component="a"
-        href="https://mail.google.com/mail/?view=cm&fs=1&to=support@mrfranchise.com&su=Support%20Request&body=Hi%20Team%2C%20I%20have%20a%20question..."
+        href="https://mail.google.com/mail/?view=cm&fs=1&to=support.team@mrfranchise.in&su=Support%20Request&body=Hi%20Team%2C%20I%20have%20a%20question..."
         target="_blank"
         rel="noopener noreferrer"
         clickable

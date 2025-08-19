@@ -468,7 +468,8 @@ function Footer() {
                   color="primary.main"
                   underline="hover"
                 >
-                  support@mrfranchise.in
+                  
+support.team@mrfranchise.in
                 </Link>
               </Typography>
             </Box>

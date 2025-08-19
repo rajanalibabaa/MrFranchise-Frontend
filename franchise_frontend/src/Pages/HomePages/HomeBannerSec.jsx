@@ -292,15 +292,15 @@ const pageConfig = {
   // ...rest unchanged
   sections: [
     { component: "TopBrandThreevdocards", background: "#fff" },
-    { component: "TopFoodFranchise", background: "#fff" },
+    { component: "TopFoodFranchise", background: "#d5e7ddff" },
     { component: "TopBeverageFranchise", background: "#fff" },
-    { component: "LikedBrands", background: "#fff" },
+    { component: "LikedBrands", background: "#d5e7ddff" },
     { component: "ViewBrands", background: "#fff" },
-    { component: "TopCafeFranchises", background: "#fff" },
+    { component: "TopCafeFranchises", background: "#d5e7ddff" },
     { component: "TopDesertBakeryFranchise", background: "#fff" },
-    { component: "TopTruckAndKiosks", background: "#fff" },
+    { component: "TopTruckAndKiosks", background: "#d5e7ddff" },
     { component: "ShortlistBrands", background: "#fff" },
-    { component: "TopRestaurantsFranchise", background: "#fff" },
+    { component: "TopRestaurantsFranchise", background: "#d5e7ddff" },
     { component: "FindFranchiseLocations", background: "#fff" },
     { component: "ToTrendingBrands", title: "Trending Brands", background: "#fff" },
   ],
@@ -696,7 +696,7 @@ const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
       key={index}
       componentKey={section.component}
       dynamicComponents={dynamicComponents}
-      background={section.background || "white"}
+      background={section.background || "#d5e7ddac"}
       isMobile={isMobile}
     />
 ))}
