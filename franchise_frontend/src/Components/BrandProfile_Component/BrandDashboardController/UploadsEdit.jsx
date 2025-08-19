@@ -76,7 +76,7 @@ const FilePreviewImage = styled("img")({
   borderRadius: 4,
 });
 
-const UploadsControl = ({
+const UploadsEdit = ({
   data = {},
   errors = {},
   onChange,
@@ -1031,4 +1031,4 @@ const UploadsControl = ({
   );
 };
 
-export default UploadsControl;
+export default UploadsEdit;

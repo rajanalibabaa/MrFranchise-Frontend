@@ -442,7 +442,7 @@ function TopBrandVdoCards() {
                         sx={{
                           textTransform: "none",
                           color:
-                            theme.palette.mode === "dark" ? "white" : "white",
+                            theme.palette.mode === "dark" ? "black" : "black",
                           borderColor:
                             theme.palette.mode === "dark"
                               ? "#43ea5e"
@@ -492,7 +492,7 @@ function TopBrandVdoCards() {
                           sx={{
                             textTransform: "none",
                             color:
-                              theme.palette.mode === "dark" ? "white" : "white",
+                              theme.palette.mode === "dark" ? "black" : "black",
                             borderColor:
                               theme.palette.mode === "dark"
                                 ? "#ffb74d"
@@ -533,7 +533,7 @@ function TopBrandVdoCards() {
                           sx={{
                             textTransform: "none",
                             color:
-                              theme.palette.mode === "dark" ? "white" : "white",
+                              theme.palette.mode === "dark" ? "black" : "black",
                             borderColor:
                               theme.palette.mode === "dark"
                                 ? "#ffb74d"

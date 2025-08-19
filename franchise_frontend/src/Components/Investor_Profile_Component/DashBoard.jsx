@@ -1,35 +1,22 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  Box,
-  Typography,
-  Avatar,
-  IconButton,
-  LinearProgress,
- useTheme,
- useMediaQuery,
- Divider ,
-  Pagination,
-  Grid,
-  CircularProgress
-} from "@mui/material";
-import { Business, Favorite, AssignmentTurnedIn, Bookmark, Visibility, Close } from "@mui/icons-material";
+import { Box, Typography, Avatar, IconButton, Divider, CircularProgress } from "@mui/material";
+import { Business, Favorite, AssignmentTurnedIn, Bookmark, Close } from "@mui/icons-material";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import img from "../../assets/Images/logo.png";
 import { api } from "../../Api/api";
-import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice";
 import { fetchShortListedById } from "../../Redux/Slices/shortlistslice";
 import { fetchLikedBrandsById } from "../../Redux/Slices/likeSlice";
 import { fetchViewBrandsById, removeviewBrand } from "../../Redux/Slices/viewSlice"; 
 import { handleShortList } from "../../Api/shortListApi";
 import { likeApiFunction } from "../../Api/likeApi";
-
-// Import components
-import BrandCard from "./DashBoardFunctions/BrandCard";
 import StatCard from "./DashBoardFunctions/StatCard";
+import ViewedBrands from "./DashBoardFunctions/ViewedBrands";
+import LikedTab from "./DashBoardFunctions/LikedTab";
+import AppliedTab from "./DashBoardFunctions/AppliedTab";
+import ShortlistedTab from "./DashBoardFunctions/ShortlistedTab";
 
 const Dashboard = () => {
-  const theme = useTheme();
   const dispatch = useDispatch();
   const [tabValue, setTabValue] = useState(0);
   const [appliedBrands, setAppliedBrands] = useState([]);
@@ -61,6 +48,68 @@ const Dashboard = () => {
     totalShortlisted: shortListState?.pagination?.total || shortlistedBrands.length
   }), [viewedBrands, viewPagination, likedBrands, appliedBrands, shortlistedBrands, shortListState]);
 
+  const fetchBrandDetails = async (brandId, config) => {
+    try {
+      const response = await axios.get(
+        `${api.user.get.brand}/${brandId}`,
+        config
+      );
+      return {
+        ...response.data.data,
+        businessType: response.data.data.businessType || response.data.data.category || 'Not specified'
+      };
+    } catch (error) {
+      console.error(`Error fetching brand ${brandId}:`, error);
+      return null;
+    }
+  };
+
+  const fetchData = useCallback(async () => {
+    if (!investorUUID || !AccessToken) return;
+
+    try {
+      setIsPaginating(true);
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      };
+
+      const [likedRes, shortlistRes, viewRes, appliedRes, userRes] = await Promise.all([
+        dispatch(fetchLikedBrandsById({ userId: investorUUID })),
+        dispatch(fetchShortListedById({ 
+          investorUUID, 
+          page: 1, 
+          limit: itemsPerPage 
+        })),     
+        dispatch(fetchViewBrandsById({ userId: investorUUID })),
+        axios.get(`${api.instantApplyApi.get.getInstaApplyById}/${investorUUID}`, config),
+        axios.get(`${api.user.get.investor}/${investorUUID}`, config)
+      ]);
+
+      // Enhance applied brands with additional details
+      const enhancedAppliedBrands = await Promise.all(
+        appliedRes.data?.data?.map(async (item) => {
+          if (!item.application?.brandId) return item;
+          
+          const brandDetails = await fetchBrandDetails(item.application.brandId, config);
+          return {
+            ...item,
+            brandDetails: brandDetails || {}
+          };
+        }) || []
+      );
+
+      setAppliedBrands(enhancedAppliedBrands);
+      setUserData(userRes.data?.data || null);
+    } catch (error) {
+      console.error("Error in fetchData:", error);
+    } finally {
+      setIsPaginating(false);
+    }
+  }, [investorUUID, AccessToken, dispatch, itemsPerPage]);
+
   useEffect(() => {
     const initialLiked = {};
     likedBrands.forEach(item => {
@@ -81,42 +130,6 @@ const Dashboard = () => {
     setCurrentPage(1);
   }, [tabValue]);
 
-  const fetchData = useCallback(async () => {
-    if (!investorUUID || !AccessToken) return;
-
-    try {
-      setIsPaginating(true);
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${AccessToken}`,
-        }
-      };
-
-      await Promise.all([
-        dispatch(fetchLikedBrandsById({ userId: investorUUID })),
-        dispatch(fetchShortListedById({ 
-          investorUUID, 
-          page: 1, 
-          limit: itemsPerPage 
-        })),     
-        dispatch(fetchViewBrandsById({ userId: investorUUID })),
-        axios.get(`${api.instantApplyApi.get.getInstaApplyById}/${investorUUID}`, config)
-          .then(res => {
-            setAppliedBrands(Array.isArray(res.data?.data) ? res.data.data : []);
-          }),
-        axios.get(`${api.user.get.investor}/${investorUUID}`, config)
-          .then(res => {
-            setUserData(res.data?.data || null);
-          })
-      ]);
-    } catch (error) {
-      console.error("Error in fetchData:", error);
-    } finally {
-      setIsPaginating(false);
-    }
-  }, [investorUUID, AccessToken, dispatch, itemsPerPage]);
-
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -134,7 +147,6 @@ const Dashboard = () => {
 
     const apiBrandId = brandToRemove.uuid || brandToRemove.brandID?.uuid || brandToRemove.brandID;
 
-    // Optimistic UI update
     setLikedStates(prev => {
       const newState = { ...prev };
       delete newState[brandId];
@@ -223,39 +235,6 @@ const Dashboard = () => {
     dispatch(openBrandDialog(brand));
   }, [dispatch]);
 
-  const getCurrentBrands = useCallback(() => {
-    switch(tabValue) {
-      case 0: 
-        return Array.isArray(viewedBrands) ? 
-          viewedBrands.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
-      case 1: 
-        return Array.isArray(likedBrands) ? 
-          likedBrands.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
-      case 2: 
-        return Array.isArray(appliedBrands) ? 
-          appliedBrands.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
-      case 3: 
-        return shortlistedBrands;
-      default: 
-        return [];
-    }
-  }, [tabValue, viewedBrands, likedBrands, appliedBrands, shortlistedBrands, currentPage, itemsPerPage]);
-
-  const totalPages = useMemo(() => {
-    switch(tabValue) {
-      case 0: 
-        return Math.max(1, Math.ceil((viewedBrands?.length || 0) / itemsPerPage));
-      case 1: 
-        return Math.max(1, Math.ceil((likedBrands?.length || 0) / itemsPerPage));
-      case 2: 
-        return Math.max(1, Math.ceil((appliedBrands?.length || 0) / itemsPerPage));
-      case 3: 
-        return Math.max(1, Math.ceil((shortListState?.pagination?.total || 0) / itemsPerPage));
-      default: 
-        return 1;
-    }
-  }, [tabValue, viewedBrands, likedBrands, appliedBrands, shortListState?.pagination?.total, itemsPerPage]);
-
   const handlePageChange = async (event, value) => {
     try {
       setIsPaginating(true);
@@ -292,212 +271,170 @@ const Dashboard = () => {
       );
     }
 
-    const currentBrands = getCurrentBrands();
-    let emptyState = {
-      icon: <Business color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
-      title: "No data available",
-      description: "There are no items to display"
-    };
-
     switch(tabValue) {
-      case 0: 
-        emptyState = {
-          icon: <Visibility color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
-          title: "No viewed brands",
-          description: "Brands you view will appear here"
-        };
-        break;
-      case 1: 
-        emptyState = {
-          icon: <Favorite color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
-          title: "No liked brands yet",
-          description: "Like brands to save them for later"
-        };
-        break;
-      case 2: 
-        emptyState = {
-          icon: <AssignmentTurnedIn color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
-          title: "No applications yet",
-          description: "Your applications will appear here"
-        };
-        break;
-      case 3: 
-        emptyState = {
-          icon: <Bookmark color="disabled" sx={{ fontSize: 60, mb: 2 }} />,
-          title: "No shortlisted brands",
-          description: "Brands you shortlist will appear here"
-        };
-        break;
-      default: 
+      case 0:
+        return (
+          <ViewedBrands
+            brands={viewedBrands}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalPages={Math.max(1, Math.ceil((viewedBrands?.length || 0) / itemsPerPage))}
+            handlePageChange={handlePageChange}
+            likedStates={likedStates}
+            shortlistedStates={shortlistedStates}
+            onViewDetails={handleViewDetails}
+            onToggleLike={toggleLike}
+            onToggleShortlist={toggleShortlist}
+            onToggleViewClose={toggleViewClose}
+            isPaginating={isPaginating}
+          />
+        );
+      case 1:
+        return (
+          <LikedTab
+            items={likedBrands}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalPages={Math.max(1, Math.ceil((likedBrands?.length || 0) / itemsPerPage))}
+            handlePageChange={handlePageChange}
+            likedStates={likedStates}
+            shortlistedStates={shortlistedStates}
+            onViewDetails={handleViewDetails}
+            onToggleLike={toggleLike}
+            onToggleShortlist={toggleShortlist}
+            isPaginating={isPaginating}
+          />
+        );
+      case 2:
+        return (
+          <AppliedTab
+            items={appliedBrands}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalPages={Math.max(1, Math.ceil((appliedBrands?.length || 0) / itemsPerPage))}
+            handlePageChange={handlePageChange}
+            likedStates={likedStates}
+            shortlistedStates={shortlistedStates}
+            onViewDetails={handleViewDetails}
+            onToggleLike={toggleLike}
+            onToggleShortlist={toggleShortlist}
+            isPaginating={isPaginating}
+          />
+        );
+      case 3:
+        return (
+          <ShortlistedTab
+            items={shortlistedBrands}
+            currentPage={currentPage}
+            totalPages={Math.max(1, Math.ceil((shortListState?.pagination?.total || 0) / itemsPerPage))}
+            handlePageChange={handlePageChange}
+            likedStates={likedStates}
+            shortlistedStates={shortlistedStates}
+            onViewDetails={handleViewDetails}
+            onToggleLike={toggleLike}
+            onToggleShortlist={toggleShortlist}
+            isPaginating={isPaginating}
+          />
+        );
+      default:
+        return null;
     }
-
-    return (
-      <>
-        {isPaginating && <LinearProgress sx={{ width: '100%', mb: 2 }} />}
-        {currentBrands.length > 0 ? (
-          <>
-            <Grid container spacing={3} justifyContent="center">
-              {currentBrands.map((item) => (
-                <Grid item xs={12} sm={6} md={4} lg={2.5} key={item?.uuid || Math.random()}>
-                  <BrandCard 
-                    item={item} 
-                    type={['viewed', 'liked', 'applied', 'shortlisted'][tabValue]}
-                    likedStates={likedStates}
-                    shortlistedStates={shortlistedStates}
-                    onViewDetails={handleViewDetails}
-                    onToggleLike={toggleLike}
-                    onToggleShortlist={toggleShortlist}
-                    onToggleViewClose={toggleViewClose}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-            
-            {totalPages > 1 && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
-                <Pagination
-                  count={totalPages}
-                  page={currentPage}
-                  onChange={handlePageChange}
-                  color="primary"
-                  size="large"
-                  sx={{
-                    '& .MuiPaginationItem-root': {
-                      fontSize: '1rem',
-                      '&.Mui-selected': {
-                        fontWeight: 'bold',
-                      },
-                    },
-                  }}
-                />
-              </Box>
-            )}
-          </>
-        ) : (
-          <Box sx={{ py: 10, textAlign: 'center' }}>
-            {emptyState.icon}
-            <Typography variant="h6">{emptyState.title}</Typography>
-            <Typography>{emptyState.description}</Typography>
-          </Box>
-        )}
-      </>
-    );
   }, [
-    isLoading, 
-    errorMessage, 
-    tabValue, 
-    getCurrentBrands, 
-    totalPages, 
-    currentPage, 
-    likedStates, 
-    shortlistedStates,
-    handleViewDetails, 
-    toggleLike, 
-    toggleShortlist,
-    toggleViewClose,
-    isPaginating
+    isLoading, errorMessage, tabValue, currentPage, itemsPerPage,
+    viewedBrands, likedBrands, appliedBrands, shortlistedBrands,
+    likedStates, shortlistedStates, handleViewDetails, 
+    toggleLike, toggleShortlist, toggleViewClose, isPaginating,
+    shortListState?.pagination?.total
   ]);
 
   return (
-    <Box 
-    // sx={{ 
-    //   minHeight: '100vh',
-    //   p: { xs: 2, md: 4 }
-    // }}
-    >
-      <Box>
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          p: 2,
-          gap: 2
-        }}>
-          <Avatar
-            src={userData?.profileImage || img}
-            loading="lazy"
-            alt="Profile"
-            sx={{
-              width: 60,
-              height: 60,
-              mr: { md: 3 },
-              border: '3px solid #689f38'
-            }}
-          />
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h5" fontWeight={600}>
-              {userData?.firstName || 'Investor'} {userData?.lastName || ''}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {userData?.inveterID || ''}
-            </Typography>
-          </Box>
+    <Box>
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        p: 2,
+        gap: 2
+      }}>
+        <Avatar
+          src={userData?.profileImage || img}
+          loading="lazy"
+          alt="Profile"
+          sx={{
+            width: 60,
+            height: 60,
+            mr: { md: 3 },
+            border: '3px solid #689f38'
+          }}
+        />
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h5" fontWeight={600}>
+            {userData?.firstName || 'Investor'} {userData?.lastName || ''}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {userData?.inveterID || ''}
+          </Typography>
         </Box>
       </Box>
 
-   <Box 
-  sx={{ 
-    display: 'flex', 
-    gap: 2,
-    justifyContent: { xs: 'center', md: 'flex-start' },
-    mt: 3,
-    flexWrap: 'nowrap',
-    overflowX: 'auto',
-    pb: 1,
-    '&::-webkit-scrollbar': {
-      height: '6px',
-    },
-    '&::-webkit-scrollbar-thumb': {
-      backgroundColor: 'rgba(0,0,0,0.2)',
-      borderRadius: '3px',
-    },
-    position: 'relative', 
-    py: 2  
-  }}
->
-  
-  <StatCard 
-    icon={<Business />} 
-    title="Viewed" 
-    value={stats.totalViews} 
-    color="76, 175, 80"
-    isSelected={tabValue === 0}
-    onClick={() => setTabValue(0)}
-  />
-  <StatCard 
-    icon={<Favorite />} 
-    title="Liked" 
-    value={stats.totalLikes} 
-    color="244, 67, 54"
-    isSelected={tabValue === 1}
-    onClick={() => setTabValue(1)}
-  />
-  <StatCard 
-    icon={<AssignmentTurnedIn />} 
-    title="Applied" 
-    value={stats.totalApplications} 
-    color="33, 150, 243"
-    isSelected={tabValue === 2}
-    onClick={() => setTabValue(2)}
-  />
-  <StatCard 
-    icon={<Bookmark />}  
-    title="Shortlisted" 
-    value={stats.totalShortlisted} 
-    color="156, 39, 176"  
-    isSelected={tabValue === 3} 
-    onClick={() => setTabValue(3)}
-  />
-  
-  <Divider 
-    sx={{ 
-      position: 'absolute', 
-      bottom: 0,  // Changed from top to bottom
-      left: 0, 
-      right: 0, 
-      borderColor: 'divider' 
-    }} 
-  />
-</Box>
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 2,
+        justifyContent: { xs: 'center', md: 'flex-start' },
+        mt: 3,
+        flexWrap: 'nowrap',
+        overflowX: 'auto',
+        pb: 1,
+        '&::-webkit-scrollbar': { height: '6px' },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: 'rgba(0,0,0,0.2)',
+          borderRadius: '3px',
+        },
+        position: 'relative', 
+        py: 2  
+      }}>
+        <StatCard 
+          icon={<Business />} 
+          title="Viewed" 
+          value={stats.totalViews} 
+          color="76, 175, 80"
+          isSelected={tabValue === 0}
+          onClick={() => setTabValue(0)}
+        />
+        <StatCard 
+          icon={<Favorite />} 
+          title="Liked" 
+          value={stats.totalLikes} 
+          color="244, 67, 54"
+          isSelected={tabValue === 1}
+          onClick={() => setTabValue(1)}
+        />
+        <StatCard 
+          icon={<AssignmentTurnedIn />} 
+          title="Applied" 
+          value={stats.totalApplications} 
+          color="33, 150, 243"
+          isSelected={tabValue === 2}
+          onClick={() => setTabValue(2)}
+        />
+        <StatCard 
+          icon={<Bookmark />}  
+          title="Shortlisted" 
+          value={stats.totalShortlisted} 
+          color="156, 39, 176"  
+          isSelected={tabValue === 3} 
+          onClick={() => setTabValue(3)}
+        />
+        
+        <Divider 
+          sx={{ 
+            position: 'absolute', 
+            bottom: 0,
+            left: 0, 
+            right: 0, 
+            borderColor: 'divider' 
+          }} 
+        />
+      </Box>
 
       <Box sx={{ p: 3 }}>
         {removeMsg && (

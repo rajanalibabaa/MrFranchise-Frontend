@@ -45,8 +45,10 @@ export const fetchBrandById = async (brandId) => {
   try {
     const response = await apiClient.get(
       `/brandlisting/getBrandListingByUUID/${brandId}`
+      
     );
     return response.data.data;
+    console.log("Brand data fetched:", response.data.data);
   } catch (error) {
     console.error("Error fetching brand by ID:", error);
     throw error;

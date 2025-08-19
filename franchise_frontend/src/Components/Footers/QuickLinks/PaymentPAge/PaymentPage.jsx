@@ -167,7 +167,7 @@ const PaymentPage = ({ membership, banners, onBack, onSubmit }) => {
           {!showQR ? (
             <>
               {/* Payment Methods */}
-              <Paper elevation={3} sx={{ p: 3, mb: 4, borderRadius: 3 }}>
+              {/* <Paper elevation={3} sx={{ p: 3, mb: 4, borderRadius: 3 }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
                   Select Payment Method
                 </Typography>
@@ -217,7 +217,7 @@ const PaymentPage = ({ membership, banners, onBack, onSubmit }) => {
                     }
                   />
                 </RadioGroup>
-              </Paper>
+              </Paper> */}
 
               {/* Payment Form */}
               {paymentMethod === 'credit_card' && (
@@ -292,7 +292,7 @@ const PaymentPage = ({ membership, banners, onBack, onSubmit }) => {
                 fullWidth
                 variant="contained"
                 size="large"
-                onClick={handlePaymentSubmit}
+                // onClick={handlePaymentSubmit}
                 sx={{
                   py: 2,
                   borderRadius: 2,
@@ -305,12 +305,13 @@ const PaymentPage = ({ membership, banners, onBack, onSubmit }) => {
                   }
                 }}
               >
-                {paymentMethod === 'upi' ? 'Generate UPI QR Code' : `Pay ₹${totalAmount.toLocaleString()}`}
+                {/* {paymentMethod === 'upi' ? 'Generate UPI QR Code' : `Pay ₹${totalAmount.toLocaleString()}`} */}
+                Please Contact support.team@mrfranchise.in To Buy
               </Button>
             </>
           ) : (
             <>
-              {/* UPI QR Code Display */}
+              {/* UPI QR Code Display
               <Paper elevation={3} sx={{ p: 4, textAlign: 'center', borderRadius: 3, mb: 3 }}>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                   Scan to Pay with Google Pay
@@ -352,7 +353,7 @@ const PaymentPage = ({ membership, banners, onBack, onSubmit }) => {
               
               <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
                 Waiting for payment confirmation...
-              </Typography>
+              </Typography> */}
             </>
           )}
         </>

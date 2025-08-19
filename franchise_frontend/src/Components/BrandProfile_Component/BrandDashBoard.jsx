@@ -31,7 +31,7 @@ import {
   DialogContent,
   DialogActions,
   CardContent,
-  Tooltip
+  Tooltip,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -120,9 +120,12 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
           `${API_BASE_URL}/instantapply/getAllInstaApply/${brandUUID}`,
           { headers: { Authorization: `Bearer ${token}` } }
         ),
-        axios.get(`${API_BASE_URL}/instantapply/getInstantApplyLocationLeadControllerById/${brandUUID}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        axios.get(
+          `${API_BASE_URL}/instantapply/getInstantApplyLocationLeadControllerById/${brandUUID}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        ),
       ];
       const responses = await Promise.all(
         endpoints.map((p) => p.catch((e) => ({ error: e })))
@@ -140,9 +143,9 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
       setLoading(false);
     }
   };
-  console.log("applyData :",applyData);
-  console.log("lead :",Leads);
-  console.log ("brandData",brandData)
+  console.log("applyData :", applyData);
+  console.log("lead :", Leads);
+  console.log("brandData", brandData);
 
   useEffect(() => {
     fetchData();
@@ -264,565 +267,561 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
       );
 
     switch (tabValue) {
+      // case 0:
+        // return (
+        //   <Box mt={4}>
+        //     <Box
+        //       sx={{
+        //         display: "flex",
+        //         justifyContent: "space-between",
+        //         alignItems: "center",
+        //         mb: 2,
+        //       }}
+        //     >
+        //       <Typography variant="h6" sx={{ color: colors.textPrimary }}>
+        //         Total Enquiries: {filteredLeadsData.length}
+        //       </Typography>
+        //     </Box>
+
+        //     {/* Filter Controls */}
+        //     <Box
+        //       sx={{
+        //         display: "flex",
+        //         flexDirection: isMobile ? "column" : "row",
+        //         gap: 2,
+        //         mb: 3,
+        //         alignItems: "center",
+        //       }}
+        //     >
+        //       {isMobile ? (
+        //         <>
+        //           <IconButton
+        //             onClick={() => setFilterDialogOpen(true)}
+        //             sx={{ alignSelf: "flex-end", color: colors.accent }}
+        //           >
+        //             <FilterList />
+        //           </IconButton>
+
+        //           <Dialog
+        //             open={filterDialogOpen}
+        //             onClose={() => setFilterDialogOpen(false)}
+        //             fullWidth
+        //             maxWidth="xs"
+        //           >
+        //             <DialogTitle
+        //               sx={{
+        //                 color: colors.textPrimary,
+        //                 backgroundColor: colors.cardBackground,
+        //               }}
+        //             >
+        //               Filter Enquiries
+        //             </DialogTitle>
+        //             <IconButton
+        //               onClick={() => setFilterDialogOpen(false)}
+        //               sx={{
+        //                 position: "absolute",
+        //                 right: 8,
+        //                 top: 8,
+        //                 color: colors.textSecondary,
+        //               }}
+        //             >
+        //               <Close />
+        //             </IconButton>
+
+        //             <DialogContent
+        //               sx={{ backgroundColor: colors.cardBackground }}
+        //             >
+        //               {/* Investment Range Filter */}
+        //               <FormControl fullWidth sx={{ mt: 1 }}>
+        //                 <InputLabel sx={{ color: colors.textSecondary }}>
+        //                   Investment Range
+        //                 </InputLabel>
+        //                 <Select
+        //                   label="Investment Range"
+        //                   value={investmentFilter}
+        //                   onChange={(e) => setInvestmentFilter(e.target.value)}
+        //                   sx={{
+        //                     "& .MuiOutlinedInput-notchedOutline": {
+        //                       borderColor: colors.divider,
+        //                     },
+        //                     "&:hover .MuiOutlinedInput-notchedOutline": {
+        //                       borderColor: colors.accent,
+        //                     },
+        //                   }}
+        //                 >
+        //                   <MenuItem value="all">All Ranges</MenuItem>
+        //                   {uniqueInvestmentRanges.map((range) => (
+        //                     <MenuItem key={range} value={range}>
+        //                       {range}
+        //                     </MenuItem>
+        //                   ))}
+        //                 </Select>
+        //               </FormControl>
+
+        //               {/* Child Category Filter */}
+        //               <FormControl fullWidth sx={{ mt: 2 }}>
+        //                 <InputLabel sx={{ color: colors.textSecondary }}>
+        //                   Category
+        //                 </InputLabel>
+        //                 <Select
+        //                   label="Category"
+        //                   value={categoryFilter}
+        //                   onChange={(e) => setCategoryFilter(e.target.value)}
+        //                   sx={{
+        //                     "& .MuiOutlinedInput-notchedOutline": {
+        //                       borderColor: colors.divider,
+        //                     },
+        //                     "&:hover .MuiOutlinedInput-notchedOutline": {
+        //                       borderColor: colors.accent,
+        //                     },
+        //                   }}
+        //                 >
+        //                   <MenuItem value="all">All Categories</MenuItem>
+        //                   {[
+        //                     ...new Set(
+        //                       applyData.flatMap(
+        //                         (lead) =>
+        //                           lead.category
+        //                             ?.map((c) => c.child)
+        //                             .filter(Boolean) || []
+        //                       )
+        //                     ),
+        //                   ].map((child) => (
+        //                     <MenuItem key={child} value={child}>
+        //                       {child}
+        //                     </MenuItem>
+        //                   ))}
+        //                 </Select>
+        //               </FormControl>
+
+        //               {/* Location Filter */}
+        //               <FormControl fullWidth sx={{ mt: 2 }}>
+        //                 <InputLabel sx={{ color: colors.textSecondary }}>
+        //                   Location
+        //                 </InputLabel>
+        //                 <Select
+        //                   label="Location"
+        //                   value={locationFilter}
+        //                   onChange={(e) => setLocationFilter(e.target.value)}
+        //                   sx={{
+        //                     "& .MuiOutlinedInput-notchedOutline": {
+        //                       borderColor: colors.divider,
+        //                     },
+        //                     "&:hover .MuiOutlinedInput-notchedOutline": {
+        //                       borderColor: colors.accent,
+        //                     },
+        //                   }}
+        //                 >
+        //                   <MenuItem value="all">All Locations</MenuItem>
+        //                   {[
+        //                     ...new Set(
+        //                       applyData.map(
+        //                         (lead) => lead.location?.state || ""
+        //                       )
+        //                     ),
+        //                   ]
+        //                     .filter(Boolean)
+        //                     .map((state) => (
+        //                       <MenuItem key={state} value={state}>
+        //                         {state}
+        //                       </MenuItem>
+        //                     ))}
+        //                 </Select>
+        //               </FormControl>
+
+        //               {/* Date Filter */}
+        //               <FormControl fullWidth sx={{ mt: 2 }}>
+        //                 <InputLabel sx={{ color: colors.textSecondary }}>
+        //                   Time Period
+        //                 </InputLabel>
+        //                 <Select
+        //                   label="Time Period"
+        //                   value={dateFilter}
+        //                   onChange={(e) => setDateFilter(e.target.value)}
+        //                   sx={{
+        //                     "& .MuiOutlinedInput-notchedOutline": {
+        //                       borderColor: colors.divider,
+        //                     },
+        //                     "&:hover .MuiOutlinedInput-notchedOutline": {
+        //                       borderColor: colors.accent,
+        //                     },
+        //                   }}
+        //                 >
+        //                   {dateFilters.map((option) => (
+        //                     <MenuItem key={option.value} value={option.value}>
+        //                       {option.label}
+        //                     </MenuItem>
+        //                   ))}
+        //                 </Select>
+        //               </FormControl>
+        //             </DialogContent>
+
+        //             <DialogActions
+        //               sx={{ backgroundColor: colors.cardBackground }}
+        //             >
+        //               <Button
+        //                 onClick={() => {
+        //                   setInvestmentFilter("all");
+        //                   setCategoryFilter("all");
+        //                   setLocationFilter("all");
+        //                   setDateFilter("all");
+        //                   setFilterDialogOpen(false);
+        //                 }}
+        //                 sx={{ color: colors.textSecondary }}
+        //                 aria-label="reset"
+        //               >
+        //                 Reset
+        //               </Button>
+        //               <Button
+        //                 variant="contained"
+        //                 onClick={() => setFilterDialogOpen(false)}
+        //                 sx={{
+        //                   backgroundColor: colors.accent,
+        //                   "&:hover": { backgroundColor: colors.secondary },
+        //                 }}
+        //                 aria-label="apply"
+        //               >
+        //                 Apply
+        //               </Button>
+        //             </DialogActions>
+        //           </Dialog>
+        //         </>
+        //       ) : (
+        //         <>
+        //           {/* Desktop Filters */}
+        //           <FormControl
+        //             sx={{ minWidth: 200 }}
+        //             size={isMobile ? "small" : "medium"}
+        //           >
+        //             <InputLabel sx={{ color: colors.textSecondary }}>
+        //               Investment Range
+        //             </InputLabel>
+        //             <Select
+        //               label="Investment Range"
+        //               value={investmentFilter}
+        //               onChange={(e) => setInvestmentFilter(e.target.value)}
+        //               sx={{
+        //                 "& .MuiOutlinedInput-notchedOutline": {
+        //                   borderColor: colors.divider,
+        //                 },
+        //                 "&:hover .MuiOutlinedInput-notchedOutline": {
+        //                   borderColor: colors.accent,
+        //                 },
+        //               }}
+        //             >
+        //               <MenuItem value="all">All Ranges</MenuItem>
+        //               {uniqueInvestmentRanges.map((range) => (
+        //                 <MenuItem key={range} value={range}>
+        //                   {range}
+        //                 </MenuItem>
+        //               ))}
+        //             </Select>
+        //           </FormControl>
+
+        //           <FormControl
+        //             sx={{ minWidth: 200 }}
+        //             size={isMobile ? "small" : "medium"}
+        //           >
+        //             <InputLabel sx={{ color: colors.textSecondary }}>
+        //               Category
+        //             </InputLabel>
+        //             <Select
+        //               label="Category"
+        //               value={categoryFilter}
+        //               onChange={(e) => setCategoryFilter(e.target.value)}
+        //               sx={{
+        //                 "& .MuiOutlinedInput-notchedOutline": {
+        //                   borderColor: colors.divider,
+        //                 },
+        //                 "&:hover .MuiOutlinedInput-notchedOutline": {
+        //                   borderColor: colors.accent,
+        //                 },
+        //               }}
+        //             >
+        //               <MenuItem value="all">All Categories</MenuItem>
+        //               {[
+        //                 ...new Set(
+        //                   applyData.flatMap(
+        //                     (lead) =>
+        //                       lead.category
+        //                         ?.map((c) => c.child)
+        //                         .filter(Boolean) || []
+        //                   )
+        //                 ),
+        //               ].map((child) => (
+        //                 <MenuItem key={child} value={child}>
+        //                   {child}
+        //                 </MenuItem>
+        //               ))}
+        //             </Select>
+        //           </FormControl>
+
+        //           <FormControl
+        //             sx={{ minWidth: 200 }}
+        //             size={isMobile ? "small" : "medium"}
+        //           >
+        //             <InputLabel sx={{ color: colors.textSecondary }}>
+        //               Location
+        //             </InputLabel>
+        //             <Select
+        //               label="Location"
+        //               value={locationFilter}
+        //               onChange={(e) => setLocationFilter(e.target.value)}
+        //               sx={{
+        //                 "& .MuiOutlinedInput-notchedOutline": {
+        //                   borderColor: colors.divider,
+        //                 },
+        //                 "&:hover .MuiOutlinedInput-notchedOutline": {
+        //                   borderColor: colors.accent,
+        //                 },
+        //               }}
+        //             >
+        //               <MenuItem value="all">All Locations</MenuItem>
+        //               {[
+        //                 ...new Set(
+        //                   applyData.map((lead) => lead.location?.state || "")
+        //                 ),
+        //               ]
+        //                 .filter(Boolean)
+        //                 .map((state) => (
+        //                   <MenuItem key={state} value={state}>
+        //                     {state}
+        //                   </MenuItem>
+        //                 ))}
+        //             </Select>
+        //           </FormControl>
+
+        //           <FormControl
+        //             sx={{ minWidth: 200 }}
+        //             size={isMobile ? "small" : "medium"}
+        //           >
+        //             <InputLabel sx={{ color: colors.textSecondary }}>
+        //               Time Period
+        //             </InputLabel>
+        //             <Select
+        //               label="Time Period"
+        //               value={dateFilter}
+        //               onChange={(e) => setDateFilter(e.target.value)}
+        //               sx={{
+        //                 "& .MuiOutlinedInput-notchedOutline": {
+        //                   borderColor: colors.divider,
+        //                 },
+        //                 "&:hover .MuiOutlinedInput-notchedOutline": {
+        //                   borderColor: colors.accent,
+        //                 },
+        //               }}
+        //             >
+        //               {dateFilters.map((option) => (
+        //                 <MenuItem key={option.value} value={option.value}>
+        //                   {option.label}
+        //                 </MenuItem>
+        //               ))}
+        //             </Select>
+        //           </FormControl>
+        //         </>
+        //       )}
+        //     </Box>
+
+        //     {/* Enquiries Table */}
+        //     {filterByDate(applyData).filter((lead) => {
+        //       const searchLower = searchTerm.toLowerCase();
+        //       const matchesSearch =
+        //         !searchTerm ||
+        //         lead.investorName?.toLowerCase().includes(searchLower) ||
+        //         lead.investorEmail?.toLowerCase().includes(searchLower) ||
+        //         lead.investorPhone?.includes(searchTerm) ||
+        //         lead.location?.district?.toLowerCase().includes(searchLower) ||
+        //         lead.location?.state?.toLowerCase().includes(searchLower) ||
+        //         lead.location?.city?.toLowerCase().includes(searchLower);
+
+        //       const matchesCategory =
+        //         categoryFilter === "all" ||
+        //         (lead.category &&
+        //           lead.category.some((c) => c.child === categoryFilter));
+
+        //       const matchesLocation =
+        //         locationFilter === "all" ||
+        //         lead.location?.state === locationFilter;
+
+        //       const matchesInvestment =
+        //         investmentFilter === "all" ||
+        //         lead.investmentRange === investmentFilter;
+
+        //       return (
+        //         matchesSearch &&
+        //         matchesCategory &&
+        //         matchesLocation &&
+        //         matchesInvestment
+        //       );
+        //     }).length > 0 ? (
+        //       <TableContainer
+        //         component={Paper}
+        //         sx={{
+        //           border: `1px solid ${colors.divider}`,
+        //           boxShadow: "none",
+        //         }}
+        //       >
+        //         <Table>
+        //           <TableHead>
+        //             <TableRow sx={{ backgroundColor: colors.primary }}>
+        //               <TableCell sx={{ color: "#fff", fontWeight: 600 }}>
+        //                 Full Name
+        //               </TableCell>
+        //               {!isMobile && (
+        //                 <TableCell sx={{ color: "#fff", fontWeight: 600 }}>
+        //                   Mobile
+        //                 </TableCell>
+        //               )}
+        //               <TableCell sx={{ color: "#fff", fontWeight: 600 }}>
+        //                 Location
+        //               </TableCell>
+        //               {!isTablet && (
+        //                 <TableCell sx={{ color: "#fff", fontWeight: 600 }}>
+        //                   Category
+        //                 </TableCell>
+        //               )}
+        //               {!isTablet && (
+        //                 <TableCell sx={{ color: "#fff", fontWeight: 600 }}>
+        //                   Investment
+        //                 </TableCell>
+        //               )}
+        //               <TableCell
+        //                 align="right"
+        //                 sx={{ color: "#fff", fontWeight: 600 }}
+        //               >
+        //                 Actions
+        //               </TableCell>
+        //             </TableRow>
+        //           </TableHead>
+        //           <TableBody>
+        //             {filterByDate(applyData)
+        //               .filter((lead) => {
+        //                 const searchLower = searchTerm.toLowerCase();
+        //                 const matchesSearch = !searchTerm || lead.invest;
+        //                 orName?.toLowerCase().includes(searchLower) ||
+        //                   lead.investorEmail
+        //                     ?.toLowerCase()
+        //                     .includes(searchLower) ||
+        //                   lead.investorPhone?.includes(searchTerm) ||
+        //                   lead.location?.district
+        //                     ?.toLowerCase()
+        //                     .includes(searchLower) ||
+        //                   lead.location?.state
+        //                     ?.toLowerCase()
+        //                     .includes(searchLower) ||
+        //                   lead.location?.city
+        //                     ?.toLowerCase()
+        //                     .includes(searchLower);
+
+        //                 const matchesCategory =
+        //                   categoryFilter === "all" ||
+        //                   (lead.category &&
+        //                     lead.category.some(
+        //                       (c) => c.child === categoryFilter
+        //                     ));
+
+        //                 const matchesLocation =
+        //                   locationFilter === "all" ||
+        //                   lead.location?.state === locationFilter;
+
+        //                 const matchesInvestment =
+        //                   investmentFilter === "all" ||
+        //                   lead.investmentRange === investmentFilter;
+
+        //                 return (
+        //                   matchesSearch &&
+        //                   matchesCategory &&
+        //                   matchesLocation &&
+        //                   matchesInvestment
+        //                 );
+        //               })
+        //               .map((lead, index) => (
+        //                 <TableRow
+        //                   key={index}
+        //                   hover
+        //                   sx={{
+        //                     "&:hover": { backgroundColor: colors.divider },
+        //                   }}
+        //                 >
+        //                   <TableCell sx={{ color: colors.textPrimary }}>
+        //                     {lead?.investorName || "Unknown"}
+        //                   </TableCell>
+        //                   {!isMobile && (
+        //                     <TableCell sx={{ color: colors.textPrimary }}>
+        //                       {lead.investorPhone || "N/A"}
+        //                     </TableCell>
+        //                   )}
+        //                   <TableCell sx={{ color: colors.textPrimary }}>
+        //                     {[lead.location?.state]
+        //                       .filter(Boolean)
+        //                       .join(", ") || "N/A"}
+        //                   </TableCell>
+        //                   {!isTablet && (
+        //                     <TableCell sx={{ color: colors.textPrimary }}>
+        //                       {lead.category?.[0]?.child || "N/A"}
+        //                     </TableCell>
+        //                   )}
+        //                   {!isTablet && (
+        //                     <TableCell sx={{ color: colors.textPrimary }}>
+        //                       {lead.investmentRange || "N/A"}
+        //                     </TableCell>
+        //                   )}
+        //                   <TableCell align="right">
+        //                     <Button
+        //                       variant="outlined"
+        //                       size="small"
+        //                       onClick={() => handleViewDetails(lead)}
+        //                       sx={{
+        //                         color: colors.accent,
+        //                         borderColor: colors.accent,
+        //                         "&:hover": {
+        //                           backgroundColor: `${colors.accent}15`,
+        //                         },
+        //                       }}
+        //                       aria-label="details"
+        //                     >
+        //                       Details
+        //                     </Button>
+        //                   </TableCell>
+        //                 </TableRow>
+        //               ))}
+        //           </TableBody>
+        //         </Table>
+        //       </TableContainer>
+        //     ) : (
+        //       <Box
+        //         sx={{
+        //           display: "flex",
+        //           justifyContent: "center",
+        //           alignItems: "center",
+        //           height: "200px",
+        //           flexDirection: "column",
+        //           border: `1px dashed ${colors.divider}`,
+        //           borderRadius: 2,
+        //           backgroundColor: colors.cardBackground,
+        //         }}
+        //       >
+        //         <Typography
+        //           variant="h6"
+        //           color={colors.textSecondary}
+        //           gutterBottom
+        //         >
+        //           No enquiries found
+        //         </Typography>
+        //         <Typography variant="body2" color={colors.textSecondary}>
+        //           {searchTerm ||
+        //           investmentFilter !== "all" ||
+        //           categoryFilter !== "all" ||
+        //           locationFilter !== "all" ||
+        //           dateFilter !== "all"
+        //             ? "Try adjusting your search or filters"
+        //             : "No enquiries have been recorded yet"}
+        //         </Typography>
+        //       </Box>
+        //     )}
+        //   </Box>
+        // );
       case 0:
-        return (
-          <Box mt={4}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 2,
-              }}
-            >
-              <Typography variant="h6" sx={{ color: colors.textPrimary }}>
-                Total Enquiries: {filteredLeadsData.length}
-              </Typography>
-            </Box>
-
-            {/* Filter Controls */}
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                gap: 2,
-                mb: 3,
-                alignItems: "center",
-              }}
-            >
-              {isMobile ? (
-                <>
-                  <IconButton
-                    onClick={() => setFilterDialogOpen(true)}
-                    sx={{ alignSelf: "flex-end", color: colors.accent }}
-                  >
-                    <FilterList />
-                  </IconButton>
-
-                  <Dialog
-                    open={filterDialogOpen}
-                    onClose={() => setFilterDialogOpen(false)}
-                    fullWidth
-                    maxWidth="xs"
-                  >
-                    <DialogTitle
-                      sx={{
-                        color: colors.textPrimary,
-                        backgroundColor: colors.cardBackground,
-                      }}
-                    >
-                      Filter Enquiries
-                    </DialogTitle>
-                    <IconButton
-                      onClick={() => setFilterDialogOpen(false)}
-                      sx={{
-                        position: "absolute",
-                        right: 8,
-                        top: 8,
-                        color: colors.textSecondary,
-                      }}
-                    >
-                      <Close />
-                    </IconButton>
-
-                    <DialogContent
-                      sx={{ backgroundColor: colors.cardBackground }}
-                    >
-                      {/* Investment Range Filter */}
-                      <FormControl fullWidth sx={{ mt: 1 }}>
-                        <InputLabel sx={{ color: colors.textSecondary }}>
-                          Investment Range
-                        </InputLabel>
-                        <Select
-                          label="Investment Range"
-                          value={investmentFilter}
-                          onChange={(e) => setInvestmentFilter(e.target.value)}
-                          sx={{
-                            "& .MuiOutlinedInput-notchedOutline": {
-                              borderColor: colors.divider,
-                            },
-                            "&:hover .MuiOutlinedInput-notchedOutline": {
-                              borderColor: colors.accent,
-                            },
-                          }}
-                        >
-                          <MenuItem value="all">All Ranges</MenuItem>
-                          {uniqueInvestmentRanges.map((range) => (
-                            <MenuItem key={range} value={range}>
-                              {range}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-
-                      {/* Child Category Filter */}
-                      <FormControl fullWidth sx={{ mt: 2 }}>
-                        <InputLabel sx={{ color: colors.textSecondary }}>
-                          Category
-                        </InputLabel>
-                        <Select
-                          label="Category"
-                          value={categoryFilter}
-                          onChange={(e) => setCategoryFilter(e.target.value)}
-                          sx={{
-                            "& .MuiOutlinedInput-notchedOutline": {
-                              borderColor: colors.divider,
-                            },
-                            "&:hover .MuiOutlinedInput-notchedOutline": {
-                              borderColor: colors.accent,
-                            },
-                          }}
-                        >
-                          <MenuItem value="all">All Categories</MenuItem>
-                          {[
-                            ...new Set(
-                              applyData.flatMap(
-                                (lead) =>
-                                  lead.category
-                                    ?.map((c) => c.child)
-                                    .filter(Boolean) || []
-                              )
-                            ),
-                          ].map((child) => (
-                            <MenuItem key={child} value={child}>
-                              {child}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-
-                      {/* Location Filter */}
-                      <FormControl fullWidth sx={{ mt: 2 }}>
-                        <InputLabel sx={{ color: colors.textSecondary }}>
-                          Location
-                        </InputLabel>
-                        <Select
-                          label="Location"
-                          value={locationFilter}
-                          onChange={(e) => setLocationFilter(e.target.value)}
-                          sx={{
-                            "& .MuiOutlinedInput-notchedOutline": {
-                              borderColor: colors.divider,
-                            },
-                            "&:hover .MuiOutlinedInput-notchedOutline": {
-                              borderColor: colors.accent,
-                            },
-                          }}
-                        >
-                          <MenuItem value="all">All Locations</MenuItem>
-                          {[
-                            ...new Set(
-                              applyData.map(
-                                (lead) => lead.location?.state || ""
-                              )
-                            ),
-                          ]
-                            .filter(Boolean)
-                            .map((state) => (
-                              <MenuItem key={state} value={state}>
-                                {state}
-                              </MenuItem>
-                            ))}
-                        </Select>
-                      </FormControl>
-
-                      {/* Date Filter */}
-                      <FormControl fullWidth sx={{ mt: 2 }}>
-                        <InputLabel sx={{ color: colors.textSecondary }}>
-                          Time Period
-                        </InputLabel>
-                        <Select
-                          label="Time Period"
-                          value={dateFilter}
-                          onChange={(e) => setDateFilter(e.target.value)}
-                          sx={{
-                            "& .MuiOutlinedInput-notchedOutline": {
-                              borderColor: colors.divider,
-                            },
-                            "&:hover .MuiOutlinedInput-notchedOutline": {
-                              borderColor: colors.accent,
-                            },
-                          }}
-                        >
-                          {dateFilters.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                              {option.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </DialogContent>
-
-                    <DialogActions
-                      sx={{ backgroundColor: colors.cardBackground }}
-                    >
-                      <Button
-                        onClick={() => {
-                          setInvestmentFilter("all");
-                          setCategoryFilter("all");
-                          setLocationFilter("all");
-                          setDateFilter("all");
-                          setFilterDialogOpen(false);
-                        }}
-                        sx={{ color: colors.textSecondary }}
-                        aria-label="reset"
-                      >
-                        Reset
-                      </Button>
-                      <Button
-                        variant="contained"
-                        onClick={() => setFilterDialogOpen(false)}
-                        sx={{
-                          backgroundColor: colors.accent,
-                          "&:hover": { backgroundColor: colors.secondary },
-                        }}
-                        aria-label="apply"
-                      >
-                        Apply
-                      </Button>
-                    </DialogActions>
-                  </Dialog>
-                </>
-              ) : (
-                <>
-                  {/* Desktop Filters */}
-                  <FormControl
-                    sx={{ minWidth: 200 }}
-                    size={isMobile ? "small" : "medium"}
-                  >
-                    <InputLabel sx={{ color: colors.textSecondary }}>
-                      Investment Range
-                    </InputLabel>
-                    <Select
-                      label="Investment Range"
-                      value={investmentFilter}
-                      onChange={(e) => setInvestmentFilter(e.target.value)}
-                      sx={{
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: colors.divider,
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: colors.accent,
-                        },
-                      }}
-                    >
-                      <MenuItem value="all">All Ranges</MenuItem>
-                      {uniqueInvestmentRanges.map((range) => (
-                        <MenuItem key={range} value={range}>
-                          {range}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <FormControl
-                    sx={{ minWidth: 200 }}
-                    size={isMobile ? "small" : "medium"}
-                  >
-                    <InputLabel sx={{ color: colors.textSecondary }}>
-                      Category
-                    </InputLabel>
-                    <Select
-                      label="Category"
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
-                      sx={{
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: colors.divider,
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: colors.accent,
-                        },
-                      }}
-                    >
-                      <MenuItem value="all">All Categories</MenuItem>
-                      {[
-                        ...new Set(
-                          applyData.flatMap(
-                            (lead) =>
-                              lead.category
-                                ?.map((c) => c.child)
-                                .filter(Boolean) || []
-                          )
-                        ),
-                      ].map((child) => (
-                        <MenuItem key={child} value={child}>
-                          {child}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <FormControl
-                    sx={{ minWidth: 200 }}
-                    size={isMobile ? "small" : "medium"}
-                  >
-                    <InputLabel sx={{ color: colors.textSecondary }}>
-                      Location
-                    </InputLabel>
-                    <Select
-                      label="Location"
-                      value={locationFilter}
-                      onChange={(e) => setLocationFilter(e.target.value)}
-                      sx={{
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: colors.divider,
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: colors.accent,
-                        },
-                      }}
-                    >
-                      <MenuItem value="all">All Locations</MenuItem>
-                      {[
-                        ...new Set(
-                          applyData.map((lead) => lead.location?.state || "")
-                        ),
-                      ]
-                        .filter(Boolean)
-                        .map((state) => (
-                          <MenuItem key={state} value={state}>
-                            {state}
-                          </MenuItem>
-                        ))}
-                    </Select>
-                  </FormControl>
-
-                  <FormControl
-                    sx={{ minWidth: 200 }}
-                    size={isMobile ? "small" : "medium"}
-                  >
-                    <InputLabel sx={{ color: colors.textSecondary }}>
-                      Time Period
-                    </InputLabel>
-                    <Select
-                      label="Time Period"
-                      value={dateFilter}
-                      onChange={(e) => setDateFilter(e.target.value)}
-                      sx={{
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: colors.divider,
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: colors.accent,
-                        },
-                      }}
-                    >
-                      {dateFilters.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </>
-              )}
-            </Box>
-
-            {/* Enquiries Table */}
-            {filterByDate(applyData).filter((lead) => {
-              const searchLower = searchTerm.toLowerCase();
-              const matchesSearch =
-                !searchTerm ||
-                lead.investorName?.toLowerCase().includes(searchLower) ||
-                lead.investorEmail?.toLowerCase().includes(searchLower) ||
-                lead.investorPhone?.includes(searchTerm) ||
-                lead.location?.district?.toLowerCase().includes(searchLower) ||
-                lead.location?.state?.toLowerCase().includes(searchLower) ||
-                lead.location?.city?.toLowerCase().includes(searchLower);
-
-              const matchesCategory =
-                categoryFilter === "all" ||
-                (lead.category &&
-                  lead.category.some((c) => c.child === categoryFilter));
-
-              const matchesLocation =
-                locationFilter === "all" ||
-                lead.location?.state === locationFilter;
-
-              const matchesInvestment =
-                investmentFilter === "all" ||
-                lead.investmentRange === investmentFilter;
-
-              return (
-                matchesSearch &&
-                matchesCategory &&
-                matchesLocation &&
-                matchesInvestment
-              );
-            }).length > 0 ? (
-              <TableContainer
-                component={Paper}
-                sx={{
-                  border: `1px solid ${colors.divider}`,
-                  boxShadow: "none",
-                }}
-              >
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ backgroundColor: colors.primary }}>
-                      <TableCell sx={{ color: "#fff", fontWeight: 600 }}>
-                        Full Name
-                      </TableCell>
-                      {!isMobile && (
-                        <TableCell sx={{ color: "#fff", fontWeight: 600 }}>
-                          Mobile
-                        </TableCell>
-                      )}
-                      <TableCell sx={{ color: "#fff", fontWeight: 600 }}>
-                        Location
-                      </TableCell>
-                      {!isTablet && (
-                        <TableCell sx={{ color: "#fff", fontWeight: 600 }}>
-                          Category
-                        </TableCell>
-                      )}
-                      {!isTablet && (
-                        <TableCell sx={{ color: "#fff", fontWeight: 600 }}>
-                          Investment
-                        </TableCell>
-                      )}
-                      <TableCell
-                        align="right"
-                        sx={{ color: "#fff", fontWeight: 600 }}
-                      >
-                        Actions
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {filterByDate(applyData)
-                      .filter((lead) => {
-                        const searchLower = searchTerm.toLowerCase();
-                        const matchesSearch =
-                          !searchTerm ||
-                          lead.invest
-                          orName
-                            ?.toLowerCase()
-                            .includes(searchLower) ||
-                          lead.investorEmail
-                            ?.toLowerCase()
-                            .includes(searchLower) ||
-                          lead.investorPhone?.includes(searchTerm) ||
-                          lead.location?.district
-                            ?.toLowerCase()
-                            .includes(searchLower) ||
-                          lead.location?.state
-                            ?.toLowerCase()
-                            .includes(searchLower) ||
-                          lead.location?.city
-                            ?.toLowerCase()
-                            .includes(searchLower);
-
-                        const matchesCategory =
-                          categoryFilter === "all" ||
-                          (lead.category &&
-                            lead.category.some(
-                              (c) => c.child === categoryFilter
-                            ));
-
-                        const matchesLocation =
-                          locationFilter === "all" ||
-                          lead.location?.state === locationFilter;
-
-                        const matchesInvestment =
-                          investmentFilter === "all" ||
-                          lead.investmentRange === investmentFilter;
-
-                        return (
-                          matchesSearch &&
-                          matchesCategory &&
-                          matchesLocation &&
-                          matchesInvestment
-                        );
-                      })
-                      .map((lead, index) => (
-                        <TableRow
-                          key={index}
-                          hover
-                          sx={{
-                            "&:hover": { backgroundColor: colors.divider },
-                          }}
-                        >
-                          <TableCell sx={{ color: colors.textPrimary }}>
-                            {lead?.investorName || "Unknown"}
-                          </TableCell>
-                          {!isMobile && (
-                            <TableCell sx={{ color: colors.textPrimary }}>
-                              {lead.investorPhone || "N/A"}
-                            </TableCell>
-                          )}
-                          <TableCell sx={{ color: colors.textPrimary }}>
-                            {[lead.location?.state]
-                              .filter(Boolean)
-                              .join(", ") || "N/A"}
-                          </TableCell>
-                          {!isTablet && (
-                            <TableCell sx={{ color: colors.textPrimary }}>
-                              {lead.category?.[0]?.child || "N/A"}
-                            </TableCell>
-                          )}
-                          {!isTablet && (
-                            <TableCell sx={{ color: colors.textPrimary }}>
-                              {lead.investmentRange || "N/A"}
-                            </TableCell>
-                          )}
-                          <TableCell align="right">
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              onClick={() => handleViewDetails(lead)}
-                              sx={{
-                                color: colors.accent,
-                                borderColor: colors.accent,
-                                "&:hover": {
-                                  backgroundColor: `${colors.accent}15`,
-                                },
-                              }}
-                              aria-label="details"
-                            >
-                              Details
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            ) : (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "200px",
-                  flexDirection: "column",
-                  border: `1px dashed ${colors.divider}`,
-                  borderRadius: 2,
-                  backgroundColor: colors.cardBackground,
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  color={colors.textSecondary}
-                  gutterBottom
-                >
-                  No enquiries found
-                </Typography>
-                <Typography variant="body2" color={colors.textSecondary}>
-                  {searchTerm ||
-                  investmentFilter !== "all" ||
-                  categoryFilter !== "all" ||
-                  locationFilter !== "all" ||
-                  dateFilter !== "all"
-                    ? "Try adjusting your search or filters"
-                    : "No enquiries have been recorded yet"}
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        );
-      case 1:
         return (
           <Box mt={4}>
             <Box
@@ -1220,7 +1219,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                     </Select>
                   </FormControl>
 
-                   {/* <FormControl
+                  {/* <FormControl
                     sx={{ minWidth: 200 }}
                     size={isMobile ? "small" : "medium"}
                   >
@@ -1254,7 +1253,6 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                         ))}
                     </Select>
                   </FormControl> */}
-
 
                   {/* <FormControl
                     sx={{ minWidth: 200 }}
@@ -1492,10 +1490,11 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                               size="small"
                               onClick={() => handleViewDetails(lead)}
                               sx={{
-                                color: colors.accent,
-                                borderColor: colors.accent,
+                                color:"black",
+                                backgroundColor:"success.light",
                                 "&:hover": {
-                                  backgroundColor: `${colors.accent}15`,
+                                  backgroundColor: `success.light`,
+                       
                                 },
                               }}
                               aria-label="details"
@@ -1542,7 +1541,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
             )}
           </Box>
         );
-      
+
       default:
         return null;
     }
@@ -1599,7 +1598,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
               <Grid item xs={12} sm={6}>
                 <Typography
                   variant="subtitle2"
-                  sx={{ color: colors.textPrimary }}
+                  sx={{ color: colors.textPrimary, fontWeight: "bold", mb: 1 }}
                 >
                   Contact Information
                 </Typography>
@@ -1618,14 +1617,16 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                     "N/A"}
                 </Typography>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6} sx={{ marginLeft: "auto" }}>
                 <Typography
                   variant="subtitle2"
-                  sx={{ color: colors.textPrimary }}
+                  sx={{ color: colors.textPrimary, fontWeight: "bold", mb: 1 }}
                 >
                   Location
                 </Typography>
-                <Typography sx={{ color: colors.textSecondary }}>
+                <Typography
+                  sx={{ color: colors.textSecondary, whiteSpace: "pre-line" }}
+                >
                   {[
                     selectedItem.district,
                     selectedItem?.state,
@@ -1644,7 +1645,11 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                 <Grid item xs={12} sm={6}>
                   <Typography
                     variant="subtitle2"
-                    sx={{ color: colors.textPrimary }}
+                    sx={{
+                      color: colors.textPrimary,
+                      fontWeight: "bold",
+                      mb: 1,
+                    }}
                   >
                     Investment Details
                   </Typography>
@@ -1656,10 +1661,10 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                   </Typography>
                 </Grid>
               )}
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6} sx={{ marginLeft: "auto" }}>
                 <Typography
                   variant="subtitle2"
-                  sx={{ color: colors.textPrimary }}
+                  sx={{ color: colors.textPrimary, fontWeight: "bold", mb: 1 }}
                 >
                   Additional Info
                 </Typography>
@@ -1810,13 +1815,16 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                         >
                           <VisibilityIcon fontSize="medium" />
                         </Box>
-                        <Box
-                          sx={{ display: "flex", gap: 5 }}
-                        >
+                        <Box sx={{ display: "flex", gap: 5 }}>
                           <Typography
                             variant="subtitle1"
                             fontWeight="medium"
-                            sx={{ color: "text.secondary", mt: 3, mb: 0, ml: 3 }}
+                            sx={{
+                              color: "text.secondary",
+                              mt: 3,
+                              mb: 0,
+                              ml: 3,
+                            }}
                           >
                             Views
                           </Typography>
@@ -1849,7 +1857,6 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
 
                   {/* Likes Card */}
                   <Grid item xs={12} sm={6} md={4}>
-                    
                     <Card
                       sx={{
                         minWidth: 120,
@@ -1892,7 +1899,12 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                           <Typography
                             variant="subtitle1"
                             fontWeight="medium"
-                            sx={{ color: "text.secondary", mt: 3, mb: 0, ml: 3 }}
+                            sx={{
+                              color: "text.secondary",
+                              mt: 3,
+                              mb: 0,
+                              ml: 3,
+                            }}
                           >
                             Liked
                           </Typography>
@@ -1967,7 +1979,12 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                           <Typography
                             variant="subtitle1"
                             fontWeight="medium"
-                            sx={{ color: "text.secondary", mt: 3, mb: 0, ml: 3 }}
+                            sx={{
+                              color: "text.secondary",
+                              mt: 3,
+                              mb: 0,
+                              ml: 3,
+                            }}
                           >
                             SortList
                           </Typography>
@@ -2016,12 +2033,12 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                 scrollButtons="auto"
                 sx={{
                   "& .MuiTabs-indicator": {
-                    backgroundColor: colors.accent,
+                    backgroundColor: "orange",
                     height: 3,
                   },
                 }}
               >
-                {["Exclusive Enquiries", "Leads"].map((label, index) => (
+                {["Leads"].map((label, index) => (
                   <Tab
                     key={index}
                     label={
@@ -2057,14 +2074,16 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                         </Typography>
                         <Box
                           sx={{
-                            backgroundColor:
-                              tabValue === index
-                                ? colors.accent
-                                : colors.divider,
-                            color:
-                              tabValue === index
-                                ? "#fff"
-                                : colors.textSecondary,
+                            // backgroundColor:
+                            //   tabValue === index
+                            //     ? colors.accent
+                            //     : colors.divider,
+                            // color:
+                            //   tabValue === index
+                            //     ? "#fff"
+                            //     : colors.textSecondary,
+                            backgroundColor : "#39da39ff",
+                            color :"#111b14ff",
                             borderRadius: "50%",
                             width: 24,
                             height: 24,
@@ -2075,7 +2094,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                             ml: 0.5,
                           }}
                         >
-                          {[applyData.length, Leads.length][index]}
+                          {[ Leads.length][index]}
                         </Box>
                       </Box>
                     }
@@ -2088,6 +2107,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                     }}
                   />
                 ))}
+                
               </Tabs>
             </Card>
 

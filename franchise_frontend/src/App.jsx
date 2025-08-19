@@ -50,7 +50,7 @@ const BrandSearchus = lazy(() => import('./Components/BrandProfile_Component/Bra
 const BrandDetailsEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/BrandDetailsEdit'));
 const FranchiseDetailsEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/FranchiseDetailsEdit'));
 const ExpansionLocationControl = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/ExpansionLocationControl'));
-const UploadsControl = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/UploadsControl'));
+const UploadsEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/UploadsEdit.jsx'));
 
 // Footer Pages
 const AboutUs = lazy(() => import('./Components/Footers/HelpAndSupport/AboutUs'));
@@ -164,7 +164,7 @@ const App = () => {
                   <Route path="branddetailcontrol" element={<BrandDetailsEdit />} />
                   <Route path="franchisedetailcontrol" element={<FranchiseDetailsEdit />} />
                   <Route path="expansionlocationcontrol" element={<ExpansionLocationControl />} />
-                  <Route path="uploadcontrol" element={<UploadsControl />} />
+                  <Route path="uploadcontrol" element={<UploadsEdit />} />
                   <Route path="brandfeedback" element={<BrandFeedBack />} />
                   <Route path="brandcomplaint" element={<BrandComplaint />} />
                   <Route path="brandsearchus" element={<BrandSearchus />} />

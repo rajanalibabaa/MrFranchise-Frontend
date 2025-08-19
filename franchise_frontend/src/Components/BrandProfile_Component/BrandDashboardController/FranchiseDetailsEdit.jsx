@@ -227,12 +227,10 @@ const FranchiseDetailsEdit = ({
           : parseInt(data.franchiseOutlets || 0);
       const total = companyOwned + franchise;
 
-      onChange({
-        [name]: value,
-        totalOutlets: total.toString(),
-      });
+      onChange(name, value);
+      onChange("totalOutlets", total.toString());
     } else {
-      onChange({ [name]: value });
+      onChange(name, value);
     }
   };
 
@@ -580,8 +578,8 @@ const FranchiseDetailsEdit = ({
     onObjectChange("brandCategories", newCategory);
   };
 
-  const handleDescriptionChange = (content) => {
-    onChange({ brandDescription: content });
+  const handleDescriptionChange = (e) => {
+    onChange("brandDescription", e.target.value);
   };
 
   const handleAddUSP = () => {
@@ -605,6 +603,13 @@ const FranchiseDetailsEdit = ({
     const updatedUSPs = [...(data.uniqueSellingPoints || [])];
     updatedUSPs.splice(index, 1);
     onArrayChange("uniqueSellingPoints", updatedUSPs);
+  };
+
+  const handleTrainingSupportChange = (option, checked) => {
+    const newValue = checked
+      ? [...(data.trainingSupport || []), option]
+      : (data.trainingSupport || []).filter((v) => v !== option);
+    onArrayChange("trainingSupport", newValue);
   };
 
   const formatCurrency = (value) => {
@@ -742,12 +747,7 @@ const FranchiseDetailsEdit = ({
             value={data.establishedYear ? String(data.establishedYear) : null}
             getOptionLabel={(option) => option}
             onChange={(event, newValue) => {
-              handleChange({
-                target: {
-                  name: "establishedYear",
-                  value: newValue ? Number(newValue) : "",
-                },
-              });
+              onChange("establishedYear", newValue ? Number(newValue) : "");
             }}
             renderInput={(params) => (
               <TextField
@@ -818,12 +818,7 @@ const FranchiseDetailsEdit = ({
             }
             getOptionLabel={(option) => option}
             onChange={(event, newValue) => {
-              handleChange({
-                target: {
-                  name: "franchiseSinceYear",
-                  value: newValue ? Number(newValue) : "",
-                },
-              });
+              onChange("franchiseSinceYear", newValue ? Number(newValue) : "");
             }}
             renderInput={(params) => (
               <TextField
@@ -1785,9 +1780,7 @@ const FranchiseDetailsEdit = ({
                 row 
                 sx={{ display: "flex", ml: 5, gap: 15 }}
                 value={data.aidFinancing || ""}
-                onChange={(e) => handleChange({
-                  target: { name: "aidFinancing", value: e.target.value }
-                })}
+                onChange={(e) => onChange("aidFinancing", e.target.value)}
               >
                 {aidFinancingOptions.map((type) => (
                   <FormControlLabel
@@ -1846,9 +1839,7 @@ const FranchiseDetailsEdit = ({
                 row 
                 sx={{ display: "flex", ml: 5, gap: 15 }}
                 value={data.franchiseDevelopment || ""}
-                onChange={(e) => handleChange({
-                  target: { name: "franchiseDevelopment", value: e.target.value }
-                })}
+                onChange={(e) => onChange("franchiseDevelopment", e.target.value)}
               >
                 {aidFinancingOptions.map((type) => (
                   <FormControlLabel
@@ -1910,9 +1901,7 @@ const FranchiseDetailsEdit = ({
                 row 
                 sx={{ display: "flex", ml: 5, gap: 15 }}
                 value={data.consultationOrAssistance || ""}
-                onChange={(e) => handleChange({
-                  target: { name: "consultationOrAssistance", value: e.target.value }
-                })}
+                onChange={(e) => onChange("consultationOrAssistance", e.target.value)}
               >
                 {aidFinancingOptions.map((type) => (
                   <FormControlLabel
@@ -1989,19 +1978,7 @@ const FranchiseDetailsEdit = ({
                         checked={
                           data.trainingSupport?.includes(option) || false
                         }
-                        onChange={(e) => {
-                          const newValue = e.target.checked
-                            ? [...(data.trainingSupport || []), option]
-                            : (data.trainingSupport || []).filter(
-                                (v) => v !== option
-                              );
-                          handleChange({
-                            target: {
-                              name: "trainingSupport",
-                              value: newValue,
-                            },
-                          });
-                        }}
+                        onChange={(e) => handleTrainingSupportChange(option, e.target.checked)}
                         name="trainingSupport"
                         color="primary"
                         disabled={!isEditing}
@@ -2173,7 +2150,7 @@ const FranchiseDetailsEdit = ({
             minRows={8}
             fullWidth
             value={data.brandDescription || ""}
-            onChange={(e) => handleDescriptionChange(e.target.value)}
+            onChange={handleDescriptionChange}
             variant="outlined"
             placeholder="Enter brand description here..."
             error={!!errors.brandDescription}
