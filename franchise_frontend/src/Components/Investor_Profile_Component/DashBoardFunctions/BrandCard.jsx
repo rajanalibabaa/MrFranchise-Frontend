@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo,useCallback } from "react";
 import {
   Box,
   Typography,
@@ -14,14 +14,23 @@ import { Favorite, Close } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { RiBookmark3Fill } from "react-icons/ri";
 import img from "../../../assets/Images/logo.png";
+import { openBrandDialog } from "../../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+import { useDispatch } from "react-redux";
 
 const BrandCard = memo(({ 
   item, 
   type, 
   likedStates, 
   shortlistedStates, 
+  investmentRange,
+  brandNameData,
+  areaRequired,
+  brandLogoData,
+  franchiseModel,
+  brandCategoryChild,
   onViewDetails, 
   onToggleLike, 
+  brandIdData,
   onToggleShortlist, 
   onToggleViewClose 
 }) => {
@@ -30,9 +39,14 @@ const BrandCard = memo(({
 
   if (!item || typeof item !== 'object') return null;
 
-  const brandId = item.uuid || item.brandID?.uuid || item.brandID;
+  const brandId = item.uuid || item.brandID?.uuid || item.brandID  || brandIdData;
   const isLiked = brandId ? likedStates[brandId] : false;
   const isShortlisted = brandId ? shortlistedStates[brandId] : false;
+const dispatch = useDispatch();
+  const OpenBrandDialog = useCallback (()=>{
+    
+    dispatch(openBrandDialog(item));
+  }, [item]);
 
   // Function to break text after a limit without splitting words
   const breakText = (text, limit = 15) => {
@@ -58,7 +72,7 @@ const BrandCard = memo(({
     item?.brandDetails?.brandName ||
     (typeof item?.brandID === "object" && item.brandID?.brandName) ||
     item?.name ||
-    item?.brand_title ||
+    item?.brand_title || brandNameData
     "Unnamed Brand";
 
   const brandLogo =
@@ -67,7 +81,7 @@ const BrandCard = memo(({
     item?.brandDetails?.brandLogo ||
     (typeof item?.brandID === "object" ? item.brandID?.brandLogo : null) ||
     item?.uploads?.brandLogo?.[0] ||
-    item?.image ||
+    item?.image || brandLogoData ||
     img;
 
   return (
@@ -202,18 +216,18 @@ const BrandCard = memo(({
             overflowWrap: "normal"
           }}
         >
-          {breakText(item.brandCategories?.child || item.category, 30)}
+          {breakText(item.brandCategories?.child || brandCategoryChild, 30)}
         </Typography>
 
         <Stack direction="column" spacing={0.5} sx={{ mb: 0.5, width: "100%" }}>
           <Typography variant="caption" fontWeight={500}>
-            Investment : {item.fico?.investmentRange || item.investment || "N/A"}
+            Investment : {item.fico?.investmentRange || investmentRange || "N/A"}
           </Typography>
           <Typography variant="caption" fontWeight={500}>
-            Area : {item.fico?.areaRequired || item.area || "N/A"}
+            Area : {item.fico?.areaRequired || areaRequired || "N/A"}
           </Typography>
           <Typography variant="caption" fontWeight={500}>
-            Type : {item.fico?.franchiseModel || item.model || "N/A"}
+            Type : {item.fico?.franchiseModel || franchiseModel || "N/A"}
           </Typography>
         </Stack>
 
@@ -222,7 +236,7 @@ const BrandCard = memo(({
           aria-label="apply now"
           size="small"
           fullWidth
-          onClick={() => onViewDetails(item)}
+          onClick={() => OpenBrandDialog(item)}
           sx={{
             mt: "auto",
             borderRadius: 2,

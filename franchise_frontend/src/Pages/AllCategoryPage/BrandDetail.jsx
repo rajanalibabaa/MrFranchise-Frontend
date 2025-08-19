@@ -287,6 +287,7 @@ const handleSubmit = useCallback(
         readyToInvest: formData.readyToInvest,
         brandId: selectedBrand[0]?.uuid, // Correctly access brand UUID from array
         brandName: selectedBrand[0]?.brandDetails?.brandName || "",
+        
         applyId: id,
       };
  
