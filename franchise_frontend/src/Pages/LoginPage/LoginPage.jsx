@@ -17,18 +17,20 @@ import {
 } from "@mui/material";
 import illustration from "../../assets/Images/LoginImage.png";
 import axios from "axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUUIDandTOKEN, logout } from "../../Redux/Slices/AuthSlice/authSlice";
 import CloseIcon from "@mui/icons-material/Close";
 import { showLoading, hideLoading } from "../../Redux/Slices/loadingSlice";
 import { useMediaQuery, useTheme } from "@mui/system";
+
 function LoginPage({ open, onClose }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-    const theme = useTheme();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  
+  const token = useSelector((state) => state.auth.token);
+
   const [formData, setFormData] = useState({ username: "", otp: "" });
   const [errors, setErrors] = useState({});
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -56,6 +58,7 @@ function LoginPage({ open, onClose }) {
     };
   }, [formData.otp, formData.username, isEmail]);
 
+  // Countdown for resend OTP
   useEffect(() => {
     if (resendDisabled && timer > 0) {
       const interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
@@ -65,6 +68,29 @@ function LoginPage({ open, onClose }) {
       setTimer(30);
     }
   }, [resendDisabled, timer]);
+
+  // 🔥 Auto logout checker
+  useEffect(() => {
+    const logoutTimestamp = localStorage.getItem("logoutTimestamp");
+    if (!logoutTimestamp) return;
+
+    const parsed = parseInt(logoutTimestamp, 10);
+    const now = Date.now();
+
+    if (parsed <= now) {
+      dispatch(logout());
+      navigate("/");
+      return;
+    }
+
+    const timeout = parsed - now;
+    const timer = setTimeout(() => {
+      dispatch(logout());
+      navigate("/");
+    }, timeout);
+
+    return () => clearTimeout(timer);
+  }, [dispatch, navigate, token]);
 
   const handleChange = useCallback((e) => {
     const { id, value } = e.target;
@@ -87,17 +113,14 @@ function LoginPage({ open, onClose }) {
   }, [formData.username]);
 
   const handleOtpRequest = useCallback(async () => {
-
     if (!validateForm()) return;
-     setIsLoading(true);
+    setIsLoading(true);
     try {
       const response = await axios.post(
         `http://localhost:5000/api/v1/login/generateOTPforLogin`,
         otpRequestPayload,
         { headers: { "Content-Type": "application/json" } }
       );
-
-      // console.log(response.data)
 
       if (response.data.success) {
         setSnackbar({
@@ -117,7 +140,7 @@ function LoginPage({ open, onClose }) {
     }
   }, [otpRequestPayload, validateForm]);
 
-const handleVerifyOtp = useCallback(async () => {
+  const handleVerifyOtp = useCallback(async () => {
     if (!formData.otp) {
       setErrors((prev) => ({ ...prev, otp: "OTP is required" }));
       return;
@@ -143,25 +166,12 @@ const handleVerifyOtp = useCallback(async () => {
           })
         );
 
-        // Set auto logout timer
-        const logoutTimestamp = localStorage.getItem("logoutTimestamp");
-        const parsedLogoutTime = parseInt(logoutTimestamp, 10);
-        const now = Date.now();
-        const exitTime = parsedLogoutTime - now;
-        setTimeout(() => {
-          dispatch(logout());
-          navigate("/");
-          window.location.reload(); // Refresh on auto logout
-        }, exitTime);
-
-        // Show success message
         setSnackbar({
           open: true,
           message: "Login successful! Redirecting...",
           severity: "success",
         });
 
-        // Handle post-login actions
         setTimeout(() => {
           onClose();
           setFormData({ username: "", otp: "" });
@@ -170,13 +180,7 @@ const handleVerifyOtp = useCallback(async () => {
           setTimer(30);
           setErrors({});
           navigate("/");
-          
-          // Refresh the window after navigation
-          window.location.reload(); // Full page refresh
-          
-          // Alternative: Soft refresh (if you don't want full reload)
-          // window.dispatchEvent(new Event('appRefresh')); 
-          // Then listen for this event in components that need to update
+          window.location.reload(); // Full refresh
         }, 1000);
       } else {
         throw new Error(response.data.message || "Invalid OTP");
@@ -187,6 +191,7 @@ const handleVerifyOtp = useCallback(async () => {
       setIsLoading(false);
     }
   }, [otpVerifyPayload, formData.otp, dispatch, navigate, onClose]);
+
   const handleSubmit = useCallback(
     (e) => {
       e.preventDefault();
@@ -212,20 +217,26 @@ const handleVerifyOtp = useCallback(async () => {
             py: 2,
           }}
         >
-          <Typography variant="h5" component={"span"}>Login</Typography>
+          <Typography variant="h5" component={"span"}>
+            Login
+          </Typography>
           <IconButton onClick={onClose}>
-            <CloseIcon sx={{ color: "red",fontSize: 30 }} />
+            <CloseIcon sx={{ color: "red", fontSize: 30 }} />
           </IconButton>
         </DialogTitle>
 
         <DialogContent sx={{ p: 0 }}>
           <Grid display={"flex"} sx={{ minHeight: "65vh" }}>
-              
-           {!isMobile && (
-              <Box ml={4} sx={{ display: "flex", alignItems: "center", justifyContent: "center",p:4}}>
-                <img src={illustration} alt="Login" loading="lazy" style={{ maxWidth: "100%", height: "65vh" }} />
-                </Box>
-           )}
+            {!isMobile && (
+              <Box ml={4} sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 4 }}>
+                <img
+                  src={illustration}
+                  alt="Login"
+                  loading="lazy"
+                  style={{ maxWidth: "100%", height: "65vh" }}
+                />
+              </Box>
+            )}
 
             <Grid ml={2} xs={12} md={6} sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 4 }}>
               <Box sx={{ width: "100%", maxWidth: 400 }}>
@@ -239,7 +250,7 @@ const handleVerifyOtp = useCallback(async () => {
                 <form onSubmit={handleSubmit}>
                   <TextField
                     fullWidth
-                    label="Enter your registered Email"
+                    label="Enter your registered Email / Phone"
                     id="username"
                     value={formData.username}
                     onChange={handleChange}
@@ -271,7 +282,13 @@ const handleVerifyOtp = useCallback(async () => {
                     disabled={isLoading}
                     sx={{ height: 48, mb: 2, bgcolor: "#007BFF", "&:hover": { bgcolor: "#0056b3" } }}
                   >
-                    {isLoading ? <CircularProgress size={24} color="inherit" /> : isOtpSent ? "Verify OTP" : "Request OTP"}
+                    {isLoading ? (
+                      <CircularProgress size={24} color="inherit" />
+                    ) : isOtpSent ? (
+                      "Verify OTP"
+                    ) : (
+                      "Request OTP"
+                    )}
                   </Button>
                 </form>
 

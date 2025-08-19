@@ -80,7 +80,7 @@ const flattenBrandData = (brandDoc) => {
     isInternationalExpansion: brandDoc.expansionLocationData?.isInternationalExpansion || false,
     
     // Uploads
-    brandLogo: brandDoc.uploads?.brandLogo || [],
+    brandLogo: brandDoc.uploads?.logo || [],
     exteriorOutlet: brandDoc.uploads?.exteriorOutlet || [],
     franchisePromotionVideo: brandDoc.uploads?.franchisePromotionVideo || [],
     gstCertificate: brandDoc.uploads?.gstCertificate || [],
