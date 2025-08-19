@@ -49,6 +49,8 @@ import {
   HomeWork,
   MeetingRoom,
   CheckCircle,
+  CheckCircleOutline,
+  Send,
 } from "@mui/icons-material";
 import { categories } from "./BrandLIstingRegister/BrandCategories";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
@@ -127,6 +129,7 @@ const InvestorRegister = () => {
   const [selectedChild, setSelectedChild] = useState("");
   const propertyTypeValue = useWatch({ control, name: "propertyType" });
 
+  // OTP verification state
   const [otpModal, setOtpModal] = useState({
     open: false,
     type: null,
@@ -134,6 +137,35 @@ const InvestorRegister = () => {
     loading: false,
     verified: false,
   });
+
+  // Email verification state
+  const [verificationState, setVerificationState] = useState({
+    email: {
+      verified: false,
+      otpSent: false,
+      showDialog: false,
+      loading: false,
+      error: null,
+    },
+    mobile: {
+      verified: false,
+      otpSent: false,
+      showDialog: false,
+      loading: false,
+      error: null,
+    },
+  });
+
+  const [otpInput, setOtpInput] = useState("");
+  const [otpToken, setOtpToken] = useState(null);
+  const [formData, setFormData] = useState(null);
+
+
+  // const [snackbar, setSnackbar] = useState({
+  //   open: false,
+  //   message: "",
+  //   severity: "info",
+  // });
 
   const FORM_DATA_KEY = "investor_form_data";
 
@@ -494,77 +526,172 @@ const InvestorRegister = () => {
     });
   };
 
-  const verifyOtp = async () => {
-    const { type, otp } = otpModal;
 
-    if (!otp || otp.length < 6) {
-      showSnackbar("Please enter a valid OTP", "error");
+ // Handle verification dialog open/close
+  const handleVerificationDialog = (field, open) => {
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        showDialog: open,
+        error: null,
+      },
+    }));
+    setOtpInput("");
+  };
+
+  const handleSendOtp = async (field) => {
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        loading: true,
+        error: null,
+      },
+    }));
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/otpverify/send-otp-email`,
+        {
+          [field === "email" ? "email" : "phone"]: watch(field),
+          type: field,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.token) {
+        setOtpToken(response.data.token);
+        setVerificationState((prev) => ({
+          ...prev,
+          [field]: {
+            ...prev[field],
+            otpSent: true,
+            loading: false,
+            verified: false,
+          },
+        }));
+        showSnackbar(`OTP sent successfully to your ${field}`, "success");
+      } else {
+        throw new Error(response.data.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.error(`Error sending OTP for ${field}:`, error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to send OTP";
+
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          loading: false,
+          error: errorMessage,
+        },
+      }));
+      showSnackbar(errorMessage, "error");
+    }
+  };
+
+  const handleVerifyOtp = async (field) => {
+    if (!otpInput || otpInput.length !== 6) {
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          error: "Please enter a valid 6-digit OTP",
+        },
+      }));
       return;
     }
 
-    setOtpModal((prev) => ({ ...prev, loading: true }));
+    setVerificationState((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field],
+        loading: true,
+        error: null,
+      },
+    }));
 
     try {
       const response = await axios.post(
         `${API_BASE_URL}/otpverify/verify-otp`,
         {
-          identifier:
-            type === "email"
-              ? watch("email")
-              : `${phonePrefix}${watch(
-                  type === "mobile" ? "mobileNumber" : "whatsappNumber"
-                )}`,
-          otp,
-          type,
+          identifier: watch(field),
+          otp: otpInput,
+          type: field,
         },
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${otpStates[type].token}`,
+            Authorization: `Bearer ${otpToken}`,
           },
         }
       );
 
-      if (response.status === 200 || response.data.message) {
-        showSnackbar(`${type} verified successfully!`, "success");
-        setOtpStates((prev) => ({
+      if (response.data.message?.includes("verified successfully")) {
+        setVerificationState((prev) => ({
           ...prev,
-          [type]: {
-            ...prev[type],
+          [field]: {
+            ...prev[field],
             verified: true,
+            showDialog: false,
             loading: false,
           },
         }));
-        setOtpModal((prev) => ({
-          ...prev,
-          open: false,
-          loading: false,
-          verified: true,
-        }));
+        showSnackbar(
+          response.data.message ||
+            `${field === "email" ? "Email" : "Mobile number"} verified successfully!`,
+          "success"
+        );
+        setOtpInput("");
       } else {
-        throw new Error(response.data.message || "Verification failed");
+        throw new Error(response.data.error || "OTP verification failed");
       }
     } catch (error) {
-      console.error("OTP verification error:", error);
-      showSnackbar(
-        error.response?.data?.message || "Invalid OTP. Please try again.",
-        "error"
-      );
-      setOtpModal((prev) => ({ ...prev, loading: false }));
+      console.error(`Error verifying OTP for ${field}:`, error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "OTP verification failed";
+
+      setVerificationState((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          loading: false,
+          error: errorMessage,
+        },
+      }));
+      showSnackbar(errorMessage, "error");
     }
   };
 
-  const [formData, setFormData] = useState(() => {
-    const savedData = localStorage.getItem(FORM_DATA_KEY);
-    return savedData ? JSON.parse(savedData) : initialFormData;
-  });
+  const handleResendOtp = (field) => {
+    handleSendOtp(field);
+  };
 
-  useEffect(() => {
-    const subscription = watch((value) => {
-      localStorage.setItem(FORM_DATA_KEY, JSON.stringify(value));
-    });
-    return () => subscription.unsubscribe();
-  }, [watch]);
+  // Verify OTP (for modal)
+  const verifyOtp = async () => {
+    setOtpModal((prev) => ({ ...prev, loading: true }));
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setOtpModal((prev) => ({ ...prev, verified: true, loading: false }));
+      showSnackbar("OTP verified successfully!", "success");
+    } catch (error) {
+      setOtpModal((prev) => ({ ...prev, loading: false }));
+      showSnackbar("OTP verification failed", "error");
+    }
+  };
 
   const onSubmit = async (data) => {
     if (!preferences.length) {
@@ -572,6 +699,11 @@ const InvestorRegister = () => {
         "Please add at least one preference before submitting.",
         "error"
       );
+      return;
+    }
+
+    if (!verificationState.email.verified) {
+      showSnackbar("Please verify your email before submitting.", "error");
       return;
     }
     const formatNumber = (num) => {
@@ -877,6 +1009,7 @@ const InvestorRegister = () => {
                 <Controller
                   name="firstName"
                   control={control}
+                  rules={{ required: "First name is required" }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -904,46 +1037,74 @@ const InvestorRegister = () => {
               </Grid>
 
               {/* Email */}
-              <Grid
-                container
-                spacing={2}
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
-                  gap: 2,
-                }}
-              >
-                <Grid item xs={12} md={6}>
-                  <Controller
-                    name="email"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        value={field.value || ""}
-                        label="Email"
-                        type="email"
-                        fullWidth
-                        variant="outlined"
-                        error={!!errors.email}
-                        helperText={errors.email?.message || " "}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Email color="action" />
-                            </InputAdornment>
-                          ),
-                        }}
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                          },
-                        }}
-                      />
-                    )}
-                  />
-                </Grid>
-
+              <Grid item xs={12} md={6}>
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      value={field.value || ""}
+                      label="Email"
+                      type="email"
+                      fullWidth
+                      variant="outlined"
+                      error={!!errors.email}
+                      helperText={errors.email?.message || " "}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Email color="action" />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            {verificationState.email.verified ? (
+                              <Box
+                                display="flex"
+                                alignItems="center"
+                                color="success.main"
+                              >
+                                <CheckCircleOutline fontSize="medium" />
+                                <Typography variant="caption" sx={{ ml: 0.5 }}>
+                                  Verified
+                                </Typography>
+                              </Box>
+                            ) : (
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={async () => {
+                                  handleVerificationDialog("email", true);
+                                  await handleSendOtp("email");
+                                }}
+                                disabled={
+                                  !field.value || verificationState.email.loading
+                                }
+                                startIcon={
+                                  verificationState.email.loading ? (
+                                    <CircularProgress size={14} />
+                                  ) : (
+                                    <Send fontSize="small" />
+                                  )
+                                }
+                              >
+                                Verify
+                              </Button>
+                            )}
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+  
                 {/* Mobile Number */}
                 <Grid item xs={12} md={6}>
                   <Controller
@@ -1038,7 +1199,6 @@ const InvestorRegister = () => {
                     )}
                   />
                 </Grid>
-              </Grid>
               <Grid
                 container
                 spacing={2}
@@ -1445,6 +1605,85 @@ const InvestorRegister = () => {
             </Box>
           </form>
 
+          {/* Email Verification Dialog */}
+          <Dialog
+            open={verificationState.email.showDialog}
+            onClose={() => handleVerificationDialog("email", false)}
+            PaperProps={{
+              sx: {
+                borderRadius: "16px",
+                p: 3,
+              },
+            }}
+          >
+            <DialogTitle sx={{ fontWeight: "bold", textAlign: "center" }}>
+              Verify Email
+            </DialogTitle>
+            <DialogContent>
+              <Box sx={{ minWidth: 300, pt: 1 }}>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  We've sent a 6-digit OTP to {watch("email")}
+                </Typography>
+                <TextField
+                  fullWidth
+                  label="Enter OTP"
+                  value={otpInput}
+                  onChange={(e) =>
+                    setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))
+                  }
+                  variant="outlined"
+                  size="medium"
+                  inputProps={{ maxLength: 6 }}
+                  error={!!verificationState.email.error}
+                  helperText={verificationState.email.error}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                    },
+                  }}
+                />
+                <Box
+                  sx={{
+                    mt: 2,
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Button
+                    onClick={() => handleResendOtp("email")}
+                    disabled={verificationState.email.loading}
+                    sx={{ color: "primary.main" }}
+                  >
+                    {verificationState.email.loading
+                      ? "Sending..."
+                      : "Resend OTP"}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => handleVerifyOtp("email")}
+                    disabled={
+                      otpInput.length !== 6 || verificationState.email.loading
+                    }
+                    startIcon={
+                      verificationState.email.loading ? (
+                        <CircularProgress size={14} />
+                      ) : null
+                    }
+                    sx={{
+                      borderRadius: "8px",
+                      backgroundColor: "#7ad03a",
+                      "&:hover": {
+                        backgroundColor: "#5a9e2a",
+                      },
+                    }}
+                  >
+                    {verificationState.email.loading ? "Verifying..." : "Verify"}
+                  </Button>
+                </Box>
+              </Box>
+            </DialogContent>
+          </Dialog>
+
           {/* Login Popup Dialog */}
           <Dialog
             open={registrationSuccess || loginOpen} // CHANGED
@@ -1627,3 +1866,4 @@ const InvestorRegister = () => {
 };
 
 export default InvestorRegister;
+
