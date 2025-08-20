@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Alert,
 } from "@mui/material";
 import {
   InfoOutlined,
@@ -78,109 +79,197 @@ const FilePreviewImage = styled("img")({
 
 const UploadsEdit = ({
   data = {},
+  files = {},
   errors = {},
   onChange,
   onArrayChange,
+  onFileChange,
+  onRemoveFile,
   isEditing = false,
 }) => {
   const theme = useTheme();
   const [editAwardIndex, setEditAwardIndex] = useState(null);
-  const [currentAward, setCurrentAward] = useState({
-    text: "",
-    document: null,
-  });
+  const [currentAward, setCurrentAward] = useState({ text: "", document: null });
   const [confirmDeleteIndex, setConfirmDeleteIndex] = useState(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [editingField, setEditingField] = useState(null);
-  const [editFileIndex, setEditFileIndex] = useState(null);
+  const [imageErrors, setImageErrors] = useState({
+    exteriorOutlet: "",
+    interiorOutlet: ""
+  });
 
-  // Reset edit states when editing is toggled
+  // Convert string URLs to file-like objects for consistent handling
+  const normalizeFileData = (field) => {
+    if (!data[field]) return [];
+    
+    // Handle case where data[field] is a single file/string (convert to array)
+    if (!Array.isArray(data[field])) {
+      const item = data[field];
+      if (typeof item === 'string') {
+        return [{
+          url: item,
+          name: item.split('/').pop(),
+          type: item.split('.').pop().toLowerCase() === 'pdf' ? 'application/pdf' : 
+                item.split('.').pop().toLowerCase() === 'mp4' ? 'video/mp4' : 
+                'image/jpeg'
+        }];
+      }
+      // If it's a file object, wrap it in an array
+      return [item];
+    }
+    
+    // If it's already an array, process each item
+    return data[field].map(item => {
+      if (typeof item === 'string') {
+        return {
+          url: item,
+          name: item.split('/').pop(),
+          type: item.split('.').pop().toLowerCase() === 'pdf' ? 'application/pdf' : 
+                item.split('.').pop().toLowerCase() === 'mp4' ? 'video/mp4' : 
+                'image/jpeg'
+        };
+      }
+      return item;
+    });
+  };
+
+  const [normalizedData, setNormalizedData] = useState({
+    brandLogo: normalizeFileData('brandLogo'),
+    franchisePromotionVideo: normalizeFileData('franchisePromotionVideo'),
+    pancard: normalizeFileData('pancard'),
+    gstCertificate: normalizeFileData('gstCertificate'),
+    exteriorOutlet: normalizeFileData('exteriorOutlet'),
+    interiorOutlet: normalizeFileData('interiorOutlet'),
+    businessPlan: normalizeFileData('businessPlan'),
+    awards: data.awards ? (Array.isArray(data.awards)) ? data.awards.map(award => ({
+      ...award,
+      document: typeof award.document === 'string' ? {
+        url: award.document,
+        name: award.document.split('/').pop(),
+        type: 'application/pdf'
+      } : award.document
+    })) : [] : []
+  });
+
   useEffect(() => {
     if (!isEditing) {
-      setEditingField(null);
-      setEditFileIndex(null);
       setEditAwardIndex(null);
       setCurrentAward({ text: "", document: null });
     }
   }, [isEditing]);
 
-  const handleFileChange =
-    (field, options = {}) =>
-    (e) => {
-      if (!isEditing) return;
+  useEffect(() => {
+    setNormalizedData({
+      brandLogo: normalizeFileData('brandLogo'),
+      franchisePromotionVideo: normalizeFileData('franchisePromotionVideo'),
+      pancard: normalizeFileData('pancard'),
+      gstCertificate: normalizeFileData('gstCertificate'),
+      exteriorOutlet: normalizeFileData('exteriorOutlet'),
+      interiorOutlet: normalizeFileData('interiorOutlet'),
+      businessPlan: normalizeFileData('businessPlan'),
+      awards: data.awards ? data.awards.map(award => ({
+        ...award,
+        document: typeof award.document === 'string' ? {
+          url: award.document,
+          name: award.document.split('/').pop(),
+          type: 'application/pdf'
+        } : award.document
+      })) : []
+    });
+  }, [data]);
 
-      const { maxFiles = Infinity, allowedTypes = [], maxSize = 5 } = options;
-      const files = Array.from(e.target.files || []);
+  const handleFileUpload = (field, options = {}) => (e) => {
+    if (!isEditing) return;
+    const { maxFiles = Infinity, allowedTypes = [], maxSize = 5, minFiles = 0 } = options;
+    const files = Array.from(e.target.files || []);
 
-      // Validate file types
-      const validFiles = files.filter((file) => {
-        if (!file || !file.type) return false;
-        if (allowedTypes.length === 0) return true;
-        return allowedTypes.some((type) => file.type.includes(type));
-      });
+    // Validate file count
+    const currentFiles = normalizedData[field] || [];
+    const totalFiles = currentFiles.length + files.length;
 
-      // Validate file size (in MB)
-      const sizeValidFiles = validFiles.filter(
-        (file) => file.size <= maxSize * 1024 * 1024
-      );
+    if (totalFiles > maxFiles) {
+      setImageErrors(prev => ({
+        ...prev,
+        [field]: `Maximum ${maxFiles} file(s) allowed for this field`
+      }));
+      return;
+    }
 
-      if (sizeValidFiles.length < validFiles.length) {
-        alert(`Some files exceed the maximum size of ${maxSize}MB`);
-      }
+    if (totalFiles < minFiles) {
+      setImageErrors(prev => ({
+        ...prev,
+        [field]: `Minimum ${minFiles} file(s) required for this field`
+      }));
+      return;
+    }
 
-      // Validate number of files
-      const currentFiles = data[field] || [];
-      const totalFiles = currentFiles.length + sizeValidFiles.length;
+    // Clear error if validation passes
+    setImageErrors(prev => ({
+      ...prev,
+      [field]: ""
+    }));
 
-      if (totalFiles > maxFiles) {
-        alert(`Maximum ${maxFiles} file(s) allowed for this field`);
-        return;
-      }
+    const validFiles = files.filter((file) => {
+      if (!file || !file.type) return false;
+      if (allowedTypes.length === 0) return true;
+      return allowedTypes.some((type) => file.type.includes(type));
+    });
 
-      // If we're editing a specific file, replace it
-      if (editingField === field && editFileIndex !== null) {
-        const updatedFiles = [...currentFiles];
-        updatedFiles[editFileIndex] = sizeValidFiles[0];
-        onArrayChange(field, updatedFiles);
-        setEditingField(null);
-        setEditFileIndex(null);
-      } else {
-        // Otherwise add new files
-        const updatedFiles = [...currentFiles, ...sizeValidFiles];
-        onArrayChange(field, updatedFiles);
-      }
-    };
+    const sizeValidFiles = validFiles.filter(
+      (file) => file.size <= maxSize * 1024 * 1024
+    );
 
-  const handleRemoveFile = (field, index) => {
+    if (sizeValidFiles.length < validFiles.length) {
+      alert(`Some files exceed the maximum size of ${maxSize}MB`);
+    }
+
+    // Update normalized data for UI
+    const updatedFiles = [...currentFiles, ...sizeValidFiles];
+    setNormalizedData(prev => ({ ...prev, [field]: updatedFiles }));
+    
+    // Pass new files to parent component
+    onFileChange(field, sizeValidFiles);
+  };
+
+  const handleRemoveUploadedFile = (field, index) => {
     if (!isEditing) return;
     
-    const updatedFiles = [...(data[field] || [])];
-    updatedFiles.splice(index, 1);
-    onArrayChange(field, updatedFiles);
+    const currentFiles = normalizedData[field] || [];
     
-    if (editingField === field && editFileIndex === index) {
-      setEditingField(null);
-      setEditFileIndex(null);
+    // Check if removing this file would violate minimum requirement
+    if (currentFiles.length - 1 < 3 && (field === 'exteriorOutlet' || field === 'interiorOutlet')) {
+      setImageErrors(prev => ({
+        ...prev,
+        [field]: `Minimum 3 images required for ${field === 'exteriorOutlet' ? 'exterior' : 'interior'} images`
+      }));
+      return;
     }
-  };
-
-  const startEditFile = (field, index) => {
-    setEditingField(field);
-    setEditFileIndex(index);
-  };
-
-  const cancelEditFile = () => {
-    setEditingField(null);
-    setEditFileIndex(null);
+    
+    const updatedFiles = [...currentFiles];
+    const removedFile = updatedFiles.splice(index, 1)[0];
+    setNormalizedData(prev => ({ ...prev, [field]: updatedFiles }));
+    
+    // Notify parent component about the removal
+    onRemoveFile(field, index);
+    
+    // Clear error if validation passes
+    if (updatedFiles.length >= 3) {
+      setImageErrors(prev => ({
+        ...prev,
+        [field]: ""
+      }));
+    }
   };
 
   const createObjectURL = (file) => {
     if (!file) return "";
     try {
-      if (file instanceof Blob) {
+      if (file instanceof Blob || file instanceof File) {
         return URL.createObjectURL(file);
       }
-      return file;
+      if (file.url) {
+        return file.url;
+      }
+      return file; // Assume it's a URL string
     } catch (error) {
       console.error("Error creating object URL:", error);
       return "";
@@ -205,10 +294,11 @@ const UploadsEdit = ({
   };
 
   const handleAddAward = () => {
-    if (!currentAward.text || !currentAward.document) return;
-
-    const updatedAwards = [...(data.awards || [])];
-    
+    if (!currentAward.text || !currentAward.document) {
+      setFormSubmitted(true);
+      return;
+    }
+    const updatedAwards = [...normalizedData.awards];
     if (editAwardIndex !== null) {
       updatedAwards[editAwardIndex] = {
         text: currentAward.text,
@@ -220,15 +310,18 @@ const UploadsEdit = ({
         document: currentAward.document,
       });
     }
-
+    setNormalizedData(prev => ({ ...prev, awards: updatedAwards }));
     onArrayChange("awards", updatedAwards);
+    if (currentAward.document) {
+      onFileChange("awardDoc", [currentAward.document]);
+    }
     setCurrentAward({ text: "", document: null });
     setEditAwardIndex(null);
     setFormSubmitted(false);
   };
 
   const handleEditAward = (index) => {
-    const award = data.awards[index];
+    const award = normalizedData.awards[index];
     setCurrentAward({
       text: award.text,
       document: award.document,
@@ -237,9 +330,13 @@ const UploadsEdit = ({
   };
 
   const handleDeleteAward = (index) => {
-    const updatedAwards = [...(data.awards || [])];
-    updatedAwards.splice(index, 1);
+    const updatedAwards = [...normalizedData.awards];
+    const removedAward = updatedAwards.splice(index, 1)[0];
+    setNormalizedData(prev => ({ ...prev, awards: updatedAwards }));
     onArrayChange("awards", updatedAwards);
+    if (removedAward.document) {
+      onRemoveFile("awardDoc", index);
+    }
     setConfirmDeleteIndex(null);
   };
 
@@ -249,99 +346,139 @@ const UploadsEdit = ({
     setFormSubmitted(false);
   };
 
-  const isFileBeingEdited = (field, index) => {
-    return editingField === field && editFileIndex === index;
+  const getFileDisplayName = (file) => {
+    if (!file) return "";
+    if (typeof file === 'string') return file.split('/').pop();
+    if (file.name) return file.name;
+    if (file.url) return file.url.split('/').pop();
+    return "File";
+  };
+
+  const isImageFile = (file) => {
+    if (!file) return false;
+    const type = typeof file === 'string' ? 
+      file.split('.').pop().toLowerCase() : 
+      file.type ? file.type.split('/')[0] : 
+      file.url ? file.url.split('.').pop().toLowerCase() : '';
+    return ['jpg', 'jpeg', 'png', 'gif'].includes(type) || type === 'image';
+  };
+
+  const isVideoFile = (file) => {
+    if (!file) return false;
+    const type = typeof file === 'string' ? 
+      file.split('.').pop().toLowerCase() : 
+      file.type ? file.type.split('/')[0] : 
+      file.url ? file.url.split('.').pop().toLowerCase() : '';
+    return ['mp4', 'mov', 'avi'].includes(type) || type === 'video';
+  };
+
+  const isPdfFile = (file) => {
+    if (!file) return false;
+    const type = typeof file === 'string' ? 
+      file.split('.').pop().toLowerCase() : 
+      file.type ? file.type.split('/')[1] : 
+      file.url ? file.url.split('.').pop().toLowerCase() : '';
+    return type === 'pdf' || (file.type && file.type.includes('pdf'));
   };
 
   return (
     <Box sx={{ pr: 1, mr: { sm: 0, md: 10 }, ml: { sm: 0, md: 10 } }}>
-      {/* Section 1: Brand Identity */}
+      {/* Brand Identity */}
       <StyledPaper>
         <SectionTitle variant="h6">
           Brand Identity
-          <Tooltip title="Drag and drop your logo here or click to upload" placement="right-start" arrow enterTouchDelay={0}>
-            <IconButton size="small" sx={{ color: "warning.main", "&:hover": { backgroundColor: "info.main", color: "white" }, marginLeft: "5px" }}>
+          <Tooltip
+            title="Drag and drop your logo here or click to upload"
+            placement="right-start"
+            arrow
+            enterTouchDelay={0}
+          >
+            <IconButton
+              size="small"
+              sx={{
+                color: "warning.main",
+                "&:hover": { backgroundColor: "info.main", color: "white" },
+                marginLeft: "5px",
+              }}
+            >
               <InfoOutlined fontSize="medium" />
             </IconButton>
           </Tooltip>
         </SectionTitle>
-
-        <Grid container spacing={3} sx={{ display: { md: "flex" } }} justifyContent={"space-evenly"}>
-          {/* Brand Logo */}
+        <Grid
+          container
+          spacing={3}
+          sx={{ display: { md: "flex" } }}
+          justifyContent={"space-evenly"}
+        >
           <Grid item xs={12} md={6}>
             <Typography textAlign={"center"} mb={1} variant="body2">
               Brand Logo
             </Typography>
             <FormControl fullWidth>
               <Box sx={{ width: { md: "400px" } }}>
-                {editingField === "brandLogo" && editFileIndex === 0 ? (
-                  <>
-                    <UploadButton component="label" color="success" variant="outlined" startIcon={<CloudUpload />}>
-                      Replace Logo
-                      <VisuallyHiddenInput
-                        type="file"
-                        accept="image/jpeg,image/png"
-                        onChange={handleFileChange("brandLogo", { maxFiles: 1, allowedTypes: ["image/jpeg", "image/png"], maxSize: 2 })}
-                      />
-                    </UploadButton>
-                    <Button variant="outlined" aria-label="cancel" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
-                      Cancel
-                    </Button>
-                  </>
-                ) : (
-                  <UploadButton component="label" color="success" variant="outlined" startIcon={<CloudUpload />} disabled={!isEditing}>
-                    Upload Logo
-                    <VisuallyHiddenInput
-                      type="file"
-                      accept="image/jpeg,image/png"
-                      onChange={handleFileChange("brandLogo", { maxFiles: 1, allowedTypes: ["image/jpeg", "image/png"], maxSize: 2 })}
-                    />
-                  </UploadButton>
-                )}
-                <Typography variant="caption" color={errors.brandLogo ? "error" : "textSecondary"}>
+                <UploadButton
+                  component="label"
+                  color="success"
+                  variant="outlined"
+                  startIcon={<CloudUpload />}
+                  disabled={!isEditing}
+                >
+                  Upload Logo
+                  <VisuallyHiddenInput
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    onChange={handleFileUpload("brandLogo", {
+                      maxFiles: 1,
+                      allowedTypes: ["image/jpeg", "image/png"],
+                      maxSize: 2,
+                    })}
+                  />
+                </UploadButton>
+                <Typography
+                  variant="caption"
+                  color={errors.brandLogo ? "error" : "textSecondary"}
+                >
                   {errors.brandLogo || "(Accepted formats: JPEG, PNG up to 2MB)"}
                 </Typography>
-
-                {data.brandLogo?.length > 0 && (
+                {normalizedData.brandLogo?.length > 0 && (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-                    {typeof data.brandLogo[0] === "string" ? (
+                    {isImageFile(normalizedData.brandLogo[0]) ? (
                       <>
                         <img
-                          src={data.brandLogo[0]}
+                          src={createObjectURL(normalizedData.brandLogo[0])}
                           alt="Brand Logo"
                           loading="lazy"
-                          style={{ height: 60, borderRadius: 4, border: "1px solid #ccc", padding: 4 }}
+                          style={{
+                            height: 60,
+                            borderRadius: 4,
+                            border: "1px solid #ccc",
+                            padding: 4,
+                          }}
                         />
                         {isEditing && (
-                          <Box sx={{ display: "flex", gap: 1 }}>
-                            <IconButton onClick={() => startEditFile("brandLogo", 0)} color="primary" size="small">
-                              <Edit fontSize="small" />
-                            </IconButton>
-                            <IconButton onClick={() => handleRemoveFile("brandLogo", 0)} color="error" size="small">
-                              <Delete fontSize="small" />
-                            </IconButton>
-                          </Box>
+                          <IconButton
+                            onClick={() => handleRemoveUploadedFile("brandLogo", 0)}
+                            color="error"
+                            size="small"
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
                         )}
                       </>
                     ) : (
                       <>
                         <Chip
-                          label={data.brandLogo[0].name}
-                          onDelete={isEditing ? () => handleRemoveFile("brandLogo", 0) : undefined}
+                          label={getFileDisplayName(normalizedData.brandLogo[0])}
+                          onDelete={
+                            isEditing
+                              ? () => handleRemoveUploadedFile("brandLogo", 0)
+                              : undefined
+                          }
                           deleteIcon={<CheckCircle fontSize="small" />}
                           variant="outlined"
                           color="success"
                         />
-                        {isEditing && (
-                          <Box sx={{ display: "flex", gap: 1 }}>
-                            <IconButton onClick={() => startEditFile("brandLogo", 0)} color="primary" size="small">
-                              <Edit fontSize="small" />
-                            </IconButton>
-                            <IconButton onClick={() => handleRemoveFile("brandLogo", 0)} color="error" size="small">
-                              <Delete fontSize="small" />
-                            </IconButton>
-                          </Box>
-                        )}
                       </>
                     )}
                   </Box>
@@ -349,76 +486,74 @@ const UploadsEdit = ({
               </Box>
             </FormControl>
           </Grid>
-
-          {/* Promotion Videos */}
           <Grid item xs={12} md={6} sx={{ mt: { md: 0, xs: 3 } }}>
             <Typography textAlign={"center"} mb={1} variant="body2">
               Franchise Promotion Video
             </Typography>
             <FormControl fullWidth>
               <Box sx={{ width: { md: "400px" } }}>
-                {editingField === "franchisePromotionVideo" && editFileIndex === 0 ? (
-                  <>
-                    <UploadButton component="label" variant="outlined" color="success" startIcon={<VideoCameraBack />}>
-                      Replace Video
-                      <VisuallyHiddenInput
-                        type="file"
-                        accept="video/mp4,video/quicktime"
-                        onChange={handleFileChange("franchisePromotionVideo", { maxFiles: 1, allowedTypes: ["video/mp4", "video/quicktime"], maxSize: 25 })}
-                      />
-                    </UploadButton>
-                    <Button variant="outlined" aria-label="cancel" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
-                      Cancel
-                    </Button>
-                  </>
-                ) : (
-                  <UploadButton component="label" variant="outlined" color="success" startIcon={<VideoCameraBack />} disabled={!isEditing}>
-                    Upload Video
-                    <VisuallyHiddenInput
-                      type="file"
-                      accept="video/mp4,video/quicktime"
-                      onChange={handleFileChange("franchisePromotionVideo", { maxFiles: 1, allowedTypes: ["video/mp4", "video/quicktime"], maxSize: 25 })}
-                    />
-                  </UploadButton>
-                )}
-                <Typography variant="caption" color={errors.franchisePromotionVideo ? "error" : "textSecondary"}>
-                  {errors.franchisePromotionVideo || "Accepted formats: MP4, Quicktime Video (up to 25MB)"}
+                <UploadButton
+                  component="label"
+                  variant="outlined"
+                  color="success"
+                  startIcon={<VideoCameraBack />}
+                  disabled={!isEditing}
+                >
+                  Upload Video
+                  <VisuallyHiddenInput
+                    type="file"
+                    accept="video/mp4,video/quicktime"
+                    onChange={handleFileUpload("franchisePromotionVideo", {
+                      maxFiles: 1,
+                      allowedTypes: ["video/mp4", "video/quicktime"],
+                      maxSize: 25,
+                    })}
+                  />
+                </UploadButton>
+                <Typography
+                  variant="caption"
+                  color={
+                    errors.franchisePromotionVideo ? "error" : "textSecondary"
+                  }
+                >
+                  {errors.franchisePromotionVideo ||
+                    "Accepted formats: MP4, Quicktime Video (up to 25MB)"}
                 </Typography>
-                {data.franchisePromotionVideo?.length > 0 && (
+                {normalizedData.franchisePromotionVideo?.length > 0 && (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-                    {typeof data.franchisePromotionVideo[0] === "string" ? (
+                    {isVideoFile(normalizedData.franchisePromotionVideo[0]) ? (
                       <>
-                        <video src={data.franchisePromotionVideo[0]} controls style={{ width: 200, borderRadius: 4 }} />
+                        <video
+                          src={createObjectURL(normalizedData.franchisePromotionVideo[0])}
+                          controls
+                          style={{ width: 200, borderRadius: 4 }}
+                        />
                         {isEditing && (
-                          <Box sx={{ display: "flex", gap: 1 }}>
-                            <IconButton onClick={() => startEditFile("franchisePromotionVideo", 0)} color="primary" size="small">
-                              <Edit fontSize="small" />
-                            </IconButton>
-                            <IconButton onClick={() => handleRemoveFile("franchisePromotionVideo", 0)} color="error" size="small">
-                              <Delete fontSize="small" />
-                            </IconButton>
-                          </Box>
+                          <IconButton
+                            onClick={() =>
+                              handleRemoveUploadedFile("franchisePromotionVideo", 0)
+                            }
+                            color="error"
+                            size="small"
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
                         )}
                       </>
                     ) : (
                       <>
                         <Chip
-                          label={data.franchisePromotionVideo[0].name}
-                          onDelete={isEditing ? () => handleRemoveFile("franchisePromotionVideo", 0) : undefined}
+                          label={getFileDisplayName(normalizedData.franchisePromotionVideo[0])}
+                          onDelete={
+                            isEditing
+                              ? () =>
+                                  handleRemoveUploadedFile("franchisePromotionVideo", 0)
+                              : undefined
+                          }
                           deleteIcon={<CheckCircle fontSize="small" />}
                           variant="outlined"
                           color="success"
                         />
-                        {isEditing && (
-                          <Box sx={{ display: "flex", gap: 1 }}>
-                            <IconButton onClick={() => startEditFile("franchisePromotionVideo", 0)} color="primary" size="small">
-                              <Edit fontSize="small" />
-                            </IconButton>
-                            <IconButton onClick={() => handleRemoveFile("franchisePromotionVideo", 0)} color="error" size="small">
-                              <Delete fontSize="small" />
-                            </IconButton>
-                          </Box>
-                        )}
                       </>
                     )}
                   </Box>
@@ -429,203 +564,198 @@ const UploadsEdit = ({
         </Grid>
       </StyledPaper>
 
-      {/* Section 2: Company Credentials */}
+      {/* Company Credentials */}
       <StyledPaper>
         <SectionTitle variant="h6">
           Company Credentials
-          <Tooltip title="Upload your company credentials documents" placement="right-start" arrow enterTouchDelay={0}>
-            <IconButton size="small" sx={{ color: "warning.main", "&:hover": { backgroundColor: "info.main", color: "white" }, marginLeft: "5px" }}>
+          <Tooltip
+            title="Upload your company credentials documents"
+            placement="right-start"
+            arrow
+            enterTouchDelay={0}
+          >
+            <IconButton
+              size="small"
+              sx={{
+                color: "warning.main",
+                "&:hover": { backgroundColor: "info.main", color: "white" },
+                marginLeft: "5px",
+              }}
+            >
               <InfoOutlined fontSize="medium" />
             </IconButton>
           </Tooltip>
         </SectionTitle>
-
-        <Grid container spacing={3} sx={{ display: { md: "flex" } }} justifyContent={"space-evenly"}>
-          {/* PAN Details */}
+        <Grid
+          container
+          spacing={3}
+          sx={{ display: { md: "flex" } }}
+          justifyContent={"space-evenly"}
+        >
           <Grid item xs={12} md={6} sx={{ mr: { md: 2 } }}>
             <TextField
               label="PAN Number"
               fullWidth
               value={data.pancardNumber || ""}
-              onChange={(e) => onChange("pancardNumber", e.target.value.toUpperCase())}
+              onChange={(e) =>
+                onChange("pancardNumber", e.target.value.toUpperCase())
+              }
               error={!!errors.pancardNumber}
               helperText={errors.pancardNumber}
               sx={{ mb: 2 }}
-              inputProps={{ maxLength: 10, pattern: "[A-Z]{5}[0-9]{4}[A-Z]{1}", title: "PAN must be in format: AAAAA9999A" }}
+              inputProps={{
+                maxLength: 10,
+                pattern: "[A-Z]{5}[0-9]{4}[A-Z]{1}",
+                title: "PAN must be in format: AAAAA9999A",
+              }}
               disabled={!isEditing}
             />
-
             <InputLabel shrink sx={{ mb: 1 }}>
               PAN Card Upload
             </InputLabel>
-            {editingField === "pancard" && editFileIndex === 0 ? (
-              <>
-                <UploadButton component="label" variant="outlined" startIcon={<Description />} fullWidth color="success">
-                  Replace PAN Card
-                  <VisuallyHiddenInput
-                    type="file"
-                    accept=".pdf,image/jpeg,image/png"
-                    onChange={handleFileChange("pancard", { maxFiles: 1, allowedTypes: ["application/pdf", "image/jpeg", "image/png"], maxSize: 1 })}
-                  />
-                </UploadButton>
-                <Button variant="outlined" aria-label="cancel" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              <UploadButton component="label" variant="outlined" startIcon={<Description />} fullWidth color="success" disabled={!isEditing}>
-                Upload PAN Card
-                <VisuallyHiddenInput
-                  type="file"
-                  accept=".pdf,image/jpeg,image/png"
-                  onChange={handleFileChange("pancard", { maxFiles: 1, allowedTypes: ["application/pdf", "image/jpeg", "image/png"], maxSize: 1 })}
-                />
-              </UploadButton>
-            )}
-            <Typography variant="caption" color={errors.pancard ? "error" : "textSecondary"}>
+            <UploadButton
+              component="label"
+              variant="outlined"
+              startIcon={<Description />}
+              fullWidth
+              color="success"
+              disabled={!isEditing}
+            >
+              Upload PAN Card
+              <VisuallyHiddenInput
+                type="file"
+                accept=".pdf,image/jpeg,image/png"
+                onChange={handleFileUpload("pancard", {
+                  maxFiles: 1,
+                  allowedTypes: ["application/pdf", "image/jpeg", "image/png"],
+                  maxSize: 1,
+                })}
+              />
+            </UploadButton>
+            <Typography
+              variant="caption"
+              color={errors.pancard ? "error" : "textSecondary"}
+            >
               {errors.pancard || "Accepted formats: PDF, JPEG, PNG (up to 1MB)"}
             </Typography>
-            {data.pancard?.length > 0 && (
+            {normalizedData.pancard?.length > 0 && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-                {typeof data.pancard[0] === "string" ? (
+                {isImageFile(normalizedData.pancard[0]) ? (
                   <>
-                    {data.pancard[0].endsWith(".pdf") ? (
-                      <Chip
-                        label="PAN Card (PDF)"
-                        onDelete={isEditing ? () => handleRemoveFile("pancard", 0) : undefined}
-                        deleteIcon={<CheckCircle fontSize="small" />}
-                        variant="outlined"
-                        color="success"
-                      />
-                    ) : (
-                      <Box component="img" src={data.pancard[0]} alt="PAN Preview" loading="lazy" sx={{ width: 100, borderRadius: 1, border: "1px solid #ccc" }} />
-                    )}
+                    <Box
+                      component="img"
+                      src={createObjectURL(normalizedData.pancard[0])}
+                      alt="PAN Preview"
+                      loading="lazy"
+                      sx={{ width: 100, borderRadius: 1, border: "1px solid #ccc" }}
+                    />
                     {isEditing && (
-                      <Box sx={{ display: "flex", gap: 1 }}>
-                        <IconButton onClick={() => startEditFile("pancard", 0)} color="primary" size="small">
-                          <Edit fontSize="small" />
-                        </IconButton>
-                        <IconButton onClick={() => handleRemoveFile("pancard", 0)} color="error" size="small">
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Box>
+                      <IconButton
+                        onClick={() => handleRemoveUploadedFile("pancard", 0)}
+                        color="error"
+                        size="small"
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
                     )}
                   </>
                 ) : (
                   <>
                     <Chip
-                      label={data.pancard[0].name}
-                      onDelete={isEditing ? () => handleRemoveFile("pancard", 0) : undefined}
+                      label={getFileDisplayName(normalizedData.pancard[0])}
+                      onDelete={
+                        isEditing ? () => handleRemoveUploadedFile("pancard", 0) : undefined
+                      }
                       deleteIcon={<CheckCircle fontSize="small" />}
                       variant="outlined"
                       color="success"
                     />
-                    {isEditing && (
-                      <Box sx={{ display: "flex", gap: 1 }}>
-                        <IconButton onClick={() => startEditFile("pancard", 0)} color="primary" size="small">
-                          <Edit fontSize="small" />
-                        </IconButton>
-                        <IconButton onClick={() => handleRemoveFile("pancard", 0)} color="error" size="small">
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    )}
                   </>
                 )}
               </Box>
             )}
           </Grid>
-
-          {/* GST Details */}
           <Grid item xs={12} md={6} sx={{ mt: { xs: 3, md: 0 }, ml: { md: 2 } }}>
             <TextField
               label="GST Number"
               fullWidth
               value={data.gstNumber || ""}
-              onChange={(e) => onChange("gstNumber", e.target.value.toUpperCase())}
+              onChange={(e) =>
+                onChange("gstNumber", e.target.value.toUpperCase())
+              }
               error={!!errors.gstNumber}
               helperText={errors.gstNumber}
               sx={{ mb: 2 }}
-              inputProps={{ maxLength: 15, pattern: "[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}", title: "GST must be in format: 22AAAAA0000A1Z5" }}
+              inputProps={{
+                maxLength: 15,
+                pattern: "[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}",
+                title: "GST must be in format: 22AAAAA0000A1Z5",
+              }}
               disabled={!isEditing}
             />
-
             <InputLabel shrink sx={{ mb: 1 }}>
               GST Certificate Upload
             </InputLabel>
-            {editingField === "gstCertificate" && editFileIndex === 0 ? (
-              <>
-                <UploadButton component="label" variant="outlined" startIcon={<Description />} fullWidth color="success">
-                  Replace GST Certificate
-                  <VisuallyHiddenInput
-                    type="file"
-                    accept=".pdf,image/jpeg,image/png"
-                    onChange={handleFileChange("gstCertificate", { maxFiles: 1, allowedTypes: ["application/pdf", "image/jpeg", "image/png"], maxSize: 1 })}
-                  />
-                </UploadButton>
-                <Button variant="outlined" aria-label="cancel" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              <UploadButton component="label" variant="outlined" startIcon={<Description />} fullWidth color="success" disabled={!isEditing}>
-                Upload GST Certificate
-                <VisuallyHiddenInput
-                  type="file"
-                  accept=".pdf,image/jpeg,image/png"
-                  onChange={handleFileChange("gstCertificate", { maxFiles: 1, allowedTypes: ["application/pdf", "image/jpeg", "image/png"], maxSize: 1 })}
-                />
-              </UploadButton>
-            )}
-            <Typography variant="caption" color={errors.gstCertificate ? "error" : "textSecondary"}>
-              {errors.gstCertificate || "Accepted formats: PDF, JPEG, PNG (up to 1MB)"}
+            <UploadButton
+              component="label"
+              variant="outlined"
+              startIcon={<Description />}
+              fullWidth
+              color="success"
+              disabled={!isEditing}
+            >
+              Upload GST Certificate
+              <VisuallyHiddenInput
+                type="file"
+                accept=".pdf,image/jpeg,image/png"
+                onChange={handleFileUpload("gstCertificate", {
+                  maxFiles: 1,
+                  allowedTypes: ["application/pdf", "image/jpeg", "image/png"],
+                  maxSize: 1,
+                })}
+              />
+            </UploadButton>
+            <Typography
+              variant="caption"
+              color={errors.gstCertificate ? "error" : "textSecondary"}
+            >
+              {errors.gstCertificate ||
+                "Accepted formats: PDF, JPEG, PNG (up to 1MB)"}
             </Typography>
-
-            {data.gstCertificate?.length > 0 && (
+            {normalizedData.gstCertificate?.length > 0 && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-                {typeof data.gstCertificate[0] === "string" ? (
+                {isImageFile(normalizedData.gstCertificate[0]) ? (
                   <>
-                    {data.gstCertificate[0].endsWith(".pdf") ? (
-                      <Chip
-                        label="GST Certificate (PDF)"
-                        onDelete={isEditing ? () => handleRemoveFile("gstCertificate", 0) : undefined}
-                        deleteIcon={<CheckCircle fontSize="small" />}
-                        variant="outlined"
-                        color="success"
-                      />
-                    ) : (
-                      <Box component="img" src={data.gstCertificate[0]} alt="GST Certificate" loading="lazy" sx={{ width: 100, borderRadius: 1, border: "1px solid #ccc" }} />
-                    )}
+                    <Box
+                      component="img"
+                      src={createObjectURL(normalizedData.gstCertificate[0])}
+                      alt="GST Certificate"
+                      loading="lazy"
+                      sx={{ width: 100, borderRadius: 1, border: "1px solid #ccc" }}
+                    />
                     {isEditing && (
-                      <Box sx={{ display: "flex", gap: 1 }}>
-                        <IconButton onClick={() => startEditFile("gstCertificate", 0)} color="primary" size="small">
-                          <Edit fontSize="small" />
-                        </IconButton>
-                        <IconButton onClick={() => handleRemoveFile("gstCertificate", 0)} color="error" size="small">
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Box>
+                      <IconButton
+                        onClick={() => handleRemoveUploadedFile("gstCertificate", 0)}
+                        color="error"
+                        size="small"
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
                     )}
                   </>
                 ) : (
                   <>
                     <Chip
-                      label={data.gstCertificate[0].name}
-                      onDelete={isEditing ? () => handleRemoveFile("gstCertificate", 0) : undefined}
+                      label={getFileDisplayName(normalizedData.gstCertificate[0])}
+                      onDelete={
+                        isEditing
+                          ? () => handleRemoveUploadedFile("gstCertificate", 0)
+                          : undefined
+                      }
                       deleteIcon={<CheckCircle fontSize="small" />}
                       variant="outlined"
                       color="success"
                     />
-                    {isEditing && (
-                      <Box sx={{ display: "flex", gap: 1 }}>
-                        <IconButton onClick={() => startEditFile("gstCertificate", 0)} color="primary" size="small">
-                          <Edit fontSize="small" />
-                        </IconButton>
-                        <IconButton onClick={() => handleRemoveFile("gstCertificate", 0)} color="error" size="small">
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    )}
                   </>
                 )}
               </Box>
@@ -634,264 +764,374 @@ const UploadsEdit = ({
         </Grid>
       </StyledPaper>
 
-      {/* Section 3: Brand Images */}
+      {/* Brand Images */}
       <StyledPaper>
         <SectionTitle variant="h6">
           Store / Branch / Images
-          <Tooltip title={<span><strong>Brand Images</strong> <br /> Accepted formats: JPEG, PNG (up to 1MB)</span>} placement="right-start" arrow enterTouchDelay={0}>
-            <IconButton size="small" sx={{ color: "warning.main", "&:hover": { backgroundColor: "info.main", color: "white" }, marginLeft: "5px" }}>
+          <Tooltip
+            title={
+              <span>
+                <strong>Brand Images</strong> <br /> Accepted formats: JPEG, PNG
+                (up to 1MB)
+              </span>
+            }
+            placement="right-start"
+            arrow
+            enterTouchDelay={0}
+          >
+            <IconButton
+              size="small"
+              sx={{
+                color: "warning.main",
+                "&:hover": { backgroundColor: "info.main", color: "white" },
+                marginLeft: "5px",
+              }}
+            >
               <InfoOutlined fontSize="medium" />
             </IconButton>
           </Tooltip>
         </SectionTitle>
-
-        <Grid container spacing={3} sx={{ display: { md: "flex" } }} justifyContent={"space-evenly"}>
-          {/* Exterior Images */}
-          <Grid item xs={12} md={6}>
+        
+        {/* Exterior Images */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" gutterBottom>
+              Exterior Images (Minimum 3, Maximum 5)
+            </Typography>
+            {imageErrors.exteriorOutlet && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {imageErrors.exteriorOutlet}
+              </Alert>
+            )}
             <FormControl fullWidth>
-              <Box sx={{ width: { md: "568px" } }}>
-                <UploadButton component="label" variant="outlined" color="success" fullWidth startIcon={<PhotoCamera />} disabled={!isEditing || editingField === "exteriorOutlet"}>
-                  Upload Exterior Images
-                  <VisuallyHiddenInput
-                    type="file"
-                    accept="image/jpeg,image/png"
-                    multiple
-                    onChange={handleFileChange("exteriorOutlet", { maxFiles: 5, allowedTypes: ["image/jpeg", "image/png"], maxSize: 5 })}
-                  />
-                </UploadButton>
-
-                <Typography variant="caption" color={errors.exteriorOutlet || errors.exteriorOutletCount ? "error" : "textSecondary"} sx={{ mt: -1 }}>
-                  {errors.exteriorOutlet || errors.exteriorOutletCount || "Accepted formats: JPEG, PNG (up to total 5MB)"}
-                </Typography>
-
-                {data.exteriorOutlet?.length > 0 && (
-                  <Box>
-                    <Box sx={{ display: "flex", gap: 1, alignItems: "center", overflowX: "auto", py: 1, "&::-webkit-scrollbar": { height: "6px" }, "&::-webkit-scrollbar-thumb": { backgroundColor: "divider", borderRadius: "3px" } }}>
-                      {data.exteriorOutlet.map((file, index) => (
-                        <Box key={index} sx={{ position: "relative", flexShrink: 0, width: "100px", height: "100px" }}>
-                          {isFileBeingEdited("exteriorOutlet", index) ? (
-                            <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", zIndex: 1 }}>
-                              <UploadButton component="label" variant="contained" size="small" sx={{ mb: 1 }}>
-                                Replace
-                                <VisuallyHiddenInput
-                                  type="file"
-                                  accept="image/jpeg,image/png"
-                                  onChange={handleFileChange("exteriorOutlet", { maxFiles: 1, allowedTypes: ["image/jpeg", "image/png"], maxSize: 5 })}
-                                />
-                              </UploadButton>
-                              <Button variant="outlined" aria-label="cancel" color="secondary" size="small" onClick={cancelEditFile}>
-                                Cancel
-                              </Button>
-                            </Box>
-                          ) : null}
-                          <FilePreviewImage src={createObjectURL(file)} alt={`Exterior ${index + 1}`} loading="lazy" />
-                          {isEditing && !isFileBeingEdited("exteriorOutlet", index) && (
-                            <Box sx={{ position: "absolute", top: 4, right: 4, display: "flex", gap: 0.5 }}>
-                              <IconButton
-                                onClick={() => startEditFile("exteriorOutlet", index)}
-                                color="primary"
-                                size="small"
-                                sx={{ backgroundColor: "rgba(255,255,255,0.8)", "&:hover": { backgroundColor: "rgba(255,255,255,0.9)" } }}
-                              >
-                                <Edit fontSize="small" />
-                              </IconButton>
-                              <IconButton
-                                onClick={() => handleRemoveFile("exteriorOutlet", index)}
-                                color="error"
-                                size="small"
-                                sx={{ backgroundColor: "rgba(255,255,255,0.8)", "&:hover": { backgroundColor: "rgba(255,255,255,0.9)" } }}
-                              >
-                                <Delete fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          )}
-                        </Box>
-                      ))}
-                    </Box>
-                    <Typography variant="caption" color={data.exteriorOutlet.length < 3 ? "error" : "success"} sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-                      {data.exteriorOutlet.length < 3 ? (
-                        <>
-                          <ErrorOutline fontSize="small" sx={{ mr: 0.5 }} />
-                          {3 - data.exteriorOutlet.length} more required
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle fontSize="small" sx={{ mr: 0.5 }} />
-                          Minimum requirement met
-                        </>
-                      )}
-                    </Typography>
+              <UploadButton
+                component="label"
+                variant="outlined"
+                color="success"
+                fullWidth
+                startIcon={<PhotoCamera />}
+                disabled={!isEditing || normalizedData.exteriorOutlet?.length >= 5}
+              >
+                Upload Exterior Images
+                <VisuallyHiddenInput
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  multiple
+                  onChange={handleFileUpload("exteriorOutlet", {
+                    maxFiles: 5,
+                    minFiles: 3,
+                    allowedTypes: ["image/jpeg", "image/png"],
+                    maxSize: 5,
+                  })}
+                />
+              </UploadButton>
+              <Typography
+                variant="caption"
+                color="textSecondary"
+                sx={{ mt: -1 }}
+              >
+                Accepted formats: JPEG, PNG (up to total 5MB)
+              </Typography>
+              {normalizedData.exteriorOutlet?.length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 1,
+                      alignItems: "center",
+                      overflowX: "auto",
+                      py: 1,
+                      "&::-webkit-scrollbar": { height: "6px" },
+                      "&::-webkit-scrollbar-thumb": {
+                        backgroundColor: "divider",
+                        borderRadius: "3px",
+                      },
+                    }}
+                  >
+                    {normalizedData.exteriorOutlet.map((file, index) => (
+                      <Box
+                        key={index}
+                        sx={{
+                          position: "relative",
+                          flexShrink: 0,
+                          width: "100px",
+                          height: "100px",
+                        }}
+                      >
+                        <FilePreviewImage
+                          src={createObjectURL(file)}
+                          alt={`Exterior ${index + 1}`}
+                          loading="lazy"
+                        />
+                        {isEditing && (
+                          <IconButton
+                            onClick={() => handleRemoveUploadedFile("exteriorOutlet", index)}
+                            color="error"
+                            size="small"
+                            sx={{
+                              position: "absolute",
+                              top: 4,
+                              right: 4,
+                              backgroundColor: "rgba(255,255,255,0.8)",
+                              "&:hover": { backgroundColor: "rgba(255,255,255,0.9)" },
+                            }}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        )}
+                      </Box>
+                    ))}
                   </Box>
-                )}
-              </Box>
+                  <Typography
+                    variant="caption"
+                    color={normalizedData.exteriorOutlet.length < 3 ? "error" : "success"}
+                    sx={{ display: "flex", alignItems: "center", mt: 1 }}
+                  >
+                    {normalizedData.exteriorOutlet.length < 3 ? (
+                      <>
+                        <ErrorOutline fontSize="small" sx={{ mr: 0.5 }} />
+                        {3 - normalizedData.exteriorOutlet.length} more required
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle fontSize="small" sx={{ mr: 0.5 }} />
+                        Minimum requirement met ({normalizedData.exteriorOutlet.length}/5)
+                      </>
+                    )}
+                  </Typography>
+                </Box>
+              )}
             </FormControl>
           </Grid>
+        </Grid>
 
-          {/* Interior Images */}
-          <Grid item xs={12} md={6}>
+        {/* Interior Images */}
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" gutterBottom>
+              Interior Images (Minimum 3, Maximum 5)
+            </Typography>
+            {imageErrors.interiorOutlet && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {imageErrors.interiorOutlet}
+              </Alert>
+            )}
             <FormControl fullWidth>
-              <Box sx={{ width: { md: "568px" } }}>
-                <UploadButton component="label" variant="outlined" fullWidth color="success" startIcon={<PhotoCamera />} sx={{ height: "56px" }} disabled={!isEditing || editingField === "interiorOutlet"}>
-                  Upload Interior Images
-                  <VisuallyHiddenInput
-                    type="file"
-                    accept="image/jpeg,image/png"
-                    multiple
-                    onChange={handleFileChange("interiorOutlet", { maxFiles: 5, allowedTypes: ["image/jpeg", "image/png"], maxSize: 5 })}
-                  />
-                </UploadButton>
-
-                <Typography variant="caption" color={errors.interiorOutlet || errors.interiorOutletCount ? "error" : "textSecondary"} sx={{ mt: -1 }}>
-                  {errors.interiorOutlet || errors.interiorOutletCount || "Accepted formats: JPEG, PNG (up to total 5MB)"}
-                </Typography>
-
-                {data.interiorOutlet?.length > 0 && (
-                  <Box>
-                    <Box sx={{ display: "flex", gap: 2, overflowX: "auto", py: 1, "&::-webkit-scrollbar": { height: "6px" }, "&::-webkit-scrollbar-thumb": { backgroundColor: "divider", borderRadius: "3px" } }}>
-                      {data.interiorOutlet.map((file, index) => (
-                        <Box key={index} sx={{ position: "relative", flexShrink: 0, width: "100px", height: "100px" }}>
-                          {isFileBeingEdited("interiorOutlet", index) ? (
-                            <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", zIndex: 1 }}>
-                              <UploadButton component="label" variant="contained" size="small" sx={{ mb: 1 }}>
-                                Replace
-                                <VisuallyHiddenInput
-                                  type="file"
-                                  accept="image/jpeg,image/png"
-                                  onChange={handleFileChange("interiorOutlet", { maxFiles: 1, allowedTypes: ["image/jpeg", "image/png"], maxSize: 5 })}
-                                />
-                              </UploadButton>
-                              <Button variant="outlined" aria-label="cancel" color="secondary" size="small" onClick={cancelEditFile}>
-                                Cancel
-                              </Button>
-                            </Box>
-                          ) : null}
-                          <FilePreviewImage src={createObjectURL(file)} alt={`Interior ${index + 1}`} loading="lazy" />
-                          {isEditing && !isFileBeingEdited("interiorOutlet", index) && (
-                            <Box sx={{ position: "absolute", top: 4, right: 4, display: "flex", gap: 0.5 }}>
-                              <IconButton
-                                onClick={() => startEditFile("interiorOutlet", index)}
-                                color="primary"
-                                size="small"
-                                sx={{ backgroundColor: "rgba(255,255,255,0.8)", "&:hover": { backgroundColor: "rgba(255,255,255,0.9)" } }}
-                              >
-                                <Edit fontSize="small" />
-                              </IconButton>
-                              <IconButton
-                                onClick={() => handleRemoveFile("interiorOutlet", index)}
-                                color="error"
-                                size="small"
-                                sx={{ backgroundColor: "rgba(255,255,255,0.8)", "&:hover": { backgroundColor: "rgba(255,255,255,0.9)" } }}
-                              >
-                                <Delete fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          )}
-                        </Box>
-                      ))}
-                    </Box>
-                    <Typography variant="caption" color={data.interiorOutlet.length < 3 ? "error" : "success"} sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-                      {data.interiorOutlet.length < 3 ? (
-                        <>
-                          <ErrorOutline fontSize="small" sx={{ mr: 0.5 }} />
-                          {3 - data.interiorOutlet.length} more required
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle fontSize="small" sx={{ mr: 0.5 }} />
-                          Minimum requirement met
-                        </>
-                      )}
-                    </Typography>
+              <UploadButton
+                component="label"
+                variant="outlined"
+                fullWidth
+                color="success"
+                startIcon={<PhotoCamera />}
+                sx={{ height: "56px" }}
+                disabled={!isEditing || normalizedData.interiorOutlet?.length >= 5}
+              >
+                Upload Interior Images
+                <VisuallyHiddenInput
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  multiple
+                  onChange={handleFileUpload("interiorOutlet", {
+                    maxFiles: 5,
+                    minFiles: 3,
+                    allowedTypes: ["image/jpeg", "image/png"],
+                    maxSize: 5,
+                  })}
+                />
+              </UploadButton>
+              <Typography
+                variant="caption"
+                color="textSecondary"
+                sx={{ mt: -1 }}
+              >
+                Accepted formats: JPEG, PNG (up to total 5MB)
+              </Typography>
+              {normalizedData.interiorOutlet?.length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 2,
+                      overflowX: "auto",
+                      py: 1,
+                      "&::-webkit-scrollbar": { height: "6px" },
+                      "&::-webkit-scrollbar-thumb": {
+                        backgroundColor: "divider",
+                        borderRadius: "3px",
+                      },
+                    }}
+                  >
+                    {normalizedData.interiorOutlet.map((file, index) => (
+                      <Box
+                        key={index}
+                        sx={{
+                          position: "relative",
+                          flexShrink: 0,
+                          width: "100px",
+                          height: "100px",
+                        }}
+                      >
+                        <FilePreviewImage
+                          src={createObjectURL(file)}
+                          alt={`Interior ${index + 1}`}
+                          loading="lazy"
+                        />
+                        {isEditing && (
+                          <IconButton
+                            onClick={() => handleRemoveUploadedFile("interiorOutlet", index)}
+                            color="error"
+                            size="small"
+                            sx={{
+                              position: "absolute",
+                              top: 4,
+                              right: 4,
+                              backgroundColor: "rgba(255,255,255,0.8)",
+                              "&:hover": { backgroundColor: "rgba(255,255,255,0.9)" },
+                            }}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        )}
+                      </Box>
+                    ))}
                   </Box>
-                )}
-              </Box>
+                  <Typography
+                    variant="caption"
+                    color={normalizedData.interiorOutlet.length < 3 ? "error" : "success"}
+                    sx={{ display: "flex", alignItems: "center", mt: 1 }}
+                  >
+                    {normalizedData.interiorOutlet.length < 3 ? (
+                      <>
+                        <ErrorOutline fontSize="small" sx={{ mr: 0.5 }} />
+                        {3 - normalizedData.interiorOutlet.length} more required
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle fontSize="small" sx={{ mr: 0.5 }} />
+                        Minimum requirement met ({normalizedData.interiorOutlet.length}/5)
+                      </>
+                    )}
+                  </Typography>
+                </Box>
+              )}
             </FormControl>
           </Grid>
         </Grid>
       </StyledPaper>
 
-      {/* Section 4: Awards & Recognitions */}
+      {/* Awards & Recognitions */}
       <StyledPaper sx={{ p: 3 }}>
         <SectionTitle variant="h6">
           Award Description & Documents
-          <Tooltip title="Add awards and recognition documents" placement="right-start" arrow enterTouchDelay={0}>
-            <IconButton size="small" sx={{ color: "warning.main", "&:hover": { backgroundColor: "info.main", color: "white" }, marginLeft: "5px" }}>
+          <Tooltip
+            title="Add awards and recognition documents"
+            placement="right-start"
+            arrow
+            enterTouchDelay={0}
+          >
+            <IconButton
+              size="small"
+              sx={{
+                color: "warning.main",
+                "&:hover": { backgroundColor: "info.main", color: "white" },
+                marginLeft: "5px",
+              }}
+            >
               <InfoOutlined fontSize="medium" />
             </IconButton>
           </Tooltip>
         </SectionTitle>
-
-        {isEditing && (
-          <Grid container spacing={2} sx={{ display: { md: "flex", xs: "grid" } }}>
-            <Grid item>
-              <TextField
-                label="Award Description"
-                value={currentAward.text}
-                onChange={handleAwardTextChange}
-                sx={{ width: { xs: "100%", md: 900 } }}
-                error={!currentAward.text && formSubmitted}
-                helperText={!currentAward.text && formSubmitted ? "Award description is required" : ""}
-              />
-            </Grid>
-
-            <Grid item>
-              <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <UploadButton
-                  component="label"
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    borderColor: "green",
-                    color: "#5a8f29",
-                    "&:hover": { backgroundColor: "rgba(122, 208, 58, 0.08)", borderColor: "#5db024" },
-                    ...(!currentAward.document && formSubmitted ? { borderColor: "error.main", color: "error.main" } : {}),
-                  }}
-                  startIcon={<CloudUpload />}
-                >
-                  Upload Document
-                  <VisuallyHiddenInput type="file" accept=".pdf,.doc,.docx,image/*" onChange={handleAwardFileChange} />
-                </UploadButton>
-
-                <Box sx={{ mt: 0.5, minHeight: 24 }}>
-                  {currentAward.document ? (
-                    <Typography variant="caption" sx={{ color: "#666" }}>
-                      {currentAward.document.name}
-                    </Typography>
-                  ) : (
-                    formSubmitted && (
-                      <Typography variant="caption" sx={{ color: "error.main" }}>
-                        Please upload a document
-                      </Typography>
-                    )
-                  )}
-                </Box>
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} md={2}>
-              <Button
-                variant="contained"
-                aria-label="add"
-                fullWidth
-                sx={{ py: 2, backgroundColor: "#7ad03a", "&:hover": { backgroundColor: "#5db024" }, "&:disabled": { backgroundColor: "#e0e0e0" } }}
-                onClick={() => {
-                  setFormSubmitted(true);
-                  handleAddAward();
-                }}
-                disabled={!currentAward.text || !currentAward.document}
-              >
-                {editAwardIndex !== null ? "Update Award" : "Add Award"}
-              </Button>
-              {editAwardIndex !== null && (
-                <Button variant="outlined" aria-label="cancel" fullWidth sx={{ mt: 1 }} onClick={handleCancelEdit}>
-                  Cancel
-                </Button>
-              )}
-            </Grid>
-          </Grid>
-        )}
-
-        {data.awards?.length > 0 && (
+    {isEditing && (
+  <Grid container spacing={2} sx={{ display: { md: "flex", xs: "grid" } }}>
+    <Grid item>
+      <TextField
+        label="Award Description"
+        value={currentAward.text}
+        onChange={handleAwardTextChange}
+        sx={{ width: { xs: "100%", md: 900 } }}
+        error={!currentAward.text && formSubmitted}
+        helperText={
+          !currentAward.text && formSubmitted
+            ? "Award description is required"
+            : ""
+        }
+      />
+    </Grid>
+    <Grid item>
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <UploadButton
+          component="label"
+          variant="outlined"
+          size="small"
+          sx={{
+            borderColor: "green",
+            color: "#5a8f29",
+            "&:hover": {
+              backgroundColor: "rgba(122, 208, 58, 0.08)",
+              borderColor: "#5db024",
+            },
+            ...(!currentAward.document && formSubmitted
+              ? { borderColor: "error.main", color: "error.main" }
+              : {}),
+          }}
+          startIcon={<CloudUpload />}
+        >
+          Upload Document
+          <VisuallyHiddenInput
+            type="file"
+            accept=".pdf,.doc,.docx,image/*"
+            onChange={handleAwardFileChange}
+          />
+        </UploadButton>
+        <Box sx={{ mt: 0.5, minHeight: 24 }}>
+          {currentAward.document ? (
+            <Typography variant="caption" sx={{ color: "#666" }}>
+              {getFileDisplayName(currentAward.document)}
+            </Typography>
+          ) : (
+            formSubmitted && (
+              <Typography variant="caption" sx={{ color: "error.main" }}>
+                Please upload a document
+              </Typography>
+            )
+          )}
+        </Box>
+      </Box> {/* Missing closing Box tag */}
+    </Grid>
+    <Grid item xs={12} md={2}>
+      <Button
+        variant="contained"
+        aria-label="add"
+        fullWidth
+        sx={{
+          py: 2,
+          backgroundColor: "#7ad03a",
+          "&:hover": { backgroundColor: "#5db024" },
+          "&:disabled": { backgroundColor: "#e0e0e0" },
+        }}
+        onClick={() => {
+          setFormSubmitted(true);
+          handleAddAward();
+        }}
+        disabled={!currentAward.text || !currentAward.document}
+      >
+        {editAwardIndex !== null ? "Update Award" : "Add Award"}
+      </Button>
+      {editAwardIndex !== null && (
+        <Button
+          variant="outlined"
+          aria-label="cancel"
+          fullWidth
+          sx={{ mt: 1 }}
+          onClick={handleCancelEdit}
+        >
+          Cancel
+        </Button>
+      )}
+    </Grid>
+  </Grid>
+)}
+        {normalizedData.awards?.length > 0 && (
           <Box sx={{ mt: 3 }}>
             <TableContainer>
               <Table>
@@ -903,17 +1143,21 @@ const UploadsEdit = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {data.awards.map((award, index) => (
+                  {normalizedData.awards.map((award, index) => (
                     <TableRow key={index}>
                       <TableCell>{award.text}</TableCell>
                       <TableCell>
                         {award.document ? (
-                          typeof award.document === "string" ? (
-                            <a href={award.document} target="_blank" rel="noopener noreferrer">
+                          isPdfFile(award.document) ? (
+                            <a
+                              href={createObjectURL(award.document)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
                               View Document
                             </a>
                           ) : (
-                            award.document.name
+                            getFileDisplayName(award.document)
                           )
                         ) : (
                           "No document"
@@ -938,91 +1182,103 @@ const UploadsEdit = ({
         )}
       </StyledPaper>
 
-      {/* Section 5: Business Plan */}
+      {/* Business Plan */}
       <StyledPaper>
         <SectionTitle variant="h6">
           Business Plan (Optional)
-          <Tooltip title="You can upload your business plan in PDF, DOC, or DOCX format" placement="right-start" arrow enterTouchDelay={0}>
-            <IconButton size="small" sx={{ color: "warning.main", "&:hover": { backgroundColor: "info.main", color: "white" }, marginLeft: "5px" }}>
+          <Tooltip
+            title="You can upload your business plan in PDF, DOC, or DOCX format"
+            placement="right-start"
+            arrow
+            enterTouchDelay={0}
+          >
+            <IconButton
+              size="small"
+              sx={{
+                color: "warning.main",
+                "&:hover": { backgroundColor: "info.main", color: "white" },
+                marginLeft: "5px",
+              }}
+            >
               <InfoOutlined fontSize="medium" />
             </IconButton>
           </Tooltip>
         </SectionTitle>
-
         <Grid sx={{ ml: { md: 5, xs: 0 }, mr: { md: 5, xs: 0 } }}>
-          {editingField === "businessPlan" && editFileIndex === 0 ? (
-            <>
-              <UploadButton fullWidth component="label" variant="outlined" size="small" color="success" startIcon={<Description />}>
-                Replace Business Plan
-                <VisuallyHiddenInput
-                  type="file"
-                  accept=".pdf,.doc,.docx,"
-                  onChange={handleFileChange("businessPlan", {
-                    maxFiles: 1,
-                    allowedTypes: [
-                      "application/pdf",
-                      "application/msword",
-                      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    ],
-                    maxSize: 1,
-                  })}
-                />
-              </UploadButton>
-              <Button variant="outlined" aria-label="cancel" color="error" onClick={cancelEditFile} sx={{ mt: 1 }}>
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <UploadButton fullWidth component="label" variant="outlined" size="small" color="success" startIcon={<Description />} disabled={!isEditing}>
-              Upload (PDF, DOC, DOCX)
-              <VisuallyHiddenInput
-                type="file"
-                accept=".pdf,.doc,.docx,"
-                onChange={handleFileChange("businessPlan", {
-                  maxFiles: 1,
-                  allowedTypes: [
-                    "application/pdf",
-                    "application/msword",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                  ],
-                  maxSize: 1,
-                })}
-              />
-            </UploadButton>
-          )}
-          <Typography variant="caption" color={errors.businessPlan ? "error" : "textSecondary"}>
+          <UploadButton
+            fullWidth
+            component="label"
+            variant="outlined"
+            size="small"
+            color="success"
+            startIcon={<Description />}
+            disabled={!isEditing}
+          >
+            Upload (PDF, DOC, DOCX)
+            <VisuallyHiddenInput
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={handleFileUpload("businessPlan", {
+                maxFiles: 1,
+                allowedTypes: [
+                  "application/pdf",
+                  "application/msword",
+                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ],
+                maxSize: 1,
+              })}
+            />
+          </UploadButton>
+          <Typography
+            variant="caption"
+            color={errors.businessPlan ? "error" : "textSecondary"}
+          >
             {errors.businessPlan || "Accepted formats: PDF, DOC, DOCX (up to 10MB)"}
           </Typography>
-
-          {data.businessPlan?.length > 0 && (
+          {normalizedData.businessPlan?.length > 0 && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}>
               <Description color="primary" />
               <Typography variant="body2">
-                {typeof data.businessPlan[0] === "string" ? "Business Plan Document" : data.businessPlan[0].name}
+                {getFileDisplayName(normalizedData.businessPlan[0])}
               </Typography>
               {isEditing && (
-                <Box sx={{ display: "flex", gap: 1, ml: "auto" }}>
-                  <IconButton onClick={() => startEditFile("businessPlan", 0)} color="primary" size="small">
-                    <Edit fontSize="small" />
-                  </IconButton>
-                  <IconButton onClick={() => handleRemoveFile("businessPlan", 0)} size="small" color="error">
-                    <Delete fontSize="small" />
-                  </IconButton>
-                </Box>
+                <IconButton
+                  onClick={() => handleRemoveUploadedFile("businessPlan", 0)}
+                  size="small"
+                  color="error"
+                >
+                  <Delete fontSize="small" />
+                </IconButton>
               )}
             </Box>
           )}
         </Grid>
       </StyledPaper>
 
-      <Dialog open={confirmDeleteIndex !== null} onClose={() => setConfirmDeleteIndex(null)}>
+      <Dialog
+        open={confirmDeleteIndex !== null}
+        onClose={() => setConfirmDeleteIndex(null)}
+      >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete this award? This action cannot be undone.</Typography>
+          <Typography>
+            Are you sure you want to delete this award? This action cannot be
+            undone.
+          </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmDeleteIndex(null)} aria-label="cancel">Cancel</Button>
-          <Button onClick={() => handleDeleteAward(confirmDeleteIndex)} color="error" aria-label="delete" variant="contained">
+          <Button
+            onClick={() => setConfirmDeleteIndex(null)}
+            aria-label="cancel"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => handleDeleteAward(confirmDeleteIndex)}
+            color="error"
+            aria-label="delete"
+            variant="contained"
+          >
             Delete
           </Button>
         </DialogActions>

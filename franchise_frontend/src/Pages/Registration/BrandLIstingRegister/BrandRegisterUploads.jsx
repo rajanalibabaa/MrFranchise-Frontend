@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Grid,
@@ -1084,4 +1083,3 @@ const Uploads = ({
 };
 
 export default Uploads;
-
