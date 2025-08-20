@@ -192,7 +192,7 @@ const BrandDetailsEdit = ({ data = {}, errors = {}, onChange, isEditing }) => {
         size="medium"
         inputProps={{ maxLength: 15 }}
         placeholder="Enter mobile number"
-        disabled={!isEditing}
+        disabled={true}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -244,7 +244,7 @@ const BrandDetailsEdit = ({ data = {}, errors = {}, onChange, isEditing }) => {
         size="medium"
         inputProps={{ maxLength: 15 }}
         placeholder="Enter WhatsApp number"
-        disabled={!isEditing}
+        disabled={true}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -297,7 +297,7 @@ const BrandDetailsEdit = ({ data = {}, errors = {}, onChange, isEditing }) => {
         size="medium"
         inputProps={{ maxLength: 15 }}
         placeholder="Enter mobile number"
-        disabled={!isEditing}
+        disabled={true}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -350,7 +350,7 @@ const BrandDetailsEdit = ({ data = {}, errors = {}, onChange, isEditing }) => {
         size="medium"
         inputProps={{ maxLength: 15 }}
         placeholder="Enter mobile number"
-        disabled={!isEditing}
+        disabled={true}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -420,7 +420,7 @@ const BrandDetailsEdit = ({ data = {}, errors = {}, onChange, isEditing }) => {
             helperText={errors.fullName}
             variant="outlined"
             size="medium"
-            disabled={!isEditing}
+            disabled={true}
             required
           />
         </Grid>
@@ -438,7 +438,7 @@ const BrandDetailsEdit = ({ data = {}, errors = {}, onChange, isEditing }) => {
             helperText={errors.email}
             variant="outlined"
             size="medium"
-            disabled={!isEditing}
+            disabled={true}
             required
           />
         </Grid>
@@ -479,7 +479,7 @@ const BrandDetailsEdit = ({ data = {}, errors = {}, onChange, isEditing }) => {
             size="medium"
             error={!!errors.companyName}
             helperText={errors.companyName}
-            disabled={!isEditing}
+            disabled={true}
             required
           />
         </Grid>
@@ -496,7 +496,7 @@ const BrandDetailsEdit = ({ data = {}, errors = {}, onChange, isEditing }) => {
             size="medium"
             error={!!errors.brandName}
             helperText={errors.brandName}
-            disabled={!isEditing}
+            disabled={true}
             required
           />
         </Grid>
@@ -558,7 +558,7 @@ const BrandDetailsEdit = ({ data = {}, errors = {}, onChange, isEditing }) => {
             size="medium"
             error={!!errors.ceoEmail}
             helperText={errors.ceoEmail}
-            disabled={!isEditing}
+            disabled={true}
             required
           />
         </Grid>
@@ -595,7 +595,7 @@ const BrandDetailsEdit = ({ data = {}, errors = {}, onChange, isEditing }) => {
             size="medium"
             error={!!errors.officeEmail}
             helperText={errors.officeEmail}
-            disabled={!isEditing}
+            disabled={true}
           />
         </Grid>
 
