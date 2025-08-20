@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import BrandDetailsEdit from './BrandDetailsEdit';
 import FranchiseDetailsControl from './FranchiseDetailsEdit';
-import ExpansionLocationControl from './ExpansionLocationControl';
+import ExpansionLocationControl from './ExpansionLocationEdit';
 import UploadsEdit from './UploadsEdit';
 import {
   Box,

@@ -49,7 +49,7 @@ const BrandListingEdit = lazy(() => import('./Components/BrandProfile_Component/
 const BrandSearchus = lazy(() => import('./Components/BrandProfile_Component/BrandSearches'));
 const BrandDetailsEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/BrandDetailsEdit'));
 const FranchiseDetailsEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/FranchiseDetailsEdit'));
-const ExpansionLocationControl = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/ExpansionLocationControl'));
+const ExpansionLocationEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/ExpansionLocationEdit'));
 const UploadsEdit = lazy(() => import('./Components/BrandProfile_Component/BrandDashboardController/UploadsEdit.jsx'));
 
 // Footer Pages
@@ -101,7 +101,7 @@ const App = () => {
         window.location.href = '/loginpage';
       }
     };
-
+    
     checkAutoLogout();
     const interval = setInterval(checkAutoLogout, 60000); // Check every minute
     
@@ -163,7 +163,7 @@ const App = () => {
                   <Route path="brandDashboard" element={<BrandDashBoard />} />
                   <Route path="branddetailcontrol" element={<BrandDetailsEdit />} />
                   <Route path="franchisedetailcontrol" element={<FranchiseDetailsEdit />} />
-                  <Route path="expansionlocationcontrol" element={<ExpansionLocationControl />} />
+                  <Route path="expansionlocationcontrol" element={<ExpansionLocationEdit />} />
                   <Route path="uploadcontrol" element={<UploadsEdit />} />
                   <Route path="brandfeedback" element={<BrandFeedBack />} />
                   <Route path="brandcomplaint" element={<BrandComplaint />} />
