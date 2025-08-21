@@ -414,7 +414,7 @@ const HomePageLeads = () => {
               ₹{calculateTotal.toLocaleString()}
             </Typography>
           </Box>
-          <Button
+          {/* <Button
             variant="contained"
             size="large"
             fullWidth
@@ -433,7 +433,7 @@ const HomePageLeads = () => {
             }}
           >
             Proceed to Payment
-          </Button>
+          </Button> */}
         </Paper>
       )}
     </Box>

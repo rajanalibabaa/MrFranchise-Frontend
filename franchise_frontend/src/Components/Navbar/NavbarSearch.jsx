@@ -459,7 +459,7 @@ const NavbarSearch = ({ open, handleClose }) => {
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogContent sx={{ position: 'relative', p: 3 }}>
+      <DialogContent sx={{  p: 3 ,background:'#d5e7ddac'}}>
         {/* Close Button */}
         <IconButton
           onClick={handleClose}

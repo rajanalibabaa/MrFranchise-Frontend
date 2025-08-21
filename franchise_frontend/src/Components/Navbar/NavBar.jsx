@@ -10,11 +10,9 @@ import {
   Typography,
   Button,
   MenuItem,
- 
   useMediaQuery,
   useTheme,
   Menu,
-  
   Divider
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -33,7 +31,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import logo from "../../assets/Images/logo.png";
 import { showLoading } from "../../Redux/Slices/loadingSlice";
 import NavbarSearch from "../Navbar/NavbarSearch";
-// import backgroundPattern from "../../assets/Images/network-pattern.png";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -54,7 +51,6 @@ function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [logoutLoading, setlogoutLoading] = useState(false);
 
-  // Fallback for ID if Redux state is empty (e.g., after refresh)
   const ID =
     localStorage.getItem("brandUUID") ||
     localStorage.getItem("investorUUID") 
@@ -69,7 +65,6 @@ function Navbar() {
   }, []);
 
   useEffect(() => {
-
     const handleClickOutside = (event) => {
       if (
         menuOpen &&
@@ -89,26 +84,23 @@ function Navbar() {
     navigate(path);
     dispatch(toggleMenu(false));
     setAnchorEl(null);
-    
   };
 
   const handleLoginSuccess = (userData) => {
-
-    // console.log("User Data:", userData);
     dispatch(loginSuccess(userData));
     setLoginModalOpen(false);
   };
 
   const handleSignOut = () => {
+    setAnchorEl(null); // Close the menu when signing out
     dispatch(toggleMenu(false));
     setPopupLogout(true);
   };
 
   const handleVerifySignOut = async () => {
-    setlogoutLoading(true)
+    setlogoutLoading(true);
     try {
       const response = await axios.post(
-      
         `http://localhost:5000/api/v1/logout/${ID}`,
         {},
         {
@@ -120,40 +112,42 @@ function Navbar() {
         }
       );
 
-      // console.log("===logout===")
-
       if (response.status === 200) {
         setTimeout(() => {
           dispatch(logout());
           setPopupLogout(false);
           navigate("/");
-          setlogoutLoading(false)
+          setlogoutLoading(false);
+          // Clear local storage items
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("brandUUID");
+          localStorage.removeItem("investorUUID");
+          localStorage.removeItem("userName");
         }, 2000);
       }
     } catch (error) {
       console.error("Logout error:", error.message || error);
+      setlogoutLoading(false);
     }
   };
 
   const handleMyProfileNavigate = () => {
-  const investorUUID = localStorage.getItem("investorUUID");
-  const brandUUID = localStorage.getItem("brandUUID");
-  const userName = localStorage.getItem("userName") || "Guest";
+    const investorUUID = localStorage.getItem("investorUUID");
+    const brandUUID = localStorage.getItem("brandUUID");
+    const userName = localStorage.getItem("userName") || "Guest";
 
-  let url = "/";
+    let url = "/";
 
-  if (investorUUID) {
-    url = `/investordashboard?id=${encodeURIComponent(investorUUID)}&name=${encodeURIComponent(userName)}`;
-  } else if (brandUUID) {
-    url = `/brandDashboard?id=${encodeURIComponent(brandUUID)}&name=${encodeURIComponent(userName)}`;
-  }
+    if (investorUUID) {
+      url = `/investordashboard?id=${encodeURIComponent(investorUUID)}&name=${encodeURIComponent(userName)}`;
+    } else if (brandUUID) {
+      url = `/brandDashboard?id=${encodeURIComponent(brandUUID)}&name=${encodeURIComponent(userName)}`;
+    }
 
-  // Opens in a new tab/window
-  window.open(url, "_blank", "noopener,noreferrer");
-
-  dispatch(toggleMenu(false));
-};
-
+    window.open(url, "_blank", "noopener,noreferrer");
+    dispatch(toggleMenu(false));
+  };
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -164,17 +158,18 @@ function Navbar() {
     setAnchorEl(null);
     dispatch(toggleMenu(false));
   };
+
   const handleLogoClick = () => {
-    if (location.pathname === '/') {
-    window.location.reload();
-  } else {
-    dispatch(showLoading());
-      navigate("/");}
+    if (window.location.pathname === '/') {
+      window.location.reload();
+    } else {
+      dispatch(showLoading());
+      navigate("/");
+    }
   };
 
   return (
     <>
-      {/* Main Navigation Bar */}
       <AppBar 
         position="sticky" 
         color="transparent" 
@@ -195,29 +190,17 @@ function Navbar() {
             backgroundSize: '200% 100%',
             animation: 'gradient 3s ease infinite',
           },
-          '@keyframes gradient': {
-            '0%': {
-              backgroundPosition: '0% 50%',
-            },
-            '50%': {
-              backgroundPosition: '100% 50%',
-            },
-            '100%': {
-              backgroundPosition: '0% 50%',
-            },
-          }
         }}
       >
         <Box sx={{ 
           display:{ xs: "none", sm: "flex"}, 
           flexWrap: "wrap",
           ml: "40px", 
-          
           gap: isMobile ? 0.5 : 1,
           position: 'relative',
           zIndex: 1
         }}>
-          {['Expand Your Franchise', 'Investor', 'Advertise','Other Industries',"Blogs"].map((text, index) => (
+          {['Expand Your Franchise', 'Investor', 'Advertise','Other Industries',"Blogs"].map((text) => (
             <motion.div
               key={text}
               whileHover={{ scale: 1.05 }}
@@ -229,7 +212,6 @@ function Navbar() {
                   text === 'Expand Your Franchise' ? '/expandyourbrand' :
                   text === 'Investor' ? '/investfranchise' :
                   text === 'Advertise' ? '/advertisewithus' :
-                  // text === 'Lead Distribution Packages' ? '/franchisepromotion' : 
                   text === 'Other Industries' ? '/otherindustries' : 
                   text === 'Blogs' ? '/blogs' : '/'
                 }
@@ -295,89 +277,58 @@ function Navbar() {
                 />
               </Box>
             </motion.div>
-            
           </Box>
 
-
-            
           <Box sx={{ flexGrow: isMobile ? 0 : 1 }} />
 
-<Box  sx={{ 
-              display: 'flex', 
-              gap:isMobile?1: 5,
-              flex: isTablet ? 1 : 'none',
-              justifyContent: isTablet ? 'center' : 'flex-end',
-              alignItems:"center"
-            }}>
-
-              <motion.div >
-    <IconButton 
-      onClick={() => setSearchOpen(true)}  >
-      <Search  size={25}  />
-      <Typography sx={{display:{xs:"none", sm:"flex"}}}>Search</Typography>
-    </IconButton>
-  </motion.div>
-              <motion.div whileHover={{ y: -2 }}>
-                <Button 
+          <Box sx={{ 
+            display: 'flex', 
+            gap:isMobile?1: 5,
+            flex: isTablet ? 1 : 'none',
+            justifyContent: isTablet ? 'center' : 'flex-end',
+            alignItems:"center"
+          }}>
+            <motion.div>
+              <IconButton onClick={() => setSearchOpen(true)}>
+                <Search size={25} />
+                <Typography sx={{display:{xs:"none", sm:"flex"}}}>Search</Typography>
+              </IconButton>
+            </motion.div>
+            <motion.div whileHover={{ y: -2 }}>
+              <Button 
                 onClick={() => {
-  const url = `/brandlistingform?source=${encodeURIComponent("mr franchise")}&ref=${encodeURIComponent("homepage")}`;
-  window.open(url, "_blank");
-}}
-
-                  startIcon={<Plus size={20} />}
-                  
-                  sx={{
-                    color: 'black',  
-                    backgroundColor: ' #6fff00fa',
-                    borderRadius: '8px',
-                    px: {4: 3, xs: 2},
-                    py:isMobile?0: 1,
-                    margin:{ xs:"5px"},
-                    textTransform: 'none',
-                    fontSize: isMobile ? '0.5': '1rem',
-                    fontWeight: 500,
-                    '&:hover': {
-                      backgroundColor: '#7ad03a'
-                    }
-                  }}
-                >
-                  Add Your Brand
-                </Button>
-              </motion.div>
-              
-              {/* <motion.div whileHover={{ y: -2 }}>
-                <Button 
-                  startIcon={<Search size={18} />}
-                  onClick={() => navigate('/brandviewpage')}
-                  sx={{ 
-                    color: '#ff9800',  
-                    backgroundColor: 'rgba(255, 152, 0, 0.1)',
-                    borderRadius: '8px',
-                    px: 3,
-                    py: 1,
-                    textTransform: 'none',
-                    fontWeight: 500,
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 152, 0, 0.2)'
-                    }
-                  }}
-                >
-                  Find Your Brand To Franchise
-                </Button>
-              </motion.div> */}
-            </Box>
+                  const url = `/brandlistingform?source=${encodeURIComponent("mr franchise")}&ref=${encodeURIComponent("homepage")}`;
+                  window.open(url, "_blank");
+                }}
+                startIcon={<Plus size={20} />}
+                sx={{
+                  color: 'black',  
+                  backgroundColor: ' #6fff00fa',
+                  borderRadius: '8px',
+                  px: {4: 3, xs: 2},
+                  py:isMobile?0: 1,
+                  margin:{ xs:"5px"},
+                  textTransform: 'none',
+                  fontSize: isMobile ? '0.5': '1rem',
+                  fontWeight: 500,
+                  '&:hover': {
+                    backgroundColor: '#7ad03a'
+                  }
+                }}
+              >
+                Add Your Brand
+              </Button>
+            </motion.div>
+          </Box>
 
           <Box ref={avatarRef} sx={{ position: "relative" }}>
-            
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
               <IconButton 
                 onClick={handleMenuOpen}
-                sx={{ 
-                  p: 0,
-                }}
+                sx={{ p: 0 }}
               >
                 <Avatar
                   sx={{
@@ -519,19 +470,7 @@ function Navbar() {
               )}
             </Menu>
           </Box>
-
-          <Box sx={{ 
-          display: "flex", 
-          alignItems: "center", 
-          gap: isMobile ? 2 : 1,
-          position: 'relative',
-          zIndex: 1
-        }}>
-          
-        </Box>
         </Toolbar>
-
-       
       </AppBar>
 
       {/* Sidebar */}
