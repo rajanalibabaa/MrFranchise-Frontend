@@ -116,49 +116,40 @@ const ExpansionLocationEdit = ({ data, onChange, onNestedChange, onObjectChange,
       const locationKey = type === "current" ? "currentOutletLocations" : "expansionLocations";
 
       if (locationType === "domestic") {
-        const newLocations = [];
+      // Process domestic locations
+      const existingLocations = data[locationKey]?.domestic?.locations || [];
+      const newLocationsMap = {};
 
-        // Process states
-        selections.selectedStates.forEach((stateName) => {
-          const existingStateIndex = newLocations.findIndex(
-            (loc) => loc.state === stateName
-          );
+      existingLocations.forEach((loc) => {
+        newLocationsMap[loc.state] = loc.districts;
+      });
 
-          if (existingStateIndex === -1) {
-            newLocations.push({
-              state: stateName,
-              districts: [],
-            });
+      selections.selectedStates.forEach((stateName) => {
+        if (!newLocationsMap[stateName]) {
+          newLocationsMap[stateName] = [];
+        }
+      });
+
+      selections.selectedDistricts.forEach(({ state, district }) => {
+        if (newLocationsMap[state]) {
+          if (!newLocationsMap[state].some((d) => d.district === district)) {
+            newLocationsMap[state].push({ district });
           }
-        });
+        }
+      });
 
-        // Process districts
-        selections.selectedDistricts.forEach(({ state, district }) => {
-          const stateIndex = newLocations.findIndex(
-            (loc) => loc.state === state
-          );
+      const newLocations = Object.entries(newLocationsMap).map(([state, districts]) => ({
+        state,
+        districts,
+      }));
 
-          if (stateIndex !== -1) {
-            const districtExists = newLocations[stateIndex].districts.some(
-              (d) => d.district === district
-            );
-
-            if (!districtExists) {
-              newLocations[stateIndex].districts.push({
-                district,
-              });
-            }
-          }
-        });
-
-        // Update the form data using the provided onChange function
-        onObjectChange(locationKey, {
-          ...data[locationKey],
-          domestic: {
-            locations: newLocations,
-          },
-        });
-      } else {
+      onObjectChange(locationKey, {
+        ...data[locationKey],
+        domestic: {
+          locations: newLocations,
+        },
+      });
+    } else {
         // International locations
         const newLocations = [];
 
@@ -571,54 +562,36 @@ const ExpansionLocationEdit = ({ data, onChange, onNestedChange, onObjectChange,
   );
 
   // Handle "Select All" for states in a country
-  const handleSelectAllStates = useCallback(
-    (countryName, states, isSelected, type) => {
-      const setSelections =
-        type === "current"
-          ? setCurrentInternationalSelections
-          : setInternationalSelections;
+const handleSelectAllStates = useCallback(
+  (isSelected, type) => {
+    const setSelections =
+      type === "current"
+        ? setCurrentDomesticSelections
+        : setDomesticSelections;
 
-      setSelections((prev) => {
-        const newSelectedStates = { ...prev.selectedStates };
-        const newSelectedCities = { ...prev.selectedCities };
+    setSelections((prev) => {
+      const newStates = isSelected ? states.map(s => s.name) : [];
+      const newDistricts = isSelected ? Object.keys(districts).reduce((acc, stateName) => {
+        acc.push(...(districts[stateName] || []).map(district => ({
+          state: stateName,
+          district,
+        })));
+        return acc;
+      }, []) : []; // clear districts if unselected.
 
-        if (isSelected) {
-          // Add all states for this country
-          newSelectedStates[countryName] = states;
+      const newSelections = {
+        selectedStates: newStates,
+        selectedDistricts: newDistricts,
+      };
 
-          // Remove any cities for states that are being selected (since we're selecting the whole state)
-          states.forEach((stateName) => {
-            const stateKey = `${countryName}-${stateName}`;
-            if (newSelectedCities[stateKey]) {
-              delete newSelectedCities[stateKey];
-            }
-          });
-        } else {
-          // Remove all states for this country
-          delete newSelectedStates[countryName];
+      updateFormData(type === "current" ? "current" : "expansion", "domestic", newSelections);
+      return newSelections;
+    });
+  },
+  [states, districts, updateFormData]
+);
+// ...existing code...
 
-          // Remove all cities for this country
-          Object.keys(newSelectedCities).forEach((key) => {
-            if (key.startsWith(`${countryName}-`)) {
-              delete newSelectedCities[key];
-            }
-          });
-        }
-
-        const newSelections = {
-          ...prev,
-          selectedStates: newSelectedStates,
-          selectedCities: newSelectedCities,
-        };
-
-        // Update form data immediately
-        updateFormData(type, "international", newSelections);
-
-        return newSelections;
-      });
-    },
-    [updateFormData]
-  );
 
   // Handle "Select All" for cities in a state
   const handleSelectAllStateCities = useCallback(
@@ -778,12 +751,20 @@ const ExpansionLocationEdit = ({ data, onChange, onNestedChange, onObjectChange,
           : setDomesticSelections;
 
       setSelections((prev) => {
-        const newSelections = {
-          selectedStates,
-          selectedDistricts: prev.selectedDistricts.filter(
-            (district) => selectedStates.includes(district.state)
-          ),
-        };
+        // const newSelections = {
+        //   selectedStates,
+        //   selectedDistricts: prev.selectedDistricts.filter(
+        //     (district) => selectedStates.includes(district.state)
+        //   ),
+        // };
+        const newDistricts = prev.selectedDistricts.filter((district) =>
+        selectedStates.includes(district.state)
+      );
+
+      const newSelections = {
+        selectedStates,
+        selectedDistricts: newDistricts, // using updated districts
+      };
         updateFormData(
           type === "current" ? "current" : "expansion",
           "domestic",
@@ -885,18 +866,21 @@ const ExpansionLocationEdit = ({ data, onChange, onNestedChange, onObjectChange,
       if (locationType === "domestic") {
         if (field === "state") {
           // Remove specific state
-          currentData.domestic.locations = 
-            currentData.domestic.locations.filter((_, i) => i !== index);
+          // currentData.domestic.locations = 
+          //   currentData.domestic.locations.filter((_, i) => i !== index);
+
+          currentData.domestic.locations.splice(index, 1);
         } else if (field === "district") {
           // Remove specific district from its state
           const stateIndex = Math.floor(index / 1000);
           const districtIndex = index % 1000;
           
           if (currentData.domestic.locations[stateIndex]?.districts) {
-            currentData.domestic.locations[stateIndex].districts = 
-              currentData.domestic.locations[stateIndex].districts
-                .filter((_, i) => i !== districtIndex);
-                
+            // currentData.domestic.locations[stateIndex].districts = 
+            //   currentData.domestic.locations[stateIndex].districts
+            //     .filter((_, i) => i !== districtIndex);
+                currentData.domestic.locations[stateIndex].districts.splice(districtIndex, 1);
+
             // Remove the state if it has no districts left
             if (currentData.domestic.locations[stateIndex].districts.length === 0) {
               currentData.domestic.locations.splice(stateIndex, 1);
@@ -1371,14 +1355,17 @@ const DomesticStateDrawer = ({
                     <Checkbox
                       checked={isSelected}
                       onChange={() => {
-                        const updated = isSelected
-                          ? selections.selectedStates.filter(
-                              (s) => s !== state.name
-                            )
-                          : [...selections.selectedStates, state.name];
-                        handleDomesticStateSelection(updated, type);
-                      }}
-                    />
+          const currentSelected = [...(selections.selectedStates)];
+          if (isSelected) {
+            // Unselect the state
+            const idx = currentSelected.indexOf(state.name);
+            if (idx > -1) currentSelected.splice(idx, 1);
+          } else {
+            currentSelected.push(state.name);
+          }
+          handleDomesticStateSelection(currentSelected, type); // Use the modified state selection handler
+        }}
+      />
                   }
                   label={state.name}
                 />
@@ -2465,4 +2452,4 @@ const InternationalCityDrawer = ({
   );
 };
 
-export default ExpansionLocationEdit;
+export default ExpansionLocationEdit; 
