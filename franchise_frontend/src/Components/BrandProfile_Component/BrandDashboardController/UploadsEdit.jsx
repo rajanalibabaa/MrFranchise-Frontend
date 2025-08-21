@@ -1227,7 +1227,7 @@ const UploadsEdit = ({
                 ],
                 maxSize: 1,
               })}
-            />
+            />  
           </UploadButton>
           <Typography
             variant="caption"

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import BrandDetailsEdit from './BrandDetailsEdit';
 import FranchiseDetailsControl from './FranchiseDetailsEdit';
-import ExpansionLocationControl from './ExpansionLocationControl';
+import ExpansionLocationControl from './ExpansionLocationEdit';
 import UploadsEdit from './UploadsEdit';
 import {
   Box,
@@ -69,16 +69,15 @@ const flattenBrandData = (brandDoc) => {
     uniqueSellingPoints: brandDoc.franchiseDetails?.uniqueSellingPoints || [],
     
     // Expansion Data
-    currentOutletLocations: brandDoc.expansionLocationData?.currentOutletLocations || {
+    currentOutletLocations: brandDoc.expansionlocationdata?.currentOutletLocations || {
       domestic: { locations: [] },
       international: { country: [] }
     },
-    expansionLocations: brandDoc.expansionLocationData?.expansionLocations || {
+    expansionLocations: brandDoc.expansionlocationdata?.expansionLocations || {
       domestic: { locations: [] },
       international: { country: [] }
     },
-    isInternationalExpansion: brandDoc.expansionLocationData?.isInternationalExpansion || false,
-    
+    isInternationalExpansion: brandDoc.expansionlocationdata?.isInternationalExpansion || false,
     // Uploads
     brandLogo: brandDoc.uploads?.logo || [],
     exteriorOutlet: brandDoc.uploads?.exteriorOutlet || [],
@@ -88,7 +87,9 @@ const flattenBrandData = (brandDoc) => {
     pancard: brandDoc.uploads?.pancard || [],
     businessPlan: brandDoc.uploads?.businessPlan || [],
     awards: brandDoc.uploads?.awards || [],
+    
   };
+
 };
 
 const BrandListingEdit = () => {
@@ -119,6 +120,8 @@ const BrandListingEdit = () => {
   });
   const [filesToDelete, setFilesToDelete] = useState({});
 
+  console.log("BrandListingEdit formData:", formData);
+
   useEffect(() => {
     const fetchBrandData = async () => {
       const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
@@ -138,6 +141,7 @@ const BrandListingEdit = () => {
 
         if (response.data.success) {
           const flatData = flattenBrandData(brand);
+          console.log("Flattened brand data:", flatData);
           setFormData(flatData);
           setOriginalData(brand);
         } else {
