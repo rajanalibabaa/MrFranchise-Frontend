@@ -526,7 +526,7 @@ const FilterPanel = React.memo(
                 }}
               >
                 <Typography variant="subtitle1" fontWeight="bold" fontSize="0.8125rem">
-                  District
+                  Cities
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 1 }}>
@@ -589,7 +589,7 @@ const FilterPanel = React.memo(
             </Accordion>
 
             {/* City Filter */}
-            <Accordion
+            {/* <Accordion
               expanded={!!filters.district}
               disabled={!filters.district}
               elevation={0}
@@ -664,7 +664,7 @@ const FilterPanel = React.memo(
                   </RadioGroup>
                 )}
               </AccordionDetails>
-            </Accordion>
+            </Accordion> */}
           </AccordionDetails>
         </Accordion>
 
