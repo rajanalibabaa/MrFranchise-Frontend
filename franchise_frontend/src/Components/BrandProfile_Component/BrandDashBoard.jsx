@@ -1751,6 +1751,7 @@ const BrandDashBoard = ({ selectedSection, sectionContent }) => {
                   height: isMobile ? 80 : 80,
                   border: `3px solid ${colors.accent}`,
                   bgcolor: colors.secondary,
+                  borderRadius: 1,
                 }}
                 as="image"
               />
