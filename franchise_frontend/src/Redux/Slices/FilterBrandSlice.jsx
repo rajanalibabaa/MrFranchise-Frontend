@@ -1,5 +1,3 @@
-
-
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { userId } from '../../Utils/autherId';
@@ -15,7 +13,6 @@ export const fetchFilteredBrands = createAsyncThunk(
       const {
         page = 1,
         limit = 20,
-     
         maincat,
         subcat,
         childcat,
@@ -112,7 +109,9 @@ const initialState = {
     modelType: null,
     page: 1,
     limit: 20,
-  }
+  },
+  // Add a cache key to track when filters change
+  cacheKey: Date.now()
 };
 
 const filterBrandSlice = createSlice({
@@ -139,10 +138,14 @@ const filterBrandSlice = createSlice({
       // Reset to first page when filters change
       state.filters.page = 1;
       state.pagination.currentPage = 1;
+      
+      // Update cache key when filters change
+      state.cacheKey = Date.now();
     },
     resetFilters: (state) => {
       state.filters = initialState.filters;
       state.pagination.currentPage = 1;
+      state.cacheKey = Date.now();
     },
     setPage: (state, action) => {
       state.filters.page = action.payload;
@@ -178,12 +181,22 @@ const filterBrandSlice = createSlice({
       })
       .addCase(fetchFilteredBrands.fulfilled, (state, action) => {
         state.loading = false;
-         // Shuffle logic: videos come first
-  const sortedBrands = [...action.payload.brands].sort((a, b) => {
-    const aHasVideo = a.uploads?.video ? 1 : 0;
-    const bHasVideo = b.uploads?.video ? 1 : 0;
-    return bHasVideo - aHasVideo; // puts brands with video first
-  });
+        
+        // Stable sorting: brands with videos first, then by a consistent criteria
+        const sortedBrands = [...action.payload.brands].sort((a, b) => {
+          // First priority: brands with videos
+          const aHasVideo = a.uploads?.video ? 1 : 0;
+          const bHasVideo = b.uploads?.video ? 1 : 0;
+          
+          if (bHasVideo !== aHasVideo) {
+            return bHasVideo - aHasVideo; // Brands with videos first
+          }
+          
+          // Second priority: use brand UUID for consistent ordering
+          // This ensures the same order on every refresh with the same filters
+          return a.uuid.localeCompare(b.uuid);
+        });
+        
         state.brands = sortedBrands;
        
         // Update pagination info

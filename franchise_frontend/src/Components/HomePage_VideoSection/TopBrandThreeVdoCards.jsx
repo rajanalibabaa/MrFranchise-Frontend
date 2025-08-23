@@ -180,6 +180,7 @@ function TopBrandVdoCards() {
     return () => clearTimeout(timeoutRef.current);
   }, [currentIndex, startAutoSlide]);
 
+  
   const handleVideoPlay = (index) => {
     // Pause all other videos
     videoRefs.current.forEach((video, i) => {

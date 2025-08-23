@@ -640,11 +640,11 @@ export const VideoPlayer = ({
   // HLS setup
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !videoUrl) return;
 
     let hls;
 
-    if (videoUrl.endsWith('.m3u8')) {
+    if ( typeof videoUrl === 'string' && videoUrl.endsWith('.m3u8')) {
       if (Hls.isSupported()) {
         hls = new Hls();
         hls.loadSource(videoUrl);

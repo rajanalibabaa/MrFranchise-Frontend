@@ -314,7 +314,7 @@ const handleSubmit = useCallback(
  
       // Make API request
       const response = await axios.post(
-        "https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication",
+        "http://localhost:5000/api/v1/instantapply/postApplication",
         payload,
         {
           headers: {
@@ -395,7 +395,7 @@ const handleSubmit = useCallback(
     if (!investorUUID || !AccessToken) return;
     try {
       const response = await axios.get(
-        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
