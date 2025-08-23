@@ -289,11 +289,16 @@ const ExpansionLocationEdit = ({ data, onChange, onNestedChange, onObjectChange,
   const loadDomesticData = useCallback(() => {
     try {
       // Build array of state objects
-      const statesList = Object.keys(indianStatesData).map((stateName) => ({
-        id: stateName, // using state name as ID for simplicity
-        name: stateName
-      }));
-      setStates(statesList);
+      console.log("indianStatesData", indianStatesData); // <-- Add this line
+  
+      const statesList = Object.keys(indianStatesData)
+  .filter(Boolean)
+  .map((stateName) => ({
+    id: stateName,
+    name: stateName
+  }));
+setStates(statesList);
+console.log("Loaded states:", statesList);
 
       // Build districts mapping
       const districtsMap = {};
@@ -562,35 +567,35 @@ const ExpansionLocationEdit = ({ data, onChange, onNestedChange, onObjectChange,
   );
 
   // Handle "Select All" for states in a country
-const handleSelectAllStates = useCallback(
-  (isSelected, type) => {
-    const setSelections =
-      type === "current"
-        ? setCurrentDomesticSelections
-        : setDomesticSelections;
+// const handleSelectAllStates = useCallback(
+//   (isSelected, type) => {
+//     const setSelections =
+//       type === "current"
+//         ? setCurrentDomesticSelections
+//         : setDomesticSelections;
 
-    setSelections((prev) => {
-      const newStates = isSelected ? states.map(s => s.name) : [];
-      const newDistricts = isSelected ? Object.keys(districts).reduce((acc, stateName) => {
-        acc.push(...(districts[stateName] || []).map(district => ({
-          state: stateName,
-          district,
-        })));
-        return acc;
-      }, []) : []; // clear districts if unselected.
+//     setSelections((prev) => {
+//       const newStates = isSelected ? states.map(s => s.name) : [];
+//       const newDistricts = isSelected ? Object.keys(districts).reduce((acc, stateName) => {
+//         acc.push(...(districts[stateName] || []).map(district => ({
+//           state: stateName,
+//           district,
+//         })));
+//         return acc;
+//       }, []) : []; // clear districts if unselected.
 
-      const newSelections = {
-        selectedStates: newStates,
-        selectedDistricts: newDistricts,
-      };
+//       const newSelections = {
+//         selectedStates: newStates,
+//         selectedDistricts: newDistricts,
+//       };
 
-      updateFormData(type === "current" ? "current" : "expansion", "domestic", newSelections);
-      return newSelections;
-    });
-  },
-  [states, districts, updateFormData]
-);
-// ...existing code...
+//       updateFormData(type === "current" ? "current" : "expansion", "domestic", newSelections);
+//       return newSelections;
+//     });
+//   },
+//   [states, districts, updateFormData]
+// );
+// // ...existing code...
 
 
   // Handle "Select All" for cities in a state
@@ -743,38 +748,65 @@ const handleSelectAllStates = useCallback(
   }, []);
 
   // Handle domestic state selection
-  const handleDomesticStateSelection = useCallback(
-    (selectedStates, type) => {
-      const setSelections =
-        type === "current"
-          ? setCurrentDomesticSelections
-          : setDomesticSelections;
+const handleDomesticStateSelection = useCallback(
+  (selectedStates, type) => {
+    const setSelections =
+      type === "current"
+        ? setCurrentDomesticSelections
+        : setDomesticSelections;
 
-      setSelections((prev) => {
-        // const newSelections = {
-        //   selectedStates,
-        //   selectedDistricts: prev.selectedDistricts.filter(
-        //     (district) => selectedStates.includes(district.state)
-        //   ),
-        // };
-        const newDistricts = prev.selectedDistricts.filter((district) =>
-        selectedStates.includes(district.state)
-      );
+    // Filter districts to only include those from the selected states
+    const newDistricts = (type === "current"
+      ? currentDomesticSelections.selectedDistricts
+      : domesticSelections.selectedDistricts
+    ).filter((district) =>
+      selectedStates.includes(district.state)
+    );
 
+    const newSelections = {
+      selectedStates,
+      selectedDistricts: newDistricts,
+    };
+
+    setSelections(newSelections); // <-- Direct set, not callback
+
+    updateFormData(
+      type === "current" ? "current" : "expansion",
+      "domestic",
+      newSelections
+    );
+  },
+  [updateFormData, currentDomesticSelections.selectedDistricts, domesticSelections.selectedDistricts]
+);
+
+  const handleSelectAllDomesticStates = useCallback(
+  (isSelected, type) => {
+    const setSelections =
+      type === "current"
+        ? setCurrentDomesticSelections
+        : setDomesticSelections;
+
+    setSelections((prev) => {
+      const newStates = isSelected ? states.map(s => s.name) : [];
+      const newDistricts = isSelected
+        ? newStates.flatMap(stateName =>
+            (districts[stateName] || []).map(district => ({
+              state: stateName,
+              district,
+            }))
+          )
+        : [];
       const newSelections = {
-        selectedStates,
-        selectedDistricts: newDistricts, // using updated districts
+        selectedStates: newStates,
+        selectedDistricts: newDistricts,
       };
-        updateFormData(
-          type === "current" ? "current" : "expansion",
-          "domestic",
-          newSelections
-        );
-        return newSelections;
-      });
-    },
-    [updateFormData]
-  );
+      updateFormData(type === "current" ? "current" : "expansion", "domestic", newSelections);
+      return newSelections;
+    });
+  },
+  [states, districts, updateFormData]
+);
+
 
   // Handle domestic district selection
   const handleDomesticDistrictSelection = useCallback(
@@ -1068,16 +1100,17 @@ const handleSelectAllStates = useCallback(
       {currentOutletLocationType === "domestic" ? (
         <>
           <DomesticStateDrawer
-            type="current"
-            selections={currentDomesticSelections}
-            drawerOpen={currentDrawerOpen.states}
-            sortedStates={sortedStates}
-            handleDomesticStateSelection={handleDomesticStateSelection}
-            handleSearchChange={handleSearchChange}
-            toggleDrawer={toggleDrawer}
-            isEditing={isEditing}
-            removeLocationItems={removeLocationItems}
-          />
+    type="current"
+  selections={currentDomesticSelections}
+  drawerOpen={currentDrawerOpen.states}
+  sortedStates={sortedStates}
+  handleDomesticStateSelection={handleDomesticStateSelection}
+  handleSelectAllDomesticStates={handleSelectAllDomesticStates} // Add this line
+  handleSearchChange={handleSearchChange}
+  toggleDrawer={toggleDrawer}
+  isEditing={true}
+  removeLocationItems={removeLocationItems}
+/>
           <DomesticDistrictDrawer
             type="current"
             selections={currentDomesticSelections}
@@ -1161,16 +1194,17 @@ const handleSelectAllStates = useCallback(
       {locationType === "domestic" ? (
         <>
           <DomesticStateDrawer
-            type="expansion"
-            selections={domesticSelections}
-            drawerOpen={drawerOpen.states}
-            sortedStates={sortedStates}
-            handleDomesticStateSelection={handleDomesticStateSelection}
-            handleSearchChange={handleSearchChange}
-            toggleDrawer={toggleDrawer}
-            isEditing={isEditing}
-            removeLocationItems={removeLocationItems}
-          />
+type="expansion"
+  selections={domesticSelections}
+  drawerOpen={drawerOpen.states}
+  sortedStates={sortedStates}
+  handleDomesticStateSelection={handleDomesticStateSelection}
+  handleSelectAllDomesticStates={handleSelectAllDomesticStates} // Add this line
+  handleSearchChange={handleSearchChange}
+  toggleDrawer={toggleDrawer}
+  isEditing={true}
+  removeLocationItems={removeLocationItems}
+/>
           <DomesticDistrictDrawer
             type="expansion"
             selections={domesticSelections}
@@ -1182,7 +1216,7 @@ const handleSelectAllStates = useCallback(
             handleSearchChange={handleSearchChange}
             handleSelectAllDistricts={handleSelectAllDistricts}
             toggleDrawer={toggleDrawer}
-            isEditing={isEditing}
+            isEditing={true}
             removeLocationItems={removeLocationItems}
           />
         </>
@@ -1231,25 +1265,32 @@ const handleSelectAllStates = useCallback(
 };
 
 // Domestic State Drawer Component
+// Domestic State Drawer Component - Fixed version
 const DomesticStateDrawer = ({
   type,
   selections,
   drawerOpen,
   sortedStates,
   handleDomesticStateSelection,
+  handleSelectAllDomesticStates,
   handleSearchChange,
   toggleDrawer,
   isEditing,
-  removeLocationItems
+  removeLocationItems,
 }) => {
-  const allStatesSelected =
-    selections.selectedStates.length === sortedStates.length;
-  const someStatesSelected =
-    selections.selectedStates.length > 0 && !allStatesSelected;
+  const allStatesSelected = selections.selectedStates.length === sortedStates.length;
+  const someStatesSelected = selections.selectedStates.length > 0 && !allStatesSelected;
+
+  const handleStateCheckboxChange = (stateName, isChecked) => {
+    const newSelectedStates = isChecked
+      ? [...selections.selectedStates, stateName]
+      : selections.selectedStates.filter(s => s !== stateName);
+
+    handleDomesticStateSelection(newSelectedStates, type);
+  };
 
   return (
     <Box sx={{ mt: 4, mb: 3 }}>
-      {/* Trigger Button */}
       <Button
         variant="outlined"
         fullWidth
@@ -1264,7 +1305,6 @@ const DomesticStateDrawer = ({
           : "Select States"}
       </Button>
 
-      {/* Main State Drawer */}
       <Drawer
         anchor="top"
         open={drawerOpen}
@@ -1280,32 +1320,15 @@ const DomesticStateDrawer = ({
           },
         }}
       >
-        {/* Header */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 3,
-          }}
-        >
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            sx={{ color: "#ff9800" }}
-          >
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+          <Typography variant="h6" fontWeight={700} sx={{ color: "#ff9800" }}>
             Select States
           </Typography>
-          <Button
-            variant="outlined"
-            color="warning"
-            onClick={() => toggleDrawer(type, { states: false })}
-          >
+          <Button variant="outlined" color="warning" onClick={() => toggleDrawer(type, { states: false })}>
             Done
           </Button>
         </Box>
 
-        {/* Search Field */}
         <TextField
           placeholder="Search states..."
           variant="outlined"
@@ -1317,55 +1340,29 @@ const DomesticStateDrawer = ({
           }}
         />
 
-        {/* Select All */}
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <Checkbox
             checked={allStatesSelected}
             indeterminate={someStatesSelected}
-            onChange={() => {
-              handleDomesticStateSelection(
-                allStatesSelected ? [] : sortedStates.map((s) => s.name),
-                type
-              );
-            }}
+            onChange={(e) => handleSelectAllDomesticStates(e.target.checked, type)}
           />
           <Typography variant="subtitle1" sx={{ ml: 1 }}>
             Select All States
           </Typography>
         </Box>
 
-        {/* States Grid */}
         <Box sx={{ flex: 1, overflow: "auto", mt: 1 }}>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(5, 1fr)",
-              gap: 1,
-              px: 5,
-            }}
-          >
+          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 1, px: 5 }}>
             {sortedStates.map((state) => {
-              const isSelected = selections.selectedStates.includes(
-                state.name
-              );
+              const isSelected = selections.selectedStates.includes(state.name);
               return (
                 <FormControlLabel
                   key={`state-${state.name}`}
                   control={
                     <Checkbox
                       checked={isSelected}
-                      onChange={() => {
-          const currentSelected = [...(selections.selectedStates)];
-          if (isSelected) {
-            // Unselect the state
-            const idx = currentSelected.indexOf(state.name);
-            if (idx > -1) currentSelected.splice(idx, 1);
-          } else {
-            currentSelected.push(state.name);
-          }
-          handleDomesticStateSelection(currentSelected, type); // Use the modified state selection handler
-        }}
-      />
+                      onChange={(e) => handleStateCheckboxChange(state.name, e.target.checked)}
+                    />
                   }
                   label={state.name}
                 />
@@ -1375,7 +1372,7 @@ const DomesticStateDrawer = ({
         </Box>
       </Drawer>
 
-      {/* Selected States Accordion */}
+      {/* Accordion for Selected States */}
       {selections.selectedStates.length > 0 && (
         <Box sx={{ mt: 2 }}>
           <Accordion>
@@ -1385,22 +1382,14 @@ const DomesticStateDrawer = ({
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    "repeat(auto-fill, minmax(200px, 1fr))",
-                  gap: 1,
-                }}
-              >
+              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 1 }}>
                 {selections.selectedStates.map((state, index) => (
                   <Chip
                     key={`selected-state-${index}`}
                     label={state}
                     onDelete={() => {
-                      if (isEditing) {
-                        removeLocationItems(type, "domestic", "state", index);
-                      }
+                      const newSelectedStates = selections.selectedStates.filter((_, i) => i !== index);
+                      handleDomesticStateSelection(newSelectedStates, type);
                     }}
                     variant="outlined"
                     sx={{ mb: 1 }}
@@ -1414,6 +1403,9 @@ const DomesticStateDrawer = ({
     </Box>
   );
 };
+
+
+
 
 // Domestic District Drawer Component
 const DomesticDistrictDrawer = ({

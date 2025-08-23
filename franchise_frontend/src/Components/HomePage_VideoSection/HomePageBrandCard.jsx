@@ -174,6 +174,7 @@ const HomePageBrandCard = React.memo(
             id={brand.uuid}
             videoUrl={brand.franchiseVideos || brand.logo}
             poster={brand.logo}
+            preload="auto"
             width="100%"
             height={dimensions.height * 0.4}
             ref={videoRef}

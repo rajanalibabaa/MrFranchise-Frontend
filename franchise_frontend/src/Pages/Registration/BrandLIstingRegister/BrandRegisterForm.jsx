@@ -419,7 +419,7 @@ const BrandRegisterForm = () => {
         });
 console.log("Form data prepared for submission:", formDataSend);
         const response = await axios.post(
-          "http://localhost:5000/api/v1/brandlisting/createBrandListing",
+          "https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {
@@ -435,7 +435,7 @@ console.log("Form data prepared for submission:", formDataSend);
             message: "Form submitted successfully!",
             severity: "success",
           });
-
+          console.log('Form data submitted successfully:', response.data);
           localStorage.removeItem(FORM_DATA_KEY);
           localStorage.removeItem(FORM_STEP_KEY);
           setFormData(initialFormData);

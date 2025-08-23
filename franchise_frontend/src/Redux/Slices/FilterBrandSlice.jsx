@@ -4,7 +4,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { userId } from '../../Utils/autherId';
 
-const API_BASE_URL = 'http://localhost:5000/api/v1/';
+const API_BASE_URL = 'https://mrfranchisebackend.mrfranchise.in/api/v1/';
 
 const id = userId
 
@@ -178,7 +178,13 @@ const filterBrandSlice = createSlice({
       })
       .addCase(fetchFilteredBrands.fulfilled, (state, action) => {
         state.loading = false;
-        state.brands = action.payload.brands;
+         // Shuffle logic: videos come first
+  const sortedBrands = [...action.payload.brands].sort((a, b) => {
+    const aHasVideo = a.uploads?.video ? 1 : 0;
+    const bHasVideo = b.uploads?.video ? 1 : 0;
+    return bHasVideo - aHasVideo; // puts brands with video first
+  });
+        state.brands = sortedBrands;
        
         // Update pagination info
         if (action.payload.pagination) {

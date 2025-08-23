@@ -667,10 +667,29 @@ function TopBrandVdoCards() {
                     playsInline
                     onPlay={() => handleVideoPlay(0)}
                     onPause={() => handleVideoPause(0)}
+<<<<<<< HEAD
                     onClick={(e) => {
                       e.stopPropagation();
                       togglePlayPause(0);
                     }}
+=======
+                  /> */}
+                  <VideoPlayer
+                    id={mainBrand.uuid}
+                    videoUrl={mainBrand.franchiseVideos}
+                    // poster={mainBrand.logo}
+                    width="100%"
+                    height="100%"
+                    preload='metadata'
+                    objectFit="contain"
+                    onPlay={() => handleVideoPlay(0)}
+                    onPause={() => handleVideoPause(0)}
+                    // autoPlay={false}
+                    autoPlay
+                    loop={true}
+                    muted={false}
+                    ref={(el) => (videoRefs.current[0] = el?.videoRef || null)}
+>>>>>>> d12d255ab3d7ef679441ff9c777c8eabf7024214
                   />
                   
                   {/* Custom video controls container */}
@@ -1165,6 +1184,28 @@ function TopBrandVdoCards() {
                     playsInline
                     onPlay={() => handleVideoPlay(i + 1)}
                     onPause={() => handleVideoPause(i + 1)}
+<<<<<<< HEAD
+=======
+                  /> */}
+                  <VideoPlayer
+                    key={brand.uuid}
+                    id={brand.uuid}
+                    videoUrl={brand.franchiseVideos}
+                    poster={brand.logo}
+                    width="100%"
+                    height="100%"
+                    objectFit="contain"
+                  
+                    preload='auto'
+                    onPlay={() => handleVideoPlay(i + 1)}
+                    onPause={() => handleVideoPause(i + 1)}
+                    autoPlay={false} // Controlled manually
+                    loop={true}
+                    muted={true}
+                    ref={(el) =>
+                      (videoRefs.current[i + 1] = el?.videoRef || null)
+                    }
+>>>>>>> d12d255ab3d7ef679441ff9c777c8eabf7024214
                   />
                   
                   {/* Play/Pause Icon */}

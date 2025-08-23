@@ -21,6 +21,8 @@ import {
   PictureInPictureAlt,
   Close
 } from "@mui/icons-material";
+import Hls from "hls.js";
+
 
 const MediaSection = ({
   allVideos = [],
@@ -45,6 +47,47 @@ const MediaSection = ({
 
   const videoSrc = Array.isArray(allVideos) ? allVideos[0] : allVideos;
   const poster = allImages?.[0] || "";
+
+
+  // Initialize HLS if needed
+useEffect(() => {
+  if (!videoSrc) return;
+  const video = videoRef.current;
+  setVideoLoading(true);
+  setVideoError(false);
+
+  // Check if URL ends with '.m3u8' for HLS
+  if (videoSrc.endsWith('.m3u8')) {
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(videoSrc);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        setVideoLoading(false);
+        if (!isMuted) video.play();
+      });
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        console.error("HLS error:", data);
+        setVideoError(true);
+      });
+      return () => hls.destroy();
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      // fallback native support
+      video.src = videoSrc;
+      setVideoLoading(false);
+    } else {
+      setVideoError(true);
+      setVideoLoading(false);
+    }
+  } else {
+    // Non-HLS (e.g., MP4)
+    video.src = videoSrc;
+    setVideoLoading(false);
+    if (!isMuted) video.play();
+  }
+}, [videoSrc]);
+
+
 
   // Start muted & autoplay for compatibility
   useEffect(() => {

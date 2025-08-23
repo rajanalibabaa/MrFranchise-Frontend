@@ -252,6 +252,7 @@ const BrandCard = memo(
               id={brand.uuid}
               videoUrl={brand.franchiseVideos || brand.logo}
               poster={brand.logo}
+              preload="auto"
               width="100%"
               height="100%"
               ref={videoRef}
