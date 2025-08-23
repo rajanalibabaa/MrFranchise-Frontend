@@ -581,7 +581,8 @@ function TopBrandVdoCards() {
                     objectFit="contain"
                     onPlay={() => handleVideoPlay(0)}
                     onPause={() => handleVideoPause(0)}
-                    autoPlay={false}
+                    // autoPlay={false}
+                    autoPlay
                     loop={true}
                     muted={false}
                     ref={(el) => (videoRefs.current[0] = el?.videoRef || null)}
@@ -963,6 +964,7 @@ function TopBrandVdoCards() {
                     width="100%"
                     height="100%"
                     objectFit="contain"
+                  
                     preload='auto'
                     onPlay={() => handleVideoPlay(i + 1)}
                     onPause={() => handleVideoPause(i + 1)}

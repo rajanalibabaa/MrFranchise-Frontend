@@ -842,8 +842,8 @@ export const VideoPlayer = ({
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.7)',
               },
-              width: 64,
-              height: 64
+              width: 44,
+              height: 44
             }}
           >
             {isPlaying ? <Pause fontSize="large" /> : <PlayArrow fontSize="large" />}
