@@ -555,7 +555,7 @@ function TopBrandVdoCards() {
                       )}
                     </Box>
                   )}
-                  {/* <video
+                  <video
                     ref={(el) => (videoRefs.current[0] = el)}
                     src={mainBrand?.franchiseVideos}
                     alt={mainBrand?.brandname}
@@ -570,8 +570,8 @@ function TopBrandVdoCards() {
                     playsInline
                     onPlay={() => handleVideoPlay(0)}
                     onPause={() => handleVideoPause(0)}
-                  /> */}
-                  <VideoPlayer
+                  />
+                  {/* <VideoPlayer
                     id={mainBrand.uuid}
                     videoUrl={mainBrand.franchiseVideos}
                     // poster={mainBrand.logo}
@@ -584,7 +584,7 @@ function TopBrandVdoCards() {
                     loop={true}
                     muted={false}
                     ref={(el) => (videoRefs.current[0] = el?.videoRef || null)}
-                  />
+                  /> */}
                 </Box>
 
                 <CardContent
@@ -937,7 +937,7 @@ function TopBrandVdoCards() {
                   }}
                   onClick={() => togglePlayPause(i + 1)}
                 >
-                  {/* <video
+                  <video
                     ref={(el) => (videoRefs.current[i + 1] = el)}
                     loading="lazy"
                     src={brand.franchiseVideos}
@@ -953,8 +953,8 @@ function TopBrandVdoCards() {
                     playsInline
                     onPlay={() => handleVideoPlay(i + 1)}
                     onPause={() => handleVideoPause(i + 1)}
-                  /> */}
-                  <VideoPlayer
+                  />
+                  {/* <VideoPlayer
                     key={brand.uuid}
                     id={brand.uuid}
                     videoUrl={brand.franchiseVideos}
@@ -970,7 +970,7 @@ function TopBrandVdoCards() {
                     ref={(el) =>
                       (videoRefs.current[i + 1] = el?.videoRef || null)
                     }
-                  />
+                  /> */}
                   <Chip
                     label={i === 0 ? "Trending" : "Popular"}
                     size="small"
