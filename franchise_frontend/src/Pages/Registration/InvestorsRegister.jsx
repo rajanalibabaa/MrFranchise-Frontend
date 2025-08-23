@@ -1037,6 +1037,15 @@ const InvestorRegister = () => {
               </Grid>
 
               {/* Email */}
+              <Grid
+                container
+                spacing={2}
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { md: "repeat(3, 1fr)", xs: "1fr" },
+                  gap: 2,
+                }}
+              >
               <Grid item xs={12} md={6}>
                 <Controller
                   name="email"
@@ -1198,6 +1207,7 @@ const InvestorRegister = () => {
                       />
                     )}
                   />
+                </Grid>
                 </Grid>
               <Grid
                 container

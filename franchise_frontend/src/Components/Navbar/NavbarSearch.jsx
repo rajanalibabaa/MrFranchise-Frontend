@@ -757,7 +757,7 @@ const NavbarSearch = ({ open, handleClose }) => {
         {tab === 1 && (
           <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center" mb={3}>
             {/* State Filter */}
-            <FormControl sx={{ minWidth: 200 }}>
+            <FormControl sx={{ minWidth: 300 }}>
               <Autocomplete
                 options={filteredStates}
                 value={selectedState}
@@ -794,7 +794,7 @@ const NavbarSearch = ({ open, handleClose }) => {
             </FormControl>
 
             {/* District Filter - dependent on selected state */}
-            <FormControl sx={{ minWidth: 200 }}>
+            <FormControl sx={{ minWidth: 300 }}>
               <Autocomplete
                 options={filteredDistricts}
                 value={selectedDistrict}
@@ -809,7 +809,7 @@ const NavbarSearch = ({ open, handleClose }) => {
                 renderInput={(params) => (
                   <TextField 
                     {...params} 
-                    label="District" 
+                    label="Cities" 
                     variant="outlined"
                     disabled={!selectedState || dropdownLoading}
                     InputProps={{
@@ -831,7 +831,7 @@ const NavbarSearch = ({ open, handleClose }) => {
             </FormControl>
 
             {/* City Filter - dependent on selected district */}
-            <FormControl sx={{ minWidth: 200 }}>
+            {/* <FormControl sx={{ minWidth: 200 }}>
               <Autocomplete
                 options={filteredCities}
                 value={selectedCity}
@@ -864,13 +864,13 @@ const NavbarSearch = ({ open, handleClose }) => {
                 loading={dropdownLoading}
                 disabled={!selectedDistrict || dropdownLoading}
               />
-            </FormControl>
+            </FormControl> */}
           </Box>
         )}
 
         {tab === 2 && (
           <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center" mb={3}>
-            <FormControl sx={{ minWidth: 200 }}>
+            <FormControl sx={{ minWidth: 300 }}>
               <Autocomplete
                 options={filteredInvestmentRanges}
                 value={selectedInvestmentRange}
