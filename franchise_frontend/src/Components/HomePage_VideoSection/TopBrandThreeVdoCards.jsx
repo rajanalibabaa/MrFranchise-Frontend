@@ -577,6 +577,7 @@ function TopBrandVdoCards() {
                     // poster={mainBrand.logo}
                     width="100%"
                     height="100%"
+                    preload='metadata'
                     objectFit="contain"
                     onPlay={() => handleVideoPlay(0)}
                     onPause={() => handleVideoPause(0)}
@@ -962,6 +963,7 @@ function TopBrandVdoCards() {
                     width="100%"
                     height="100%"
                     objectFit="contain"
+                    preload='auto'
                     onPlay={() => handleVideoPlay(i + 1)}
                     onPause={() => handleVideoPause(i + 1)}
                     autoPlay={false} // Controlled manually
