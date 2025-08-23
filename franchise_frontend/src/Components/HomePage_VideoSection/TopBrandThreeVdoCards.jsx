@@ -653,27 +653,7 @@ function TopBrandVdoCards() {
                     </Box>
                   )}
                   
-                  <video
-                    ref={(el) => (videoRefs.current[0] = el)}
-                    src={mainBrand?.franchiseVideos}
-                    alt={mainBrand?.brandname}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                    }}
-                    controls
-                    autoPlay
-                    playsInline
-                    onPlay={() => handleVideoPlay(0)}
-                    onPause={() => handleVideoPause(0)}
-<<<<<<< HEAD
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      togglePlayPause(0);
-                    }}
-=======
-                  /> */}
+
                   <VideoPlayer
                     id={mainBrand.uuid}
                     videoUrl={mainBrand.franchiseVideos}
@@ -689,134 +669,8 @@ function TopBrandVdoCards() {
                     loop={true}
                     muted={false}
                     ref={(el) => (videoRefs.current[0] = el?.videoRef || null)}
->>>>>>> d12d255ab3d7ef679441ff9c777c8eabf7024214
                   />
                   
-                  {/* Custom video controls container */}
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      bottom: 8,
-                      right: 8,
-                      display: "flex",
-                      gap: 1,
-                      zIndex: 10,
-                      backgroundColor: "rgba(0, 0, 0, 0.6)",
-                      borderRadius: 1,
-                      p: 0.5,
-                    }}
-                  >
-                    {/* Picture-in-Picture Button */}
-                    {document.pictureInPictureEnabled && (
-                      <Tooltip title="Picture-in-Picture">
-                        <IconButton
-                          size="small"
-                          sx={{ color: "white" }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePictureInPicture(0);
-                          }}
-                        >
-                          <PictureInPicture fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </Box>
-
-                  {/* Play/Pause Icon for main video */}
-                  {activeVideo !== 0 && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        width: 60,
-                        height: 60,
-                        borderRadius: "50%",
-                        backgroundColor: "rgba(0, 0, 0, 0.6)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        zIndex: 10,
-                        "&:hover": {
-                          backgroundColor: "rgba(0, 0, 0, 0.8)",
-                        },
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        togglePlayPause(0);
-                      }}
-                    >
-                      <Box
-                        component="span"
-                        sx={{
-                          width: 0,
-                          height: 0,
-                          borderTop: "12px solid transparent",
-                          borderBottom: "12px solid transparent",
-                          borderLeft: "20px solid white",
-                          marginLeft: "4px",
-                        }}
-                      />
-                    </Box>
-                  )}
-                  
-                  {/* Pause Icon for main video (when video is playing) */}
-                  {activeVideo === 0 && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        width: 60,
-                        height: 60,
-                        borderRadius: "50%",
-                        backgroundColor: "rgba(0, 0, 0, 0.6)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        zIndex: 10,
-                        opacity: 0,
-                        transition: "opacity 0.3s ease",
-                        "&:hover": {
-                          opacity: 1,
-                          backgroundColor: "rgba(0, 0, 0, 0.8)",
-                        },
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        togglePlayPause(0);
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          gap: "6px",
-                        }}
-                      >
-                        <Box
-                          component="span"
-                          sx={{
-                            width: "8px",
-                            height: "24px",
-                            backgroundColor: "white",
-                          }}
-                        />
-                        <Box
-                          component="span"
-                          sx={{
-                            width: "8px",
-                            height: "24px",
-                            backgroundColor: "white",
-                          }}
-                        />
-                      </Box>
-                    </Box>
-                  )}
                 </Box>
 
                 <CardContent
@@ -1184,28 +1038,6 @@ function TopBrandVdoCards() {
                     playsInline
                     onPlay={() => handleVideoPlay(i + 1)}
                     onPause={() => handleVideoPause(i + 1)}
-<<<<<<< HEAD
-=======
-                  /> */}
-                  <VideoPlayer
-                    key={brand.uuid}
-                    id={brand.uuid}
-                    videoUrl={brand.franchiseVideos}
-                    poster={brand.logo}
-                    width="100%"
-                    height="100%"
-                    objectFit="contain"
-                  
-                    preload='auto'
-                    onPlay={() => handleVideoPlay(i + 1)}
-                    onPause={() => handleVideoPause(i + 1)}
-                    autoPlay={false} // Controlled manually
-                    loop={true}
-                    muted={true}
-                    ref={(el) =>
-                      (videoRefs.current[i + 1] = el?.videoRef || null)
-                    }
->>>>>>> d12d255ab3d7ef679441ff9c777c8eabf7024214
                   />
                   
                   {/* Play/Pause Icon */}
