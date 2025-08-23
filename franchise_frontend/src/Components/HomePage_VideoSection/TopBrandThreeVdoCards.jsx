@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Box,
@@ -17,6 +18,7 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
 import Favorite from "@mui/icons-material/Favorite";
+import PictureInPicture from "@mui/icons-material/PictureInPicture";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@mui/material/styles";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
@@ -54,8 +56,6 @@ import {
 } from "../../Redux/Slices/viewSlice.jsx";
 import { toggleBrandShortListfilter } from "../../Redux/Slices/FilterBrandSlice.jsx";
 
-
-
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -63,12 +63,13 @@ function TopBrandVdoCards() {
   const [showLogin, setShowLogin] = useState(false);
   const [likeProcessing, setLikeProcessing] = useState({});
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [initialAutoplayDone, setInitialAutoplayDone] = useState(false);
 
   const timeoutRef = useRef(null);
   const videoRefs = useRef([]);
+  const containerRef = useRef(null);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -149,14 +150,32 @@ function TopBrandVdoCards() {
       timeoutRef.current = setTimeout(() => handleNext(), 15000);
     }
   };
+
+  // Handle clicks outside the component to pause videos
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        // Pause all videos when clicking outside the component
+        videoRefs.current.forEach((video, index) => {
+          if (video) {
+            video.pause();
+            handleVideoPause(index);
+          }
+        });
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Video controls
-  // Update your useEffect for video initialization
   useEffect(() => {
     videoRefs.current.forEach((video, index) => {
       if (video) {
-        video.autoplay = false; // Disable default autoplay
         video.loop = true;
-        video.muted = true;
         video.playsInline = true;
 
         // Add event listeners
@@ -174,6 +193,39 @@ function TopBrandVdoCards() {
       });
     };
   }, [brands]);
+
+  // Autoplay the main video on initial load
+  useEffect(() => {
+    if (brands.length > 0 && !initialAutoplayDone && videoRefs.current[0]) {
+      const mainVideo = videoRefs.current[0];
+      
+      // Try to autoplay with sound
+      const playPromise = mainVideo.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            // Autoplay started successfully
+            mainVideo.muted = false; // Unmute after play starts
+            setActiveVideo(0);
+            setInitialAutoplayDone(true);
+          })
+          .catch(error => {
+            // Autoplay was prevented, fallback to muted autoplay
+            console.log("Autoplay with sound prevented, falling back to muted");
+            mainVideo.muted = true;
+            mainVideo.play()
+              .then(() => {
+                setActiveVideo(0);
+                setInitialAutoplayDone(true);
+              })
+              .catch(err => {
+                console.log("Autoplay completely prevented:", err);
+              });
+          });
+      }
+    }
+  }, [brands, initialAutoplayDone]);
 
   useEffect(() => {
     startAutoSlide();
@@ -197,14 +249,53 @@ function TopBrandVdoCards() {
     }
   };
 
+  // Modified: New function to handle side video click, swapping with main video
+  const handleSideVideoClick = (index) => {
+    // Calculate the actual brand index from the side video index (i + 1)
+    const clickedBrandIndex = (currentIndex + index + 1) % brands.length;
+    
+    // Update currentIndex to show the clicked brand in the main video
+    setCurrentIndex(clickedBrandIndex);
+    
+    // Play the new main video
+    const mainVideo = videoRefs.current[0];
+    if (mainVideo) {
+      mainVideo.play().then(() => handleVideoPlay(0));
+    }
+    
+    // Update viewed brands count
+    setViewedBrandsCount((prev) => prev + 1);
+  };
+
   const togglePlayPause = (index) => {
     const video = videoRefs.current[index];
     if (video) {
       if (video.paused) {
+        // Pause all other videos before playing this one
+        videoRefs.current.forEach((v, i) => {
+          if (v && i !== index) {
+            v.pause();
+          }
+        });
         video.play().then(() => handleVideoPlay(index));
       } else {
         video.pause();
         handleVideoPause(index);
+      }
+    }
+  };
+
+  const handlePictureInPicture = async (index) => {
+    const video = videoRefs.current[index];
+    if (video && document.pictureInPictureEnabled) {
+      try {
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+        } else {
+          await video.requestPictureInPicture();
+        }
+      } catch (error) {
+        console.error("Picture-in-Picture failed:", error);
       }
     }
   };
@@ -259,6 +350,7 @@ function TopBrandVdoCards() {
       });
     }
   };
+
   useEffect(() => {
     if (currentIndex >= brands.length - 1 && hasMore && !isLoading) {
       handleLoadMore();
@@ -314,6 +406,7 @@ function TopBrandVdoCards() {
   }
 
   const mainBrand = brands[currentIndex];
+  // Modified: Adjust nextBrands to show the next two brands after the current main brand
   const nextBrands = [
     brands[(currentIndex + 1) % brands.length],
     brands[(currentIndex + 2) % brands.length],
@@ -327,6 +420,7 @@ function TopBrandVdoCards() {
 
   return (
     <Box
+      ref={containerRef}
       sx={{
         py: isMobile ? 0 : 2,
         mx: "auto",
@@ -421,7 +515,10 @@ function TopBrandVdoCards() {
                     backgroundColor: "#000",
                     overflow: "hidden",
                   }}
-                  onClick={() => togglePlayPause(0)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePlayPause(0);
+                  }}
                 >
                   {!isMobile && (
                     <Box
@@ -443,7 +540,7 @@ function TopBrandVdoCards() {
                         sx={{
                           textTransform: "none",
                           color:
-                            theme.palette.mode === "dark" ? "black" : "black",
+                            theme.palette.mode === "dark" ? "white" : "white",
                           borderColor:
                             theme.palette.mode === "dark"
                               ? "#43ea5e"
@@ -534,7 +631,7 @@ function TopBrandVdoCards() {
                           sx={{
                             textTransform: "none",
                             color:
-                              theme.palette.mode === "dark" ? "black" : "black",
+                              theme.palette.mode === "dark" ? "white" : "white",
                             borderColor:
                               theme.palette.mode === "dark"
                                 ? "#ffb74d"
@@ -556,22 +653,8 @@ function TopBrandVdoCards() {
                       )}
                     </Box>
                   )}
-                  {/* <video
-                    ref={(el) => (videoRefs.current[0] = el)}
-                    src={mainBrand?.franchiseVideos}
-                    alt={mainBrand?.brandname}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                    }}
-                    controls
-                    autoPlay
-                    
-                    playsInline
-                    onPlay={() => handleVideoPlay(0)}
-                    onPause={() => handleVideoPause(0)}
-                  /> */}
+                  
+
                   <VideoPlayer
                     id={mainBrand.uuid}
                     videoUrl={mainBrand.franchiseVideos}
@@ -588,6 +671,7 @@ function TopBrandVdoCards() {
                     muted={false}
                     ref={(el) => (videoRefs.current[0] = el?.videoRef || null)}
                   />
+                  
                 </Box>
 
                 <CardContent
@@ -651,6 +735,7 @@ function TopBrandVdoCards() {
                             borderRadius: 0,
                             objectFit: "contain",
                             display: "block",
+                            marginRight: 2,
                           }}
                         />
                       )}
@@ -863,11 +948,6 @@ function TopBrandVdoCards() {
               </Button>
               <Button
                 variant="contained"
-                // onClick={
-                //   viewedBrandsCount >= brands.length - 1
-                //     ? handleLoadMore
-                //     : handleNext
-                // }
                 onClick={handleLoadMore}
                 endIcon={
                   isLoading ? (
@@ -938,9 +1018,13 @@ function TopBrandVdoCards() {
                     backgroundColor: "#000",
                     flexShrink: 0,
                   }}
-                  onClick={() => togglePlayPause(i + 1)}
+                  // Modified: Changed onClick to use handleSideVideoClick instead of togglePlayPause
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSideVideoClick(i);
+                  }}
                 >
-                  {/* <video
+                  <video
                     ref={(el) => (videoRefs.current[i + 1] = el)}
                     loading="lazy"
                     src={brand.franchiseVideos}
@@ -950,32 +1034,110 @@ function TopBrandVdoCards() {
                       height: "100%",
                       objectFit: "contain",
                     }}
-                    autoPlay
                     muted
                     loop
                     playsInline
                     onPlay={() => handleVideoPlay(i + 1)}
                     onPause={() => handleVideoPause(i + 1)}
-                  /> */}
-                  <VideoPlayer
-                    key={brand.uuid}
-                    id={brand.uuid}
-                    videoUrl={brand.franchiseVideos}
-                    poster={brand.logo}
-                    width="100%"
-                    height="100%"
-                    objectFit="contain"
-                  
-                    preload='auto'
-                    onPlay={() => handleVideoPlay(i + 1)}
-                    onPause={() => handleVideoPause(i + 1)}
-                    autoPlay={false} // Controlled manually
-                    loop={true}
-                    muted={true}
-                    ref={(el) =>
-                      (videoRefs.current[i + 1] = el?.videoRef || null)
-                    }
                   />
+                  
+                  {/* Play/Pause Icon */}
+                  {activeVideo !== i + 1 && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        width: 60,
+                        height: 60,
+                        borderRadius: "50%",
+                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        zIndex: 10,
+                        "&:hover": {
+                          backgroundColor: "rgba(0, 0, 0, 0.8)",
+                        },
+                      }}
+                      // Modified: Changed onClick to use handleSideVideoClick
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSideVideoClick(i);
+                      }}
+                    >
+                      <Box
+                        component="span"
+                        sx={{
+                          width: 0,
+                          height: 0,
+                          borderTop: "12px solid transparent",
+                          borderBottom: "12px solid transparent",
+                          borderLeft: "20px solid white",
+                          marginLeft: "4px",
+                        }}
+                      />
+                    </Box>
+                  )}
+                  
+                  {/* Pause Icon (when video is playing) */}
+                  {activeVideo === i + 1 && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        width: 60,
+                        height: 60,
+                        borderRadius: "50%",
+                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        zIndex: 10,
+                        opacity: 0,
+                        transition: "opacity 0.3s ease",
+                        "&:hover": {
+                          opacity: 1,
+                          backgroundColor: "rgba(0, 0, 0, 0.8)",
+                        },
+                      }}
+                      // Modified: Changed onClick to use handleSideVideoClick
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSideVideoClick(i);
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: "6px",
+                        }}
+                      >
+                        <Box
+                          component="span"
+                          sx={{
+                            width: "8px",
+                            height: "24px",
+                            backgroundColor: "white",
+                          }}
+                        />
+                        <Box
+                          component="span"
+                          sx={{
+                            width: "8px",
+                            height: "24px",
+                            backgroundColor: "white",
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  )}
+
                   <Chip
                     label={i === 0 ? "Trending" : "Popular"}
                     size="small"
@@ -990,6 +1152,7 @@ function TopBrandVdoCards() {
                       color: "#fff",
                       fontWeight: "bold",
                       fontSize: "0.65rem",
+                      zIndex: 10,
                     }}
                   />
                 </Box>
