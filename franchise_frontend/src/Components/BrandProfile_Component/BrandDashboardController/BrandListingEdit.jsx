@@ -119,8 +119,19 @@ const BrandListingEdit = () => {
     awardDoc: []
   });
   const [filesToDelete, setFilesToDelete] = useState({});
+  const [addExpansionData, setAddExpansionData] = useState({
+    currentOutletLocations: { domestic: { state: [], districts: {}, city: {} }, international: { country: [], states: {}, city: {} } },
+    expansionLocations: { domestic: { state: [], districts: {}, city: {} }, international: { country: [], states: {}, city: {} } },
+  });
+  const [removeExpansionData, setRemoveExpansionData] = useState({
+    currentOutletLocations: { domestic: { state: [], districts: {}, city: {} }, international: { country: [], states: {}, city: {} } },
+    expansionLocations: { domestic: { state: [], districts: {}, city: {} }, international: { country: [], states: {}, city: {} } },
+  });
 
-  console.log("BrandListingEdit formData:", formData);
+
+  console.log("BrandListingEdit addExpansionData:", addExpansionData);
+  console.log("BrandListingEdit removeExpansionData:", removeExpansionData);
+  // console.log("BrandListingEdit formData:", formData);
 
   useEffect(() => {
     const fetchBrandData = async () => {
@@ -390,17 +401,24 @@ const handleRemoveFile = (field, index) => {
           trainingSupport: formData.trainingSupport,
           uniqueSellingPoints: formData.uniqueSellingPoints
         },
-        expansionLocationData: {
-          currentOutletLocations: formData.currentOutletLocations,
-          expansionLocations: formData.expansionLocations,
-          isInternationalExpansion: formData.isInternationalExpansion
-        }
+        // expansionLocationData: {
+        //   addExpansionLocationData: addExpansionData,
+        //   removeExpansionLocationData: removeExpansionData,
+        //   isInternationalExpansion: formData.isInternationalExpansion
+        // }
       };
+
+      console.log("Prepared updateData:", updateData);
 
       // Append JSON data as strings
       formDataToSend.append('brandDetails', JSON.stringify(updateData.brandDetails));
       formDataToSend.append('franchiseDetails', JSON.stringify(updateData.franchiseDetails));
-      formDataToSend.append('expansionLocationData', JSON.stringify(updateData.expansionLocationData));
+     formDataToSend.append('addExpansionLocationData', JSON.stringify(addExpansionData));
+formDataToSend.append('removeExpansionLocationData', JSON.stringify(removeExpansionData));
+// If you need to send isInternationalExpansion (currently unused in backend), append it separately
+formDataToSend.append('isInternationalExpansion', formData.isInternationalExpansion);
+
+      console.log("Prepared formDataToSend:", formDataToSend);
 
       // First update the brand details
       const detailsResponse = await axios.patch(
@@ -691,6 +709,10 @@ const handleRemoveFile = (field, index) => {
             onChange={handleFormChange}
             onNestedChange={handleNestedFormChange}
             onObjectChange={handleObjectChange}
+            onAddRemoveChange={(data) => {
+              setAddExpansionData(data.addExpansionLocationData);
+              setRemoveExpansionData(data.removeExpansionLocationData);
+            }}
             errors={{}}
             isEditing={isEditing}
           />
