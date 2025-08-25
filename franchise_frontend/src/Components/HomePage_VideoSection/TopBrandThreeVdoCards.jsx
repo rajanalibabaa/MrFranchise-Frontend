@@ -18,7 +18,6 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
 import Favorite from "@mui/icons-material/Favorite";
-import PictureInPicture from "@mui/icons-material/PictureInPicture";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@mui/material/styles";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
@@ -55,6 +54,8 @@ import {
   toggleviewSliceLiked,
 } from "../../Redux/Slices/viewSlice.jsx";
 import { toggleBrandShortListfilter } from "../../Redux/Slices/FilterBrandSlice.jsx";
+import { useInView } from 'react-intersection-observer';
+
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -69,8 +70,11 @@ function TopBrandVdoCards() {
 
   const timeoutRef = useRef(null);
   const videoRefs = useRef([]);
-  const containerRef = useRef(null);
-
+  // const containerRef = useRef(null);
+ const [containerRef, inView] = useInView({
+    threshold: 0.3,
+    triggerOnce: false
+  });
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -195,44 +199,81 @@ function TopBrandVdoCards() {
   }, [brands]);
 
   // Autoplay the main video on initial load
-  useEffect(() => {
-    if (brands.length > 0 && !initialAutoplayDone && videoRefs.current[0]) {
+ useEffect(() => {
+    if (brands.length > 0 && videoRefs.current[0]) {
       const mainVideo = videoRefs.current[0];
       
-      // Try to autoplay with sound
-      const playPromise = mainVideo.play();
-      
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            // Autoplay started successfully
-            mainVideo.muted = false; // Unmute after play starts
-            setActiveVideo(0);
-            setInitialAutoplayDone(true);
-          })
-          .catch(error => {
-            // Autoplay was prevented, fallback to muted autoplay
-            console.log("Autoplay with sound prevented, falling back to muted");
-            mainVideo.muted = true;
-            mainVideo.play()
+      if (inView) {
+        // Only attempt autoplay when in view
+        if (!initialAutoplayDone) {
+          const playPromise = mainVideo.play();
+          
+          if (playPromise !== undefined) {
+            playPromise
               .then(() => {
+                mainVideo.muted = false;
                 setActiveVideo(0);
                 setInitialAutoplayDone(true);
               })
-              .catch(err => {
-                console.log("Autoplay completely prevented:", err);
+              .catch(error => {
+                mainVideo.muted = true;
+                mainVideo.play()
+                  .then(() => {
+                    setActiveVideo(0);
+                    setInitialAutoplayDone(true);
+                  })
+                  .catch(err => {
+                    console.log("Autoplay completely prevented:", err);
+                  });
               });
-          });
+          }
+        }
+      } else {
+        // Pause video when out of view
+        mainVideo.pause();
+        setActiveVideo(null);
       }
     }
-  }, [brands, initialAutoplayDone]);
-
-  useEffect(() => {
-    startAutoSlide();
-    return () => clearTimeout(timeoutRef.current);
-  }, [currentIndex, startAutoSlide]);
-
+  }, [brands, initialAutoplayDone, inView]);
   
+  // Pause all videos when out of view
+  useEffect(() => {
+    if (!inView) {
+      videoRefs.current.forEach(video => {
+        if (video) {
+          video.pause();
+        }
+      });
+      setActiveVideo(null);
+    }
+  }, [inView]);
+
+
+
+useEffect(() => {
+  // Only start auto-slide when in view
+  if (inView) {
+    startAutoSlide();
+  } else {
+    clearTimeout(timeoutRef.current);
+  }
+  return () => clearTimeout(timeoutRef.current);
+}, [currentIndex, startAutoSlide, inView]);
+
+  // Add this effect to clean up resources
+useEffect(() => {
+  return () => {
+    // Clean up video resources when component unmounts
+    videoRefs.current.forEach(video => {
+      if (video) {
+        video.src = '';
+        video.load();
+      }
+    });
+  };
+}, []);
+
+
   const handleVideoPlay = (index) => {
     // Pause all other videos
     videoRefs.current.forEach((video, i) => {
@@ -267,38 +308,37 @@ function TopBrandVdoCards() {
     setViewedBrandsCount((prev) => prev + 1);
   };
 
-  const togglePlayPause = (index) => {
-    const video = videoRefs.current[index];
-    if (video) {
-      if (video.paused) {
-        // Pause all other videos before playing this one
-        videoRefs.current.forEach((v, i) => {
-          if (v && i !== index) {
-            v.pause();
-          }
-        });
-        video.play().then(() => handleVideoPlay(index));
-      } else {
-        video.pause();
-        handleVideoPause(index);
-      }
-    }
-  };
-
-  const handlePictureInPicture = async (index) => {
-    const video = videoRefs.current[index];
-    if (video && document.pictureInPictureEnabled) {
-      try {
-        if (document.pictureInPictureElement) {
-          await document.exitPictureInPicture();
-        } else {
-          await video.requestPictureInPicture();
+ const togglePlayPause = useCallback((index) => {
+  const video = videoRefs.current[index];
+  if (video) {
+    if (video.paused) {
+      videoRefs.current.forEach((v, i) => {
+        if (v && i !== index) {
+          v.pause();
         }
-      } catch (error) {
-        console.error("Picture-in-Picture failed:", error);
-      }
+      });
+      video.play().then(() => handleVideoPlay(index));
+    } else {
+      video.pause();
+      handleVideoPause(index);
     }
-  };
+  }
+}, []);
+
+  // const handlePictureInPicture = async (index) => {
+  //   const video = videoRefs.current[index];
+  //   if (video && document.pictureInPictureEnabled) {
+  //     try {
+  //       if (document.pictureInPictureElement) {
+  //         await document.exitPictureInPicture();
+  //       } else {
+  //         await video.requestPictureInPicture();
+  //       }
+  //     } catch (error) {
+  //       console.error("Picture-in-Picture failed:", error);
+  //     }
+  //   }
+  // };
 
   const handleLikeClick = async (brand) => {
     if (!token) {
@@ -661,12 +701,12 @@ function TopBrandVdoCards() {
                     // poster={mainBrand.logo}
                     width="100%"
                     height="100%"
-                    preload='metadata'
+                    preload='none'
                     objectFit="contain"
                     onPlay={() => handleVideoPlay(0)}
                     onPause={() => handleVideoPause(0)}
                     // autoPlay={false}
-                    autoPlay
+                    autoPlay={inView && initialLoadComplete} // Only autoplay when in view
                     loop={true}
                     muted={false}
                     ref={(el) => (videoRefs.current[0] = el?.videoRef || null)}
@@ -1027,8 +1067,10 @@ function TopBrandVdoCards() {
                   <video
                     ref={(el) => (videoRefs.current[i + 1] = el)}
                     loading="lazy"
+                    preload="none"
                     src={brand.franchiseVideos}
                     alt={brand.brandname}
+                    poster={brand.logo}
                     style={{
                       width: "100%",
                       height: "100%",
