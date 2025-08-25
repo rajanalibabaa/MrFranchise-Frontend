@@ -301,10 +301,7 @@ const handleRemoveFile = (field, index) => {
       if (response.data.token) {
         setOtpToken(response.data.token);
       }
-
-      if (!response.data.success) {
-        throw new Error(response.data.message || 'Failed to send OTP');
-      }
+  
     } catch (err) { 
       throw new Error(err.response?.data?.message || 'Error sending OTP');
     }
