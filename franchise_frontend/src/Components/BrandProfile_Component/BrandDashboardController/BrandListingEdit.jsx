@@ -1,10 +1,9 @@
-
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import BrandDetailsEdit from './BrandDetailsEdit';
-import FranchiseDetailsControl from './FranchiseDetailsEdit';
-import ExpansionLocationControl from './ExpansionLocationEdit';
-import UploadsEdit from './UploadsEdit';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import BrandDetailsEdit from "./BrandDetailsEdit";
+import FranchiseDetailsControl from "./FranchiseDetailsEdit";
+import ExpansionLocationControl from "./ExpansionLocationEdit";
+import UploadsEdit from "./UploadsEdit";
 import {
   Box,
   Button,
@@ -21,9 +20,9 @@ import {
   AccordionSummary,
   AccordionDetails,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { getApi } from '../../../Api/DefaultApi';
+import { getApi } from "../../../Api/DefaultApi";
 
 const flattenBrandData = (brandDoc) => {
   if (!brandDoc) return {};
@@ -53,13 +52,14 @@ const flattenBrandData = (brandDoc) => {
     linkedin: brandDoc.brandDetails?.linkedin || "",
     gstNumber: brandDoc.brandDetails?.gstNumber || "",
     pancardNumber: brandDoc.brandDetails?.pancardNumber || "",
-    
+
     // Franchise Details
     brandCategories: brandDoc.franchiseDetails?.brandCategories || {},
     aidFinancing: brandDoc.franchiseDetails?.aidFinancing || "",
     brandDescription: brandDoc.franchiseDetails?.brandDescription || "",
     companyOwnedOutlets: brandDoc.franchiseDetails?.companyOwnedOutlets || "",
-    consultationOrAssistance: brandDoc.franchiseDetails?.consultationOrAssistance || "",
+    consultationOrAssistance:
+      brandDoc.franchiseDetails?.consultationOrAssistance || "",
     establishedYear: brandDoc.franchiseDetails?.establishedYear || "",
     franchiseDevelopment: brandDoc.franchiseDetails?.franchiseDevelopment || "",
     franchiseOutlets: brandDoc.franchiseDetails?.franchiseOutlets || "",
@@ -68,17 +68,19 @@ const flattenBrandData = (brandDoc) => {
     fico: brandDoc.franchiseDetails?.fico || [],
     trainingSupport: brandDoc.franchiseDetails?.trainingSupport || [],
     uniqueSellingPoints: brandDoc.franchiseDetails?.uniqueSellingPoints || [],
-    
+
     // Expansion Data
-    currentOutletLocations: brandDoc.expansionlocationdata?.currentOutletLocations || {
+    currentOutletLocations: brandDoc.expansionlocationdata
+      ?.currentOutletLocations || {
       domestic: { locations: [] },
-      international: { country: [] }
+      international: { country: [] },
     },
     expansionLocations: brandDoc.expansionlocationdata?.expansionLocations || {
       domestic: { locations: [] },
-      international: { country: [] }
+      international: { country: [] },
     },
-    isInternationalExpansion: brandDoc.expansionlocationdata?.isInternationalExpansion || false,
+    isInternationalExpansion:
+      brandDoc.expansionlocationdata?.isInternationalExpansion || false,
     // Uploads
     brandLogo: brandDoc.uploads?.logo || [],
     exteriorOutlet: brandDoc.uploads?.exteriorOutlet || [],
@@ -88,23 +90,26 @@ const flattenBrandData = (brandDoc) => {
     pancard: brandDoc.uploads?.pancard || [],
     businessPlan: brandDoc.uploads?.businessPlan || [],
     awards: brandDoc.uploads?.awards || [],
-    
   };
 };
 const BrandListingEdit = () => {
   const [formData, setFormData] = useState({});
   const [originalData, setOriginalData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [saveStatus, setSaveStatus] = useState({ loading: false, success: false, error: '' });
+  const [error, setError] = useState("");
+  const [saveStatus, setSaveStatus] = useState({
+    loading: false,
+    success: false,
+    error: "",
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [showOtpDialog, setShowOtpDialog] = useState(false);
   const [expanded, setExpanded] = useState("panel1");
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState("");
   const [otpSending, setOtpSending] = useState(false);
   const [otpVerifying, setOtpVerifying] = useState(false);
-  const [otpSendError, setOtpSendError] = useState('');
-  const [otpError, setOtpError] = useState('');
+  const [otpSendError, setOtpSendError] = useState("");
+  const [otpError, setOtpError] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpToken, setOtpToken] = useState(null);
   const [files, setFiles] = useState({
@@ -115,7 +120,7 @@ const BrandListingEdit = () => {
     interiorOutlet: [],
     pancard: [],
     businessPlan: [],
-    awardDoc: []
+    awardDoc: [],
   });
   const [filesToDelete, setFilesToDelete] = useState({
     // brandLogo: [],
@@ -125,24 +130,37 @@ const BrandListingEdit = () => {
     interiorOutlet: [],
     // pancard: [],
     // businessPlan: [],
-    awardDoc: []
+    awardDoc: [],
   });
 
-  
   const [awardsToDelete, setAwardsToDelete] = useState([]);
 
   const [addExpansionData, setAddExpansionData] = useState({
-    currentOutletLocations: { domestic: { state: [], districts: {}, city: {} }, international: { country: [], states: {}, city: {} } },
-    expansionLocations: { domestic: { state: [], districts: {}, city: {} }, international: { country: [], states: {}, city: {} } },
+    currentOutletLocations: {
+      domestic: { state: [], districts: {}, city: {} },
+      international: { country: [], states: {}, city: {} },
+    },
+    expansionLocations: {
+      domestic: { state: [], districts: {}, city: {} },
+      international: { country: [], states: {}, city: {} },
+    },
   });
   const [removeExpansionData, setRemoveExpansionData] = useState({
-    currentOutletLocations: { domestic: { state: [], districts: {}, city: {} }, international: { country: [], states: {}, city: {} } },
-    expansionLocations: { domestic: { state: [], districts: {}, city: {} }, international: { country: [], states: {}, city: {} } },
+    currentOutletLocations: {
+      domestic: { state: [], districts: {}, city: {} },
+      international: { country: [], states: {}, city: {} },
+    },
+    expansionLocations: {
+      domestic: { state: [], districts: {}, city: {} },
+      international: { country: [], states: {}, city: {} },
+    },
   });
 
   useEffect(() => {
     const fetchBrandData = async () => {
-      const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
+      const uuid =
+        localStorage.getItem("brandUUID") ||
+        localStorage.getItem("investorUUID");
 
       if (!uuid) {
         setError("No UUID found.");
@@ -176,96 +194,103 @@ const BrandListingEdit = () => {
   }, []);
 
   const handleFormChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleNestedFormChange = (section, field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [section]: {
         ...prev[section],
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
   };
 
   const handleArrayChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    if (field === "awards") {
+      // For awards, we need to preserve both description and image data
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
   };
-
   const handleObjectChange = (field, key, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: {
         ...prev[field],
-        [key]: value
-      }
+        [key]: value,
+      },
     }));
   };
 
   const handleFileChange = (field, newFiles) => {
-    setFiles(prev => ({
+    setFiles((prev) => ({
       ...prev,
-      [field]: [...prev[field], ...newFiles]
+      [field]: [...prev[field], ...newFiles],
     }));
   };
 
   const handleRemoveFile = (field, removeIndex = null, fileUrl = null) => {
     if (fileUrl) {
-      setFilesToDelete(prev => ({
+      setFilesToDelete((prev) => ({
         ...prev,
-        [field]: [...(prev[field] || []), fileUrl]
+        [field]: [...(prev[field] || []), fileUrl],
       }));
     } else if (removeIndex !== null) {
-      setFiles(prev => {
+      setFiles((prev) => {
         const updatedFiles = [...prev[field]];
         updatedFiles.splice(removeIndex, 1);
         return {
           ...prev,
-          [field]: updatedFiles
+          [field]: updatedFiles,
         };
       });
     }
   };
 
   const handleAwardDelete = (index) => {
-    setAwardsToDelete(prev => [...prev, index]);
+    setAwardsToDelete((prev) => [...prev, index]);
   };
 
   const handleOtpChange = (e) => {
     setOtp(e.target.value);
-    setOtpError('');
+    setOtpError("");
   };
 
   const handleCloseOtpDialog = () => {
     setShowOtpDialog(false);
-    setOtp('');
-    setOtpError('');
+    setOtp("");
+    setOtpError("");
     setOtpSent(false);
   };
 
   const handleEditClick = async () => {
     if (!formData.email) {
-      setOtpSendError('No email found in profile');
+      setOtpSendError("No email found in profile");
       return;
     }
 
     setShowOtpDialog(true);
     setOtpSending(true);
-    setOtpSendError('');
+    setOtpSendError("");
     setOtpSent(false);
-    
+
     try {
       await sendOtp();
       setOtpSent(true);
     } catch (err) {
-      setOtpSendError(err.message || 'Error sending OTP');
+      setOtpSendError(err.message || "Error sending OTP");
     } finally {
       setOtpSending(false);
     }
@@ -280,28 +305,27 @@ const BrandListingEdit = () => {
         },
         {
           headers: {
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
       if (response.data.token) {
         setOtpToken(response.data.token);
       }
-  
-    } catch (err) { 
-      throw new Error(err.response?.data?.message || 'Error sending OTP');
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Error sending OTP");
     }
   };
 
   const verifyOtp = async () => {
     if (!otp || otp.length !== 6) {
-      setOtpError('Please enter a valid 6-digit OTP');
+      setOtpError("Please enter a valid 6-digit OTP");
       return;
     }
-    
+
     setOtpVerifying(true);
-    setOtpError('');
+    setOtpError("");
 
     try {
       const response = await axios.post(
@@ -309,34 +333,38 @@ const BrandListingEdit = () => {
         {
           identifier: formData.email,
           otp: otp,
-          type: "email"
+          type: "email",
         },
         {
           headers: {
             Authorization: `Bearer ${otpToken}`,
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
-      if (response.data.success === true || response.data.message?.includes("verified successfully")) {
+      if (
+        response.data.success === true ||
+        response.data.message?.includes("verified successfully")
+      ) {
         setIsEditing(true);
         setShowOtpDialog(false);
       } else {
-        setOtpError(response.data.error || 'Invalid OTP');
+        setOtpError(response.data.error || "Invalid OTP");
       }
     } catch (err) {
-      setOtpError(err.response?.data?.error || 'Verification failed');
+      setOtpError(err.response?.data?.error || "Verification failed");
     } finally {
       setOtpVerifying(false);
     }
   };
 
   const handleSave = async () => {
-    const uuid = localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
+    const uuid =
+      localStorage.getItem("brandUUID") || localStorage.getItem("investorUUID");
     if (!uuid) return;
 
-    setSaveStatus({ loading: true, success: false, error: '' });
+    setSaveStatus({ loading: true, success: false, error: "" });
 
     try {
       // Step 1: Update brand details and franchise details
@@ -383,16 +411,31 @@ const BrandListingEdit = () => {
           totalOutlets: formData.totalOutlets,
           fico: formData.fico,
           trainingSupport: formData.trainingSupport,
-          uniqueSellingPoints: formData.uniqueSellingPoints
+          uniqueSellingPoints: formData.uniqueSellingPoints,
         },
       };
 
       // Append JSON data as strings
-      formDataToSend.append('brandDetails', JSON.stringify(updateData.brandDetails));
-      formDataToSend.append('franchiseDetails', JSON.stringify(updateData.franchiseDetails));
-      formDataToSend.append('addExpansionLocationData', JSON.stringify(addExpansionData));
-      formDataToSend.append('removeExpansionLocationData', JSON.stringify(removeExpansionData));
-      formDataToSend.append('isInternationalExpansion', formData.isInternationalExpansion);
+      formDataToSend.append(
+        "brandDetails",
+        JSON.stringify(updateData.brandDetails)
+      );
+      formDataToSend.append(
+        "franchiseDetails",
+        JSON.stringify(updateData.franchiseDetails)
+      );
+      formDataToSend.append(
+        "addExpansionLocationData",
+        JSON.stringify(addExpansionData)
+      );
+      formDataToSend.append(
+        "removeExpansionLocationData",
+        JSON.stringify(removeExpansionData)
+      );
+      formDataToSend.append(
+        "isInternationalExpansion",
+        formData.isInternationalExpansion
+      );
 
       // First update the brand details
       const detailsResponse = await axios.patch(
@@ -400,13 +443,15 @@ const BrandListingEdit = () => {
         formDataToSend,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
       if (!detailsResponse.data.success) {
-        throw new Error(detailsResponse.data.message || "Failed to save brand details.");
+        throw new Error(
+          detailsResponse.data.message || "Failed to save brand details."
+        );
       }
 
       // Step 2: Handle file uploads and deletions
@@ -415,19 +460,19 @@ const BrandListingEdit = () => {
 
       // Append files to upload
       const fileFields = [
-        'brandLogo',
-        'exteriorOutlet',
-        'franchisePromotionVideo',
-        'gstCertificate',
-        'interiorOutlet',
-        'pancard',
-        'businessPlan',
-        'awardDoc'
+        "brandLogo",
+        "exteriorOutlet",
+        "franchisePromotionVideo",
+        "gstCertificate",
+        "interiorOutlet",
+        "pancard",
+        "businessPlan",
+        "awardDoc",
       ];
 
-      fileFields.forEach(field => {
+      fileFields.forEach((field) => {
         if (files[field] && files[field].length > 0) {
-          files[field].forEach(file => {
+          files[field].forEach((file) => {
             if (file instanceof File) {
               uploadFormData.append(field, file);
               hasFilesToUpload = true;
@@ -436,24 +481,28 @@ const BrandListingEdit = () => {
         }
       });
 
-      // Append award text if exists
-        if (formData.awards && formData.awards.length > 0) {
-      const awardDescriptions = formData.awards.map(award => award.awardDescription);
-      uploadFormData.append('addAwardDescription', JSON.stringify(awardDescriptions));
-      hasFilesToUpload = true;
-    }
+      // In handleSave function, update the awards handling:
+      if (formData.awards && formData.awards.length > 0) {
+        // Send both descriptions and existing image URLs
+        const awardsData = formData.awards.map((award) => ({
+          awardDescription: award.awardDescription,
+          // awardImage is handled separately via file upload
+        }));
+        uploadFormData.append("awardDescriptions", JSON.stringify(awardsData));
+        hasFilesToUpload = true;
+      }
 
       // Append files to delete
       if (Object.keys(filesToDelete).length > 0) {
         // console.log("Files to delete ========== :", filesToDelete);
-        uploadFormData.append('imageDeleteData',JSON.stringify(filesToDelete));
+        uploadFormData.append("imageDeleteData", JSON.stringify(filesToDelete));
         hasFilesToUpload = true;
       }
-      
+
       // Append awards to delete
       if (awardsToDelete.length > 0) {
         console.log("Awards to delete ========== :", awardsToDelete);
-        uploadFormData.append('awardsToDelete', JSON.stringify(awardsToDelete));
+        uploadFormData.append("awardsToDelete", JSON.stringify(awardsToDelete));
         hasFilesToUpload = true;
       }
 
@@ -466,27 +515,31 @@ const BrandListingEdit = () => {
           uploadFormData,
           {
             headers: {
-              'Content-Type': 'multipart/form-data',
+              "Content-Type": "multipart/form-data",
             },
           }
         );
 
         if (!uploadResponse.data.success) {
-          throw new Error(uploadResponse.data.message || "Failed to upload files.");
+          throw new Error(
+            uploadResponse.data.message || "Failed to upload files."
+          );
         }
       }
 
       // Refresh the data after successful update
-      const refreshResponse = await getApi(`http://localhost:5000/api/v1/brandlisting/getBrandById/${uuid}`);
+      const refreshResponse = await getApi(
+        `http://localhost:5000/api/v1/brandlisting/getBrandById/${uuid}`
+      );
       const updatedBrand = refreshResponse?.data?.data;
-      
+
       if (refreshResponse.data.success) {
         const flatData = flattenBrandData(updatedBrand);
         setFormData(flatData);
         setOriginalData(updatedBrand);
-        setSaveStatus({ loading: false, success: true, error: '' });
+        setSaveStatus({ loading: false, success: true, error: "" });
         setIsEditing(false);
-        
+
         // Clear files and deletions after successful upload
         setFiles({
           brandLogo: [],
@@ -496,7 +549,7 @@ const BrandListingEdit = () => {
           interiorOutlet: [],
           pancard: [],
           businessPlan: [],
-          awardDoc: []
+          awardDoc: [],
         });
         setFilesToDelete({
           brandLogo: [],
@@ -506,7 +559,7 @@ const BrandListingEdit = () => {
           interiorOutlet: [],
           pancard: [],
           businessPlan: [],
-          awardDoc: []
+          awardDoc: [],
         });
         setAwardsToDelete([]);
       } else {
@@ -525,7 +578,7 @@ const BrandListingEdit = () => {
   const handleCancel = () => {
     setFormData(flattenBrandData(originalData));
     setIsEditing(false);
-    
+
     // Clear any unsaved files and deletions
     setFiles({
       brandLogo: [],
@@ -535,7 +588,7 @@ const BrandListingEdit = () => {
       interiorOutlet: [],
       pancard: [],
       businessPlan: [],
-      awardDoc: []
+      awardDoc: [],
     });
     setFilesToDelete({
       brandLogo: [],
@@ -545,7 +598,7 @@ const BrandListingEdit = () => {
       interiorOutlet: [],
       pancard: [],
       businessPlan: [],
-      awardDoc: []
+      awardDoc: [],
     });
     setAwardsToDelete([]);
   };
@@ -554,8 +607,18 @@ const BrandListingEdit = () => {
     setExpanded(isExpanded ? panel : false);
   };
 
-  if (loading) return <Box display="flex" justifyContent="center" mt={4}><CircularProgress /></Box>;
-  if (error) return <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>;
+  if (loading)
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
+    );
+  if (error)
+    return (
+      <Alert severity="error" sx={{ mt: 2 }}>
+        {error}
+      </Alert>
+    );
 
   return (
     <Box>
@@ -602,17 +665,17 @@ const BrandListingEdit = () => {
         </DialogContent>
 
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button 
-            onClick={handleCloseOtpDialog} 
+          <Button
+            onClick={handleCloseOtpDialog}
             disabled={otpVerifying}
             variant="outlined"
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={async () => {
               setOtpSending(true);
-              setOtpSendError('');
+              setOtpSendError("");
               setOtpSent(false);
               try {
                 await sendOtp();
@@ -625,9 +688,9 @@ const BrandListingEdit = () => {
             }}
             disabled={otpSending || otpVerifying}
             variant="outlined"
-            sx={{ ml: 'auto' }}
+            sx={{ ml: "auto" }}
           >
-            {otpSending ? <CircularProgress size={20} /> : 'Resend OTP'}
+            {otpSending ? <CircularProgress size={20} /> : "Resend OTP"}
           </Button>
           <Button
             onClick={verifyOtp}
@@ -635,13 +698,13 @@ const BrandListingEdit = () => {
             variant="contained"
             disabled={!otp || otp.length !== 6 || otpSending || otpVerifying}
           >
-            {otpVerifying ? <CircularProgress size={20} /> : 'Verify'}
+            {otpVerifying ? <CircularProgress size={20} /> : "Verify"}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Edit / Save Buttons */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
         {!isEditing ? (
           <Button variant="outlined" onClick={handleEditClick}>
             Edit
@@ -653,7 +716,9 @@ const BrandListingEdit = () => {
               color="primary"
               onClick={handleSave}
               disabled={saveStatus.loading}
-              startIcon={saveStatus.loading ? <CircularProgress size={20} /> : null}
+              startIcon={
+                saveStatus.loading ? <CircularProgress size={20} /> : null
+              }
               sx={{ mr: 2 }}
             >
               {saveStatus.loading ? "Saving..." : "Save Changes"}
@@ -671,7 +736,10 @@ const BrandListingEdit = () => {
       </Box>
 
       {/* Brand Details */}
-      <Accordion expanded={expanded === "panel1"} onChange={handleAccordionChange("panel1")}>
+      <Accordion
+        expanded={expanded === "panel1"}
+        onChange={handleAccordionChange("panel1")}
+      >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography fontWeight="bold">Brand Details</Typography>
         </AccordionSummary>
@@ -686,11 +754,14 @@ const BrandListingEdit = () => {
       </Accordion>
 
       {/* Franchise Details */}
-      <Accordion expanded={expanded === "panel2"} onChange={handleAccordionChange("panel2")}>
+      <Accordion
+        expanded={expanded === "panel2"}
+        onChange={handleAccordionChange("panel2")}
+      >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography fontWeight="bold">Franchise Details</Typography>
         </AccordionSummary>
-        <AccordionDetails>  
+        <AccordionDetails>
           <FranchiseDetailsControl
             data={formData}
             onChange={handleFormChange}
@@ -704,7 +775,10 @@ const BrandListingEdit = () => {
       </Accordion>
 
       {/* Expansion Location */}
-      <Accordion expanded={expanded === "panel3"} onChange={handleAccordionChange("panel3")}>
+      <Accordion
+        expanded={expanded === "panel3"}
+        onChange={handleAccordionChange("panel3")}
+      >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography fontWeight="bold">Expansion Location</Typography>
         </AccordionSummary>
@@ -725,7 +799,10 @@ const BrandListingEdit = () => {
       </Accordion>
 
       {/* Uploads */}
-      <Accordion expanded={expanded === "panel4"} onChange={handleAccordionChange("panel4")}>
+      <Accordion
+        expanded={expanded === "panel4"}
+        onChange={handleAccordionChange("panel4")}
+      >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography fontWeight="bold">Uploads</Typography>
         </AccordionSummary>
@@ -747,11 +824,18 @@ const BrandListingEdit = () => {
       <Snackbar
         open={saveStatus.success || !!saveStatus.error}
         autoHideDuration={6000}
-        onClose={() => setSaveStatus(prev => ({ ...prev, success: false, error: '' }))}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        onClose={() =>
+          setSaveStatus((prev) => ({ ...prev, success: false, error: "" }))
+        }
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity={saveStatus.success ? 'success' : 'error'} sx={{ width: '100%' }}>
-          {saveStatus.success ? 'Changes saved successfully!' : saveStatus.error}
+        <Alert
+          severity={saveStatus.success ? "success" : "error"}
+          sx={{ width: "100%" }}
+        >
+          {saveStatus.success
+            ? "Changes saved successfully!"
+            : saveStatus.error}
         </Alert>
       </Snackbar>
     </Box>

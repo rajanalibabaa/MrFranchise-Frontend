@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Grid,
@@ -32,6 +31,7 @@ import {
   CheckCircle,
   Delete,
   Edit,
+  Visibility, // Added for the "View" icon
 } from "@mui/icons-material";
 
 const VisuallyHiddenInput = styled("input")({
@@ -87,7 +87,10 @@ const UploadsEdit = ({
 }) => {
   const theme = useTheme();
   const [editAwardIndex, setEditAwardIndex] = useState(null);
-  const [currentAward, setCurrentAward] = useState({ awardDescription: "", awardImage: null });
+  const [currentAward, setCurrentAward] = useState({
+    awardDescription: "",
+    awardImage: null,
+  });
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [imageErrors, setImageErrors] = useState({
     exteriorOutlet: "",
@@ -204,43 +207,48 @@ const UploadsEdit = ({
           ? "Minimum 3 images required for interior images"
           : "",
     });
-  }, [normalizedData.exteriorOutlet.length, normalizedData.interiorOutlet.length]);
+  }, [
+    normalizedData.exteriorOutlet.length,
+    normalizedData.interiorOutlet.length,
+  ]);
 
-  const handleFileUpload = (field, options = {}) => (e) => {
-    if (!isEditing) return;
-    const { maxFiles = Infinity, allowedTypes = [], maxSize = 5 } = options;
-    const newFiles = Array.from(e.target.files || []);
+  const handleFileUpload =
+    (field, options = {}) =>
+    (e) => {
+      if (!isEditing) return;
+      const { maxFiles = Infinity, allowedTypes = [], maxSize = 5 } = options;
+      const newFiles = Array.from(e.target.files || []);
 
-    const currentFiles = normalizedData[field] || [];
-    const totalFiles = currentFiles.length + newFiles.length;
+      const currentFiles = normalizedData[field] || [];
+      const totalFiles = currentFiles.length + newFiles.length;
 
-    if (totalFiles > maxFiles) {
-      setImageErrors((prev) => ({
-        ...prev,
-        [field]: `Maximum ${maxFiles} file(s) allowed for this field`,
-      }));
-      return;
-    }
+      if (totalFiles > maxFiles) {
+        setImageErrors((prev) => ({
+          ...prev,
+          [field]: `Maximum ${maxFiles} file(s) allowed for this field`,
+        }));
+        return;
+      }
 
-    const validFiles = newFiles.filter((file) => {
-      if (!file || !file.type) return false;
-      if (allowedTypes.length === 0) return true;
-      return allowedTypes.some((type) => file.type.includes(type));
-    });
+      const validFiles = newFiles.filter((file) => {
+        if (!file || !file.type) return false;
+        if (allowedTypes.length === 0) return true;
+        return allowedTypes.some((type) => file.type.includes(type));
+      });
 
-    const sizeValidFiles = validFiles.filter(
-      (file) => file.size <= maxSize * 1024 * 1024
-    );
+      const sizeValidFiles = validFiles.filter(
+        (file) => file.size <= maxSize * 1024 * 1024
+      );
 
-    if (sizeValidFiles.length < validFiles.length) {
-      alert(`Some files exceed the maximum size of ${maxSize}MB`);
-    }
+      if (sizeValidFiles.length < validFiles.length) {
+        alert(`Some files exceed the maximum size of ${maxSize}MB`);
+      }
 
-    const updatedFiles = [...currentFiles, ...sizeValidFiles];
-    setNormalizedData((prev) => ({ ...prev, [field]: updatedFiles }));
+      const updatedFiles = [...currentFiles, ...sizeValidFiles];
+      setNormalizedData((prev) => ({ ...prev, [field]: updatedFiles }));
 
-    onFileChange(field, sizeValidFiles);
-  };
+      onFileChange(field, sizeValidFiles);
+    };
 
   const handleRemoveUploadedFile = (field, index) => {
     if (!isEditing) return;
@@ -298,44 +306,44 @@ const UploadsEdit = ({
     }
   };
 
- const handleAddAward = () => {
-  if (!currentAward.awardDescription || !currentAward.awardImage) {
-    setFormSubmitted(true);
-    return;
-  }
-  
-  const updatedAwards = [...normalizedData.awards];
-  
-  if (editAwardIndex !== null) {
-    // Update existing award
-    updatedAwards[editAwardIndex] = {
-      awardDescription: currentAward.awardDescription,
-      awardImage: currentAward.awardImage,
-    };
-  } else {
-    // Add new award
-    updatedAwards.push({
-      awardDescription: currentAward.awardDescription,
-      awardImage: currentAward.awardImage,
-    });
-  }
-  
-  setNormalizedData(prev => ({ ...prev, awards: updatedAwards }));
-  
-  // Update the form data with award descriptions
-  onArrayChange("awards", updatedAwards.map(award => ({
-    awardDescription: award.awardDescription
-  })));
-  
-  // Handle file upload for new awards
-  if (currentAward.awardImage instanceof File) {
-    onFileChange("awardDoc", [currentAward.awardImage]);
-  }
-  
-  setCurrentAward({ awardDescription: "", awardImage: null });
-  setEditAwardIndex(null);
-  setFormSubmitted(false);
-};
+  const handleAddAward = () => {
+    if (!currentAward.awardDescription || !currentAward.awardImage) {
+      setFormSubmitted(true);
+      return;
+    }
+
+    const updatedAwards = [...normalizedData.awards];
+
+    if (editAwardIndex !== null) {
+      updatedAwards[editAwardIndex] = {
+        awardDescription: currentAward.awardDescription,
+        awardImage: currentAward.awardImage,
+      };
+    } else {
+      updatedAwards.push({
+        awardDescription: currentAward.awardDescription,
+        awardImage: currentAward.awardImage,
+      });
+    }
+
+    setNormalizedData((prev) => ({ ...prev, awards: updatedAwards }));
+
+    onArrayChange(
+      "awards",
+      updatedAwards.map((award) => ({
+        awardDescription: award.awardDescription,
+        awardImage: award.awardImage,
+      }))
+    );
+
+    if (currentAward.awardImage instanceof File) {
+      onFileChange("awardDoc", [currentAward.awardImage]);
+    }
+
+    setCurrentAward({ awardDescription: "", awardImage: null });
+    setEditAwardIndex(null);
+    setFormSubmitted(false);
+  };
 
   const handleEditAward = (index) => {
     const award = normalizedData.awards[index];
@@ -354,11 +362,19 @@ const UploadsEdit = ({
 
     const updatedAwards = [...currentAwards];
     const removedAward = updatedAwards.splice(index, 1)[0];
+
     setNormalizedData((prev) => ({ ...prev, awards: updatedAwards }));
-    onArrayChange("awards", updatedAwards);
+
+    onArrayChange(
+      "awards",
+      updatedAwards.map((award) => ({
+        awardDescription: award.awardDescription,
+        awardImage: award.awardImage,
+      }))
+    );
 
     if (index < firstNewIndex) {
-      onAwardDelete(removedAward.originalIndex);
+      onAwardDelete(index);
     } else {
       const newIndex = index - firstNewIndex;
       onRemoveFile("awardDoc", newIndex);
@@ -476,10 +492,18 @@ const UploadsEdit = ({
                   variant="caption"
                   color={errors.brandLogo ? "error" : "textSecondary"}
                 >
-                  {errors.brandLogo || "(Accepted formats: JPEG, PNG up to 2MB)"}
+                  {errors.brandLogo ||
+                    "(Accepted formats: JPEG, PNG up to 2MB)"}
                 </Typography>
                 {normalizedData.brandLogo?.length > 0 && (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mt: 1,
+                    }}
+                  >
                     {isImageFile(normalizedData.brandLogo[0]) ? (
                       <>
                         <img
@@ -495,7 +519,9 @@ const UploadsEdit = ({
                         />
                         {isEditing && (
                           <IconButton
-                            onClick={() => handleRemoveUploadedFile("brandLogo", 0)}
+                            onClick={() =>
+                              handleRemoveUploadedFile("brandLogo", 0)
+                            }
                             color="error"
                             size="small"
                           >
@@ -506,7 +532,9 @@ const UploadsEdit = ({
                     ) : (
                       <>
                         <Chip
-                          label={getFileDisplayName(normalizedData.brandLogo[0])}
+                          label={getFileDisplayName(
+                            normalizedData.brandLogo[0]
+                          )}
                           onDelete={
                             isEditing
                               ? () => handleRemoveUploadedFile("brandLogo", 0)
@@ -549,24 +577,38 @@ const UploadsEdit = ({
                 </UploadButton>
                 <Typography
                   variant="caption"
-                  color={errors.franchisePromotionVideo ? "error" : "textSecondary"}
+                  color={
+                    errors.franchisePromotionVideo ? "error" : "textSecondary"
+                  }
                 >
                   {errors.franchisePromotionVideo ||
                     "Accepted formats: MP4, Quicktime Video (up to 25MB)"}
                 </Typography>
                 {normalizedData.franchisePromotionVideo?.length > 0 && (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mt: 1,
+                    }}
+                  >
                     {isVideoFile(normalizedData.franchisePromotionVideo[0]) ? (
                       <>
                         <video
-                          src={createObjectURL(normalizedData.franchisePromotionVideo[0])}
+                          src={createObjectURL(
+                            normalizedData.franchisePromotionVideo[0]
+                          )}
                           controls
                           style={{ width: 200, borderRadius: 4 }}
                         />
                         {isEditing && (
                           <IconButton
                             onClick={() =>
-                              handleRemoveUploadedFile("franchisePromotionVideo", 0)
+                              handleRemoveUploadedFile(
+                                "franchisePromotionVideo",
+                                0
+                              )
                             }
                             color="error"
                             size="small"
@@ -578,11 +620,16 @@ const UploadsEdit = ({
                     ) : (
                       <>
                         <Chip
-                          label={getFileDisplayName(normalizedData.franchisePromotionVideo[0])}
+                          label={getFileDisplayName(
+                            normalizedData.franchisePromotionVideo[0]
+                          )}
                           onDelete={
                             isEditing
                               ? () =>
-                                  handleRemoveUploadedFile("franchisePromotionVideo", 0)
+                                  handleRemoveUploadedFile(
+                                    "franchisePromotionVideo",
+                                    0
+                                  )
                               : undefined
                           }
                           deleteIcon={<CheckCircle fontSize="small" />}
@@ -632,7 +679,9 @@ const UploadsEdit = ({
               label="PAN Number"
               fullWidth
               value={data.pancardNumber || ""}
-              onChange={(e) => onChange("pancardNumber", e.target.value.toUpperCase())}
+              onChange={(e) =>
+                onChange("pancardNumber", e.target.value.toUpperCase())
+              }
               error={!!errors.pancardNumber}
               helperText={errors.pancardNumber}
               sx={{ mb: 2 }}
@@ -672,7 +721,9 @@ const UploadsEdit = ({
               {errors.pancard || "Accepted formats: PDF, JPEG, PNG (up to 1MB)"}
             </Typography>
             {normalizedData.pancard?.length > 0 && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}
+              >
                 {isImageFile(normalizedData.pancard[0]) ? (
                   <>
                     <Box
@@ -680,7 +731,11 @@ const UploadsEdit = ({
                       src={createObjectURL(normalizedData.pancard[0])}
                       alt="PAN Preview"
                       loading="lazy"
-                      sx={{ width: 100, borderRadius: 1, border: "1px solid #ccc" }}
+                      sx={{
+                        width: 100,
+                        borderRadius: 1,
+                        border: "1px solid #ccc",
+                      }}
                     />
                     {isEditing && (
                       <IconButton
@@ -697,7 +752,9 @@ const UploadsEdit = ({
                     <Chip
                       label={getFileDisplayName(normalizedData.pancard[0])}
                       onDelete={
-                        isEditing ? () => handleRemoveUploadedFile("pancard", 0) : undefined
+                        isEditing
+                          ? () => handleRemoveUploadedFile("pancard", 0)
+                          : undefined
                       }
                       deleteIcon={<CheckCircle fontSize="small" />}
                       variant="outlined"
@@ -708,18 +765,26 @@ const UploadsEdit = ({
               </Box>
             )}
           </Grid>
-          <Grid item xs={12} md={6} sx={{ mt: { xs: 3, md: 0 }, ml: { md: 2 } }}>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{ mt: { xs: 3, md: 0 }, ml: { md: 2 } }}
+          >
             <TextField
               label="GST Number"
               fullWidth
               value={data.gstNumber || ""}
-              onChange={(e) => onChange("gstNumber", e.target.value.toUpperCase())}
+              onChange={(e) =>
+                onChange("gstNumber", e.target.value.toUpperCase())
+              }
               error={!!errors.gstNumber}
               helperText={errors.gstNumber}
               sx={{ mb: 2 }}
               inputProps={{
                 maxLength: 15,
-                pattern: "[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}",
+                pattern:
+                  "[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}",
                 title: "GST must be in format: 22AAAAA0000A1Z5",
               }}
               disabled={!isEditing}
@@ -750,10 +815,13 @@ const UploadsEdit = ({
               variant="caption"
               color={errors.gstCertificate ? "error" : "textSecondary"}
             >
-              {errors.gstCertificate || "Accepted formats: PDF, JPEG, PNG (up to 1MB)"}
+              {errors.gstCertificate ||
+                "Accepted formats: PDF, JPEG, PNG (up to 1MB)"}
             </Typography>
             {normalizedData.gstCertificate?.length > 0 && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}
+              >
                 {isImageFile(normalizedData.gstCertificate[0]) ? (
                   <>
                     <Box
@@ -761,11 +829,17 @@ const UploadsEdit = ({
                       src={createObjectURL(normalizedData.gstCertificate[0])}
                       alt="GST Certificate"
                       loading="lazy"
-                      sx={{ width: 100, borderRadius: 1, border: "1px solid #ccc" }}
+                      sx={{
+                        width: 100,
+                        borderRadius: 1,
+                        border: "1px solid #ccc",
+                      }}
                     />
                     {isEditing && (
                       <IconButton
-                        onClick={() => handleRemoveUploadedFile("gstCertificate", 0)}
+                        onClick={() =>
+                          handleRemoveUploadedFile("gstCertificate", 0)
+                        }
                         color="error"
                         size="small"
                       >
@@ -776,7 +850,9 @@ const UploadsEdit = ({
                 ) : (
                   <>
                     <Chip
-                      label={getFileDisplayName(normalizedData.gstCertificate[0])}
+                      label={getFileDisplayName(
+                        normalizedData.gstCertificate[0]
+                      )}
                       onDelete={
                         isEditing
                           ? () => handleRemoveUploadedFile("gstCertificate", 0)
@@ -801,7 +877,8 @@ const UploadsEdit = ({
           <Tooltip
             title={
               <span>
-                <strong>Brand Images</strong> <br /> Accepted formats: JPEG, PNG (up to 1MB)
+                <strong>Brand Images</strong> <br /> Accepted formats: JPEG, PNG
+                (up to 1MB)
               </span>
             }
             placement="right-start"
@@ -839,7 +916,9 @@ const UploadsEdit = ({
                 color="success"
                 fullWidth
                 startIcon={<PhotoCamera />}
-                disabled={!isEditing || normalizedData.exteriorOutlet?.length >= 5}
+                disabled={
+                  !isEditing || normalizedData.exteriorOutlet?.length >= 5
+                }
               >
                 Upload Exterior Images
                 <VisuallyHiddenInput
@@ -853,7 +932,11 @@ const UploadsEdit = ({
                   })}
                 />
               </UploadButton>
-              <Typography variant="caption" color="textSecondary" sx={{ mt: -1 }}>
+              <Typography
+                variant="caption"
+                color="textSecondary"
+                sx={{ mt: -1 }}
+              >
                 Accepted formats: JPEG, PNG (up to total 5MB)
               </Typography>
               {normalizedData.exteriorOutlet?.length > 0 && (
@@ -889,7 +972,9 @@ const UploadsEdit = ({
                         />
                         {isEditing && (
                           <IconButton
-                            onClick={() => handleRemoveUploadedFile("exteriorOutlet", index)}
+                            onClick={() =>
+                              handleRemoveUploadedFile("exteriorOutlet", index)
+                            }
                             color="error"
                             size="small"
                             sx={{
@@ -897,7 +982,9 @@ const UploadsEdit = ({
                               top: 4,
                               right: 4,
                               backgroundColor: "rgba(255,255,255,0.8)",
-                              "&:hover": { backgroundColor: "rgba(255,255,255,0.9)" },
+                              "&:hover": {
+                                backgroundColor: "rgba(255,255,255,0.9)",
+                              },
                             }}
                           >
                             <Delete fontSize="small" />
@@ -908,7 +995,11 @@ const UploadsEdit = ({
                   </Box>
                   <Typography
                     variant="caption"
-                    color={normalizedData.exteriorOutlet.length < 3 ? "error" : "success"}
+                    color={
+                      normalizedData.exteriorOutlet.length < 3
+                        ? "error"
+                        : "success"
+                    }
                     sx={{ display: "flex", alignItems: "center", mt: 1 }}
                   >
                     {normalizedData.exteriorOutlet.length < 3 ? (
@@ -919,7 +1010,8 @@ const UploadsEdit = ({
                     ) : (
                       <>
                         <CheckCircle fontSize="small" sx={{ mr: 0.5 }} />
-                        Minimum requirement met ({normalizedData.exteriorOutlet.length}/5)
+                        Minimum requirement met (
+                        {normalizedData.exteriorOutlet.length}/5)
                       </>
                     )}
                   </Typography>
@@ -948,7 +1040,9 @@ const UploadsEdit = ({
                 color="success"
                 startIcon={<PhotoCamera />}
                 sx={{ height: "56px" }}
-                disabled={!isEditing || normalizedData.interiorOutlet?.length >= 5}
+                disabled={
+                  !isEditing || normalizedData.interiorOutlet?.length >= 5
+                }
               >
                 Upload Interior Images
                 <VisuallyHiddenInput
@@ -962,7 +1056,11 @@ const UploadsEdit = ({
                   })}
                 />
               </UploadButton>
-              <Typography variant="caption" color="textSecondary" sx={{ mt: -1 }}>
+              <Typography
+                variant="caption"
+                color="textSecondary"
+                sx={{ mt: -1 }}
+              >
                 Accepted formats: JPEG, PNG (up to total 5MB)
               </Typography>
               {normalizedData.interiorOutlet?.length > 0 && (
@@ -997,7 +1095,9 @@ const UploadsEdit = ({
                         />
                         {isEditing && (
                           <IconButton
-                            onClick={() => handleRemoveUploadedFile("interiorOutlet", index)}
+                            onClick={() =>
+                              handleRemoveUploadedFile("interiorOutlet", index)
+                            }
                             color="error"
                             size="small"
                             sx={{
@@ -1005,7 +1105,9 @@ const UploadsEdit = ({
                               top: 4,
                               right: 4,
                               backgroundColor: "rgba(255,255,255,0.8)",
-                              "&:hover": { backgroundColor: "rgba(255,255,255,0.9)" },
+                              "&:hover": {
+                                backgroundColor: "rgba(255,255,255,0.9)",
+                              },
                             }}
                           >
                             <Delete fontSize="small" />
@@ -1016,7 +1118,11 @@ const UploadsEdit = ({
                   </Box>
                   <Typography
                     variant="caption"
-                    color={normalizedData.interiorOutlet.length < 3 ? "error" : "success"}
+                    color={
+                      normalizedData.interiorOutlet.length < 3
+                        ? "error"
+                        : "success"
+                    }
                     sx={{ display: "flex", alignItems: "center", mt: 1 }}
                   >
                     {normalizedData.interiorOutlet.length < 3 ? (
@@ -1027,7 +1133,8 @@ const UploadsEdit = ({
                     ) : (
                       <>
                         <CheckCircle fontSize="small" sx={{ mr: 0.5 }} />
-                        Minimum requirement met ({normalizedData.interiorOutlet.length}/5)
+                        Minimum requirement met (
+                        {normalizedData.interiorOutlet.length}/5)
                       </>
                     )}
                   </Typography>
@@ -1061,7 +1168,11 @@ const UploadsEdit = ({
           </Tooltip>
         </SectionTitle>
         {isEditing && (
-          <Grid container spacing={2} sx={{ display: { md: "flex", xs: "grid" } }}>
+          <Grid
+            container
+            spacing={2}
+            sx={{ display: { md: "flex", xs: "grid" } }}
+          >
             <Grid item>
               <TextField
                 label="Award Description"
@@ -1110,7 +1221,10 @@ const UploadsEdit = ({
                     </Typography>
                   ) : (
                     formSubmitted && (
-                      <Typography variant="caption" sx={{ color: "error.main" }}>
+                      <Typography
+                        variant="caption"
+                        sx={{ color: "error.main" }}
+                      >
                         Please upload a document
                       </Typography>
                     )
@@ -1133,7 +1247,9 @@ const UploadsEdit = ({
                   setFormSubmitted(true);
                   handleAddAward();
                 }}
-                disabled={!currentAward.awardDescription || !currentAward.awardImage}
+                disabled={
+                  !currentAward.awardDescription || !currentAward.awardImage
+                }
               >
                 {editAwardIndex !== null ? "Update Award" : "Add Award"}
               </Button>
@@ -1253,7 +1369,8 @@ const UploadsEdit = ({
             variant="caption"
             color={errors.businessPlan ? "error" : "textSecondary"}
           >
-            {errors.businessPlan || "Accepted formats: PDF, DOC, DOCX (up to 10MB)"}
+            {errors.businessPlan ||
+              "Accepted formats: PDF, DOC, DOCX (up to 10MB)"}
           </Typography>
           {normalizedData.businessPlan?.length > 0 && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2 }}>
@@ -1261,6 +1378,17 @@ const UploadsEdit = ({
               <Typography variant="body2">
                 {getFileDisplayName(normalizedData.businessPlan[0])}
               </Typography>
+              <IconButton
+                component="a"
+                href={createObjectURL(normalizedData.businessPlan[0])}
+                target="_blank"
+                rel="noopener noreferrer"
+                color="primary"
+                size="small"
+                title="View Business Plan"
+              >
+                <Visibility fontSize="small" />
+              </IconButton>
               {isEditing && (
                 <IconButton
                   onClick={() => handleRemoveUploadedFile("businessPlan", 0)}
