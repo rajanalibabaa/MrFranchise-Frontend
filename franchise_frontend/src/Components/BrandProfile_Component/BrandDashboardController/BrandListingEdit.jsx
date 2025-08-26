@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import BrandDetailsEdit from './BrandDetailsEdit';
@@ -89,9 +90,7 @@ const flattenBrandData = (brandDoc) => {
     awards: brandDoc.uploads?.awards || [],
     
   };
-
 };
-
 const BrandListingEdit = () => {
   const [formData, setFormData] = useState({});
   const [originalData, setOriginalData] = useState(null);
@@ -118,7 +117,20 @@ const BrandListingEdit = () => {
     businessPlan: [],
     awardDoc: []
   });
-  const [filesToDelete, setFilesToDelete] = useState({});
+  const [filesToDelete, setFilesToDelete] = useState({
+    // brandLogo: [],
+    exteriorOutlet: [],
+    // franchisePromotionVideo: [],
+    // gstCertificate: [],
+    interiorOutlet: [],
+    // pancard: [],
+    // businessPlan: [],
+    awardDoc: []
+  });
+
+  
+  const [awardsToDelete, setAwardsToDelete] = useState([]);
+
   const [addExpansionData, setAddExpansionData] = useState({
     currentOutletLocations: { domestic: { state: [], districts: {}, city: {} }, international: { country: [], states: {}, city: {} } },
     expansionLocations: { domestic: { state: [], districts: {}, city: {} }, international: { country: [], states: {}, city: {} } },
@@ -127,11 +139,6 @@ const BrandListingEdit = () => {
     currentOutletLocations: { domestic: { state: [], districts: {}, city: {} }, international: { country: [], states: {}, city: {} } },
     expansionLocations: { domestic: { state: [], districts: {}, city: {} }, international: { country: [], states: {}, city: {} } },
   });
-
-
-  // console.log("BrandListingEdit addExpansionData:", addExpansionData);
-  // console.log("BrandListingEdit removeExpansionData:", removeExpansionData);
-  // console.log("BrandListingEdit formData:", formData);
 
   useEffect(() => {
     const fetchBrandData = async () => {
@@ -209,47 +216,27 @@ const BrandListingEdit = () => {
     }));
   };
 
-const handleRemoveFile = (field, index) => {
-  setFiles(prev => {
-    const updatedFiles = [...prev[field]];
-    const removedFile = updatedFiles.splice(index, 1)[0];
-    
-    // Handle different file types
-    if (removedFile) {
-      let fileUrl;
-      
-      // If it's a string (URL from existing file)
-      if (typeof removedFile === 'string') {
-        fileUrl = removedFile;
-      } 
-      // If it's an object with url property
-      else if (removedFile.url) {
-        fileUrl = removedFile.url;
-      }
-      // If it's a File object (new upload), we don't need to track for deletion
-      else if (removedFile instanceof File) {
-        // No action needed for new files - they haven't been uploaded yet
+  const handleRemoveFile = (field, removeIndex = null, fileUrl = null) => {
+    if (fileUrl) {
+      setFilesToDelete(prev => ({
+        ...prev,
+        [field]: [...(prev[field] || []), fileUrl]
+      }));
+    } else if (removeIndex !== null) {
+      setFiles(prev => {
+        const updatedFiles = [...prev[field]];
+        updatedFiles.splice(removeIndex, 1);
         return {
           ...prev,
           [field]: updatedFiles
         };
-      }
-      
-      // Add to filesToDelete only if we have a URL
-      if (fileUrl) {
-        setFilesToDelete(prev => ({
-          ...prev,
-          [field]: [...(prev[field] || []), fileUrl]
-        }));
-      }
+      });
     }
-    
-    return {
-      ...prev,
-      [field]: updatedFiles
-    };
-  });
-};
+  };
+
+  const handleAwardDelete = (index) => {
+    setAwardsToDelete(prev => [...prev, index]);
+  };
 
   const handleOtpChange = (e) => {
     setOtp(e.target.value);
@@ -398,24 +385,14 @@ const handleRemoveFile = (field, index) => {
           trainingSupport: formData.trainingSupport,
           uniqueSellingPoints: formData.uniqueSellingPoints
         },
-        // expansionLocationData: {
-        //   addExpansionLocationData: addExpansionData,
-        //   removeExpansionLocationData: removeExpansionData,
-        //   isInternationalExpansion: formData.isInternationalExpansion
-        // }
       };
-
-      // console.log("Prepared updateData:", updateData);
 
       // Append JSON data as strings
       formDataToSend.append('brandDetails', JSON.stringify(updateData.brandDetails));
       formDataToSend.append('franchiseDetails', JSON.stringify(updateData.franchiseDetails));
-     formDataToSend.append('addExpansionLocationData', JSON.stringify(addExpansionData));
-formDataToSend.append('removeExpansionLocationData', JSON.stringify(removeExpansionData));
-// If you need to send isInternationalExpansion (currently unused in backend), append it separately
-formDataToSend.append('isInternationalExpansion', formData.isInternationalExpansion);
-
-      // console.log("Prepared formDataToSend:", formDataToSend);
+      formDataToSend.append('addExpansionLocationData', JSON.stringify(addExpansionData));
+      formDataToSend.append('removeExpansionLocationData', JSON.stringify(removeExpansionData));
+      formDataToSend.append('isInternationalExpansion', formData.isInternationalExpansion);
 
       // First update the brand details
       const detailsResponse = await axios.patch(
@@ -451,7 +428,6 @@ formDataToSend.append('isInternationalExpansion', formData.isInternationalExpans
       fileFields.forEach(field => {
         if (files[field] && files[field].length > 0) {
           files[field].forEach(file => {
-            // Only append if it's a File object (new upload)
             if (file instanceof File) {
               uploadFormData.append(field, file);
               hasFilesToUpload = true;
@@ -461,15 +437,27 @@ formDataToSend.append('isInternationalExpansion', formData.isInternationalExpans
       });
 
       // Append award text if exists
-      if (formData.awards && formData.awards.length > 0) {
-        uploadFormData.append('awardText', JSON.stringify(formData.awards.map(award => award.awardDescription)));
-      }
+        if (formData.awards && formData.awards.length > 0) {
+      const awardDescriptions = formData.awards.map(award => award.awardDescription);
+      uploadFormData.append('addAwardDescription', JSON.stringify(awardDescriptions));
+      hasFilesToUpload = true;
+    }
 
       // Append files to delete
       if (Object.keys(filesToDelete).length > 0) {
-        uploadFormData.append('imageDeleteData', JSON.stringify(filesToDelete));
+        // console.log("Files to delete ========== :", filesToDelete);
+        uploadFormData.append('imageDeleteData',JSON.stringify(filesToDelete));
         hasFilesToUpload = true;
       }
+      
+      // Append awards to delete
+      if (awardsToDelete.length > 0) {
+        console.log("Awards to delete ========== :", awardsToDelete);
+        uploadFormData.append('awardsToDelete', JSON.stringify(awardsToDelete));
+        hasFilesToUpload = true;
+      }
+
+      console.log("Uploading files:", uploadFormData);
 
       // Only make the upload request if there are files to upload or delete
       if (hasFilesToUpload) {
@@ -499,7 +487,7 @@ formDataToSend.append('isInternationalExpansion', formData.isInternationalExpans
         setSaveStatus({ loading: false, success: true, error: '' });
         setIsEditing(false);
         
-        // Clear files and filesToDelete after successful upload
+        // Clear files and deletions after successful upload
         setFiles({
           brandLogo: [],
           exteriorOutlet: [],
@@ -510,7 +498,17 @@ formDataToSend.append('isInternationalExpansion', formData.isInternationalExpans
           businessPlan: [],
           awardDoc: []
         });
-        setFilesToDelete({});
+        setFilesToDelete({
+          brandLogo: [],
+          exteriorOutlet: [],
+          franchisePromotionVideo: [],
+          gstCertificate: [],
+          interiorOutlet: [],
+          pancard: [],
+          businessPlan: [],
+          awardDoc: []
+        });
+        setAwardsToDelete([]);
       } else {
         throw new Error("Failed to refresh data after update.");
       }
@@ -539,7 +537,17 @@ formDataToSend.append('isInternationalExpansion', formData.isInternationalExpans
       businessPlan: [],
       awardDoc: []
     });
-    setFilesToDelete({});
+    setFilesToDelete({
+      brandLogo: [],
+      exteriorOutlet: [],
+      franchisePromotionVideo: [],
+      gstCertificate: [],
+      interiorOutlet: [],
+      pancard: [],
+      businessPlan: [],
+      awardDoc: []
+    });
+    setAwardsToDelete([]);
   };
 
   const handleAccordionChange = (panel) => (event, isExpanded) => {
@@ -729,6 +737,7 @@ formDataToSend.append('isInternationalExpansion', formData.isInternationalExpans
             onFileChange={handleFileChange}
             onRemoveFile={handleRemoveFile}
             onArrayChange={handleArrayChange}
+            onAwardDelete={handleAwardDelete}
             errors={{}}
             isEditing={isEditing}
           />

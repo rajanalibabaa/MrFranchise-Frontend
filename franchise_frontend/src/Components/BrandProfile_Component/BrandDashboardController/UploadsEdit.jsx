@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   Grid,
@@ -19,10 +20,6 @@ import {
   Chip,
   TextField,
   useTheme,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Alert,
 } from "@mui/material";
 import {
@@ -85,47 +82,52 @@ const UploadsEdit = ({
   onArrayChange,
   onFileChange,
   onRemoveFile,
+  onAwardDelete,
   isEditing = false,
 }) => {
   const theme = useTheme();
   const [editAwardIndex, setEditAwardIndex] = useState(null);
-  const [currentAward, setCurrentAward] = useState({ text: "", document: null });
-  const [confirmDeleteIndex, setConfirmDeleteIndex] = useState(null);
+  const [currentAward, setCurrentAward] = useState({ awardDescription: "", awardImage: null });
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [imageErrors, setImageErrors] = useState({
     exteriorOutlet: "",
-    interiorOutlet: ""
+    interiorOutlet: "",
   });
 
   // Convert string URLs to file-like objects for consistent handling
   const normalizeFileData = (field) => {
     if (!data[field]) return [];
-    
-    // Handle case where data[field] is a single file/string (convert to array)
+
     if (!Array.isArray(data[field])) {
       const item = data[field];
-      if (typeof item === 'string') {
-        return [{
-          url: item,
-          name: item.split('/').pop(),
-          type: item.split('.').pop().toLowerCase() === 'pdf' ? 'application/pdf' : 
-                item.split('.').pop().toLowerCase() === 'mp4' ? 'video/mp4' : 
-                'image/jpeg'
-        }];
+      if (typeof item === "string") {
+        return [
+          {
+            url: item,
+            name: item.split("/").pop(),
+            type:
+              item.split(".").pop().toLowerCase() === "pdf"
+                ? "application/pdf"
+                : item.split(".").pop().toLowerCase() === "mp4"
+                ? "video/mp4"
+                : "image/jpeg",
+          },
+        ];
       }
-      // If it's a file object, wrap it in an array
       return [item];
     }
-    
-    // If it's already an array, process each item
-    return data[field].map(item => {
-      if (typeof item === 'string') {
+
+    return data[field].map((item) => {
+      if (typeof item === "string") {
         return {
           url: item,
-          name: item.split('/').pop(),
-          type: item.split('.').pop().toLowerCase() === 'pdf' ? 'application/pdf' : 
-                item.split('.').pop().toLowerCase() === 'mp4' ? 'video/mp4' : 
-                'image/jpeg'
+          name: item.split("/").pop(),
+          type:
+            item.split(".").pop().toLowerCase() === "pdf"
+              ? "application/pdf"
+              : item.split(".").pop().toLowerCase() === "mp4"
+              ? "video/mp4"
+              : "image/jpeg",
         };
       }
       return item;
@@ -133,82 +135,94 @@ const UploadsEdit = ({
   };
 
   const [normalizedData, setNormalizedData] = useState({
-    brandLogo: normalizeFileData('brandLogo'),
-    franchisePromotionVideo: normalizeFileData('franchisePromotionVideo'),
-    pancard: normalizeFileData('pancard'),
-    gstCertificate: normalizeFileData('gstCertificate'),
-    exteriorOutlet: normalizeFileData('exteriorOutlet'),
-    interiorOutlet: normalizeFileData('interiorOutlet'),
-    businessPlan: normalizeFileData('businessPlan'),
-    awards: data.awards ? (Array.isArray(data.awards)) ? data.awards.map(award => ({
-      ...award,
-      document: typeof award.document === 'string' ? {
-        url: award.document,
-        name: award.document.split('/').pop(),
-        type: 'application/pdf'
-      } : award.document
-    })) : [] : []
+    brandLogo: normalizeFileData("brandLogo"),
+    franchisePromotionVideo: normalizeFileData("franchisePromotionVideo"),
+    pancard: normalizeFileData("pancard"),
+    gstCertificate: normalizeFileData("gstCertificate"),
+    exteriorOutlet: normalizeFileData("exteriorOutlet"),
+    interiorOutlet: normalizeFileData("interiorOutlet"),
+    businessPlan: normalizeFileData("businessPlan"),
+    awards: data.awards
+      ? Array.isArray(data.awards)
+        ? data.awards.map((award, idx) => ({
+            ...award,
+            awardImage:
+              typeof award.awardImage === "string"
+                ? {
+                    url: award.awardImage,
+                    name: award.awardImage.split("/").pop(),
+                    type: "application/pdf",
+                  }
+                : award.awardImage,
+            originalIndex: idx,
+          }))
+        : []
+      : [],
   });
 
   useEffect(() => {
     if (!isEditing) {
       setEditAwardIndex(null);
-      setCurrentAward({ text: "", document: null });
+      setCurrentAward({ awardDescription: "", awardImage: null });
     }
   }, [isEditing]);
 
   useEffect(() => {
     setNormalizedData({
-      brandLogo: normalizeFileData('brandLogo'),
-      franchisePromotionVideo: normalizeFileData('franchisePromotionVideo'),
-      pancard: normalizeFileData('pancard'),
-      gstCertificate: normalizeFileData('gstCertificate'),
-      exteriorOutlet: normalizeFileData('exteriorOutlet'),
-      interiorOutlet: normalizeFileData('interiorOutlet'),
-      businessPlan: normalizeFileData('businessPlan'),
-      awards: data.awards ? data.awards.map(award => ({
-        ...award,
-        document: typeof award.document === 'string' ? {
-          url: award.document,
-          name: award.document.split('/').pop(),
-          type: 'application/pdf'
-        } : award.document
-      })) : []
+      brandLogo: normalizeFileData("brandLogo"),
+      franchisePromotionVideo: normalizeFileData("franchisePromotionVideo"),
+      pancard: normalizeFileData("pancard"),
+      gstCertificate: normalizeFileData("gstCertificate"),
+      exteriorOutlet: normalizeFileData("exteriorOutlet"),
+      interiorOutlet: normalizeFileData("interiorOutlet"),
+      businessPlan: normalizeFileData("businessPlan"),
+      awards: data.awards
+        ? data.awards.map((award, idx) => ({
+            ...award,
+            awardImage:
+              typeof award.awardImage === "string"
+                ? {
+                    url: award.awardImage,
+                    name: award.awardImage.split("/").pop(),
+                    type: "application/pdf",
+                  }
+                : award.awardImage,
+            originalIndex: idx,
+          }))
+        : [],
     });
   }, [data]);
 
+  useEffect(() => {
+    setImageErrors({
+      exteriorOutlet:
+        normalizedData.exteriorOutlet.length < 3
+          ? "Minimum 3 images required for exterior images"
+          : "",
+      interiorOutlet:
+        normalizedData.interiorOutlet.length < 3
+          ? "Minimum 3 images required for interior images"
+          : "",
+    });
+  }, [normalizedData.exteriorOutlet.length, normalizedData.interiorOutlet.length]);
+
   const handleFileUpload = (field, options = {}) => (e) => {
     if (!isEditing) return;
-    const { maxFiles = Infinity, allowedTypes = [], maxSize = 5, minFiles = 0 } = options;
-    const files = Array.from(e.target.files || []);
+    const { maxFiles = Infinity, allowedTypes = [], maxSize = 5 } = options;
+    const newFiles = Array.from(e.target.files || []);
 
-    // Validate file count
     const currentFiles = normalizedData[field] || [];
-    const totalFiles = currentFiles.length + files.length;
+    const totalFiles = currentFiles.length + newFiles.length;
 
     if (totalFiles > maxFiles) {
-      setImageErrors(prev => ({
+      setImageErrors((prev) => ({
         ...prev,
-        [field]: `Maximum ${maxFiles} file(s) allowed for this field`
+        [field]: `Maximum ${maxFiles} file(s) allowed for this field`,
       }));
       return;
     }
 
-    if (totalFiles < minFiles) {
-      setImageErrors(prev => ({
-        ...prev,
-        [field]: `Minimum ${minFiles} file(s) required for this field`
-      }));
-      return;
-    }
-
-    // Clear error if validation passes
-    setImageErrors(prev => ({
-      ...prev,
-      [field]: ""
-    }));
-
-    const validFiles = files.filter((file) => {
+    const validFiles = newFiles.filter((file) => {
       if (!file || !file.type) return false;
       if (allowedTypes.length === 0) return true;
       return allowedTypes.some((type) => file.type.includes(type));
@@ -222,42 +236,33 @@ const UploadsEdit = ({
       alert(`Some files exceed the maximum size of ${maxSize}MB`);
     }
 
-    // Update normalized data for UI
     const updatedFiles = [...currentFiles, ...sizeValidFiles];
-    setNormalizedData(prev => ({ ...prev, [field]: updatedFiles }));
-    
-    // Pass new files to parent component
+    setNormalizedData((prev) => ({ ...prev, [field]: updatedFiles }));
+
     onFileChange(field, sizeValidFiles);
   };
 
   const handleRemoveUploadedFile = (field, index) => {
     if (!isEditing) return;
-    
+
     const currentFiles = normalizedData[field] || [];
-    
-    // Check if removing this file would violate minimum requirement
-    if (currentFiles.length - 1 < 3 && (field === 'exteriorOutlet' || field === 'interiorOutlet')) {
-      setImageErrors(prev => ({
-        ...prev,
-        [field]: `Minimum 3 images required for ${field === 'exteriorOutlet' ? 'exterior' : 'interior'} images`
-      }));
-      return;
-    }
-    
+    const addedLength = files[field]?.length || 0;
+    const currentLength = currentFiles.length;
+    const firstNewIndex = currentLength - addedLength;
+
     const updatedFiles = [...currentFiles];
     const removedFile = updatedFiles.splice(index, 1)[0];
-    setNormalizedData(prev => ({ ...prev, [field]: updatedFiles }));
-    
-    // Notify parent component about the removal
-    onRemoveFile(field, index);
-    
-    // Clear error if validation passes
-    if (updatedFiles.length >= 3) {
-      setImageErrors(prev => ({
-        ...prev,
-        [field]: ""
-      }));
+
+    let fileUrl = null;
+    if (index < firstNewIndex) {
+      fileUrl = typeof removedFile === "string" ? removedFile : removedFile.url;
+      onRemoveFile(field, null, fileUrl);
+    } else {
+      const newIndex = index - firstNewIndex;
+      onRemoveFile(field, newIndex);
     }
+
+    setNormalizedData((prev) => ({ ...prev, [field]: updatedFiles }));
   };
 
   const createObjectURL = (file) => {
@@ -269,7 +274,7 @@ const UploadsEdit = ({
       if (file.url) {
         return file.url;
       }
-      return file; // Assume it's a URL string
+      return file;
     } catch (error) {
       console.error("Error creating object URL:", error);
       return "";
@@ -279,7 +284,7 @@ const UploadsEdit = ({
   const handleAwardTextChange = (e) => {
     setCurrentAward((prev) => ({
       ...prev,
-      text: e.target.value,
+      awardDescription: e.target.value,
     }));
   };
 
@@ -288,97 +293,129 @@ const UploadsEdit = ({
     if (file) {
       setCurrentAward((prev) => ({
         ...prev,
-        document: file,
+        awardImage: file,
       }));
     }
   };
 
-  const handleAddAward = () => {
-    if (!currentAward.text || !currentAward.document) {
-      setFormSubmitted(true);
-      return;
-    }
-    const updatedAwards = [...normalizedData.awards];
-    if (editAwardIndex !== null) {
-      updatedAwards[editAwardIndex] = {
-        text: currentAward.text,
-        document: currentAward.document,
-      };
-    } else {
-      updatedAwards.push({
-        text: currentAward.text,
-        document: currentAward.document,
-      });
-    }
-    setNormalizedData(prev => ({ ...prev, awards: updatedAwards }));
-    onArrayChange("awards", updatedAwards);
-    if (currentAward.document) {
-      onFileChange("awardDoc", [currentAward.document]);
-    }
-    setCurrentAward({ text: "", document: null });
-    setEditAwardIndex(null);
-    setFormSubmitted(false);
-  };
+ const handleAddAward = () => {
+  if (!currentAward.awardDescription || !currentAward.awardImage) {
+    setFormSubmitted(true);
+    return;
+  }
+  
+  const updatedAwards = [...normalizedData.awards];
+  
+  if (editAwardIndex !== null) {
+    // Update existing award
+    updatedAwards[editAwardIndex] = {
+      awardDescription: currentAward.awardDescription,
+      awardImage: currentAward.awardImage,
+    };
+  } else {
+    // Add new award
+    updatedAwards.push({
+      awardDescription: currentAward.awardDescription,
+      awardImage: currentAward.awardImage,
+    });
+  }
+  
+  setNormalizedData(prev => ({ ...prev, awards: updatedAwards }));
+  
+  // Update the form data with award descriptions
+  onArrayChange("awards", updatedAwards.map(award => ({
+    awardDescription: award.awardDescription
+  })));
+  
+  // Handle file upload for new awards
+  if (currentAward.awardImage instanceof File) {
+    onFileChange("awardDoc", [currentAward.awardImage]);
+  }
+  
+  setCurrentAward({ awardDescription: "", awardImage: null });
+  setEditAwardIndex(null);
+  setFormSubmitted(false);
+};
 
   const handleEditAward = (index) => {
     const award = normalizedData.awards[index];
     setCurrentAward({
-      text: award.text,
-      document: award.document,
+      awardDescription: award.awardDescription,
+      awardImage: award.awardImage,
     });
     setEditAwardIndex(index);
   };
 
   const handleDeleteAward = (index) => {
-    const updatedAwards = [...normalizedData.awards];
+    const currentAwards = normalizedData.awards || [];
+    const addedLength = files.awardDoc?.length || 0;
+    const currentLength = currentAwards.length;
+    const firstNewIndex = currentLength - addedLength;
+
+    const updatedAwards = [...currentAwards];
     const removedAward = updatedAwards.splice(index, 1)[0];
-    setNormalizedData(prev => ({ ...prev, awards: updatedAwards }));
+    setNormalizedData((prev) => ({ ...prev, awards: updatedAwards }));
     onArrayChange("awards", updatedAwards);
-    if (removedAward.document) {
-      onRemoveFile("awardDoc", index);
+
+    if (index < firstNewIndex) {
+      onAwardDelete(removedAward.originalIndex);
+    } else {
+      const newIndex = index - firstNewIndex;
+      onRemoveFile("awardDoc", newIndex);
     }
-    setConfirmDeleteIndex(null);
   };
 
   const handleCancelEdit = () => {
-    setCurrentAward({ text: "", document: null });
+    setCurrentAward({ awardDescription: "", awardImage: null });
     setEditAwardIndex(null);
     setFormSubmitted(false);
   };
 
   const getFileDisplayName = (file) => {
     if (!file) return "";
-    if (typeof file === 'string') return file.split('/').pop();
+    if (typeof file === "string") return file.split("/").pop();
     if (file.name) return file.name;
-    if (file.url) return file.url.split('/').pop();
+    if (file.url) return file.url.split("/").pop();
     return "File";
   };
 
   const isImageFile = (file) => {
     if (!file) return false;
-    const type = typeof file === 'string' ? 
-      file.split('.').pop().toLowerCase() : 
-      file.type ? file.type.split('/')[0] : 
-      file.url ? file.url.split('.').pop().toLowerCase() : '';
-    return ['jpg', 'jpeg', 'png', 'gif'].includes(type) || type === 'image';
+    const type =
+      typeof file === "string"
+        ? file.split(".").pop().toLowerCase()
+        : file.type
+        ? file.type.split("/")[0]
+        : file.url
+        ? file.url.split(".").pop().toLowerCase()
+        : "";
+    return ["jpg", "jpeg", "png", "gif"].includes(type) || type === "image";
   };
 
   const isVideoFile = (file) => {
     if (!file) return false;
-    const type = typeof file === 'string' ? 
-      file.split('.').pop().toLowerCase() : 
-      file.type ? file.type.split('/')[0] : 
-      file.url ? file.url.split('.').pop().toLowerCase() : '';
-    return ['mp4', 'mov', 'avi'].includes(type) || type === 'video';
+    const type =
+      typeof file === "string"
+        ? file.split(".").pop().toLowerCase()
+        : file.type
+        ? file.type.split("/")[0]
+        : file.url
+        ? file.url.split(".").pop().toLowerCase()
+        : "";
+    return ["mp4", "mov", "avi"].includes(type) || type === "video";
   };
 
   const isPdfFile = (file) => {
     if (!file) return false;
-    const type = typeof file === 'string' ? 
-      file.split('.').pop().toLowerCase() : 
-      file.type ? file.type.split('/')[1] : 
-      file.url ? file.url.split('.').pop().toLowerCase() : '';
-    return type === 'pdf' || (file.type && file.type.includes('pdf'));
+    const type =
+      typeof file === "string"
+        ? file.split(".").pop().toLowerCase()
+        : file.type
+        ? file.type.split("/")[1]
+        : file.url
+        ? file.url.split(".").pop().toLowerCase()
+        : "";
+    return type === "pdf" || (file.type && file.type.includes("pdf"));
   };
 
   return (
@@ -512,9 +549,7 @@ const UploadsEdit = ({
                 </UploadButton>
                 <Typography
                   variant="caption"
-                  color={
-                    errors.franchisePromotionVideo ? "error" : "textSecondary"
-                  }
+                  color={errors.franchisePromotionVideo ? "error" : "textSecondary"}
                 >
                   {errors.franchisePromotionVideo ||
                     "Accepted formats: MP4, Quicktime Video (up to 25MB)"}
@@ -597,9 +632,7 @@ const UploadsEdit = ({
               label="PAN Number"
               fullWidth
               value={data.pancardNumber || ""}
-              onChange={(e) =>
-                onChange("pancardNumber", e.target.value.toUpperCase())
-              }
+              onChange={(e) => onChange("pancardNumber", e.target.value.toUpperCase())}
               error={!!errors.pancardNumber}
               helperText={errors.pancardNumber}
               sx={{ mb: 2 }}
@@ -680,9 +713,7 @@ const UploadsEdit = ({
               label="GST Number"
               fullWidth
               value={data.gstNumber || ""}
-              onChange={(e) =>
-                onChange("gstNumber", e.target.value.toUpperCase())
-              }
+              onChange={(e) => onChange("gstNumber", e.target.value.toUpperCase())}
               error={!!errors.gstNumber}
               helperText={errors.gstNumber}
               sx={{ mb: 2 }}
@@ -719,8 +750,7 @@ const UploadsEdit = ({
               variant="caption"
               color={errors.gstCertificate ? "error" : "textSecondary"}
             >
-              {errors.gstCertificate ||
-                "Accepted formats: PDF, JPEG, PNG (up to 1MB)"}
+              {errors.gstCertificate || "Accepted formats: PDF, JPEG, PNG (up to 1MB)"}
             </Typography>
             {normalizedData.gstCertificate?.length > 0 && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
@@ -771,8 +801,7 @@ const UploadsEdit = ({
           <Tooltip
             title={
               <span>
-                <strong>Brand Images</strong> <br /> Accepted formats: JPEG, PNG
-                (up to 1MB)
+                <strong>Brand Images</strong> <br /> Accepted formats: JPEG, PNG (up to 1MB)
               </span>
             }
             placement="right-start"
@@ -791,7 +820,7 @@ const UploadsEdit = ({
             </IconButton>
           </Tooltip>
         </SectionTitle>
-        
+
         {/* Exterior Images */}
         <Grid container spacing={3} sx={{ mb: 3 }}>
           <Grid item xs={12}>
@@ -819,17 +848,12 @@ const UploadsEdit = ({
                   multiple
                   onChange={handleFileUpload("exteriorOutlet", {
                     maxFiles: 5,
-                    minFiles: 3,
                     allowedTypes: ["image/jpeg", "image/png"],
                     maxSize: 5,
                   })}
                 />
               </UploadButton>
-              <Typography
-                variant="caption"
-                color="textSecondary"
-                sx={{ mt: -1 }}
-              >
+              <Typography variant="caption" color="textSecondary" sx={{ mt: -1 }}>
                 Accepted formats: JPEG, PNG (up to total 5MB)
               </Typography>
               {normalizedData.exteriorOutlet?.length > 0 && (
@@ -933,17 +957,12 @@ const UploadsEdit = ({
                   multiple
                   onChange={handleFileUpload("interiorOutlet", {
                     maxFiles: 5,
-                    minFiles: 3,
                     allowedTypes: ["image/jpeg", "image/png"],
                     maxSize: 5,
                   })}
                 />
               </UploadButton>
-              <Typography
-                variant="caption"
-                color="textSecondary"
-                sx={{ mt: -1 }}
-              >
+              <Typography variant="caption" color="textSecondary" sx={{ mt: -1 }}>
                 Accepted formats: JPEG, PNG (up to total 5MB)
               </Typography>
               {normalizedData.interiorOutlet?.length > 0 && (
@@ -1041,96 +1060,97 @@ const UploadsEdit = ({
             </IconButton>
           </Tooltip>
         </SectionTitle>
-    {isEditing && (
-  <Grid container spacing={2} sx={{ display: { md: "flex", xs: "grid" } }}>
-    <Grid item>
-      <TextField
-        label="Award Description"
-        value={currentAward.text}
-        onChange={handleAwardTextChange}
-        sx={{ width: { xs: "100%", md: 900 } }}
-        error={!currentAward.text && formSubmitted}
-        helperText={
-          !currentAward.text && formSubmitted
-            ? "Award description is required"
-            : ""
-        }
-      />
-    </Grid>
-    <Grid item>
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <UploadButton
-          component="label"
-          variant="outlined"
-          size="small"
-          sx={{
-            borderColor: "green",
-            color: "#5a8f29",
-            "&:hover": {
-              backgroundColor: "rgba(122, 208, 58, 0.08)",
-              borderColor: "#5db024",
-            },
-            ...(!currentAward.document && formSubmitted
-              ? { borderColor: "error.main", color: "error.main" }
-              : {}),
-          }}
-          startIcon={<CloudUpload />}
-        >
-          Upload Document
-          <VisuallyHiddenInput
-            type="file"
-            accept=".pdf,.doc,.docx,image/*"
-            onChange={handleAwardFileChange}
-          />
-        </UploadButton>
-        <Box sx={{ mt: 0.5, minHeight: 24 }}>
-          {currentAward.document ? (
-            <Typography variant="caption" sx={{ color: "#666" }}>
-              {getFileDisplayName(currentAward.document)}
-            </Typography>
-          ) : (
-            formSubmitted && (
-              <Typography variant="caption" sx={{ color: "error.main" }}>
-                Please upload a document
-              </Typography>
-            )
-          )}
-        </Box>
-      </Box> {/* Missing closing Box tag */}
-    </Grid>
-    <Grid item xs={12} md={2}>
-      <Button
-        variant="contained"
-        aria-label="add"
-        fullWidth
-        sx={{
-          py: 2,
-          backgroundColor: "#7ad03a",
-          "&:hover": { backgroundColor: "#5db024" },
-          "&:disabled": { backgroundColor: "#e0e0e0" },
-        }}
-        onClick={() => {
-          setFormSubmitted(true);
-          handleAddAward();
-        }}
-        disabled={!currentAward.text || !currentAward.document}
-      >
-        {editAwardIndex !== null ? "Update Award" : "Add Award"}
-      </Button>
-      {editAwardIndex !== null && (
-        <Button
-          variant="outlined"
-          aria-label="cancel"
-          fullWidth
-          sx={{ mt: 1 }}
-          onClick={handleCancelEdit}
-        >
-          Cancel
-        </Button>
-      )}
-    </Grid>
-  </Grid>
-)}
+        {isEditing && (
+          <Grid container spacing={2} sx={{ display: { md: "flex", xs: "grid" } }}>
+            <Grid item>
+              <TextField
+                label="Award Description"
+                value={currentAward.awardDescription}
+                onChange={handleAwardTextChange}
+                sx={{ width: { xs: "100%", md: 900 } }}
+                error={!currentAward.awardDescription && formSubmitted}
+                helperText={
+                  !currentAward.awardDescription && formSubmitted
+                    ? "Award description is required"
+                    : ""
+                }
+              />
+            </Grid>
+            <Grid item>
+              <Box sx={{ display: "flex", flexDirection: "column" }}>
+                <UploadButton
+                  component="label"
+                  variant="outlined"
+                  size="small"
+                  sx={{
+                    borderColor: "green",
+                    color: "#5a8f29",
+                    "&:hover": {
+                      backgroundColor: "rgba(122, 208, 58, 0.08)",
+                      borderColor: "#5db024",
+                    },
+                    ...(!currentAward.awardImage && formSubmitted
+                      ? { borderColor: "error.main", color: "error.main" }
+                      : {}),
+                  }}
+                  startIcon={<CloudUpload />}
+                  disabled={editAwardIndex !== null}
+                >
+                  Upload Document
+                  <VisuallyHiddenInput
+                    type="file"
+                    accept=".pdf,.doc,.docx,image/*"
+                    onChange={handleAwardFileChange}
+                  />
+                </UploadButton>
+                <Box sx={{ mt: 0.5, minHeight: 24 }}>
+                  {currentAward.awardImage ? (
+                    <Typography variant="caption" sx={{ color: "#666" }}>
+                      {getFileDisplayName(currentAward.awardImage)}
+                    </Typography>
+                  ) : (
+                    formSubmitted && (
+                      <Typography variant="caption" sx={{ color: "error.main" }}>
+                        Please upload a document
+                      </Typography>
+                    )
+                  )}
+                </Box>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={2}>
+              <Button
+                variant="contained"
+                aria-label="add"
+                fullWidth
+                sx={{
+                  py: 2,
+                  backgroundColor: "#7ad03a",
+                  "&:hover": { backgroundColor: "#5db024" },
+                  "&:disabled": { backgroundColor: "#e0e0e0" },
+                }}
+                onClick={() => {
+                  setFormSubmitted(true);
+                  handleAddAward();
+                }}
+                disabled={!currentAward.awardDescription || !currentAward.awardImage}
+              >
+                {editAwardIndex !== null ? "Update Award" : "Add Award"}
+              </Button>
+              {editAwardIndex !== null && (
+                <Button
+                  variant="outlined"
+                  aria-label="cancel"
+                  fullWidth
+                  sx={{ mt: 1 }}
+                  onClick={handleCancelEdit}
+                >
+                  Cancel
+                </Button>
+              )}
+            </Grid>
+          </Grid>
+        )}
         {normalizedData.awards?.length > 0 && (
           <Box sx={{ mt: 3 }}>
             <TableContainer>
@@ -1145,19 +1165,19 @@ const UploadsEdit = ({
                 <TableBody>
                   {normalizedData.awards.map((award, index) => (
                     <TableRow key={index}>
-                      <TableCell>{award.text}</TableCell>
+                      <TableCell>{award.awardDescription}</TableCell>
                       <TableCell>
-                        {award.document ? (
-                          isPdfFile(award.document) ? (
+                        {award.awardImage ? (
+                          isPdfFile(award.awardImage) ? (
                             <a
-                              href={createObjectURL(award.document)}
+                              href={createObjectURL(award.awardImage)}
                               target="_blank"
                               rel="noopener noreferrer"
                             >
                               View Document
                             </a>
                           ) : (
-                            getFileDisplayName(award.document)
+                            getFileDisplayName(award.awardImage)
                           )
                         ) : (
                           "No document"
@@ -1168,7 +1188,7 @@ const UploadsEdit = ({
                           <IconButton onClick={() => handleEditAward(index)}>
                             <Edit color="primary" />
                           </IconButton>
-                          <IconButton onClick={() => setConfirmDeleteIndex(index)}>
+                          <IconButton onClick={() => handleDeleteAward(index)}>
                             <Delete color="error" />
                           </IconButton>
                         </TableCell>
@@ -1227,7 +1247,7 @@ const UploadsEdit = ({
                 ],
                 maxSize: 1,
               })}
-            />  
+            />
           </UploadButton>
           <Typography
             variant="caption"
@@ -1254,35 +1274,6 @@ const UploadsEdit = ({
           )}
         </Grid>
       </StyledPaper>
-
-      <Dialog
-        open={confirmDeleteIndex !== null}
-        onClose={() => setConfirmDeleteIndex(null)}
-      >
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to delete this award? This action cannot be
-            undone.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setConfirmDeleteIndex(null)}
-            aria-label="cancel"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => handleDeleteAward(confirmDeleteIndex)}
-            color="error"
-            aria-label="delete"
-            variant="contained"
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
