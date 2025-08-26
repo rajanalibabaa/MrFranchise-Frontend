@@ -55,7 +55,7 @@ export const fetchLikedBrandsById = createAsyncThunk(
     
 
       const query = { page, limit };
-      const baseUrl =  "https://mrfranchisebackend.mrfranchise.in/api/v1/like";
+      const baseUrl =  "http://localhost:5000/api/v1/like";
       const url = `${baseUrl}/get-favbrands/${userId}`;
 
       const response = await getApi(url, query, token);

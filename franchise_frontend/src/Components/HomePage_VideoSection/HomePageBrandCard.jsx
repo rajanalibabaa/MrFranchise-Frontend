@@ -19,8 +19,6 @@ import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import AreaChart from "@mui/icons-material/AreaChart";
 import { handleShortList } from "../../Api/shortListApi";
 import LoginPage from "../../Pages/LoginPage/LoginPage";
-
-// import { BsFillBookmarkStarFill } from "react-icons/bs";
 import { RiBookmark3Fill } from "react-icons/ri";
 import {
   toggleHomeCardLike,
@@ -28,42 +26,55 @@ import {
 } from "../../Redux/Slices/TopCardFetchingSlice";
 import { token } from "../../Utils/autherId.jsx";
 import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
-
 import { postView } from "../../Utils/function/view.jsx";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 import { useDispatch } from "react-redux";
-import { addSortlist, removeSortList, toggleSortlistBrandLike } from "../../Redux/Slices/shortlistslice.jsx";
-import { toggleBrandLike, toggleBrandShortList } from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
-import  {likeApiFunction}  from "../../Api/likeApi.jsx";
-import { addLikedBrand, removeLikedBrand,toggleLikedSliceShortList } from "../../Redux/Slices/likeSlice.jsx";
-import { toggleviewSliceShortList,toggleviewSliceLiked } from "../../Redux/Slices/viewSlice.jsx";
-import { toggleBrandShortListfilter,toggleBrandLikefilter} from "../../Redux/Slices/FilterBrandSlice.jsx";
+import {
+  addSortlist,
+  removeSortList,
+  toggleSortlistBrandLike,
+} from "../../Redux/Slices/shortlistslice.jsx";
+import {
+  toggleBrandLike,
+  toggleBrandShortList,
+} from "../../Redux/Slices/GetAllBrandsDataUpdationFile.jsx";
+import { likeApiFunction } from "../../Api/likeApi.jsx";
+import {
+  addLikedBrand,
+  removeLikedBrand,
+  toggleLikedSliceShortList,
+} from "../../Redux/Slices/likeSlice.jsx";
+import {
+  toggleviewSliceShortList,
+  toggleviewSliceLiked,
+} from "../../Redux/Slices/viewSlice.jsx";
+import {
+  toggleBrandShortListfilter,
+  toggleBrandLikefilter,
+} from "../../Redux/Slices/FilterBrandSlice.jsx";
+import confetti from "canvas-confetti";
+
 const cardVariants = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
-const HomePageBrandCard = React.memo(
-  ({
-    brand,
+const AnimatedIconButton = motion(IconButton);
 
-    // handleLikeClick,
-    likeProcessing,
-    dimensions,
-    theme,
-  }) => {
+const HomePageBrandCard = React.memo(
+  ({ brand, likeProcessing, dimensions, theme }) => {
     const videoRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
     const observerRef = useRef();
     const [showLogin, setShowLogin] = useState(false);
+    const shortlistButtonRef = useRef(null);
+    const likeButtonRef = useRef(null);
 
     const brandId = brand?.uuid || "";
-    const franchiseModel = brand?.fico || {}; // Changed to match the array structure
-    const category = brand?.brandCategories || {}; // Changed to match the new structure
-    const videoUrl = brand?.franchiseVideos || brand?.logo; // Direct URL now
+    const franchiseModel = brand?.fico || {};
+    const category = brand?.brandCategories || {};
     const brandLogo = brand?.logo || "";
     const brandName = brand?.brandname || brand?.brandName;
-    const mediaHeight = dimensions.height * 0.4;
 
     const {
       investmentRange = "Not specified",
@@ -95,54 +106,80 @@ const HomePageBrandCard = React.memo(
 
     const [shortListed, setShortListed] = useState(brand.isShortListed);
     const dispatch = useDispatch();
+
+    // 🎉 Updated confetti effect to use element position
+    const triggerCelebration = (color, elementRef) => {
+      if (elementRef && elementRef.current) {
+        const rect = elementRef.current.getBoundingClientRect();
+        const x = (rect.left + rect.width / 2) / window.innerWidth;
+        const y = (rect.top + rect.height / 2) / window.innerHeight;
+        
+        confetti({
+          particleCount: 200,
+          spread: 150,
+          origin: { x, y },
+          colors: [color, "#ffffff", "#fdc81cff", "#76ec1cff", "#ff1dd6ffff", "#00eaffff", "#0400ffff", "#000000", "#f10808ffff", "#f5f50aff"],
+        });
+      } else {
+        // Fallback to center if element not found
+        confetti({
+          particleCount: 70,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: [color, "#ffffff"],
+        });
+      }
+    };
+
     const handleToggleShortList = async (brand) => {
       try {
-        // const response = await handleShortList(brand);
-        // if (response.success) {
-        //   setShortListed(!shortListed);
-        // }
         if (!token) {
           setShowLogin(true);
           return;
         }
+        if (!brand.isShortListed) {
+          dispatch(addSortlist(brand));
+        } else {
+          dispatch(removeSortList(brand?.uuid));
+        }
+        dispatch(toggleLikedSliceShortList(brand?.uuid));
+        dispatch(toggleviewSliceShortList(brand?.uuid));
+        dispatch(toggleBrandShortListfilter(brand?.uuid));
+        dispatch(toggleBrandShortList(brand?.uuid));
+        dispatch(toggleHomeCardShortlist(brand?.uuid));
+
+        await handleShortList(brand?.uuid);
+        setShortListed(!shortListed);
 
         if (!brand.isShortListed) {
-                dispatch(addSortlist(brand))
-              }else(
-                dispatch(removeSortList(brand?.uuid))
-              )
-
-        dispatch(toggleLikedSliceShortList(brand?.uuid))
-        dispatch(toggleviewSliceShortList(brand?.uuid))
-                   dispatch(toggleBrandShortListfilter(brand?.uuid))
-
-        dispatch(toggleBrandShortList(brand?.uuid))
-        dispatch(toggleHomeCardShortlist(brand?.uuid))
-        await handleShortList(brand?.uuid)
-        setShortListed(!shortListed)
+          triggerCelebration("#7ef400ff", shortlistButtonRef);
+        }
       } catch (error) {
         console.error("Error toggling shortlist:", error);
       }
     };
 
-    const handleLikeClick =  async(brand) => {
-           if (!token) {
-             setShowLogin(true);
-             return;
-           }
-           dispatch(toggleSortlistBrandLike(brand?.uuid))
-           dispatch(toggleBrandLikefilter(brand?.uuid))
-           dispatch(toggleBrandLike(brand?.uuid))
-           if (!brand?.isLiked) {
-            dispatch(addLikedBrand(brand))
-           } else {
-            dispatch(removeLikedBrand(brand?.uuid))
-           }
-           dispatch(toggleviewSliceLiked(brand?.uuid))
-           dispatch(toggleHomeCardLike(brand?.uuid))
-           await likeApiFunction(brand?.uuid)
-         }
-    
+    const handleLikeClick = async (brand) => {
+      if (!token) {
+        setShowLogin(true);
+        return;
+      }
+      dispatch(toggleSortlistBrandLike(brand?.uuid));
+      dispatch(toggleBrandLikefilter(brand?.uuid));
+      dispatch(toggleBrandLike(brand?.uuid));
+      if (!brand?.isLiked) {
+        dispatch(addLikedBrand(brand));
+      } else {
+        dispatch(removeLikedBrand(brand?.uuid));
+      }
+      dispatch(toggleviewSliceLiked(brand?.uuid));
+      dispatch(toggleHomeCardLike(brand?.uuid));
+      await likeApiFunction(brand?.uuid);
+
+      if (!brand?.isLiked) {
+        triggerCelebration("#f44336", likeButtonRef);
+      }
+    };
 
     const handleApply = (brand) => {
       postView(brand?.uuid);
@@ -153,10 +190,7 @@ const HomePageBrandCard = React.memo(
       <motion.div
         key={brandId}
         variants={cardVariants}
-        style={{
-          width: dimensions.width,
-          flexShrink: 0,
-        }}
+        style={{ width: dimensions.width, flexShrink: 0 }}
       >
         <Card
           sx={{
@@ -205,35 +239,50 @@ const HomePageBrandCard = React.memo(
                   }}
                 />
 
-                <Box>
-                  <IconButton
-                    onClick={() => handleToggleShortList(brand)}
-                    sx={{
-                      color: brand.isShortListed
-                        ? "#7ef400ff"
-                        : "rgba(0, 0, 0, 0.23)",
-                    }}
-                  >
-                    <Tooltip title={"ShortList"}>
-                      <RiBookmark3Fill size={21} />
-                    </Tooltip>
-                  </IconButton>
+                {/* 🔖 ShortList Button with animations */}
+                <AnimatedIconButton
+                  ref={shortlistButtonRef}
+                  onClick={() => handleToggleShortList(brand)}
+                  whileTap={{ scale: 0.8 }}
+                  whileHover={{ scale: 1.2 }}
+                  animate={
+                    brand.isShortListed ? { scale: [1, 1.3, 1] } : { scale: 1 }
+                  }
+                  transition={{ duration: 0.3 }}
+                  sx={{
+                    color: brand.isShortListed
+                      ? "#7ef400ff"
+                      : "rgba(0, 0, 0, 0.23)",
+                  }}
+                >
+                  <Tooltip title={"ShortList"}>
+                    <RiBookmark3Fill size={21} />
+                  </Tooltip>
+                </AnimatedIconButton>
 
-                  <IconButton
-                    onClick={() => handleLikeClick(brand)}
-                    disabled={likeProcessing[brandId]}
-                    sx={{
-                      color: brand?.isLiked ? "#f44336" : "rgba(0, 0, 0, 0.23)",
-                    }}
-                  >
-                    {likeProcessing[brandId] ? (
-                      <CircularProgress size={24} />
-                    ) : (
-                      <Favorite />
-                    )}
-                  </IconButton>
-                </Box>
+                {/* ❤️ Like Button with animations */}
+                <AnimatedIconButton
+                  ref={likeButtonRef}
+                  onClick={() => handleLikeClick(brand)}
+                  disabled={likeProcessing[brandId]}
+                  whileTap={{ scale: 0.8 }}
+                  whileHover={{ scale: 1.2 }}
+                  animate={brand.isLiked ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  sx={{
+                    color: brand?.isLiked
+                      ? "#f44336"
+                      : "rgba(0, 0, 0, 0.23)",
+                  }}
+                >
+                  {likeProcessing[brandId] ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    <Favorite />
+                  )}
+                </AnimatedIconButton>
               </Box>
+
               <Typography
                 variant="body1"
                 fontWeight={800}
@@ -249,6 +298,7 @@ const HomePageBrandCard = React.memo(
               >
                 {brandName}
               </Typography>
+
               {category?.child && (
                 <Box sx={{ mb: 2 }}>
                   <Stack
@@ -273,42 +323,21 @@ const HomePageBrandCard = React.memo(
 
               <Stack spacing={1} sx={{ mb: 2 }}>
                 <Box display="flex" alignItems="center">
-                  <Business
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
+                  <Business sx={{ mr: 1.5, fontSize: "1rem", color: "text.secondary", flexShrink: 0 }} />
                   <Typography variant="body2">
                     <strong>Investment:</strong> {investmentRange}
                   </Typography>
                 </Box>
 
                 <Box display="flex" alignItems="center">
-                  <MonetizationOn
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
+                  <MonetizationOn sx={{ mr: 1.5, fontSize: "1rem", color: "text.secondary", flexShrink: 0 }} />
                   <Typography variant="body2">
                     <strong>Area:</strong> {areaRequired}
                   </Typography>
                 </Box>
 
                 <Box display="flex" alignItems="center">
-                  <AreaChart
-                    sx={{
-                      mr: 1.5,
-                      fontSize: "1rem",
-                      color: "text.secondary",
-                      flexShrink: 0,
-                    }}
-                  />
+                  <AreaChart sx={{ mr: 1.5, fontSize: "1rem", color: "text.secondary", flexShrink: 0 }} />
                   <Typography variant="body2">
                     <strong>Model :</strong> {modelType}
                   </Typography>

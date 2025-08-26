@@ -73,7 +73,7 @@ function BrandDetailsPage() {
     (async () => {
       try {
         const res = await axios.get(
-          `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandListingByUUID/${brandId}`,
+          `http://localhost:5000/api/v1/brandlisting/getBrandListingByUUID/${brandId}`,
           { params: { userId } }
         );
         let brand = res.data?.data;

@@ -22,7 +22,7 @@ export const removeFromShortlist = createAsyncThunk(
       if (!userId || !brandId) throw new Error("Missing user ID or brand ID");
  
       const baseUrl =
-        api.shortListApi.base || "https://mrfranchisebackend.mrfranchise.in/api/v1/shortList";
+        api.shortListApi.base || "http://localhost:5000/api/v1/shortList";
       const url = `${baseUrl}/removeFromShortlist/${userId}/${brandId}`;
  
       await axios.delete(url, {
@@ -45,7 +45,7 @@ export const fetchShortListedById = createAsyncThunk(
  
       const query = { page, limit };
       const baseUrl =
-        api.shortListApi.base || "https://mrfranchisebackend.mrfranchise.in/api/v1/shortList";
+        api.shortListApi.base || "http://localhost:5000/api/v1/shortList";
       const url = `${baseUrl}/getShortListedById/${userId}`;
  
       const response = await getApi(url, query, token); // ✅ Correct usage

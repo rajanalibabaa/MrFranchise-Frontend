@@ -36,6 +36,7 @@ import { toggleHomeCardLike, toggleHomeCardShortlist } from "../../Redux/Slices/
 import { addSortlist, removeSortList, toggleSortlistBrandLike } from "../../Redux/Slices/shortlistslice.jsx";
 import { RiBookmark3Fill } from "react-icons/ri";
 import { VideoPlayer } from "../../services/VideoControllerMedia/VideoPlayercomponents.jsx";
+import confetti from "canvas-confetti";
 
 const cardStyles = {
   width: { xs: "40vh", sm: "calc(50% - 10px)", md: 260 },
@@ -105,6 +106,32 @@ const BrandCard = memo(
     const [likeProcessing, setLikeProcessing] = useState(false);
     const [shortlistProcessing, setShortlistProcessing] = useState(false);
     const videoRef = useRef(null);
+    const likeButtonRef = useRef(null);
+    const shortlistButtonRef = useRef(null);
+
+    // 🎉 Updated confetti effect to use element position
+    const triggerCelebration = (color, buttonRef) => {
+      if (buttonRef && buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        const x = (rect.left + rect.width / 2) / window.innerWidth;
+        const y = (rect.top + rect.height / 2) / window.innerHeight;
+        
+        confetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { x, y },
+          colors: [color, "#ffffff", "#fdc81cff", "#76ec1cff", "#ff1dd6ffff", "#00eaffff", "#0400ffff", "#000000", "#f10808ffff", "#f5f50aff"],
+        });
+      } else {
+        // Fallback to center if element not found
+        confetti({
+          particleCount: 70,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: [color, "#ffffff"],
+        });
+      }
+    };
 
     const handleOpenBrand = useCallback(() => {
       if ("requestIdleCallback" in window) {
@@ -134,6 +161,11 @@ const BrandCard = memo(
 
         // Call the API to update the server
         await likeApiFunction(uuid);
+
+        // Trigger confetti if it's a new like
+        if (!isLiked) {
+          triggerCelebration("#f44336", likeButtonRef);
+        }
       } catch (error) {
         console.error("Error toggling like:", error);
         // Revert the change if API call fails
@@ -143,7 +175,7 @@ const BrandCard = memo(
       } finally {
         setLikeProcessing(false);
       }
-    }, [uuid, likeProcessing, onShowLogin, dispatch]);
+    }, [uuid, likeProcessing, onShowLogin, dispatch, isLiked]);
 
     const handleToggleShortList = useCallback(async () => {
       if (shortlistProcessing) return;
@@ -166,6 +198,11 @@ const BrandCard = memo(
 
         // Call the API to update the server
         await handleShortList(uuid);
+
+        // Trigger confetti if it's a new shortlist
+        if (!isShortListed) {
+          triggerCelebration("#7ef400ff", shortlistButtonRef);
+        }
       } catch (error) {
         console.error("Error toggling shortlist:", error);
         // Revert the change if API call fails
@@ -175,7 +212,7 @@ const BrandCard = memo(
       } finally {
         setShortlistProcessing(false);
       }
-    }, [brand, uuid, shortlistProcessing, onShowLogin, dispatch]);
+    }, [brand, uuid, shortlistProcessing, onShowLogin, dispatch, isShortListed]);
 
     const handlePlay = useCallback(() => {
       const allVideos = document.querySelectorAll("video");
@@ -271,6 +308,7 @@ const BrandCard = memo(
             </Typography>
             <Box>
               <IconButton
+                ref={likeButtonRef}
                 onClick={handleLike}
                 disabled={likeProcessing}
                 size="small"
@@ -286,6 +324,7 @@ const BrandCard = memo(
                 )}
               </IconButton>
               <IconButton
+                ref={shortlistButtonRef}
                 onClick={handleToggleShortList}
                 size="small"
                 disabled={shortlistProcessing}

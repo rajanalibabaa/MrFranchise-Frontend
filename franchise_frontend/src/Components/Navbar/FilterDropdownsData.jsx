@@ -144,7 +144,8 @@ const handleFindBrands = useCallback(() => {
     queryParams.append("state", filters.selectedState);
   }
 
-  navigate(`/brands?${queryParams.toString()}`);
+ // 🔹 Open in a new browser tab instead of same tab
+  window.open(`/brands?${queryParams.toString()}`, "_blank", "noopener,noreferrer");
 }, [filters, navigate]);
 
 

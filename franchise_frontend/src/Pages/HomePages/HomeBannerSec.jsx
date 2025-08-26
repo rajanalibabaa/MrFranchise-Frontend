@@ -4,11 +4,11 @@ import React, {
   useEffect,
   Suspense,
   useCallback,
-  useMemo,
 } from "react";
 import { useInView } from "react-intersection-observer";
 import { FixedSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -26,7 +26,7 @@ import { hideLoading, showLoading } from "../../Redux/Slices/loadingSlice.jsx";
 import Navbar from "../../Components/Navbar/NavBar.jsx";
 import SEO from "../../Components/SEO/Seo.jsx";
 import HomeBanner from "../../assets/Images/HomeBanner.avif";
-import { createLazyWithPreload } from "../../Utils/PreLoad/PreLoad.jsx";
+import CompareButton from "./CompareButtonsCompenents.jsx";
 
 // --- ErrorBoundary ---
 class ErrorBoundary extends React.Component {
@@ -327,39 +327,7 @@ const pageConfig = {
   },
 };
 
-// --- create lazy dynamicComponents using preloading ---
-// const useDynamicComponents = () => {
-//   return useMemo(() => {
-//     const make = (name) =>
-//       createLazyWithPreload(() =>
-//         import(
-//           /* webpackChunkName: "[request]" */
-//           /* webpackPrefetch: true */
-//           `../../Components/HomePage_VideoSection/${name}`
-//         ).catch(() => ({
-//           default: () => (
-//             <Typography color="error" align="center">
-//               Failed to load {name}
-//             </Typography>
-//           ),
-//         }))
-//       );
-//     return {
-//       TopBrandThreevdocards: make("TopBrandThreeVdoCards.jsx"),
-//       LikedBrands: make("LikedBrands.jsx"),
-//       ShortlistBrands: make("ShortlistBrands.jsx"),
-//       TopCafeFranchises: make("TopCafeBrands.jsx"),
-//       TopFoodFranchise: make("TopFoodFranchise.jsx"),
-//       ViewBrands: make("ViewBrands.jsx"),
-//       TopBeverageFranchise: make("TopBeverageFranchise.jsx"),
-//       TopDesertBakeryFranchise: make("TopDesertBakerys.jsx"),
-//       TopTruckAndKiosks: make("TopTruckAndKiosks.jsx"),
-//       TopRestaurantsFranchise: make("TopRestaurantsFranchise.jsx"),
-//       ToTrendingBrands: make("ToTrendingBrands.jsx"),
-//       FindFranchiseLocations: make("FindFranchiseLocations.jsx"),
-//     };
-//   }, []);
-// };
+
 
 
 const useDynamicComponents = () => {
@@ -451,7 +419,7 @@ const HomeBannerSec = () => {
   const [isLoading, setIsLoading] = useState(true);
   const controls = useAnimation();
 const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
-
+const navigate = useNavigate();
   useEffect(() => {
     const nav = performance.getEntriesByType("navigation")[0]?.type === "reload";
     const shown = sessionStorage.getItem("popup-shown");
@@ -700,6 +668,11 @@ const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
       isMobile={isMobile}
     />
 ))}
+
+
+{/* 👇 Add here, before Footer */}
+<CompareButton />
+
 
       <Footer />
     </>

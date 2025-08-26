@@ -21,7 +21,9 @@ import {
 import { motion } from "framer-motion";
 import ShareDialogActions from "../ShareDialogActions";
 import { RiBookmark3Fill } from "react-icons/ri";
- 
+import { useRef } from "react";
+import confetti from "canvas-confetti";
+
 const BrandHeader = ({
   brand,
   isMobile,
@@ -36,13 +38,57 @@ const BrandHeader = ({
   toggleDrawer,
   getOutletRange,
 }) => {
+  const likeButtonRef = useRef(null);
+  const shortlistButtonRef = useRef(null);
+
+  // 🎉 Confetti effect to use element position
+  const triggerCelebration = (color, buttonRef) => {
+    if (buttonRef && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const x = (rect.left + rect.width / 2) / window.innerWidth;
+      const y = (rect.top + rect.height / 2) / window.innerHeight;
+      
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { x, y },
+          colors: [color, "#ffffff", "#fdc81cff", "#76ec1cff", "#ff1dd6ffff", "#00eaffff", "#0400ffff", "#000000", "#f10808ffff", "#f5f50aff"],
+      });
+    } else {
+      // Fallback to center if element not found
+      confetti({
+        particleCount: 70,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: [color, "#ffffff"],
+      });
+    }
+  };
+
   const handleMoreClick = (e) => {
-  e.preventDefault();
-  const element = document.getElementById('expansion-location');
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' });
-  }
-};
+    e.preventDefault();
+    const element = document.getElementById('expansion-location');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Modified handleLikeClick to include confetti
+  const handleLikeClickWithConfetti = () => {
+    handleLikeClick();
+    if (!localIsLiked) {
+      triggerCelebration("#f44336", likeButtonRef);
+    }
+  };
+
+  // Modified handleToggleShortList to include confetti
+  const handleToggleShortListWithConfetti = () => {
+    handleToggleShortList(brand[0]?.uuid);
+    if (!shortListed) {
+      triggerCelebration("#7ef400ff", shortlistButtonRef);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -66,31 +112,30 @@ const BrandHeader = ({
           width="100%"
         >
           <Box
-  position="relative"
-  sx={{ 
-    border: "2px solid orange", 
-    borderRadius: "10px", 
-    width: "clamp(120px, 20vw, 200px)", 
-    height: "clamp(120px, 20vw, 200px)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  }}
->
-  <Box
-    component="img"
-    src={brand[0].uploads?.logo}
-    alt={brand[0].brandDetails?.brandName}
-    sx={{
-      width: "100%",
-      height: "100%",
-      objectFit: "contain"
-    }}
-  />
-</Box>
+            position="relative"
+            sx={{ 
+              border: "2px solid orange", 
+              borderRadius: "10px", 
+              width: "clamp(120px, 20vw, 200px)", 
+              height: "clamp(120px, 20vw, 200px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+            }}
+          >
+            <Box
+              component="img"
+              src={brand[0].uploads?.logo}
+              alt={brand[0].brandDetails?.brandName}
+              sx={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain"
+              }}
+            />
+          </Box>
 
- 
           <Box width="100%">
             {/* Brand name and actions */}
             <Box>
@@ -136,7 +181,7 @@ const BrandHeader = ({
                     <Typography fontSize={isMobile ? "0.8rem" : "0.9rem"}>
                       Established Year:{" "}
                       <label variant="body1" color="text.secondary">
-{brand?.[0]?.brandfranchisedetails?.franchiseDetails?.establishedYear || "N/A"}
+                        {brand?.[0]?.brandfranchisedetails?.franchiseDetails?.establishedYear || "N/A"}
                       </label>
                     </Typography>
                     <Typography fontSize={isMobile ? "0.8rem" : "0.9rem"}>
@@ -164,8 +209,9 @@ const BrandHeader = ({
                     VIEW CONTACT
                   </Button>
                   <IconButton
+                    ref={likeButtonRef}
                     sx={{ marginLeft: "90px" }}
-                    onClick={handleLikeClick}
+                    onClick={handleLikeClickWithConfetti}
                     disabled={isProcessingLike}
                   >
                     {isProcessingLike ? (
@@ -181,7 +227,8 @@ const BrandHeader = ({
                     )}
                   </IconButton>
                   <IconButton
-                    onClick={() => handleToggleShortList(brand.uuid)}
+                    ref={shortlistButtonRef}
+                    onClick={handleToggleShortListWithConfetti}
                     sx={{
                       color: shortListed ? "#7ef400ff" : "rgba(0, 0, 0, 0.23)",
                     }}
@@ -196,7 +243,7 @@ const BrandHeader = ({
                       sx={{ fontSize: isMobile ? "1.2rem" : "1.5rem" }}
                     />
                   </IconButton>
- 
+
                   <ShareDialogActions
                     anchorEl={anchorEl}
                     setAnchorEl={setAnchorEl}
@@ -204,7 +251,7 @@ const BrandHeader = ({
                 </Box>
               </Box>
             </Box>
- 
+
             {/* Brand details table */}
             <Box sx={{ width: "100%", overflow: "hidden", mt: 2 }}>
               <TableContainer
@@ -275,7 +322,7 @@ const BrandHeader = ({
                           py: isMobile ? "8px" : "12px",
                         }}
                       >
-{brand?.[0]?.brandfranchisedetails?.franchiseDetails?.brandCategories?.child || "N/A"}
+                        {brand?.[0]?.brandfranchisedetails?.franchiseDetails?.brandCategories?.child || "N/A"}
                       </TableCell>
                       <TableCell
                         sx={{
@@ -286,7 +333,7 @@ const BrandHeader = ({
                           py: isMobile ? "8px" : "12px",
                         }}
                       >
-{brand?.[0]?.brandfranchisedetails?.franchiseDetails?.fico?.[0]?.areaRequired || "N/A"}
+                        {brand?.[0]?.brandfranchisedetails?.franchiseDetails?.fico?.[0]?.areaRequired || "N/A"}
                       </TableCell>
                       <TableCell
                         sx={{
@@ -297,7 +344,7 @@ const BrandHeader = ({
                           py: isMobile ? "8px" : "12px",
                         }}
                       >
-{brand?.[0]?.brandfranchisedetails?.franchiseDetails?.fico?.[0]?.investmentRange || "N/A"}
+                        {brand?.[0]?.brandfranchisedetails?.franchiseDetails?.fico?.[0]?.investmentRange || "N/A"}
                       </TableCell>
                       <TableCell
                         sx={{
@@ -308,8 +355,7 @@ const BrandHeader = ({
                           py: isMobile ? "8px" : "12px",
                         }}
                       >
-{getOutletRange(brand?.[0]?.brandfranchisedetails?.franchiseDetails?.
-totalOutlets || "N/A")}
+                        {getOutletRange(brand?.[0]?.brandfranchisedetails?.franchiseDetails?.totalOutlets || "N/A")}
                       </TableCell>
                       <TableCell
                         sx={{
@@ -321,38 +367,37 @@ totalOutlets || "N/A")}
                         }}
                       >
                         {(() => {
-                          const locations =
-  brand?.[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
- 
+                          const locations = brand?.[0]?.brandexpansionlocationdatas?.expansionLocations?.domestic?.locations || [];
+
                           const states = locations
                             .map((loc) => loc.state)
                             .filter(Boolean);
                           const hasMore = states.length > 2;
- 
+
                           if (states.length === 0) {
                             return "Multiple Locations";
                           }
- 
+
                           const visibleStates = states.slice(0, 2).join(", ");
- 
+
                           return (
                             <>
                               {visibleStates}
                               {hasMore && (
-                              <a
-  href="#expansion-location"
-  onClick={handleMoreClick}
-  style={{
-    marginLeft: 8,
-    fontSize: "0.7rem",
-    textDecoration: "none",
-    color: "#1976d2",
-    fontWeight: 500,
-    cursor: "pointer",
-  }}
->
-  More
-</a>
+                                <a
+                                  href="#expansion-location"
+                                  onClick={handleMoreClick}
+                                  style={{
+                                    marginLeft: 8,
+                                    fontSize: "0.7rem",
+                                    textDecoration: "none",
+                                    color: "#1976d2",
+                                    fontWeight: 500,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  More
+                                </a>
                               )}
                             </>
                           );
@@ -369,7 +414,5 @@ totalOutlets || "N/A")}
     </motion.div>
   );
 };
- 
+
 export default BrandHeader;
- 
- 

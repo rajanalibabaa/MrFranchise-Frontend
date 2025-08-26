@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { RiBookmark3Fill } from "react-icons/ri";
 import { motion } from "framer-motion";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { postView } from "../../Utils/function/view";
@@ -25,6 +25,7 @@ import { token } from "../../Utils/autherId";
 import { handleShortList } from "../../Api/shortListApi";
 import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 import { addSortlist, removeSortList, toggleSortlistBrandLike } from "../../Redux/Slices/shortlistslice.jsx";
+import confetti from "canvas-confetti";
 
 const TopInvestVdocardround = () => {
   const [likeProcessing, setLikeProcessing] = useState({});
@@ -32,7 +33,9 @@ const TopInvestVdocardround = () => {
   const [page, setPage] = useState(1);
   const [allBrands, setAllBrands] = useState([]);
   const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const likeButtonRefs = useRef({});
+  const shortlistButtonRefs = useRef({});
 
   const dispatch = useDispatch();
  
@@ -81,50 +84,84 @@ const TopInvestVdocardround = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, isLoading]);
+
+  // 🎉 Updated confetti effect to use element position
+  const triggerCelebration = (color, brandId, buttonType) => {
+    const refs = buttonType === 'like' ? likeButtonRefs : shortlistButtonRefs;
+    const buttonRef = refs.current[brandId];
+    
+    if (buttonRef) {
+      const rect = buttonRef.getBoundingClientRect();
+      const x = (rect.left + rect.width / 2) / window.innerWidth;
+      const y = (rect.top + rect.height / 2) / window.innerHeight;
+      
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { x, y },
+          colors: [color, "#ffffff", "#fdc81cff", "#76ec1cff", "#ff1dd6ffff", "#00eaffff", "#0400ffff", "#000000", "#f10808ffff", "#f5f50aff"],
+      });
+    } else {
+      // Fallback to center if element not found
+      confetti({
+        particleCount: 70,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: [color, "#ffffff"],
+      });
+    }
+  };
  
   const handleToggleShortList = async (brand) => {
     if (!token) {
       setShowLogin(true);
       return;
     }
-  try {
+    try {
+      if (!brand.isShortListed) {
+        dispatch(addSortlist(brand));
+      } else {
+        dispatch(removeSortList(brand.uuid));
+      }
+      dispatch(toggleBrandShortList(brand.uuid));
+      await handleShortList(brand.uuid);
+      dispatch(toggleHomeCardShortlist(brand.uuid));
 
-    if (!brand.isShortListed) {
-            dispatch(addSortlist(brand))
-          }else{
-            dispatch(removeSortList(brand.uuid))
-          }
-    dispatch(toggleBrandShortList(brand.uuid));
-    await handleShortList(brand.uuid);
-     dispatch(toggleHomeCardShortlist(brand.uuid))
-  } catch (error) {
-    console.error("Error toggling shortlist:", error);
-  }
-};
+      if (!brand.isShortListed) {
+        triggerCelebration("#7ef400ff", brand.uuid, 'shortlist');
+      }
+    } catch (error) {
+      console.error("Error toggling shortlist:", error);
+    }
+  };
  
-  const handleLikeClick = async (brandId) => {
+  const handleLikeClick = async (brand) => {
     if (!token) {
       setShowLogin(true);
       return;
     }
  
-    setLikeProcessing((prev) => ({ ...prev, [brandId]: true }));
+    setLikeProcessing((prev) => ({ ...prev, [brand.uuid]: true }));
     try {
-      dispatch(toggleSortlistBrandLike(brandId));
-       dispatch(toggleBrandLike(brandId));
-       dispatch(toggleHomeCardLike(brandId));
-       likeApiFunction(brandId);
+      dispatch(toggleSortlistBrandLike(brand.uuid));
+      dispatch(toggleBrandLike(brand.uuid));
+      dispatch(toggleHomeCardLike(brand.uuid));
+      await likeApiFunction(brand.uuid);
+
+      if (!brand.isLiked) {
+        triggerCelebration("#f44336", brand.uuid, 'like');
+      }
     } catch (error) {
       console.error("Error toggling like:", error);
     } finally {
-      setLikeProcessing((prev) => ({ ...prev, [brandId]: false }));
+      setLikeProcessing((prev) => ({ ...prev, [brand.uuid]: false }));
     }
   };
  
-   const handleApply = (brand) => {
-        postView(brand.uuid);
-        dispatch(openBrandDialog(brand));
-      };
+  const handleApply = (brand) => {
+    postView(brand.uuid);
+    dispatch(openBrandDialog(brand));
+  };
  
   if (isLoading && page === 1) {
     return (
@@ -148,23 +185,23 @@ const TopInvestVdocardround = () => {
     <Box component="section" sx={{ maxWidth: 1300, mx: "auto" }}>
       <Typography
         variant={isMobile ? "body1" : "h5"}
-             fontWeight="bold"
-             sx={{
-               color: "black",
-               mb: 1,
-               textAlign: "left",
-               position: "relative",
-               "&:after": {
-                 content: '""',
-                 display: "block",
-                 width: "80px",
-                 height: "4px",
-                 background:
-                   theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                 mt: 1,
-                 borderRadius: 2,
-               },
-             }}
+        fontWeight="bold"
+        sx={{
+          color: "black",
+          mb: 1,
+          textAlign: "left",
+          position: "relative",
+          "&:after": {
+            content: '""',
+            display: "block",
+            width: "80px",
+            height: "4px",
+            background:
+              theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
+            mt: 1,
+            borderRadius: 2,
+          },
+        }}
       >
         Franchise Opportunities
       </Typography>
@@ -213,78 +250,79 @@ const TopInvestVdocardround = () => {
                 overflow: "hidden",
               }}
             >
-             {!isMobile && (
+              {!isMobile && (
                 <Stack
-                direction="column"
-                spacing={0.5}
-                sx={{ position: "absolute", top: 4, right: 4, zIndex: 2 }}
-              >
-                <IconButton
-                  sx={{
-                    color: brand?.isLiked ? "#ff5252" : "rgba(0,0,0,0.2)",
-                    "&:hover": { color: "#ff5252" },
-                  }}
-                  onClick={() => handleLikeClick(brand.uuid)}
-                  disabled={likeProcessing[brand.uuid]}
+                  direction="column"
+                  spacing={0.5}
+                  sx={{ position: "absolute", top: 4, right: 4, zIndex: 2 }}
                 >
-                  {likeProcessing[brand.uuid] ? (
-                    <CircularProgress size={24} />
-                  ) : brand?.isLiked ? (
-                    <FavoriteIcon fontSize="small" />
-                  ) : (
-                    <FavoriteBorderIcon fontSize="small" />
-                  )}
-                </IconButton>
+                  <IconButton
+                    ref={el => likeButtonRefs.current[brand.uuid] = el}
+                    sx={{
+                      color: brand?.isLiked ? "#ff5252" : "rgba(0,0,0,0.2)",
+                      "&:hover": { color: "#ff5252" },
+                    }}
+                    onClick={() => handleLikeClick(brand)}
+                    disabled={likeProcessing[brand.uuid]}
+                  >
+                    {likeProcessing[brand.uuid] ? (
+                      <CircularProgress size={24} />
+                    ) : brand?.isLiked ? (
+                      <FavoriteIcon fontSize="small" />
+                    ) : (
+                      <FavoriteBorderIcon fontSize="small" />
+                    )}
+                  </IconButton>
  
-                <IconButton
-                  onClick={() => handleToggleShortList(brand)}
-                  sx={{
-                    color: brand?.isShortListed
-                      ? "#7ef400ff"
-                      : "rgba(0, 0, 0, 0.23)",
-                  }}
-                >
-                  <Tooltip title="ShortList">
-                    <RiBookmark3Fill size={21} />
-                  </Tooltip>
-                </IconButton>
-              </Stack>
-             )}
- {isMobile && (
-                 <Stack
-                direction="row"
-                spacing={0.5}
-              >
-                <IconButton
-                  sx={{
-                    color: brand?.isLiked ? "#ff5252" : "rgba(0,0,0,0.2)",
-                    "&:hover": { color: "#ff5252" },
-                  }}
-                  onClick={() => handleLikeClick(brand.uuid)}
-                  disabled={likeProcessing[brand.uuid]}
-                >
-                  {likeProcessing[brand.uuid] ? (
-                    <CircularProgress size={24} />
-                  ) : brand?.isLiked ? (
-                    <FavoriteIcon fontSize="small" />
-                  ) : (
-                    <FavoriteBorderIcon fontSize="small" />
-                  )}
-                </IconButton>
+                  <IconButton
+                    ref={el => shortlistButtonRefs.current[brand.uuid] = el}
+                    onClick={() => handleToggleShortList(brand)}
+                    sx={{
+                      color: brand?.isShortListed
+                        ? "#7ef400ff"
+                        : "rgba(0, 0, 0, 0.23)",
+                    }}
+                  >
+                    <Tooltip title="ShortList">
+                      <RiBookmark3Fill size={21} />
+                    </Tooltip>
+                  </IconButton>
+                </Stack>
+              )}
+              {isMobile && (
+                <Stack direction="row" spacing={0.5}>
+                  <IconButton
+                    ref={el => likeButtonRefs.current[brand.uuid] = el}
+                    sx={{
+                      color: brand?.isLiked ? "#ff5252" : "rgba(0,0,0,0.2)",
+                      "&:hover": { color: "#ff5252" },
+                    }}
+                    onClick={() => handleLikeClick(brand)}
+                    disabled={likeProcessing[brand.uuid]}
+                  >
+                    {likeProcessing[brand.uuid] ? (
+                      <CircularProgress size={24} />
+                    ) : brand?.isLiked ? (
+                      <FavoriteIcon fontSize="small" />
+                    ) : (
+                      <FavoriteBorderIcon fontSize="small" />
+                    )}
+                  </IconButton>
  
-                <IconButton
-                  onClick={() => handleToggleShortList(brand)}
-                  sx={{
-                    color: brand?.isShortListed
-                      ? "#7ef400ff"
-                      : "rgba(0, 0, 0, 0.23)",
-                  }}
-                >
-                  <Tooltip title="ShortList">
-                    <RiBookmark3Fill size={21} />
-                  </Tooltip>
-                </IconButton>
-              </Stack>
+                  <IconButton
+                    ref={el => shortlistButtonRefs.current[brand.uuid] = el}
+                    onClick={() => handleToggleShortList(brand)}
+                    sx={{
+                      color: brand?.isShortListed
+                        ? "#7ef400ff"
+                        : "rgba(0, 0, 0, 0.23)",
+                    }}
+                  >
+                    <Tooltip title="ShortList">
+                      <RiBookmark3Fill size={21} />
+                    </Tooltip>
+                  </IconButton>
+                </Stack>
               )}
               <Box
                 component="img"
@@ -312,69 +350,38 @@ const TopInvestVdocardround = () => {
                   px: 0.5,
                 }}
               >
-                
                 {brand.brandname}
               </Typography>
               <Typography
-  variant="caption"
-  sx={{
-    display: "flex",
-    justifyContent: "center",
-    flexWrap: "wrap",
-    gap: 0.5,
-    mt: 0.5,
-    mb: 1,
-    width: "100%",
-    textAlign: "center",
-    wordBreak: "break-word",       
-    overflowWrap: "break-word",    
-    whiteSpace: "normal",         
-  }}
-><Typography
-  variant="caption"
-  sx={{
-    display: "flex",
-    justifyContent: "center",
-    flexWrap: "wrap",
-    gap: 0.5,
-    mt: 0.5,
-    mb: 1,
-    width: "100%",
-    textAlign: "center",
-    wordBreak: "break-word",       // allow breaking inside long words
-    overflowWrap: "break-word",    // cross-browser support
-    whiteSpace: "normal",          // allow wrapping
-  }}
->
-  {(() => {
-    const insertZeroWidth = (str = "", n = 30) =>
-      typeof str === "string"
-        ? str.replace(new RegExp(`(.{${n}})`, "g"), "$1\u200B")
-        : str || "";
+                variant="caption"
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  flexWrap: "wrap",
+                  gap: 0.5,
+                  mt: 0.5,
+                  mb: 1,
+                  width: "100%",
+                  textAlign: "center",
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
+                  whiteSpace: "normal",
+                }}
+              >
+                {(() => {
+                  const insertZeroWidth = (str = "", n = 30) =>
+                    typeof str === "string"
+                      ? str.replace(new RegExp(`(.{${n}})`, "g"), "$1\u200B")
+                      : str || "";
 
-    const category = brand.brandCategories?.child;
+                  const category = brand.brandCategories?.child;
 
-    if (Array.isArray(category)) {
-      return category.map(c => insertZeroWidth(String(c), 30)).join(", ");
-    }
-    return insertZeroWidth(String(category || ""), 30);
-  })()}
-</Typography>
-
-  {(() => {
-    const insertZeroWidth = (str = "", n = 10) =>
-      typeof str === "string"
-        ? str.replace(new RegExp(`(.{${n}})`, "g"), "$1\u200B")
-        : str || "";
-
-    const category = brand.brandCategories?.child;
-
-    if (Array.isArray(category)) {
-      return category.map(c => insertZeroWidth(String(c), 30)).join(", ");
-    }
-    return insertZeroWidth(String(category || ""), 30);
-  })()}
-</Typography>
+                  if (Array.isArray(category)) {
+                    return category.map(c => insertZeroWidth(String(c), 30)).join(", ");
+                  }
+                  return insertZeroWidth(String(category || ""), 30);
+                })()}
+              </Typography>
 
               <Stack direction="column" spacing={0.5} sx={{ mb: 0.5, width: "100%" }}>
                 <Typography variant="caption" fontWeight={500}>
@@ -426,5 +433,3 @@ const TopInvestVdocardround = () => {
 };
  
 export default React.memo(TopInvestVdocardround);
- 
- 

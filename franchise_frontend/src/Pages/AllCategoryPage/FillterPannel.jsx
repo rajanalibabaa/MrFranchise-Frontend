@@ -328,30 +328,52 @@ const FilterPanel = React.memo(
                               </Typography>
                             </AccordionSummary>
                             <AccordionDetails sx={{ pt: 0, px: 1 }}>
-                              {loadingChildCategories ? (
-                                <Box sx={{ p: 2 }}>
-                                  <CircularProgress size={20} sx={{ color: "#ff9800" }} />
-                                </Box>
-                              ) : (
-                                <Box sx={{ maxHeight: 200, overflow: "auto" }}>
-                                  {childCategories.map((childCategory) => (
-                                    <MemoizedCheckboxLabel
-                                      key={`childcat-${childCategory}`}
-                                      id={childCategory}
-                                      label={<Typography fontSize="0.8125rem">{childCategory}</Typography>}
-                                      checked={(filters.childcat || []).includes(childCategory)}
-                                      onChange={(e) => {
-                                        const checked = e.target.checked;
-                                        const newSelection = checked
-                                          ? [...(filters.childcat || []), childCategory]
-                                          : (filters.childcat || []).filter((item) => item !== childCategory);
-                                        onFilterChange("childcat", newSelection);
-                                      }}
-                                    />
-                                  ))}
-                                </Box>
-                              )}
-                            </AccordionDetails>
+  {loadingChildCategories ? (
+    <Box sx={{ p: 2 }}>
+      <CircularProgress size={20} sx={{ color: "#ff9800" }} />
+    </Box>
+  ) : (
+    <RadioGroup
+      value={filters.childcat || ""}
+      onChange={(e) => onFilterChange("childcat", e.target.value)}
+    >
+      <FormControlLabel
+        value=""
+        control={
+          <Radio
+            size="small"
+            sx={{
+              color: "#ff9800",
+              "&.Mui-checked": { color: "#4caf50" },
+              padding: "6px",
+            }}
+          />
+        }
+        label={<Typography fontSize="0.8125rem">All Child Categories</Typography>}
+        sx={{ mb: 0, mr: 0 }}
+      />
+      {childCategories.map((childCategory) => (
+        <FormControlLabel
+          key={`childcat-${childCategory}`}
+          value={childCategory}
+          control={
+            <Radio
+              size="small"
+              sx={{
+                color: "#ff9800",
+                "&.Mui-checked": { color: "#4caf50" },
+                padding: "6px",
+              }}
+            />
+          }
+          label={<Typography fontSize="0.8125rem">{childCategory}</Typography>}
+          sx={{ mb: 0, mr: 0 }}
+        />
+      ))}
+    </RadioGroup>
+  )}
+</AccordionDetails>
+
                           </Accordion>
                         </Collapse>
                       )}

@@ -11,15 +11,12 @@ import {
   Tabs,
   Tab,
   Box,
-  InputLabel,
-  Select,
-  MenuItem,
+  
   Button,
   Typography,
   FormControl,
   Paper,
   List,
-  ListItem,
   ListItemText,
   Divider,
   Chip,
@@ -369,50 +366,31 @@ const NavbarSearch = ({ open, handleClose }) => {
     }
   };
 
-  const handleExplore = async () => {
-    setLoading(true);
-    
-    // Reset all filters first
-    dispatch(resetFilters());
-    
-    // Apply selected filters
-    if (searchTerm) {
-      dispatch(setFilter({ filterName: 'serchterm', value: searchTerm }));
-    }
-    
-    if (selectedMainCategory) {
-      dispatch(setFilter({ filterName: 'maincat', value: selectedMainCategory }));
-    }
-    
-    if (selectedSubCategory) {
-      dispatch(setFilter({ filterName: 'subcat', value: selectedSubCategory }));
-    }
-    
-    if (selectedChildCategory) {
-      dispatch(setFilter({ filterName: 'childcat', value: selectedChildCategory }));
-    }
-    
-    if (selectedState) {
-      dispatch(setFilter({ filterName: 'state', value: selectedState }));
-    }
-    
-    if (selectedDistrict) {
-      dispatch(setFilter({ filterName: 'district', value: selectedDistrict }));
-    }
-    
-    if (selectedCity) {
-      dispatch(setFilter({ filterName: 'city', value: selectedCity }));
-    }
-    
-    if (selectedInvestmentRange) {
-      dispatch(setFilter({ filterName: 'investmentRange', value: selectedInvestmentRange }));
-    }
-    
-    // Navigate to brand view page
-    navigate('/brandViewPage');
-    handleClose();
-    setLoading(false);
-  };
+ const handleExplore = async () => {
+  setLoading(true);
+
+  // Reset filters in Redux (for current tab if needed)
+  dispatch(resetFilters());
+
+  // Collect filters into query params
+  const queryParams = new URLSearchParams();
+
+  if (searchTerm) queryParams.append("searchTerm", searchTerm);
+  if (selectedMainCategory) queryParams.append("maincat", selectedMainCategory);
+  if (selectedSubCategory) queryParams.append("subcat", selectedSubCategory);
+  if (selectedChildCategory) queryParams.append("childcat", selectedChildCategory);
+  if (selectedState) queryParams.append("state", selectedState);
+  if (selectedDistrict) queryParams.append("district", selectedDistrict);
+  if (selectedCity) queryParams.append("city", selectedCity);
+  if (selectedInvestmentRange) queryParams.append("investmentRange", selectedInvestmentRange);
+
+  // ✅ open new tab with filters in URL
+  window.open(`/brandViewPage?${queryParams.toString()}`, "_blank", "noopener,noreferrer");
+
+  handleClose();
+  setLoading(false);
+};
+
 
   const handleClearAll = () => {
     setSearchTerm('');
@@ -465,7 +443,7 @@ const NavbarSearch = ({ open, handleClose }) => {
           onClick={handleClose}
           sx={{ position: 'absolute', top: 8, right: 8 }}
         >
-          <CloseIcon />
+          <CloseIcon color="error" />
         </IconButton>
 
         {/* Search Input with Suggestions */}
@@ -498,7 +476,7 @@ const NavbarSearch = ({ open, handleClose }) => {
                     />
                   )}
                   <IconButton 
-                    sx={{ bgcolor: 'rgb(104, 159, 56)', color: 'white', "&:hover": { backgroundColor: "#7ad03a" } }}
+                    sx={{ bgcolor: '#7ad03a', color: 'white', "&:hover": { backgroundColor: "rgb(104, 159, 56)" } }}
                     onClick={handleExplore}
                     disabled={loading}
                   >
@@ -913,18 +891,19 @@ const NavbarSearch = ({ open, handleClose }) => {
             onClick={handleExplore}
             disabled={loading}
             sx={{
-              backgroundColor: 'rgb(104, 159, 56)',
-              '&:hover': { backgroundColor: "#7ad03a" },
+              backgroundColor: '#7ad03a',
+              '&:hover': { backgroundColor: "rgb(104, 159, 56)" },
               textTransform: 'none'
             }}
           >
             {loading ? <CircularProgress size={24} color="inherit" /> : 'Explore'}
           </Button>
           <Button
-            variant="text"
+            variant="contained"
+            color='error'
             onClick={handleClearAll}
             disabled={loading}
-            sx={{ textTransform: 'none', color: "black" }}
+            sx={{ textTransform: 'none', color: "white" }}
           >
             Clear All
           </Button>

@@ -55,7 +55,7 @@ import {
 } from "../../Redux/Slices/viewSlice.jsx";
 import { toggleBrandShortListfilter } from "../../Redux/Slices/FilterBrandSlice.jsx";
 import { useInView } from 'react-intersection-observer';
-
+import confetti from "canvas-confetti";
 
 function TopBrandVdoCards() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -325,22 +325,24 @@ useEffect(() => {
   }
 }, []);
 
-  // const handlePictureInPicture = async (index) => {
-  //   const video = videoRefs.current[index];
-  //   if (video && document.pictureInPictureEnabled) {
-  //     try {
-  //       if (document.pictureInPictureElement) {
-  //         await document.exitPictureInPicture();
-  //       } else {
-  //         await video.requestPictureInPicture();
-  //       }
-  //     } catch (error) {
-  //       console.error("Picture-in-Picture failed:", error);
-  //     }
-  //   }
-  // };
 
-  const handleLikeClick = async (brand) => {
+
+const triggerCelebration = (e, color = "#f44336") => {
+  const rect = e.currentTarget.getBoundingClientRect(); // icon position
+  const x = (rect.left + rect.width / 2) / window.innerWidth;
+  const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+  confetti({
+    particleCount: 150,
+    spread: 150,
+    origin: { x, y },  // 🎯 confetti comes from icon position
+          colors: [color, "#ffffff", "#fdc81cff", "#76ec1cff", "#ff1dd6ffff", "#00eaffff", "#0400ffff", "#000000", "#f10808ffff", "#f5f50aff"],
+  });
+};
+
+
+
+  const handleLikeClick = async (brand,e) => {
     if (!token) {
       setShowLogin(true);
       return;
@@ -348,6 +350,7 @@ useEffect(() => {
 
     if (!brand.isLiked) {
       dispatch(addLikedBrand(brand));
+      triggerCelebration(e,"#f44336"); // ❤️ Fire confetti when liked
     } else {
       dispatch(removeLikedBrand(brand.uuid));
     }
@@ -359,7 +362,7 @@ useEffect(() => {
     await likeApiFunction(brand.uuid);
   };
 
-  const handleToggleShortList = async (mainBrand) => {
+  const handleToggleShortList = async (mainBrand,e) => {
     if (!token) {
       setShowLogin(true);
       return;
@@ -370,6 +373,7 @@ useEffect(() => {
     dispatch(toggleHomeCardShortlist(mainBrand.uuid));
     if (!mainBrand.isShortListed) {
       dispatch(addSortlist(mainBrand));
+      triggerCelebration(e,"#7ef400ff"); // 🔖 Fire confetti when shortlisted
     } else {
       dispatch(removeSortList(mainBrand.uuid));
     }
@@ -807,7 +811,7 @@ useEffect(() => {
                                 }
                               >
                                 <IconButton
-                                  onClick={() => handleLikeClick(mainBrand)}
+                                  onClick={(e) => handleLikeClick(mainBrand,e)}
                                   disabled={
                                     isLoading || likeProcessing[mainBrand.uuid]
                                   }
@@ -922,7 +926,7 @@ useEffect(() => {
                               }
                             >
                               <IconButton
-                                onClick={() => handleLikeClick(mainBrand)}
+                                onClick={(e) => handleLikeClick(mainBrand,e)}
                                 disabled={
                                   isLoading || likeProcessing[mainBrand.uuid]
                                 }
@@ -942,7 +946,7 @@ useEffect(() => {
                               }
                             >
                               <IconButton
-                                onClick={() => handleToggleShortList(mainBrand)}
+                                onClick={(e) => handleToggleShortList(mainBrand,e)}
                                 sx={{
                                   color: mainBrand.isShortListed
                                     ? "#7ef400ff"
@@ -1277,7 +1281,7 @@ useEffect(() => {
                         >
                           <IconButton
                             size="small"
-                            onClick={() => handleLikeClick(brand)}
+                            onClick={(e) => handleLikeClick(brand, e)}
                             disabled={isLoading || likeProcessing[brand.uuid]}
                             sx={{
                               color: brand.isLiked ? "red" : "gray",
@@ -1300,7 +1304,7 @@ useEffect(() => {
                         >
                           <IconButton
                             size="small"
-                            onClick={() => handleToggleShortList(brand)}
+                            onClick={(e) => handleToggleShortList(brand,e)}
                             sx={{
                               color: brand.isShortListed
                                 ? "#7ef400ff"

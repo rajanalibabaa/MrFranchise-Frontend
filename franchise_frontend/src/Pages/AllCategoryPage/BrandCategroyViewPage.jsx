@@ -22,20 +22,28 @@ function BrandCategoryViewPage() {
   const state = new URLSearchParams(location.search).get('state') || 'India';
   const investmentRange = new URLSearchParams(location.search).get('investmentRange') || '';
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const filters = {};
-    
-    if (params.has('subcat')) filters.subcat = params.get('subcat');
-    if (params.has('state')) filters.state = params.get('state');
-    if (params.has('investmentRange')) {
-      filters.investmentRange = params.get('investmentRange');
-    }
+useEffect(() => {
+  const params = new URLSearchParams(location.search);
 
-    if (Object.keys(filters).length > 0) {
-      dispatch(setFilter(filters));
-    }
-  }, [location.search, dispatch]);
+  if (params.has('subcat')) {
+    dispatch(setFilter({ filterName: 'subcat', value: params.get('subcat') }));
+  }
+  if (params.has('state')) {
+    dispatch(setFilter({ filterName: 'state', value: params.get('state') }));
+  }
+  if (params.has('investmentRange')) {
+    dispatch(setFilter({ filterName: 'investmentRange', value: params.get('investmentRange') }));
+  }
+  if (params.has('maincat')) {
+    dispatch(setFilter({ filterName: 'maincat', value: params.get('maincat') }));
+  }
+  if (params.has('childcat')) {
+    dispatch(setFilter({ filterName: 'childcat', value: params.get('childcat') }));
+  }
+  if (params.has('searchTerm')) {
+    dispatch(setFilter({ filterName: 'searchTerm', value: params.get('searchTerm') }));
+  }
+}, [location.search, dispatch]);
 
   // Generate dynamic title and description
   const seoTitle = investmentRange 
