@@ -20,6 +20,7 @@ import {
   CheckBox,
   CheckBoxOutlineBlank,
   PlaylistAddCheckCircleOutlined,
+  RadioButtonUnchecked,Block ,CheckCircle
 } from "@mui/icons-material";
 import LoginPage from "../LoginPage/LoginPage";
 import { postView } from "../../Utils/function/view";
@@ -234,38 +235,47 @@ const BrandCard = memo(
           placement="right"
           arrow
         >
-          <span>
-            <IconButton
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 2,
-                zIndex: 2,
-                backgroundColor: isSelectedForComparison
-                  ? "rgba(76, 175, 80, 0.9)"
-                  : maxComparisonReached
-                  ? "rgba(244, 67, 54, 0.7)"
-                  : "rgba(0,0,0,0.5)",
-                color: "white",
-                "&:hover": {
-                  backgroundColor: isSelectedForComparison
-                    ? "rgba(56, 142, 60, 0.9)"
-                    : maxComparisonReached
-                    ? "rgba(244, 67, 54, 0.9)"
-                    : "rgba(0,0,0,0.7)",
-                },
-                width: 32,
-                height: 32,
-              }}
-              onClick={() => onToggleBrandComparison(brand)}
-              disabled={maxComparisonReached && !isSelectedForComparison}
-            >
-              {isSelectedForComparison ? (
-                <CheckBox fontSize="small" />
-              ) : (
-                <CheckBoxOutlineBlank fontSize="small" />
-              )}
-            </IconButton>
+          <span><IconButton
+  sx={{
+    position: "absolute",
+    top: 8,
+    right: 8,
+    zIndex: 2,
+    backgroundColor: isSelectedForComparison
+      ? "#ff9800" // ✅ Green if selected
+      : maxComparisonReached
+      ? "rgba(244, 67, 54, 0.85)" // ✅ Red if max reached
+      : "rgba(255, 255, 255, 0.85)", // ✅ Neutral white when idle
+    color: isSelectedForComparison
+      ? "white"
+      : maxComparisonReached
+      ? "white"
+      : "rgba(0,0,0,0.7)",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+    "&:hover": {
+      backgroundColor: isSelectedForComparison
+        ? "rgba(56, 142, 60, 0.9)"
+        : maxComparisonReached
+        ? "rgba(211, 47, 47, 0.9)"
+        : "rgba(240,240,240,0.95)",
+      transform: "scale(1.15)",
+      transition: "all 0.2s ease-in-out",
+    },
+    width: 36,
+    height: 36,
+    borderRadius: "50%", // ✅ rounded for modern look
+  }}
+  onClick={() => onToggleBrandComparison(brand)}
+  disabled={maxComparisonReached && !isSelectedForComparison}
+>
+  {isSelectedForComparison ? (
+    <CheckCircle fontSize="small" />
+  ) : maxComparisonReached ? (
+    <Block fontSize="small" /> // ❌ blocked icon when max limit hit
+  ) : (
+    <RadioButtonUnchecked fontSize="small" />
+  )}
+</IconButton>  
           </span>
         </Tooltip>
 
