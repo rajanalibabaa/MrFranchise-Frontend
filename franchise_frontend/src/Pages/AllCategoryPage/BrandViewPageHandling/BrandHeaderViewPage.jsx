@@ -66,19 +66,30 @@ const BrandHeader = ({
           width="100%"
         >
           <Box
-            position="relative"
-            sx={{ border: "3px solid orange", borderRadius: "10px" }}
-          >
-            <Avatar
-              src={brand[0].uploads?.logo}
-              alt={brand[0].brandDetails?.brandName}
-              sx={{
-                width: isMobile ? 150 : 200,
-                height: isMobile ? 150 : 200,
-                objectFit: "contain",
-              }}
-            />
-          </Box>
+  position="relative"
+  sx={{ 
+    border: "2px solid orange", 
+    borderRadius: "10px", 
+    width: "clamp(120px, 20vw, 200px)", 
+    height: "clamp(120px, 20vw, 200px)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  }}
+>
+  <Box
+    component="img"
+    src={brand[0].uploads?.logo}
+    alt={brand[0].brandDetails?.brandName}
+    sx={{
+      width: "100%",
+      height: "100%",
+      objectFit: "contain"
+    }}
+  />
+</Box>
+
  
           <Box width="100%">
             {/* Brand name and actions */}

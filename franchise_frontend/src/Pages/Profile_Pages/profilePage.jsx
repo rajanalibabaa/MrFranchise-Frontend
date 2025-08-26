@@ -39,7 +39,6 @@ const NavItem = React.memo(({
   icon: Icon, 
   text,
   tooltip,
-  navigate,
   onClick
 }) => {
   const isActive = location.pathname === path;
@@ -110,7 +109,6 @@ const NavItem = React.memo(({
 
 const InvestorDashboard = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const theme = useTheme();
   const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));

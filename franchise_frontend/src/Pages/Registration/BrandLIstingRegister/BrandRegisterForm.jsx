@@ -419,7 +419,7 @@ const BrandRegisterForm = () => {
         });
 console.log("Form data prepared for submission:", formDataSend);
         const response = await axios.post(
-          "http://localhost:5000/api/v1/brandlisting/createBrandListing",
+          "https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/createBrandListing",
           formDataSend,
           {
             headers: {
@@ -1317,7 +1317,7 @@ console.log("Form data prepared for submission:", formDataSend);
                 border: 0,
                 mr: 2,
                 borderRadius: "12px",
-                color: "#FFFFFF",
+                color: "black",
                 cursor: "pointer",
                 display: "inline-block",
                 fontFamily:
@@ -1352,18 +1352,10 @@ console.log("Form data prepared for submission:", formDataSend);
               variant="outlined"
               onClick={handlePreviewOpen}
               sx={{
-                backgroundColor: "#c2fbd7",
+                backgroundColor: "#7ad03a",
                 borderRadius: "100px",
-                boxShadow: `
-      rgba(44, 187, 99, 0.2) 0 -25px 18px -14px inset,
-      rgba(44, 187, 99, 0.15) 0 1px 2px,
-      rgba(44, 187, 99, 0.15) 0 2px 4px,
-      rgba(44, 187, 99, 0.15) 0 4px 8px,
-      rgba(44, 187, 99, 0.15) 0 8px 16px,
-      rgba(44, 187, 99, 0.15) 0 16px 32px
-    `,
                 mr: 2,
-                color: "green",
+                color: "black",
                 fontFamily:
                   "CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif",
                 padding: "7px 20px",
@@ -1375,16 +1367,9 @@ console.log("Form data prepared for submission:", formDataSend);
                 WebkitUserSelect: "none",
                 touchAction: "manipulation",
                 "&:hover": {
-                  boxShadow: `
-        rgba(44, 187, 99, 0.35) 0 -25px 18px -14px inset,
-        rgba(44, 187, 99, 0.25) 0 1px 2px,
-        rgba(44, 187, 99, 0.25) 0 2px 4px,
-        rgba(44, 187, 99, 0.25) 0 4px 8px,
-        rgba(44, 187, 99, 0.25) 0 8px 16px,
-        rgba(44, 187, 99, 0.25) 0 16px 32px
-      `,
+    
                   transform: "scale(1.05) rotate(-1deg)",
-                  backgroundColor: "#c2fbd7", // Maintain same background on hover
+                  backgroundColor: "#5db024", // Maintain same background on hover
                 },
                 "&:active": {
                   transform: "scale(1) rotate(0deg)", // Reset on click
@@ -1398,18 +1383,11 @@ console.log("Form data prepared for submission:", formDataSend);
             <Button
               variant="outlined"
               sx={{
-                backgroundColor: "#c2fbd7",
+                backgroundColor: "#7ad03a",
                 borderRadius: "100px",
-                boxShadow: `
-      rgba(44, 187, 99, 0.2) 0 -25px 18px -14px inset,
-      rgba(44, 187, 99, 0.15) 0 1px 2px,
-      rgba(44, 187, 99, 0.15) 0 2px 4px,
-      rgba(44, 187, 99, 0.15) 0 4px 8px,
-      rgba(44, 187, 99, 0.15) 0 8px 16px,
-      rgba(44, 187, 99, 0.15) 0 16px 32px
-    `,
+    
                 mr: 2,
-                color: "red",
+                color: "black",
                 fontFamily:
                   "CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif",
                 padding: "7px 20px",
@@ -1421,16 +1399,9 @@ console.log("Form data prepared for submission:", formDataSend);
                 WebkitUserSelect: "none",
                 touchAction: "manipulation",
                 "&:hover": {
-                  boxShadow: `
-        rgba(44, 187, 99, 0.35) 0 -25px 18px -14px inset,
-        rgba(44, 187, 99, 0.25) 0 1px 2px,
-        rgba(44, 187, 99, 0.25) 0 2px 4px,
-        rgba(44, 187, 99, 0.25) 0 4px 8px,
-        rgba(44, 187, 99, 0.25) 0 8px 16px,
-        rgba(44, 187, 99, 0.25) 0 16px 32px
-      `,
+     
                   transform: "scale(1.05) rotate(-1deg)",
-                  backgroundColor: "#c2fbd7", // Maintain same background on hover
+                  backgroundColor: "#5db024", // Maintain same background on hover
                 },
                 "&:active": {
                   transform: "scale(1) rotate(0deg)", // Reset on click

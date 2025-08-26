@@ -45,7 +45,7 @@ const MediaSection = ({
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const videoSrc = Array.isArray(allVideos) ? allVideos[0] : allVideos;
+  const videoSrc = Array.isArray(allVideos) ? allVideos[0] : allVideos ;
   const poster = allImages?.[0] || "";
 
 
@@ -179,7 +179,7 @@ useEffect(() => {
 
   const handleFullscreen = (e) => {
     e?.stopPropagation();
-    const elem = videoContainerRef.current;
+    const elem = videoRef.current;
     if (!elem) return;
     if (!document.fullscreenElement) {
       elem.requestFullscreen();
@@ -188,6 +188,17 @@ useEffect(() => {
     }
     setShowControls(true);
   };
+// Keep isFullscreen in sync with browser fullscreen
+useEffect(() => {
+  const handleFsChange = () => {
+    setIsFullscreen(!!document.fullscreenElement);
+  };
+
+  document.addEventListener("fullscreenchange", handleFsChange);
+  return () => {
+    document.removeEventListener("fullscreenchange", handleFsChange);
+  };
+}, []);
 
   // PiP
   const handlePiP = async (e) => {
@@ -432,7 +443,7 @@ opacity: (showControls || !isPlaying || videoLoading || videoError) ? 1 : 0,
                   justifyContent: "center",
                 }}
               >
-                <Typography>No promotional video available</Typography>
+                <Typography>No promotional video available for this brand (or) Under review</Typography>
               </Box>
             )}
           </Box>

@@ -42,8 +42,8 @@ const LikedBrands = () => {
     error = null,
   } = useSelector((state) => state.likedBrands || {});
 
-  console.log("Liked Brands:", brands);
-  console.log("Pagination:", currentPage, totalPages);
+  // console.log("Liked Brands:", brands);
+  // console.log("Pagination:", currentPage, totalPages);
 
   // Data fetching
   useEffect(() => {

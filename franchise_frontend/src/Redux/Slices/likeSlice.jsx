@@ -27,7 +27,7 @@ export const removeFromLikedBrands = createAsyncThunk(
       // Updated URL to match backend expectation
       const url = `${api.likeApi.delete}/${brandId}`;
 
-      console.log("Delete URL:", url); // For debugging
+      // console.log("Delete URL:", url); // For debugging
 
       const response = await axios.delete(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -44,7 +44,7 @@ export const removeFromLikedBrands = createAsyncThunk(
   }
 );
 
-  console.log("userId",userId)
+  // console.log("userId",userId)
   
 export const fetchLikedBrandsById = createAsyncThunk(
   "likedBrands/fetchById",
@@ -55,12 +55,12 @@ export const fetchLikedBrandsById = createAsyncThunk(
     
 
       const query = { page, limit };
-      const baseUrl =  "http://localhost:5000/api/v1/like";
+      const baseUrl =  "https://mrfranchisebackend.mrfranchise.in/api/v1/like";
       const url = `${baseUrl}/get-favbrands/${userId}`;
 
       const response = await getApi(url, query, token);
 
-      console.log("...", response.data?.data)
+      // console.log("...", response.data?.data)
 
       const responseData = response.data?.data;
       if (!responseData) throw new Error("No data received");

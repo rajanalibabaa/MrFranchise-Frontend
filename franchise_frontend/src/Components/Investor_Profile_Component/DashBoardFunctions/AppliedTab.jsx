@@ -18,25 +18,25 @@ const AppliedTab = ({
   toggleShortlist,
   isPaginating
 }) => {
-  useEffect(() => {
-    console.log('AppliedTab - Received items:', {
-      count: items.length,
-      data: items,
-      currentPage,
-      totalPages
-    });
+  // useEffect(() => {
+  //   console.log('AppliedTab - Received items:', {
+  //     count: items.length,
+  //     data: items,
+  //     currentPage,
+  //     totalPages
+  //   });
     
-    if (items.length > 0) {
-      console.log('Sample item structure cards:', items[0]);
-    }
-  }, [items, currentPage, totalPages]);
+  //   if (items.length > 0) {
+  //     console.log('Sample item structure cards:', items[0]);
+  //   }
+  // }, [items, currentPage, totalPages]);
 
   // Transform the items to match the expected structure
   const transformedItems = items.map(item => {
     const application = item.application || {};
     const brand = item?.brandDetails || {};
 
-    console.log('Sample brand structure:', brand);
+    // console.log('Sample brand structure:', brand);
     return {
       ...item,
       brand: {

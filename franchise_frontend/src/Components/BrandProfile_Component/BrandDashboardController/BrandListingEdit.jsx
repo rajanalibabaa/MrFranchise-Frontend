@@ -129,8 +129,8 @@ const BrandListingEdit = () => {
   });
 
 
-  console.log("BrandListingEdit addExpansionData:", addExpansionData);
-  console.log("BrandListingEdit removeExpansionData:", removeExpansionData);
+  // console.log("BrandListingEdit addExpansionData:", addExpansionData);
+  // console.log("BrandListingEdit removeExpansionData:", removeExpansionData);
   // console.log("BrandListingEdit formData:", formData);
 
   useEffect(() => {
@@ -144,15 +144,15 @@ const BrandListingEdit = () => {
       }
 
       try {
-        const url = `http://localhost:5000/api/v1/brandlisting/getBrandById/${uuid}`;
+        const url = `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandById/${uuid}`;
         const response = await getApi(url);
         const brand = response?.data?.data;
 
-        console.log("Fetched brand data:", brand);
+        // console.log("Fetched brand data:", brand);
 
         if (response.data.success) {
           const flatData = flattenBrandData(brand);
-          console.log("Flattened brand data:", flatData);
+          // console.log("Flattened brand data:", flatData);
           setFormData(flatData);
           setOriginalData(brand);
         } else {
@@ -287,7 +287,7 @@ const handleRemoveFile = (field, index) => {
   const sendOtp = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/v1/otpverify/send-otp-email`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/send-otp-email`,
         {
           email: formData.email,
         },
@@ -318,7 +318,7 @@ const handleRemoveFile = (field, index) => {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/v1/otpverify/verify-otp`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/otpverify/verify-otp`,
         {
           identifier: formData.email,
           otp: otp,
@@ -405,7 +405,7 @@ const handleRemoveFile = (field, index) => {
         // }
       };
 
-      console.log("Prepared updateData:", updateData);
+      // console.log("Prepared updateData:", updateData);
 
       // Append JSON data as strings
       formDataToSend.append('brandDetails', JSON.stringify(updateData.brandDetails));
@@ -415,11 +415,11 @@ formDataToSend.append('removeExpansionLocationData', JSON.stringify(removeExpans
 // If you need to send isInternationalExpansion (currently unused in backend), append it separately
 formDataToSend.append('isInternationalExpansion', formData.isInternationalExpansion);
 
-      console.log("Prepared formDataToSend:", formDataToSend);
+      // console.log("Prepared formDataToSend:", formDataToSend);
 
       // First update the brand details
       const detailsResponse = await axios.patch(
-        `http://localhost:5000/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/updateBrandListingByUUID/${uuid}`,
         formDataToSend,
         {
           headers: {
@@ -474,7 +474,7 @@ formDataToSend.append('isInternationalExpansion', formData.isInternationalExpans
       // Only make the upload request if there are files to upload or delete
       if (hasFilesToUpload) {
         const uploadResponse = await axios.patch(
-          `http://localhost:5000/api/v1/brandlisting/updateBrandImageById/${uuid}`,
+          `https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/updateBrandImageById/${uuid}`,
           uploadFormData,
           {
             headers: {
@@ -489,7 +489,7 @@ formDataToSend.append('isInternationalExpansion', formData.isInternationalExpans
       }
 
       // Refresh the data after successful update
-      const refreshResponse = await getApi(`http://localhost:5000/api/v1/brandlisting/getBrandById/${uuid}`);
+      const refreshResponse = await getApi(`https://mrfranchisebackend.mrfranchise.in/api/v1/brandlisting/getBrandById/${uuid}`);
       const updatedBrand = refreshResponse?.data?.data;
       
       if (refreshResponse.data.success) {

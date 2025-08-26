@@ -165,7 +165,7 @@ const filterBrandSlice = createSlice({
     },
     toggleBrandShortListfilter: (state, action) => {
       const brandId = action.payload;
-      console.log("Toggling shortlist for brand:", brandId);
+      // console.log("Toggling shortlist for brand:", brandId);
       state.brands = state.brands.map(brand => 
         brand?.uuid === brandId 
           ? { ...brand, isShortListed: !brand?.isShortListed }

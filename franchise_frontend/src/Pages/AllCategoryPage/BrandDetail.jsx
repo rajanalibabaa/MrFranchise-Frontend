@@ -310,11 +310,11 @@ const handleSubmit = useCallback(
         return;
       }
  
-      console.log("Submitting payload:", payload);
+      // console.log("Submitting payload:", payload);
  
       // Make API request
       const response = await axios.post(
-        "http://localhost:5000/api/v1/instantapply/postApplication",
+        "https://mrfranchisebackend.mrfranchise.in/api/v1/instantapply/postApplication",
         payload,
         {
           headers: {
@@ -325,7 +325,7 @@ const handleSubmit = useCallback(
         }
       );
  
-      console.log("API Response:", response.data);
+      // console.log("API Response:", response.data);
  
       if (response.data && response.data.success) {
         setSubmitSuccess(true);
@@ -395,7 +395,7 @@ const handleSubmit = useCallback(
     if (!investorUUID || !AccessToken) return;
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/v1/investor/getInvestorByUUID/${investorUUID}`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/getInvestorByUUID/${investorUUID}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -404,10 +404,10 @@ const handleSubmit = useCallback(
           signal: AbortSignal.timeout(5000),
         }
       );
-      console.log("Investor Details Response:", response);
+      // console.log("Investor Details Response:", response);
       if (response.data?.data) {
         setUserData(response.data.data);
-        console.log("User Data:", setUserData);
+        // console.log("User Data:", setUserData);
         setFormData((prev) => ({
           ...prev,
           fullName: response.data.data.firstName || "",

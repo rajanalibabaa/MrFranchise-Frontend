@@ -41,8 +41,8 @@ const ShortlistBrands = () => {
     error = null,
   } = useSelector((state) => state.shortList || {});
 
-  console.log("Shortlisted Brands:", brands);
-  console.log("Pagination:", currentPage, totalPages);
+  // console.log("Shortlisted Brands:", brands);
+  // console.log("Pagination:", currentPage, totalPages);
 
   // Data fetching
   useEffect(() => {

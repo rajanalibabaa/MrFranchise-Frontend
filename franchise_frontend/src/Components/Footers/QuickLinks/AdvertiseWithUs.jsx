@@ -38,7 +38,7 @@ const AdvertisingPage = () => {
   };
   
   const handlePaymentSubmit = (paymentData) => {
-    console.log('Payment submitted:', paymentData);
+    // console.log('Payment submitted:', paymentData);
     alert('Payment successful! Thank you for your purchase.');
   };
 

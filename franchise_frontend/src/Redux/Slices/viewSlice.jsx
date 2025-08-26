@@ -19,7 +19,7 @@ export const fetchViewBrandsById = createAsyncThunk(
     try {
       if (!userId) throw new Error("User ID is required Login to continue");
 
-      console.log("page :",page)
+      // console.log("page :",page)
    
  
       const query = { page, limit };
@@ -27,7 +27,7 @@ export const fetchViewBrandsById = createAsyncThunk(
  
       const response = await getApi(url, query, token);
  
-      console.log("fetchViewBrandsById", response.data?.data)
+      // console.log("fetchViewBrandsById", response.data?.data)
  
       const responseData = response.data?.data;
       if (!responseData) throw new Error("No data received");

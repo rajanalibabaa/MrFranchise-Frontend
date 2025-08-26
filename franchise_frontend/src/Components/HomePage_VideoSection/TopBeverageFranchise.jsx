@@ -48,7 +48,7 @@ const {
   pagination
 } = beveragesFranchiseState || {};
 
-console.log("beveragesFranchiseState",beveragesFranchiseState);
+// console.log("beveragesFranchiseState",beveragesFranchiseState);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isSmallDesktop = useMediaQuery(theme.breakpoints.between("md", "lg"));

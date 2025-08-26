@@ -779,7 +779,7 @@ const InvestorRegister = () => {
     try {
       dispatch(showLoading());
       const response = await axios.post(
-        `http://localhost:5000/api/v1/investor/createInvestor`,
+        `https://mrfranchisebackend.mrfranchise.in/api/v1/investor/createInvestor`,
         formattedData,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -787,7 +787,7 @@ const InvestorRegister = () => {
       if (response.status === 201) {
         localStorage.removeItem(FORM_DATA_KEY);
         setFormData(initialFormData);
-        console.log("Submitting formattedData:", formattedData);
+        // console.log("Submitting formattedData:", formattedData);
         if (formattedData.firstName) {
           localStorage.setItem("investorName", formattedData.firstName);
         }
