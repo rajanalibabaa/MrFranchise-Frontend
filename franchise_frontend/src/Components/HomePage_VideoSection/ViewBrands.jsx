@@ -15,6 +15,7 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
+import adsimg1 from "../../assets/Images/HomeBanner.avif";
 import { ArrowBack, ArrowForward, ArrowRight } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";

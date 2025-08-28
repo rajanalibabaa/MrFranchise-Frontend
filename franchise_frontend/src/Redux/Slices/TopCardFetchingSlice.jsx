@@ -325,7 +325,7 @@ const topFoodFranchiseSlice = createSlice({
     toggleHomeCardLike : (state,action) => {
       const brandId = action.payload
       state.cafes.brands = state.cafes.brands.map((brand) => {
-        if (brand.uuid === brandId) {
+        if (brand?.uuid === brandId) {
           return {
         ...brand,
         isLiked: !brand.isLiked,
@@ -384,7 +384,7 @@ const topFoodFranchiseSlice = createSlice({
     toggleHomeCardShortlist : (state,action) => {
       const brandId = action.payload
       state.cafes.brands = state.cafes.brands.map((brand) => {
-        if (brand.uuid === brandId) {
+        if (brand?.uuid === brandId) {
           return {
         ...brand,
         isShortListed: !brand.isShortListed,

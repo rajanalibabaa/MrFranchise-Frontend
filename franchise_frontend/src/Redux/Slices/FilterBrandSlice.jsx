@@ -159,6 +159,7 @@ const filterBrandSlice = createSlice({
       const brandId = action.payload;
       state.brands = state.brands.map(brand => 
         brand?.uuid === brandId 
+        brand?.uuid === brandId 
           ? { ...brand, isLiked: !brand.isLiked }
           : brand
       );

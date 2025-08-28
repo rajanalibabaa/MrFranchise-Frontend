@@ -65,7 +65,7 @@ const filterDropdownSlice = createSlice({
       state.childCategoriesError = null;
       state.districtsError = null;
       state.citiesError = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder

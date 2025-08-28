@@ -104,7 +104,7 @@ const HomePageBrandCard = React.memo(
       };
     }, []);
 
-    const [shortListed, setShortListed] = useState(brand.isShortListed);
+    const [shortListed, setShortListed] = useState(brand?.isShortListed);
     const dispatch = useDispatch();
 
     // 🎉 Updated confetti effect to use element position
@@ -183,7 +183,9 @@ const HomePageBrandCard = React.memo(
 
     const handleApply = (brand) => {
       postView(brand?.uuid);
+      postView(brand?.uuid);
       dispatch(openBrandDialog(brand));
+      
     };
 
     return (

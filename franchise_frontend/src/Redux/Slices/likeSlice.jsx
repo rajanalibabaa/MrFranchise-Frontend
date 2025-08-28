@@ -61,6 +61,7 @@ export const fetchLikedBrandsById = createAsyncThunk(
       const response = await getApi(url, query, token);
 
       // console.log("...", response.data?.data)
+      // console.log("...", response.data?.data)
 
       const responseData = response.data?.data;
       if (!responseData) throw new Error("No data received");
@@ -105,7 +106,7 @@ const likedBrandsSlice = createSlice({
 
     removeLikedBrand: (state, action) => {
       state.brands = state.brands.filter(
-        (brand) => brand.uuid !== action.payload
+        (brand) => brand?.uuid !== action.payload
       );
       state.pagination.totalItems = state.brands.length;
     },
@@ -118,15 +119,15 @@ const likedBrandsSlice = createSlice({
 
     toggleLikedBrand: (state, action) => {
       state.brands = state.brands.map((brand) =>
-        brand.uuid === action.payload
+        brand?.uuid === action.payload
           ? { ...brand, isLiked: !brand.isLiked }
           : brand
       );
     },
      toggleLikedSliceShortList: (state, action) => {
       state.brands = state.brands.map((brand) =>
-        brand.uuid === action.payload
-          ? { ...brand, isShortListed: !brand.isShortListed }
+        brand?.uuid === action.payload
+          ? { ...brand, isShortListed: !brand?.isShortListed }
           : brand
       );
     },
