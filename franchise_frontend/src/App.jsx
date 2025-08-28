@@ -13,6 +13,7 @@ import LoadingFallback from '../src/services/SupportingComponents/LoadingFallbac
 import HomeBannerSec from "./Pages/HomePages/HomeBannerSec"
 import BrandDetailsPage from './Pages/AllCategoryPage/BrandDetailsPage'
 import BrandCategroyViewPage from './Pages/AllCategoryPage/BrandCategroyViewPage'
+import Testing from './Components/Testing.jsx';
 // Lazy-loaded components with prefetching
 // const  = lazy(() => import(/* webpackPrefetch: true */ ));
 // const  = lazy(() => import(/* webpackPrefetch: true */ ''));
@@ -187,6 +188,7 @@ const App = () => {
 
               {/* Fallback Route */}
               <Route path="*" element={<NotFound />} />
+              <Route path="/testing" element={<Testing />} />
             </Routes>
           </Suspense>
       

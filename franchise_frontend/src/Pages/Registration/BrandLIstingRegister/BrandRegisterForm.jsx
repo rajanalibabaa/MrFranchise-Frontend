@@ -45,6 +45,7 @@ import BrandExpansionLocationDetails from "./BrandExpansionLocationDetails";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import { useDispatch } from "react-redux";
 import { showLoading } from "../../../Redux/Slices/loadingSlice";
+import socket from "../../../Utils/Socket";
 
 const FORM_DATA_KEY = "brandRegistrationFormData";
 const FORM_STEP_KEY = "brandRegistrationActiveStep";
@@ -439,6 +440,7 @@ console.log("Form data prepared for submission:", formDataSend);
           localStorage.removeItem(FORM_DATA_KEY);
           localStorage.removeItem(FORM_STEP_KEY);
           setFormData(initialFormData);
+          socket.emit("newbrand","approved");
           setActiveStep(0);
           setTimeout(() => {
             navigate("/advertisewithus");
