@@ -440,7 +440,7 @@ console.log("Form data prepared for submission:", formDataSend);
           localStorage.removeItem(FORM_DATA_KEY);
           localStorage.removeItem(FORM_STEP_KEY);
           setFormData(initialFormData);
-          socket.emit("newbrand","approved");
+          socket.emit("newbrand","incoming new brand");
           setActiveStep(0);
           setTimeout(() => {
             navigate("/advertisewithus");
