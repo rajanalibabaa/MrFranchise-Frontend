@@ -352,24 +352,25 @@ const FilterPanel = React.memo(
         label={<Typography fontSize="0.8125rem">All Child Categories</Typography>}
         sx={{ mb: 0, mr: 0 }}
       />
-      {childCategories.map((childCategory) => (
-        <FormControlLabel
-          key={`childcat-${childCategory}`}
-          value={childCategory}
-          control={
-            <Radio
-              size="small"
-              sx={{
-                color: "#ff9800",
-                "&.Mui-checked": { color: "#4caf50" },
-                padding: "6px",
-              }}
-            />
-          }
-          label={<Typography fontSize="0.8125rem">{childCategory}</Typography>}
-          sx={{ mb: 0, mr: 0 }}
-        />
-      ))}
+     {Array.isArray(childCategories) ? childCategories.map((childCategory) => (
+  <FormControlLabel
+    key={`childcat-${childCategory}`}
+    value={childCategory}
+    control={
+      <Radio
+        size="small"
+        sx={{
+          color: "#ff9800",
+          "&.Mui-checked": { color: "#4caf50" },
+          padding: "6px",
+        }}
+      />
+    }
+    label={<Typography fontSize="0.8125rem">{childCategory}</Typography>}
+    sx={{ mb: 0, mr: 0 }}
+  />
+)) : null}
+
     </RadioGroup>
   )}
 </AccordionDetails>

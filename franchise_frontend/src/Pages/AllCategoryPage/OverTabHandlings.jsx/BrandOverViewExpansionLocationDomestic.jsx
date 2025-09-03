@@ -127,13 +127,13 @@ const getCitiesOrDistrict = (stateIndex, districtIndex) => {
                   p: 2,
                   position: "sticky",
                   top: 0,
-                  bgcolor: "#7ad03a",
+                  bgcolor: "#ff9800",
                   zIndex: 2,
                   borderBottom: "1px solid #e0e0e0",
                   display: "flex",
                   alignItems: "center",
                 }}
-              >
+              > 
                 <Place sx={{ mr: 1, color: "#fff" }} />
                 States
               </Typography>

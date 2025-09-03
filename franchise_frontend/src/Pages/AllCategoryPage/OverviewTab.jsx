@@ -115,7 +115,7 @@ const OverviewTab = ({ brand }) => {
        {/* OUTLET GRIDS: Lazy-load (domestic, international) */}
       {hasData(expansionLocationData.currentOutletLocations?.domestic?.locations) && (
         <LazyInViewSection minHeight={180}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#7ad03a" }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, mt: 4, color: "#ff9800" }}>
             Current Outlets (India)
           </Typography>
           <Suspense fallback={<SectionSkeleton lines={2} height={36} />}>

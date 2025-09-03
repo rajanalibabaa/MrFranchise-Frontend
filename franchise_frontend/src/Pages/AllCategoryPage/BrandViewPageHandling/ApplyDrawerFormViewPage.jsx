@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useEffect } from "react";
 import {
   Drawer,
   Box,
@@ -18,6 +18,7 @@ const ApplyDrawer = ({
   isMobile,
   isTablet,
   formData,
+  setFormData,
   handleChange,
   handleSubmit,
   isSubmitting,
@@ -28,6 +29,18 @@ const ApplyDrawer = ({
   selectedBrand,
   userData,
 }) => {
+  
+ // Prefill form with userData when available
+  useEffect(() => {
+    if (userData && open) {
+      setFormData((prev) => ({
+        ...prev,
+        fullName: userData.firstName || "",
+        investorEmail: userData.email || "",
+        mobileNumber: userData.mobileNumber || "",
+      }));
+    }
+  }, [userData, open, setFormData]);
 
   // console.log('userdata ', userData)
   return (
@@ -89,7 +102,7 @@ const ApplyDrawer = ({
                 fullWidth
                 label="Full Name"
                 name="fullName"
-                value={ userData?.firstName || ""}
+                value={ formData.fullName || userData?.firstName || ""}
                 onChange={handleChange}
                 required
                 variant="outlined"
@@ -101,7 +114,7 @@ const ApplyDrawer = ({
                 fullWidth
                 label="Email"
                 name="investorEmail"
-                value={ userData?.email || ""}
+                value={ formData.investorEmail || userData?.email || ""}
                 onChange={handleChange}
                 required
                 variant="outlined"
@@ -113,7 +126,7 @@ const ApplyDrawer = ({
                 fullWidth
                 label="Mobile Number"
                 name="mobileNumber"
-                value={ userData?.mobileNumber || ""}
+                value={ formData.mobileNumber || userData?.mobileNumber || ""}
                 onChange={handleChange}
                 required
                 variant="outlined"

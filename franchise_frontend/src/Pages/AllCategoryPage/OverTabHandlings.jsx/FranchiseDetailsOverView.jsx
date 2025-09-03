@@ -94,24 +94,51 @@ const FranchiseDetailsTable = ({ ficoDetails, formatCurrency }) => {
       <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: "#7ad03a" }}>
         Franchise Details
       </Typography>
-      <TableContainer
-        ref={containerRef}
-        sx={{
-          borderRadius: "16px",
-          overflowX: "auto",
-          maxHeight: "calc(100vh - 300px)",
-          "&::-webkit-scrollbar": {
-            height: "8px",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "#7ad03a",
-            borderRadius: "4px",
-          },
-        }}
-        onTouchStart={handleUserScrollStart}
-        onTouchEnd={handleUserScrollEnd}
-        onMouseEnter={handleMouseEnter}
-      >
+     <TableContainer
+  ref={containerRef}
+  sx={{
+    borderRadius: "16px",
+    overflowX: "auto",
+    overflowY: "auto",
+    maxHeight: "calc(100vh - 300px)",
+    WebkitOverflowScrolling: "touch", // smooth touch scroll
+    cursor: "grab",                   // show grab cursor
+    "&:active": { cursor: "grabbing" },
+    "&::-webkit-scrollbar": {
+      height: "8px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: "#7ad03a",
+      borderRadius: "4px",
+    },
+  }}
+  onTouchStart={handleUserScrollStart}
+  onTouchEnd={handleUserScrollEnd}
+  onMouseEnter={handleMouseEnter}
+  onMouseDown={(e) => {
+    const el = containerRef.current;
+    el.isDown = true;
+    el.startX = e.pageX - el.offsetLeft;
+    el.scrollLeftStart = el.scrollLeft;
+  }}
+  onMouseLeave={() => {
+    const el = containerRef.current;
+    el.isDown = false;
+  }}
+  onMouseUp={() => {
+    const el = containerRef.current;
+    el.isDown = false;
+  }}
+  onMouseMove={(e) => {
+    const el = containerRef.current;
+    if (!el.isDown) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - el.startX) * 1; // scroll speed
+    el.scrollLeft = el.scrollLeftStart - walk;
+  }}
+>
+
         <Table
           stickyHeader
           sx={{

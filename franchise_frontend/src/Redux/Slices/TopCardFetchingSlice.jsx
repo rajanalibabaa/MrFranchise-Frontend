@@ -8,7 +8,7 @@ export const fetchTopFoodFranchises = createAsyncThunk(
   'topFoodFranchises/fetchAll',
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopFoodFranchise`, {
+      const response = await axios.get(`${API_BASE_URL}/overAllPlatformOnlyMainCategory?main=Food %26 Beverages&sub=Food Franchises`, {
         params: { page,id:userId }
       });
 
@@ -38,7 +38,7 @@ export const fetchTopCafes = createAsyncThunk(
   'topCafes/fetchAll',
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopCafes`, {
+      const response = await axios.get(`${API_BASE_URL}/overAllPlatformOnlyMainCategory?main=Food %26 Beverages&sub=Beverage Franchises&child=Coffee %26 Tea Cafes`, {
         params: { page,id:userId }
       });
 
@@ -68,7 +68,7 @@ export const fetchTopBeverageFranchises = createAsyncThunk(
   'topBeverageFranchises/fetchAll',
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopBeverageFranchise`, {
+      const response = await axios.get(`${API_BASE_URL}/overAllPlatformOnlyMainCategory?main=Food %26 Beverages&sub=Beverage Franchises`, {
         params: { page,id:userId }
       });
 
@@ -97,7 +97,7 @@ export const fetchTopTruckAndKiosksFranchises = createAsyncThunk(
   'topTruckAndKiosksFranchises/fetchAll',
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopTrucksAndKiosks`, {
+      const response = await axios.get(`${API_BASE_URL}/overAllPlatformOnlyMainCategory?main=Food %26 Beverages&sub=Food Trucks %26 Kiosks Franchises`, {
         params: { page,id:userId }
       });
 
@@ -127,7 +127,7 @@ export const fetchDesertAndBakery = createAsyncThunk(
   'topdesertAndBakeryFranchises/fetchAll',
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopDesertAndBakery`, {
+      const response = await axios.get(`${API_BASE_URL}/overAllPlatformOnlyMainCategory?main=Food %26 Beverages&sub=Dessert %26 Bakery`, {
         params: { page,id:userId }
       });
 
@@ -155,7 +155,7 @@ export const fetchTopRestarunt = createAsyncThunk(
   'toprestaurant/fetchAll',
   async ({ page = 1 }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/brandlisting/getTopRestaurants`, {
+      const response = await axios.get(`${API_BASE_URL}/overAllPlatformOnlyMainCategory?main=Food %26 Beverages&sub=Food Franchises`, {
         params: { page,id:userId }
       });
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useCallback } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -35,6 +35,9 @@ import { token, userId } from "../../Utils/autherId";
 import LoginPage from "../LoginPage/LoginPage";
 import { toggleHomeCardShortlist } from "../../Redux/Slices/TopCardFetchingSlice";
 import { toggleBrandShortListfilter } from "../../Redux/Slices/FilterBrandSlice";
+import { postView } from "../../Utils/function/view.jsx";
+import { openBrandDialog } from "../../Redux/Slices/OpenBrandNewPageSlice.jsx";
+
 
 const BrandComparison = ({
   open,
@@ -133,29 +136,11 @@ const BrandComparison = ({
     }
   };
 
-  const handleNextModel = (brandId) => {
-    setCurrentModelIndexes((prev) => {
-      const brand = brandDetails.find(b => b.uuid === brandId);
-      const models = brand?.brandfranchisedetails?.franchiseDetails?.fico || [];
-      const currentIndex = prev[brandId] || 0;
-      return {
-        ...prev,
-        [brandId]: (currentIndex + 1) % models.length
-      };
-    });
-  };
-
-  const handlePrevModel = (brandId) => {
-    setCurrentModelIndexes((prev) => {
-      const brand = brandDetails.find(b => b.uuid === brandId);
-      const models = brand?.brandfranchisedetails?.franchiseDetails?.fico || [];
-      const currentIndex = prev[brandId] || 0;
-      return {
-        ...prev,
-        [brandId]: (currentIndex - 1 + models.length) % models.length
-      };
-    });
-  };
+ 
+ const handleApply = (brand) => {
+       postView(brand?.uuid);
+       dispatch(openBrandDialog(brand));
+     };
 
   const basicInfoFields = [
     { label: "Brand Name", field: "brandDetails.brandName" },
@@ -308,7 +293,9 @@ const BrandComparison = ({
                           >
                             {brand.brandDetails?.brandName || "-"}
                           </Typography>
-                          
+                          <Typography display='flex' space='between' flexDirection='row'>
+                                                      <Chip label="Apply Brand" size="small" onClick={() => handleApply(brand)} sx={{ mt: 1, bgcolor: "#ff9800", color: "white", "&:hover": { bgcolor: "#fb8c00", }, }} />
+
                           <Chip
                             label="Remove"
                             size="small"
@@ -318,10 +305,12 @@ const BrandComparison = ({
                               bgcolor: "#F2211D",
                               color: "white",
                               "&:hover": {
-                                bgcolor: "#fb8c00",
+                                bgcolor: "#fb2a00ff",
                               },
                             }}
                           />
+                          </Typography>
+                          
                         </Box>
                       </TableCell>
                     ))}

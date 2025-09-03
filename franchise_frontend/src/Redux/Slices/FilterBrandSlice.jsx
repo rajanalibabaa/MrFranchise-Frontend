@@ -40,8 +40,8 @@ export const fetchFilteredBrands = createAsyncThunk(
       if (investmentRange) params.append('investmentRange', investmentRange);
       if (modelType) params.append('modelType', modelType);
 
-      const response = await axios.get(`${API_BASE_URL}filter/getAllBrandsAndFilter?${params.toString()}`);
-
+      const response = await axios.get(`${API_BASE_URL}filter/getAllBrandsAndFilter?maincat=Food %26 Beverages&${params.toString()}`);
+      
       // Normalize the brand data to ensure consistent structure
       const normalizedBrands = response.data.data?.brands?.map(brand => ({
         ...brand,
