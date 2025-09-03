@@ -29,7 +29,11 @@ export const fetchFilteredBrands = createAsyncThunk(
       params.append('page', page);
       params.append('limit', limit);
       if (id) params.append('id', id);
-      if (maincat) params.append('maincat', maincat);
+      if (maincat){
+        params.append('maincat', maincat);
+      }else {
+        params.append('maincat', "Food & Beverages");
+      }
       if (subcat) params.append('subcat', subcat);
       if (childcat) params.append('childcat', childcat);
       if (serchterm) params.append('serchterm', serchterm);
@@ -40,8 +44,10 @@ export const fetchFilteredBrands = createAsyncThunk(
       if (investmentRange) params.append('investmentRange', investmentRange);
       if (modelType) params.append('modelType', modelType);
 
-      // const response = await axios.get(`${API_BASE_URL}filter/getAllBrandsAndFilter?${params.toString()}`);
-      const response = await axios.get(`http://localhost:5000/api/v1/filter/getAllBrandsAndFilter?maincat=Food%20%26%20Beverages`);
+      console.log("=============",`${API_BASE_URL}filter/getAllBrandsAndFilter?${params}`)
+      const response = await axios.get(`${API_BASE_URL}filter/getAllBrandsAndFilter?${params}`);
+
+       console.log("=============",response.data.data?.brands)
 
       // Normalize the brand data to ensure consistent structure
       const normalizedBrands = response.data.data?.brands?.map(brand => ({
@@ -69,7 +75,7 @@ export const fetchFilteredBrands = createAsyncThunk(
 
       return {
         brands: normalizedBrands,
-        pagination: response.data.data?.pagination || {
+        pagination: response?.data?.data?.pagination || {
           currentPage: 1,
           totalPages: 1,
           limit: parseInt(limit),
