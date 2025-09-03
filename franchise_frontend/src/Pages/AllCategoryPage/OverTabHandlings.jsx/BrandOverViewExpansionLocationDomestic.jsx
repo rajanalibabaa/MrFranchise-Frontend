@@ -122,21 +122,23 @@ const getCitiesOrDistrict = (stateIndex, districtIndex) => {
               }}
             >
               <Typography
-                variant="subtitle1"
-                sx={{
-                  p: 2,
-                  position: "sticky",
-                  top: 0,
-                  bgcolor: "#ff9800",
-                  zIndex: 2,
-                  borderBottom: "1px solid #e0e0e0",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              > 
-                <Place sx={{ mr: 1, color: "#fff" }} />
-                States
-              </Typography>
+  variant="subtitle1"
+  sx={{
+    p: 2,
+    position: "sticky",
+    top: 0,
+    bgcolor: "#ff9800",
+    zIndex: 2,
+    borderBottom: "1px solid #e0e0e0",
+    display: "flex",
+    alignItems: "center",   // vertical center
+    justifyContent: "center", // horizontal center
+  }}
+>
+  <Place sx={{ mr: 1, color: "#fff" }} />
+  States
+</Typography>
+
               <Box
                 sx={{
                   p: 1,
@@ -214,6 +216,7 @@ const getCitiesOrDistrict = (stateIndex, districtIndex) => {
                   borderBottom: "1px solid #e0e0e0",
                   display: "flex",
                   alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
                 <Map sx={{ mr: 1, color: "#fff" }} />

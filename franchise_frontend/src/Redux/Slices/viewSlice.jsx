@@ -92,7 +92,7 @@ const viewBrandsSlice = createSlice({
     },
      toggleviewSliceShortList: (state, action) => {
       state.brands = state.brands.map((brand) =>
-        brand.uuid === action.payload
+        brand?.uuid === action.payload
           ? { ...brand, isShortListed: !brand.isShortListed }
           : brand
       );

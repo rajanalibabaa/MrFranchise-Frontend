@@ -142,6 +142,10 @@ const BrandComparison = ({
        dispatch(openBrandDialog(brand));
      };
 
+
+
+
+
   const basicInfoFields = [
     { label: "Brand Name", field: "brandDetails.brandName" },
     { label: "Company Name", field: "brandDetails.companyName" },
@@ -410,17 +414,22 @@ const BrandComparison = ({
           sx={{ bgcolor: "#f5f5f5", position: "sticky", bottom: 0, zIndex: 1 }}
         >
           <Button
-            onClick={onClose}
-            sx={{
-              color: "white",
-              bgcolor: "#ff9800",
-              "&:hover": {
-                bgcolor: "#388e3c",
-              },
-            }}
-          >
-            Close Comparison
-          </Button>
+  onClick={() => {
+    setBrandDetails([]); // clear brand details
+    setCurrentModelIndexes({}); // reset indexes
+    onClose(); // then close the dialog
+  }}
+  sx={{
+    color: "white",
+    bgcolor: "#ff9800",
+    "&:hover": {
+      bgcolor: "#388e3c",
+    },
+  }}
+>
+  Close Comparison
+</Button>
+
         </DialogActions>
       </Dialog>
 

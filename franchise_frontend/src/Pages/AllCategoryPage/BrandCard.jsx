@@ -91,6 +91,7 @@ const BrandCard = memo(
     isSelectedForComparison,
     onToggleBrandComparison,
     maxComparisonReached,
+    enableComparison
   }) => {
     const {
       uuid,
@@ -215,69 +216,57 @@ const BrandCard = memo(
       }
     }, [brand, uuid, shortlistProcessing, onShowLogin, dispatch, isShortListed]);
 
-    const handlePlay = useCallback(() => {
-      const allVideos = document.querySelectorAll("video");
-      allVideos.forEach((vid) => {
-        if (vid !== videoRef.current) {
-          vid.pause();
-        }
-      });
-    }, []);
 
     return (
       <Card sx={cardStyles}>
-        <Tooltip
-          title={
-            maxComparisonReached && !isSelectedForComparison
-              ? "Maximum 3 brands can be compared"
-              : "Click to add from comparison"
-          }
-          placement="right"
-          arrow
-        >
-          <span><IconButton
-  sx={{
-    position: "absolute",
-    top: 8,
-    right: 8,
-    zIndex: 2,
-    backgroundColor: isSelectedForComparison
-      ? "#ff9800" // ✅ Green if selected
-      : maxComparisonReached
-      ? "rgba(244, 67, 54, 0.85)" // ✅ Red if max reached
-      : "rgba(255, 255, 255, 0.85)", // ✅ Neutral white when idle
-    color: isSelectedForComparison
-      ? "white"
-      : maxComparisonReached
-      ? "white"
-      : "rgba(0,0,0,0.7)",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-    "&:hover": {
-      backgroundColor: isSelectedForComparison
-        ? "rgba(56, 142, 60, 0.9)"
-        : maxComparisonReached
-        ? "rgba(211, 47, 47, 0.9)"
-        : "rgba(240,240,240,0.95)",
-      transform: "scale(1.15)",
-      transition: "all 0.2s ease-in-out",
-    },
-    width: 36,
-    height: 36,
-    borderRadius: "50%", // ✅ rounded for modern look
-  }}
-  onClick={() => onToggleBrandComparison(brand)}
-  disabled={maxComparisonReached && !isSelectedForComparison}
->
-  {isSelectedForComparison ? (
-    <CheckCircle fontSize="small" />
-  ) : maxComparisonReached ? (
-    <Block fontSize="small" /> // ❌ blocked icon when max limit hit
-  ) : (
-    <RadioButtonUnchecked fontSize="small" />
-  )}
-</IconButton>  
-          </span>
-        </Tooltip>
+       {/* Compare Toggle */}
+{enableComparison && (
+  <Tooltip
+    title={
+      maxComparisonReached && !isSelectedForComparison
+        ? "Maximum 3 brands can be compared"
+        : isSelectedForComparison
+        ? "Already selected"
+        : "Click to add to comparison"
+    }
+    placement="right"
+    arrow
+  >
+    <span>
+      <IconButton
+        sx={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          zIndex: 2,
+          backgroundColor: isSelectedForComparison
+            ? "#ff9800"
+            : maxComparisonReached
+            ? "rgba(244, 67, 54, 0.75)"
+            : "rgba(255,255,255,0.85)",
+          color: isSelectedForComparison ? "#fff" : "#ff8914ff",
+          "&:hover": {
+            transform: "scale(1.15)",
+          },
+          width: 36,
+          height: 36,
+          borderRadius: "50%",
+        }}
+        onClick={() => onToggleBrandComparison(brand)}
+        disabled={maxComparisonReached && !isSelectedForComparison}
+      >
+        {isSelectedForComparison ? (
+          <CheckCircle fontSize="small" /> // ✅ Selected
+        ) : maxComparisonReached ? (
+          <Block fontSize="small" /> // ❌ disabled
+        ) : (
+          <RadioButtonUnchecked fontSize="small" /> // ⚪ default
+        )}
+      </IconButton>
+    </span>
+  </Tooltip>
+)}
+
 
         <Box
           sx={{ p: 0.5, flexGrow: 1, display: "flex", flexDirection: "column" }}
@@ -418,7 +407,9 @@ const BrandCard = memo(
     prevProps.brand.isShortListed === nextProps.brand.isShortListed &&
     prevProps.isSelectedForComparison === nextProps.isSelectedForComparison &&
     prevProps.showLogin === nextProps.showLogin &&
-    prevProps.maxComparisonReached === nextProps.maxComparisonReached
+    prevProps.maxComparisonReached === nextProps.maxComparisonReached&&
+    prevProps.enableComparison === nextProps.enableComparison 
+
 );
 
 const DetailItem = memo(({ icon, label, value }) => {

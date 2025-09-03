@@ -258,19 +258,26 @@ const SimilarBrands = ({ brandData }) => {
           </Typography>
 
           <Button
-            variant="text"
-            size="small"
-            aria-label="view more brands"
-            endIcon={<ArrowRight />}
-            sx={{
-              textTransform: "none",
-              fontSize: isMobile ? 14 : 16,
-              color: theme.palette.text.secondary,
-              "&:hover": {
-                color: theme.palette.mode === "dark" ? "#ffb74d" : "#f57c00",
-                backgroundColor: "transparent",
-              },
-            }}
+           variant="outlined"
+             size="small"
+             aria-label="view more brands"
+             endIcon={<ArrowRight />}
+             sx={{
+               textTransform: "none",
+               fontSize: isMobile ? 14 : 16,
+               background: theme.palette.mode === "dark" 
+                 ? "linear-gradient(90deg, #ff9800, #ffb74d)" 
+                 : "linear-gradient(90deg, #f57c00, #ff9800)",
+               color: "#fff",
+               borderRadius: "8px",
+               px: 2,
+               "&:hover": {
+                 background: theme.palette.mode === "dark" 
+                   ? "linear-gradient(90deg, #ffb74d, #ff9800)" 
+                   : "linear-gradient(90deg, #ff9800, #f57c00)",
+                 boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+               },
+             }}
             onClick={() => {
               window.open(`/brandviewpage?category=${currentSubCategory}&subCategory=${currentChildCategory}`, "_blank");
             }}

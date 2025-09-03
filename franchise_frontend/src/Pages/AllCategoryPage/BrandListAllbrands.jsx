@@ -81,6 +81,7 @@ function BrandList() {
   const toggleLike = useToggleLike();
   const [scrollPosition, setScrollPosition] = useState(0);
   const [comparisonOpen, setComparisonOpen] = useState(false);
+  const [enableComparison, setEnableComparison] = useState(false); 
   const [selectedForComparison, setSelectedForComparison] = useState([]);
   const [isScrolling, setIsScrolling] = useState(false);
   const dispatch = useDispatch();
@@ -192,20 +193,28 @@ function BrandList() {
     [likeProcessing, toggleLike, authState, dispatch, filters]
   );
 
-  const toggleBrandComparison = useCallback((brand) => {
-    setSelectedForComparison((prev) => {
-      const isSelected = prev.some((b) => b.uuid === brand.uuid);
-      if (isSelected) {
-        return prev.filter((b) => b.uuid !== brand.uuid);
-      } else {
-        return prev.length < 3 ? [...prev, brand] : prev;
-      }
-    });
-  }, []);
+const toggleBrandComparison = useCallback((brand) => {
+  setSelectedForComparison((prev) => {
+    const isSelected = prev.some((b) => b.uuid === brand.uuid);
+    let updated;
 
-  const scrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+    if (isSelected) {
+      updated = prev.filter((b) => b.uuid !== brand.uuid);
+    } else {
+      updated = prev.length < 3 ? [...prev, brand] : prev;
+    }
+
+    // ✅ Auto-open dialog once 3 brands selected
+    if (updated.length === 3) {
+      setComparisonOpen(true);
+    }
+
+    return updated;
+  });
+}, []);
+
+
+
 
   // Calculate active filter count
   const activeFilterCount = useMemo(() => {
@@ -221,7 +230,7 @@ function BrandList() {
   return (
     <Container maxWidth="xl" sx={{ mt: 0, mb: 6 }}>
       {/* Comparison Button */}
-      {selectedForComparison.length > 0 && (
+     
         <Box sx={{ position: "fixed", top: 290, right: 25, zIndex: 1000 }}>
           <Badge badgeContent={selectedForComparison.length} color="primary">
             <Tooltip
@@ -233,7 +242,13 @@ function BrandList() {
                 variant="contained"
                 color="primary"
                 startIcon={<Compare />}
-                onClick={() => setComparisonOpen(true)}
+               onClick={() => {
+    setEnableComparison(true);
+
+    if (selectedForComparison.length > 0) {
+      setComparisonOpen(true); // ✅ open if at least 1 selected
+    }
+  }}
                 sx={{
                   borderRadius: 4,
                   boxShadow: 3,
@@ -246,7 +261,7 @@ function BrandList() {
             </Tooltip>
           </Badge>
         </Box>
-      )}
+    
 
       <Box display="flex" flexDirection={{ xs: "column", md: "row" }}>
         {/* Desktop Filters */}
@@ -393,13 +408,14 @@ function BrandList() {
                         brand={brand}
                         handleLikeClick={handleLikeClick}
                         likeProcessing={likeProcessing}
+                        enableComparison={enableComparison}
                         showLogin={showLogin}
                         onShowLogin={setShowLogin}
                         isSelectedForComparison={selectedForComparison.some(
                           (b) => b.uuid === brand.uuid
                         )}
                         onToggleBrandComparison={toggleBrandComparison}
-                        maxComparisonReached={selectedForComparison.length >= 3}
+                        maxComparisonReached={selectedForComparison.length >= 3 && !selectedForComparison.some(b => b.uuid === brand.uuid)}
                       />
                     </Suspense>
                   </Box>
@@ -506,8 +522,14 @@ function BrandList() {
       <Suspense fallback={null}>
         <BrandComparison
           open={comparisonOpen}
-          onClose={() => setComparisonOpen(false)}
+          onClose={() => {
+    setComparisonOpen(false);   // ✅ close modal
+    setSelectedForComparison([]); // ✅ clear brands selection
+  }}
           selectedBrands={selectedForComparison}
+           onRemoveFromComparison={(uuid) =>
+    setSelectedForComparison((prev) => prev.filter((b) => b.uuid !== uuid))
+  }
         />
       </Suspense>
 

@@ -86,6 +86,7 @@ const FloatingApplyButton = ({ isMobile, brand, toggleDrawer }) => {
             mt: 1,
             fontWeight: 600,
             color: "#ff9800",
+            borderBottom: "2px solid #ff9800",
           }}
         >
           {brandName}
