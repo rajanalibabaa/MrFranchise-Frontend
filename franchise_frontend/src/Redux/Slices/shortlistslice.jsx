@@ -23,7 +23,7 @@ export const removeFromShortlist = createAsyncThunk(
  
       const baseUrl =
         api.shortListApi.base || "http://localhost:5000/api/v1/shortList";
-      const url = `${baseUrl}/removeFromShortlist/${userId}/${brandId}`;
+      const url = `${baseUrl}/removeFromShortlist/${userId}/${brandId}?main=Food %26 Beverages`;
  
       await axios.delete(url, {
         headers: { Authorization: `Bearer ${token}` },

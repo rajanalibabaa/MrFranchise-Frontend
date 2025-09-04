@@ -23,7 +23,7 @@ export const fetchViewBrandsById = createAsyncThunk(
    
  
       const query = { page, limit };
-      const url = `${api.viewApi.get.getAllViewBrandByID}/${userId}`;
+      const url = `${api.viewApi.get.getAllViewBrandByID}/${userId}?main=Food %26 Beverages`;
  
       const response = await getApi(url, query, token);
  

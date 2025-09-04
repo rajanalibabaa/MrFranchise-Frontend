@@ -183,7 +183,6 @@ const HomePageBrandCard = React.memo(
 
     const handleApply = (brand) => {
       postView(brand?.uuid);
-      postView(brand?.uuid);
       dispatch(openBrandDialog(brand));
       
     };
