@@ -22,7 +22,7 @@ const FloatingApplyButton = ({ isMobile, brand, toggleDrawer }) => {
     <Box
       sx={{
         position: "fixed",
-        bottom: isMobile ? 35 : 300,
+        bottom: isMobile ? 10 : 300,
         right: isMobile ? 0 : 20,
         left: isMobile ? 0 : "auto",
         display: "flex",
@@ -58,39 +58,36 @@ const FloatingApplyButton = ({ isMobile, brand, toggleDrawer }) => {
         whileTap={{ scale: 0.95 }}
         style={{ textAlign: "center" }}
       >
-        <Button
-          variant="contained"
-          size="large" // 🔹 fixed standard button size
-          onClick={toggleDrawer(true)}
-          sx={{
-            backgroundColor: "#ff9800",
-            color: "white",
-            borderRadius: 50,
-            px: 4,
-            py: 1.2,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-            "&:hover": {
-              backgroundColor: "#e65100",
-            },
-            fontSize: "1rem",
-            animation: `${bounce} 2s infinite ease-in-out`,
-          }}
-        >
-          Apply Now
-        </Button>
+ <Button
+  variant="contained"
+  size="large"
+  onClick={toggleDrawer(true)}
+  sx={{
+    display: "flex",
+    flexDirection: "column", // 🔹 Stack text vertically
+    alignItems: "center",
+    backgroundColor: "#ff9800",
+    color: "white",
+    borderRadius: 4,
+    
+    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+    "&:hover": {
+      backgroundColor: "#e65100",
+    },
+    fontSize: "1rem",
+    animation: `${bounce} 2s infinite ease-in-out`,
+  }}
+>
+  {/* Top line → Apply Now */}
+  <span style={{ fontWeight: 600, fontSize: "1rem" }}>Apply Now</span>
 
-        {/* Brand Name */}
-        <Typography
-          variant="body2"
-          sx={{
-            mt: 1,
-            fontWeight: 600,
-            color: "#ff9800",
-            borderBottom: "2px solid #ff9800",
-          }}
-        >
-          {brandName}
-        </Typography>
+  {/* Bottom line → Brand Name */}
+  <span style={{ fontSize: "0.75rem" }}>
+    {brandName}
+  </span>
+</Button>
+
+
 
         {/* Brand Category */}
        

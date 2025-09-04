@@ -231,36 +231,34 @@ const toggleBrandComparison = useCallback((brand) => {
     <Container maxWidth="xl" sx={{ mt: 0, mb: 6 }}>
       {/* Comparison Button */}
      
-        <Box sx={{ position: "fixed", top: 290, right: 25, zIndex: 1000 }}>
-          <Badge badgeContent={selectedForComparison.length} color="primary">
-            <Tooltip
-              title="Click to compare selected brands"
-              placement="left"
-              arrow
-            >
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<Compare />}
-               onClick={() => {
-    setEnableComparison(true);
+       <Box sx={{ position: "fixed", top: "30%", right: 12, zIndex: 1000 }}>
+  <Badge badgeContent={selectedForComparison.length} color="primary">
+    <Tooltip title="Click to compare selected brands" placement="left" arrow>
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<Compare />}
+        onClick={() => {
+          setEnableComparison(true);
+          if (selectedForComparison.length > 0) {
+            setComparisonOpen(true);
+          }
+        }}
+        sx={{
+          transform: "rotate(-90deg)", // 🔹 Rotate button
+          transformOrigin: "right center",
+          borderRadius: 2,
+          boxShadow: 3,
+          bgcolor: "#ff9800",
+          "&:hover": { bgcolor: "#fb8c00", boxShadow: 6 },
+        }}
+      >
+        Compare
+      </Button>
+    </Tooltip>
+  </Badge>
+</Box>
 
-    if (selectedForComparison.length > 0) {
-      setComparisonOpen(true); // ✅ open if at least 1 selected
-    }
-  }}
-                sx={{
-                  borderRadius: 4,
-                  boxShadow: 3,
-                  bgcolor: "#ff9800",
-                  "&:hover": { bgcolor: "#fb8c00", boxShadow: 6 },
-                }}
-              >
-                Compare
-              </Button>
-            </Tooltip>
-          </Badge>
-        </Box>
     
 
       <Box display="flex" flexDirection={{ xs: "column", md: "row" }}>

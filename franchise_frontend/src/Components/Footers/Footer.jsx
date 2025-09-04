@@ -32,10 +32,11 @@ function Footer() {
   const [successMsg, setSuccessMsg] = React.useState("");
   const [response, setresponse] = React.useState("");
   const navigate = useNavigate();
+  
   const handleSubscribe = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/v1/subcribe/getsubscribe",
+        "https://mrfranchisebackend.mrfranchise.in/api/v1/subcribe/getsubscribe",
         { email },
         {
           headers: {
@@ -43,7 +44,6 @@ function Footer() {
           },
         }
       );
-      // console.log("Response from server:", res.data);
       setresponse(res.data.success);
 
       if (res.data.success) {
@@ -65,7 +65,6 @@ function Footer() {
     <Box
       component="footer"
       sx={{
-        // backgroundColor: "#0a1929",
         backgroundColor: "#000",
         color: "#fff",
         pt: 2.5,
@@ -82,13 +81,11 @@ function Footer() {
         },
       }}
     >
-      <Container maxWidth="xl">
-        <Grid container spacing={5} justifyContent="space-between">
+      <Container maxWidth="xl" >
+        <Grid container spacing={4} justifyContent="space-between">
           {/* Brand Column */}
-          <Grid item xs={12} md={4}>
-            <Box
-              sx={{ display: "flex", flexDirection: "column", justifyContent:'space-evenly', height: "100%" }}
-            >
+          <Grid item xs={12} md={3}>
+            <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
               <Box
                 component="img"
                 src={brandlogo}
@@ -124,128 +121,8 @@ function Footer() {
                   textAlign: { xs: "center", md: "left" },
                 }}
               >
-                Empowering franchise growth by connecting brands <br />
-                with serious investors through innovative digital solutions.
+                Empowering franchise growth by connecting brands with serious investors through innovative digital solutions.
               </Typography>
-
-              
-<Grid item xs={12} md={4}>
-            <Typography
-              variant="h6"
-              sx={{
-                color: "#ffba00",
-                fontWeight: 700,
-                mb: 2.5,
-                fontSize: "1.1rem",
-                position: "relative",
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  bottom: -8,
-                  left: 0,
-                  width: "50px",
-                  height: "3px",
-                  backgroundColor: "#ff6d00",
-                },
-              }}
-            >
-              Newsletter
-            </Typography>
-            <Typography variant="body2" color="#b0bec5" mb={2}>
-              Subscribe to our newsletter for the latest franchise opportunities
-              and industry insights.
-            </Typography>
-
-            {successMsg && (
-              <Box
-                sx={{
-                  position: "fixed",
-                  top: "40px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  backgroundColor: response ? "green" : "red",
-                  color: "white",
-                  border: "1px solid #c3e6cb",
-                  borderRadius: "8px",
-                  padding: "8px 40px",
-                  fontSize: "0.95rem",
-                  zIndex: 1300,
-                  boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-                  transition: "opacity 0.3s ease-in-out",
-                }}
-              >
-                {successMsg}
-              </Box>
-            )}
-
-            <Box component="form" sx={{ display: "flex", mb: 3 }}>
-              <input
-                type="email"
-                placeholder="Your email address"
-                value={email}
-                style={{
-                  flex: 1,
-                  padding: "12px 15px",
-                  border: "none",
-                  borderRadius: "4px 0 0 4px",
-                  fontSize: "0.95rem",
-                  backgroundColor: "#1e3a5c",
-                  color: "#fff",
-                  outline: "none",
-                }}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Button
-                variant="contained"
-                aria-label="Subscribe"
-                sx={{
-                  borderRadius: "0 4px 4px 0",
-                  backgroundColor: "#ff6d00",
-                  "&:hover": {
-                    backgroundColor: "#ff8500",
-                  },
-                  px: 3,
-                  textTransform: "none",
-                }}
-                onClick={handleSubscribe}
-              >
-                Subscribe
-              </Button>
-            </Box>
-
-            {/* Social Media */}
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="body2" color="#b0bec5" mb={1.5}>
-                Connect with us:
-              </Typography>
-              <Box sx={{ display: "flex", gap: 1.5 }}>
-                {[
-                  { icon: <Facebook  />, color: "#4267B2",url:'https://www.facebook.com/profile.php?id=61575143466373' },
-                  { icon: <Twitter />, color: "#1DA1F2",url:'https://twitter.com/' },
-                  { icon: <LinkedIn />, color: "#0077B5",url:'https://www.linkedin.com/company/mr-franchise-www-mrfranchise-in/posts/?feedView=all&viewAsMember=true' },
-                  { icon: <Instagram />, color: "#E1306C",url:'https://www.instagram.com/mrfranchise.in/' },
-                ].map((social, index) => (
-                  <IconButton
-                    key={index}
-                    component="a"
-                    href={social.url}
-                    target="_blank"
-        rel="noopener noreferrer"
-                    sx={{
-                      backgroundColor: `${social.color}20`,
-                      color: social.color,
-                      "&:hover": {
-                        backgroundColor: `${social.color}30`,
-                      },
-                    }}
-                  >
-                    {social.icon}
-                  </IconButton>
-                ))}
-              </Box>
-            </Box>
-          </Grid>
-              {/* Contact Info */}
             </Box>
           </Grid>
 
@@ -341,7 +218,6 @@ function Footer() {
             >
               {[
                 { text: "About Us", href: "/aboutus" },
-                // { text: "Contact Support", href: "/contactus" },
                 { text: "FAQs", href: "/faq" },
                 { text: "Help Center", href: "/help" },
                 { text: "Terms & Conditions", href: "/termsandconditions" },
@@ -366,16 +242,10 @@ function Footer() {
             </Box>
           </Grid>
 
-         
-
           {/* Newsletter Column */}
-          
-             <Box >
-            {/* Contact Details Section */}
-
-            <Box  >
-              <Typography
-                variant="h6"
+          <Grid item xs={12} md={3}>
+            <Typography
+              variant="h6"
               sx={{
                 color: "#ffba00",
                 fontWeight: 700,
@@ -392,45 +262,155 @@ function Footer() {
                   backgroundColor: "#ff6d00",
                 },
               }}
+            >
+              Newsletter
+            </Typography>
+            <Typography variant="body2" color="#b0bec5" mb={2}>
+              Subscribe to our newsletter for the latest franchise opportunities and industry insights.
+            </Typography>
+
+            {successMsg && (
+              <Box
+                sx={{
+                  position: "fixed",
+                  top: "40px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  backgroundColor: response ? "green" : "red",
+                  color: "white",
+                  border: "1px solid #c3e6cb",
+                  borderRadius: "8px",
+                  padding: "8px 40px",
+                  fontSize: "0.95rem",
+                  zIndex: 1300,
+                  boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+                  transition: "opacity 0.3s ease-in-out",
+                }}
               >
-                Contact Details
-              </Typography>
-              <Box sx={{ display: "flex", alignItems: "center", mb: 1.5,gap:2 }}>
-                <Phone sx={{ color: "#ffba00", mr: 1.5, fontSize: "1.2rem" }} />
-                <Link
-                  href="tel:+917449213799"
-                  color="#b0bec5"
-                  underline="hover"
-                  variant="body2"
-                >
-                  +91 7449213799
-                </Link>
-                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                <LocationOn
-                  sx={{ color: "#ffba00", fontSize: "1.2rem" }}
-                />
-                <Typography variant="body2" color="#b0bec5" 
->
-                  India
-                </Typography>
+                {successMsg}
               </Box>
-              </Box>
-             
+            )}
+
+            <Box component="form" sx={{ display: "flex", mb: 3 }}>
+              <input
+                type="email"
+                placeholder="Your email address"
+                value={email}
+                style={{
+                  flex: 1,
+                  padding: "12px 15px",
+                  border: "none",
+                  borderRadius: "4px 0 0 4px",
+                  fontSize: "0.95rem",
+                  backgroundColor: "#1e3a5c",
+                  color: "#fff",
+                  outline: "none",
+                }}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Button
+                variant="contained"
+                aria-label="Subscribe"
+                sx={{
+                  borderRadius: "0 4px 4px 0",
+                  backgroundColor: "#ff6d00",
+                  "&:hover": {
+                    backgroundColor: "#ff8500",
+                  },
+                  px: 3,
+                  textTransform: "none",
+                }}
+                onClick={handleSubscribe}
+              >
+                Subscribe
+              </Button>
             </Box>
 
-            <Box sx={{ flex: 1 }} mb={2}>
-              <Typography
-                  variant="subtitle"
-                sx={{ color: "#ffba00",  fontSize: "0.9rem" }}
+            {/* Social Media */}
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="body2" color="#b0bec5" mb={1.5}>
+                Connect with us:
+              </Typography>
+              <Box sx={{ display: "flex", gap: 1.5 }}>
+                {[
+                  { icon: <Facebook />, color: "#4267B2", url: 'https://www.facebook.com/profile.php?id=61575143466373' },
+                  { icon: <Twitter />, color: "#1DA1F2", url: 'https://twitter.com/' },
+                  { icon: <LinkedIn />, color: "#0077B5", url: 'https://www.linkedin.com/company/mr-franchise-www-mrfranchise-in/posts/?feedView=all&viewAsMember=true' },
+                  { icon: <Instagram />, color: "#E1306C", url: 'https://www.instagram.com/mrfranchise.in/' },
+                ].map((social, index) => (
+                  <IconButton
+                    key={index}
+                    component="a"
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{
+                      backgroundColor: `${social.color}20`,
+                      color: social.color,
+                      "&:hover": {
+                        backgroundColor: `${social.color}30`,
+                      },
+                    }}
+                  >
+                    {social.icon}
+                  </IconButton>
+                ))}
+              </Box>
+            </Box>
+          </Grid>
+
+          {/* Contact Details Column */}
+          <Grid item xs={12} md={2}>
+            <Typography
+              variant="h6"
+              sx={{
+                color: "#ffba00",
+                fontWeight: 700,
+                mb: 2.5,
+                fontSize: "1.1rem",
+                position: "relative",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: -8,
+                  left: 0,
+                  width: "50px",
+                  height: "3px",
+                  backgroundColor: "#ff6d00",
+                },
+              }}
+            >
+              Contact Details
+            </Typography>
+            
+            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+              <Phone sx={{ color: "#ffba00", mr: 1.5, fontSize: "1.2rem" }} />
+              <Link
+                href="tel:+917449213799"
+                color="#b0bec5"
+                underline="hover"
+                variant="body2"
               >
+                +91 7449213799
+              </Link>
+            </Box>
+            
+            <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+              <LocationOn sx={{ color: "#ffba00", mr: 1.5, fontSize: "1.2rem" }} />
+              <Typography variant="body2" color="#b0bec5">
+                India
+              </Typography>
+            </Box>
+            
+            <Box mb={2}>
+              <Typography variant="body2" sx={{ color: "#ffba00", mb: 1 }}>
                 Want to "ADVERTISE YOUR BRAND" on www.MrFranchise.in?
               </Typography>
-              <br/>
-              <Typography variant="text" color="#b0bec5">
+              <Typography variant="body2" color="#b0bec5">
                 Mail to{" "}
                 <Link
                   href="mailto:sales@mrfranchise.in"
-                  color="primary.main"
+                  color="#ffba00"
                   underline="hover"
                 >
                   sales@mrfranchise.in
@@ -438,20 +418,15 @@ function Footer() {
               </Typography>
             </Box>
 
-            <Box sx={{ flex: 1 }} mb={2}>
-              <Typography
-                variant="subtitle"
-                sx={{ color: "#ffba00", fontSize: "0.9rem" }}
-              >
+            <Box mb={2}>
+              <Typography variant="body2" sx={{ color: "#ffba00", mb: 1 }}>
                 Want to "START A FOOD AND BEVERAGE BUSINESS" and need support?
               </Typography>
-                            <br/>
-
-              <Typography variant="text" color="#b0bec5">
+              <Typography variant="body2" color="#b0bec5">
                 Mail to{" "}
                 <Link
                   href="mailto:investor@mrfranchise.in"
-                  color="primary.main"
+                  color="#ffba00"
                   underline="hover"
                 >
                   investor@mrfranchise.in
@@ -459,28 +434,22 @@ function Footer() {
               </Typography>
             </Box>
 
-            <Box sx={{ flex: 1 }} mb={2}>
-              <Typography
-                variant=""
-                sx={{ color: "#ffba00", fontSize: "0.9rem" }}
-              >
+            <Box mb={2}>
+              <Typography variant="body2" sx={{ color: "#ffba00", mb: 1 }}>
                 Want to "CHANGE YOUR LISTING INFORMATION" on www.MrFranchise.in?
               </Typography>
-                            <br/>
-
-              <Typography variant="text" color="#b0bec5">
+              <Typography variant="body2" color="#b0bec5">
                 Mail to{" "}
                 <Link
-                  href="mailto:support@mrfranchise.in"
-                  color="primary.main"
+                  href="mailto:support.team@mrfranchise.in"
+                  color="#ffba00"
                   underline="hover"
                 >
-                  
-support.team@mrfranchise.in
+                  support.team@mrfranchise.in
                 </Link>
               </Typography>
             </Box>
-          </Box>
+          </Grid>
         </Grid>
 
         {/* Bottom Bar */}

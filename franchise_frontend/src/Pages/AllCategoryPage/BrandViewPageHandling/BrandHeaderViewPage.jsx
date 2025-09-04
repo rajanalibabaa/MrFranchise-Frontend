@@ -199,7 +199,7 @@ const BrandHeader = ({
                     startIcon={<Phone />}
                     onClick={toggleDrawer(true)}
                     sx={{
-                      px: isMobile ? 1 : 1.5,
+                      px: isMobile ? 0 : 1.5,
                       py: isMobile ? 1 : 2,
                       bgcolor: "#ff9800",
                       "&:hover": { bgcolor: "#e65100" },
