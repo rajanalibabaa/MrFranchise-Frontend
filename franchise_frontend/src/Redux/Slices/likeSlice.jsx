@@ -56,7 +56,7 @@ export const fetchLikedBrandsById = createAsyncThunk(
 
       const query = { page, limit };
       const baseUrl =  "http://localhost:5000/api/v1/like";
-      const url = `${baseUrl}/get-favbrands/${userId}`;
+      const url = `${baseUrl}/get-favbrands/${userId}?main=Food %26 Beverages`;
 
       const response = await getApi(url, query, token);
 
