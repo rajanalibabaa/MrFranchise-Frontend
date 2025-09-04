@@ -16,6 +16,7 @@ import { RiBookmark3Fill } from "react-icons/ri";
 import img from "../../../assets/Images/logo.png";
 import { openBrandDialog } from "../../../Redux/Slices/OpenBrandNewPageSlice.jsx";
 import { useDispatch } from "react-redux";
+import { removeLikedBrand } from "../../../Redux/Slices/likeSlice.jsx";
 
 const BrandCard = memo(({ 
   item, 
@@ -28,11 +29,11 @@ const BrandCard = memo(({
   brandLogoData,
   franchiseModel,
   brandCategoryChild,
-  onViewDetails, 
-  onToggleLike, 
+  // onViewDetails, 
+  // onToggleLike, 
   brandIdData,
-  onToggleShortlist, 
-  onToggleViewClose 
+  // onToggleShortlist, 
+  // onToggleViewClose 
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -83,6 +84,14 @@ const dispatch = useDispatch();
     item?.uploads?.brandLogo?.[0] ||
     item?.image || brandLogoData ||
     img;
+
+    const onToggleLike = (brandId) => {
+      console.log("brand :",brandId)
+      dispatch(removeLikedBrand(brandId))
+    }
+    const onToggleShortlist = (brandId) => {
+      console.log("onToggleShortlist :",brandId)
+    }
 
   return (
     <motion.div whileHover={{ y: -5 }} transition={{ duration: 0.2 }} style={{ minWidth: 0 }}>
