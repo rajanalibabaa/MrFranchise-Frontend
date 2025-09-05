@@ -22,8 +22,8 @@ export const removeFromShortlist = createAsyncThunk(
       if (!userId || !brandId) throw new Error("Missing user ID or brand ID");
  
       const baseUrl =
-        api.shortListApi.base || "https://mrfranchisebackend.mrfranchise.in/api/v1/shortList";
-      const url = `${baseUrl}/removeFromShortlist/${userId}/${brandId}`;
+        api.shortListApi.base || "http://localhost:5000/api/v1/shortList";
+      const url = `${baseUrl}/removeFromShortlist/${userId}/${brandId}?main=Food %26 Beverages`;
  
       await axios.delete(url, {
         headers: { Authorization: `Bearer ${token}` },

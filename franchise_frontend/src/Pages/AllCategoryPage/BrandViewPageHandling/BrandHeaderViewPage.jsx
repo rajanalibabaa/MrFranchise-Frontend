@@ -247,6 +247,11 @@ const BrandHeader = ({
                   <ShareDialogActions
                     anchorEl={anchorEl}
                     setAnchorEl={setAnchorEl}
+                    brand={{
+                      name: brand[0]?.brandDetails?.brandName,
+                      logo: brand[0]?.uploads?.logo,
+                      // video: brand[0]?.uploads?.franchisePromotionVideo
+                    }}
                   />
                 </Box>
               </Box>

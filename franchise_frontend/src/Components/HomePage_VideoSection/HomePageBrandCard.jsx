@@ -33,6 +33,7 @@ import {
   addSortlist,
   removeSortList,
   toggleSortlistBrandLike,
+  fetchShortListedById
 } from "../../Redux/Slices/shortlistslice.jsx";
 import {
   toggleBrandLike,
@@ -43,10 +44,12 @@ import {
   addLikedBrand,
   removeLikedBrand,
   toggleLikedSliceShortList,
+  fetchLikedBrandsById,
 } from "../../Redux/Slices/likeSlice.jsx";
 import {
   toggleviewSliceShortList,
   toggleviewSliceLiked,
+  fetchViewBrandsById,
 } from "../../Redux/Slices/viewSlice.jsx";
 import {
   toggleBrandShortListfilter,
@@ -104,7 +107,7 @@ const HomePageBrandCard = React.memo(
       };
     }, []);
 
-    const [shortListed, setShortListed] = useState(brand?.isShortListed);
+    const [shortListed, setShortListed] = useState(brand.isShortListed);
     const dispatch = useDispatch();
 
     // 🎉 Updated confetti effect to use element position
@@ -113,12 +116,23 @@ const HomePageBrandCard = React.memo(
         const rect = elementRef.current.getBoundingClientRect();
         const x = (rect.left + rect.width / 2) / window.innerWidth;
         const y = (rect.top + rect.height / 2) / window.innerHeight;
-        
+
         confetti({
           particleCount: 200,
           spread: 150,
           origin: { x, y },
-          colors: [color, "#ffffff", "#fdc81cff", "#76ec1cff", "#ff1dd6ffff", "#00eaffff", "#0400ffff", "#000000", "#f10808ffff", "#f5f50aff"],
+          colors: [
+            color,
+            "#ffffff",
+            "#fdc81cff",
+            "#76ec1cff",
+            "#ff1dd6ffff",
+            "#00eaffff",
+            "#0400ffff",
+            "#000000",
+            "#f10808ffff",
+            "#f5f50aff",
+          ],
         });
       } else {
         // Fallback to center if element not found
@@ -150,6 +164,8 @@ const HomePageBrandCard = React.memo(
 
         await handleShortList(brand?.uuid);
         setShortListed(!shortListed);
+        // Refetch shortlisted brands
+        dispatch(fetchShortListedById({ page: 1, limit: 10 }));
 
         if (!brand.isShortListed) {
           triggerCelebration("#7ef400ff", shortlistButtonRef);
@@ -160,32 +176,38 @@ const HomePageBrandCard = React.memo(
     };
 
     const handleLikeClick = async (brand) => {
-      if (!token) {
-        setShowLogin(true);
-        return;
-      }
-      dispatch(toggleSortlistBrandLike(brand?.uuid));
-      dispatch(toggleBrandLikefilter(brand?.uuid));
-      dispatch(toggleBrandLike(brand?.uuid));
-      if (!brand?.isLiked) {
-        dispatch(addLikedBrand(brand));
-      } else {
-        dispatch(removeLikedBrand(brand?.uuid));
-      }
-      dispatch(toggleviewSliceLiked(brand?.uuid));
-      dispatch(toggleHomeCardLike(brand?.uuid));
-      await likeApiFunction(brand?.uuid);
+      try {
+        if (!token) {
+          setShowLogin(true);
+          return;
+        }
+        dispatch(toggleSortlistBrandLike(brand?.uuid));
+        dispatch(toggleBrandLikefilter(brand?.uuid));
+        dispatch(toggleBrandLike(brand?.uuid));
+        if (!brand?.isLiked) {
+          dispatch(addLikedBrand(brand));
+        } else {
+          dispatch(removeLikedBrand(brand?.uuid));
+        }
+        dispatch(toggleviewSliceLiked(brand?.uuid));
+        dispatch(toggleHomeCardLike(brand?.uuid));
+        await likeApiFunction(brand?.uuid);
+        // Refetch liked brands
+        dispatch(fetchLikedBrandsById({ page: 1, limit: 10 }));
 
-      if (!brand?.isLiked) {
-        triggerCelebration("#f44336", likeButtonRef);
+        if (!brand?.isLiked) {
+          triggerCelebration("#f44336", likeButtonRef);
+        }
+      } catch (error) {
+        console.error("Error toggling like:", error);
       }
     };
 
     const handleApply = (brand) => {
       postView(brand?.uuid);
-      postView(brand?.uuid);
       dispatch(openBrandDialog(brand));
-      
+      // Refetch viewed brands
+      dispatch(fetchViewBrandsById({ page: 1, limit: 10 }));
     };
 
     return (
@@ -325,21 +347,42 @@ const HomePageBrandCard = React.memo(
 
               <Stack spacing={1} sx={{ mb: 2 }}>
                 <Box display="flex" alignItems="center">
-                  <Business sx={{ mr: 1.5, fontSize: "1rem", color: "text.secondary", flexShrink: 0 }} />
+                  <Business
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
                   <Typography variant="body2">
                     <strong>Investment:</strong> {investmentRange}
                   </Typography>
                 </Box>
 
                 <Box display="flex" alignItems="center">
-                  <MonetizationOn sx={{ mr: 1.5, fontSize: "1rem", color: "text.secondary", flexShrink: 0 }} />
+                  <MonetizationOn
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
                   <Typography variant="body2">
                     <strong>Area:</strong> {areaRequired}
                   </Typography>
                 </Box>
 
                 <Box display="flex" alignItems="center">
-                  <AreaChart sx={{ mr: 1.5, fontSize: "1rem", color: "text.secondary", flexShrink: 0 }} />
+                  <AreaChart
+                    sx={{
+                      mr: 1.5,
+                      fontSize: "1rem",
+                      color: "text.secondary",
+                      flexShrink: 0,
+                    }}
+                  />
                   <Typography variant="body2">
                     <strong>Model :</strong> {modelType}
                   </Typography>

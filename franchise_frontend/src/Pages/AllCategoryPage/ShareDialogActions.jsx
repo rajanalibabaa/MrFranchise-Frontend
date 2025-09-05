@@ -15,19 +15,24 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
+
 import Facebook from "@mui/icons-material/Facebook";
 import Twitter from "@mui/icons-material/Twitter";
 import LinkedIn from "@mui/icons-material/LinkedIn";
 import WhatsApp from "@mui/icons-material/WhatsApp";
 import Email from "@mui/icons-material/Email";
+import Instagram from "@mui/icons-material/Instagram";
 import ShareIcon from "@mui/icons-material/Share";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
-const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
+import { Helmet } from "react-helmet-async";
+
+const ShareDialogActions = ({ anchorEl, setAnchorEl, brand }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const open = Boolean(anchorEl);
+
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const [urlDialogOpen, setUrlDialogOpen] = React.useState(false);
   const [currentUrl, setCurrentUrl] = React.useState("");
@@ -36,27 +41,20 @@ const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
     setCurrentUrl(window.location.href);
   }, []);
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
-
-  const handleUrlDialogClose = () => {
-    setUrlDialogOpen(false);
-  };
+  const handleClose = () => setAnchorEl(null);
+  const handleSnackbarClose = () => setSnackbarOpen(false);
+  const handleUrlDialogClose = () => setUrlDialogOpen(false);
 
   const copyToClipboard = () => {
-    const shareMessage = `🌟 Check this out! 🌟\n\n${currentUrl}\n\n#ShareWithFriends`;
+    const shareMessage = `🌟 Check this out from ${brand?.name || "MrFranchise"}! 🌟\n\n${currentUrl}\n\n#MrFranchise.in`;
     navigator.clipboard.writeText(shareMessage);
     setSnackbarOpen(true);
     setUrlDialogOpen(false);
   };
 
-  const shareText = `🌟 Check this out! 🌟\n\n${currentUrl}\n\n#ShareWithFriends`;
+  const shareText = `🌟 ${brand?.name || "Check this out"}! 🌟\n\n${currentUrl}\n\n#MrFranchise.in`;
 
+  // ✅ Social Platforms List
   const socialPlatforms = [
     {
       name: "Facebook",
@@ -73,7 +71,7 @@ const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
       color: "primary",
       url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
         currentUrl
-      )}&text=${encodeURIComponent(shareText)}&hashtags=ShareWithFriends`,
+      )}&text=${encodeURIComponent(shareText)}&hashtags=Franchise`,
       action: "share",
     },
     {
@@ -97,8 +95,15 @@ const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
       icon: <Email />,
       color: "default",
       url: `mailto:?subject=${encodeURIComponent(
-        "Check this out!"
+        `Check out ${brand?.name || "MrFranchise"}`
       )}&body=${encodeURIComponent(shareText)}`,
+      action: "share",
+    },
+    {
+      name: "Instagram",
+      icon: <Instagram />,
+      color: "secondary",
+      url: "https://www.instagram.com/yourbrand/", // Replace with your IG
       action: "share",
     },
     {
@@ -119,6 +124,42 @@ const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
 
   return (
     <>
+      {/* ✅ Dynamic SEO Meta — uses API props */}
+      <Helmet>
+        <title>{brand?.name || "MrFranchise"}</title>
+        <meta
+          name="description"
+          content={brand?.description || "Discover top franchise opportunities at MrFranchise"}
+        />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={brand?.name || "MrFranchise"} />
+        <meta
+          property="og:description"
+          content={brand?.description || "Top franchise opportunities"}
+        />
+        <meta
+          property="og:image"
+          content={brand?.logo || "https://mrfranchise.in/images/default-logo.jpg"}
+        />
+        <meta property="og:url" content={currentUrl} />
+        <meta property="og:site_name" content="MrFranchise" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={brand?.name || "MrFranchise"} />
+        <meta
+          name="twitter:description"
+          content={brand?.description || "Best franchise deals"}
+        />
+        <meta
+          name="twitter:image"
+          content={brand?.logo || "https://mrfranchise.in/images/default-logo.jpg"}
+        />
+      </Helmet>
+
+      {/* Popover Menu */}
       <Popover
         open={open}
         anchorEl={anchorEl}
@@ -136,7 +177,6 @@ const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
             marginLeft: isSmallScreen ? 0 : "60px",
             marginBottom: isSmallScreen ? 0 : "30px",
             mt: isSmallScreen ? 0 : "79px",
-
             boxShadow: "none",
             backgroundColor: "transparent",
             zIndex: 1200,
@@ -145,9 +185,6 @@ const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
       >
         <Box
           sx={{
-            backgroundColor: "transparent",
-            marginBottom: isSmallScreen ? 0 : "50px",
-            marginRight: isSmallScreen ? 0 : "20px",
             p: isSmallScreen ? 1 : 0,
             borderRadius: 1,
             bgcolor: isSmallScreen ? "background.paper" : "transparent",
@@ -161,17 +198,9 @@ const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
             </Box>
           )}
 
-          <Box
-            display="flex"
-            flexDirection={isSmallScreen ? "row" : "column"}
-            gap={1}
-          >
+          <Box display="flex" flexDirection={isSmallScreen ? "row" : "column"} gap={1}>
             {socialPlatforms.map((platform) => (
-              <Tooltip
-                key={platform.name}
-                title={`Share on ${platform.name}`}
-                arrow
-              >
+              <Tooltip key={platform.name} title={`Share on ${platform.name}`} arrow>
                 <IconButton
                   color={platform.color}
                   onClick={() => handleAction(platform)}
@@ -192,7 +221,7 @@ const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
         </Box>
       </Popover>
 
-      {/* URL Display Dialog */}
+      {/* Copy URL Dialog */}
       <Dialog open={urlDialogOpen} onClose={handleUrlDialogClose}>
         <DialogTitle>Share this content</DialogTitle>
         <DialogContent>
@@ -209,52 +238,32 @@ const ShareDialogActions = ({ anchorEl, setAnchorEl }) => {
               mb: 2,
             }}
           >
-            <Typography
-              variant="body1"
-              sx={{ flexGrow: 1, wordBreak: "break-all" }}
-            >
+            <Typography variant="body1" sx={{ flexGrow: 1, wordBreak: "break-all" }}>
               {currentUrl}
             </Typography>
             <Tooltip title="Open in new tab">
-              <IconButton
-                onClick={() => window.open(currentUrl, "_blank")}
-                size="small"
-                sx={{ ml: 1 }}
-              >
+              <IconButton onClick={() => window.open(currentUrl, "_blank")} size="small" sx={{ ml: 1 }}>
                 <OpenInNewIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           </Box>
-          <Typography variant="body2" color="text.secondary">
-            The link will include a preview with our brand logo when shared on
-            social media.
-          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleUrlDialogClose}>Cancel</Button>
-          <Button
-            onClick={copyToClipboard}
-            variant="contained"
-            startIcon={<ContentCopyIcon />}
-            color="primary"
-          >
+          <Button onClick={copyToClipboard} variant="contained" startIcon={<ContentCopyIcon />} color="primary">
             Copy Share Message
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Copy Success Snackbar */}
+      {/* Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity="success"
-          sx={{ width: "100%" }}
-        >
+        <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: "100%" }}>
           Share message copied to clipboard!
         </Alert>
       </Snackbar>
